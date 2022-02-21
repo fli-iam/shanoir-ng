@@ -140,7 +140,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					 	<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
 					 		{{study.dataUserAgreementPaths[0]}}
 							<button class="dl-button" (click)="deleteDataUserAgreement()">
-								<i class="fas fa-trash"></i>
+								<i class="fa-regular fa-trash-can"></i>
 							</button>
 						</span>
 					</li>
@@ -203,7 +203,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
-								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (userChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
+								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (onChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
 								<span>Multicenter</span>
 							</ng-template>
 						</span>
@@ -263,7 +263,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <input #input hidden type="file" (change)="attachNewFile($event)"/>
                             <button class="left-icon" (click)="setFile()"><i class="fas fa-upload"></i>Upload a new file</button>
                             <ul class="files">
-                                <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="deleteFile(file)"><i class="fas fa-trash"></i></button>
+                                <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
                                 </li>
                             </ul>
                         </span>
