@@ -586,7 +586,7 @@ public class BIDSServiceImpl implements BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 
 		// add to scans.tsv
-		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
 		
 		// Create events.tsv file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_event.tsv";
@@ -607,7 +607,7 @@ public class BIDSServiceImpl implements BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 		
 		// add to scans.tsv
-		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
 		
 		// If no coordinates system, don't create electrode.csv & _coordsystem.json files
 		if (dataset.getCoordinatesSystem() == null) {
@@ -630,7 +630,7 @@ public class BIDSServiceImpl implements BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 
 		// add to scans.tsv
-		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
 
 		// Create _coordsystem.json file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_coordsystem.json";
@@ -645,11 +645,11 @@ public class BIDSServiceImpl implements BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 		
 		// add to scans.tsv
-		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
 	}
 	
-	private void addToTsvFile(File parentFolder, String fileName, Dataset dataset) throws IOException {
-		File scansTsvFile = getScansFile(parentFolder);
+	private void addToTsvFile(File parentFolder, String fileName, Dataset dataset, String subjectName) throws IOException {
+		File scansTsvFile = getScansFile(parentFolder, subjectName);
 
 		StringBuilder buffer = new StringBuilder();
 		buffer.append(fileName).append(TABULATION)
