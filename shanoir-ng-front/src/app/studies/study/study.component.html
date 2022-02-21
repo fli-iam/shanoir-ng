@@ -207,6 +207,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<span>Multicenter</span>
 							</ng-template>
 						</span>
+						<span *ngIf="mode == 'view'" class="left-col">
+						    <p><b>Centers</b></p>
+						    <ol *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
+                                <li class="center-list">- {{studyCenter.center.name}}<span *ngIf="studyCenter.subjectNamePrefix">: {{studyCenter.subjectNamePrefix}}</span></li>    
+                            </ol>
+						</span>
 					</li>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
