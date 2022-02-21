@@ -184,7 +184,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 					// Set file creation as default
 					if (examDate == null) {
-						examDate = LocalDate.from(creationTime.toInstant());
+						examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneId.systemDefault());
 					}
 					examination = createExam(studyId, centerId, subjectId, sessionLabel, examDate);
 					examCreated = true;
