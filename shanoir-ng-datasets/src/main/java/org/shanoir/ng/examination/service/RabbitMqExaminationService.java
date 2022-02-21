@@ -24,6 +24,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,13 +58,14 @@ public class RabbitMqExaminationService {
 	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE)
 	@RabbitHandler
 	@Transactional
-	public Long createExamination(String message) {
+	public Long createExamination(Message message) {
 		try {
-			mapper.registerModule(new JavaTimeModule());
+			Long userId = Long.valueOf("" + message.getMessageProperties().getHeaders().get("x-user-id"));
 
-			Examination exam = mapper.readValue(message, Examination.class);
+			mapper.registerModule(new JavaTimeModule());
+			Examination exam = mapper.readValue(message.getBody(), Examination.class);
 			exam = examRepo.save(exam);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, exam.getId().toString(), KeycloakUtil.getTokenUserId(), "" + exam.getStudyId(), ShanoirEvent.SUCCESS, exam.getStudyId()));
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, exam.getId().toString(), userId, "" + exam.getStudyId(), ShanoirEvent.SUCCESS, exam.getStudyId()));
 
 			return exam.getId();
 		} catch (Exception e) {
