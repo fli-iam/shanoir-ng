@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div class="welcome">
         {{username}}
         <span class="admin-tag-sep" *ngIf="keycloakService.isUserAdmin()">- </span>
-        <span class="admin-tag" *ngIf="keycloakService.isUserAdmin()"><i class="fas fa-shield-alt"></i>Administrator</span>
+        <span class="admin-tag" *ngIf="keycloakService.isUserAdmin()"><i class="fas fa-shield"></i>Administrator</span>
     </div>
     <div class="user-commands">
         <a routerLink="/user/details/{{userId}}" routerLinkActive="active"><i class="fas fa-user"></i> Profile</a>
@@ -50,10 +50,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <span *ngIf="notificationsService.nbProcess > 0" class="notif">( {{notificationsService.nbProcess}} pending - {{notificationsService.totalProgress() * 100 | number:'0.0-0'}}%)</span>
     </li>
     
-    <li routerLink="/solr-search" routerLinkActive="active"><i class="fas fa-sun"></i>Solr search</li>
+    <li routerLink="/solr-search" routerLinkActive="active"><i class="fa-regular fa-sun"></i>Solr search</li>
     <li (click)="state.dataOpened = !state.dataOpened; saveState();"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="state.dataOpened" class="sub-menu" [@slideDown]="state.dataOpened">
-        <li routerLink="/study/list" routerLinkActive="active"><i class="fas fa-folder-open"></i>Studies</li>
+        <li routerLink="/study/list" routerLinkActive="active"><i class="fa-regular fa-folder-open"></i>Studies</li>
         <li routerLink="/subject/list" routerLinkActive="active"><i class="fas fa-user-injured"></i>Subjects</li>
         <li routerLink="/examination/list" routerLinkActive="active"><i class="fas fa-stethoscope"></i>Examinations</li>
         <li routerLink="/dataset-acquisition/list" routerLinkActive="active"><i class="fas fa-procedures"></i>Dataset acquisitions</li>
@@ -62,7 +62,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <li (click)="state.eqOpened = !state.eqOpened; saveState();"><i class="fas fa-vial"></i>Medical configuration<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="state.eqOpened" class="sub-menu" [@slideDown]="state.eqOpened">
-        <li routerLink="/center/list" routerLinkActive="active"><i class="fas fa-hospital"></i>Centers</li>
+        <li routerLink="/center/list" routerLinkActive="active"><i class="fa-regular fa-hospital"></i>Centers</li>
         <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Acquisition equipments</li>
         <li routerLink="/coil/list" routerLinkActive="active"><i class="fas fa-magnet"></i>Coils</li>
         <li routerLink="/study-card/list" routerLinkActive="active"><i class="fab fa-accusoft"></i>Study Cards</li>
