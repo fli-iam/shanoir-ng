@@ -169,6 +169,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 			// Load examinations linked to the study of the datasets
 			for (Long relatedStudyId : studyIds) {
+				LOG.error("############################################ relatedStudyId : " + studyId);
 				relatedExams.addAll(examinationService.findBySubjectIdStudyId(subjectId, relatedStudyId));
 			}
 			
