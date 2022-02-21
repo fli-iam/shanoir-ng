@@ -19,6 +19,8 @@ import java.util.Set;
 
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +29,8 @@ public class StudyRightsService {
 		
 	@Autowired
 	private StudyUserRightsRepository repo;
+	
+	private static final Logger LOG = LoggerFactory.getLogger(StudyRightsService.class);
 	
 	
 	/**
@@ -38,10 +42,15 @@ public class StudyRightsService {
 	 */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
 		Long userId = KeycloakUtil.getTokenUserId();
+		LOG.error("################################ Strange Bug : " 
+				+ "studyId = " + studyId
+				+ "; rightStr = " + rightStr
+				+ "; userId = " + userId);
 		if (userId == null) {
 			throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
 		}
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
+		LOG.error("################################ Strange Bug : founded = " + founded);
 		return
 				founded.getStudyUserRights() != null
 				&& founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))
