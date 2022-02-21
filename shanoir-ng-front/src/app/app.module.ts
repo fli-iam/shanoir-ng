@@ -231,11 +231,12 @@ import { ImportBrukerService } from './preclinical/importBruker/importBruker.ser
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { DUAComponent } from './dua/dua.component';
 import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
-import { SolrCriterionComponent } from './solr/criteria/solr.criterion.component';
+import { SolrPagingCriterionComponent } from './solr/criteria/solr.paging-criterion.component';
 import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
+import { SolrTextSearchModeComponent } from './solr/text-search/solr.text-search-mode.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
@@ -403,10 +404,11 @@ import { VarDirective } from './utils/ng-var.directive';
         DUAComponent,
         DUASigningComponent,
         EventTypePipe,
-        SolrCriterionComponent,
+        SolrPagingCriterionComponent,
         SolrTextSearchComponent,
         MetadataComponent,
         StudyCardApplyComponent,
+        SolrTextSearchModeComponent,
         ChallengeBlockComponent,
         TagCreatorComponent,
         SolrRangeCriterionComponent,

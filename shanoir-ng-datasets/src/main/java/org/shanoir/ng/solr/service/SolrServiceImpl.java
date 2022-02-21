@@ -36,7 +36,7 @@ import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
-import org.shanoir.ng.solr.model.ShanoirSolrFacet;
+import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
 import org.shanoir.ng.solr.repository.SolrRepository;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -198,32 +198,16 @@ public class SolrServiceImpl implements SolrService {
 				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
 	}
 
-	@Override
-	public SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable) {
-		SolrResultPage<ShanoirSolrDocument> result = null;
-		pageable = prepareTextFields(pageable);
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findAllDocsAndFacets(pageable);
-		} else {
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			if (studyIds.isEmpty()) {
-				return new SolrResultPage<>(Collections.emptyList());
-			}
-			result = solrRepository.findByStudyIdIn(studyIds, pageable);
-		}
-		return result;
-	}
-
 	@Transactional
 	@Override
-	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
+	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException {
 		SolrResultPage<ShanoirSolrDocument> result = null;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByFacetCriteria(facet, pageable);
+			result = solrRepository.findByFacetCriteria(query, pageable);
 		} else {
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, facet, pageable);
+			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, query, pageable);
 		}
 		return result;
 	}

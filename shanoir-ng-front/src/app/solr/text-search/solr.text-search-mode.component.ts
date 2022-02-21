@@ -17,48 +17,37 @@ import { slideDown } from '../../shared/animations/animations';
 
 
 @Component({
-    selector: 'solr-text-search',
-    templateUrl: 'solr.text-search.component.html',
+    selector: 'solr-text-search-mode',
+    templateUrl: 'solr.text-search-mode.component.html',
     styleUrls: ['solr.text-search.component.css'],
     animations: [slideDown],
     providers: [
         {
           provide: NG_VALUE_ACCESSOR,
-          useExisting: forwardRef(() => SolrTextSearchComponent),
+          useExisting: forwardRef(() => SolrTextSearchModeComponent),
           multi: true,
         }]  
 })
 
-export class SolrTextSearchComponent implements ControlValueAccessor {
+export class SolrTextSearchModeComponent implements ControlValueAccessor {
 
     showInfo: boolean = false;
-    searchText: string = "";
-    @Output() onChange: EventEmitter<string> = new EventEmitter();
-    @Output() onType: EventEmitter<void> = new EventEmitter();
-    @Input() syntaxError: boolean = false;
-    @Input() expertMode: boolean = false;
+    @Output() onChange: EventEmitter<boolean> = new EventEmitter();
+    expertMode: boolean = false;
     protected propagateChange = (_: any) => {};
     protected propagateTouched = () => {};
 
-    onChangeSearch() {
-        if (!this.syntaxError) {
-            this.propagateChange(this.searchText);   
-            this.onChange.emit(this.searchText);
-        }
-    }
-
     onExpertModeChange() {
-        if (this.searchText && this.searchText.length > 0) {
-            this.onChangeSearch();
-        }
+        this.propagateChange(this.expertMode);    
     }
 
-    clear(text?: string) {
-        this.searchText = text ? text : '';
+    onExpertModeUserChange() {
+        this.onExpertModeChange();
+        this.onChange.emit(this.expertMode);
     }
 
-    writeValue(value: string): void {
-        this.searchText = value;
+    writeValue(value: boolean): void {
+        this.expertMode = value;
     }
 
     registerOnChange(fn: any): void {
