@@ -30,7 +30,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<ul class="tabs">
 				<li (click)="activeTab = 'general'" [class.active]="activeTab == 'general'">General</li>
 				<li (click)="activeTab = 'files'" [class.active]="activeTab == 'files'">Files</li>
-				<li (click)="activeTab = 'dua'" [class.active]="activeTab == 'dua'">DUA</li>
 				<li (click)="activeTab = 'subjects'" [class.active]="activeTab == 'subjects'">Subjects</li>
 				<li (click)="activeTab = 'centers'" [class.active]="activeTab == 'centers'">Centers</li>
 				<li (click)="activeTab = 'members'" [class.active]="activeTab == 'members'">Members</li>
@@ -132,7 +131,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset [class.hidden]="activeTab != 'dua'">
+			<fieldset [class.hidden]="activeTab != 'files'">
 				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
 					Data User Agreement (DUA)
 					<tool-tip class="larger">
