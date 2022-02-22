@@ -346,11 +346,12 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             else if (this.mode == 'edit') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToView method');
         }
+        let currentRoute: string = this.breadcrumbsService.currentStep?.route?.split('#')[0];
         let replace: boolean = this.breadcrumbsService.currentStep && (
-                this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToEdit(id)
-                || this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToCreate()
+                currentRoute == this.entityRoutes.getRouteToEdit(id)
+                || currentRoute == this.entityRoutes.getRouteToCreate()
                 // Create route can be contained in incoming route (more arguments for example)
-                || this.breadcrumbsService.currentStep.route.indexOf(this.entityRoutes.getRouteToCreate()) != -1);
+                || currentRoute.indexOf(this.entityRoutes.getRouteToCreate()) != -1);
         this.router.navigate([this.entityRoutes.getRouteToView(id)], {replaceUrl: replace, fragment: this.activeTab});
     }
 
@@ -360,7 +361,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             else if (this.mode == 'view') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToEdit method');
         }
-        let replace: boolean = this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToView(id);
+        let replace: boolean = this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.route?.split('#')[0] == this.entityRoutes.getRouteToView(id);
         this.router.navigate([this.entityRoutes.getRouteToEdit(id)], {replaceUrl: replace, fragment: this.activeTab});
     }
 
