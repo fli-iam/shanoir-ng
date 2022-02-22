@@ -348,6 +348,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             });
     }
 
+    protected openApplyStudyCard = () => {
+        console.log('apply !!!')
+    }
+
     private getCommonColumnDefs() {
         function dateRenderer(date: number) {
             if (date) {
@@ -404,6 +408,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
             {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash-can", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
+            {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
         );
         return customActionDefs;
     }
@@ -419,6 +424,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
             {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash-can", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
+            {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
         );
         return customActionDefs;
     }

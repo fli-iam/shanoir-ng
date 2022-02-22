@@ -5,12 +5,13 @@ caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-
 caption { overflow: hidden; }
 th { width: 100%; white-space: normal; position: relative; height: 1px; min-width: 10px; }
 	.controls { padding: 0; text-align: left; background-color: transparent; color: var(--very-dark-grey); }
-		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 2px; border: 1px solid transparent; color: var(--dark-grey); }
+		.controls button { margin: 0; height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 2px; border: 1px solid transparent; color: var(--dark-grey); }
 			.controls button:not(:disabled):hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
 			.controls button:disabled { opacity: 0.5; }
 			.controls button span { vertical-align: middle; }
 			.controls button img { height: 16px; vertical-align: middle; }
-			.command-block + .command-block { margin-left: 10px; }
+			.command-block { white-space: normal; }
+			.command-block:not(:last-child) { margin-right: 10px; }
 			.controls .awesome { vertical-align: middle; margin-right: 4px; }
 				.controls .awesome i { color: var(--color-c); }
 		.controls input,
@@ -20,6 +21,7 @@ th { width: 100%; white-space: normal; position: relative; height: 1px; min-widt
 		.controls .text-search,
 		.controls .options,
 		.select-ctrl { margin: 0 3px 0 0; padding: 0 20px 0 5px; vertical-align: baseline; }
+		.ctrl-right { width: calc(100% - 47px); display: inline-block; margin-bottom: 5px; }
 			.controls .options .max-results { width: 40px; text-align: right; }
 	th.sortable { cursor: pointer; position: relative; overflow: initial; }
 		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
@@ -31,7 +33,7 @@ th { width: 100%; white-space: normal; position: relative; height: 1px; min-widt
 	th.status-bar { text-align: left; padding: 3px 0; color: var(--greyer)}
 		th.status-bar input { width: 150px; }
 		th.status-bar .options { border-right: 0; }
-			th.status-bar .options span { padding: 0 10px; }
+			th.status-bar .options span { padding: 0 10px; white-space: nowrap; }
 				th.status-bar .options span + span { border: 0; border-left: 1px solid var(--grey); }
 tr { height: 20px; }
 	/* tr.even { background-color: var(--light-grey); }
