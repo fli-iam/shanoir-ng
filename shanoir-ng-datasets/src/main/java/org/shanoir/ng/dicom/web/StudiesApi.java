@@ -18,6 +18,7 @@ import org.shanoir.ng.dicom.web.dto.StudiesDTO;
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,9 +39,9 @@ public interface StudiesApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "", produces = { "application/json" })
+	@GetMapping(value = "", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-//	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<StudiesDTO> findStudies();
 
 }
