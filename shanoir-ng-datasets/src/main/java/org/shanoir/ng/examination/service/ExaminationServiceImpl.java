@@ -217,7 +217,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public String addExtraDataFromfile(final Long examinationId, final File file) {
+	public String addExtraDataFromFile(final Long examinationId, final File file) {
 		String filePath = getExtraDataFilePath(examinationId, file.getName());
 		File fileToCreate = new File(filePath);
 		fileToCreate.getParentFile().mkdirs();

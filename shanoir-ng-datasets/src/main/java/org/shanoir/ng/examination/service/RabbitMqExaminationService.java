@@ -81,7 +81,7 @@ public class RabbitMqExaminationService {
 			IdName examExtradata = mapper.readValue(path, IdName.class);
 
 			// add examination extra-data
-			examinationService.addExtraDataFromfile(examExtradata.getId(), new File(examExtradata.getName()));
+			examinationService.addExtraDataFromFile(examExtradata.getId(), new File(examExtradata.getName()));
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
