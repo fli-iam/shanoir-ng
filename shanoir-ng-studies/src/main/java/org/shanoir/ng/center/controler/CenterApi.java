@@ -93,7 +93,6 @@ public interface CenterApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/names/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCenters(returnObject.getBody(), #studyId)")
 	ResponseEntity<List<IdName>> findCentersNames(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
