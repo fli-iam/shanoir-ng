@@ -79,7 +79,7 @@ public enum DatasetExpressionFormat {
 	// EEG
 	EEG(19),
 	
-	// EEG
+	// BIDS
 	BIDS(20);
 	
 	private int id;
