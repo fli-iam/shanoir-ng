@@ -100,7 +100,8 @@ public class BidsImporterApiController implements BidsImporterApi {
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile bidsFile,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") String studyName,
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId)
+			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+			@ApiParam(value = "id of the equipment", required = true) @PathVariable("equipmentId") Long equipmentId)
 					throws RestServiceException, ShanoirException, IOException {
 
 		// STEP 1: Analyze folder and unzip it.
@@ -124,7 +125,8 @@ public class BidsImporterApiController implements BidsImporterApi {
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);
 		File tempFile = ImportUtils.saveTempFile(userImportDir, bidsFile);
 		File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, bidsFile, false);
-
+		
+		importJob.setAcquisitionEquipmentId(equipmentId);
 		importJob.setWorkFolder(importJobDir.getAbsolutePath());
 
 		// STEP 2: Subject level, analyze and create the new subject if necessary

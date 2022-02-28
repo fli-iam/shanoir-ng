@@ -228,7 +228,7 @@ public class BidsImporterService {
 		}
 
 		datasetAcquisition.setDatasets(datasets);
-		datasetAcquisition.setAcquisitionEquipmentId(1L);
+		datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
 		datasetAcquisitionRepository.save(datasetAcquisition);
 		
 		event.setStatus(ShanoirEvent.SUCCESS);
