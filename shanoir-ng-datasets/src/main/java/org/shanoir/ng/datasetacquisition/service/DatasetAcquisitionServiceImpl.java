@@ -14,7 +14,10 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -23,23 +26,27 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
 
-	
+
 	@Autowired
 	private DatasetAcquisitionRepository repository;
-	
+
 
 	@Autowired
 	private StudyUserRightsRepository rightsRepository;
@@ -50,12 +57,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
 	@Autowired
 	private SolrService solrService;
-	
+
 	@Override
 	public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
 		return repository.findByStudyCardId(studyCardId);
 	}
-	
+
 	@Override
 	public List<DatasetAcquisition> findByExamination(Long examinationId) {
 		return repository.findByExaminationId(examinationId);
@@ -84,7 +91,31 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			return repository.findByExaminationStudyIdIn(studyIds, pageable);
+
+			// Check if user has restrictions.
+			boolean hasRestrictions = false;
+			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(userId));
+			Map<Long, List<Long>> studyUserCenters = new HashMap<>();
+			for (StudyUser studyUser : studyUsers) {
+				if (! CollectionUtils.isEmpty(studyUser.getCentersIds())) {
+					hasRestrictions = true;
+					studyUserCenters.put(studyUser.getStudyId(), studyUser.getCentersIds());
+				}
+			}
+			// If yes, get all acquisitions and filter by centers
+			if (hasRestrictions) {
+
+				List<DatasetAcquisition> acqs = Utils.toList(repository.findByExaminationStudyIdIn(studyIds, pageable.getSort()));
+				acqs = acqs.stream().filter(acq -> 
+				studyUserCenters.get(acq.getExamination().getStudyId()) == null ||
+				studyUserCenters.get(acq.getExamination().getStudyId()).contains(acq.getExamination().getCenterId())).collect(Collectors.toList());
+
+				acqs.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
+				Page<DatasetAcquisition> page = new PageImpl<>(acqs);
+				return page;
+			} else {
+				return repository.findByExaminationStudyIdIn(studyIds, pageable);
+			}
 		}
 	}
 
@@ -92,7 +123,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	public DatasetAcquisition create(DatasetAcquisition entity) {
 		DatasetAcquisition savedEntity = repository.save(entity);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
-		
+
 		return savedEntity;
 	}
 
@@ -104,7 +135,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 		}
 		updateValues(entity, entityDb);
 		DatasetAcquisition acq =  repository.save(entityDb);
-		
+
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
 
 		return acq;

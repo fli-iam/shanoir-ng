@@ -17,6 +17,7 @@ package org.shanoir.ng.dataset.service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -25,12 +26,15 @@ import javax.transaction.Transactional;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -38,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Dataset service implementation.
@@ -164,7 +169,30 @@ public class DatasetServiceImpl implements DatasetService {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			
-			return repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable);
+			// Check if user has restrictions.
+			boolean hasRestrictions = false;
+			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(userId));
+			Map<Long, List<Long>> studyUserCenters = new HashMap<>();
+			for (StudyUser studyUser : studyUsers) {
+				if (! CollectionUtils.isEmpty(studyUser.getCentersIds())) {
+					hasRestrictions = true;
+					studyUserCenters.put(studyUser.getStudyId(), studyUser.getCentersIds());
+				}
+			}
+			// If yes, get all examinations and filter by centers
+			if (hasRestrictions) {
+				List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable.getSort()));
+
+				datasets = datasets.stream().filter(ds -> 
+						studyUserCenters.get(ds.getStudyId()) == null ||
+						studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId())).collect(Collectors.toList());
+
+				datasets.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
+				Page<Dataset> page = new PageImpl<>(datasets);
+				return page;
+			} else {
+				return repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable);
+			}
 		}
 	}
 

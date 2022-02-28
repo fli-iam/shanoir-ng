@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
@@ -33,6 +34,9 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 	
 	List<DatasetAcquisition> findByExaminationId(Long studyCardId);
 	
+	List<DatasetAcquisition> findByExaminationStudyIdIn(Iterable<Long> studyIds, Sort sort);
+
 	Page<DatasetAcquisition> findByExaminationStudyIdIn(Iterable<Long> studyIds, Pageable pageable);
+
 
 }
