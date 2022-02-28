@@ -15,8 +15,11 @@
 package org.shanoir.ng.examination.service;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -28,18 +31,24 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.paging.FacetPageableImpl;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -116,9 +125,35 @@ public class ExaminationServiceImpl implements ExaminationService {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return examinationRepository.findAllByPreclinical(pageable, preclinical);
 		} else {
+			// Find everything
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			return examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable);
+			
+			// Check if user has restrictions.
+			boolean hasRestrictions = false;
+			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(userId));
+			Map<Long, List<Long>> studyUserCenters = new HashMap<>();
+			for (StudyUser studyUser : studyUsers) {
+				if (! CollectionUtils.isEmpty(studyUser.getCentersIds())) {
+					hasRestrictions = true;
+					studyUserCenters.put(studyUser.getStudyId(), studyUser.getCentersIds());
+				}
+			}
+			// If yes, get all examinations and filter by centers
+			if (hasRestrictions) {
+				List<Examination> exams = examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable.getSort());
+				
+				exams = exams.stream().filter(exam -> 
+						studyUserCenters.get(exam.getStudyId()) == null ||
+						studyUserCenters.get(exam.getStudyId()).contains(exam.getCenterId())).collect(Collectors.toList());
+				
+				exams.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
+				Page<Examination> page = new PageImpl<Examination>(exams);
+				return page;
+			} else {
+				System.err.println("Pas de restrictions");
+				return examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable);
+			}
 		}
 	}
 

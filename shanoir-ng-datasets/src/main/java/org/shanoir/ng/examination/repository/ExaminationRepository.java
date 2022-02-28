@@ -19,6 +19,8 @@ import java.util.List;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
@@ -39,16 +41,29 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	Page<Examination> findByStudyIdIn(List<Long> studyIds, Pageable pageable);
 
+	@Query(value = "SELECT * FROM examination e WHERE e.study_id in #studyIds "
+			+ "JOIN study_user_center suc "
+			+ "ON suc.center_id = e.center_id"
+			+ "AND suc.study_id = e.center_id;",
+			    countQuery = "SELECT count(*) FROM examination e WHERE e.study_id in #studyIds "
+						+ "JOIN study_user_center suc "
+						+ "ON suc.center_id = e.center_id"
+						+ "AND suc.study_id = e.center_id;",
+			    nativeQuery = true)
+	Page<Examination>findByStudyIdInFilterByCenter(List<Long> studyIds, Pageable pageable);
+	
 	/**
 	 * Get a paginated list of examinations for a list of studies.
 	 * 
 	 * @param studyIds
 	 *            list of study ids.
-	 * @param pageable
+	 * @param sort
 	 *            pagination data.
 	 * @return list of examinations.
 	 */
 	Page<Examination> findByPreclinicalAndStudyIdIn(Boolean preclinical, List<Long> studyIds, Pageable pageable);
+
+	List<Examination> findByPreclinicalAndStudyIdIn(Boolean preclinical, List<Long> studyIds, Sort sort);
 
 	/**
 	 * Get a list of examinations for a subject.

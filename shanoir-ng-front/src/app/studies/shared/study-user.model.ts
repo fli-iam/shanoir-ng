@@ -27,6 +27,7 @@ export class StudyUser {
     userName: string;
     user: User;
     confirmed: boolean = false;
+    centers: number[];
 
     public completeMember(users: User[]) {
         StudyUser.completeMember(this, users);

@@ -15,22 +15,29 @@
 package org.shanoir.ng.study.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
+import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUserInterface;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -75,6 +82,10 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	/** User name. Duplicate: master record in ms users. */
 	@NotBlank
 	private String userName;
+
+	@ElementCollection
+	@CollectionTable(name="study_user_center", joinColumns=@JoinColumn(name="study_user_id"))
+	private List<Center> centers;
 
 	/**
 	 * @return the receiveStudyUserReport
@@ -186,6 +197,23 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	@Override
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	public List<Center> getCenters() {
+		return centers;
+	}
+
+	@JsonIgnore
+	public List<Long> getCentersIds() {
+		if (CollectionUtils.isEmpty(this.centers)) {
+			return Collections.emptyList();
+		}
+		return centers.stream().map(center -> center.getId()).collect(Collectors.toList());
+	}
+
+	@JsonIgnore
+	public void setCenters(List<Center> centers) {
+		this.centers = centers;
 	}
 
 }

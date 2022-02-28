@@ -111,6 +111,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             { headerName: 'Email', field: 'user.email', width: '200%' },
             { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
             { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', suppressSorting: true},
+            { headerName: 'Centers', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
+                cellRenderer: (params: any) => !params.data.centers || params.data.centers.length == 0},
             { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
                 //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},

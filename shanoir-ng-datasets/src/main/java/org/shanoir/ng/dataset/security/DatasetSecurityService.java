@@ -35,13 +35,17 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class DatasetSecurityService {
@@ -62,6 +66,9 @@ public class DatasetSecurityService {
 	
 	@Autowired
 	StudyRightsService commService;
+	
+	@Autowired
+	private StudyUserRightsRepository studyUserRepository;
 
 	@Autowired
 	StudyRepository studyRepository;
@@ -632,6 +639,7 @@ public class DatasetSecurityService {
     	});
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
     	list.removeIf((StudyCard sc) -> !checkedIds.contains(sc.getStudyId()));
+    	
     	return true;
     }
     
@@ -646,6 +654,7 @@ public class DatasetSecurityService {
     	if (page == null) {
 			return true;
 		}
+
     	Set<Long> studyIds = new HashSet<>();
     	page.forEach((ExaminationDTO exam) -> {
     		if (exam.getStudyId() != null) {
@@ -657,6 +666,15 @@ public class DatasetSecurityService {
     		if (exam.getStudyId() == null || !checkedIds.contains(exam.getStudyId())) {
 				return false;
 			}
+    	}
+    	Long userId = KeycloakUtil.getTokenUserId();
+    	// Filter by centers
+    	List<StudyUser> studyUsers = Utils.toList(studyUserRepository.findByUserIdAndStudyIdIn(userId, studyIds));
+    	
+    	List<Long> centerIds = new ArrayList<>();
+    	Map<Long, List<Long>> centersByStudy = new HashMap<>();
+    	for (StudyUser studyUser : studyUsers) {
+    		centersByStudy.put(studyUser.getStudyId(), studyUser.getCentersIds());
     	}
     	return true;
     }
@@ -680,7 +698,37 @@ public class DatasetSecurityService {
     	list.removeIf((ExaminationDTO exam) -> exam.getStudyId() == null || !checkedIds.contains(exam.getStudyId()));
     	return true;
     }
-   
+
+    public boolean filterExaminationByCenter(List<Examination> list, Long studyId) {
+		Long userId = KeycloakUtil.getTokenUserId();
+
+		StudyUser su = studyUserRepository.findByUserIdAndStudyId(userId, studyId);
+		if (su == null || userId == null) {
+			return false;
+		}
+		if (CollectionUtils.isEmpty(su.getCentersIds())) {
+			return true;
+		}
+		// Filter only allowed centers.
+		list.removeIf(exam -> !su.getCentersIds().contains(exam.getCenterId()));
+		return true;
+    }
+
+    public boolean filterExaminationDTOByCenter(List<ExaminationDTO> list, Long studyId) {
+		Long userId = KeycloakUtil.getTokenUserId();
+
+		StudyUser su = studyUserRepository.findByUserIdAndStudyId(userId, studyId);
+		if (su == null || userId == null) {
+			return false;
+		}
+		if (CollectionUtils.isEmpty(su.getCentersIds())) {
+			return true;
+		}
+		// Filter only allowed centers.
+		list.removeIf(exam -> !su.getCentersIds().contains(exam.getCenterId()));
+		return true;
+    }
+
     /**
      * Filter datasets in that page checking the connected user has the right on those datasets.
      * 

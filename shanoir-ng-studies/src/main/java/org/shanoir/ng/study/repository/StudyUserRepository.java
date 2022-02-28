@@ -33,9 +33,9 @@ public interface StudyUserRepository extends CrudRepository<StudyUser, Long> {
 
 	List<StudyUser> findByUserId(Long userId);
 	
-	List<StudyUser> findByStudy_Id(Long studyId);
-
 	StudyUser findByUserIdAndStudy_Id(Long userId, Long studyId);
+	
+	List<StudyUser> findByStudy_Id(Long studyId);
 
 	@Transactional
 	void deleteByIdIn(Set<Long> ids);

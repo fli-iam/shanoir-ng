@@ -24,6 +24,7 @@ import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
@@ -117,6 +118,9 @@ public class BIDSServiceImpl implements BIDSService {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	DatasetSecurityService datasetSecurityService;
 
 	@Override
 	/**
@@ -275,6 +279,8 @@ public class BIDSServiceImpl implements BIDSService {
 
 		// Get subject examinations and filter on the one with adapted study only
 		List<Examination> examinationList = examService.findBySubjectIdStudyId(subject.getId(), studyId);
+		
+		datasetSecurityService.filterExaminationByCenter(examinationList, studyId);
 
 		// Create session folder only if there is multiple exmainations
 		boolean useSessionFolder = (examinationList != null && examinationList.size() > 1) ;

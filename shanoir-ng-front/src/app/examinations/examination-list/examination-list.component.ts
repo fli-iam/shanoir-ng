@@ -76,7 +76,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                 route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];
-        return colDef;       
+        return colDef;
     }
 
     getCustomActionsDefs(): any[] {
