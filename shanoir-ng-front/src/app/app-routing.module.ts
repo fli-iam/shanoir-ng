@@ -84,6 +84,7 @@ import { ProcessedDatasetClinicalContextComponent } from './import/processed-dat
 import { DUAComponent } from './dua/dua.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
+import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 
 let routes: Routes = [
     {
@@ -526,6 +527,10 @@ let routes: Routes = [
     {
 		path: 'study-card/apply/:id',
 		component: StudyCardApplyComponent,
+        canActivate: [AuthAdminOrExpertGuard],
+	},{
+		path: 'study-card/apply-on-datasets',
+		component: ApplyStudyCardOnComponent,
         canActivate: [AuthAdminOrExpertGuard],
 	},
 	{

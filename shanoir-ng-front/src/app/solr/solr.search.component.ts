@@ -349,7 +349,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     protected openApplyStudyCard = () => {
-        console.log('apply !!!')
+        this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+            this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
+        });
     }
 
     private getCommonColumnDefs() {

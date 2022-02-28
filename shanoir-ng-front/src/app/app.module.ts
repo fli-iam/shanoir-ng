@@ -236,6 +236,7 @@ import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterio
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
+import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { SolrTextSearchModeComponent } from './solr/text-search/solr.text-search-mode.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
@@ -408,6 +409,7 @@ import { VarDirective } from './utils/ng-var.directive';
         SolrTextSearchComponent,
         MetadataComponent,
         StudyCardApplyComponent,
+        ApplyStudyCardOnComponent,
         SolrTextSearchModeComponent,
         ChallengeBlockComponent,
         TagCreatorComponent,
