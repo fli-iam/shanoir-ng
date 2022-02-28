@@ -35,6 +35,10 @@ public interface DatasetAcquisitionService {
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
+	List<DatasetAcquisition> findByDatasetId(Long[] datasetIds);
+	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
 	List<DatasetAcquisition> findByExamination(Long examinationId);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")

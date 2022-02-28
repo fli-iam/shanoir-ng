@@ -16,7 +16,6 @@ package org.shanoir.ng.datasetacquisition.dto.mapper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
@@ -24,9 +23,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
-import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 
 /**
  * Decorator for dataset acquisitions mapper.
@@ -34,43 +31,34 @@ import org.springframework.data.domain.Page;
  * @author msimon
  *
  */
-public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionMapper {
+public abstract class DatasetAcquisitionDatasetsDecorator implements DatasetAcquisitionDatasetsMapper {
 
 	@Autowired
-	private DatasetAcquisitionMapper delegate;
+	private DatasetAcquisitionDatasetsMapper delegate;
 
 	
 	@Override
-	public List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
+	public List<DatasetAcquisitionDatasetsDTO> datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(
 			final List<DatasetAcquisition> datasetAcquisitions) {
 		if (datasetAcquisitions == null) {
 			return null;
 		}
-		final List<DatasetAcquisitionDTO> datasetAcquisitionDTOs = new ArrayList<>();
+		final List<DatasetAcquisitionDatasetsDTO> datasetAcquisitionDTOs = new ArrayList<>();
 		for (DatasetAcquisition datasetAcquisition : datasetAcquisitions) {
-			datasetAcquisitionDTOs.add(datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition));
+			datasetAcquisitionDTOs.add(datasetAcquisitionToDatasetAcquisitionDatasetsDTO(datasetAcquisition));
 		}
 		return datasetAcquisitionDTOs;
 	}
 	
+	
 	@Override
-	public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page) {
-		Page<DatasetAcquisitionDTO> mappedPage = page.map(new Function<DatasetAcquisition, DatasetAcquisitionDTO>() {
-			public DatasetAcquisitionDTO apply(DatasetAcquisition entity) {
-				return datasetAcquisitionToDatasetAcquisitionDTO(entity);
-			}
-		});
-		return new PageImpl<>(mappedPage);
-	}
-
-	@Override
-	public DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
+	public DatasetAcquisitionDatasetsDTO datasetAcquisitionToDatasetAcquisitionDatasetsDTO(
 			final DatasetAcquisition datasetAcquisition) {
 		if (datasetAcquisition == null) {
 			return null;
 		}
-		final DatasetAcquisitionDTO datasetAcquisitionDTO = delegate
-				.datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition);
+		final DatasetAcquisitionDatasetsDTO datasetAcquisitionDTO = delegate
+				.datasetAcquisitionToDatasetAcquisitionDatasetsDTO(datasetAcquisition);
         setType(datasetAcquisitionDTO, datasetAcquisition);
 		return datasetAcquisitionDTO;
 	}

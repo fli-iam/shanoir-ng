@@ -57,6 +57,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	}
 	
 	@Override
+	public List<DatasetAcquisition> findByDatasetId(Long[] datasetIds) {
+		return repository.findDistinctByDatasetsIdIn(datasetIds);
+	}
+	
+	@Override
 	public List<DatasetAcquisition> findByExamination(Long examinationId) {
 		return repository.findByExaminationId(examinationId);
 	}
