@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -80,6 +81,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	@Override
 	public DatasetAcquisition findById(Long id) {
 		return repository.findById(id).orElse(null);
+	}
+	
+	@Override
+	public List<DatasetAcquisition> findById(List<Long> ids) {
+		return Utils.toList(repository.findAllById(ids));
 	}
 
 	@Override
