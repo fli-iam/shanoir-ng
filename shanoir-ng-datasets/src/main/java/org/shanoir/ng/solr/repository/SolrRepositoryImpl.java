@@ -5,13 +5,13 @@ package org.shanoir.ng.solr.repository;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 
@@ -49,15 +49,16 @@ import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SimpleFacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.CollectionUtils;
 
 /**
  * @author yyao
  *
  */
 public class SolrRepositoryImpl implements SolrRepositoryCustom {
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(SolrRepositoryImpl.class);
-	
+
 	private static final String DOCUMENT_ID_FACET = "id";
 	private static final String DATASET_ID_FACET = "datasetId";
 	private static final String DATASET_NAME_FACET = "datasetName";
@@ -73,44 +74,44 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	private static final String SLICE_THICKNESS_FACET = "sliceThickness";
 	private static final String PIXEL_BANDWIDTH_FACET = "pixelBandwidth";
 	private static final String MAGNETIC_FIELD_STRENGHT_FACET = "magneticFieldStrength";
-    private static final String TAGS_FACET = "tags";
+	private static final String TAGS_FACET = "tags";
 
-    private static final String[] DOCUMENT_FACET_LIST = {
-    		DOCUMENT_ID_FACET,
-    		DATASET_ID_FACET,
-    		DATASET_NAME_FACET,
-    		DATASET_TYPE_FACET,
-    		DATASET_NATURE_FACET,
-    		DATASET_CREATION_DATE_FACET,
-    		EXAMINATION_COMMENT_FACET,
-    		EXAMINATION_DATE_FACET,
-    		SUBJECT_NAME_FACET,
-    		STUDY_NAME_FACET,
-    		STUDY_ID_FACET,
-    		CENTER_NAME_FACET,
-    		SLICE_THICKNESS_FACET,
-    		PIXEL_BANDWIDTH_FACET,
-    		MAGNETIC_FIELD_STRENGHT_FACET,
-    	    TAGS_FACET,	
-    };
+	private static final String[] DOCUMENT_FACET_LIST = {
+			DOCUMENT_ID_FACET,
+			DATASET_ID_FACET,
+			DATASET_NAME_FACET,
+			DATASET_TYPE_FACET,
+			DATASET_NATURE_FACET,
+			DATASET_CREATION_DATE_FACET,
+			EXAMINATION_COMMENT_FACET,
+			EXAMINATION_DATE_FACET,
+			SUBJECT_NAME_FACET,
+			STUDY_NAME_FACET,
+			STUDY_ID_FACET,
+			CENTER_NAME_FACET,
+			SLICE_THICKNESS_FACET,
+			PIXEL_BANDWIDTH_FACET,
+			MAGNETIC_FIELD_STRENGHT_FACET,
+			TAGS_FACET,	
+	};
 
-    private static final String[] TEXTUAL_FACET_LIST = {
-    		DATASET_NAME_FACET,
-    		DATASET_TYPE_FACET,
-    		DATASET_NATURE_FACET,
-    		EXAMINATION_COMMENT_FACET,
-    		SUBJECT_NAME_FACET,
-    		STUDY_NAME_FACET,
-    		CENTER_NAME_FACET,
-    	    TAGS_FACET,	
-    };
+	private static final String[] TEXTUAL_FACET_LIST = {
+			DATASET_NAME_FACET,
+			DATASET_TYPE_FACET,
+			DATASET_NATURE_FACET,
+			EXAMINATION_COMMENT_FACET,
+			SUBJECT_NAME_FACET,
+			STUDY_NAME_FACET,
+			CENTER_NAME_FACET,
+			TAGS_FACET,	
+	};
 
 	@Resource
 	private SolrTemplate solrTemplate;
-	
+
 	@Autowired 
 	private SolrConfig solrConfig;
-	
+
 
 	@Override
 	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteria(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
@@ -118,7 +119,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	}
 
 	@Override
-	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Collection<Long> studyIds,
+	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Map<Long, List<String>> studyIds,
 			ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
 		return getSearchResultsWithFacets(facet, pageable, studyIds);
 
@@ -129,7 +130,27 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			query.addFilterQuery(fieldName + ":(\"" + String.join("\" OR \"", values) + "\")");
 		} 
 	}
-	
+
+	private void addFilterQueryForCenterStudy(SolrQuery query, Map<Long, List<String>> studyIds) {
+		String filter = "";
+		for (Entry<Long, List<String>> entry : studyIds.entrySet()) {
+			if (!filter.equals("")) {
+				filter+=" OR ";
+			}
+			if (CollectionUtils.isEmpty(entry.getValue())) {
+				filter = filter + STUDY_NAME_FACET + ":" + entry.getKey();
+			} else {
+				boolean first = true;
+				for (String centerName: entry.getValue()) {
+					filter =  filter + (!first ? " OR " : "") + " (" + STUDY_ID_FACET + ":" + entry.getKey() + " AND " + CENTER_NAME_FACET + ":\"" + centerName + "\")";
+					first = false;
+				}
+			}
+		}
+		LOG.error(filter);
+		query.addFilterQuery(filter);
+	}
+
 	private void addFilterQueryFromLongs(SolrQuery query, String fieldName, Collection<Long> values) {
 		if (values != null && !values.isEmpty()) {
 			List<String> valueStr = new ArrayList<>();
@@ -139,7 +160,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			addFilterQuery(query, fieldName, valueStr);			
 		}
 	}
-	
+
 	private <T> void addFilterQueryFromRange(SolrQuery query, String fieldName, Range<T> range) {
 		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
 			String rangeQueryStr = fieldName + ":[" 
@@ -150,7 +171,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			query.addFilterQuery(rangeQueryStr);
 		}
 	}
-	
+
 	private void addFilterQueryFromDateRange(SolrQuery query, String fieldName, Range<LocalDate> range) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
 		if (range != null && (range.getLowerBound() != null || range.getUpperBound() != null)) {
@@ -162,40 +183,52 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			query.addFilterQuery(rangeQueryStr);
 		}
 	}
-	
+
 	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException {
 		return getSearchResultsWithFacets(query, pageable, null);
 	}
-	
-	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(ShanoirSolrQuery shanoirQuery, Pageable pageable, Collection<Long> studyIds) throws RestServiceException {
+
+	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(ShanoirSolrQuery shanoirQuery, Pageable pageable, Map<Long, List<String>> studyIds) throws RestServiceException {
 		SolrClient client = solrConfig.solrClient();
 		final SolrQuery query = new SolrQuery("*:*");
-		
+
 		/* add user's filtering */
 		addUserFiltering(query, shanoirQuery);
-		
-		/* add study filtering */
-		addFilterQueryFromLongs(query, STUDY_ID_FACET, studyIds);
-		
+
+		boolean hasRestrictions = false;
+		if (!CollectionUtils.isEmpty(studyIds)) {
+			for (Entry<Long, List<String>> element : studyIds.entrySet()) {
+				if (!CollectionUtils.isEmpty(element.getValue())) {
+					hasRestrictions = true;
+				}
+			}
+			if (hasRestrictions) {
+				addFilterQueryForCenterStudy(query, studyIds);
+			} else {
+				/* add study filtering */
+				addFilterQueryFromLongs(query, STUDY_ID_FACET, studyIds.keySet());
+			}
+		}
+
 		/* add sorting */
 		if (pageable.getSort() != null) {
 			for (Sort.Order order : pageable.getSort()) {
 				query.addSort(order.getProperty(), order.getDirection().equals(Direction.ASC) ? ORDER.asc : ORDER.desc);				
 			}
 		}
-		
+
 		/* add paging */
 		query.setRows(pageable.getPageSize());
 		query.setStart(pageable.getPageNumber() * pageable.getPageSize());
-		
+
 		/* results with all the columns */
 		for (String fieldStr : DOCUMENT_FACET_LIST) {			
 			query.addField(fieldStr);
 		}
-		
+
 		/* configure the returned facet values */
 		addFacetPaging(query, shanoirQuery);
-		
+
 		/* query Solr server */
 		QueryResponse response;
 		try {
@@ -212,7 +245,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		/* build the page object */
 		return buildShanoirSolrPage(response, pageable, shanoirQuery.getFacetPaging());
 	}
-	
+
 	private void addUserFiltering(SolrQuery query, ShanoirSolrQuery shanoirQuery) {
 		/* add user's filtering */
 		addFilterQuery(query, STUDY_NAME_FACET, shanoirQuery.getStudyName());
@@ -227,7 +260,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		addFilterQueryFromRange(query, PIXEL_BANDWIDTH_FACET, shanoirQuery.getPixelBandwidth());
 		addFilterQueryFromRange(query, MAGNETIC_FIELD_STRENGHT_FACET, shanoirQuery.getMagneticFieldStrength());
 		addFilterQueryFromDateRange(query, DATASET_CREATION_DATE_FACET, shanoirQuery.getDatasetDateRange());
-		
+
 		if (shanoirQuery.getSearchText() != null && !shanoirQuery.getSearchText().trim().isEmpty()) {
 			if (shanoirQuery.isExpertMode()) {
 				addExpertClause(query, shanoirQuery.getSearchText());
@@ -238,28 +271,28 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	}
 
 	private SolrResultPage<ShanoirSolrDocument> buildShanoirSolrPage(QueryResponse response, Pageable pageable, Map<String, FacetPageable> facetPaging) {
-		
+
 		SolrDocumentList documents = response.getResults();
 		if (documents == null) documents = new SolrDocumentList();
 		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
 		for(SolrDocument document : documents) {
-			  ShanoirSolrDocument solrDoc = new ShanoirSolrDocument();
-			  solrDoc.setId((String) document.getFirstValue("id"));
-			  solrDoc.setDatasetId((Long) document.getFirstValue("datasetId"));
-			  solrDoc.setDatasetName((String) document.getFirstValue("datasetName"));
-			  solrDoc.setDatasetType((String) document.getFirstValue("datasetType"));
-			  solrDoc.setDatasetNature((String) document.getFirstValue("datasetNature"));
-			  solrDoc.setDatasetCreationDate((Date) document.getFirstValue("datasetCreationDate"));
-			  solrDoc.setExaminationComment((String) document.getFirstValue("examinationComment"));
-			  solrDoc.setExaminationDate((Date) document.getFirstValue("examinationDate"));
-			  solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
-			  solrDoc.setStudyName((String) document.getFirstValue("studyName"));
-			  solrDoc.setStudyId((Long) document.getFirstValue("studyId"));
-			  solrDoc.setCenterName((String) document.getFirstValue("centerName"));
-			  solrDoc.setSliceThickness((Double) document.getFirstValue("sliceThickness")); 
-			  solrDoc.setPixelBandwidth((Double) document.getFirstValue("pixelBandwidth"));
-			  solrDoc.setMagneticFieldStrength((Double) document.getFirstValue("magneticFieldStrength"));
-			  solrDocuments.add(solrDoc);
+			ShanoirSolrDocument solrDoc = new ShanoirSolrDocument();
+			solrDoc.setId((String) document.getFirstValue("id"));
+			solrDoc.setDatasetId((Long) document.getFirstValue("datasetId"));
+			solrDoc.setDatasetName((String) document.getFirstValue("datasetName"));
+			solrDoc.setDatasetType((String) document.getFirstValue("datasetType"));
+			solrDoc.setDatasetNature((String) document.getFirstValue("datasetNature"));
+			solrDoc.setDatasetCreationDate((Date) document.getFirstValue("datasetCreationDate"));
+			solrDoc.setExaminationComment((String) document.getFirstValue("examinationComment"));
+			solrDoc.setExaminationDate((Date) document.getFirstValue("examinationDate"));
+			solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
+			solrDoc.setStudyName((String) document.getFirstValue("studyName"));
+			solrDoc.setStudyId((Long) document.getFirstValue("studyId"));
+			solrDoc.setCenterName((String) document.getFirstValue("centerName"));
+			solrDoc.setSliceThickness((Double) document.getFirstValue("sliceThickness")); 
+			solrDoc.setPixelBandwidth((Double) document.getFirstValue("pixelBandwidth"));
+			solrDoc.setMagneticFieldStrength((Double) document.getFirstValue("magneticFieldStrength"));
+			solrDocuments.add(solrDoc);
 		}
 		SolrResultPage<ShanoirSolrDocument> page = new SolrResultPage<>(solrDocuments, pageable, documents.getNumFound(), null);
 
@@ -269,12 +302,12 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 					Page<FacetFieldEntry> facetPage = new PageImpl<FacetFieldEntry>(buildFacetResultPage(facetField, facetPaging.get(facetField.getName())));
 					page.addFacetResultPage(facetPage, new SimpleField(facetField.getName()));
 				}
-				
+
 			}			
 		}
 		return page;
 	}
-	
+
 	private Page<FacetFieldEntry> buildFacetResultPage(FacetField facetField, FacetPageable facetPageable) {
 		List<FacetFieldEntry> content = new ArrayList<>();
 		for (FacetField.Count facetFieldCount : facetField.getValues()) {
@@ -285,11 +318,11 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 					facetFieldCount.getCount());
 			content.add(facetFieldEntry);
 		}
-		
+
 		Page<FacetFieldEntry> facetPage = new PageImpl<FacetFieldEntry>(content, facetPageable, facetField.getValueCount());
 		return facetPage;
 	}
-	
+
 	private void addExpertClause(SolrQuery query, String searchStr) {
 		LOG.warn("Solr expert research : " + searchStr);
 		//searchStr = searchStr.replace(STUDY_ID_FACET, "");
@@ -318,7 +351,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			}
 		}
 	}
-	
+
 	private void addFacetPaging(SolrQuery query, ShanoirSolrQuery shanoirQuery) {
 		if (shanoirQuery.getFacetPaging() != null) {
 			query.setFacetMinCount(0);
