@@ -33,13 +33,13 @@ window.config = {
   	  {
     	// ~ REQUIRED
     	// Authorization Server URL
-    	authority: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/auth/realms/shanoir-ng',
+    	authority: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/auth/realms/shanoir-ng',
     	client_id: 'ohif-viewer',
-    	redirect_uri: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST', // `OHIFStandaloneViewer.js`
+    	redirect_uri: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/callback', // `OHIFStandaloneViewer.js`
     	// "Authorization Code Flow"
 		// Resource: https://medium.com/@darutk/diagrams-of-all-the-openid-connect-flows-6968e3990660
 		response_type: 'code',
-		scope: 'email', // email profile openid
+		scope: 'openid', // email profile openid
 		// ~ OPTIONAL
 		post_logout_redirect_uri: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST'
     }
