@@ -13,6 +13,6 @@ div.warning { color: orangered; }
 .apply:disabled { opacity: 0.4; }
 
 .apply.warning { background-color: orangered; }
-.apply:not(:disabled):hover { background-color: #fe8545; }
+.apply.warning:not(:disabled):hover { background-color: #fe8545; }
 
 .button-div { margin: 20px 0 40px; }
