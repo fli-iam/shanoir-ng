@@ -18,6 +18,7 @@ import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.mod
 import * as shajs from 'sha.js';
 import { Router } from '@angular/router';
 import { Page } from '../../shared/components/table/pageable.model';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 
 @Component({
@@ -227,7 +228,8 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     }
 
     static getHash(facetName: string, routerUrl: string): string {
-        let stringToBeHashed: string = facetName + '-' + routerUrl;
+        let username: string = KeycloakService.auth.authz.tokenParsed.name;
+        let stringToBeHashed: string = username + '-' + facetName + '-' + routerUrl;
         let hash = shajs('sha').update(stringToBeHashed).digest('hex');
         let hex = hash.substring(0, 30);
         return hex;
