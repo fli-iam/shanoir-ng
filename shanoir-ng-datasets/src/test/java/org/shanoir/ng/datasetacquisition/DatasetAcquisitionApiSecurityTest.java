@@ -36,6 +36,8 @@ import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +68,9 @@ public class DatasetAcquisitionApiSecurityTest {
 	private DatasetAcquisitionApi api;
 	
 	@MockBean
+	private StudyUserRightsRepository rightsRepository;
+	
+	@MockBean
 	private StudyRightsService commService;
 	
 	private BindingResult mockBindingResult;
@@ -76,6 +81,7 @@ public class DatasetAcquisitionApiSecurityTest {
 		mockBindingResult = new BeanPropertyBindingResult(mockDsAcq(1L), "datasetAcquisition");
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
 		given(commService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
+		given(rightsRepository.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).willReturn( new StudyUser());
 	}
 	
 	@Test

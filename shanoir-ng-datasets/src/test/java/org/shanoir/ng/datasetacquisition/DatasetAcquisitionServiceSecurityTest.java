@@ -32,6 +32,8 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +63,9 @@ public class DatasetAcquisitionServiceSecurityTest {
 	private DatasetAcquisitionService service;
 	
 	@MockBean
+	private StudyUserRightsRepository rightsRepository;
+	
+	@MockBean
 	StudyRightsService commService;
 	
 	@MockBean
@@ -73,6 +78,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 	public void setup() {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
 		given(commService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
+		given(rightsRepository.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).willReturn( new StudyUser());
 	}
 	
 	@Test
