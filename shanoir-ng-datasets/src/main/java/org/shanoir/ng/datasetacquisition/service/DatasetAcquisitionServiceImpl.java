@@ -106,11 +106,16 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 			if (hasRestrictions) {
 
 				List<DatasetAcquisition> acqs = Utils.toList(repository.findByExaminationStudyIdIn(studyIds, pageable.getSort()));
+				
+				if (CollectionUtils.isEmpty(acqs)) {
+					return new PageImpl<>(acqs);
+				}
+				
 				acqs = acqs.stream().filter(acq -> 
 				studyUserCenters.get(acq.getExamination().getStudyId()) == null ||
 				studyUserCenters.get(acq.getExamination().getStudyId()).contains(acq.getExamination().getCenterId())).collect(Collectors.toList());
 
-				acqs.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
+				acqs = acqs.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
 				Page<DatasetAcquisition> page = new PageImpl<>(acqs);
 				return page;
 			} else {

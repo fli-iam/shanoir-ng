@@ -143,11 +143,15 @@ public class ExaminationServiceImpl implements ExaminationService {
 			if (hasRestrictions) {
 				List<Examination> exams = examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable.getSort());
 				
+				if (CollectionUtils.isEmpty(exams)) {
+					return new PageImpl<>(exams);
+				}
+
 				exams = exams.stream().filter(exam -> 
 						studyUserCenters.get(exam.getStudyId()) == null ||
 						studyUserCenters.get(exam.getStudyId()).contains(exam.getCenterId())).collect(Collectors.toList());
 				
-				exams.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
+				exams = exams.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
 				Page<Examination> page = new PageImpl<>(exams);
 				return page;
 			} else {

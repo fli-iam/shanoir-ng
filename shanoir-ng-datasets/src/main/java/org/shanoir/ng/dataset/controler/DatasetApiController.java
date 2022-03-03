@@ -251,20 +251,6 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<Long>> findDatasetIdsBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
-		final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
-
-		List<Long> datasetIds = new ArrayList<Long>();
-		for(Examination examination : examinations) {
-			ResponseEntity<List<Long>> response = findDatasetIdsBySubjectIdStudyId(subjectId, examination.getStudyId());
-			if(response.getStatusCode() == HttpStatus.OK) {
-				datasetIds.addAll(response.getBody());
-			}
-		}
-		return new ResponseEntity<List<Long>>(datasetIds, HttpStatus.OK);
-	}
-
-	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
 
 		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);

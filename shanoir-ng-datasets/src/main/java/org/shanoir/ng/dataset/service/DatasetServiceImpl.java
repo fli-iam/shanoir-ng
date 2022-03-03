@@ -183,11 +183,15 @@ public class DatasetServiceImpl implements DatasetService {
 			if (hasRestrictions) {
 				List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable.getSort()));
 
+				if (CollectionUtils.isEmpty(datasets)) {
+					return new PageImpl<>(datasets);
+				}
+				
 				datasets = datasets.stream().filter(ds -> 
 						studyUserCenters.get(ds.getStudyId()) == null ||
 						studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId())).collect(Collectors.toList());
 
-				datasets.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
+				datasets = datasets.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
 				Page<Dataset> page = new PageImpl<>(datasets);
 				return page;
 			} else {

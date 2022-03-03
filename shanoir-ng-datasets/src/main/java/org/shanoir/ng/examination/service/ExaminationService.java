@@ -86,6 +86,7 @@ public interface ExaminationService {
 	 * @return
 	 * @author yyao
 	 */
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
 	List<Examination> findByStudyId(Long studyId);
 
 	/**

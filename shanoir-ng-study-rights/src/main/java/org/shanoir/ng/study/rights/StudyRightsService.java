@@ -15,12 +15,15 @@
 package org.shanoir.ng.study.rights;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class StudyRightsService {
@@ -59,9 +62,28 @@ public class StudyRightsService {
 				founded != null
 				&& 
 				( founded.getCentersIds().isEmpty() || founded.getCentersIds().contains(centerId) );
-
     }
-    
+
+    /*
+     * Checks that the user has at least the right on one study
+     */
+    public boolean hasRightOnCenter(Set<Long> studies, Long centerId) {
+		Long userId = KeycloakUtil.getTokenUserId();
+		if (userId == null) {
+			throw new IllegalStateException("UserId should not be null. Cannot check rights");
+		}
+		List<StudyUser> founded = Utils.toList(repo.findByUserIdAndStudyIdIn(userId, studies));
+		
+		if (CollectionUtils.isEmpty(founded)) {
+			return false;
+		}
+		boolean hasRight = false;
+		for (StudyUser su  : founded) {
+			hasRight = hasRight || CollectionUtils.isEmpty(su.getCentersIds()) || su.getCentersIds().contains(centerId);
+		}
+		return hasRight;
+    }
+
     /**
 	 * Check that the connected user has one of the given rights for the given study.
 	 * 

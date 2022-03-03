@@ -109,8 +109,7 @@ public interface DatasetAcquisitionApi {
 			@ApiResponse(code = 404, message = "no datasetAcquisition found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getExamination().getStudyId(), 'CAN_SEE_ALL')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#datasetAcquisitionId, 'CAN_SEE_ALL')")
 	ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId);
 	
