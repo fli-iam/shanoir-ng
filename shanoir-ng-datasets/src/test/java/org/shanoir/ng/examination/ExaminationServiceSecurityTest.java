@@ -187,9 +187,11 @@ public class ExaminationServiceSecurityTest {
 		Examination ex3 = mockExam(3L); ex3.setStudyId(1L); exList.add(ex3);
 		Examination ex4 = mockExam(4L); ex4.setStudyId(2L); exList.add(ex4);
 		given(examinationRepository.findBySubjectId(1L)).willReturn(exList);
-		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L, 2L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L)));
-		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L)));
 		
+		given(rightsService.hasRightOnStudy(Mockito.eq(1L), Mockito.anyString())).willReturn(true);
+		given(rightsService.hasRightOnStudy(Mockito.eq(2L), Mockito.anyString())).willReturn(false);
+		given(rightsService.hasRightOnCenter(Mockito.anyLong(), Mockito.anyLong())).willReturn(true);
+
 		assertEquals(3, service.findBySubjectId(1L).size());
 	}
 	

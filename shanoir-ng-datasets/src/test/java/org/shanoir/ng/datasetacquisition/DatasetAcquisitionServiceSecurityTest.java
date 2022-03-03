@@ -79,6 +79,8 @@ public class DatasetAcquisitionServiceSecurityTest {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
 		given(commService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
 		given(rightsRepository.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).willReturn( new StudyUser());
+		given(commService.hasRightOnCenter(Mockito.anyLong(), Mockito.anyLong())).willReturn(true);
+		given(commService.hasRightOnCenter(Mockito.any(Set.class), Mockito.anyLong())).willReturn(true);
 	}
 	
 	@Test
@@ -103,15 +105,16 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findById, 3L);
 		
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
-		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
+		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
+		given(commService.hasRightOnCenter(Mockito.any(Set.class), Mockito.anyLong())).willReturn(false);		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
 		assertEquals(0, service.findPage(PageRequest.of(0, 10)).getTotalElements());
 		assertEquals(0, service.findByStudyCard(1L).size());
 		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
-		//assertEquals(2, service.findPage(PageRequest.of(0, 10)).getTotalElements());
+		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
+		given(commService.hasRightOnCenter(Mockito.any(Set.class), Mockito.anyLong())).willReturn(true);		//assertEquals(2, service.findPage(PageRequest.of(0, 10)).getTotalElements());
 		assertEquals(2, service.findByStudyCard(1L).size());
 		
+		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
 		assertAccessDenied(service::create, mockDsAcq());
 		assertAccessDenied(service::update, mockDsAcq(1L));
 		assertAccessDenied(service::deleteById, 1L);
@@ -124,16 +127,19 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findById, 3L);
 		
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
+		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
+		given(commService.hasRightOnCenter(Mockito.any(Set.class), Mockito.anyLong())).willReturn(false);
 		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
 		assertAccessAuthorized(service::findByStudyCard, 1L);
 		assertEquals(0, service.findPage(PageRequest.of(0, 10)).getTotalElements());
 		assertEquals(0, service.findByStudyCard(1L).size());
 		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
+		given(commService.hasRightOnCenter(Mockito.anyLong(), Mockito.anyLong())).willReturn(true);
+		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		//assertEquals(2, service.findPage(PageRequest.of(0, 10)).getTotalElements());
 		assertEquals(2, service.findByStudyCard(1L).size());
 		
+		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
 		given(commService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
 		DatasetAcquisition dsAcq = mockDsAcq();
 		dsAcq.getExamination().setStudyId(3L);

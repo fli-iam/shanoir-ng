@@ -144,10 +144,13 @@ public class DatasetServiceSecurityTest {
 	
 	private void testFindOne() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(false);
+		given(rightsService.hasRightOnCenter(Mockito.anyLong(), Mockito.anyLong())).willReturn(true);
 		given(datasetRepository.findById(1L)).willReturn(Optional.of(mockDataset(1L)));
 		assertAccessDenied(service::findById, 1L);
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
+		given(rightsService.hasRightOnCenter(Mockito.anyLong(), Mockito.anyLong())).willReturn(true);
 		given(datasetRepository.findById(1L)).willReturn(Optional.of(mockDataset(1L)));
+		given(rightsService.hasRightOnCenter(Mockito.any(Set.class), Mockito.anyLong())).willReturn(true);
 		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(Collections.singleton(1L));
 		assertNotNull(service.findById(1L));
 	}
