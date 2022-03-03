@@ -29,8 +29,9 @@ public class StudyDTO {
 
 	/**
 	 * STUDY: 5 attributes (1 not in standard: studyDescription, but used by OHIF viewer)
+	 * ".1." is chosen randomly by MK, to separate from other instances and indicate study.
 	 */
-	// Unique key == RootPrefix + ExaminationID
+	// Unique key == RootPrefix + ".1." + ExaminationID
     @JsonProperty("StudyInstanceUID")
 	private String studyInstanceUID;
 
@@ -80,8 +81,14 @@ public class StudyDTO {
 		NumberOfStudyRelatedSeries
 		NumberOfStudyRelatedInstances
      */
+    @JsonProperty("NumInstances")
+	private Integer numInstances;
     
-	private List series;
+    @JsonProperty("Modalities")
+	private String modalities;
+    
+    @JsonProperty("series")
+	private List<SerieDTO> series;
 
 	public String getStudyInstanceUID() {
 		return studyInstanceUID;
@@ -163,12 +170,28 @@ public class StudyDTO {
 		this.patientSex = patientSex;
 	}
 
-	public List getSeries() {
+	public List<SerieDTO> getSeries() {
 		return series;
 	}
 
-	public void setSeries(List series) {
+	public void setSeries(List<SerieDTO> series) {
 		this.series = series;
+	}
+
+	public Integer getNumInstances() {
+		return numInstances;
+	}
+
+	public void setNumInstances(Integer numInstances) {
+		this.numInstances = numInstances;
+	}
+
+	public String getModalities() {
+		return modalities;
+	}
+
+	public void setModalities(String modalities) {
+		this.modalities = modalities;
 	}
 
 }
