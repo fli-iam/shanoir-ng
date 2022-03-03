@@ -28,14 +28,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 
 			<ul class="tabs">
-				<li (click)="activeTab = 'general'" [class.active]="activeTab == 'general'">General</li>
-				<li (click)="activeTab = 'files'" [class.active]="activeTab == 'files'">Files</li>
-				<li (click)="activeTab = 'subjects'" [class.active]="activeTab == 'subjects'">Subjects</li>
-				<li (click)="activeTab = 'centers'" [class.active]="activeTab == 'centers'">Centers</li>
-				<li (click)="activeTab = 'members'" [class.active]="activeTab == 'members'">Members</li>
-				<li (click)="activeTab = 'tags'" [class.active]="activeTab == 'tags'">Tags</li>
-				<li (click)="mode == 'view' ? activeTab = 'tree' : null" [class.active]="activeTab == 'tree'" [class.disabled]="mode != 'view'">Tree</li>
-				<li (click)="mode == 'view' ? activeTab = 'bids' : null" [class.active]="activeTab == 'bids'" [class.disabled]="mode != 'view'" >BIDS</li>
+				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'">General</li>
+				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'">Files</li>
+				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'">Subjects</li>
+				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'">Centers</li>
+				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'">Members</li>
+				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'">Tags</li>
+				<ng-container *ngIf="mode == 'view'">
+					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'">Tree</li>
+					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'">BIDS</li>
+				</ng-container>
+				<ng-container *ngIf="mode != 'view'">
+					<li [class.active]="activeTab == 'tree'" class="disabled">Tree</li>
+					<li [class.active]="activeTab == 'bids'" class="disabled">BIDS</li>
+				</ng-container>
+				
 			</ul>
 
 			<fieldset [class.hidden]="activeTab != 'general'">

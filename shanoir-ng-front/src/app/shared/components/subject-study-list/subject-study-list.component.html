@@ -46,9 +46,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </td>
                     <td class="dropdown-col tag-cell" *ngIf="hasTags">
                         <tag-list *ngIf="mode != 'view'" [(ngModel)]="subjectStudy.tags" [availableTags]="subjectStudy.study?.tags" [ngModelOptions]="{standalone: true}" (onChange)="onChange()"></tag-list>
-                        <span ngIf="mode == 'view'" class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subjectStudy.tags">
-                            {{tag.name}}
-                        </span>
+                        <ng-container *ngIf="mode == 'view'">
+                            <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subjectStudy.tags">
+                                {{tag.name}}
+                            </span>
+                        </ng-container>
                     </td>
                     <td class="input-col">
                         <input *ngIf="mode != 'view'" type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()"/>
