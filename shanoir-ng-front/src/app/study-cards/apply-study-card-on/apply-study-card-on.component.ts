@@ -80,9 +80,11 @@ export class ApplyStudyCardOnComponent implements OnInit {
             this.studyCards = studycards;
             this.studycardOptions = [];
             studycards.forEach(sc => {
-                let option: Option<StudyCard> = new Option(sc, sc.name);
-                option.compatible = acquisitions.findIndex(acq => acq.acquisitionEquipment?.id != sc.acquisitionEquipment?.id) == -1;
-                this.studycardOptions.push(option);
+                if (sc) {
+                    let option: Option<StudyCard> = new Option(sc, sc.name);
+                    option.compatible = acquisitions.findIndex(acq => acq.acquisitionEquipment?.id != sc.acquisitionEquipment?.id) == -1;
+                    this.studycardOptions.push(option);
+                }
             });
         });
     }
