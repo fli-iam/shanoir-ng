@@ -1,5 +1,7 @@
 package org.shanoir.ng.dicom.web;
 
+import java.util.Map;
+
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,7 +42,9 @@ public interface DICOMWebApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/studies", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<String> findStudies() throws RestServiceException;
+	@ResponseBody String findStudies(
+			@RequestParam Map<String,String> allParams
+			) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Returns all DICOM series/acquisitions", response = String.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
