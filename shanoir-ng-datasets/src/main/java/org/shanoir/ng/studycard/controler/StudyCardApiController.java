@@ -24,6 +24,7 @@ import java.util.List;
 import javax.json.Json;
 import javax.mail.MessagingException;
 
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.json.JSONReader;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -44,6 +45,8 @@ import org.shanoir.ng.studycard.model.StudyCardApply;
 import org.shanoir.ng.studycard.service.StudyCardProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +62,8 @@ import io.swagger.annotations.ApiParam;
 public class StudyCardApiController implements StudyCardApi {
 
 	private static final String MICROSERVICE_COMMUNICATION_ERROR = "Microservice communication error";
+	
+	private static final Logger LOG = LoggerFactory.getLogger(StudyCardApiController.class);
 
 	@Autowired
 	private StudyCardService studyCardService;
@@ -245,10 +250,18 @@ public class StudyCardApiController implements StudyCardApi {
 					if (!urls.isEmpty()) {
 						String jsonMetadataStr = downloader.downloadDicomMetadataForURL(urls.get(0));
 						JSONReader jsonReader = new JSONReader(Json.createParser(new StringReader(jsonMetadataStr)));
-						studyCardProcessingService.applyStudyCard(acquisition, studyCard, jsonReader.getFileMetaInformation());									
+						Attributes dicomAttributes = jsonReader.getFileMetaInformation();
+						if (dicomAttributes != null) {
+							studyCardProcessingService.applyStudyCard(acquisition, studyCard, dicomAttributes);																
+						} else {
+							LOG.error("Could not apply studycard " + studyCard.getId() + " on dataset acquisition " + acquisition.getId() 
+									+ " : dicom attributes are empty");
+						}
+					} else {
+						LOG.error("Could not apply studycard " + studyCard.getId() + " on dataset acquisition " + acquisition.getId() 
+						+ " : no pacs url for this acquisition");
 					}
 				} catch (IOException | MessagingException e) {
-					// TODO Auto-generated catch block
 					throw new RestClientException("Cannot apply study card " + studyCardApplyObject.getStudyCardId() + " on acquisitions " + studyCardApplyObject.getDatasetAcquisitionIds(), e);
 				}
 			}
