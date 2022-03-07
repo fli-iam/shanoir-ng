@@ -83,6 +83,7 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -159,7 +160,9 @@ public class DatasetApiController implements DatasetApi {
 	@Autowired
 	ShanoirEventService eventService;
 
-	@Autowired
+	@Autowired	
+	private ConnectionFactory connectionFactory;
+	
 	private RabbitTemplate rabbitTemplate;
 
 	/** Number of downloadable datasets. */
@@ -172,6 +175,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@PostConstruct
 	private void initialize() {
+		this.rabbitTemplate = new RabbitTemplate(connectionFactory);
 		// Set timeout to 1mn (consider nifti reconversion can take some time)
 		this.rabbitTemplate.setReplyTimeout(60000);
 	}
