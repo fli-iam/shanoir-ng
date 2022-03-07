@@ -11,6 +11,6 @@ CREATE TABLE `bids_dataset_acquisition` (
   CONSTRAINT `FKe78qni1n2gip32q17j6m85qn1` FOREIGN KEY (`id`) REFERENCES `dataset_acquisition` (`id`)
 );
 
-SET sql_mode="NO_AUTO_VALUE_ON_ZERO"
+SET sql_mode="NO_AUTO_VALUE_ON_ZERO";
 INSERT INTO center (id, name) VALUES (0,'Unknown');
 SET sql_mode=(SELECT REPLACE(@@sql_mode,'NO_AUTO_VALUE_ON_ZERO',''));
