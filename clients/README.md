@@ -1,6 +1,6 @@
-# Shanoir clients
+# Shanoir clients (tools which use the Shanoir API)
 
-Clients (tools which use the Shanoir API) are added to the main Shanoir repository as [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+Some clients like shanoir_downloader and download_data_on_shanoir are added to the main Shanoir repository as [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
 
 ## Submodules
 
@@ -24,6 +24,10 @@ This will create the following entry in the `.gitmodules` file:
 	path = clients/shanoir-downloader
 	url = git@github.com:Inria-Empenn/shanoir_downloader.git
 ```
+
+## Shanoir Uploader
+
+Advanced GUI to upload data on shanoir.
 
 ## Shanoir Downloader
 
