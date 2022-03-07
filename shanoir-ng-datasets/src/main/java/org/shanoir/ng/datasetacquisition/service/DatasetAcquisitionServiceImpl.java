@@ -148,7 +148,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 		Iterable<DatasetAcquisition> updatedAcqs =  repository.saveAll(entitiesDb);
 		
 		for (DatasetAcquisition db : updatedAcqs) {
-			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, db.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));			
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, db.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, db.getExamination().getStudyId()));			
 		}
 		return updatedAcqs;
 	}
