@@ -1,8 +1,23 @@
-# Shanoir clients (tools which use the Shanoir API)
+# Shanoir clients
 
-Some clients like shanoir_downloader and download_data_on_shanoir are added to the main Shanoir repository as [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+Shanoir clients are tools which use the Shanoir API.
+
+## Shanoir Uploader
+
+Advanced GUI to upload data on shanoir.
+
+## Shanoir Downloader
+
+Shanoir downloader enables to download datasets, check that the downloaded DICOM content is correct, anonymize, archive and encrypt them.
+The `convert_dicoms_to_niftis.py` script enables to convert DICOMS to nifti using different converters and logs the conversion results in a .csv file.
+
+## Download data on Shanoir
+
+This script uses previous script (shanoir_downloader.py) to interact more easily with Solr and reorganize data as BIDS-like specification. Of note, the script needs to be modify to fit your needs as described in the header. Indeed, you need to define how you want to organize your data, the ID of your study, the data you want to retrieve, where you want to download the data, you Shanoir ID and the type of file you want to download (either DICOM or NIFTI, conversion done with dcm2niix directly by Shanoir).
 
 ## Submodules
+
+Some clients like shanoir_downloader and download_data_on_shanoir are added to the main Shanoir repository as [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
 
 ### Initialize git submodules when cloning the shanoir-ng repository
 
@@ -24,16 +39,3 @@ This will create the following entry in the `.gitmodules` file:
 	path = clients/shanoir-downloader
 	url = git@github.com:Inria-Empenn/shanoir_downloader.git
 ```
-
-## Shanoir Uploader
-
-Advanced GUI to upload data on shanoir.
-
-## Shanoir Downloader
-
-Shanoir downloader enables to download datasets, check that the downloaded DICOM content is correct, anonymize, archive and encrypt them.
-The `convert_dicoms_to_niftis.py` script enables to convert DICOMS to nifti using different converters and logs the conversion results in a .csv file.
-
-## Download data on Shanoir
-
-This script uses previous script (shanoir_downloader.py) to interact more easily with Solr and reorganize data as BIDS-like specification. Of note, the script needs to be modify to fit your needs as described in the header. Indeed, you need to define how you want to organize your data, the ID of your study, the data you want to retrieve, where you want to download the data, you Shanoir ID and the type of file you want to download (either DICOM or NIFTI, conversion done with dcm2niix directly by Shanoir).
