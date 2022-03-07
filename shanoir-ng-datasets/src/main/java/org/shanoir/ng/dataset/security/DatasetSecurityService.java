@@ -207,6 +207,31 @@ public class DatasetSecurityService {
 		}
         return commService.hasRightOnStudy(datasetAcq.getExamination().getStudyId(), rightStr);
     }
+    
+    /**
+     * Check that the connected user has the given right for the given dataset acquisitions.
+     * !!! The acquisitions must be trusted, meaning they must come from the database, not from the user !!!
+     * 
+     * @param datasetId the dataset acquisition id
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasRightOnEveryTrustedDatasetAcquisition(List<DatasetAcquisition> datasetAcquisitions, String rightStr) throws EntityNotFoundException {
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
+    	// If the entry is empty, return an empty list
+    	if (datasetAcquisitions == null || datasetAcquisitions.isEmpty()) {
+			return true;
+		}
+    	
+    	Set<Long> studyIds = new HashSet<Long>();
+    	for (DatasetAcquisition acq : datasetAcquisitions) {
+    		studyIds.add(acq.getExamination().getStudyId());
+    	}
+    	return studyIds.equals(commService.hasRightOnStudies(studyIds, rightStr));
+    }
 
     /**
      * Check that the connected user has the given right for at least one of the given datasets.

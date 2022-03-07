@@ -373,12 +373,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             let pref: TablePreferences = JSON.parse(prefStr);
             this.maxResults = pref.pageSize;
             this.columnDefs.forEach((col, i) => {
-                col.width = pref.colWidths[i].width;
-                col.hidden = pref.colWidths[i].hidden;
+                col.width = pref.colWidths[i]?.width;
+                col.hidden = pref.colWidths[i]?.hidden;
             });
             this.subRowsDefs?.forEach((col, i) => {
-                col.width = pref.colWidths[this.columnDefs.length + i].width;
-                col.hidden = pref.colWidths[this.columnDefs.length + i].hidden;
+                col.width = pref.colWidths[this.columnDefs.length + i]?.width;
+                col.hidden = pref.colWidths[this.columnDefs.length + i]?.hidden;
             });
         }
     }

@@ -55,6 +55,9 @@ public interface DatasetAcquisitionService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasUpdateRightOnDatasetAcquisition(#entity, 'CAN_ADMINISTRATE')")
 	DatasetAcquisition update(DatasetAcquisition entity) throws EntityNotFoundException;
 	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnEveryTrustedDatasetAcquisition(#entities, 'CAN_ADMINISTRATE')")
+	Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
+	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException;
 

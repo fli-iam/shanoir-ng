@@ -253,6 +253,7 @@ public class StudyCardApiController implements StudyCardApi {
 				}
 			}
 		}
+		datasetAcquisitionService.update(acquisitions);
 		return new ResponseEntity<Void>(HttpStatus.OK);
 		
 	}

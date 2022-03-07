@@ -38,6 +38,7 @@ public class StudyCardProcessingService {
 
 	
 	public void applyStudyCard(DatasetAcquisition acquisition, StudyCard studyCard, Attributes dicomAttributes) {
+		LOG.debug("apply studycard n° " + studyCard.getId());
 		if (studyCard.getRules() != null) {
 			for (StudyCardRule rule : studyCard.getRules()) {
 				applyStudyCardRule(acquisition, rule, dicomAttributes);
@@ -153,6 +154,8 @@ public class StudyCardProcessingService {
 
 	private void applyAssignment(DatasetAcquisition acquisition, StudyCardAssignment assignment) {
 		try {
+			LOG.debug("apply assignment : " + assignment);
+			LOG.debug("on acquisition : " + acquisition);
 			assignment.getField().update(acquisition, assignment.getValue());			
 		} catch (IllegalArgumentException e) {
 			LOG.error("Error in studycard processing : ", e);

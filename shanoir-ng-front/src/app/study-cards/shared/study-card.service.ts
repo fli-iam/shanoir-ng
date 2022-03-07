@@ -57,8 +57,8 @@ export class StudyCardService extends EntityService<StudyCard> {
         });
     }
 
-    applyStudyCardOn(studyCardId: number, datasetIds: number[]) {
-        return this.http.post<any[]>(this.API_URL + '/apply/', JSON.stringify({studyCardId: studyCardId, datasetIds: datasetIds}))
+    applyStudyCardOn(studyCardId: number, datasetAcquisitionIds: number[]) {
+        return this.http.post<any[]>(this.API_URL + '/apply', JSON.stringify({studyCardId: studyCardId, datasetAcquisitionIds: datasetAcquisitionIds}))
             .toPromise()
             .then();
     }

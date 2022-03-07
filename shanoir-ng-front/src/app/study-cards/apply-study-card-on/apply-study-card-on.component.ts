@@ -12,13 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
-import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { slideRight } from '../../shared/animations/animations';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
@@ -47,13 +46,12 @@ export class ApplyStudyCardOnComponent implements OnInit {
     browserPaging: BrowserPaging<DatasetAcquisition>;
     nbSelectedDatasets: number;
     nbIncompatible: number = 0;
-
+    finished: boolean = false;
+    loading: boolean = false;
 
     constructor(
-            private datasetService: DatasetService,
             private datasetAcquisitionService: DatasetAcquisitionService,
             private studycardService: StudyCardService,
-            private activatedRoute: ActivatedRoute,
             private breadcrumbsService: BreadcrumbsService,
             private confirmService: ConfirmDialogService,
             private router : Router) {
@@ -76,6 +74,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
             return dsAcqs;
         });
 
+        this.finished = this.breadcrumbsService.currentStep.data.finished;
         Promise.all([acquisitionPromise, this.studycardService.getAll()]).then(([acquisitions, studycards]) => {
             this.studyCards = studycards;
             this.studycardOptions = [];
@@ -86,6 +85,9 @@ export class ApplyStudyCardOnComponent implements OnInit {
                     this.studycardOptions.push(option);
                 }
             });
+            if (this.breadcrumbsService.currentStep.data.studyCardId) {
+                this.studycard = this.studyCards.find(sc => sc.id == this.breadcrumbsService.currentStep.data.studyCardId);
+            }
         });
     }
 
@@ -112,15 +114,22 @@ export class ApplyStudyCardOnComponent implements OnInit {
         this.reapplyOn([...this.selectedAcquisitionIds]);
     }
 
-    private reapplyOn(datasetIds: number[]) {
+    private reapplyOn(datasetAcquisitionIds: number[]) {
         this.confirmService.confirm('Apply Study Card ?',
                 'Would you like to apply the study card "' 
                 + this.studycard.name
-                + '" to ' + datasetIds.length
+                + '" to ' + datasetAcquisitionIds.length
                 + ' datasets? Note that any previous study card application will be permanentely overwriten by new values.'
         ).then(res => {
             if (res) {
-                this.studycardService.applyStudyCardOn(this.studycard.id, datasetIds);
+                this.loading = true;
+                this.studycardService.applyStudyCardOn(this.studycard.id, datasetAcquisitionIds).then(() => {
+                    this.loading = false;
+                    this.finished = true;
+                    this.breadcrumbsService.currentStep.data.finished = true;
+                }).catch(() => {
+                    this.loading = false;
+                });
             }
         });
     }
@@ -142,18 +151,18 @@ export class ApplyStudyCardOnComponent implements OnInit {
             { headerName: "Center", field: "acquisitionEquipment.center.name", suppressSorting: true,
 				route: (dsAcq: DatasetAcquisition) => dsAcq.acquisitionEquipment.center? '/center/details/' + dsAcq.acquisitionEquipment.center.id : null
 			},
-            { headerName: "Last StudyCard", field: "studyCard.name",
-                route: (dsAcq: DatasetAcquisition) => dsAcq.studyCard ? '/study-card/details/' + dsAcq.studyCard.id : null
-            }
+            { headerName: "Last StudyCard", field: "studyCard.name"},
+            { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.router.navigate(['/dataset-acquisition/details/' + item.id]) }
         ];
         return colDef;       
     }
 
     getSubRowDefs() {
         return [
-            {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
-            {headerName: "Name", field: "name", orderBy: ["updatedMetadata.name", "originMetadata.name", "id"]},
-            {headerName: "Comment", field: "originMetadata.comment"},
+            { headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false },
+            { headerName: "Name", field: "name", orderBy: ["updatedMetadata.name", "originMetadata.name", "id"] },
+            { headerName: "Comment", field: "originMetadata.comment" },
+            { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.router.navigate(['/dataset/details/' + item.id]) }
         ];
     }
 
@@ -227,6 +236,11 @@ export class ApplyStudyCardOnComponent implements OnInit {
                 } 
             });
         }
+    }
+
+    updateStudyCard() {
+        this.updateNbIncompatible();
+        this.breadcrumbsService.currentStep.data.studyCardId = this.studycard?.id;
     }
 
 }

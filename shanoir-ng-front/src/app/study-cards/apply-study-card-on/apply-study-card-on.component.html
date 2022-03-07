@@ -26,7 +26,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <li>
             <span class="label">Study card : </span>
-            <span><select-box [(ngModel)]="studycard" [options]="studycardOptions" (userChange)="updateNbIncompatible()" (onViewClick)="showStudyCard()" [viewDisabled]="!studycard"></select-box></span>
+            <span *ngIf="!finished"><select-box [(ngModel)]="studycard" [options]="studycardOptions" (userChange)="updateStudyCard()" (onViewClick)="showStudyCard()" [viewDisabled]="!studycard"></select-box></span>
+            <span *ngIf="finished"class="value">{{studycard?.name}}</span>
         </li>
     </ul>
     <ul class="form sc-box" *ngIf="studycard" @slideRight>
@@ -45,10 +46,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </ul>
 </div>
 
-<div class="button-div">
+<div *ngIf="!finished" class="button-div">
     <button class="apply right-icon" 
             [class.warning]="nbIncompatible > 0" 
-            [disabled]="!studycard || !selectedAcquisitionIds || selectedAcquisitionIds.size == 0" 
+            [disabled]="loading || !studycard || !selectedAcquisitionIds || selectedAcquisitionIds.size == 0" 
             (click)="reapplyOnSelected()">
         Apply Studycard
         <i class="fa-solid fa-history"></i>
@@ -59,6 +60,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </div>
 </div>
 
+<div *ngIf="finished" class="button-div done right-icon">
+    Done<i class="fa-solid fa-check"></i>
+</div>
+
 <shanoir-table #table
         *ngIf="browserPaging"
         [getPage]="getPage.bind(this)" 
@@ -66,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [subRowsDefs]="subRowsDefs"
         [customActionDefs]="customActionDefs"
         subRowsKey="datasets"
-		[selectionAllowed]="true"
+		[selectionAllowed]="!finished"
         [browserSearch]="false"
         [(selection)]="selectedAcquisitionIds"
         (selectionChange)="onSelectionChange()">
