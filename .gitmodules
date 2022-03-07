@@ -1,0 +1,6 @@
+[submodule "clients/shanoir_downloader"]
+	path = clients/shanoir_downloader
+	url = git@github.com:Inria-Empenn/shanoir_downloader.git
+[submodule "clients/download-data-on-shanoir"]
+	path = clients/download-data-on-shanoir
+	url = git@gitlab.inria.fr:mgaubert/download-data-on-shanoir.git
