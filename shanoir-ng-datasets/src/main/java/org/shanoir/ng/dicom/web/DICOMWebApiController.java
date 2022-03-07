@@ -2,7 +2,9 @@ package org.shanoir.ng.dicom.web;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 
+@Controller
 public class DICOMWebApiController implements DICOMWebApi {
 
 	@Override

@@ -19,8 +19,8 @@ window.config = {
       {
         name: 'SHANOIR-NG',
         wadoUriRoot: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/shanoir-ng/',
-        qidoRoot: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/shanoir-ng/dicomweb',
-        wadoRoot: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/shanoir-ng/dicomweb',
+        qidoRoot: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/dicomweb',
+        wadoRoot: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/dicomweb',
         qidoSupportsIncludeField: true,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
