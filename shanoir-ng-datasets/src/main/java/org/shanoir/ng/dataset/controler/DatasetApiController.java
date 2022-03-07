@@ -159,10 +159,8 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	ShanoirEventService eventService;
-
-	@Autowired	
-	private ConnectionFactory connectionFactory;
 	
+	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
 	/** Number of downloadable datasets. */
@@ -175,9 +173,8 @@ public class DatasetApiController implements DatasetApi {
 
 	@PostConstruct
 	private void initialize() {
-		this.rabbitTemplate = new RabbitTemplate(connectionFactory);
-		// Set timeout to 1mn (consider nifti reconversion can take some time)
-		this.rabbitTemplate.setReplyTimeout(60000);
+		// Set timeout to undefined (consider nifti reconversion can take some time)
+		this.rabbitTemplate.setReplyTimeout(-1);
 	}
 
 	@Override
