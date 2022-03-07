@@ -28,9 +28,9 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-@Api(value = "studies")
-@RequestMapping("/studies")
-public interface StudiesApi {
+@Api(value = "dicomjson")
+@RequestMapping("/dicomjson")
+public interface DICOMJsonApi {
 
 	@ApiOperation(value = "", notes = "Returns all studies", response = StudyDTO.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
@@ -39,7 +39,7 @@ public interface StudiesApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "", produces = { "application/dicom+json" })
+	@GetMapping(value = "/studies", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<StudiesDTO> findStudies();

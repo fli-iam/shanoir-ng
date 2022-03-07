@@ -47,13 +47,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(controllers = StudiesApiController.class)
+@WebMvcTest(controllers = DICOMJsonApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration()
 @EnableSpringDataWebSupport
-public class StudiesApiControllerTest {
+public class DICOMJsonApiControllerTest {
 
-	private static final String REQUEST_PATH = "/studies";
+	private static final String REQUEST_PATH = "/dicomjson/studies";
 
 	private Gson gson;
 
@@ -80,7 +80,7 @@ public class StudiesApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void findStudiesTest() throws Exception {
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept("application/dicom+json")
 				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PageRequest.of(0, 10))))
 		.andExpect(status().isNoContent());
 	}

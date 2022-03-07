@@ -1,0 +1,170 @@
+package org.shanoir.ng.dicom.web;
+
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+
+@Api(value = "dicomweb")
+@RequestMapping("/dicomweb")
+public interface DICOMWebApi {
+
+	@ApiOperation(value = "", notes = "Returns all DICOM patients/subjects", response = String.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found patients/subjects", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no patient/subject found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/patients", produces = { "application/dicom+json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<String> findPatients() throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Returns all DICOM studies/examinations", response = String.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found studies/examinations", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no study/exam found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/studies", produces = { "application/dicom+json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<String> findStudies() throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Returns all DICOM series/acquisitions", response = String.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found series/acquisitions", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no serie/acquisition found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/series", produces = { "application/dicom+json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<String> findSeries() throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Returns all DICOM series/acquisitions of a study", response = String.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found series/acquisitions", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no serie/acquisition found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/studies/{StudyInstanceUID}/series", produces = { "application/dicom+json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<String> findSeriesOfStudy(
+			@ApiParam(value = "StudyInstanceUID", required = true) @PathVariable("StudyInstanceUID") String studyInstanceUID
+		) throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Returns all DICOM instances/datasets", response = String.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/instances", produces = { "application/dicom+json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<String> findInstances() throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Returns all DICOM instances/datasets of a study", response = String.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/studies/{StudyInstanceUID}/instances", produces = { "application/dicom+json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<String> findInstancesOfStudy(
+			@ApiParam(value = "StudyInstanceUID", required = true) @PathVariable("StudyInstanceUID") String studyInstanceUID
+		) throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Returns all DICOM instances/datasets of a study and serie", response = String.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/studies/{StudyInstanceUID}/series/{SeriesInstanceUID}/instances", produces = { "application/dicom+json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<String> findInstancesOfStudyOfSerie(
+			@ApiParam(value = "StudyInstanceUID", required = true) @PathVariable("StudyInstanceUID") String studyInstanceUID,
+			@ApiParam(value = "SerieInstanceUID", required = true) @PathVariable("SerieInstanceUID") String serieInstanceUID	
+		) throws RestServiceException;
+
+//    @GET
+//    @NoCache
+//    @Path("/patients/count")
+//    @Produces("application/json")
+//    public Response countPatients() {
+//        return count("CountPatients", Model.PATIENT, null, null);
+//    }
+//
+//    @GET
+//    @NoCache
+//    @Path("/studies/count")
+//    @Produces("application/json")
+//    public Response countStudies() {
+//        return count("CountStudies", Model.STUDY, null, null);
+//    }
+//
+//    @GET
+//    @NoCache
+//    @Path("/series/count")
+//    @Produces("application/json")
+//    public Response countSeries() {
+//        return count("CountSeries", Model.SERIES, null, null);
+//    }
+//
+//    @GET
+//    @NoCache
+//    @Path("/studies/{StudyInstanceUID}/series/count")
+//    @Produces("application/json")
+//    public Response countSeriesOfStudy(
+//            @PathParam("StudyInstanceUID") String studyInstanceUID) {
+//        return count("CountStudySeries", Model.SERIES, studyInstanceUID, null);
+//    }
+//
+//    @GET
+//    @NoCache
+//    @Path("/instances/count")
+//    @Produces("application/json")
+//    public Response countInstances() {
+//        return count("CountInstances", Model.INSTANCE, null, null);
+//    }
+//
+//    @GET
+//    @NoCache
+//    @Path("/studies/{StudyInstanceUID}/instances/count")
+//    @Produces("application/json")
+//    public Response countInstancesOfStudy(
+//            @PathParam("StudyInstanceUID") String studyInstanceUID) {
+//        return count("CountStudyInstances", Model.INSTANCE, studyInstanceUID, null);
+//    }
+//
+//    @GET
+//    @NoCache
+//    @Path("/studies/{StudyInstanceUID}/series/{SeriesInstanceUID}/instances/count")
+//    @Produces("application/json")
+//    public Response countInstancesOfSeries(
+//            @PathParam("StudyInstanceUID") String studyInstanceUID,
+//            @PathParam("SeriesInstanceUID") String seriesInstanceUID) {
+//        return count("CountStudySeriesInstances", Model.INSTANCE, studyInstanceUID, seriesInstanceUID);
+//    }
+//
+//    @GET
+//    @NoCache
+//    @Path("/studies/size")
+//    @Produces("application/json")
+
+}

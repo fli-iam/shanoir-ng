@@ -27,7 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 @Controller
-public class StudiesApiController implements StudiesApi {
+public class DICOMJsonApiController implements DICOMJsonApi {
 
 	@Autowired
 	private ExaminationToStudyDTOMapper examinationToStudyDTOMapper;
