@@ -54,23 +54,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                         [disabled]="(!study || !centerOptions)"
                         [(ngModel)]="center"
-                        (userChange)="onSelectCenter();"
                         (onViewClick)="showCenterDetails()"
                         [viewDisabled]="!center"
                         [options]="centerOptions">
                 </select-box>
             </span>
-        <li>
-            <label>Select an acquisition equipment</label> 
-            <span class="right-col">
-                <select-box *ngIf="center"
-                        [disabled]="(!center || !acquisitionEquipmentOptions)"
-                        [(ngModel)]="acquisitionEquipment" 
-                        (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
-                        [options]="acquisitionEquipmentOptions">
-                </select-box>
-            </span>
-        </li>
     </ol>
 </fieldset>
 

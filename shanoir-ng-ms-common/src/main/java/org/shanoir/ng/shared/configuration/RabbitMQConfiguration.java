@@ -121,6 +121,9 @@ public class RabbitMQConfiguration {
 	/** Queue to create all bids dataset acquisitions */
 	public static final String IMPORTER_BIDS_DATASET_QUEUE = "importer-bids-dataset-queue";
 
+	/** Queue to create get equipment ID from code. */
+	public static final String ACQUISITION_EQUIPEMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -380,6 +383,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue importBidsDatasetQueue() {
 		return new Queue(IMPORTER_BIDS_DATASET_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue acquisitionEquipmentCodeQueue() {
+		return new Queue(ACQUISITION_EQUIPEMENT_CODE_QUEUE, true);
 	}
 
 }

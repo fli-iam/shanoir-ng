@@ -23,8 +23,6 @@ import { Study } from '../../studies/shared/study.model';
 import { Option } from '../../shared/select/select.component';
 import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -43,16 +41,13 @@ export class BidsUploadComponent {
     public study: Study;
     public center: Center;
     public centerOptions: Option<Center>[] = [];
-    public acquisitionEquipment: AcquisitionEquipment;
-    public acquisitionEquipmentOptions: Option<AcquisitionEquipment>[] = [];
 
     constructor(
             private importService: ImportService,
             private centerService: CenterService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
-            private studyService: StudyService,
-            private acqEqPipe: AcquisitionEquipmentPipe) {
+            private studyService: StudyService) {
                 
     Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
             .then(([allStudies, allCenters]) => {
@@ -83,20 +78,6 @@ export class BidsUploadComponent {
         });
     }
     
-    public onSelectCenter(): void {
-        this.acquisitionEquipment = null;
-        if (this.center) {
-            let index = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id === this.center.id);
-        }
-        this.acquisitionEquipmentOptions =  [];
-        if (this.center && this.center.acquisitionEquipments) {
-            for (let acqEq of this.center.acquisitionEquipments) {
-                let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
-                this.acquisitionEquipmentOptions.push(option);
-            }
-        }
-    }
-    
     public onSelectStudy() {
         if (this.study && this.study.id && this.study.studyCenterList) {
             for (let studyCenter of this.study.studyCenterList) {
@@ -120,7 +101,7 @@ export class BidsUploadComponent {
 
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
-        this.importService.uploadBidsFile(formData, this.study.id, this.study.name, this.center.id, this.acquisitionEquipment.id)
+        this.importService.uploadBidsFile(formData, this.study.id, this.study.name, this.center.id)
             .then((importJob: ImportJob) => {
                 this.setArchiveStatus('uploaded');
                 this.errorMessage = "";
@@ -146,10 +127,6 @@ export class BidsUploadComponent {
 
     public showCenterDetails() {
         window.open('center/details/' + this.center.id, '_blank');
-    }
-    
-    public showAcquistionEquipmentDetails() {
-        window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
     }
 }
     

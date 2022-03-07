@@ -1,6 +1,7 @@
 package org.shanoir.ng.importer.service;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,8 +11,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.apache.tomcat.util.json.JSONParser;
+import org.apache.tomcat.util.json.ParseException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -38,6 +44,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -46,6 +53,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysql.cj.xdevapi.JsonParser;
 
 @Service
 public class BidsImporterService {
@@ -62,6 +70,9 @@ public class BidsImporterService {
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
@@ -162,8 +173,10 @@ public class BidsImporterService {
 	 * @param event 
 	 * @param workfolder the work folder we are working in
 	 * @throws IOException 
+	 * @throws ParseException 
+	 * @throws JSONException 
 	 */
-	private void importDataset(ImportJob importJob, BidsDataType bidsDataType, DatasetModalityType modalityType, ShanoirEvent event) throws IOException {
+	private void importDataset(ImportJob importJob, BidsDataType bidsDataType, DatasetModalityType modalityType, ShanoirEvent event) throws IOException, ParseException, JSONException {
 
 		DatasetAcquisition datasetAcquisition = new BidsDatasetAcquisition();
 
@@ -175,6 +188,8 @@ public class BidsImporterService {
 		float progress = 0f;
 
 		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles();
+		
+		Long equipmentId = 0L;
 
 		for (File importedFile : filesToImport) {
 			progress += 1f / filesToImport.length;
@@ -213,6 +228,19 @@ public class BidsImporterService {
 			dsFile.setPacs(false);
 			dsFile.setPath(importedFileFinalLocation.toUri().toString().replaceAll(" ", "%20"));
 			files.add(dsFile);
+			if(importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
+				// Check equipment in json file
+				JSONParser json = new JSONParser(new FileReader(importedFile));
+				LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
+				
+				if (jsonObject.get("DeviceSerialNumber") != null) {
+					String value = (String) jsonObject.get("DeviceSerialNumber");
+					Long equipId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE, value);
+					if (equipId != null) {
+						equipmentId = equipId;
+					}
+				}
+			}
 
 			expression.setDatasetFiles(files);
 			datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
@@ -228,7 +256,7 @@ public class BidsImporterService {
 		}
 
 		datasetAcquisition.setDatasets(datasets);
-		datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
+		datasetAcquisition.setAcquisitionEquipmentId(equipmentId);
 		datasetAcquisitionRepository.save(datasetAcquisition);
 		
 		event.setStatus(ShanoirEvent.SUCCESS);
