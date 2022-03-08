@@ -46,6 +46,7 @@ export class ExaminationNodeComponent implements OnChanges {
     datasetIds: number[];
 	hasEEG: boolean = false;
 	hasDicom: boolean = false;
+    hasBids: boolean = false;
 
     constructor(
         private router: Router,
@@ -116,7 +117,9 @@ export class ExaminationNodeComponent implements OnChanges {
                         datasetIds.push(ds.id);
 						if (ds.type === 'Eeg') {
 							this.hasEEG = true;
-						} else {
+						} else if (ds.type === 'BIDS') {
+                            this.hasBids = true;
+                        } else {
 							this.hasDicom = true;
 						}
                     });

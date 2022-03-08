@@ -1,5 +1,5 @@
 
-package org.shanoir.ng.exporter.controller;
+package org.shanoir.ng.bids.controller;
 
 import java.io.IOException;
 

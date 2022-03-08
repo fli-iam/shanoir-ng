@@ -412,7 +412,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Delete selected", awesome: "fa-regular fa-trash-can", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
         );
-        return customActionDefs;
+        return customActionDefs; 
     }
 
     getSelectionCustomActionsDefs(): any[] {

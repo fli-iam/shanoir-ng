@@ -55,4 +55,20 @@ public class RabbitMqCenterService {
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
 	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public Long findAcquisitionEquipementIdFromCode(String message) {
+		try {
+			AcquisitionEquipment ae = acquisitionEquipementService.findBySerialNumber(message);
+			if (ae == null) {
+				return null;
+			} else {
+				return ae.getId();
+			}
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
 }

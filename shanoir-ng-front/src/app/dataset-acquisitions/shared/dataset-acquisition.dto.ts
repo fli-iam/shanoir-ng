@@ -153,7 +153,7 @@ export class DatasetAcquisitionDTO {
     softwareRelease: string;
     sortingIndex: number;
     creationDate: Date;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed' | 'BIDS';
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
@@ -175,7 +175,7 @@ export class ProcessedDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
 export class ExaminationDatasetAcquisitionDTO {
     id: number;
     name: string;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed' | 'BIDS';
     datasets: any;
 }
 

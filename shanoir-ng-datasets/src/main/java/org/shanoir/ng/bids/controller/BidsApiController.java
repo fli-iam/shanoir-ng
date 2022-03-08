@@ -1,4 +1,4 @@
-package org.shanoir.ng.exporter.controller;
+package org.shanoir.ng.bids.controller;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,7 +21,7 @@ import org.joda.time.DateTime;
 import org.shanoir.ng.bids.BidsDeserializer;
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFolder;
-import org.shanoir.ng.exporter.service.BIDSService;
+import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.StudyRepository;
