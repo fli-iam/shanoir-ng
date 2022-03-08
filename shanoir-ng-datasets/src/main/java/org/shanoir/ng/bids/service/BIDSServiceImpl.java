@@ -1,4 +1,4 @@
-package org.shanoir.ng.exporter.service;
+package org.shanoir.ng.bids.service;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.controler.DatasetApiController.CoordinatesSystem;
+import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataSetDescription;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -70,6 +71,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Service
 public class BIDSServiceImpl implements BIDSService {
+
+	private static final String SESSIONS_TSV = "_sessions.tsv";
 
 	private static final String TABULATION = "\t";
 
@@ -285,11 +288,21 @@ public class BIDSServiceImpl implements BIDSService {
 		// Create session folder only if there is multiple exmainations
 		boolean useSessionFolder = (examinationList != null && examinationList.size() > 1) ;
 
+		File sessionFile = new File(subjDir.getAbsolutePath() + "/" + subjDir.getName() + SESSIONS_TSV);
+		if (useSessionFolder) {
+			// Generate  sub-<label>_sessions.tsv file
+			sessionFile.createNewFile();
+			StringBuilder buffer = new StringBuilder();
+			buffer.append("session_id").append(TABULATION)
+			.append("acq_time").append(TABULATION)
+			.append(NEW_LINE);
+			Files.write(Paths.get(sessionFile.getAbsolutePath()), buffer.toString().getBytes());
+		}
 		// Iterate over examinations to export them as BIDS
 		File examDir = subjDir;
 		for (Examination exam : examinationList) {
 			if (useSessionFolder) {
-				examDir = createExaminationFolder(exam, subjDir);
+				examDir = createExaminationFolder(exam, subjDir, sessionFile);
 			}
 			exportAsBids(exam, examDir, studyName, subject.getName());
 		}
@@ -337,7 +350,7 @@ public class BIDSServiceImpl implements BIDSService {
 			List<Dataset> datasets = acq.getDatasets();
 			for (Dataset ds : datasets) {
 				try {
-					getScansFile(examDir);
+					getScansFile(examDir, subjectName);
 					createDatasetBidsFiles(ds, examDir, studyName, subjectName);
 				} catch (IOException e) {
 					LOG.error(e.getMessage());
@@ -350,11 +363,22 @@ public class BIDSServiceImpl implements BIDSService {
 	 * Create the session/examination BIDS folder
 	 * @param examination the examination for which we want to create the folder
 	 * @param subjectDir the parent folder
+	 * @param sessionFile the session file to complete
 	 * @return the newly created folder
+	 * @throws IOException 
 	 */
-	private File createExaminationFolder(final Examination examination, final File subjectDir) {
+	private File createExaminationFolder(final Examination examination, final File subjectDir, File sessionFile) throws IOException {
 		String sessionLabel = "" + examination.getId();
 		sessionLabel += (examination.getComment() != null ? "-" + examination.getComment() : "");
+		
+		// Write the session file
+		StringBuilder buffer = new StringBuilder();
+		buffer.append(sessionLabel).append(TABULATION)
+		.append(examination.getExaminationDate()).append(TABULATION)
+		.append(NEW_LINE);
+		Files.write(Paths.get(sessionFile.getAbsolutePath()), buffer.toString().getBytes());
+		
+		// Create exam/session folder
 		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  sessionLabel);
 		if (!examFolder.exists()) {
 			examFolder.mkdirs();
@@ -419,8 +443,9 @@ public class BIDSServiceImpl implements BIDSService {
 			if (dataFolder == null) {
 				dataFolder = createDataFolder("undefined", workDir);
 			}
-		} else {
-			dataFolder = workDir;
+		} else if (dataset instanceof BidsDataset) {
+			BidsDataset bidsdataset = (BidsDataset) dataset;
+			dataFolder = createDataFolder(bidsdataset.getBidsDataType(), workDir);
 		}
 		// Copy dataset files in the directory AS hard link to avoid duplicating files
 		List<URL> pathURLs = new ArrayList<>();
@@ -437,14 +462,13 @@ public class BIDSServiceImpl implements BIDSService {
 				Files.createLink(pathToGo, srcFile.toPath());
 
 				// Add the file to the scans.tsv reference
-				File scansTsvFile = getScansFile(workDir);
+				File scansTsvFile = getScansFile(workDir, subjectName);
 				StringBuilder buffer = new StringBuilder();
 				buffer.append(pathToGo.getFileName()).append(TABULATION)
 				.append(dataset.getDatasetAcquisition().getExamination().getExaminationDate()).append(TABULATION)
 				.append(dataset.getDatasetAcquisition().getExamination().getId())
 				.append(NEW_LINE);
 
-				// TODO: center_id / comment / weigth / other examination things ?
 				Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
 
 			} catch (IOException exception) {
@@ -460,9 +484,12 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 	}
 
-	private File getScansFile(File parentFile) throws IOException {
-		// What if we don't have subject name ?
-		File scansFile = new File(parentFile.getAbsolutePath() + File.separator + parentFile.getName() + SCANS_FILE_EXTENSION);
+	private File getScansFile(File parentFile, String subjectName) throws IOException {
+		String fileName = parentFile.getName() + SCANS_FILE_EXTENSION;
+		if (!parentFile.getName().contains(subjectName)) {
+			fileName = SUBJECT_PREFIX + subjectName + "_" + parentFile.getName() + SCANS_FILE_EXTENSION;
+		}
+		File scansFile = new File(parentFile.getAbsolutePath() + File.separator + fileName);
 		if (!scansFile.exists()) {
 			StringBuilder buffer = new StringBuilder();
 			buffer.append("filename").append(TABULATION)
@@ -565,7 +592,7 @@ public class BIDSServiceImpl implements BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 
 		// add to scans.tsv
-		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
 		
 		// Create events.tsv file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_event.tsv";
@@ -586,7 +613,7 @@ public class BIDSServiceImpl implements BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 		
 		// add to scans.tsv
-		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
 		
 		// If no coordinates system, don't create electrode.csv & _coordsystem.json files
 		if (dataset.getCoordinatesSystem() == null) {
@@ -609,7 +636,7 @@ public class BIDSServiceImpl implements BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 
 		// add to scans.tsv
-		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
 
 		// Create _coordsystem.json file
 		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_coordsystem.json";
@@ -624,11 +651,11 @@ public class BIDSServiceImpl implements BIDSService {
 		Files.write(Paths.get(destFile), buffer.toString().getBytes());
 		
 		// add to scans.tsv
-		addToTsvFile(dataFolder.getParentFile(), fileName, dataset);
+		addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
 	}
 	
-	private void addToTsvFile(File parentFolder, String fileName, Dataset dataset) throws IOException {
-		File scansTsvFile = getScansFile(parentFolder);
+	private void addToTsvFile(File parentFolder, String fileName, Dataset dataset, String subjectName) throws IOException {
+		File scansTsvFile = getScansFile(parentFolder, subjectName);
 
 		StringBuilder buffer = new StringBuilder();
 		buffer.append(fileName).append(TABULATION)

@@ -99,12 +99,13 @@ public class CenterApiControllerTest {
 				.willReturn(Arrays.asList(new CenterDTO()));
 		Center center = new Center();
 		center.setId(Long.valueOf(123));
+		IdName idNameCenter = new IdName(1L, "naIme");
 		given(centerMapperMock.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
 
 		doNothing().when(centerServiceMock).deleteById(1L);
-		given(centerServiceMock.findAll()).willReturn(Arrays.asList(new Center()));
-		given(centerServiceMock.findById(1L)).willReturn(Optional.of(new Center()));
-		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
+		given(centerServiceMock.findAll()).willReturn(Arrays.asList(center));
+		given(centerServiceMock.findById(1L)).willReturn(Optional.of(center));
+		given(centerServiceMock.findIdsAndNames()).willReturn(Arrays.asList(idNameCenter));
 		given(centerServiceMock.create(Mockito.any(Center.class))).willReturn(center);
 		given(fieldEditionSecurityManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(Center.class))).willReturn(new FieldErrorMap());
@@ -116,6 +117,13 @@ public class CenterApiControllerTest {
 	public void deleteCenterTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+	public void deleteUnknownCenterTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/0").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
 	}
 
 	@Test

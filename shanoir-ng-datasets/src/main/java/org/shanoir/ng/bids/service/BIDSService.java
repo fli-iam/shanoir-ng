@@ -1,4 +1,4 @@
-package org.shanoir.ng.exporter.service;
+package org.shanoir.ng.bids.service;
 
 import java.io.File;
 import java.io.IOException;
