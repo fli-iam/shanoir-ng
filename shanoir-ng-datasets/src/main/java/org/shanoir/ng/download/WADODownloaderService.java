@@ -128,8 +128,8 @@ public class WADODownloaderService {
 	 * @throws MessagingException
 	 */
 	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
-		for (Iterator iterator = urls.iterator(); iterator.hasNext();) {
-			String url = ((URL) iterator.next()).toString() + "&";
+		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
+			String url = ((URL) iterator.next()).toString();
 			String instanceUID = null;
 			// handle and check at first for WADO-RS URLs by "/instances/"
 			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);

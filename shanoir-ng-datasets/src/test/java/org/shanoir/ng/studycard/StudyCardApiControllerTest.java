@@ -26,11 +26,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.validation.FindByRepository;
 import org.shanoir.ng.studycard.controler.StudyCardApiController;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.service.StudyCardProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -70,6 +73,15 @@ public class StudyCardApiControllerTest {
 
 	@MockBean
 	private StudyCardService studyCardServiceMock;
+	
+	@MockBean
+	private StudyCardProcessingService studyCardProcessingServiceMock;
+	
+	@MockBean
+	private DatasetAcquisitionService datasetAcquisitionServiceMock;
+	
+	@MockBean
+	private WADODownloaderService downloaderMock;
 	
 	@MockBean
 	private FindByRepository<StudyCard> findByRepositoryMock;
