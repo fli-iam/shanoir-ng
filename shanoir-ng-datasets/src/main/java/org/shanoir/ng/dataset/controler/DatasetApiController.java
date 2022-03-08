@@ -171,12 +171,6 @@ public class DatasetApiController implements DatasetApi {
 		this.request = request;
 	}
 
-	@PostConstruct
-	private void initialize() {
-		// Set timeout to undefined (consider nifti reconversion can take some time)
-		this.rabbitTemplate.setReplyTimeout(-1);
-	}
-
 	@Override
 	public ResponseEntity<Void> deleteDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId)
@@ -376,7 +370,9 @@ public class DatasetApiController implements DatasetApi {
 					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName, dataset);
 
 					// Convert them, sending to import microservice
+					this.rabbitTemplate.setReplyTimeout(60000);
 					boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + tmpFile.getAbsolutePath());
+					this.rabbitTemplate.setReplyTimeout(1000);
 
 					if (!result) {
 						throw new RestServiceException(
