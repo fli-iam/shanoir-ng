@@ -1,6 +1,6 @@
 .info { margin-top: 40px; }
 .form { margin: 0 0 5px; display: inline-block; vertical-align: middle; }
-.form li { margin: 5px 0; }
+.form li { margin: 5px 0; height: 19px; }
 select-box { width: 200px; }
 .form .value { color: var(--color-a); font-weight: bold; }
 .form ul { width: auto; }
@@ -17,3 +17,4 @@ div.warning { color: orangered; }
 
 .button-div { margin: 20px 0 40px; }
 .done { color: darkgreen; font-size: 35px; font-weight: bold; }
+checkbox { vertical-align: bottom; }

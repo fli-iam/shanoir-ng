@@ -48,6 +48,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
     nbIncompatible: number = 0;
     finished: boolean = false;
     loading: boolean = false;
+    showIncompatibles: boolean = true;
 
     constructor(
             private datasetAcquisitionService: DatasetAcquisitionService,
@@ -75,16 +76,12 @@ export class ApplyStudyCardOnComponent implements OnInit {
         });
 
         this.finished = this.breadcrumbsService.currentStep.data.finished;
+        if (this.breadcrumbsService.currentStep.data.showIncompatibles != undefined) {
+            this.showIncompatibles = this.breadcrumbsService.currentStep.data.showIncompatibles;
+        }
         Promise.all([acquisitionPromise, this.studycardService.getAll()]).then(([acquisitions, studycards]) => {
             this.studyCards = studycards;
-            this.studycardOptions = [];
-            studycards.forEach(sc => {
-                if (sc) {
-                    let option: Option<StudyCard> = new Option(sc, sc.name);
-                    option.compatible = acquisitions.findIndex(acq => acq.acquisitionEquipment?.id != sc.acquisitionEquipment?.id) == -1;
-                    this.studycardOptions.push(option);
-                }
-            });
+            this.updateOptions();
             if (this.breadcrumbsService.currentStep.data.studyCardId) {
                 this.studycard = this.studyCards.find(sc => sc.id == this.breadcrumbsService.currentStep.data.studyCardId);
             }
@@ -199,8 +196,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
                 this.nbSelectedDatasets += acq.datasets?.length;
             }
         });
-        this.updateStudyCardCompatibilities();
-        this.updateNbIncompatible();
+        this.updateOptions();
     }
 
     showStudyCard() {
@@ -214,16 +210,6 @@ export class ApplyStudyCardOnComponent implements OnInit {
             return this.studycard.acquisitionEquipment?.id == equipmentId;
         } else {
             return null;
-        }
-    }
-
-    updateStudyCardCompatibilities() {
-        if (this.studycardOptions) {
-            this.studycardOptions.forEach(option => {
-                option.compatible = this.datasetAcquisitions
-                    .filter(acq => this.selectedAcquisitionIds.has(acq.id))
-                    .findIndex(acq => acq.acquisitionEquipment?.id != option.value.acquisitionEquipment?.id) == -1;
-            });
         }
     }
 
@@ -241,6 +227,29 @@ export class ApplyStudyCardOnComponent implements OnInit {
     updateStudyCard() {
         this.updateNbIncompatible();
         this.breadcrumbsService.currentStep.data.studyCardId = this.studycard?.id;
+    }
+
+    updateOptions() {
+        console.log('update options', this.studyCards?.length)
+        if (this.studyCards) {
+            this.studycardOptions = [];
+            this.studyCards.forEach(sc => {
+                if (sc) {
+                    let option: Option<StudyCard> = new Option(sc, sc.name);
+                    option.compatible = this.datasetAcquisitions.findIndex(acq => acq.acquisitionEquipment?.id != sc.acquisitionEquipment?.id) == -1;
+                    console.log(option.compatible, this.showIncompatibles)
+                    if (option.compatible || this.showIncompatibles) {
+                        this.studycardOptions.push(option);
+                    }
+                }
+            });
+            this.updateNbIncompatible();
+        }
+    }
+
+    updateShowIncompatible() {
+        this.breadcrumbsService.currentStep.data.showIncompatibles = this.showIncompatibles;
+        this.updateOptions();
     }
 
 }

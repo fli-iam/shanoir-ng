@@ -29,6 +29,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span *ngIf="!finished"><select-box [(ngModel)]="studycard" [options]="studycardOptions" (userChange)="updateStudyCard()" (onViewClick)="showStudyCard()" [viewDisabled]="!studycard"></select-box></span>
             <span *ngIf="finished"class="value">{{studycard?.name}}</span>
         </li>
+        <li *ngIf="!finished">
+            <span class="label">Show incompatible studycards : </span>
+            <span><checkbox [(ngModel)]="showIncompatibles" (onChange)="updateShowIncompatible()"></checkbox></span>
+        </li>
     </ul>
     <ul class="form sc-box" *ngIf="studycard" @slideRight>
         <li>
