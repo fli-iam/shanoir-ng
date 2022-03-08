@@ -44,13 +44,17 @@ export class MetadataComponent {
     private loadMetadata() {
         const id: number = +this.activatedRoute.snapshot.params['id'];
         Promise.all([this.datasetService.downloadDicomMetadata(id), this.dicomService.getDicomTags()]).then(([data, tags]) => {
-            let metadata = Object.entries(data[0]);
-            metadata.forEach(entry => {
-                const entryCode: number = parseInt(entry[0], 16);
-                entry[1]['tagLabel'] = tags.find(tag => tag.code == entryCode)?.label;
-                if (entry[1]['Value']?.toString() == '[object Object]') entry[1]['Value'] = JSON.stringify(entry[1]['Value']);
-            })
-            this.metadataArr = metadata;
+            if (data) {
+                let metadata = Object.entries(data[0]);
+                metadata.forEach(entry => {
+                    const entryCode: number = parseInt(entry[0], 16);
+                    entry[1]['tagLabel'] = tags.find(tag => tag.code == entryCode)?.label;
+                    if (entry[1]['Value']?.toString() == '[object Object]') entry[1]['Value'] = JSON.stringify(entry[1]['Value']);
+                })
+                this.metadataArr = metadata;
+            } else {
+                this.metadataArr = [];
+            }
         });
     }
 

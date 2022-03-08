@@ -20,4 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<td>{{tag[1].Value}}</td>
 	</tr>
 </table>
+<div class="no-metadata" *ngIf="metadataArr?.length == 0">
+	No metadata to display
+</div>
 <button class="Button left-icon" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>
