@@ -261,7 +261,7 @@ public class StudyCardApiController implements StudyCardApi {
 						LOG.error("Could not apply studycard " + studyCard.getId() + " on dataset acquisition " + acquisition.getId() 
 						+ " : no pacs url for this acquisition");
 					}
-				} catch (IOException | MessagingException e) {
+				} catch (IOException | MessagingException | RestClientException e) {
 					throw new RestClientException("Cannot apply study card " + studyCardApplyObject.getStudyCardId() + " on acquisitions " + studyCardApplyObject.getDatasetAcquisitionIds(), e);
 				}
 			}

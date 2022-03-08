@@ -47,6 +47,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 /**
  * This class is used to download files on using WADO URLs:
@@ -164,7 +165,7 @@ public class WADODownloaderService {
 		}
 	}
 	
-	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException {
+	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {
 		if (url != null) {
 			String urlStr = url.toString();
 			if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURItoWadoRS(urlStr);
@@ -219,7 +220,7 @@ public class WADODownloaderService {
 	}
 	
 	
-	private String downloadMetadataFromPACS(final String url) throws IOException {
+	private String downloadMetadataFromPACS(final String url) throws IOException, RestClientException {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
