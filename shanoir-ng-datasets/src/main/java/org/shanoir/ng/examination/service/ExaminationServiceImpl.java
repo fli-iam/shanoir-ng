@@ -15,6 +15,8 @@
 package org.shanoir.ng.examination.service;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -206,6 +208,22 @@ public class ExaminationServiceImpl implements ExaminationService {
 		try {
 			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
 			file.transferTo(new File(filePath));
+		} catch (Exception e) {
+			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", examinationId, e);
+			e.printStackTrace();
+			return null;
+		}
+		return filePath;
+	}
+
+	@Override
+	public String addExtraDataFromFile(final Long examinationId, final File file) {
+		String filePath = getExtraDataFilePath(examinationId, file.getName());
+		File fileToCreate = new File(filePath);
+		fileToCreate.getParentFile().mkdirs();
+		try {
+			LOG.info("Saving file {} to destination: {}", file.getName(), filePath);
+			Files.copy(Path.of(file.getAbsolutePath()), Path.of(filePath));
 		} catch (Exception e) {
 			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", examinationId, e);
 			e.printStackTrace();

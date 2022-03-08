@@ -83,6 +83,7 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -108,6 +109,8 @@ public class DatasetApiController implements DatasetApi {
 	private static final String EEG = "eeg";
 
 	private static final String NII = "nii";
+	
+	private static final String BIDS = "BIDS";
 
 	private static final String DCM = "dcm";
 
@@ -116,10 +119,6 @@ public class DatasetApiController implements DatasetApi {
 	private static final String DOWNLOAD = ".download";
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
-
-	private static final String SUB_PREFIX = "sub-";
-
-	private static final String SES_PREFIX = "ses-";
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
 
@@ -160,7 +159,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	ShanoirEventService eventService;
-
+	
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
@@ -172,17 +171,10 @@ public class DatasetApiController implements DatasetApi {
 		this.request = request;
 	}
 
-	@PostConstruct
-	private void initialize() {
-		// Set timeout to 1mn (consider nifti reconversion can take some time)
-		this.rabbitTemplate.setReplyTimeout(60000);
-	}
-
 	@Override
 	public ResponseEntity<Void> deleteDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId)
 					throws RestServiceException {
-
 		try {
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -378,7 +370,9 @@ public class DatasetApiController implements DatasetApi {
 					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName, dataset);
 
 					// Convert them, sending to import microservice
+					this.rabbitTemplate.setReplyTimeout(60000);
 					boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + tmpFile.getAbsolutePath());
+					this.rabbitTemplate.setReplyTimeout(1000);
 
 					if (!result) {
 						throw new RestServiceException(
@@ -392,6 +386,9 @@ public class DatasetApiController implements DatasetApi {
 				}
 			} else if (EEG.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
+				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+			} else if (BIDS.equals(format)) {
+				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
 				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
 			} else {
 				throw new RestServiceException(
@@ -450,7 +447,7 @@ public class DatasetApiController implements DatasetApi {
 	public void massiveDownloadByDatasetIds(
 			@ApiParam(value = "ids of the datasets", required=true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM) @Valid
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg, BIDS", defaultValue = DCM) @Valid
 			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
 		// STEP 0: Check data integrity
 		if (datasetIds == null || datasetIds.isEmpty()) {
@@ -473,7 +470,7 @@ public class DatasetApiController implements DatasetApi {
 	public void massiveDownloadByStudyId(
 			@ApiParam(value = "id of the study", required=true) @Valid
 			@RequestParam(value = "studyId", required = true) Long studyId,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM) @Valid
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg, BIDS", defaultValue = DCM) @Valid
 			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
 		// STEP 0: Check data integrity
 		if (studyId == null) {
@@ -547,6 +544,9 @@ public class DatasetApiController implements DatasetApi {
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName, dataset);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
+				} else if (BIDS.equals(format)) {
+					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
 					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
 				} else {
 					throw new RestServiceException(
@@ -760,28 +760,6 @@ public class DatasetApiController implements DatasetApi {
 		}
 		file.createNewFile();
 		return file;
-	}
-
-	/**
-	 * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
-	 * @param urls
-	 * @param workFolder
-	 * @throws IOException
-	 * @throws MessagingException
-	 */
-	public void copyFilesForBIDSExport(final List<URL> urls, final File workFolder, final String subjectName,
-			final String sesId, final String modalityLabel) throws IOException {
-		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-			URL url =  iterator.next();
-			File srcFile = new File(url.getPath());
-			String destFilePath = srcFile.getPath().substring(niftiStorageDir.length() + 1, srcFile.getPath().lastIndexOf('/'));
-			File destFolder = new File(workFolder.getAbsolutePath() + File.separator + destFilePath);
-			destFolder.mkdirs();
-			String extensionType = srcFile.getPath().substring(srcFile.getPath().lastIndexOf(".") + 1);
-			String destFileNameBIDS = SUB_PREFIX + subjectName + "_" + SES_PREFIX + sesId + "_" + modalityLabel + "." + extensionType;
-			File destFile = new File(destFolder.getAbsolutePath() + File.separator + destFileNameBIDS);
-			Files.copy(srcFile.toPath(), destFile.toPath());
-		}
 	}
 
 	public static File getUserImportDir(String importDir) {

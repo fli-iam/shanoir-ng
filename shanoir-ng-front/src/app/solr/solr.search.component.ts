@@ -405,7 +405,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash-can", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
         );
-        return customActionDefs;
+        return customActionDefs; 
     }
 
     getSelectionCustomActionsDefs(): any[] {
