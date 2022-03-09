@@ -1,9 +1,12 @@
 package org.shanoir.ng.dicom.web;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -32,6 +35,13 @@ public class DICOMWebApiController implements DICOMWebApi {
 	@Autowired
 	private DICOMWebService dicomWebService;
 	
+	private HashMap<Long, String> examinationIdToStudyInstanceUIDCache;
+	
+	@PostConstruct
+	public void init() {
+		examinationIdToStudyInstanceUIDCache = new HashMap<Long, String>(1000);
+	}
+	
 	@Override
 	public ResponseEntity<String> findPatients() throws RestServiceException {
 		return null;
@@ -50,11 +60,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	@Override
 	public ResponseEntity<String> findSeriesOfStudy(Long examinationId) throws RestServiceException {
-		Examination examination = examinationService.findById(examinationId);
-		if (examination == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		String studyInstanceUID = findStudyInstanceUID(examination);
+		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
 			return new ResponseEntity<String>(response, HttpStatus.OK);
@@ -66,11 +72,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 	@Override
 	public ResponseEntity<String> findSerieMetadataOfStudy(Long examinationId, String serieId)
 			throws RestServiceException {
-		Examination examination = examinationService.findById(examinationId);
-		if (examination == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		String studyInstanceUID = findStudyInstanceUID(examination);
+		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
 		if (studyInstanceUID != null && serieId != null) {
 			String response = dicomWebService.findSerieMetadataOfStudy(studyInstanceUID, serieId);
 			return new ResponseEntity<String>(response, HttpStatus.OK);
@@ -78,7 +80,34 @@ public class DICOMWebApiController implements DICOMWebApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
+	
+	@Override
+	public ResponseEntity<String> findFrameOfStudyOfSerieOfInstance(Long examinationId, String serieInstanceUID,
+			String sopInstanceUID, String frame) throws RestServiceException {
+		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
+		return null;
+	}
 
+	@Override
+	public ResponseEntity<String> findInstancesOfStudyOfSerie(String studyInstanceUID, String serieInstanceUID)
+			throws RestServiceException {
+		return null;
+	}
+
+	private String findStudyInstanceUIDFromCacheOrDatabase(Long examinationId) {
+		String studyInstanceUID = examinationIdToStudyInstanceUIDCache.get(examinationId);
+		if (studyInstanceUID == null) {
+			Examination examination = examinationService.findById(examinationId);
+			if (examination != null) {
+				studyInstanceUID = findStudyInstanceUID(examination);
+				if (studyInstanceUID != null) {
+					examinationIdToStudyInstanceUIDCache.put(examination.getId(), studyInstanceUID);
+				}
+			}
+		}
+		return studyInstanceUID;
+	}
+	
 	private String findStudyInstanceUID(Examination examination) {
 		// get StudyInstanceUID from dataset_file table
 		// TODO this should be optimized by probably storing the StudyInstanceUID on exam level by default
@@ -119,12 +148,6 @@ public class DICOMWebApiController implements DICOMWebApi {
 
 	@Override
 	public ResponseEntity<String> findInstancesOfStudy(String studyInstanceUID) throws RestServiceException {
-		return null;
-	}
-
-	@Override
-	public ResponseEntity<String> findInstancesOfStudyOfSerie(String studyInstanceUID, String serieInstanceUID)
-			throws RestServiceException {
 		return null;
 	}
 

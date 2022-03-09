@@ -77,13 +77,43 @@ public interface DICOMWebApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/studies/{examinationId}/series/{serieId}/metadata", produces = { "application/dicom+json" })
+	@GetMapping(value = "/studies/{examinationId}/series/{serieInstanceUID}/metadata", produces = { "application/dicom+json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	ResponseEntity<String> findSerieMetadataOfStudy(
 			@ApiParam(value = "examinationId", required = true) @PathVariable("examinationId") Long examinationId,
-			@ApiParam(value = "serieId", required = true) @PathVariable("serieId") String serieId
+			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
 		) throws RestServiceException;
 
+	@ApiOperation(value = "", notes = "Returns all DICOM instances/datasets of a study and serie", response = String.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/studies/{examinationId}/series/{seriesInstanceUID}/instances", produces = { "application/dicom+json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
+	ResponseEntity<String> findInstancesOfStudyOfSerie(
+			@ApiParam(value = "examinationId", required = true) @PathVariable("examinationId") String examinationId,
+			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
+		) throws RestServiceException;
+	
+	@ApiOperation(value = "", notes = "Returns a frame of a DICOM instance/dataset, of a study and serie", response = String.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/studies/{examinationId}/series/{seriesInstanceUID}/instances/{sopInstanceUID}/frames/{frame}", produces = { "application/dicom+json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
+	ResponseEntity<String> findFrameOfStudyOfSerieOfInstance(
+			@ApiParam(value = "examinationId", required = true) @PathVariable("examinationId") Long examinationId,
+			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
+			@ApiParam(value = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID,
+			@ApiParam(value = "frame", required = true) @PathVariable("frame") String frame
+		) throws RestServiceException;
+	
 	@ApiOperation(value = "", notes = "Returns all DICOM instances/datasets", response = String.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
@@ -102,24 +132,10 @@ public interface DICOMWebApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/studies/{StudyInstanceUID}/instances", produces = { "application/dicom+json" })
+	@GetMapping(value = "/studies/{studyInstanceUID}/instances", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findInstancesOfStudy(
-			@ApiParam(value = "StudyInstanceUID", required = true) @PathVariable("StudyInstanceUID") String studyInstanceUID
-		) throws RestServiceException;
-
-	@ApiOperation(value = "", notes = "Returns all DICOM instances/datasets of a study and serie", response = String.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/studies/{StudyInstanceUID}/series/{SeriesInstanceUID}/instances", produces = { "application/dicom+json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<String> findInstancesOfStudyOfSerie(
-			@ApiParam(value = "StudyInstanceUID", required = true) @PathVariable("StudyInstanceUID") String studyInstanceUID,
-			@ApiParam(value = "SerieInstanceUID", required = true) @PathVariable("SerieInstanceUID") String serieInstanceUID	
+			@ApiParam(value = "studyInstanceUID", required = true) @PathVariable("studyInstanceUID") String studyInstanceUID
 		) throws RestServiceException;
 
 //    @GET
