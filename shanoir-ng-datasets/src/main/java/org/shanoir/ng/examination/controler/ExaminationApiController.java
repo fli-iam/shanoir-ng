@@ -116,7 +116,6 @@ public class ExaminationApiController implements ExaminationApi {
 	public ResponseEntity<ExaminationDTO> findExaminationById(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
 					throws RestServiceException {
-
 		Examination examination = examinationService.findById(examinationId);
 		orderDatasetAcquisitions(examination);
 		if (examination == null) {

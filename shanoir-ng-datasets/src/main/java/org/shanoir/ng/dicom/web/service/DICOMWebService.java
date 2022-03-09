@@ -55,5 +55,35 @@ public class DICOMWebService {
 		}
 		return null;
 	}
+	
+	public String findSeriesOfStudy(String studyInstanceUID) {
+		try {
+			String url = this.serverURL + "/" + studyInstanceUID + "/series";
+			HttpGet httpGet = new HttpGet(url);
+			CloseableHttpResponse response = httpClient.execute(httpGet);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				return EntityUtils.toString(entity);
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
+	
+	public String findSerieMetadataOfStudy(String studyInstanceUID, String serieInstanceUID) {
+		try {
+			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata";
+			HttpGet httpGet = new HttpGet(url);
+			CloseableHttpResponse response = httpClient.execute(httpGet);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				return EntityUtils.toString(entity);
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
 
 }

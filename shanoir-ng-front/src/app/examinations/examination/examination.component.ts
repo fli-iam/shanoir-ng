@@ -149,6 +149,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             this.datasetService.downloadDatasets(ids, format, this.progressBar);
         });
     }
+    
+    openViewer() {
+	    window.open('https://viewer/viewer/' + this.entity.id, '_blank');
+    }
 
     getCenters(): void {
         this.centerService
