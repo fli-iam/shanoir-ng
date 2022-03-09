@@ -21,13 +21,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.assertj.core.util.Arrays;
+import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -246,7 +246,6 @@ public class RabbitMQDatasetsService {
 				T entity =  repository.save(existing);
 				return entity;
 			} else {
-				// create new entity
 				try {
 					T newOne = clazz.newInstance();
 					newOne.setId(received.getId());

@@ -166,7 +166,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view' && !forceStudy">
-				<subject-study-list [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
+				<subject-study-list [subject]="subject" [selectableList]="studies" [(ngModel)]="subject.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
 			</fieldset>
 			<fieldset *ngIf="mode !== 'view' && forceStudy">
 				<ol>

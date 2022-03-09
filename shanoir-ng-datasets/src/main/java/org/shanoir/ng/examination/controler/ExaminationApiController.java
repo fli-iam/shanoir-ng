@@ -44,6 +44,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -236,6 +237,8 @@ public class ExaminationApiController implements ExaminationApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (ShanoirException e) {
+			throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
 		}
 	}
 

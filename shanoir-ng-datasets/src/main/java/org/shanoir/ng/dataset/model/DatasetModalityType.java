@@ -41,7 +41,16 @@ public enum DatasetModalityType {
 	EEG_DATASET(6),
 
 	// GENERIC Dataset
-	GENERIC_DATASET(7);
+	GENERIC_DATASET(7),
+	
+	// IEEG Dataset
+	IEEG_DATASET(8),
+	
+	// Microscopy Dataset
+	MICR_DATASET(9),
+	
+	// Behavioural Dataset
+	BEH_DATASET(10);
 
 	private int id;
 

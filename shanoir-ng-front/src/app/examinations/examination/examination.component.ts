@@ -1,3 +1,4 @@
+
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -64,6 +65,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     noDatasets: boolean = false;
 	hasEEG: boolean = false;
 	hasDicom: boolean = false;
+    hasBids: boolean = false;
+
 
     constructor(
             private route: ActivatedRoute,
@@ -188,6 +191,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
          return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 
+    public isAdmin(): boolean {
+         return this.keycloakService.isUserAdmin();
+    }
+
     public deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
@@ -210,7 +217,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
                 this.examinationService.postFile(file, this.entity.id);
             }
             return result;            
-        });
+        }).catch(reason => { if (reason.status == 403) {
+            this.msgBoxService.log('error', 'Updating study, subject or center of an examination is forbiden. Please contact an administrator.');
+            return null;
+        } else {
+            throw reason;
+        }});
     }
 
     getFileName(element): string {
@@ -237,7 +249,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
                             datasetIds.push(ds.id);
 							if (ds.type == 'Eeg') {
 								this.hasEEG = true;
-							} else {
+							} else if (ds.type == 'BIDS') {
+                                this.hasBids = true;
+                            } else {
 								this.hasDicom = true;
 							}
                         });

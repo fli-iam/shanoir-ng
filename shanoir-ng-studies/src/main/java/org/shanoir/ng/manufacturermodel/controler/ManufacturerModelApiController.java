@@ -16,6 +16,7 @@ package org.shanoir.ng.manufacturermodel.controler;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerModelService;
@@ -53,22 +54,26 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 
 	@Override
 	public ResponseEntity<List<ManufacturerModel>> findManufacturerModels() {
-		final List<ManufacturerModel> manufacturerModels = manufacturerModelService.findAll();
+		List<ManufacturerModel> manufacturerModels = manufacturerModelService.findAll();
+		// Remove "unknown" manufacturer models
+		manufacturerModels = manufacturerModels.stream().filter(manufacturer -> manufacturer.getId() != 0).collect(Collectors.toList());
 		if (manufacturerModels.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
 	}
-	
+
 	@Override
 	public ResponseEntity<List<IdName>> findManufacturerModelsNames() {
-		final List<IdName> manufacturerModels = manufacturerModelService.findIdsAndNames();
+		List<IdName> manufacturerModels = manufacturerModelService.findIdsAndNames();
+		// Remove "unknown" manufacturer models
+		manufacturerModels = manufacturerModels.stream().filter(manufacturer -> manufacturer.getId() != 0).collect(Collectors.toList());
 		if (manufacturerModels.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(manufacturerModels, HttpStatus.OK);
 	}
-	
+
 	@Override
 	public ResponseEntity<List<IdName>> findCenterManufacturerModelsNames(@PathVariable("centerId") final Long centerId) {
 		final List<IdName> manufacturerModels = manufacturerModelService.findIdsAndNamesForCenter(centerId);
@@ -81,8 +86,8 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 	@Override
 	public ResponseEntity<ManufacturerModel> saveNewManufacturerModel(
 			@RequestBody final ManufacturerModel manufacturerModel, final BindingResult result)
-			throws RestServiceException {
-		
+					throws RestServiceException {
+
 		/* Validation */
 		validate(result);
 
@@ -94,23 +99,25 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 	public ResponseEntity<Void> updateManufacturerModel(
 			@PathVariable("manufacturerModelId") final Long manufacturerModelId,
 			@RequestBody final ManufacturerModel manufacturerModel, final BindingResult result)
-			throws RestServiceException {
-		manufacturerModel.setId(manufacturerModelId);
-
-		/* Validation */
-		validate(result);
-
-		/* Update user in db. */
+					throws RestServiceException {
 		try {
+			if (manufacturerModelId.equals(0L)) {
+				throw new EntityNotFoundException("Cannot update unknown manufacturer model");
+			}
+			manufacturerModel.setId(manufacturerModelId);
+
+			/* Validation */
+			validate(result);
+
+			/* Update user in db. */
 			manufacturerModelService.update(manufacturerModel);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
+
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-	
-	
+
 	private void validate(BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap(result);
 		if (!errors.isEmpty()) {

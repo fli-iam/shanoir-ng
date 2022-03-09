@@ -19,8 +19,6 @@ import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -84,6 +82,7 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyRightsService: StudyRightsService) {
 
         super(route, 'study');
+        this.activeTab = 'general';
     }
 
     public get study(): Study { return this.entity; }
