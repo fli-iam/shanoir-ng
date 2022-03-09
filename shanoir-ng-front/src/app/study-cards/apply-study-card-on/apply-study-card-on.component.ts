@@ -230,14 +230,12 @@ export class ApplyStudyCardOnComponent implements OnInit {
     }
 
     updateOptions() {
-        console.log('update options', this.studyCards?.length)
         if (this.studyCards) {
             this.studycardOptions = [];
             this.studyCards.forEach(sc => {
                 if (sc) {
                     let option: Option<StudyCard> = new Option(sc, sc.name);
                     option.compatible = this.datasetAcquisitions.findIndex(acq => acq.acquisitionEquipment?.id != sc.acquisitionEquipment?.id) == -1;
-                    console.log(option.compatible, this.showIncompatibles)
                     if (option.compatible || this.showIncompatibles) {
                         this.studycardOptions.push(option);
                     }
