@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.studyName"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable()"> 
+                (onChange)="updateSelections(); refreshTable('studyName')"> 
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -40,7 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.subjectName"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable()"> 
+                (onChange)="updateSelections(); refreshTable('subjectName')"> 
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -50,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.datasetName"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable()"> 
+                (onChange)="updateSelections(); refreshTable('datasetName')"> 
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.tags"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable()"> 
+                (onChange)="updateSelections(); refreshTable('tags')"> 
         </solr-paging-criterion>
 
         <div class="dates">
@@ -92,7 +92,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.examinationComment"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable()"> 
+                (onChange)="updateSelections(); refreshTable('examinationComment')"> 
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -102,7 +102,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.centerName"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable()"> 
+                (onChange)="updateSelections(); refreshTable('centerName')"> 
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -112,7 +112,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.datasetType"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable()"> 
+                (onChange)="updateSelections(); refreshTable('datasetType')"> 
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -122,7 +122,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.datasetNature"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable()"> 
+                (onChange)="updateSelections(); refreshTable('datasetNature')"> 
         </solr-paging-criterion>
 
         <solr-range-criterion

@@ -17,6 +17,8 @@ import { slideDown, slideRight } from '../../shared/animations/animations';
 import { FacetResultPage, FacetField, FacetPageable } from '../solr.document.model';
 import * as shajs from 'sha.js';
 import { Router } from '@angular/router';
+import { Page } from '../../shared/components/table/pageable.model';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 
 @Component({
@@ -85,6 +87,8 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     loadPage(page: FacetResultPage) {
         if (!page || !page.content || page.content.length == 0) {
             this.maxPage = this.currentPage ? this.currentPage.number : 1;
+            this.displayedFacets = [];
+            this.currentPage = page ? page : new Page();
         } else {
             if (page.content.length < SolrPagingCriterionComponent.PAGE_SIZE) {
                 this.maxPage = page.number;
@@ -98,8 +102,8 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
         }
     }
 
-    getCurrentPageable(): FacetPageable {
-        return new FacetPageable(this.currentPage?.number && this.sortMode == 'INDEX' ? this.currentPage?.number : 1, SolrPagingCriterionComponent.PAGE_SIZE, this.sortMode, this.filterText);
+    getCurrentPageable(pageNumber?: number): FacetPageable {
+        return new FacetPageable(pageNumber ? pageNumber : this.currentPage?.number, SolrPagingCriterionComponent.PAGE_SIZE, this.sortMode, this.filterText);
     }
 
     resetList(): Promise<void> {
@@ -108,6 +112,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
 
     public refresh(page?: FacetResultPage) {
         if (page) {
+            this.maxPage = Infinity;
             this.loadPage(page);
             this.loaded = true;
             this.loadedPromiseResolve();
@@ -223,7 +228,8 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     }
 
     static getHash(facetName: string, routerUrl: string): string {
-        let stringToBeHashed: string = facetName + '-' + routerUrl;
+        let username: string = KeycloakService.auth.authz.tokenParsed.name;
+        let stringToBeHashed: string = username + '-' + facetName + '-' + routerUrl;
         let hash = shajs('sha').update(stringToBeHashed).digest('hex');
         let hex = hash.substring(0, 30);
         return hex;
