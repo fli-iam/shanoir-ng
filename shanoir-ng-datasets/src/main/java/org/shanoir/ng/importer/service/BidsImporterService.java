@@ -13,11 +13,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -53,7 +53,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mysql.cj.xdevapi.JsonParser;
 
 @Service
 public class BidsImporterService {
@@ -76,11 +75,12 @@ public class BidsImporterService {
 
 	@Autowired
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-
+	
 	@Value("${datasets-data}")
 	private String niftiStorageDir;
 
 	private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
+
 
 	/**
 	 * Create BIDS dataset.
@@ -189,6 +189,7 @@ public class BidsImporterService {
 
 		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles();
 		
+		Map<String, Integer> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE, "all"), Map.class);
 		Long equipmentId = 0L;
 
 		for (File importedFile : filesToImport) {
@@ -232,16 +233,12 @@ public class BidsImporterService {
 				// Check equipment in json file
 				JSONParser json = new JSONParser(new FileReader(importedFile));
 				LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
-				
 				if (jsonObject.get("DeviceSerialNumber") != null) {
-					String value = (String) jsonObject.get("DeviceSerialNumber");
-					Long equipId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE, value);
-					if (equipId != null) {
-						equipmentId = equipId;
-					}
+					String code = (String) jsonObject.get("DeviceSerialNumber");
+					equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
 				}
 			}
-
+			
 			expression.setDatasetFiles(files);
 			datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
 

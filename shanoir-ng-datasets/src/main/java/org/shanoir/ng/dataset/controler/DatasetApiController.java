@@ -83,7 +83,6 @@ import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -159,7 +158,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	ShanoirEventService eventService;
-	
+
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 
@@ -169,6 +168,12 @@ public class DatasetApiController implements DatasetApi {
 	@org.springframework.beans.factory.annotation.Autowired
 	public DatasetApiController(final HttpServletRequest request) {
 		this.request = request;
+	}
+
+	@PostConstruct
+	private void initialize() {
+		// Set timeout to 1mn (consider nifti reconversion can take some time)
+		this.rabbitTemplate.setReplyTimeout(60000);
 	}
 
 	@Override
@@ -370,9 +375,7 @@ public class DatasetApiController implements DatasetApi {
 					downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName, dataset);
 
 					// Convert them, sending to import microservice
-					this.rabbitTemplate.setReplyTimeout(60000);
 					boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + tmpFile.getAbsolutePath());
-					this.rabbitTemplate.setReplyTimeout(1000);
 
 					if (!result) {
 						throw new RestServiceException(
