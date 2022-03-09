@@ -38,6 +38,12 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { Option } from '../../shared/select/select.component';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
+import { Subscription } from 'rxjs';
+import { EegImportJob } from '../shared/eeg-data.model';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { SubjectService } from '../../subjects/shared/subject.service';
+import { ImportService } from '../shared/import.service';
+import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 
 
 @Component({
@@ -63,6 +69,7 @@ export class EegClinicalContextComponent implements OnInit {
     public subject: SubjectWithSubjectStudy;
     public columnDefs: any[];
     public hasPosition: boolean;
+    openSubjectStudy: boolean = false;
     
     public coordSystemOptions: Option<CoordSystems>[];
     public coordsystem : string;
@@ -75,6 +82,8 @@ export class EegClinicalContextComponent implements OnInit {
         new Option<string>('PATIENT', 'Patient'),
         new Option<string>('PHANTOM', 'Phantom')
     ];
+
+    private subscribtions: Subscription[] = [];
     
     constructor(
             private studyService: StudyService,
@@ -84,12 +93,15 @@ export class EegClinicalContextComponent implements OnInit {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
             public acqEqPipe: AcquisitionEquipmentPipe,
-            public subjectExaminationPipe: SubjectExaminationPipe) {
+            public subjectExaminationPipe: SubjectExaminationPipe,
+            private subjectService: SubjectService,
+            private importService: ImportService,
+            private msgService: MsgBoxService) {
 
         this.coordSystemOptions = CoordSystems.options;
 
         // No channels => no import
-        if (!this.importDataService.eegImportJob.datasets ) {
+        if (!this.importDataService?.eegImportJob?.datasets) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
@@ -162,7 +174,7 @@ export class EegClinicalContextComponent implements OnInit {
     }
     
     private initEventsTable(): void {
-        
+        if (!this.importDataService.eegImportJob) return;
         this.columnDefs = [
             {headerName: "Dataset name", field: "name", type: "string", cellRenderer: function (params: any) {
                     return params.data.dataset_name;
@@ -214,6 +226,7 @@ export class EegClinicalContextComponent implements OnInit {
 
     public onSelectStudy(): void {
         this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
+        this.openSubjectStudy = false;
         this.center = this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.study && this.study.id && this.study.studyCenterList) {
             this.center = this.study.studyCenterList[0].center;
@@ -226,6 +239,7 @@ export class EegClinicalContextComponent implements OnInit {
 
     public onSelectCenter(): void {
         this.acquisitionEquipments = this.subjects = this.examinations = [];
+        this.openSubjectStudy = false;
         this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center && this.center.acquisitionEquipments) {
             this.acquisitionEquipment = this.center.acquisitionEquipments[0];
@@ -236,6 +250,7 @@ export class EegClinicalContextComponent implements OnInit {
 
     public onSelectAcquisitonEquipment(): void {
         this.subjects = this.examinations = [];
+        this.openSubjectStudy = false;
         this.subject = this.examination = null;
         if (this.acquisitionEquipment) {
             this.studyService
@@ -269,7 +284,7 @@ export class EegClinicalContextComponent implements OnInit {
     
     private getContext(): ContextData {
         return new ContextData(this.study, null, false, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, null, this.coordsystem);
+            this.subject, this.examination, null, this.coordsystem, null, null, null, null, null, null);
     }
 
     private getPrefilledCenter(): Center {
@@ -320,6 +335,7 @@ export class EegClinicalContextComponent implements OnInit {
         let newSubject = new Subject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
         newSubject.subjectStudyList = [subjectStudy];
+        newSubject.birthDate = null;
         return newSubject;
     }
 
@@ -337,9 +353,10 @@ export class EegClinicalContextComponent implements OnInit {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/examination/create']).then(success => {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
-            });
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
+                }));
         });
     }
 
@@ -392,12 +409,68 @@ export class EegClinicalContextComponent implements OnInit {
             && context.acquisitionEquipment != undefined && context.acquisitionEquipment != null
             && context.subject != undefined && context.subject != null
             && context.examination != undefined && context.examination != null
+            && context.subject.subjectStudy.subjectType
             && ((context.coordinatesSystem != undefined && context.coordinatesSystem != null && this.hasPosition) || !(this.hasPosition))
         );
     }
 
     public next() {
-        this.router.navigate(['imports/eegfinish']);
+        this.startEegImportJob();
+    }
+    
+    public startEegImportJob(): void {
+        let context = this.importDataService.contextData;
+        this.subjectService
+            .updateSubjectStudyValues(context.subject.subjectStudy)
+            .then(() => {
+                let that = this;
+                this.importData()
+                    .then((importJob: EegImportJob) => {
+                        this.importDataService.reset();
+                        setTimeout(function () {
+                            that.msgService.log('info', 'The import successfully started')
+                        }, 0);
+                        // go back to the first step of import
+                        this.router.navigate(['/imports/eeg']);
+                    }).catch(error => {
+                        throw error;
+                    });
+            }).catch(error => {
+                throw new Error('Could not save the subjectStudy object, the import job has been stopped. Cause : ' + error);
+            });
+    }
+
+    private importData(): Promise<any> {
+        let importJob = new EegImportJob();
+        importJob.datasets = [];
+        let context = this.importDataService.contextData;
+        let importJobContext = this.importDataService.eegImportJob;
+
+        for (let dataset of importJobContext.datasets) {
+            let datasetToSet = new EegDatasetDTO();
+            datasetToSet.channels = dataset.channels;
+            datasetToSet.name = dataset.name;
+            datasetToSet.files = dataset.files;
+            datasetToSet.events = dataset.events;
+            datasetToSet.samplingFrequency = dataset.samplingFrequency;
+            datasetToSet.channelCount = dataset.channelCount;
+            datasetToSet.coordinatesSystem = context.coordinatesSystem;
+            importJob.datasets.push(datasetToSet);
+        }
+        importJob.subjectId = context.subject.id;
+        importJob.subjectName = context.subject.name;
+        importJob.studyName = context.study.name;
+        importJob.workFolder = importJobContext.workFolder;
+        importJob.examinationId = context.examination.id;
+        importJob.studyId = context.study.id;
+        importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
+        return this.importService.startEegImportJob(importJob);
+    }
+    
+    ngOnDestroy() {
+        for(let subscribtion of this.subscribtions) {
+            subscribtion.unsubscribe();
+        }
     }
 }
 

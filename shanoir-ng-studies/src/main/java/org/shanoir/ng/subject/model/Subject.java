@@ -34,13 +34,17 @@ import javax.persistence.SqlResultSetMapping;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
@@ -54,7 +58,9 @@ public class Subject extends HalEntity {
 
 	private static final long serialVersionUID = 6844259659282875507L;
 
-	@LocalDateAnnotations
+	@JsonSerialize(using = LocalDateSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 	private LocalDate birthDate;
 
 	@Unique

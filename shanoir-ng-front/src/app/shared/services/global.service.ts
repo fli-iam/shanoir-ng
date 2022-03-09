@@ -20,11 +20,14 @@ import { fromEvent } from 'rxjs';
 export class GlobalService {
     
     public onGlobalClick: Observable<Event>;
+
+    public onGlobalMouseUp: Observable<Event>;
     
     constructor() { }
 
     registerGlobalClick(rootElement: ElementRef) {
         this.onGlobalClick = fromEvent(rootElement.nativeElement, 'click');
+        this.onGlobalMouseUp = fromEvent(rootElement.nativeElement, 'mouseup');
     }
     
 }

@@ -62,7 +62,7 @@ public class StudyUserUpdateService {
         Iterable<StudyUser> toBeUpdatedDb = studyUserRepository.findAllById(toBeUpdated.keySet());
         for (StudyUser existingSu : toBeUpdatedDb) {
         	StudyUser replacingSu = toBeUpdated.get(existingSu.getId());
-			existingSu.setReceiveAnonymizationReport(replacingSu.isReceiveAnonymizationReport());
+			existingSu.setReceiveStudyUserReport(replacingSu.isReceiveStudyUserReport());
 			existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
 			existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
 			existingSu.setConfirmed(replacingSu.isConfirmed());

@@ -66,7 +66,6 @@ public abstract class DatasetDecorator implements DatasetMapper {
 				else if (entity instanceof EegDataset) {
 					return eegMapper.datasetToDatasetDTO((EegDataset)entity);
 				}
-				// TODO : Complete
 				else {
 					return defaultMapper.datasetToDatasetDTO(entity);
 				}

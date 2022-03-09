@@ -44,6 +44,7 @@ import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.timepoint.Timepoint;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -149,6 +150,9 @@ public class Study extends HalEntity {
 	private boolean withExamination;
 
 	private boolean challenge;
+	
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Tag> tags;
 
 	/**
 	 * Init HATEOAS links
@@ -461,5 +465,19 @@ public class Study extends HalEntity {
 	 */
 	public void setChallenge(boolean challenge) {
 		this.challenge = challenge;
+	}
+
+	/**
+	 * @return the tags
+	 */
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	/**
+	 * @param tags the tags to set
+	 */
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
 	}
 }

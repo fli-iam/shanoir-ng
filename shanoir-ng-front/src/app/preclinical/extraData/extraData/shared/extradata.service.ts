@@ -18,7 +18,8 @@ import { Observable } from 'rxjs/Observable';
 import { EntityService } from '../../../../shared/components/entity/entity.abstract.service';
 import { ExtraData } from './extradata.model';
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
-import { HttpClient } from '@angular/common/http';
+import * as AppUtils from '../../../../utils/app.utils';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 
 @Injectable()
 export class ExtraDataService extends EntityService<ExtraData>{
@@ -43,12 +44,31 @@ export class ExtraDataService extends EntityService<ExtraData>{
             .toPromise()
             .then((entity) => this.toRealObject(entity));
     }
-  
+
+
+    downloadFile(examId: number): Promise<void> {
+        const endpoint = this.API_URL + '/extradata/download/' + examId;
+        return this.http.get(endpoint, { observe: 'response', responseType: 'blob' }
+        ).toPromise().then(
+            response => {
+                this.downloadIntoBrowser(response);
+            }
+        );
+    }
+
+    private downloadIntoBrowser(response: HttpResponse<Blob>){
+        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+    }
+
+    private getFilename(response: HttpResponse<any>): string {
+        const prefix = 'attachment;filename=';
+        let contentDispHeader: string = response.headers.get('Content-Disposition');
+        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+    }
     
-    createExtraData(datatype:string,extradata: any): Observable<any> {
+    createExtraData(datatype:string,extradata: any): Promise<any> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${datatype}`;
-        return this.http
-        .post<ExtraData>(url, JSON.stringify(extradata));
+        return this.http.post<ExtraData>(url, JSON.stringify(extradata)).toPromise();
     }
         
         

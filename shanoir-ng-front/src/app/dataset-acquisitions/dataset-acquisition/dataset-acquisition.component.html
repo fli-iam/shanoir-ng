@@ -47,11 +47,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
+						<label>Study</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								<a [routerLink]="['/study/details/', datasetAcquisition.examination?.study?.id]">
+									{{datasetAcquisition.examination?.study?.name}}
+								</a> 
+							</ng-template> 
+						</span>
+					</li>
+					<li>
 						<label>Study card</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{datasetAcquisition.studyCard?.name}}
-							</ng-template> 
+								<a [routerLink]="['/study-card/details/', datasetAcquisition.studyCard?.id]">
+									{{datasetAcquisition.studyCard?.name}}
+								</a>
+							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select-box formControlName="study-card" [(ngModel)]="datasetAcquisition.studyCard" [optionArr]="studyCards">
 								</select-box>
@@ -68,7 +80,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label>Acquisition equipment</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-								{{datasetAcquisition.acquisitionEquipment | acqEqptLabel}}
+								<a [routerLink]="['/acquisition-equipment/details/', datasetAcquisition.acquisitionEquipment?.id]">
+									{{datasetAcquisition.acquisitionEquipment | acqEqptLabel}}
+								</a>
 							</ng-template> 
 							<ng-template ngSwitchDefault>
 								<select-box formControlName="acq-eq" [(ngModel)]="datasetAcquisition.acquisitionEquipment" [optionArr]="acquisitionEquipments" [pipe]="acqEqPipe">

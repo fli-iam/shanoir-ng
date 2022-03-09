@@ -140,6 +140,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		if (user.getUsername() == null && user.getFirstName() != null && user.getLastName() != null) {
 			generateUsername(user);
 		}
+		user.setFirstExpirationNotificationSent(Boolean.FALSE);
+		user.setSecondExpirationNotificationSent(Boolean.FALSE);
+		user.setExtensionRequestDemand(Boolean.FALSE);
 		
 		user.setCreationDate(LocalDate.now()); // Set creation date on creation, which is now
 		validateIgnoreBlankUsername(user, result);

@@ -27,6 +27,8 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
+import org.shanoir.ng.subject.dto.SubjectDTO;
+import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyDecorator;
@@ -76,6 +78,8 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Autowired
 	private StudyUserRepository studyUserRepository;
+
+	@Autowired SubjectMapper subjectMapper;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
@@ -97,7 +101,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<IdName> findNames() {
 		Iterable<Subject> subjects;
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") || KeycloakUtil.getTokenRoles().contains("ROLE_EXPERT")) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			subjects = subjectRepository.findAll();
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
@@ -138,7 +142,7 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
-			updateSubjectName(new IdName(subjectDb.getId(), subjectDb.getName()));
+			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
 		}
@@ -167,7 +171,7 @@ public class SubjectServiceImpl implements SubjectService {
 		subject.setName(subjectName);
 		Subject subjectDb = subjectRepository.save(subject);
 		try {
-			updateSubjectName(new IdName(subjectDb.getId(), subjectDb.getName()));
+			updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Unable to propagate subject creation to dataset microservice: ", e);
 		}
@@ -185,6 +189,7 @@ public class SubjectServiceImpl implements SubjectService {
 		}
 		updateSubjectValues(subjectDb, subject);
 		subjectRepository.save(subjectDb);
+		updateSubjectName(subjectMapper.subjectToSubjectDTO(subjectDb));
 		return subjectDb;
 	}
 
@@ -196,10 +201,6 @@ public class SubjectServiceImpl implements SubjectService {
 	 * @return database template with new values.
 	 */
 	private Subject updateSubjectValues(final Subject subjectDb, final Subject subject) throws MicroServiceCommunicationException {
-
-		if (!subject.getName().equals(subjectDb.getName())) {
-			updateSubjectName(new IdName(subject.getId(), subject.getName()));
-		}
 		subjectDb.setName(subject.getName());
 		//subjectDb.setBirthDate(subject.getBirthDate());
 		subjectDb.setIdentifier(subject.getIdentifier());
@@ -220,9 +221,9 @@ public class SubjectServiceImpl implements SubjectService {
 		return subjectDb;
 	}
 	
-	private boolean updateSubjectName(IdName subject) throws MicroServiceCommunicationException{
+	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectNameUpdateQueue().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE,
 					new ObjectMapper().writeValueAsString(subject));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {

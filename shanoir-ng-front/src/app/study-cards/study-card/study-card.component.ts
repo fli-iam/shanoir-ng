@@ -20,6 +20,7 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { CenterService } from '../../centers/shared/center.service';
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -27,6 +28,7 @@ import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
@@ -39,7 +41,7 @@ import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.co
 })
 export class StudyCardComponent extends EntityComponent<StudyCard> {
 
-    private centers: IdName[] = [];
+    centers: IdName[] = [];
     public studies: IdName[] = [];
     public acquisitionEquipments: Option<AcquisitionEquipment>[];
     public niftiConverters: IdName[] = [];
@@ -47,6 +49,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     selectMode: boolean;
     selectedRules: StudyCardRule[] = [];
     hasAdministrateRightPromise: Promise<boolean>;
+    lockStudy: boolean = false;
     @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
 
     constructor(
@@ -56,7 +59,8 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private acqEqService: AcquisitionEquipmentService,
             private niftiConverterService: NiftiConverterService,
             private studyRightsService: StudyRightsService,
-            private acqEqptLabelPipe: AcquisitionEquipmentPipe) {
+            private acqEqptLabelPipe: AcquisitionEquipmentPipe,
+            private centerService: CenterService) {
         super(route, 'study-card');
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
@@ -89,7 +93,13 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     initCreate(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
-        this.fetchStudies();
+        this.fetchStudies().then(() => {
+            const studyId: number = parseInt(this.route.snapshot.paramMap.get('studyId'));
+            if (studyId) {
+                this.lockStudy = true;
+                this.studyCard.study = this.studies.find(st => st.id == studyId) as unknown as Study;
+            }
+        });
         this.studyCard = new StudyCard();
         this.fetchNiftiConverters().then(result => {
             // pre-select dcm2niix
@@ -130,8 +140,8 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         }
     }
     
-    private fetchStudies() {
-        this.studyService.findStudyIdNamesIcanAdmin()
+    private fetchStudies(): Promise<void | IdName[]> {
+        return this.studyService.findStudyIdNamesIcanAdmin()
             .then(studies => this.studies = studies);
     }
 
@@ -161,8 +171,11 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
                     let found = this.acquisitionEquipments.find(acqOpt => acqOpt.value.id == this.studyCard.acquisitionEquipment.id);
                     if (!found) this.studyCard.acquisitionEquipment = null;
                 }
+            }).catch(err => {
+                if (err.status != 404) throw err;
             });
             form.get('acquisitionEquipment').enable();
+            this.centerService.getCentersNamesByStudyId(study.id).then(centers => this.centers = centers);
         } else {
             form.get('acquisitionEquipment').disable();
             this.studyCard.acquisitionEquipment = null;
@@ -207,6 +220,17 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             })
         })
         this.form.get('rules').updateValueAndValidity();
+    }
+
+    createAcqEq() {
+        let currentStep: Step = this.breadcrumbsService.currentStep;
+        this.router.navigate(['/acquisition-equipment/create']).then(success => {
+            this.subscribtions.push(
+                currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
+                    (currentStep.entity as StudyCard).acquisitionEquipment = entity as AcquisitionEquipment;
+                })
+            );
+        });
     }
 
 }

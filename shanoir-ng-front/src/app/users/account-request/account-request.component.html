@@ -13,6 +13,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2 class="header command-zone"i18n="Account request|Title@@accountRequestTitle">Request an account</h2>
+<div class="rgpd">
+    <div class="language">
+        <span [class.selected]="language == 'english'" (click)="language = 'english'">english</span>
+        <span [class.selected]="language == 'french'" (click)="language = 'french'">français</span>
+    </div>
+    <div class="mention" *ngIf="language == 'english'">
+        <p>Inria is committed to protecting personal data in accordance with the General Data Protection Regulation (GDPR).</p>
+        <p>Inria uses this software in order to import, manage and share medical imaging data, on the legal basis of consent.</p>
+        <p>The recipients of this data are the system administrators. This data will be kept for 10 years and will not be transferred outside the European Union. This data collection is voluntary and does not involve automated decision-making.</p>
+        <p>You can access your data, request their deletion, exercise your rights of opposition, rectification and limitation of data processing. To exercise these rights or for any questions about the processing of your data, you can contact the DPO via <a href="mailto:dpo@inria.fr">dpo@inria.fr</a> .
+        However, if you believe that your rights are not respected or that the processing of your data is not compliant, you can submit a complaint to the CNIL</p>
+    </div>
+    <div class="mention" *ngIf="language == 'french'">
+        <p>Inria est engagé dans une démarche de protection des données personnelles en accord avec le Règlement Général sur la Protection des Données (RGPD).</p>
+        <p>Inria utilise ce logiciel afin d'importer, gérer et partager des images médicales et leurs données, sur la base légale du consentement.</p>
+        <p>Les destinataires de ces données sont les administrateurs de la plateforme. Ces données seront conservées pendant10 ans et ne seront pas transférées hors de l’Union Européenne [à adapter] . Cette collecte de données s’effectue sur la base du volontariat et n’engendre pas de prise de décision automatisée.</p>
+        <p>Vous pouvez accéder à vos données, demander leur effacement, exercer vos droits d’opposition, de rectification et à la limitation du traitement de vos données. Pour exercer ces droits ou pour toute question sur le traitement de vos données, vous pouvez contacter la DPO via <a href="mailto:dpo@inria.fr">dpo@inria.fr</a> .
+        Toutefois, si vous estimez que vos droits ne sont pas respectés ou que le traitement de vos données n’est pas conforme, vous pouvez  adresser une réclamation à la CNIL.</p>
+    </div>
+</div>
 <form *ngIf="form && !requestSent" [formGroup]="form" class="max-content" novalidate>
     <fieldset>
         <ol>

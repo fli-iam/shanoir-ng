@@ -6,7 +6,7 @@
   "notBefore": 0,
   "revokeRefreshToken": false,
   "refreshTokenMaxReuse": 0,
-  "accessTokenLifespan": 300,
+  "accessTokenLifespan": 900,
   "accessTokenLifespanForImplicitFlow": 900,
   "ssoSessionIdleTimeout": 1800,
   "ssoSessionMaxLifespan": 36000,
@@ -405,7 +405,7 @@
   "requiredCredentials": [
     "password"
   ],
-  "passwordPolicy": "hashIterations(27500) and length(8) and specialChars(1) and digits(1) and upperCase(1) and lowerCase(1)",
+  "passwordPolicy": "hashIterations(27500) and length(8) and specialChars(1) and digits(1) and upperCase(1) and lowerCase(1) and passwordHistory(1)",
   "otpPolicyType": "totp",
   "otpPolicyAlgorithm": "HmacSHA1",
   "otpPolicyInitialCounter": 0,

@@ -66,7 +66,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
             
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
-            colDef.push({headerName: "", type: "button", awesome: "fa-download",action: item => this.downloadModelSpecifications(item) });
+            colDef.push({headerName: "", type: "button", awesome: "fa-solid fa-download",action: item => this.downloadModelSpecifications(item) });
         }
         return colDef;       
     }

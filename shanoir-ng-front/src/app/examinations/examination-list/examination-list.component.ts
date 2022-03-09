@@ -87,9 +87,19 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
         return {
             new: false,
             view: true, 
-            edit: false, 
+            edit: this.keycloakService.isUserAdminOrExpert(), 
             delete: this.keycloakService.isUserAdminOrExpert()
         };
+    }
+
+    canEdit(ex: Examination): boolean {
+        return this.keycloakService.isUserAdmin() || (
+            ex.subjectStudy &&
+			ex.subjectStudy.subjectStudy &&
+			ex.subjectStudy.subjectStudy.study &&
+            ex.subjectStudy.subjectStudy.study.studyUserList && 
+            ex.subjectStudy.subjectStudy.study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_IMPORT)).length > 0
+        );
     }
 
     canDelete(exam: Examination): boolean {

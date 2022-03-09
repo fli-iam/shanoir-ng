@@ -38,7 +38,7 @@ extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
        "-Dallowed.admin.ips=${SHANOIR_ALLOWED_ADMIN_IPS}")
 
 case "$SHANOIR_MIGRATION" in
-auto)
+auto|dev)
 	# create the shanoir-ng realm if it does not exist yet
 	extra+=("-Dkeycloak.import=/tmp/import/shanoir-ng-realm.json"
 		"-Dkeycloak.migration.strategy=IGNORE_EXISTING")

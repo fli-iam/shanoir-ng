@@ -62,6 +62,14 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	List<Examination> findBySubjectId(Long subjectId);
 	
 	/**
+	 * Get a list of examinations for a list of subjects.
+	 * 
+	 * @param subjectIds
+	 * @return list of examinations.
+	 */
+	List<Examination> findBySubjectIdIn(List<Long> subjectId);
+	
+	/**
 	 * 
 	 * @param subjectId:
 	 * @param studyId
