@@ -189,7 +189,7 @@ public class BidsImporterService {
 
 		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles();
 		
-		Map<String, Long> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE, "all"), Map.class);
+		Map<String, Integer> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE, "all"), Map.class);
 		Long equipmentId = 0L;
 
 		for (File importedFile : filesToImport) {
@@ -233,13 +233,12 @@ public class BidsImporterService {
 				// Check equipment in json file
 				JSONParser json = new JSONParser(new FileReader(importedFile));
 				LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
-				
 				if (jsonObject.get("DeviceSerialNumber") != null) {
 					String code = (String) jsonObject.get("DeviceSerialNumber");
-					equipmentId = equipments.get(code) != null ? equipments.get(code) : 0L ;
+					equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
 				}
 			}
-
+			
 			expression.setDatasetFiles(files);
 			datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
 
