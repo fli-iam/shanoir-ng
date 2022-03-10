@@ -13,7 +13,9 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
@@ -90,7 +92,7 @@ public class DICOMWebService {
 		return null;
 	}
 
-	public ResponseEntity<InputStream> findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
+	public ResponseEntity findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
 			String sopInstanceUID, String frame) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
@@ -99,10 +101,10 @@ public class DICOMWebService {
 			CloseableHttpResponse response = httpClient.execute(httpGet);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
-				return ResponseEntity.ok()
-					.header(HttpHeaders.CONTENT_TYPE, entity.getContentType().toString())
-					.contentLength(entity.getContentLength())
-					.body(entity.getContent());
+				InputStreamResource inputStreamResource = new InputStreamResource(entity.getContent());
+				HttpHeaders responseHeaders = new HttpHeaders();
+				responseHeaders.setContentLength(entity.getContentLength());
+				return new ResponseEntity(inputStreamResource, responseHeaders, HttpStatus.OK);
 			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);

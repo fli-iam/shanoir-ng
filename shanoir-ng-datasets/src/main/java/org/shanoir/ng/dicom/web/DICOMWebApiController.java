@@ -134,7 +134,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 	}
 	
 	@Override
-	public ResponseEntity<InputStream> findFrameOfStudyOfSerieOfInstance(Long examinationId, String serieInstanceUID,
+	public ResponseEntity findFrameOfStudyOfSerieOfInstance(Long examinationId, String serieInstanceUID,
 			String sopInstanceUID, String frame) throws RestServiceException {
 		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
 		if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)

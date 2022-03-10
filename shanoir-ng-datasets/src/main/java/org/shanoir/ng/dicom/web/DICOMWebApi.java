@@ -92,7 +92,7 @@ public interface DICOMWebApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/studies/{examinationId}/series/{seriesInstanceUID}/instances", produces = { "application/dicom+json" })
+	@GetMapping(value = "/studies/{examinationId}/series/{serieInstanceUID}/instances", produces = { "application/dicom+json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	ResponseEntity<String> findInstancesOfStudyOfSerie(
 			@ApiParam(value = "examinationId", required = true) @PathVariable("examinationId") String examinationId,
@@ -106,9 +106,9 @@ public interface DICOMWebApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/studies/{examinationId}/series/{seriesInstanceUID}/instances/{sopInstanceUID}/frames/{frame}", produces = { "multipart/related; type=\"application/octet-stream\"" })
+	@GetMapping(value = "/studies/{examinationId}/series/{serieInstanceUID}/instances/{sopInstanceUID}/frames/{frame}")
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
-	ResponseEntity<InputStream> findFrameOfStudyOfSerieOfInstance(
+	ResponseEntity findFrameOfStudyOfSerieOfInstance(
 			@ApiParam(value = "examinationId", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
 			@ApiParam(value = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID,
