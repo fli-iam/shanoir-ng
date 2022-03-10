@@ -1,11 +1,20 @@
-:host() { display: block; padding: 4px 10px; height: 120px; overflow-x: hidden; overflow-y: auto; background-color: var(--dark-grey); border-radius: 3px; }
+:host() { display: block; position: relative; height: 20px; transition: 1s ease; overflow: hidden; margin-top: -20px; }
+:host().open { height: 128px; }
+.content { transition: 1s ease; position: absolute; left: 0; right: 0; top: 20px; padding: 4px 10px; overflow-x: hidden; overflow-y: auto; background-color: var(--dark-grey); height: 100px; }
 
-.error { color: red; }
-.warn { color: rgba(255, 136, 0); }
+.error { color: orangered; }
+.warn { color: orange }
 .info { color: limegreen; }
+.fresh { font-weight: bold; }
 
 .details-button { cursor: pointer; margin-left: 7px; }
 
 .details li { opacity: 0.8; font-size: 10px; white-space: nowrap; overflow-x: scroll; scrollbar-width: none; -ms-overflow-style: none; }
 .details li::-webkit-scrollbar { width: 0; height: 0; }
 .details ul { margin: 0 0 0 16px; }
+
+.buttons { background-color: transparent; }
+.buttons .tab { position: absolute; right: 125px; left: 125px; top: 0; color: var(--light-grey); text-align: center;
+    border-bottom: 20px solid var(--dark-grey); border-left: 10px solid transparent; border-right: 10px solid transparent; height: 0; }
+.buttons i { padding: 4px; cursor: pointer; }
+i { vertical-align: 1px; }

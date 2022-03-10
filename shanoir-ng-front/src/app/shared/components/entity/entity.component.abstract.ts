@@ -235,7 +235,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 if (entity['name']) {
                     this.consoleService.log('info', this.ROUTING_NAME[0].toUpperCase() + this.ROUTING_NAME.slice(1) + ' ' + entity['name'] + ' has been successfully saved under the id ' + entity.id);
                 } else {
-                    this.consoleService.log('info', 'The new ' + this.ROUTING_NAME + ' has been successfully saved under the id ' + entity.id);
+                    this.consoleService.log('info', 'New ' + this.ROUTING_NAME + ' successfully saved with n° ' + entity.id);
                 }
                 this._entity.id = entity.id;
                 return entity;
@@ -245,7 +245,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             return this.getService().update(this.entity.id, this.entity).then(() => {
                 this.onSave.next(this.entity);
                 this.chooseRouteAfterSave(this.entity);
-                this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + this.entity.id + ' has been successfully updated');
+                this.consoleService.log('info', this.ROUTING_NAME + ' n°' + this.entity.id + ' successfully updated');
                 return this.entity;
             });
         }
@@ -262,8 +262,9 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             .catch(reason => {
                 this.footerState.loading = false;
                 this.catchSavingErrors(reason);
+                return null;
             });
-    }
+        }
 
     protected catchSavingErrors = (reason: any) => {
         if (reason && reason.error && reason.error.code == 422) {
@@ -275,6 +276,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 if (!fieldControl.valid) fieldControl.markAsTouched();
             }
             this.footerState.valid = this.form.status == 'VALID';
+            return null;
         } else {
             throw reason;
         }

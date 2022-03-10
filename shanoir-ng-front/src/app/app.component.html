@@ -21,7 +21,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <ng-container *ngIf="isAuthenticated()">
     <div class="side-menu" *ngIf="menuOpen" @slideRight>
-        <side-menu></side-menu> 
+        <side-menu [class.reduce-height]="consoleComponenent && consoleComponenent.open ? true : false"></side-menu> 
+        <shanoir-console #console></shanoir-console>
     </div>
     <div class="main-content" [class.open]="menuOpen" [@slideMarginLeft]="menuOpen ? 'margin' : 'nomargin'">
         <div *ngIf="menuOpen" class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>

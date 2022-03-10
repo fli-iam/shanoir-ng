@@ -40,10 +40,10 @@ import { Option } from '../../shared/select/select.component';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { Subscription } from 'rxjs';
 import { EegImportJob } from '../shared/eeg-data.model';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
 import { SubjectService } from '../../subjects/shared/subject.service';
 import { ImportService } from '../shared/import.service';
 import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
+import { ConsoleService } from '../../shared/console/console.service';
 
 
 @Component({
@@ -96,7 +96,7 @@ export class EegClinicalContextComponent implements OnInit {
             public subjectExaminationPipe: SubjectExaminationPipe,
             private subjectService: SubjectService,
             private importService: ImportService,
-            private msgService: MsgBoxService) {
+            private consoleService: ConsoleService) {
 
         this.coordSystemOptions = CoordSystems.options;
 
@@ -428,7 +428,7 @@ export class EegClinicalContextComponent implements OnInit {
                     .then((importJob: EegImportJob) => {
                         this.importDataService.reset();
                         setTimeout(function () {
-                            that.msgService.log('info', 'The import successfully started')
+                            that.consoleService.log('info', 'Import successfully started')
                         }, 0);
                         // go back to the first step of import
                         this.router.navigate(['/imports/eeg']);

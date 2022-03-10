@@ -192,14 +192,14 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
             return this.updateExaminationAnesthetic().then(exam => {
                 this.onSave.next(this.examinationAnesthetic);
                 this.chooseRouteAfterSave(this.entity);
-                this.consoleService.log('info', 'The preclinical-examination n°' + this.examinationAnesthetic.id + ' has been successfully updated');
+                this.consoleService.log('info', 'Preclinical examination n°' + this.examinationAnesthetic.id + ' successfully updated');
                 return exam;
             });
         } else {
             return this.addExaminationAnesthetic().then(exam => {
                 this.onSave.next(this.examinationAnesthetic);
                 this.chooseRouteAfterSave(this.entity);
-                this.consoleService.log('info', 'The new preclinical-examination has been successfully saved under the number ' + this.examinationAnesthetic.id);
+                this.consoleService.log('info', 'New preclinical examination successfully saved with n°' + this.examinationAnesthetic.id);
                 return exam;
             });
         }

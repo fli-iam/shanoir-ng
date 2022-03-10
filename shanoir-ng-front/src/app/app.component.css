@@ -13,3 +13,6 @@ side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -mo
 
 .close-button:hover i, 
 .open-button:hover i { color: var(--color-b); }
+
+side-menu { transition: 1s ease; }
+shanoir-console { width: 300px; float: right; }

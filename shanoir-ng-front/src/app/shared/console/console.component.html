@@ -12,17 +12,25 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div *ngFor="let msg of consoleService.messages" [class]="msg.type">
-    <i *ngIf="msg.type == 'info'" class="fas fa-check-circle"></i>
-    <i *ngIf="msg.type == 'warn'" class="fas fa-exclamation-circle"></i>
-    <i *ngIf="msg.type == 'error'" class="fas fa-times-circle"></i>
-    {{msg.txt}}
-    <span *ngIf="msg.details" (click)="msg.detailsOpened = !msg.detailsOpened" class="details-button">
-        <i class="fas fa-info"></i>
-    </span>
-    <span *ngIf="msg.detailsOpened" class="details">
-        <ul>
-            <li *ngFor="let det of msg.details">{{det}}</li>
-        </ul>
-    </span>
+<div class="buttons">
+    <div class="tab">
+        <i class="fa-solid fa-chevron-up" *ngIf="!open" (click)="open = true"></i>
+        <i class="fa-solid fa-chevron-down" *ngIf="open" (click)="open = false"></i>
+    </div>
+</div>
+<div *ngIf="contentOpen" class="content">
+    <div *ngFor="let msg of messages" [class]="msg.type" [class.fresh]="msg.fresh">
+        <i *ngIf="msg.type == 'info'" class="fas fa-check-circle"></i>
+        <i *ngIf="msg.type == 'warn'" class="fas fa-exclamation-circle"></i>
+        <i *ngIf="msg.type == 'error'" class="fas fa-times-circle"></i>
+        {{msg.txt}}
+        <span *ngIf="msg.details" (click)="toggleDetails(msg)" class="details-button">
+            <i class="fas fa-info"></i>
+        </span>
+        <span *ngIf="msg.detailsOpened" class="details">
+            <ul>
+                <li *ngFor="let det of msg.details">{{det}}</li>
+            </ul>
+        </span>
+    </div>
 </div>

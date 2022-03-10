@@ -14,23 +14,34 @@
 
 import { formatDate } from '@angular/common';
 import { Injectable } from '@angular/core';
-import { MsgBoxService } from '../msg-box/msg-box.service';
+import { Observable, Observer } from 'rxjs';
 
 type MsgType = 'error' | 'warn' | 'info';
-export class Message { constructor(public type: MsgType, public txt: string, public details: string[]) {} }
+export class Message { 
+    fresh: boolean;
+    detailsOpened: boolean = false;
+
+    constructor(public type: MsgType, public txt: string, public details: string[]) {
+        this.fresh = true;
+        setTimeout(() => this.fresh = false, 30000);
+    } 
+}
 
 @Injectable()
 export class ConsoleService {
 
-    public messages: Message[] = [];
+    messages: Message[] = [];
+    messageObserver: Observer<Message>;
+    messageObservable: Observable<Message> = new Observable(observer => this.messageObserver = observer);
+    open: boolean = false;
 
-    constructor(private msgBoxService: MsgBoxService) {}
-
+    constructor() {}
 
     public log(type: MsgType, txt: string, details?: string[]) {
         let dateStr: string = formatDate(new Date(), 'HH:mm', 'en');
-        this.messages.unshift({type: type, txt: dateStr + ' - ' + txt, details: details});
-        this.msgBoxService.log(type, txt);
+        const message: Message = new Message(type, dateStr + ' - ' + txt, details); 
+        this.messages.unshift(message);
+        this.messageObserver.next(message);
     } 
 }
 

@@ -52,7 +52,7 @@ import { ImportMode } from '../../import/import.component';
 import { SimpleSubject } from '../../subjects/shared/subject.model';
 import { ImportJob } from '../shared/dicom-data.model';
 import { ImportService } from '../shared/import.service';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 
 
 @Component({
@@ -111,7 +111,7 @@ export class ClinicalContextComponent implements OnDestroy {
             public studycardService: StudyCardService,
             public studyRightsService: StudyRightsService,
             private keycloakService: KeycloakService,
-            private msgService: MsgBoxService,
+            private consoleService: ConsoleService,
             private importService: ImportService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
@@ -650,7 +650,7 @@ export class ClinicalContextComponent implements OnDestroy {
                     .then(() => {
                         this.importDataService.reset();
                         setTimeout(function () {
-                            that.msgService.log('info', 'The import successfully started.')
+                            that.consoleService.log('info', 'Import successfully started')
                         }, 0);
                         // go back to the first step of import
                         if (this.importMode == 'PACS') this.router.navigate(['/imports/pacs']);

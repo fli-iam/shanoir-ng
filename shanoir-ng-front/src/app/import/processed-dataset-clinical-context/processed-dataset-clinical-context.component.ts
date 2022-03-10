@@ -33,10 +33,9 @@ import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
 import { DatasetProcessingPipe } from '../../datasets/dataset-processing/dataset-processing.pipe';
 import { ImportMode } from '../../import/import.component';
-import { SimpleSubject } from '../../subjects/shared/subject.model';
 import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
 import { ImportService } from '../shared/import.service';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 
 @Component({
     selector: 'processed-dataset-clinical-context',
@@ -79,7 +78,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             private importDataService: ImportDataService,
             public studyRightsService: StudyRightsService,
             private keycloakService: KeycloakService,
-            private msgService: MsgBoxService,
+            private consoleService: ConsoleService,
             private importService: ImportService
             ) {
 
@@ -278,7 +277,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
                     .then((importJob: ProcessedDatasetImportJob) => {
                         this.importDataService.reset();
                         setTimeout(function () {
-                            that.msgService.log('info', 'The import successfully started')
+                            that.consoleService.log('info', 'Import successfully started')
                         }, 0);
                         // go back to the first step of import
                         this.router.navigate(['/imports/processed-dataset']);

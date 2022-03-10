@@ -27,21 +27,16 @@ export class HandleErrorService implements ErrorHandler {
 
     public handleError(error: any) {
         try {
-            console.error('error', error);
-            console.error(Object.keys(error));
             if (error instanceof HttpErrorResponse) {
-                console.log('yes')
                 this.handleHttpError(error);
             } else {
-
+                console.error(error);
+                this.handleDefaultError(error);
             }
-
         } catch (error) {
             console.error('Error handler failed : ', error);
-            console.log(2, error)
         }
     }
-
 
     private handleHttpError(error: HttpErrorResponse) {
         try {
@@ -59,10 +54,21 @@ export class HandleErrorService implements ErrorHandler {
         }
     }
 
+    private handleDefaultError(error: any) {
+        try {
+            let msg: string = 'Error' 
+            if (error.name != 'Error') msg += ' : ' + error.name;
+            let details: string[] = [error.message];
+            this.consoleService.log('error', msg, details);
+        } catch (error) {
+            console.error(error);
+            throw new Error('Error handler failed, cause above');
+        }
+    }
+
     private getStatus(code: number): string {
         return Object.keys(StatusCodes).find(status => StatusCodes[status] === code);
     }
-
 
     private extractServerNameFromUrl(url: string) {
         let urlArr: string[] = url.split('/');
