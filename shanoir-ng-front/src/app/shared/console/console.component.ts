@@ -39,14 +39,24 @@ export class ConsoleComponent implements OnDestroy {
         this.subscription = consoleService.messageObservable.subscribe(message => {
             this.messages.unshift(message);
             if (!this.open) {
-                this.open = true;
-                this.closeTimeout = setTimeout(() => this.open = false, 5000);
+                this.open = true; 
+                this.closeTimeout = this.setCloseTimeout();
+            } else if (this.closeTimeout) {
+                this.closeTimeout = this.setCloseTimeout();
             }
             if (this.messages.length > consoleService.MAX) {
                 this.messages.splice(consoleService.MAX);
             }
         });
         setTimeout(() => this.appRef = Promise.resolve(this.injector.get(ApplicationRef)));
+    }
+
+    private setCloseTimeout(): NodeJS.Timeout {
+        clearTimeout(this.closeTimeout);
+        return setTimeout(() => {
+            this.open = false;
+            this.closeTimeout = null;
+        }, 5000);
     }
 
     ngOnDestroy(): void {
