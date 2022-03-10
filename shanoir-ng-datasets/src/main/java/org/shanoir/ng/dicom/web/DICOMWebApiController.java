@@ -2,6 +2,7 @@ package org.shanoir.ng.dicom.web;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -26,12 +27,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import com.fasterxml.jackson.core.JsonPointer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 @Controller
 public class DICOMWebApiController implements DICOMWebApi {
@@ -45,6 +45,8 @@ public class DICOMWebApiController implements DICOMWebApi {
 	private DICOMWebService dicomWebService;
 	
 	private HashMap<Long, String> examinationIdToStudyInstanceUIDCache;
+	
+	private ObjectMapper mapper = new ObjectMapper();
 	
 	@PostConstruct
 	public void init() {
@@ -73,30 +75,59 @@ public class DICOMWebApiController implements DICOMWebApi {
 		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
-			ObjectMapper mapper = new ObjectMapper();
-			JsonNode jsonNode = mapper.readTree(response);
-//			if (jsonNode..get("0020000D").isArray()) {
-//				for (JsonNode node : jsonNode.get("0020000D")) {
-//					ObjectNode objectNode = (ObjectNode) node;
-//					if (objectNode.hasNonNull("Value")) {
-//						String val = objectNode.get("Value").asText();
-//						objectNode.put("Value", examinationId);
-//					}
-//				}
-//			}
-			return new ResponseEntity<String>(mapper.writeValueAsString(jsonNode), HttpStatus.OK);
+			JsonNode root = mapper.readTree(response);
+			replaceStudyInstanceUIDsWithExaminationIds(root, examinationId);
+			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
-
+	
+	private void replaceStudyInstanceUIDsWithExaminationIds(JsonNode root, Long examinationId) {
+		if (root.isObject()) {
+			Iterator<String> fieldNames = root.fieldNames();
+			while (fieldNames.hasNext()) {
+				String fieldName = fieldNames.next();
+				// find attribute: StudyInstanceUID
+				if (fieldName.equals("0020000D")) {
+					JsonNode studyInstanceUIDNode = root.get(fieldName);
+					ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path("Value");
+					for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
+						studyInstanceUIDArray.remove(i);
+						studyInstanceUIDArray.add(examinationId.toString());
+					}
+				}
+				// find attribute: RetrieveURL
+				if (fieldName.equals("00081190")) {
+					JsonNode retrieveURLNode = root.get(fieldName);
+					ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path("Value");
+					for (int i = 0; i < retrieveURLArray.size(); i++) {
+						JsonNode arrayElement = retrieveURLArray.get(i);
+						String retrieveURL = arrayElement.asText();
+						retrieveURL = retrieveURL.replaceFirst("/studies/(.*)/series/", "/studies/" + examinationId + "/series/");
+						retrieveURLArray.remove(i);
+						retrieveURLArray.add(retrieveURL);
+					}
+				}
+			}
+		} else if (root.isArray()) {
+			ArrayNode arrayNode = (ArrayNode) root;
+			for (int i = 0; i < arrayNode.size(); i++) {
+				JsonNode arrayElement = arrayNode.get(i);
+				replaceStudyInstanceUIDsWithExaminationIds(arrayElement, examinationId);
+			}
+		}
+	}
+	
 	@Override
 	public ResponseEntity<String> findSerieMetadataOfStudy(Long examinationId, String serieId)
-			throws RestServiceException {
+			throws RestServiceException, JsonMappingException, JsonProcessingException {
 		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
 		if (studyInstanceUID != null && serieId != null) {
 			String response = dicomWebService.findSerieMetadataOfStudy(studyInstanceUID, serieId);
-			return new ResponseEntity<String>(response, HttpStatus.OK);
+			JsonNode root = mapper.readTree(response);
+			replaceStudyInstanceUIDsWithExaminationIds(root, examinationId);
+			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}

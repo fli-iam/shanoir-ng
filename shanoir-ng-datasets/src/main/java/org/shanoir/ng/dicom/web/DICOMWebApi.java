@@ -83,7 +83,7 @@ public interface DICOMWebApi {
 	ResponseEntity<String> findSerieMetadataOfStudy(
 			@ApiParam(value = "examinationId", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
-		) throws RestServiceException;
+		) throws RestServiceException, JsonMappingException, JsonProcessingException;
 
 	@ApiOperation(value = "", notes = "Returns all DICOM instances/datasets of a study and serie", response = String.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
