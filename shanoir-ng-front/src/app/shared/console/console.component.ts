@@ -42,6 +42,9 @@ export class ConsoleComponent implements OnDestroy {
                 this.open = true;
                 this.closeTimeout = setTimeout(() => this.open = false, 5000);
             }
+            if (this.messages.length > consoleService.MAX) {
+                this.messages.splice(consoleService.MAX);
+            }
         });
         setTimeout(() => this.appRef = Promise.resolve(this.injector.get(ApplicationRef)));
     }

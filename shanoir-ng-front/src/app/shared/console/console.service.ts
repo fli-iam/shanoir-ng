@@ -34,6 +34,7 @@ export class ConsoleService {
     messageObserver: Observer<Message>;
     messageObservable: Observable<Message> = new Observable(observer => this.messageObserver = observer);
     open: boolean = false;
+    readonly MAX: number = 200;
 
     constructor() {}
 
@@ -42,6 +43,9 @@ export class ConsoleService {
         const message: Message = new Message(type, dateStr + ' - ' + txt, details); 
         this.messages.unshift(message);
         this.messageObserver.next(message);
+        if (this.messages.length > this.MAX) {
+            this.messages.splice(this.MAX);
+        }
     } 
 }
 
