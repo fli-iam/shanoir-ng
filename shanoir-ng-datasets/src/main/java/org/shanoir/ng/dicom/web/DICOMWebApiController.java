@@ -1,5 +1,6 @@
 package org.shanoir.ng.dicom.web;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.solr.common.StringUtils;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -23,6 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+
+import com.fasterxml.jackson.core.JsonPointer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 @Controller
 public class DICOMWebApiController implements DICOMWebApi {
@@ -48,9 +57,9 @@ public class DICOMWebApiController implements DICOMWebApi {
 	}
 
 	@Override
-	public String findStudies(Map<String,String> allParams) throws RestServiceException {
-		String response = dicomWebService.get();
-		return response;
+	public ResponseEntity<String> findStudies(Map<String,String> allParams) throws RestServiceException {
+		String response = dicomWebService.findStudies();
+		return new ResponseEntity<String>(response, HttpStatus.OK);
 	}
 
 	@Override
@@ -59,11 +68,23 @@ public class DICOMWebApiController implements DICOMWebApi {
 	}
 
 	@Override
-	public ResponseEntity<String> findSeriesOfStudy(Long examinationId) throws RestServiceException {
+	public ResponseEntity<String> findSeriesOfStudy(Long examinationId)
+			throws RestServiceException, JsonMappingException, JsonProcessingException {
 		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
-			return new ResponseEntity<String>(response, HttpStatus.OK);
+			ObjectMapper mapper = new ObjectMapper();
+			JsonNode jsonNode = mapper.readTree(response);
+//			if (jsonNode..get("0020000D").isArray()) {
+//				for (JsonNode node : jsonNode.get("0020000D")) {
+//					ObjectNode objectNode = (ObjectNode) node;
+//					if (objectNode.hasNonNull("Value")) {
+//						String val = objectNode.get("Value").asText();
+//						objectNode.put("Value", examinationId);
+//					}
+//				}
+//			}
+			return new ResponseEntity<String>(mapper.writeValueAsString(jsonNode), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -82,10 +103,15 @@ public class DICOMWebApiController implements DICOMWebApi {
 	}
 	
 	@Override
-	public ResponseEntity<String> findFrameOfStudyOfSerieOfInstance(Long examinationId, String serieInstanceUID,
+	public ResponseEntity<InputStream> findFrameOfStudyOfSerieOfInstance(Long examinationId, String serieInstanceUID,
 			String sopInstanceUID, String frame) throws RestServiceException {
 		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
-		return null;
+		if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)
+				&& !StringUtils.isEmpty(sopInstanceUID) && !StringUtils.isEmpty(frame))  {
+			return dicomWebService.findFrameOfStudyOfSerieOfInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID, frame);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
 	}
 
 	@Override

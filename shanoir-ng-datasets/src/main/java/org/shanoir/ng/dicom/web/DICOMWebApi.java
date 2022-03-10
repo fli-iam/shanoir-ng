@@ -1,5 +1,6 @@
 package org.shanoir.ng.dicom.web;
 
+import java.io.InputStream;
 import java.util.Map;
 
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -10,7 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,9 +45,7 @@ public interface DICOMWebApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/studies", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@ResponseBody String findStudies(
-			@RequestParam Map<String,String> allParams
-			) throws RestServiceException;
+	ResponseEntity<String> findStudies(@RequestParam Map<String,String> allParams) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Returns all DICOM series/acquisitions", response = String.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
@@ -68,7 +69,7 @@ public interface DICOMWebApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	ResponseEntity<String> findSeriesOfStudy(
 			@ApiParam(value = "examinationId", required = true) @PathVariable("examinationId") Long examinationId
-		) throws RestServiceException;
+		) throws RestServiceException, JsonMappingException, JsonProcessingException;
 	
 	@ApiOperation(value = "", notes = "Returns all DICOM series/acquisitions of an examination", response = String.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
@@ -105,9 +106,9 @@ public interface DICOMWebApi {
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/studies/{examinationId}/series/{seriesInstanceUID}/instances/{sopInstanceUID}/frames/{frame}", produces = { "application/dicom+json" })
+	@GetMapping(value = "/studies/{examinationId}/series/{seriesInstanceUID}/instances/{sopInstanceUID}/frames/{frame}", produces = { "multipart/related; type=\"application/octet-stream\"" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
-	ResponseEntity<String> findFrameOfStudyOfSerieOfInstance(
+	ResponseEntity<InputStream> findFrameOfStudyOfSerieOfInstance(
 			@ApiParam(value = "examinationId", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
 			@ApiParam(value = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID,

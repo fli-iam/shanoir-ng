@@ -1,5 +1,7 @@
 package org.shanoir.ng.dicom.web.service;
 
+import java.io.InputStream;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.http.HttpEntity;
@@ -11,6 +13,8 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -41,7 +45,7 @@ public class DICOMWebService {
 		}
 	}
 
-	public String get() {
+	public String findStudies() {
 		try {
 			HttpGet httpGet = new HttpGet(
 					this.serverURL + "?limit=25&offset=0&fuzzymatching=true&includefield=00081030%2C00080060");
@@ -55,7 +59,7 @@ public class DICOMWebService {
 		}
 		return null;
 	}
-	
+
 	public String findSeriesOfStudy(String studyInstanceUID) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series";
@@ -70,7 +74,7 @@ public class DICOMWebService {
 		}
 		return null;
 	}
-	
+
 	public String findSerieMetadataOfStudy(String studyInstanceUID, String serieInstanceUID) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata";
@@ -79,6 +83,26 @@ public class DICOMWebService {
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {
 				return EntityUtils.toString(entity);
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
+
+	public ResponseEntity<InputStream> findFrameOfStudyOfSerieOfInstance(String studyInstanceUID, String serieInstanceUID,
+			String sopInstanceUID, String frame) {
+		try {
+			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/"
+					+ sopInstanceUID + "/frames/" + frame;
+			HttpGet httpGet = new HttpGet(url);
+			CloseableHttpResponse response = httpClient.execute(httpGet);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				return ResponseEntity.ok()
+					.header(HttpHeaders.CONTENT_TYPE, entity.getContentType().toString())
+					.contentLength(entity.getContentLength())
+					.body(entity.getContent());
 			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
