@@ -68,6 +68,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Autowired
 	private ShanoirEventService eventService;
 	
+	@Value("${datasets-data}")
+	private String dataDir;
+	
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
@@ -108,9 +111,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 		examinationRepository.deleteById(exam.getId());
 	}
 
-	@Value("${datasets-data}")
-	private String dataDir;
-
 	@Override
 	public List<Examination> findAll() {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -130,6 +130,17 @@ public class ExaminationServiceImpl implements ExaminationService {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			return examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable);
+		}
+	}
+	
+	@Override
+	public Page<Examination> findPage(final Pageable pageable) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return examinationRepository.findAll(pageable);
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			return examinationRepository.findByStudyIdIn(studyIds, pageable);
 		}
 	}
 
