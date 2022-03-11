@@ -13,9 +13,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="button button-top">
-    <div class="tab">
-        <i class="fa-solid fa-chevron-up" *ngIf="!open" (click)="open = true"></i>
-        <i class="fa-solid fa-chevron-down" *ngIf="open" (click)="open = false"></i>
+    <div class="tab" (click)="open = !open">
+        <i class="fa-solid fa-chevron-up" *ngIf="!open"></i>
+        <i class="fa-solid fa-chevron-down" *ngIf="open"></i>
     </div>
 </div>
 <div *ngIf="contentOpen" class="content">
