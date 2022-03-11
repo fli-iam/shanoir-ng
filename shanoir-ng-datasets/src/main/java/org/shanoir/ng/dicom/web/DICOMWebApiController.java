@@ -1,24 +1,10 @@
 package org.shanoir.ng.dicom.web;
 
-import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.solr.common.StringUtils;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,21 +23,14 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 public class DICOMWebApiController implements DICOMWebApi {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebApiController.class);
-
-	@Autowired
-	private ExaminationService examinationService;
 	
 	@Autowired
 	private DICOMWebService dicomWebService;
-	
-	private HashMap<Long, String> examinationIdToStudyInstanceUIDCache;
+
+	@Autowired
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	
 	private ObjectMapper mapper = new ObjectMapper();
-	
-	@PostConstruct
-	public void init() {
-		examinationIdToStudyInstanceUIDCache = new HashMap<Long, String>(1000);
-	}
 	
 	@Override
 	public ResponseEntity<String> findPatients() throws RestServiceException {
@@ -72,7 +51,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 	@Override
 	public ResponseEntity<String> findSeriesOfStudy(Long examinationId)
 			throws RestServiceException, JsonMappingException, JsonProcessingException {
-		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
+		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationId);
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
 			JsonNode root = mapper.readTree(response);
@@ -122,7 +101,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 	@Override
 	public ResponseEntity<String> findSerieMetadataOfStudy(Long examinationId, String serieId)
 			throws RestServiceException, JsonMappingException, JsonProcessingException {
-		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
+		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationId);
 		if (studyInstanceUID != null && serieId != null) {
 			String response = dicomWebService.findSerieMetadataOfStudy(studyInstanceUID, serieId);
 			JsonNode root = mapper.readTree(response);
@@ -136,7 +115,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 	@Override
 	public ResponseEntity findFrameOfStudyOfSerieOfInstance(Long examinationId, String serieInstanceUID,
 			String sopInstanceUID, String frame) throws RestServiceException {
-		String studyInstanceUID = findStudyInstanceUIDFromCacheOrDatabase(examinationId);
+		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationId);
 		if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)
 				&& !StringUtils.isEmpty(sopInstanceUID) && !StringUtils.isEmpty(frame))  {
 			return dicomWebService.findFrameOfStudyOfSerieOfInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID, frame);
@@ -148,53 +127,6 @@ public class DICOMWebApiController implements DICOMWebApi {
 	@Override
 	public ResponseEntity<String> findInstancesOfStudyOfSerie(String studyInstanceUID, String serieInstanceUID)
 			throws RestServiceException {
-		return null;
-	}
-
-	private String findStudyInstanceUIDFromCacheOrDatabase(Long examinationId) {
-		String studyInstanceUID = examinationIdToStudyInstanceUIDCache.get(examinationId);
-		if (studyInstanceUID == null) {
-			Examination examination = examinationService.findById(examinationId);
-			if (examination != null) {
-				studyInstanceUID = findStudyInstanceUID(examination);
-				if (studyInstanceUID != null) {
-					examinationIdToStudyInstanceUIDCache.put(examination.getId(), studyInstanceUID);
-				}
-			}
-		}
-		return studyInstanceUID;
-	}
-	
-	private String findStudyInstanceUID(Examination examination) {
-		// get StudyInstanceUID from dataset_file table
-		// TODO this should be optimized by probably storing the StudyInstanceUID on exam level by default
-		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
-		if (!acquisitions.isEmpty()) {
-			DatasetAcquisition acquisition = acquisitions.get(0);
-			List<Dataset> datasets = acquisition.getDatasets();
-			if (!datasets.isEmpty()) {
-				Dataset dataset = datasets.get(0);
-				List<DatasetExpression> expressions = dataset.getDatasetExpressions();
-				if (!expressions.isEmpty()) {
-					for (DatasetExpression expression : expressions) {
-						// only DICOM is of interest here
-						if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
-							List<DatasetFile> files = expression.getDatasetFiles();
-							if (!files.isEmpty()) {
-								DatasetFile file = files.get(0);
-								String path = file.getPath();
-								Pattern p = Pattern.compile("studyUID=(.*?)\\&seriesUID");
-								Matcher m = p.matcher(path);
-								while (m.find()) {
-									String studyInstanceUID = m.group(1);
-									return studyInstanceUID;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
 		return null;
 	}
 

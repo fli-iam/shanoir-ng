@@ -1,7 +1,5 @@
 package org.shanoir.ng.dicom.web.service;
 
-import java.io.InputStream;
-
 import javax.annotation.PostConstruct;
 
 import org.apache.http.HttpEntity;
