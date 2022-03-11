@@ -79,6 +79,7 @@ export class ConsoleComponent implements OnDestroy {
             else this.contentOpen = open;
             this.appRef.then(appRef => appRef.tick());
         }
+        this.closeTimeout = null;
         this.consoleService.open = this._open;
     }
 
