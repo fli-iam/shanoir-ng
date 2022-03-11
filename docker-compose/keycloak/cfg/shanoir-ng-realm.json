@@ -1056,6 +1056,21 @@
           }
         },
         {
+          "id": "b97e1e6f-a7e5-47e2-aac3-3b713a2784fa",
+          "name": "userId",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "false",
+            "user.attribute": "userId",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "claim.name": "userId",
+            "jsonType.label": "long"
+          }
+        },
+        {
           "id": "f02c90b2-4f13-49bc-942b-e1bbb87d0b9c",
           "name": "username",
           "protocol": "openid-connect",
