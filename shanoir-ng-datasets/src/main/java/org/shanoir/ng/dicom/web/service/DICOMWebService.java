@@ -45,9 +45,9 @@ public class DICOMWebService {
 		}
 	}
 
-	public String findStudyMetadata(String studyInstanceUID) {
+	public String findStudy(String studyInstanceUID) {
 		try {
-			HttpGet httpGet = new HttpGet(this.serverURL + "/" + studyInstanceUID + "/metadata");
+			HttpGet httpGet = new HttpGet(this.serverURL + "?StudyInstanceUID=" + studyInstanceUID);
 			CloseableHttpResponse response = httpClient.execute(httpGet);
 			HttpEntity entity = response.getEntity();
 			if (entity != null) {

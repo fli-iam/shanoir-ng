@@ -56,12 +56,17 @@ public class DICOMWebApiController implements DICOMWebApi {
 		}
 		StringBuffer studies = new StringBuffer();
 		studies.append("[");
-		for (Examination examination : examinations) {
+		Iterator<Examination> iterator = examinations.iterator();
+		while (iterator.hasNext()) {
+			Examination examination = iterator.next();
 			String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examination.getId());
 			if (studyInstanceUID != null) {
-				String studyJson = dicomWebService.findStudyMetadata(studyInstanceUID);
+				String studyJson = dicomWebService.findStudy(studyInstanceUID);
 				studyJson = studyJson.substring(1, studyJson.length() - 1);
-				studies.append(studyJson + ",");
+				studies.append(studyJson);
+				if (iterator.hasNext()) {
+					studies.append(",");
+				}
 			}
 		}
 		studies.append("]");
