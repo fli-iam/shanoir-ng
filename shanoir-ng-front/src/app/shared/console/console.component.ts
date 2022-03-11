@@ -29,7 +29,7 @@ export class ConsoleComponent implements OnDestroy {
     @HostBinding('class.deployed') deployed: boolean;
     contentOpen: boolean = this._open;
     messages: Message[] = [];
-    private closeTimeout: NodeJS.Timeout;
+    private closeTimeout: any;
     private appRef: Promise<ApplicationRef> = new Promise((resolve, reject) => {});
     private subscription: Subscription;
 
@@ -53,7 +53,7 @@ export class ConsoleComponent implements OnDestroy {
         setTimeout(() => this.appRef = Promise.resolve(this.injector.get(ApplicationRef)));
     }
 
-    private setCloseTimeout(): NodeJS.Timeout {
+    private setCloseTimeout(): any {
         clearTimeout(this.closeTimeout);
         return setTimeout(() => {
             this.open = false;
