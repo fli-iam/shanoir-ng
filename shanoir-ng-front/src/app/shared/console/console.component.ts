@@ -26,6 +26,7 @@ import { ConsoleService, Message } from './console.service';
 export class ConsoleComponent implements OnDestroy {
 
     private _open: boolean = false;
+    @HostBinding('class.deployed') deployed: boolean;
     contentOpen: boolean = this._open;
     messages: Message[] = [];
     private closeTimeout: NodeJS.Timeout;
@@ -35,6 +36,7 @@ export class ConsoleComponent implements OnDestroy {
     constructor(public consoleService: ConsoleService, private injector: Injector) {
         this.messages = consoleService.messages.slice();
         this._open = consoleService.open;
+        this.deployed = consoleService.deployed;
         this.contentOpen = this._open;
         this.subscription = consoleService.messageObservable.subscribe(message => {
             this.messages.unshift(message);
@@ -81,6 +83,7 @@ export class ConsoleComponent implements OnDestroy {
         }
         this.closeTimeout = null;
         this.consoleService.open = this._open;
+        this.consoleService.deployed = this.deployed;
     }
 
     toggleDetails(message: Message) {

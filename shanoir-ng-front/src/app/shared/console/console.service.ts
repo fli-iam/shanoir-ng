@@ -34,6 +34,7 @@ export class ConsoleService {
     messageObserver: Observer<Message>;
     messageObservable: Observable<Message> = new Observable(observer => this.messageObserver = observer);
     open: boolean = false;
+    deployed: boolean = false;
     readonly MAX: number = 200;
 
     constructor() {}

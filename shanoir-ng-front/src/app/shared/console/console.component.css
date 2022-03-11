@@ -1,5 +1,6 @@
-:host() { display: block; position: relative; height: 20px; transition: 1s ease; overflow: hidden; margin-top: -20px; }
+:host() { width: 300px; display: block; position: relative; height: 20px; transition: 1s ease; overflow: hidden; margin-top: -20px; }
 :host().open { height: 128px; }
+:host().deployed { width: 100%; }
 .content { transition: 1s ease; position: absolute; left: 0; right: 0; top: 20px; padding: 4px 10px; overflow-x: hidden; overflow-y: auto; background-color: var(--dark-grey); height: 100px; }
 
 .error { color: orangered; }
@@ -13,8 +14,12 @@
 .details li::-webkit-scrollbar { width: 0; height: 0; }
 .details ul { margin: 0 0 0 16px; }
 
-.buttons { background-color: transparent; }
-.buttons .tab { position: absolute; right: 125px; left: 125px; top: 0; color: var(--light-grey); text-align: center;
+.button { background-color: transparent; }
+.button .tab { position: absolute;  color: var(--light-grey); text-align: center; }
+.button i { padding: 4px; cursor: pointer; }
+.button-top .tab {  right: 40%; left: 40%; top: 0; 
     border-bottom: 20px solid var(--dark-grey); border-left: 10px solid transparent; border-right: 10px solid transparent; height: 0; }
-.buttons i { padding: 4px; cursor: pointer; }
+.right-tab { float: right; color: var(--light-grey); margin-right: -6px; cursor: pointer; }
+.button i { padding: 4px; cursor: pointer; }
+
 i { vertical-align: 1px; }

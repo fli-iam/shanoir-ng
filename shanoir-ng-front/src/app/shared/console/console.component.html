@@ -12,13 +12,17 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="buttons">
+<div class="button button-top">
     <div class="tab">
         <i class="fa-solid fa-chevron-up" *ngIf="!open" (click)="open = true"></i>
         <i class="fa-solid fa-chevron-down" *ngIf="open" (click)="open = false"></i>
     </div>
 </div>
 <div *ngIf="contentOpen" class="content">
+    <div class="right-tab">
+        <i class="fa-solid fa-chevron-right" *ngIf="!deployed" (click)="deployed = true"></i>
+        <i class="fa-solid fa-chevron-left" *ngIf="deployed" (click)="deployed = false"></i>
+    </div>
     <div *ngFor="let msg of messages" [class]="msg.type" [class.fresh]="msg.fresh">
         <i *ngIf="msg.type == 'info'" class="fas fa-check-circle"></i>
         <i *ngIf="msg.type == 'warn'" class="fas fa-exclamation-circle"></i>
