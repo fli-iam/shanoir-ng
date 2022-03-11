@@ -1,6 +1,5 @@
 package org.shanoir.ng.dicom.web;
 
-import java.io.InputStream;
 import java.util.Map;
 
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -45,7 +44,7 @@ public interface DICOMWebApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/studies", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<String> findStudies(@RequestParam Map<String,String> allParams) throws RestServiceException;
+	ResponseEntity<String> findStudies(@RequestParam Map<String,String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException;
 
 	@ApiOperation(value = "", notes = "Returns all DICOM series/acquisitions", response = String.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {

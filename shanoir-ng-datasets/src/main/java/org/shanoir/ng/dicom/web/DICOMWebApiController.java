@@ -46,7 +46,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 	}
 
 	@Override
-	public ResponseEntity<String> findStudies(Map<String, String> allParams) throws RestServiceException {
+	public ResponseEntity<String> findStudies(Map<String, String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException {
 		int offset = Integer.valueOf(allParams.get("offset"));
 		int limit = Integer.valueOf(allParams.get("limit"));
 		Pageable pageable = PageRequest.of(offset, limit);
@@ -62,6 +62,9 @@ public class DICOMWebApiController implements DICOMWebApi {
 			String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examination.getId());
 			if (studyInstanceUID != null) {
 				String studyJson = dicomWebService.findStudy(studyInstanceUID);
+				JsonNode root = mapper.readTree(studyJson);
+				replaceStudyInstanceUIDsWithExaminationIds(root, examination.getId(), true);
+				studyJson = mapper.writeValueAsString(root);
 				studyJson = studyJson.substring(1, studyJson.length() - 1);
 				studies.append(studyJson);
 				if (iterator.hasNext()) {
@@ -85,14 +88,14 @@ public class DICOMWebApiController implements DICOMWebApi {
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
 			JsonNode root = mapper.readTree(response);
-			replaceStudyInstanceUIDsWithExaminationIds(root, examinationId);
+			replaceStudyInstanceUIDsWithExaminationIds(root, examinationId, false);
 			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 	
-	private void replaceStudyInstanceUIDsWithExaminationIds(JsonNode root, Long examinationId) {
+	private void replaceStudyInstanceUIDsWithExaminationIds(JsonNode root, Long examinationId, boolean studyLevel) {
 		if (root.isObject()) {
 			Iterator<String> fieldNames = root.fieldNames();
 			while (fieldNames.hasNext()) {
@@ -113,9 +116,15 @@ public class DICOMWebApiController implements DICOMWebApi {
 					for (int i = 0; i < retrieveURLArray.size(); i++) {
 						JsonNode arrayElement = retrieveURLArray.get(i);
 						String retrieveURL = arrayElement.asText();
-						retrieveURL = retrieveURL.replaceFirst("/studies/(.*)/series/", "/studies/" + examinationId + "/series/");
-						retrieveURLArray.remove(i);
-						retrieveURLArray.add(retrieveURL);
+						if (studyLevel) { // study level
+							retrieveURL = retrieveURL.replaceFirst("/studies/(.*)", "/studies/" + examinationId);
+							retrieveURLArray.remove(i);
+							retrieveURLArray.add(retrieveURL);
+						} else { // serie level
+							retrieveURL = retrieveURL.replaceFirst("/studies/(.*)/series/", "/studies/" + examinationId + "/series/");
+							retrieveURLArray.remove(i);
+							retrieveURLArray.add(retrieveURL);
+						}
 					}
 				}
 			}
@@ -123,7 +132,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 			ArrayNode arrayNode = (ArrayNode) root;
 			for (int i = 0; i < arrayNode.size(); i++) {
 				JsonNode arrayElement = arrayNode.get(i);
-				replaceStudyInstanceUIDsWithExaminationIds(arrayElement, examinationId);
+				replaceStudyInstanceUIDsWithExaminationIds(arrayElement, examinationId, studyLevel);
 			}
 		}
 	}
@@ -135,7 +144,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 		if (studyInstanceUID != null && serieId != null) {
 			String response = dicomWebService.findSerieMetadataOfStudy(studyInstanceUID, serieId);
 			JsonNode root = mapper.readTree(response);
-			replaceStudyInstanceUIDsWithExaminationIds(root, examinationId);
+			replaceStudyInstanceUIDsWithExaminationIds(root, examinationId, false);
 			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
