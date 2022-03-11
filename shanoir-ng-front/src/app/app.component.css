@@ -1,5 +1,6 @@
-.main-content { padding: 1px 20px 10px 20px; position: relative; margin-left: 0; }
+.main-content { padding: 0 20px 0 20px; position: relative; margin-left: 0; height: 100vh;overflow: auto; }
 .main-content.open { margin-left: 300px; }
+.main-content.reduce-height { height: calc(100vh - 108px); }
 side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -moz-scrollbars-none; -ms-overflow-style: none; }
 .side-menu { width: 300px; position: fixed; top: 0; z-index: 1; }
 
@@ -14,5 +15,5 @@ side-menu, .side-menu { overflow-x: hidden; scrollbar-width: none; overflow: -mo
 .close-button:hover i, 
 .open-button:hover i { color: var(--color-b); }
 
-side-menu { transition: 1s ease; }
+side-menu, .main-content { transition: 1s ease; }
 shanoir-console { position: absolute; bottom: 0; z-index: 1; }

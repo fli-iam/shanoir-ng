@@ -23,7 +23,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div class="side-menu" *ngIf="menuOpen" @slideRight>
         <side-menu [class.reduce-height]="consoleComponenent && consoleComponenent.open ? true : false"></side-menu> 
     </div>
-    <div class="main-content" [class.open]="menuOpen" [@slideMarginLeft]="menuOpen ? 'margin' : 'nomargin'">
+    <div class="main-content"
+            [class.reduce-height]="consoleComponenent && consoleComponenent.open && consoleComponenent.deployed ? true : false" 
+            [class.open]="menuOpen" [@slideMarginLeft]="menuOpen ? 'margin' : 'nomargin'">
         <div *ngIf="menuOpen" class="close-button" (click)="toggleMenu(false)"><i class="fas fa-chevron-left"></i></div>
         <div *ngIf="!menuOpen" class="open-button" (click)="toggleMenu(true)"><i class="fas fa-chevron-right"></i></div>
         <breadcrumbs *ngIf="isAuthenticated()"></breadcrumbs>
