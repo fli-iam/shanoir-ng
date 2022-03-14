@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 
 @Controller
 public class DICOMWebApiController implements DICOMWebApi {
@@ -65,7 +64,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 			if (studyInstanceUID != null) {
 				String studyJson = dicomWebService.findStudy(studyInstanceUID);
 				JsonNode root = mapper.readTree(studyJson);
-				replaceStudyInstanceUIDsWithExaminationIds(root, examination.getId(), true);
+				studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationIds(root, examination.getId(), true);
 				studyJson = mapper.writeValueAsString(root);
 				studyJson = studyJson.substring(1, studyJson.length() - 1);
 				studies.append(studyJson);
@@ -90,52 +89,10 @@ public class DICOMWebApiController implements DICOMWebApi {
 		if (studyInstanceUID != null) {
 			String response = dicomWebService.findSeriesOfStudy(studyInstanceUID);
 			JsonNode root = mapper.readTree(response);
-			replaceStudyInstanceUIDsWithExaminationIds(root, examinationId, false);
+			studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationIds(root, examinationId, false);
 			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-	}
-	
-	private void replaceStudyInstanceUIDsWithExaminationIds(JsonNode root, Long examinationId, boolean studyLevel) {
-		if (root.isObject()) {
-			Iterator<String> fieldNames = root.fieldNames();
-			while (fieldNames.hasNext()) {
-				String fieldName = fieldNames.next();
-				// find attribute: StudyInstanceUID
-				if (fieldName.equals("0020000D")) {
-					JsonNode studyInstanceUIDNode = root.get(fieldName);
-					ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path("Value");
-					for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
-						studyInstanceUIDArray.remove(i);
-						studyInstanceUIDArray.add(examinationId.toString());
-					}
-				}
-				// find attribute: RetrieveURL
-				if (fieldName.equals("00081190")) {
-					JsonNode retrieveURLNode = root.get(fieldName);
-					ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path("Value");
-					for (int i = 0; i < retrieveURLArray.size(); i++) {
-						JsonNode arrayElement = retrieveURLArray.get(i);
-						String retrieveURL = arrayElement.asText();
-						if (studyLevel) { // study level
-							retrieveURL = retrieveURL.replaceFirst("/studies/(.*)", "/studies/" + examinationId);
-							retrieveURLArray.remove(i);
-							retrieveURLArray.add(retrieveURL);
-						} else { // serie level
-							retrieveURL = retrieveURL.replaceFirst("/studies/(.*)/series/", "/studies/" + examinationId + "/series/");
-							retrieveURLArray.remove(i);
-							retrieveURLArray.add(retrieveURL);
-						}
-					}
-				}
-			}
-		} else if (root.isArray()) {
-			ArrayNode arrayNode = (ArrayNode) root;
-			for (int i = 0; i < arrayNode.size(); i++) {
-				JsonNode arrayElement = arrayNode.get(i);
-				replaceStudyInstanceUIDsWithExaminationIds(arrayElement, examinationId, studyLevel);
-			}
 		}
 	}
 	
@@ -146,7 +103,7 @@ public class DICOMWebApiController implements DICOMWebApi {
 		if (studyInstanceUID != null && serieId != null) {
 			String response = dicomWebService.findSerieMetadataOfStudy(studyInstanceUID, serieId);
 			JsonNode root = mapper.readTree(response);
-			replaceStudyInstanceUIDsWithExaminationIds(root, examinationId, false);
+			studyInstanceUIDHandler.replaceStudyInstanceUIDsWithExaminationIds(root, examinationId, false);
 			return new ResponseEntity<String>(mapper.writeValueAsString(root), HttpStatus.OK);
 		} else {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

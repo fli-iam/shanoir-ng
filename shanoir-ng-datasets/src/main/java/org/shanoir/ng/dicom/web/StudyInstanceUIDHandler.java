@@ -1,6 +1,7 @@
 package org.shanoir.ng.dicom.web;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,6 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 @Component
 public class StudyInstanceUIDHandler {
@@ -37,6 +41,56 @@ public class StudyInstanceUIDHandler {
 	public void init() {
 		examinationIdToStudyInstanceUIDCache = new HashMap<Long, String>(1000);
 		LOG.info("DICOMWeb cache created: examinationIdToStudyInstanceUIDCache");
+	}
+	
+	/**
+	 * This method replaces StudyInstanceUIDs returned from the PACS with IDs
+	 * of examinations in Shanoir, in the Json returned.
+	 * 
+	 * @param root
+	 * @param examinationId
+	 * @param studyLevel
+	 */
+	public void replaceStudyInstanceUIDsWithExaminationIds(JsonNode root, Long examinationId, boolean studyLevel) {
+		if (root.isObject()) {
+			Iterator<String> fieldNames = root.fieldNames();
+			while (fieldNames.hasNext()) {
+				String fieldName = fieldNames.next();
+				// find attribute: StudyInstanceUID
+				if (fieldName.equals("0020000D")) {
+					JsonNode studyInstanceUIDNode = root.get(fieldName);
+					ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path("Value");
+					for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
+						studyInstanceUIDArray.remove(i);
+						studyInstanceUIDArray.add(examinationId.toString());
+					}
+				}
+				// find attribute: RetrieveURL
+				if (fieldName.equals("00081190")) {
+					JsonNode retrieveURLNode = root.get(fieldName);
+					ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path("Value");
+					for (int i = 0; i < retrieveURLArray.size(); i++) {
+						JsonNode arrayElement = retrieveURLArray.get(i);
+						String retrieveURL = arrayElement.asText();
+						if (studyLevel) { // study level
+							retrieveURL = retrieveURL.replaceFirst("/studies/(.*)", "/studies/" + examinationId);
+							retrieveURLArray.remove(i);
+							retrieveURLArray.add(retrieveURL);
+						} else { // serie level
+							retrieveURL = retrieveURL.replaceFirst("/studies/(.*)/series/", "/studies/" + examinationId + "/series/");
+							retrieveURLArray.remove(i);
+							retrieveURLArray.add(retrieveURL);
+						}
+					}
+				}
+			}
+		} else if (root.isArray()) {
+			ArrayNode arrayNode = (ArrayNode) root;
+			for (int i = 0; i < arrayNode.size(); i++) {
+				JsonNode arrayElement = arrayNode.get(i);
+				replaceStudyInstanceUIDsWithExaminationIds(arrayElement, examinationId, studyLevel);
+			}
+		}
 	}
 
 	/**
