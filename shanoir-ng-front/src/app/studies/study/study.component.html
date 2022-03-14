@@ -28,19 +28,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 
 			<ul class="tabs">
-				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'">General</li>
-				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'">Files</li>
-				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'">Subjects</li>
-				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'">Centers</li>
-				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'">Members</li>
-				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'">Tags</li>
+				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'"skipLocationChange>General</li>
+				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" skipLocationChange>Files</li>
+				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" skipLocationChange>Subjects</li>
+				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" skipLocationChange>Centers</li>
+				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" skipLocationChange>Members</li>
+				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" skipLocationChange>Tags</li>
 				<ng-container *ngIf="mode == 'view'">
 					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'">Tree</li>
-					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'">BIDS</li>
+					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" skipLocationChange>BIDS</li>
 				</ng-container>
 				<ng-container *ngIf="mode != 'view'">
-					<li [class.active]="activeTab == 'tree'" class="disabled">Tree</li>
-					<li [class.active]="activeTab == 'bids'" class="disabled">BIDS</li>
+					<li [class.active]="activeTab == 'tree'" class="disabled" skipLocationChange>Tree</li>
+					<li [class.active]="activeTab == 'bids'" class="disabled" skipLocationChange>BIDS</li>
 				</ng-container>
 				
 			</ul>
