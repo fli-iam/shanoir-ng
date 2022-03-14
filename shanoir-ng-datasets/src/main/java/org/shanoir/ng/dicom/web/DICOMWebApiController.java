@@ -50,7 +50,9 @@ public class DICOMWebApiController implements DICOMWebApi {
 		int offset = Integer.valueOf(allParams.get("offset"));
 		int limit = Integer.valueOf(allParams.get("limit"));
 		Pageable pageable = PageRequest.of(offset, limit);
-		Page<Examination> examinations = examinationService.findPage(pageable);
+		// Search for studies with patient name (DICOM patientID does not make sense in case of Shanoir)
+		String patientName = allParams.get("PatientName");
+		Page<Examination> examinations = examinationService.findPage(pageable, patientName);
 		if (examinations.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

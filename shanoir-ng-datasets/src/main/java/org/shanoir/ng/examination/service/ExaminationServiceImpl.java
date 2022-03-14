@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
@@ -134,9 +135,13 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 	
 	@Override
-	public Page<Examination> findPage(final Pageable pageable) {
+	public Page<Examination> findPage(final Pageable pageable, String patientName) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return examinationRepository.findAll(pageable);
+			if (StringUtils.isNotEmpty(patientName) && patientName.length() <= 64) {
+				return examinationRepository.findAllBySubjectName("%" + patientName + "%", pageable);
+			} else {
+				return examinationRepository.findAll(pageable);
+			}
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
