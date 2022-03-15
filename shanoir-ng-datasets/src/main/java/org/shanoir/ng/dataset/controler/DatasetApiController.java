@@ -385,14 +385,14 @@ public class DatasetApiController implements DatasetApi {
 					workFolder = new File(tmpFile.getAbsolutePath() + File.separator + "result");
 				} else  {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, false);
 				}
 			} else if (EEG.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, false);
 			} else if (BIDS.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
-				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, true);
 			} else {
 				throw new RestServiceException(
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -541,16 +541,16 @@ public class DatasetApiController implements DatasetApi {
 
 				if (dataset instanceof EegDataset) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName, false);
 				} else if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName, dataset);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName, false);
 				} else if (BIDS.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName, true);
 				} else {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Please choose either nifti, dicom or eeg file type.", null));
@@ -631,7 +631,7 @@ public class DatasetApiController implements DatasetApi {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName) throws IOException {
+	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName, boolean keepName) throws IOException {
 		int index = 0;
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
@@ -644,29 +644,33 @@ public class DatasetApiController implements DatasetApi {
 				index++;
 				continue;
 			}
-
+			
 			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
 			StringBuilder name = new StringBuilder("");
 
-			name.append(subjectName).append("_");
-			if (dataset instanceof EegDataset) {
-				name.append(dataset.getName()).append("_");
+			if (keepName) {
+				name.append(srcFile.getName());
 			} else {
-				if (dataset.getUpdatedMetadata().getComment() != null) {
-					name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+				name.append(subjectName).append("_");
+				if (dataset instanceof EegDataset) {
+					name.append(dataset.getName()).append("_");
+				} else {
+					if (dataset.getUpdatedMetadata().getComment() != null) {
+						name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+					}
+					name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
+					if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
+						name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+					}
 				}
-				name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
-				if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
-					name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+				name.append(dataset.getDatasetAcquisition().getRank()).append("_")
+				.append(index)
+				.append(".");
+				if (srcFile.getName().endsWith(".nii.gz")) {
+					name.append("nii.gz");
+				} else {
+					name.append(FilenameUtils.getExtension(srcFile.getName()));
 				}
-			}
-			name.append(dataset.getDatasetAcquisition().getRank()).append("_")
-			.append(index)
-			.append(".");
-			if (srcFile.getName().endsWith(".nii.gz")) {
-				name.append("nii.gz");
-			} else {
-				name.append(FilenameUtils.getExtension(srcFile.getName()));
 			}
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + name);
 			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);

@@ -27,4 +27,5 @@ public class BidsDataset extends Dataset {
 		this.bidsDataType = bidsDataType;
 	}
 
+
 }
