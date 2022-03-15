@@ -668,7 +668,11 @@ public class DatasetApiController implements DatasetApi {
 			} else {
 				name.append(FilenameUtils.getExtension(srcFile.getName()));
 			}
-			File destFile = new File(workFolder.getAbsolutePath() + File.separator + name);
+			String fileName = name.toString();
+			if (fileName.contains("/")) {
+				fileName = fileName.replaceAll("/", "_");
+			}
+			File destFile = new File(workFolder.getAbsolutePath() + File.separator + fileName);
 			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			index++;
 		}
