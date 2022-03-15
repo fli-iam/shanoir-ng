@@ -70,6 +70,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     firstPageLoaded: boolean = false;
     viewChecked: boolean = false;
     solrRequest: SolrRequest = new SolrRequest();
+    private facetPageable: Map<string, FacetPageable>;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
@@ -218,7 +219,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         }
     }
 
-    refreshTable() {
+    refreshTable(updatedFacetName?: string) {
+        this.facetPageable = this.buildFacetPageable(updatedFacetName);
         if (this.tab != 'results') this.openResultTab();
         this.table.refresh(1);
     }
@@ -255,12 +257,16 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getPage(pageable: Pageable): Promise<SolrResultPage> {
         if (this.form.valid) {
             this.saveState();
-            this.solrRequest.facetPaging = this.buildFacetPageable();
+            this.solrRequest.facetPaging = this.facetPageable ? this.facetPageable : this.buildFacetPageable();
             return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
                 // populate criteria
                 if (solrResultPage) {
                     this.pagingCriterion.forEach(criterionComponent => {
-                        criterionComponent.refresh(solrResultPage.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName))
+                        if (this.solrRequest.facetPaging.has(criterionComponent.facetName)) {
+                            let facetPage: FacetResultPage = solrResultPage.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName)
+                            if (!facetPage) facetPage = new FacetResultPage();
+                            criterionComponent.refresh(facetPage);
+                        }
                     });
                 }
                 this.firstPageLoaded = true;
@@ -272,13 +278,14 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 } else throw reason;
             }).finally(() => {
                 this.solrRequest.facetPaging = null;
+                this.facetPageable = null;
             });
         } else {
             return Promise.resolve(new SolrResultPage());
         }
     }
 
-    private buildFacetPageable(): Map<string, FacetPageable> {
+    private buildFacetPageable(updatedFacetName?: string): Map<string, FacetPageable> {
         let map = new Map();
         if (!this.firstPageLoaded) { // dig into criterion save states before they load to avoid unneeded requests
             TextualFacetNames.forEach(facetName => {
@@ -295,7 +302,11 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             if (this.pagingCriterion) { // add facet request
                 this.pagingCriterion.forEach(criterion => {
                     if (criterion.open) {
-                        map.set(criterion.facetName, criterion.getCurrentPageable());
+                        if (updatedFacetName && updatedFacetName == criterion.facetName) {
+                            map.set(criterion.facetName, criterion.getCurrentPageable());
+                        } else {
+                            map.set(criterion.facetName, criterion.getCurrentPageable(1));
+                        }
                     }
                 });
             }
