@@ -49,14 +49,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i title="Sort by index" [class.disabled]="sortMode == 'COUNT'" class="fa-solid fa-arrow-down-a-z" (click)="sortMode == 'COUNT' ? toggleSortMode() : null"></i>
         <i title="Sort by count" [class.disabled]="sortMode == 'INDEX'" class="fa-solid fa-arrow-down-9-1" (click)="sortMode == 'INDEX' ? toggleSortMode() : null"></i>
     </div>
-    <ng-template [ngTemplateOutlet]="pager"></ng-template>
-    <ul *ngIf="loaded" class="min-list">
-        <ng-container *ngFor="let item of displayedFacets">
-            <li *ngIf="!item.hidden">
-                <checkbox [(ngModel)]="item.checked" (ngModelChange)="onCheckChange(item)"></checkbox>
-                <span class="facet" [title]="item.value">{{item.value}}</span><span class="facet-count" *ngIf="item.valueCount > 0">{{item.valueCount}}</span>
-            </li>
-        </ng-container>
-    </ul>
-    <ng-template [ngTemplateOutlet]="pager"></ng-template>
+    <ng-container *ngIf="displayedFacets && displayedFacets.length > 0">
+        <ng-template [ngTemplateOutlet]="pager"></ng-template>
+        <ul *ngIf="loaded" class="min-list">
+            <ng-container *ngFor="let item of displayedFacets">
+                <li *ngIf="!item.hidden">
+                    <checkbox [(ngModel)]="item.checked" (ngModelChange)="onCheckChange(item)"></checkbox>
+                    <span class="facet" [title]="item.value">{{item.value}}</span><span class="facet-count" *ngIf="item.valueCount > 0">{{item.valueCount}}</span>
+                </li>
+            </ng-container>
+        </ul>
+        <ng-template [ngTemplateOutlet]="pager"></ng-template>
+    </ng-container>
+    <div class="no-result" *ngIf="!displayedFacets || displayedFacets.length == 0">No compatible search terms</div>
 </div>

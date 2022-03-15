@@ -127,7 +127,9 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 
 	private void addFilterQuery(SolrQuery query, String fieldName, Collection<String> values) {
 		if (values != null && !values.isEmpty()) {
-			query.addFilterQuery(fieldName + ":(\"" + String.join("\" OR \"", values) + "\")");
+			query.addFilterQuery(
+					"{!tag=" + fieldName + "}" 
+					+ fieldName + ":(\"" + String.join("\" OR \"", values) + "\")");
 		} 
 	}
 
@@ -354,11 +356,11 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 
 	private void addFacetPaging(SolrQuery query, ShanoirSolrQuery shanoirQuery) {
 		if (shanoirQuery.getFacetPaging() != null) {
-			query.setFacetMinCount(0);
+			query.setFacetMinCount(1);
 			query.set("facet.numTerms", true);
 			for (String facetName : TEXTUAL_FACET_LIST) {
 				if (shanoirQuery.getFacetPaging().containsKey(facetName)) {
-					query.addFacetField(facetName); // needed ?
+					query.addFacetField("{!ex=" + facetName + "}"  + facetName); // needed ?
 					FacetPageable facetPageable = shanoirQuery.getFacetPaging().get(facetName);	
 					query.set("f." + facetName + "." + FacetParams.FACET_LIMIT, facetPageable.getPageSize());
 					query.set("f." + facetName + "." + FacetParams.FACET_OFFSET, (facetPageable.getPageNumber() - 1) * facetPageable.getPageSize());
