@@ -70,10 +70,10 @@ public interface DICOMWebApi {
 			@ApiParam(value = "examinationId", required = true) @PathVariable("examinationId") Long examinationId
 		) throws RestServiceException, JsonMappingException, JsonProcessingException;
 	
-	@ApiOperation(value = "", notes = "Returns all DICOM series/acquisitions of an examination", response = String.class, responseContainer = "List", tags = {})
+	@ApiOperation(value = "", notes = "Returns the metadata of a DICOM serie/acquisition of an examination", response = String.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found series/acquisitions", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no serie/acquisition found", response = Void.class),
+			@ApiResponse(code = 200, message = "found serie/acquisition metadata", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no serie/acquisition metadata found", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
