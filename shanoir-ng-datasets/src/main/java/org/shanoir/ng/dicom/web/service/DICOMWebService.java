@@ -32,12 +32,15 @@ public class DICOMWebService {
 	@Value("${dcm4chee-arc.host}")
 	private String dcm4cheeHost;
 
+	@Value("${dcm4chee-arc.port}")
+	private String dcm4cheePort;
+	
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
 
 	@PostConstruct
 	public void init() {
-		this.serverURL = dcm4cheeProtocol + dcm4cheeHost + dicomWebRS;
+		this.serverURL = dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRS;
 		try {
 			httpClient = HttpClients.createDefault();
 		} catch (Exception e) {
