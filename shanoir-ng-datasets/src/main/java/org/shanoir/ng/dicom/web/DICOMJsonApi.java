@@ -28,6 +28,20 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+/**
+ * This API interface returns a DICOMJson as described in
+ * https://v3-docs.ohif.org/configuration/datasources/dicom-json/
+ * for version 3 of the OHIF-Viewer.
+ * 
+ * The below implementation is only a draft and NOT FINISHED!!!
+ * It remains as an interface for a potential future integration
+ * with e.g. OHIF-viewer version 3 and as this format is considered,
+ * as close to the DICOMDir, as a much better format than the regular
+ * DICOM Json used by DICOMWeb - in terms of human readability especially.
+ * 
+ * @author mkain
+ *
+ */
 @Api(value = "dicomjson")
 @RequestMapping("/dicomjson")
 public interface DICOMJsonApi {

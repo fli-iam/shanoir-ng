@@ -20,6 +20,15 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+/**
+ * This implements the DICOMWeb REST-API exposed by Shanoir-NG.
+ * For more informations please see:
+ * 
+ * https://github.com/fli-iam/shanoir-ng/wiki/DICOMWeb
+ * 
+ * @author mkain
+ *
+ */
 @Api(value = "dicomweb")
 @RequestMapping("/dicomweb")
 public interface DICOMWebApi {
