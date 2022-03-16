@@ -32,7 +32,7 @@ public class DICOMWebService {
 	@Value("${dcm4chee-arc.host}")
 	private String dcm4cheeHost;
 
-	@Value("${dcm4chee-arc.port}")
+	@Value("${dcm4chee-arc.port.web}")
 	private String dcm4cheePort;
 	
 	@Value("${dcm4chee-arc.dicom.web.rs}")
