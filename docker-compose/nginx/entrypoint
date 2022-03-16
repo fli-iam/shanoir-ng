@@ -27,6 +27,8 @@ require VIEWER_URL_SCHEME
 require VIEWER_URL_HOST
 sed -i "s/VIEWER_URL_SCHEME/$VIEWER_URL_SCHEME/g" /etc/nginx/shanoir.conf
 sed -i "s/VIEWER_URL_HOST/$VIEWER_URL_HOST/g" /etc/nginx/shanoir.conf
+sed -i "s/VIEWER_URL_SCHEME/$VIEWER_URL_SCHEME/g" /etc/nginx/html/assets/env.js
+sed -i "s/VIEWER_URL_HOST/$VIEWER_URL_HOST/g" /etc/nginx/html/assets/env.js
 
 src="/etc/nginx/$SHANOIR_URL_SCHEME.conf"
 dst="/etc/nginx/server.conf"

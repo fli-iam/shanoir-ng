@@ -34,7 +34,7 @@ import { ExaminationNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-
+import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'examination',
@@ -151,7 +151,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
     
     openViewer() {
-	    window.open('https://viewer/viewer/' + this.entity.id, '_blank');
+	    window.open(environment.viewerUrl + '/viewer/' + this.entity.id, '_blank');
     }
 
     getCenters(): void {
