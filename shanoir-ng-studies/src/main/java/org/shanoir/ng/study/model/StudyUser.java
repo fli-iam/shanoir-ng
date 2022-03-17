@@ -199,11 +199,11 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 		this.userName = userName;
 	}
 
+	@JsonIgnore
 	public List<Center> getCenters() {
 		return centers;
 	}
 
-	@JsonIgnore
 	public List<Long> getCentersIds() {
 		if (CollectionUtils.isEmpty(this.centers)) {
 			return Collections.emptyList();
