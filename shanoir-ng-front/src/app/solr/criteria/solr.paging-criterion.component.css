@@ -11,3 +11,4 @@
 .sort-mode { color: var(--color-a); }
 .sort-mode i + i { margin-left: 5px; }
 .sort-mode i.disabled { cursor: pointer; }
+.no-result { margin: 5px 0px; font-style: italic; color: var(--color-b); }

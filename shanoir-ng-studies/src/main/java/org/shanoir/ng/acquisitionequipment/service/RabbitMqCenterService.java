@@ -13,10 +13,15 @@
  */
 package org.shanoir.ng.acquisitionequipment.service;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -59,14 +64,16 @@ public class RabbitMqCenterService {
 	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE)
 	@RabbitHandler
 	@Transactional
-	public Long findAcquisitionEquipementIdFromCode(String message) {
+	public String findAcquisitionEquipements(String message) {
 		try {
-			AcquisitionEquipment ae = acquisitionEquipementService.findBySerialNumber(message);
-			if (ae == null) {
-				return null;
-			} else {
-				return ae.getId();
+			List<AcquisitionEquipment> aes = Utils.toList(acquisitionEquipementService.findAll());
+			Map<String, Long> easMap = new HashMap<>(); 
+			for (AcquisitionEquipment ae : aes) {
+				if (ae.getSerialNumber() != null) {
+					easMap.put(ae.getSerialNumber(), ae.getId());
+				}
 			}
+			return mapper.writeValueAsString(easMap);
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
