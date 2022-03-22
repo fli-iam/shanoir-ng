@@ -3,6 +3,8 @@ package org.shanoir.ng.dicom.web;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.apache.solr.common.StringUtils;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -138,4 +141,9 @@ public class DICOMWebApiController implements DICOMWebApi {
 		return null;
 	}
 
+	@Override
+	public ResponseEntity<Void> stow(@Valid MultipartFile file) throws RestServiceException {
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+	
 }

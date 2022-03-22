@@ -32,6 +32,20 @@ public class StudyInstanceUIDHandler {
 	
 	private static final String WADO_RS_STUDY_UID_SERIES_UID = "/studies/(.*?)/series/";
 
+	private static final String DICOM_TAG_STUDY_INSTANCE_UID = "0020000D";
+
+	private static final String DICOM_TAG_RETRIEVE_URL = "00081190";
+
+	private static final String VALUE = "Value";
+
+	private static final String RETRIEVE_URL_SERIE_LEVEL = "/studies/(.*)/series/";
+
+	private static final String RETRIEVE_URL_STUDY_LEVEL = "/studies/(.*)";
+
+	private static final String STUDIES = "/studies/";
+
+	private static final String SERIES = "/series/";
+
 	@Autowired
 	private ExaminationService examinationService;
 	
@@ -57,29 +71,29 @@ public class StudyInstanceUIDHandler {
 			while (fieldNames.hasNext()) {
 				String fieldName = fieldNames.next();
 				// find attribute: StudyInstanceUID
-				if (fieldName.equals("0020000D")) {
+				if (fieldName.equals(DICOM_TAG_STUDY_INSTANCE_UID)) {
 					JsonNode studyInstanceUIDNode = root.get(fieldName);
-					ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path("Value");
+					ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path(VALUE);
 					for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
 						studyInstanceUIDArray.remove(i);
-						studyInstanceUIDArray.add(examinationId.toString());
+						studyInstanceUIDArray.insert(i, examinationId.toString());
 					}
 				}
 				// find attribute: RetrieveURL
-				if (fieldName.equals("00081190")) {
+				if (fieldName.equals(DICOM_TAG_RETRIEVE_URL)) {
 					JsonNode retrieveURLNode = root.get(fieldName);
-					ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path("Value");
+					ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path(VALUE);
 					for (int i = 0; i < retrieveURLArray.size(); i++) {
 						JsonNode arrayElement = retrieveURLArray.get(i);
 						String retrieveURL = arrayElement.asText();
 						if (studyLevel) { // study level
-							retrieveURL = retrieveURL.replaceFirst("/studies/(.*)", "/studies/" + examinationId);
+							retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + examinationId);
 							retrieveURLArray.remove(i);
-							retrieveURLArray.add(retrieveURL);
+							retrieveURLArray.insert(i, retrieveURL);
 						} else { // serie level
-							retrieveURL = retrieveURL.replaceFirst("/studies/(.*)/series/", "/studies/" + examinationId + "/series/");
+							retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + examinationId + SERIES);
 							retrieveURLArray.remove(i);
-							retrieveURLArray.add(retrieveURL);
+							retrieveURLArray.insert(i, retrieveURL);
 						}
 					}
 				}
@@ -139,8 +153,10 @@ public class StudyInstanceUIDHandler {
 							List<DatasetFile> files = expression.getDatasetFiles();
 							if (!files.isEmpty()) {
 								DatasetFile file = files.get(0);
-								String path = file.getPath();
-								return findStudyInstanceUID(path);
+								if (file.isPacs()) {
+									String path = file.getPath();
+									return findStudyInstanceUID(path);
+								}
 							}
 						}
 					}

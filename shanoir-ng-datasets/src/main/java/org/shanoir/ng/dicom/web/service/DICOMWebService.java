@@ -5,6 +5,7 @@ import javax.annotation.PostConstruct;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 @Component
 public class DICOMWebService {
@@ -105,6 +107,21 @@ public class DICOMWebService {
 				HttpHeaders responseHeaders = new HttpHeaders();
 				responseHeaders.setContentLength(entity.getContentLength());
 				return new ResponseEntity(inputStreamResource, responseHeaders, HttpStatus.OK);
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
+
+	public String stow(MultipartFile file) {
+		try {
+			HttpPost httpPost = new HttpPost(this.serverURL.substring(0, this.serverURL.indexOf("/studies")));
+			//httpPost.setEntity(null)
+			CloseableHttpResponse response = httpClient.execute(httpPost);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				return EntityUtils.toString(entity);
 			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
