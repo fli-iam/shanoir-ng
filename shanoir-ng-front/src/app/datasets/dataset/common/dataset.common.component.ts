@@ -81,10 +81,12 @@ export class CommonDatasetComponent implements OnChanges {
             if (changes['dataset'].firstChange || changes['dataset'].previousValue.studyId != changes['dataset'].currentValue.studyId) {
                 this.fetchOneStudy();
             }
-        } else if(changes['dataset'] && this.mode == 'edit') {
-	        this.parentFormGroup.markAsDirty();
-            this.parentFormGroup.updateValueAndValidity();
         }
+    }
+
+    updateForm() {
+        this.parentFormGroup.markAsDirty();
+        this.parentFormGroup.updateValueAndValidity();
     }
 
     private fetchOneSubject() {

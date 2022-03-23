@@ -119,7 +119,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<fieldset (userChange)="form.markAsDirty()" >
 				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
 					Data User Agreement (DUA)
 					<tool-tip class="larger">
