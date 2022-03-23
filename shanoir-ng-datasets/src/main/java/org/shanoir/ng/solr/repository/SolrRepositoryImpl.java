@@ -298,8 +298,9 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 
 	private void addSearchInAllClause(SolrQuery query, String searchStr) {
 		if (searchStr != null && !searchStr.isEmpty()) {
-			String[] searchTerms = ClientUtils.escapeQueryChars(searchStr).trim().split(" ");		
+			String[] searchTerms = searchStr.trim().split(" ");		
 			for (String term : searchTerms) {
+				term = ClientUtils.escapeQueryChars(term);
 				List<String> termInFieldFormattedStrList = new ArrayList<>();
 				for (String field : TEXTUAL_FACET_LIST) {
 					StringBuilder termInField = new StringBuilder()
