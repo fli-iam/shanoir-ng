@@ -411,6 +411,7 @@ export class StudyComponent extends EntityComponent<Study> {
         } else {
             this.study.dataUserAgreementPaths = ['DUA-' + this.dataUserAgreement.name];
         }
+        this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 
