@@ -83,7 +83,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             new: this.keycloakService.isUserAdminOrExpert(),
             view: true, 
             edit: this.keycloakService.isUserAdminOrExpert(), 
-            delete: this.keycloakService.isUserAdminOrExpert()
+            delete: false
         };
     }
 
@@ -92,10 +92,5 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             study.studyUserList && 
             study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
         );
-    }
-
-    canDelete(study: Study): boolean {
-        // Disallow delete study from list directly
-        return false
     }
 }

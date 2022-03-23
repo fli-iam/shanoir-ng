@@ -1,0 +1,3 @@
+[submodule "shanoir-downloader"]
+	path = shanoir-downloader
+	url = git@github.com:Inria-Empenn/shanoir_downloader.git

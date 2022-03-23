@@ -30,7 +30,6 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -85,9 +84,6 @@ public class SubjectApiSecurityTest {
 	@MockBean
 	private SubjectStudyRepository subjectStudyRepository;
 	
-	@MockBean
-	private StudyBIDSService bidsService;
-
 	@Before
 	public void setup() {
 		mockNew = ModelsUtil.createSubject();

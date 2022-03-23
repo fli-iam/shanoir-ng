@@ -19,6 +19,7 @@ import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AbstractInput } from '../../form/input.abstract';
 import { Option } from '../../select/select.component';
+import { Mode } from '../entity/entity.component.abstract';
 
 @Component({
   selector: 'subject-study-list',
@@ -35,6 +36,7 @@ import { Option } from '../../select/select.component';
 
 export class SubjectStudyListComponent extends AbstractInput implements OnChanges {
     
+    @Input() mode: Mode;
     @Input() subject: Subject;
     @Input() study: Study;
     @Input() selectableList: Subject[] | Study[];

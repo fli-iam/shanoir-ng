@@ -26,8 +26,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
-        <menu-item label="Details..." awesome="fas fa-eye" (click)="showExaminationDetails()"></menu-item>
+        <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showExaminationDetails()"></menu-item>
         <menu-item *ngIf="hasEEG && datasetIds && datasetIds.length != 0" label="Download all EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
+        <menu-item *ngIf="hasBids && datasetIds && datasetIds.length != 0" label="Download all BIDS" awesome="fas fa-download" (click)="download('BIDS')"></menu-item>
         <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0)" label="Download all DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
         <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0)" label="Download all Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
     </dropdown-menu>
@@ -45,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <node 
             *ngIf="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
             label="Extra data files"
-            awesome="far fa-folder-open"
+            awesome="fa-regular fa-folder-open"
             [hasChildren]="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
             [(opened)]="node.extraDataOpen">
         <node 

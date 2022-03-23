@@ -316,6 +316,11 @@ public class UserServiceImpl implements UserService {
 	private User updateUserValues(final User userDb, final User user) {
 		userDb.setCanAccessToDicomAssociation(user.isCanAccessToDicomAssociation() != null && user.isCanAccessToDicomAssociation());
 		userDb.setEmail(user.getEmail());
+		// If expiration date was updated, reset expiration notifications.
+		if (userDb.getExpirationDate() == null || user.getExpirationDate() == null || !userDb.getExpirationDate().isEqual(user.getExpirationDate())) {
+			userDb.setFirstExpirationNotificationSent(Boolean.FALSE);
+			userDb.setSecondExpirationNotificationSent(Boolean.FALSE);
+		}
 		userDb.setExpirationDate(user.getExpirationDate());
 		userDb.setFirstName(user.getFirstName());
 		userDb.setLastName(user.getLastName());

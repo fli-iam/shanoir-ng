@@ -27,6 +27,8 @@ import org.shanoir.ng.dataset.model.Dataset;
 @Entity
 public class CtDataset extends Dataset {
 
+	public static final String datasetType = "Ct";
+
 	/**
 	 * UID
 	 */

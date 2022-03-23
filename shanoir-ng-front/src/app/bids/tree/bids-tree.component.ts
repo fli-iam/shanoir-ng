@@ -119,6 +119,8 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
                 this.json = JSON.parse(bidsElem.content);
             } else if (bidsElem.path.indexOf('.tsv') != -1) {
                 this.tsv = this.parseTsv(bidsElem.content);
+            } else if (bidsElem.path.indexOf('README') != -1) {
+                 this.json = JSON.parse(bidsElem.content);
             }
         }
     }

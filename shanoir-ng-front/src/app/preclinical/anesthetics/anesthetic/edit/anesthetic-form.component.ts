@@ -185,10 +185,10 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         ];
 
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editIngredient(item) });
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.editIngredient(item) });
         }
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeIngredient(item) });
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeIngredient(item) });
         }
     }
 

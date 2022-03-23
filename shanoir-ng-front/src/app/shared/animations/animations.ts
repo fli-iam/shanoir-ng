@@ -21,14 +21,14 @@ export const parent = trigger('parent', [
 export const slideDown = trigger('slideDown', [
     transition(
         ':enter', [
-            style({height: '0', 'min-height': 0, 'padding-bottom': '0', overflow: 'hidden'}),
-            animate('500ms ease-in-out', style({height: '*', 'min-height': '*','padding-bottom': '*', overflow: 'hidden'}))
+            style({height: '0', 'min-height': 0, 'padding-bottom': '0', 'margin-bottom': '0', overflow: 'hidden'}),
+            animate('500ms ease-in-out', style({height: '*', 'min-height': '*','padding-bottom': '*', 'margin-bottom': '*', overflow: 'hidden'}))
         ]
     ),
     transition(
         ':leave', [
-            style({height: '*', 'min-height': '*', 'padding-bottom': '*', overflow: 'hidden'}),
-            animate('500ms ease-in-out', style({height: '0', 'min-height': 0, 'padding-bottom': '0', overflow: 'hidden'}))
+            style({height: '*', 'min-height': '*', 'padding-bottom': '*', 'margin-bottom': '*', overflow: 'hidden'}),
+            animate('500ms ease-in-out', style({height: '0', 'min-height': 0, 'padding-bottom': '0', 'margin-bottom': '0', overflow: 'hidden'}))
         ]
     )
 ]);

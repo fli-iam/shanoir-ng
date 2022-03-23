@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <form>
-    <h2>Import from {{importMode}}</h2>
+    <h2>Import {{importMode}}</h2>
     <router-outlet *ngIf="hasOneStudy"></router-outlet>
     <div *ngIf="!hasOneStudy">
         <p><strong class="warning"><i class="fas fa-exclamation-triangle"></i>Sorry, you don't have the right to import in any Study for the moment.</strong></p>

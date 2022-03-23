@@ -13,6 +13,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <span class="inner" [class.done]="progress >= 1" [style.width]="(progress * width) + 'px'">
-    <div class="left-text">{{getProgressText()}}</div>
+    <div class="left-text" [style.width]="width + 'px'">{{getProgressText()}}</div>
 </span>
 <span class="text">{{getProgressText()}}</span>

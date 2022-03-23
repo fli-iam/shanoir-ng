@@ -23,6 +23,9 @@
   position: absolute;
   padding: 4px;
   margin: 0;
+  background-color: var(--very-light-grey);
+  margin-top: 2px;
+  border: 1px solid var(--grey);
 }
 .papaya-menu li {
   font-size: 12px;
@@ -30,6 +33,10 @@
   padding: 4px 2px;
   cursor: pointer;
   list-style-type: none;
+  min-height: auto;
+}
+.papaya-menu li input, .papaya-menu li span {
+  vertical-align: middle;
 }
 .papaya-menu-label {
   font-size: 14px;
@@ -214,7 +221,12 @@ li .papaya-menu-slider {
 }
 
 .papaya-toolbar {
+  position: relative;
+  /* display: none !important; */
+}
+
+#File {
   display: none !important;
 }
 
-#papayaContainer0 { padding: 0 !important }
+#papayaContainer0 { padding: 5px 5px 0 7px !important; border: 1px solid var(--grey); border-radius: 3px; background-color: var(--color-b-light); }
