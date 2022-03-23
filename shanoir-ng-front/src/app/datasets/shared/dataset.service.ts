@@ -85,7 +85,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
     
-    progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent, callback?): void {
+    progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
        switch (event.type) {
             case HttpEventType.Sent:
               progressBar.progress = -1;
@@ -96,9 +96,6 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
             case HttpEventType.Response:
                 progressBar.progress = 0;
                 saveAs(event.body, this.getFilename(event));
-                if (callback) {
-                    callback();
-                }
         }
     }
 
