@@ -49,6 +49,11 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { EquipmentDicom, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportMode } from '../../import/import.component';
+import { SimpleSubject } from '../../subjects/shared/subject.model';
+import { ImportJob } from '../shared/dicom-data.model';
+import { ImportService } from '../shared/import.service';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+
 
 @Component({
     selector: 'clinical-context',
@@ -76,6 +81,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public niftiConverter: NiftiConverter;
     private animalSubject: AnimalSubject = new AnimalSubject();
     public importMode: ImportMode;
+    public subjectNamePrefix: string;
     private subscribtions: Subscription[] = [];
     public subjectTypes: Option<string>[] = [
         new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
@@ -104,7 +110,9 @@ export class ClinicalContextComponent implements OnDestroy {
             private acqEqPipe: AcquisitionEquipmentPipe,
             public studycardService: StudyCardService,
             public studyRightsService: StudyRightsService,
-            private keycloakService: KeycloakService) {
+            private keycloakService: KeycloakService,
+            private msgService: MsgBoxService,
+            private importService: ImportService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
             this.router.navigate(['imports'], {replaceUrl: true});
@@ -329,6 +337,10 @@ export class ClinicalContextComponent implements OnDestroy {
 
     public onSelectCenter(): void {
         this.acquisitionEquipment = this.subject = this.examination = null;
+        if (this.center) {
+            let index = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id === this.center.id);
+            this.subjectNamePrefix = this.study.studyCenterList[index].subjectNamePrefix;
+        }
         this.openSubjectStudy = false;
         this.acquisitionEquipmentOptions =  [];
         this.subjects =  [];
@@ -462,6 +474,7 @@ export class ClinicalContextComponent implements OnDestroy {
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
             this.breadcrumbsService.currentStep.data.patientName = this.patient.patientName;
             this.breadcrumbsService.currentStep.data.forceStudy = this.study;
+            this.breadcrumbsService.currentStep.data.subjectNamePrefix = this.subjectNamePrefix;
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     if (this.importMode == 'BRUKER') {
@@ -624,11 +637,87 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public next() {
-        if (this.importMode != 'BRUKER') {
-            this.router.navigate(['imports/finish']);
-        } else {
-            this.router.navigate(['imports/brukerfinish']);
-        }
+        this.startImportJob();
+    }
+
+    startImportJob(): void {
+        let context = this.importDataService.contextData;
+        this.subjectService
+            .updateSubjectStudyValues(context.subject.subjectStudy)
+            .then(() => {
+                let that = this;
+                (this.importMode != 'BRUKER' ? this.importData() : this.importDataBruker())
+                    .then(() => {
+                        this.importDataService.reset();
+                        setTimeout(function () {
+                            that.msgService.log('info', 'The import successfully started.')
+                        }, 0);
+                        // go back to the first step of import
+                        if (this.importMode == 'PACS') this.router.navigate(['/imports/pacs']);
+                        else if (this.importMode == 'DICOM') this.router.navigate(['/imports/upload']);
+                        else if (this.importMode == 'BRUKER') this.router.navigate(['/imports/bruker']);
+                        else this.router.navigate(['/home']);
+                    }).catch(error => {
+                        throw error;
+                    });
+            }).catch(error => {
+                throw new Error('Could not save the subjectStudy object, the import job has been stopped. Cause : ' + error);
+            });
+    }
+
+    private importData(): Promise<any> {
+        let importJob = new ImportJob();
+        let context = this.importDataService.contextData;
+        importJob.patients = new Array<PatientDicom>();
+        let simpleSubject: SimpleSubject = {
+            id: context.subject.id,
+            name: context.subject.name,
+            identifier: context.subject.identifier, 
+            subjectStudyList: [context.subject.subjectStudy]
+        };
+        this.patient.subject = simpleSubject;
+        let filteredPatient: PatientDicom = this.patient;
+        filteredPatient.studies = this.patient.studies.map(study => {
+            study.series = study.series.filter(serie => serie.selected);
+            return study;
+        });
+        importJob.patients.push(filteredPatient);
+        importJob.workFolder = this.importDataService.patientList.workFolder;
+        if (this.importMode == 'DICOM') importJob.fromDicomZip = true;
+        else if (this.importMode == 'PACS') importJob.fromPacs = true;
+        importJob.examinationId = context.examination.id;
+        importJob.studyId = context.study.id;
+        importJob.studyCardId = context.studyCard ? context.studyCard.id : null;
+        importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
+        importJob.converterId = context.niftiConverter.id;
+        importJob.subjectName = context.subject.name;
+        importJob.studyName = context.study.name;
+        return this.importService.startImportJob(importJob);
+    }
+
+    private importDataBruker (): Promise<any> {
+        let context = this.importDataService.contextData;
+        let contextImportJob = this.importDataService.archiveUploaded;
+
+        let importJob = new ImportJob();
+        importJob.patients = new Array<PatientDicom>();
+        // this.patient.subject = new IdName(this.context.subject.id, this.context.subject.name);
+        this.patient.subject = Subject.makeSubject(
+                context.subject.id,
+                context.subject.name, 
+                context.subject.identifier, 
+                context.subject.subjectStudy);
+        importJob.patients.push(this.patient);
+        importJob.workFolder = contextImportJob.workFolder;
+        importJob.fromDicomZip = true;
+        importJob.subjectName = context.subject.name;
+        importJob.studyName = context.study.name;
+        importJob.examinationId = context.examination.id;
+        importJob.studyId = context.study.id;
+        importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
+        importJob.converterId = context.niftiConverter.id;
+        importJob.archive = contextImportJob.archive;
+        return this.importService.startImportJob(importJob);
     }
 
     private hasCoilToUpdate(studycard: StudyCard): boolean {

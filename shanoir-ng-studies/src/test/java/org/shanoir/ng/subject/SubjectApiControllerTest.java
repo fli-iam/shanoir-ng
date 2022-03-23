@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -90,9 +89,6 @@ public class SubjectApiControllerTest {
 	@MockBean
 	private SubjectUniqueConstraintManager uniqueConstraintManager;
 	
-	@MockBean
-	StudyBIDSService bidsService;
-
 	@MockBean
 	private ShanoirEventService eventService;
 

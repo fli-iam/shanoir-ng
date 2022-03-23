@@ -57,6 +57,9 @@ public class StudyCenter extends AbstractEntity {
 	@JoinColumn(name = "study_id")
 	private Study study;
 	
+	/** The subject name prefix associated to the center. */
+	private String subjectNamePrefix;
+	
 	/**
 	 * @return the center
 	 */
@@ -85,6 +88,14 @@ public class StudyCenter extends AbstractEntity {
 	 */
 	public void setStudy(Study study) {
 		this.study = study;
+	}
+
+	public String getSubjectNamePrefix() {
+		return subjectNamePrefix;
+	}
+
+	public void setSubjectNamePrefix(String subjectNamePrefix) {
+		this.subjectNamePrefix = subjectNamePrefix;
 	}
 
 }

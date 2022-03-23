@@ -40,6 +40,7 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,7 +66,6 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -108,6 +108,8 @@ public class DatasetApiController implements DatasetApi {
 	private static final String EEG = "eeg";
 
 	private static final String NII = "nii";
+	
+	private static final String BIDS = "BIDS";
 
 	private static final String DCM = "dcm";
 
@@ -116,10 +118,6 @@ public class DatasetApiController implements DatasetApi {
 	private static final String DOWNLOAD = ".download";
 
 	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
-
-	private static final String SUB_PREFIX = "sub-";
-
-	private static final String SES_PREFIX = "ses-";
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetApiController.class);
 
@@ -150,9 +148,6 @@ public class DatasetApiController implements DatasetApi {
 	private WADODownloaderService downloader;
 
 	@Autowired
-	private BIDSService bidsService;
-
-	@Autowired
 	private DatasetSecurityService datasetSecurityService;
 
 	@Autowired
@@ -175,14 +170,17 @@ public class DatasetApiController implements DatasetApi {
 		this.request = request;
 	}
 
+	@PostConstruct
+	private void initialize() {
+		// Set timeout to 1mn (consider nifti reconversion can take some time)
+		this.rabbitTemplate.setReplyTimeout(60000);
+	}
+
 	@Override
 	public ResponseEntity<Void> deleteDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId)
 					throws RestServiceException {
-
 		try {
-			Dataset dataset = datasetService.findById(datasetId);
-			bidsService.deleteDataset(dataset);
 			datasetService.deleteById(datasetId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -196,10 +194,6 @@ public class DatasetApiController implements DatasetApi {
 			@RequestBody(required = true) List<Long> datasetIds)
 					throws RestServiceException {
 		try {
-			List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
-			for (Dataset dataset : datasets) {
-				bidsService.deleteDataset(dataset);
-			}
 			datasetService.deleteByIdIn(datasetIds);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
@@ -391,11 +385,14 @@ public class DatasetApiController implements DatasetApi {
 					workFolder = new File(tmpFile.getAbsolutePath() + File.separator + "result");
 				} else  {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, false);
 				}
 			} else if (EEG.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, false);
+			} else if (BIDS.equals(format)) {
+				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
+				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, true);
 			} else {
 				throw new RestServiceException(
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -453,7 +450,7 @@ public class DatasetApiController implements DatasetApi {
 	public void massiveDownloadByDatasetIds(
 			@ApiParam(value = "ids of the datasets", required=true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM) @Valid
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg, BIDS", defaultValue = DCM) @Valid
 			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
 		// STEP 0: Check data integrity
 		if (datasetIds == null || datasetIds.isEmpty()) {
@@ -476,7 +473,7 @@ public class DatasetApiController implements DatasetApi {
 	public void massiveDownloadByStudyId(
 			@ApiParam(value = "id of the study", required=true) @Valid
 			@RequestParam(value = "studyId", required = true) Long studyId,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM) @Valid
+			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg, BIDS", defaultValue = DCM) @Valid
 			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
 		// STEP 0: Check data integrity
 		if (studyId == null) {
@@ -544,13 +541,16 @@ public class DatasetApiController implements DatasetApi {
 
 				if (dataset instanceof EegDataset) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName, false);
 				} else if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName, dataset);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName, false);
+				} else if (BIDS.equals(format)) {
+					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName, true);
 				} else {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Please choose either nifti, dicom or eeg file type.", null));
@@ -631,7 +631,7 @@ public class DatasetApiController implements DatasetApi {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName) throws IOException {
+	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName, boolean keepName) throws IOException {
 		int index = 0;
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
@@ -644,31 +644,39 @@ public class DatasetApiController implements DatasetApi {
 				index++;
 				continue;
 			}
-
+			
 			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
 			StringBuilder name = new StringBuilder("");
 
-			name.append(subjectName).append("_");
-			if (dataset instanceof EegDataset) {
-				name.append(dataset.getName()).append("_");
+			if (keepName) {
+				name.append(srcFile.getName());
 			} else {
-				if (dataset.getUpdatedMetadata().getComment() != null) {
-					name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+				name.append(subjectName).append("_");
+				if (dataset instanceof EegDataset) {
+					name.append(dataset.getName()).append("_");
+				} else {
+					if (dataset.getUpdatedMetadata().getComment() != null) {
+						name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+					}
+					name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
+					if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
+						name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+					}
 				}
-				name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
-				if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
-					name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+				name.append(dataset.getDatasetAcquisition().getRank()).append("_")
+				.append(index)
+				.append(".");
+				if (srcFile.getName().endsWith(".nii.gz")) {
+					name.append("nii.gz");
+				} else {
+					name.append(FilenameUtils.getExtension(srcFile.getName()));
 				}
 			}
-			name.append(dataset.getDatasetAcquisition().getRank()).append("_")
-			.append(index)
-			.append(".");
-			if (srcFile.getName().endsWith(".nii.gz")) {
-				name.append("nii.gz");
-			} else {
-				name.append(FilenameUtils.getExtension(srcFile.getName()));
+			String fileName = name.toString();
+			if (fileName.contains("/")) {
+				fileName = fileName.replaceAll("/", "_");
 			}
-			File destFile = new File(workFolder.getAbsolutePath() + File.separator + name);
+			File destFile = new File(workFolder.getAbsolutePath() + File.separator + fileName);
 			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			index++;
 		}
@@ -763,28 +771,6 @@ public class DatasetApiController implements DatasetApi {
 		}
 		file.createNewFile();
 		return file;
-	}
-
-	/**
-	 * This method receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
-	 * @param urls
-	 * @param workFolder
-	 * @throws IOException
-	 * @throws MessagingException
-	 */
-	public void copyFilesForBIDSExport(final List<URL> urls, final File workFolder, final String subjectName,
-			final String sesId, final String modalityLabel) throws IOException {
-		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-			URL url =  iterator.next();
-			File srcFile = new File(url.getPath());
-			String destFilePath = srcFile.getPath().substring(niftiStorageDir.length() + 1, srcFile.getPath().lastIndexOf('/'));
-			File destFolder = new File(workFolder.getAbsolutePath() + File.separator + destFilePath);
-			destFolder.mkdirs();
-			String extensionType = srcFile.getPath().substring(srcFile.getPath().lastIndexOf(".") + 1);
-			String destFileNameBIDS = SUB_PREFIX + subjectName + "_" + SES_PREFIX + sesId + "_" + modalityLabel + "." + extensionType;
-			File destFile = new File(destFolder.getAbsolutePath() + File.separator + destFileNameBIDS);
-			Files.copy(srcFile.toPath(), destFile.toPath());
-		}
 	}
 
 	public static File getUserImportDir(String importDir) {
