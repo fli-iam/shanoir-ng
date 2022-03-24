@@ -341,8 +341,8 @@ public class DatasetApiController implements DatasetApi {
 		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
 			datasetName += "-" + dataset.getUpdatedMetadata().getComment();
 		}
-		if (datasetName.contains("/")) {
-			datasetName = datasetName.replaceAll("/", "_");
+		if (datasetName.contains(File.separator)) {
+			datasetName = datasetName.replaceAll(File.separator, "_");
 		}
 		String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
 
@@ -357,8 +357,8 @@ public class DatasetApiController implements DatasetApi {
 			if (subjectOpt.isPresent()) {
 				subjectName = subjectOpt.get().getName();
 			}
-			if (subjectName.contains("/")) {
-				subjectName = subjectName.replaceAll("/", "_");
+			if (subjectName.contains(File.separator)) {
+				subjectName = subjectName.replaceAll(File.separator, "_");
 			}
 
 			if (DCM.equals(format)) {
@@ -519,8 +519,8 @@ public class DatasetApiController implements DatasetApi {
 				}
 				// Create a new folder organized by subject / examination
 				String subjectName = subjectRepo.findById(dataset.getSubjectId()).orElse(null).getName();
-				if (subjectName.contains("/")) {
-					subjectName = subjectName.replaceAll("/", "_");
+				if (subjectName.contains(File.separator)) {
+					subjectName = subjectName.replaceAll(File.separator, "_");
 				}
 				String studyName = studyRepo.findById(dataset.getStudyId()).orElse(null).getName();
 
@@ -671,8 +671,8 @@ public class DatasetApiController implements DatasetApi {
 				name.append(FilenameUtils.getExtension(srcFile.getName()));
 			}
 			String fileName = name.toString();
-			if (fileName.contains("/")) {
-				fileName = fileName.replaceAll("/", "_");
+			if (fileName.contains(File.separator)) {
+				fileName = fileName.replaceAll(File.separator, "_");
 			}
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + fileName);
 			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
