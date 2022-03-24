@@ -37,6 +37,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<nginx.webapp.directory>${basedir}/../shanoir-ng-nginx/webapp</nginx.webapp.directory>
 		<nginx.webapp.directory.docker.compose>${basedir}/../docker-compose/nginx/webapp</nginx.webapp.directory.docker.compose>
 		<nginx.directory.docker.compose>${basedir}/../docker-compose/nginx</nginx.directory.docker.compose>
+		<ohif.viewer.directory.docker.compose>${basedir}/../docker-compose/ohif-viewer</ohif.viewer.directory.docker.compose>
 		<sonar.skip>true</sonar.skip>
 		<npm.build.task>build</npm.build.task>
 	</properties>
@@ -164,11 +165,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<version>1.7</version>
 				<executions>
 					<execution>
-						<id>copy-entrypoint_common</id>
+						<id>copy-entrypoint_common-nginx</id>
 						<phase>package</phase>
 						<configuration>
 							<target>
 								<copy file="../utils/entrypoint_common" tofile="${nginx.directory.docker.compose}/entrypoint_common" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>copy-entrypoint_common-ohif-viewer</id>
+						<phase>package</phase>
+						<configuration>
+							<target>
+								<copy file="../utils/entrypoint_common" tofile="${ohif.viewer.directory.docker.compose}/entrypoint_common" />
 							</target>
 						</configuration>
 						<goals>
