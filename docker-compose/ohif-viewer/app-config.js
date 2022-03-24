@@ -18,9 +18,9 @@ window.config = {
     dicomWeb: [
       {
         name: 'SHANOIR-NG',
-        wadoUriRoot: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/shanoir-ng/',
-        qidoRoot: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/dicomweb',
-        wadoRoot: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/dicomweb',
+        wadoUriRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/shanoir-ng/',
+        qidoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
+        wadoRoot: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/dicomweb',
         qidoSupportsIncludeField: true,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
@@ -35,7 +35,7 @@ window.config = {
     	// Authorization Server URL
     	authority: 'SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/auth/realms/shanoir-ng',
     	client_id: 'ohif-viewer',
-    	redirect_uri: 'VIEWER_URL_SCHEME://VIEWER_URL_HOST/callback', // `OHIFStandaloneViewer.js`
+    	redirect_uri: 'SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/callback', // `OHIFStandaloneViewer.js`
     	// "Authorization Code Flow"
 		// Resource: https://medium.com/@darutk/diagrams-of-all-the-openid-connect-flows-6968e3990660
 		response_type: 'code',

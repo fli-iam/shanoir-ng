@@ -1003,10 +1003,10 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "**********",
       "redirectUris": [
-        "VIEWER_URL_SCHEME://VIEWER_URL_HOST/*"
+        "SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST/*"
       ],
       "webOrigins": [
-        "VIEWER_URL_SCHEME://VIEWER_URL_HOST"
+        "SHANOIR_VIEWER_OHIF_URL_SCHEME://SHANOIR_VIEWER_OHIF_URL_HOST"
       ],
       "notBefore": 0,
       "bearerOnly": false,

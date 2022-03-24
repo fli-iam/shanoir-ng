@@ -23,17 +23,17 @@ set -e
 
 require SHANOIR_URL_SCHEME
 require SHANOIR_URL_HOST
-require VIEWER_URL_SCHEME
-require VIEWER_URL_HOST
-sed -i "s/VIEWER_URL_SCHEME/$VIEWER_URL_SCHEME/g" /etc/nginx/shanoir.conf
-sed -i "s/VIEWER_URL_HOST/$VIEWER_URL_HOST/g" /etc/nginx/shanoir.conf
-sed -i "s/VIEWER_URL_SCHEME/$VIEWER_URL_SCHEME/g" /etc/nginx/html/assets/env.js
-sed -i "s/VIEWER_URL_HOST/$VIEWER_URL_HOST/g" /etc/nginx/html/assets/env.js
+require SHANOIR_VIEWER_OHIF_URL_SCHEME
+require SHANOIR_VIEWER_OHIF_URL_HOST
+sed -i "s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g" /etc/nginx/shanoir.conf
+sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g" /etc/nginx/shanoir.conf
+sed -i "s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g" /etc/nginx/html/assets/env.js
+sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g" /etc/nginx/html/assets/env.js
 
 src="/etc/nginx/$SHANOIR_URL_SCHEME.conf"
 dst="/etc/nginx/server.conf"
 sed "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" "$src" > "$dst"
-sed -i "s/VIEWER_URL_HOST/$VIEWER_URL_HOST/g" /etc/nginx/server.conf
+sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g" /etc/nginx/server.conf
 sed -i "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/server.conf
 
 configure_instance()

@@ -31,8 +31,8 @@ services:
       - SHANOIR_ADMIN_NAME
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
-      - VIEWER_URL_SCHEME
-      - VIEWER_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_SMTP_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
@@ -161,8 +161,8 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
-      - VIEWER_URL_SCHEME
-      - VIEWER_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -295,8 +295,8 @@ services:
     environment:
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
-      - VIEWER_URL_SCHEME
-      - VIEWER_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
     networks:
       - shanoir_ng_network
     ports:
@@ -311,8 +311,8 @@ services:
       - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
       - SHANOIR_URL_HOST
-      - VIEWER_URL_SCHEME
-      - VIEWER_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_X_FORWARDED
       - SHANOIR_INSTANCE_NAME
       - SHANOIR_INSTANCE_COLOR
