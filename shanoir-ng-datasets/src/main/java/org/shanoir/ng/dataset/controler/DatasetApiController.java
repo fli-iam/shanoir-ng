@@ -341,7 +341,9 @@ public class DatasetApiController implements DatasetApi {
 		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
 			datasetName += "-" + dataset.getUpdatedMetadata().getComment();
 		}
-
+		if (datasetName.contains("/")) {
+			datasetName = datasetName.replaceAll("/", "_");
+		}
 		String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
 
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
