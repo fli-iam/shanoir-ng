@@ -95,6 +95,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public scHasDifferentModality: string;
     public modality: string;
     openSubjectStudy: boolean = false;
+    studyLoading: boolean = false;
     
     constructor(
             public studyService: StudyService,
@@ -240,6 +241,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public onSelectStudy(): Promise<void> {
+        this.studyLoading = true;
         this.studycardOptions = null;
         if (this.study && this.isAdminOfStudy[this.study.id] == undefined) {
             if (this.keycloakService.isUserAdmin) {
@@ -299,7 +301,12 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.centerOptions.push(centerOption);
             }
         }
-        return end.then(() => this.onContextChange());
+        return end.then(() => {
+            this.onContextChange();
+            this.studyLoading = false;
+        }).catch(() => {
+            this.studyLoading = false;
+        });
     }
 
     public onSelectStudyCard(): void {

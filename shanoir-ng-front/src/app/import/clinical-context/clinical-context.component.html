@@ -28,7 +28,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         (userChange)="onSelectStudy(); onContextChange();" 
                         (onViewClick)="showStudyDetails()" 
                         [viewDisabled]="!study" 
-                        [options]="studyOptions">
+                        [options]="studyOptions"
+                        [disabled]="studyLoading">
                 </select-box>
             </span>
         </li>
