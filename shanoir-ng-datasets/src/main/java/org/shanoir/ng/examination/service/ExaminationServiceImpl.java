@@ -138,14 +138,18 @@ public class ExaminationServiceImpl implements ExaminationService {
 	public Page<Examination> findPage(final Pageable pageable, String patientName) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			if (StringUtils.isNotEmpty(patientName) && patientName.length() <= 64) {
-				return examinationRepository.findAllBySubjectName("%" + patientName + "%", pageable);
+				return examinationRepository.findAllBySubjectName(patientName, pageable);
 			} else {
 				return examinationRepository.findAll(pageable);
 			}
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			return examinationRepository.findByStudyIdIn(studyIds, pageable);
+			if (StringUtils.isNotEmpty(patientName) && patientName.length() <= 64) {
+				return examinationRepository.findByStudyIdInAndBySubjectName(studyIds, patientName, pageable);
+			} else {
+				return examinationRepository.findByStudyIdIn(studyIds, pageable);
+			}
 		}
 	}
 
