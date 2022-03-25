@@ -43,7 +43,8 @@ public class StudyRightsService {
 		}
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
 		return
-				founded.getStudyUserRights() != null
+				founded != null
+				&& founded.getStudyUserRights() != null
 				&& founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr))
 				&& founded.isConfirmed();
     }
@@ -59,7 +60,7 @@ public class StudyRightsService {
 		Long userId = KeycloakUtil.getTokenUserId();
 		if (userId == null) throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
-		if (founded.getStudyUserRights() != null) {
+		if (founded != null && founded.getStudyUserRights() != null) {
 			for (String rightStr : rightStrs) {
 				if (founded.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && founded.isConfirmed()) return true;
 			}
@@ -81,10 +82,12 @@ public class StudyRightsService {
 		}
 		Iterable<StudyUser> founded = repo.findByUserIdAndStudyIdIn(userId, studyIds);
 		Set<Long> validIds = new HashSet<>();
-		for (StudyUser su : founded) {
-			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
-				validIds.add(su.getStudyId());
-			}
+		if (founded != null) {
+			for (StudyUser su : founded) {
+				if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
+					validIds.add(su.getStudyId());
+				}
+			}			
 		}
 		return validIds;
 	}
@@ -101,10 +104,12 @@ public class StudyRightsService {
 			throw new IllegalStateException("UserId should not be null. Cannot check rights.");
 		}
 		Iterable<StudyUser> founded = repo.findByUserId(userId);
-		for (StudyUser su : founded) {
-			if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
-				return true;
-			}
+		if (founded != null) {
+			for (StudyUser su : founded) {
+				if (su.getStudyUserRights().contains(StudyUserRight.valueOf(rightStr)) && su.isConfirmed()) {
+					return true;
+				}
+			}			
 		}
 		return false;
 	}

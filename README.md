@@ -41,7 +41,14 @@ Depending on your server domain just call (e.g. for Neurinfo server):
 * MS Datasets: https://shanoir.irisa.fr/shanoir-ng/datasets/swagger-ui.html
 * MS Preclinical: https://shanoir.irisa.fr/shanoir-ng/preclinical/swagger-ui.html
 
-Below an example for the dev environment:
+## Intialize Shanoir Downloader
+
+Clone the shanoir-ng repository, the shanoir-downloader/ folder will be empty ; two commands must be run to get the code:
+
+  - `git submodule init` to initialize your local configuration file
+  - `git submodule update` to fetch all the data from shanoir and check out the appropriate commit listed in `shanoir_downloader`
+
+Then the shanoir-downloader project can be simply managed as a normal git repo (as if it were a separated project) ; meaning that once your are in the shanoir-downloader/ folder, you can just `git pull` to get the latest changes, and commit some changes.
 
 ## DEPLOY
 * Install docker and docker-compose:

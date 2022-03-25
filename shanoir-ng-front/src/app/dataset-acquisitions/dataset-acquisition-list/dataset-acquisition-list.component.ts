@@ -61,7 +61,7 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
             { headerName: 'Type', field: 'type', width: '22px'},
             { headerName: "Acquisition Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
                 cellRenderer: (params: any) => this.transformAcqEq(params.data.acquisitionEquipment),
-                route: (dsAcq: DatasetAcquisition) => '/acquisition-equipment/details/' + dsAcq.acquisitionEquipment.id
+                route: (dsAcq: DatasetAcquisition) => '/acquisition-equipment/details/' + dsAcq.acquisitionEquipment?.id
             },
             { headerName: "Study", field: "examination.study.name", defaultField: 'examination.study.id', orderBy: ['examination.studyId'],
 				route: (dsAcq: DatasetAcquisition) => '/study/details/' + dsAcq.examination.study.id},
@@ -69,7 +69,7 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
                 return this.dateRenderer(params.data.examination.examinationDate);
             }},    
             { headerName: "Center", field: "acquisitionEquipment.center.name", suppressSorting: true,
-				route: (dsAcq: DatasetAcquisition) => dsAcq.acquisitionEquipment.center? '/center/details/' + dsAcq.acquisitionEquipment.center.id : null
+				route: (dsAcq: DatasetAcquisition) => (dsAcq.acquisitionEquipment && dsAcq.acquisitionEquipment.center) ? '/center/details/' + dsAcq.acquisitionEquipment?.center.id : null
 			},
             { headerName: "StudyCard", field: "studyCard.name",
                 route: (dsAcq: DatasetAcquisition) => dsAcq.studyCard ? '/study-card/details/' + dsAcq.studyCard.id : null
@@ -83,7 +83,7 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
     }
 
     transformAcqEq(acqEqpt: AcquisitionEquipment): string {
-        if (!acqEqpt) return "";
+        if (!acqEqpt || acqEqpt.id == 0) return "";
         else if (!acqEqpt.manufacturerModel) return String(acqEqpt.id);
         else {
             let manufModel: ManufacturerModel = acqEqpt.manufacturerModel;

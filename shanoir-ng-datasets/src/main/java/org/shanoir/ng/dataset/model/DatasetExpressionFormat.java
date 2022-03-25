@@ -77,7 +77,10 @@ public enum DatasetExpressionFormat {
 	PHILIPS_SPECTROSCOPY(18),
 
 	// EEG
-	EEG(19);
+	EEG(19),
+	
+	// BIDS
+	BIDS(20);
 	
 	private int id;
 
