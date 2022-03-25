@@ -12,6 +12,9 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -134,33 +137,37 @@ public class StudyInstanceUIDHandler {
 	/**
 	 * This method walks down the information model in Shanoir to read the StudyInstanceUID
 	 * from the table dataset_file.path, that contains the WADO link.
+	 * Only DICOM related dataset acquisition types are considered: MR, CT, PET.
 	 * 
 	 * @param examination
 	 * @return
 	 */
 	private String findStudyInstanceUID(Examination examination) {
 		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
-		if (!acquisitions.isEmpty()) {
-			DatasetAcquisition acquisition = acquisitions.get(0);
-			List<Dataset> datasets = acquisition.getDatasets();
-			if (!datasets.isEmpty()) {
-				Dataset dataset = datasets.get(0);
-				List<DatasetExpression> expressions = dataset.getDatasetExpressions();
-				if (!expressions.isEmpty()) {
-					for (DatasetExpression expression : expressions) {
-						// only DICOM is of interest here
-						if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
-							List<DatasetFile> files = expression.getDatasetFiles();
-							if (!files.isEmpty()) {
-								DatasetFile file = files.get(0);
-								if (file.isPacs()) {
-									String path = file.getPath();
-									return findStudyInstanceUID(path);
+		for (DatasetAcquisition acquisition : acquisitions) {
+			if (acquisition instanceof MrDatasetAcquisition
+				|| acquisition instanceof CtDatasetAcquisition
+				|| acquisition instanceof PetDatasetAcquisition) {
+				List<Dataset> datasets = acquisition.getDatasets();
+				if (!datasets.isEmpty()) {
+					Dataset dataset = datasets.get(0);
+					List<DatasetExpression> expressions = dataset.getDatasetExpressions();
+					if (!expressions.isEmpty()) {
+						for (DatasetExpression expression : expressions) {
+							// only DICOM is of interest here
+							if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
+								List<DatasetFile> files = expression.getDatasetFiles();
+								if (!files.isEmpty()) {
+									DatasetFile file = files.get(0);
+									if (file.isPacs()) {
+										String path = file.getPath();
+										return findStudyInstanceUID(path);
+									}
 								}
 							}
 						}
 					}
-				}
+				}				
 			}
 		}
 		return null;
