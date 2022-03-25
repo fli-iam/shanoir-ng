@@ -79,11 +79,15 @@ export class BidsUploadComponent {
     }
     
     public onSelectStudy() {
+        this.centerOptions = [];
         if (this.study && this.study.id && this.study.studyCenterList) {
             for (let studyCenter of this.study.studyCenterList) {
                 let centerOption = new Option<Center>(studyCenter.center, studyCenter.center.name);
                 this.centerOptions.push(centerOption);
             }
+        }
+        if (this.study.monoCenter || this.study.studyCenterList.length == 1) {
+            this.center = this.study.studyCenterList[0].center;
         }
     }
 

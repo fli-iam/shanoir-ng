@@ -21,6 +21,7 @@ import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pagea
 import * as shajs from 'sha.js';
 import { SolrResultPage } from '../../../solr/solr.document.model';
 import { slideDown } from '../../animations/animations';
+import { KeycloakService } from '../../keycloak/keycloak.service';
 
 
 @Component({
@@ -534,7 +535,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private getHash(): string {
-        let stringToBeHashed: string = this.columnDefs.map(col => col.headerName + '-' + col.headerName).join('_');
+        let username: string = KeycloakService.auth.authz.tokenParsed.name;
+        let stringToBeHashed: string = username + '_' + this.columnDefs.map(col => col.headerName + '-' + col.headerName).join('_');
         let hash = shajs('sha').update(stringToBeHashed).digest('hex');
         let hex = hash.substring(0, 30);
         return hex;
