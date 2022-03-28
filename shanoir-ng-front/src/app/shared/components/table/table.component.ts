@@ -19,6 +19,8 @@ import { ModalComponent } from '../../../shared/components/modal/modal.component
 import { GlobalService } from '../../services/global.service';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
 import * as shajs from 'sha.js';
+import { SolrResultPage } from '../../../solr/solr.document.model';
+import { KeycloakService } from '../../keycloak/keycloak.service';
 
 
 @Component({
@@ -28,7 +30,7 @@ import * as shajs from 'sha.js';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
-    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>>;
+    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<SolrResultPage>;
     @Input() columnDefs: any[];
     @Input() customActionDefs: any[];
     @Input() selectionAllowed: boolean = false;
@@ -72,7 +74,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             this.colSave = this.columnDefs.map(col => { return { width: col.width, hidden: col.hidden } });
             this.hash = this.getHash();
             this.reloadSettings();
-            this.reloadPreviousState();
+            setTimeout(() => {
+                this.reloadPreviousState();
+            })
         }
     }
 
@@ -196,10 +200,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Convert a cell content to a displayable string
      */
-    renderCell(item: Object, col: any): string {
+    renderCell(item: Object, col: any): any {
         let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
+        } else if (result.text) {
+            return result;
         } else {
             return "" + result;
         }
@@ -262,7 +268,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         return type != null ? "cell-" + type : "";
     }
 
-    goToPage(p: number, forceRefresh: boolean = false): Promise<void> {
+    goToPage(p: number, forceRefresh: boolean = false): Promise<SolrResultPage> {
         this.currentPage = p;
         this.isLoading = true;
         return this.getPage(this.getPageable(), forceRefresh).then(page => {
@@ -273,19 +279,20 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 this.isError = false;
                 this.isLoading = false;
             }, 200);
+            return page;
         }).catch(reason => {
             setTimeout(() => {
                 this.isError = true;
                 this.isLoading = false;
-                throw reason;
             }, 200);
+            throw reason;
         });
     }
 
     /**
      * Call to refresh from outsilde
      */
-    public refresh(page?: number): Promise<void> {
+    public refresh(page?: number): Promise<SolrResultPage> {
         if (page == undefined) {
             return this.goToPage(this.currentPage, true);
         } else {
@@ -499,19 +506,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    // moveDrag(event: MouseEvent) {
-    //     if (this.currentDrag) {
-    //         let leftDragWidth: number = event.pageX - this.currentDrag.leftOrigin;
-    //         if (leftDragWidth < 0) leftDragWidth = 0;
-    //         if (this.currentDrag.totalWidth - leftDragWidth < 10) leftDragWidth = this.currentDrag.totalWidth - 10;
-    //         this.columnDefs[this.currentDrag.leftColIndex].width = (leftDragWidth + 10) + 'px';
-    //         let nextIndex: number = this.columnDefs.slice(this.currentDrag.leftColIndex + 1).findIndex(col => !col.hidden);
-    //         if (nextIndex != -1) {
-    //             this.columnDefs[nextIndex + this.currentDrag.leftColIndex + 1].width = (this.currentDrag.totalWidth - leftDragWidth) + 'px';
-    //         }
-    //     }
-    // }
-
     stopDrag() {
         if (this.currentDrag) {
             this.currentDrag = null;
@@ -520,7 +514,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private getHash(): string {
-        let stringToBeHashed: string = this.columnDefs.map(col => col.headerName + '-' + col.headerName).join('_');
+        let username: string = KeycloakService.auth.authz.tokenParsed.name;
+        let stringToBeHashed: string = username + '_' + this.columnDefs.map(col => col.headerName + '-' + col.headerName).join('_');
         let hash = shajs('sha').update(stringToBeHashed).digest('hex');
         let hex = hash.substring(0, 30);
         return hex;
@@ -531,6 +526,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             col.width = this.colSave[i].width;
             col.hidden = this.colSave[i].hidden;
         });
+        this.saveSettings();
     }
 }
 

@@ -21,20 +21,16 @@ import { OnInit, Directive } from "@angular/core";
 @Directive()
 export abstract class BrowserPaginEntityListComponent<T extends Entity> extends EntityListComponent<T> implements OnInit {
 
-    private entitiesPromise: Promise<void>;
-    private browserPaging: BrowserPaging<T>;
-    protected entities: T[];
+    protected entitiesPromise: Promise<void>;
+    protected browserPaging: BrowserPaging<T>;
 
     ngOnInit() {
         this.loadEntities();
-        this.manageAfterDelete();
-        this.manageAfterAdd();
     }
     
     private loadEntities(): Promise<void> {
         this.entitiesPromise = this.getEntities().then((entities) => {
-            this.entities = entities;
-            this.browserPaging = new BrowserPaging(this.entities, this.columnDefs)
+            this.browserPaging = new BrowserPaging(entities, this.columnDefs)
         });
         return this.entitiesPromise;
     }
@@ -51,35 +47,4 @@ export abstract class BrowserPaginEntityListComponent<T extends Entity> extends 
 
     abstract getEntities(): Promise<T[]>;
 
-    protected reloadData() {
-        this.getEntities().then((entities) => {
-            this.entities = entities;
-        });
-    }
-
-    private manageAfterDelete() {
-        this.subscribtions.push(
-            this.onDelete.subscribe(response => {
-                if (this.instanceOfEntity(response)) {
-                    if (response.id) {
-                        this.entities = this.entities.filter(item => item.id != response.id);
-                    } else {
-                        this.entities = this.entities.filter(item => item != response);
-                    }
-                }
-            })
-        );
-    }
-    
-    private manageAfterAdd() {
-        this.subscribtions.push(
-            this.onAdd.subscribe(response => {
-               this.entities.push(response);
-            })
-        );
-    }
-
-    private instanceOfEntity(obj: any): boolean {
-        return obj.create && obj.delete && obj.update;
-    }
 }

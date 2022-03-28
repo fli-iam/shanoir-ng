@@ -17,10 +17,13 @@ package org.shanoir.ng.datasetacquisition.dto.mapper;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -70,7 +73,12 @@ public abstract class ExaminationDatasetAcquisitionDecorator implements Examinat
 		final StringBuilder result = new StringBuilder();
 		final List<String> datasetNameSet = new ArrayList<>();
 		final List<String> datasetCommentSet = new ArrayList<>();
-		if (datasetAcquisition.getDatasets() != null) {
+		if (datasetAcquisition instanceof BidsDatasetAcquisition) {
+			BidsDatasetAcquisition bidsDataAcq = (BidsDatasetAcquisition) datasetAcquisition;
+			if (!CollectionUtils.isEmpty(bidsDataAcq.getDatasets())) {
+				datasetNameSet.add(((BidsDataset) bidsDataAcq.getDatasets().get(0)).getBidsDataType());
+			}
+		} else if (datasetAcquisition.getDatasets() != null) {
 			for (final Dataset dataset : datasetAcquisition.getDatasets()) {
 				final String datasetName = dataset.getName();
 				if (!StringUtils.isEmpty(datasetName) && !datasetNameSet.contains(datasetName)) {

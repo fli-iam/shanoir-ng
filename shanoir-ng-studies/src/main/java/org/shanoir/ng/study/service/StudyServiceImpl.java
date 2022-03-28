@@ -389,7 +389,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		// do nothing, in case no users should receive study user report/mail
-		if (!recipients.isEmpty() && !created.isEmpty()) {
+		if (!created.isEmpty()) {
 			EmailStudyUsersAdded emailStudyUserAdded = new EmailStudyUsersAdded();
 			emailStudyUserAdded.setRecipients(recipients);
 			final Long userId = KeycloakUtil.getTokenUserId();

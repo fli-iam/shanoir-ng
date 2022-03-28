@@ -232,7 +232,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                     }
                 }
             })
-            this.hiddenOption.nativeElement.innerText = maxOption.label;
+            this.hiddenOption.nativeElement.innerText = maxOption?.label;
             this.maxWidth = this.hiddenOption.nativeElement.offsetWidth;
             this.hiddenOption.nativeElement.innerText = '';
         }

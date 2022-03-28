@@ -27,6 +27,8 @@ public class EegDatasetAndProcessingsDTO extends EegDatasetDTO implements Datase
 	
 	private DatasetAcquisitionDTO datasetAcquisition;
 
+	private DatasetProcessingDTO datasetProcessing;
+
 	@Override
 	public DatasetAcquisitionDTO getDatasetAcquisition() {
 		return this.datasetAcquisition;
@@ -47,4 +49,14 @@ public class EegDatasetAndProcessingsDTO extends EegDatasetDTO implements Datase
 		this.processings = datasetProcessings;
 	}
     
+
+	@Override
+	public DatasetProcessingDTO getDatasetProcessing() {
+		return datasetProcessing;
+	}
+
+	@Override
+	public void setDatasetProcessing(DatasetProcessingDTO datasetProcessing) {
+		this.datasetProcessing = datasetProcessing;
+	}
 }

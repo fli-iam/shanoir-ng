@@ -29,6 +29,7 @@ export class ProcessingNodeComponent implements OnChanges {
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: ProcessingNode;
     loading: boolean = false;
+    menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
 
     constructor(
@@ -43,6 +44,14 @@ export class ProcessingNodeComponent implements OnChanges {
                 throw new Error('not implemented yet');
             }
         }
+    }
+    
+    toggleMenu() {
+        this.menuOpened = !this.menuOpened;
+    }
+
+    showProcessingDetails() {
+        this.router.navigate(['/dataset-processing/details/' + this.node.id])
     }
 
     hasChildren(): boolean | 'unknown' {

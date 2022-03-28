@@ -88,13 +88,15 @@ public class AcquisitionEquipmentApiControllerTest {
 						.willReturn(Arrays.asList(new AcquisitionEquipmentDTO()));
 		AcquisitionEquipmentDTO acqEq = new AcquisitionEquipmentDTO();
 		acqEq.setId(Long.valueOf(123));
+		AcquisitionEquipment equip = new AcquisitionEquipment();
+		equip.setId(1L);
 		given(acquisitionEquipmentMapper
 				.acquisitionEquipmentToAcquisitionEquipmentDTO(Mockito.any(AcquisitionEquipment.class)))
 						.willReturn(acqEq);
 		doNothing().when(acquisitionEquipmentService).deleteById(1L);
-		given(acquisitionEquipmentService.findAll()).willReturn(Arrays.asList(new AcquisitionEquipment()));
-		given(acquisitionEquipmentService.findById(1L)).willReturn(Optional.of(new AcquisitionEquipment()));
-		given(acquisitionEquipmentService.create(Mockito.any(AcquisitionEquipment.class))).willReturn(new AcquisitionEquipment());
+		given(acquisitionEquipmentService.findAll()).willReturn(Arrays.asList(equip));
+		given(acquisitionEquipmentService.findById(1L)).willReturn(Optional.of(equip));
+		given(acquisitionEquipmentService.create(Mockito.any(AcquisitionEquipment.class))).willReturn(equip);
 		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(AcquisitionEquipment.class))).willReturn(true);
 	}
 
@@ -103,6 +105,13 @@ public class AcquisitionEquipmentApiControllerTest {
 	public void deleteAcquisitionEquipmentTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
+	}
+	
+	@Test
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+	public void deleteAcquisitionEquipmentUnknownTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/0").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
 	}
 
 	@Test

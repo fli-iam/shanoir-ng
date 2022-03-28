@@ -17,11 +17,12 @@ package org.shanoir.ng.dataset.service;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
@@ -94,7 +95,7 @@ public class DatasetServiceImpl implements DatasetService {
 		repository.deleteById(id);
 		solrService.deleteFromIndex(id);
 		this.deleteDatasetFromPacs(datasetDb);
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 	}
 
 	@Override
@@ -129,10 +130,15 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	@Transactional
 	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException {
+		List<Dataset> dss = this.findByIdIn(ids);
+		Map<Long, Long> datasetStudyMap = new HashMap<>();
+		for (Dataset ds : dss) {
+			datasetStudyMap.put(ds.getId(), ds.getStudyId());
+		}
 		repository.deleteByIdIn(ids);
 		solrService.deleteFromIndex(ids);
 		for (Long id : ids) {
-			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, datasetStudyMap.get(id)));
 		}
 	}
 
@@ -149,8 +155,11 @@ public class DatasetServiceImpl implements DatasetService {
 	@Override
 	public Dataset create(final Dataset dataset) {
 		Dataset ds = repository.save(dataset);
-		solrService.indexDataset(ds.getId());
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+		// Do not index processed dataset for the moment
+		if (ds.getDatasetProcessing() == null) {
+			solrService.indexDataset(ds.getId());
+		}
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		return ds;
 	}
 
@@ -162,7 +171,7 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 		return ds;
 	}
 
@@ -178,7 +187,7 @@ public class DatasetServiceImpl implements DatasetService {
 		datasetDb.setCreationDate(dataset.getCreationDate());
 		datasetDb.setId(dataset.getId());
 		//datasetDb.setOriginMetadata(dataset.getOriginMetadata());
-		//datasetDb.setProcessings(dataset.getProcessings());
+		datasetDb.setProcessings(dataset.getProcessings());
 		//datasetDb.setReferencedDatasetForSuperimposition(dataset.getReferencedDatasetForSuperimposition());
 		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
 		//datasetDb.setStudyId(dataset.getStudyId());

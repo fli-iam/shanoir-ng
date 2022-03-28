@@ -73,7 +73,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
             {headerName: "Study", field: "study.name",
 				route: (ds: Dataset) => '/study/details/' + ds.study.id
 			},
-            {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
+            {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
             {headerName: "Comment", field: "originMetadata.comment"},
         ];
     }
