@@ -98,7 +98,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 {{patient?.studies[0]?.series[0]?.institution?.institutionName}} - 
                 {{patient?.studies[0]?.series[0]?.institution?.institutionAddress}}
             </code>
-            <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
+            <ng-container *ngIf="!useStudyCard">
+                <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
+            </ng-container>
         </li>
         <li>
             <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label> 
@@ -110,7 +112,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         (userChange)="onSelectAcquisitonEquipment(); onContextChange();"
                         (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
                         (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
-                        [options]="acquisitionEquipmentOptions">
+                        [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
                 </select-box>
             </span>
         </li>
