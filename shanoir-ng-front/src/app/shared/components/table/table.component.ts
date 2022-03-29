@@ -365,6 +365,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     saveSelection() {
         if (!this.breadcrumbsService.currentStep.data.tableState) this.breadcrumbsService.currentStep.data.tableState = [];
+        if (!this.breadcrumbsService.currentStep.data.tableState[this.hash]) this.breadcrumbsService.currentStep.data.tableState[this.hash] = {};
         this.breadcrumbsService.currentStep.data.tableState[this.hash].selection = [...this.selection];
     }
 
