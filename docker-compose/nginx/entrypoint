@@ -4,12 +4,19 @@ set -e
 
 . /bin/entrypoint_common
 
-(
-	require SHANOIR_X_FORWARDED
+
+require SHANOIR_X_FORWARDED
+x_forwarded_headers() {
 	if [ "$SHANOIR_X_FORWARDED" = "generate" ] ; then
 		echo 'proxy_set_header 	X-Forwarded-For $remote_addr;'
 		echo 'proxy_set_header	X-Forwarded-Proto $scheme;'
 	fi
+}
+
+(
+	x_forwarded_headers
+
+	cat /etc/nginx/shanoir.template.conf
 
 	if [ -z "$SHANOIR_DEV" ] ; then
 		cat /etc/nginx/shanoir.template.prod.conf
@@ -19,6 +26,8 @@ set -e
 ) >/etc/nginx/shanoir.conf
 
 (
+	x_forwarded_headers
+
 	cat /etc/nginx/ohif-viewer.template.conf
 
 ) >/etc/nginx/ohif-viewer.conf
