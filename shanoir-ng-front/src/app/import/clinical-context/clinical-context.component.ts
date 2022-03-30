@@ -229,7 +229,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private equipmentsEquals(eq1: AcquisitionEquipment, eq2: EquipmentDicom): boolean {
-        return eq2.deviceSerialNumber && (eq1?.serialNumber == eq2?.deviceSerialNumber);
+        return eq2?.deviceSerialNumber && (eq1?.serialNumber == eq2?.deviceSerialNumber);
     }
 
     public acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean {
@@ -363,21 +363,26 @@ export class ClinicalContextComponent implements OnDestroy {
             if (index > -1) this.subjectNamePrefix = this.study.studyCenterList[index].subjectNamePrefix;
         }
         this.openSubjectStudy = false;
-        this.acquisitionEquipmentOptions =  [];
+        this.acquisitionEquipmentOptions = [];
         this.subjects =  [];
         this.examinations = [];
         let end: Promise<any> = Promise.resolve();
-        if (this.center && this.center.acquisitionEquipments) {
-            for (let acqEq of this.center.acquisitionEquipments) {
-                let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
-                if (this.importMode == 'DICOM') {
-                    option.compatible = acqEq && this.acqEqCompatible(acqEq);
-                    if (option.compatible) {
-                        this.acquisitionEquipment = option.value;
-                        Promise.all([end, this.onSelectAcquisitonEquipment()]);
+        if (this.useStudyCard) {
+             this.acquisitionEquipment = this.studycard?.acquisitionEquipment;
+             end = Promise.all([end, this.onSelectAcquisitonEquipment()]);
+        } else {
+            if (this.center && this.center.acquisitionEquipments) {
+                for (let acqEq of this.center.acquisitionEquipments) {
+                    let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
+                    if (this.importMode == 'DICOM') {
+                        option.compatible = this.acqEqCompatible(acqEq);
+                        if (option.compatible) {
+                            this.acquisitionEquipment = option.value;
+                            end = Promise.all([end, this.onSelectAcquisitonEquipment()]);
+                        }
                     }
+                    this.acquisitionEquipmentOptions.push(option);
                 }
-                this.acquisitionEquipmentOptions.push(option);
             }
         }
         return end.then(() => {
