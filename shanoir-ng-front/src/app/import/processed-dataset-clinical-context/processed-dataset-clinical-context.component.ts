@@ -270,26 +270,20 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
 
     public startImportJob(): void {
         let context = this.importDataService.contextData;
-        this.subjectService
-            .updateSubjectStudyValues(context.subject.subjectStudy)
-            .then(() => {
-                let that = this;
-                this.importData()
-                    .then((importJob: ProcessedDatasetImportJob) => {
-                        this.importDataService.reset();
-                        setTimeout(function () {
-                            that.msgService.log('info', 'The import successfully started')
-                        }, 0);
-                        // go back to the first step of import
-                        this.router.navigate(['/imports/processed-dataset']);
-                    }).catch(error => {
-                        // Clean context
-                        this.importDataService.reset();
-                        throw error;
-                    });
-            }).catch(error => {
-                throw new Error('Could not save the subjectStudy object, the import job has been stopped. Cause : ' + error);
-            });
+            let that = this;
+            this.importData()
+                .then((importJob: ProcessedDatasetImportJob) => {
+                    this.importDataService.reset();
+                    setTimeout(function () {
+                        that.msgService.log('info', 'The import successfully started')
+                    }, 0);
+                    // go back to the first step of import
+                    this.router.navigate(['/imports/processed-dataset']);
+                }).catch(error => {
+                    // Clean context
+                    this.importDataService.reset();
+                    throw error;
+        });
     }
 
     private importData(): Promise<any> {

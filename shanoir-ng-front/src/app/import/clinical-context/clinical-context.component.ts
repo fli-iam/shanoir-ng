@@ -108,7 +108,7 @@ export class ClinicalContextComponent implements OnDestroy {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
             public subjectExaminationLabelPipe: SubjectExaminationPipe,
-            private acqEqPipe: AcquisitionEquipmentPipe,
+            public acqEqPipe: AcquisitionEquipmentPipe,
             public studycardService: StudyCardService,
             public studyRightsService: StudyRightsService,
             private keycloakService: KeycloakService,
@@ -323,7 +323,12 @@ export class ClinicalContextComponent implements OnDestroy {
                 if (eqFound) return true;
                 else return false;
             })
-            this.center = scFound ? scFound.center : null;
+            if (scFound) {
+                this.center = scFound.center;
+            } else {
+                this.center = this.studycard?.acquisitionEquipment?.center;
+            }
+            this.onSelectCenter();
             this.acquisitionEquipment = this.studycard.acquisitionEquipment;
             this.niftiConverter = this.studycard.niftiConverter;
             end = Promise.all([
@@ -355,7 +360,7 @@ export class ClinicalContextComponent implements OnDestroy {
         this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center) {
             let index = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id === this.center.id);
-            this.subjectNamePrefix = this.study.studyCenterList[index].subjectNamePrefix;
+            if (index > -1) this.subjectNamePrefix = this.study.studyCenterList[index].subjectNamePrefix;
         }
         this.openSubjectStudy = false;
         this.acquisitionEquipmentOptions =  [];
@@ -366,7 +371,7 @@ export class ClinicalContextComponent implements OnDestroy {
             for (let acqEq of this.center.acquisitionEquipments) {
                 let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
                 if (this.importMode == 'DICOM') {
-                    option.compatible = this.acqEqCompatible(acqEq);
+                    option.compatible = acqEq && this.acqEqCompatible(acqEq);
                     if (option.compatible) {
                         this.acquisitionEquipment = option.value;
                         Promise.all([end, this.onSelectAcquisitonEquipment()]);
