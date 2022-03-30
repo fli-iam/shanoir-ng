@@ -80,7 +80,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 		}
 
 		List<StudyExamination> exams = Utils.toList(studyExaminationRepository.findByCenterId(id));
-		if (exams.isEmpty()) {
+		if (!exams.isEmpty()) {
 			errors.add(new FieldError("unauthorized", "Center linked to entities", "examinations"));
 		}
 
