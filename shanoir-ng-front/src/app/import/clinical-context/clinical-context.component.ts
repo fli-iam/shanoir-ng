@@ -95,7 +95,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public scHasDifferentModality: string;
     public modality: string;
     openSubjectStudy: boolean = false;
-    studyLoading: boolean = false;
+    loading: boolean = false;
     
     constructor(
             public studyService: StudyService,
@@ -241,7 +241,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public onSelectStudy(): Promise<void> {
-        this.studyLoading = true;
+        this.loading = true;
         this.studycardOptions = null;
         if (this.study && this.isAdminOfStudy[this.study.id] == undefined) {
             if (this.keycloakService.isUserAdmin) {
@@ -308,13 +308,14 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         return end.then(() => {
             this.onContextChange();
-            this.studyLoading = false;
+            this.loading = false;
         }).catch(() => {
-            this.studyLoading = false;
+            this.loading = false;
         });
     }
 
     public onSelectStudyCard(): Promise<any> {
+        this.loading = true;
         let end: Promise<any> = Promise.resolve();
         if (this.study && this.studycard && this.studycard.acquisitionEquipment) {
             this.acquisitionEquipment = null;
@@ -340,6 +341,9 @@ export class ClinicalContextComponent implements OnDestroy {
         this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
         return end.then(() => {
             this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
         });
     }
 
@@ -357,6 +361,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public onSelectCenter(): Promise<any> {
+        this.loading = true;
         this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center) {
             let index = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id === this.center.id);
@@ -387,10 +392,14 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         return end.then(() => {
             this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
         });
     }
 
     public onSelectAcquisitonEquipment(): Promise<any> {
+        this.loading = true;
         this.subject = this.examination = null;
         this.openSubjectStudy = false;
         this.subjects =  [];
@@ -409,10 +418,14 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         return end.then(() => {
             this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
         });
     }
 
     public onSelectSubject(): Promise<any> {
+        this.loading = true;
         if (this.subject && !this.subject.subjectStudy) this.subject = null;
         this.examination = null;
         this.examinations = [];
@@ -433,6 +446,9 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         return end.then(() => {
             this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
         });
     }
 
