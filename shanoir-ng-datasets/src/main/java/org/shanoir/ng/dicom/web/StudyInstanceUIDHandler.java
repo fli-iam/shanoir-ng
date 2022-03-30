@@ -21,6 +21,7 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -58,6 +59,12 @@ public class StudyInstanceUIDHandler {
 	public void init() {
 		examinationIdToStudyInstanceUIDCache = new HashMap<Long, String>(1000);
 		LOG.info("DICOMWeb cache created: examinationIdToStudyInstanceUIDCache");
+	}
+	
+	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
+	public void clearExaminationIdToStudyInstanceUIDCache() {
+		examinationIdToStudyInstanceUIDCache.clear();
+		LOG.info("DICOMWeb cache cleared: examinationIdToStudyInstanceUIDCache");
 	}
 	
 	/**
