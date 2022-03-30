@@ -4,37 +4,53 @@ set -e
 
 . /bin/entrypoint_common
 
-(
-	require SHANOIR_X_FORWARDED
+
+require SHANOIR_X_FORWARDED
+x_forwarded_headers() {
 	if [ "$SHANOIR_X_FORWARDED" = "generate" ] ; then
 		echo 'proxy_set_header 	X-Forwarded-For $remote_addr;'
 		echo 'proxy_set_header	X-Forwarded-Proto $scheme;'
 	fi
+}
+
+(
+	x_forwarded_headers
+
+	cat /etc/nginx/shanoir.template.conf
 
 	if [ -z "$SHANOIR_DEV" ] ; then
 		cat /etc/nginx/shanoir.template.prod.conf
 	else
 		cat /etc/nginx/shanoir.template.dev.conf
 	fi
-
-	optional SHANOIR_PREFIX
-	sed "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/shanoir.template.conf
 ) >/etc/nginx/shanoir.conf
 
-require SHANOIR_URL_SCHEME
-require SHANOIR_URL_HOST
-require SHANOIR_VIEWER_OHIF_URL_SCHEME
-require SHANOIR_VIEWER_OHIF_URL_HOST
-sed -i "s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g" /etc/nginx/shanoir.conf
-sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g" /etc/nginx/shanoir.conf
-sed -i "s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g" /etc/nginx/html/assets/env.js
-sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g" /etc/nginx/html/assets/env.js
+(
+	x_forwarded_headers
 
-src="/etc/nginx/$SHANOIR_URL_SCHEME.conf"
-dst="/etc/nginx/server.conf"
-sed "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" "$src" > "$dst"
-sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g" /etc/nginx/server.conf
-sed -i "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/server.conf
+	cat /etc/nginx/ohif-viewer.template.conf
+
+) >/etc/nginx/ohif-viewer.conf
+
+
+require SHANOIR_URL_HOST
+require SHANOIR_URL_SCHEME
+require SHANOIR_VIEWER_OHIF_URL_HOST
+require SHANOIR_VIEWER_OHIF_URL_SCHEME
+optional SHANOIR_PREFIX
+
+cp "/etc/nginx/$SHANOIR_URL_SCHEME.conf" /etc/nginx/server.conf
+
+sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
+	s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
+" /etc/nginx/server.conf /etc/nginx/shanoir.conf /etc/nginx/html/assets/env.js
+
+sed -i "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
+" /etc/nginx/server.conf
+
+sed -i "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g
+" /etc/nginx/shanoir.conf /etc/nginx/ohif-viewer.conf
+
 
 configure_instance()
 {
