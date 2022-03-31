@@ -58,6 +58,7 @@ export class StudyComponent extends EntityComponent<Study> {
     subjects: IdName[];
     selectedCenter: IdName;
     users: User[] = [];
+    studyNode: Study | StudyNode;
     
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
@@ -86,7 +87,10 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public get study(): Study { return this.entity; }
-    public set study(study: Study) { this.entity = study; }
+    public set study(study: Study) {
+        this.studyNode = this.breadcrumbsService.currentStep.data.studyNode ? this.breadcrumbsService.currentStep.data.studyNode : study;
+        this.entity = study; 
+    }
 
     getService(): EntityService<Study> {
         return this.studyService;

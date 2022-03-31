@@ -28,19 +28,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 
 			<ul class="tabs">
-				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'"skipLocationChange>General</li>
-				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" skipLocationChange>Files</li>
-				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" skipLocationChange>Subjects</li>
-				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" skipLocationChange>Centers</li>
-				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" skipLocationChange>Members</li>
-				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" skipLocationChange>Tags</li>
+				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'" skipLocationChange replaceUrl="true">General</li>
+				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" skipLocationChange replaceUrl="true">Files</li>
+				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" skipLocationChange replaceUrl="true">Subjects</li>
+				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" skipLocationChange replaceUrl="true">Centers</li>
+				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" skipLocationChange replaceUrl="true">Members</li>
+				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" skipLocationChange replaceUrl="true">Tags</li>
 				<ng-container *ngIf="mode == 'view'">
-					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'">Tree</li>
-					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" skipLocationChange>BIDS</li>
+					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" skipLocationChange replaceUrl="true">Tree</li>
+					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" skipLocationChange replaceUrl="true">BIDS</li>
 				</ng-container>
 				<ng-container *ngIf="mode != 'view'">
-					<li [class.active]="activeTab == 'tree'" class="disabled" skipLocationChange>Tree</li>
-					<li [class.active]="activeTab == 'bids'" class="disabled" skipLocationChange>BIDS</li>
+					<li [class.active]="activeTab == 'tree'" class="disabled" skipLocationChange replaceUrl="true">Tree</li>
+					<li [class.active]="activeTab == 'bids'" class="disabled" skipLocationChange replaceUrl="true">BIDS</li>
 				</ng-container>
 				
 			</ul>
@@ -314,8 +314,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">
 				<legend>Tree</legend>
-				<study-node [input]="breadcrumbsService.currentStep.data.studyNode ? breadcrumbsService.currentStep.data.studyNode : study" 
-						(selectedChange)="onTreeSelectedChange($event)" (nodeInit)="onStudyNodeInit($event)" [hasBox]="true"></study-node>
+				<study-node [input]="studyNode" 
+						(selectedChange)="onTreeSelectedChange($event)" 
+						(nodeInit)="onStudyNodeInit($event)" 
+						[hasBox]="true">
+				</study-node>
 			</fieldset>
             <fieldset [class.hidden]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
                 <legend>Study tags</legend>

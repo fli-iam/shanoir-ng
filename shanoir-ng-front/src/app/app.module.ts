@@ -41,7 +41,6 @@ import { TaskService } from './async-tasks/task.service';
 import { BidsTreeComponent } from './bids/tree/bids-tree.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
-import { Router } from './breadcrumbs/router';
 import { CenterListComponent } from './centers/center-list/center-list.component';
 import { CenterComponent } from './centers/center/center.component';
 import { CenterService } from './centers/shared/center.service';
@@ -471,7 +470,6 @@ import { VarDirective } from './utils/ng-var.directive';
     	EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
 	    BreadcrumbsService,
-        Router,
         GlobalService,
         ImportDataService,
         NiftiConverterService,
