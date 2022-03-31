@@ -115,6 +115,15 @@ public class RabbitMQConfiguration {
 	/** Queue to consume BIDS related events */
 	public static final String BIDS_EVENT_QUEUE = "bids-event-queue";
 	
+	/** Queue to create examination extra data from import */
+	public static final String EXAMINATION_EXTRA_DATA_QUEUE = "examination-extra-data-queue";
+
+	/** Queue to create all bids dataset acquisitions */
+	public static final String IMPORTER_BIDS_DATASET_QUEUE = "importer-bids-dataset-queue";
+
+	/** Queue to create get equipment ID from code. */
+	public static final String ACQUISITION_EQUIPEMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -143,6 +152,8 @@ public class RabbitMQConfiguration {
 	private static final String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
 
 	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
+	
+	private static final String NULL = "";
 
 	////////////////// EXCHANGES //////////////////
 
@@ -151,6 +162,7 @@ public class RabbitMQConfiguration {
 
 	/** Exchange to notify when a user / study is update / deleted. */
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
+
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -354,6 +366,11 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
+	public static Queue examinationExtraDataQueue() {
+		return new Queue(EXAMINATION_EXTRA_DATA_QUEUE, true);
+	}
+
+	@Bean
 	public static Queue importDatasetFailedMailQueue() {
 		return new Queue(IMPORT_DATASET_FAILED_MAIL_QUEUE, true);
 	}
@@ -361,6 +378,16 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue studyUserMailQueue() {
 		return new Queue(STUDY_USER_MAIL_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue importBidsDatasetQueue() {
+		return new Queue(IMPORTER_BIDS_DATASET_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue acquisitionEquipmentCodeQueue() {
+		return new Queue(ACQUISITION_EQUIPEMENT_CODE_QUEUE, true);
 	}
 
 }

@@ -185,7 +185,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <input #input hidden type="file" (change)="attachNewFile($event)"/>
                             <button (click)="setFile()" class="left-icon"><i class="fas fa-upload"></i>Choose file</button>
                             <ul>
-                                <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fas fa-trash"></i></button>
+                                <li *ngFor="let file of examination.extraDataFilePathList"> {{getFileName(file)}} <button (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
                                 </li>
                             </ul>
                         </span>

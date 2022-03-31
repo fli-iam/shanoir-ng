@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.ArrayList;import java.util.Comparator;
 
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFile;
@@ -63,6 +63,7 @@ public class BidsDeserializer {
 			}
 			folderElement.getElements().add(fileElement);
 		}
+		folderElement.getElements().sort(Comparator.comparing(BidsElement::getPath));
 		return folderElement;
 	}
 }
