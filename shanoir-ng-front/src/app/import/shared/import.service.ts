@@ -41,8 +41,8 @@ export class ImportService {
         return this.http.post<EegImportJob>(AppUtils.BACKEND_API_ANALYSE_EEG_URL, importJob).toPromise();
     }
 
-    uploadBidsFile(formData: FormData): Promise<Object> {
-        return this.http.post<Object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL, formData).toPromise();
+    uploadBidsFile(formData: FormData, studyId: number, studyName: string, centerId: number): Promise<Object> {
+        return this.http.post<Object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL + studyId + '/' + studyName + '/' + centerId, formData).toPromise();
     }
 
     uploadProcessedDataset(formData: FormData): Promise<string> {

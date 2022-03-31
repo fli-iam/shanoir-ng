@@ -95,6 +95,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public scHasDifferentModality: string;
     public modality: string;
     openSubjectStudy: boolean = false;
+    loading: boolean = false;
     
     constructor(
             public studyService: StudyService,
@@ -107,7 +108,7 @@ export class ClinicalContextComponent implements OnDestroy {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
             public subjectExaminationLabelPipe: SubjectExaminationPipe,
-            private acqEqPipe: AcquisitionEquipmentPipe,
+            public acqEqPipe: AcquisitionEquipmentPipe,
             public studycardService: StudyCardService,
             public studyRightsService: StudyRightsService,
             private keycloakService: KeycloakService,
@@ -228,7 +229,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private equipmentsEquals(eq1: AcquisitionEquipment, eq2: EquipmentDicom): boolean {
-        return eq2.deviceSerialNumber != null && (eq1.serialNumber === eq2.deviceSerialNumber)
+        return eq2?.deviceSerialNumber && (eq1?.serialNumber == eq2?.deviceSerialNumber);
     }
 
     public acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean {
@@ -240,6 +241,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public onSelectStudy(): Promise<void> {
+        this.loading = true;
         this.studycardOptions = null;
         if (this.study && this.isAdminOfStudy[this.study.id] == undefined) {
             if (this.keycloakService.isUserAdmin) {
@@ -248,7 +250,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[this.study.id] = result);
             }
         }
-        let end: Promise<void> = Promise.resolve();
+        let end: Promise<any> = Promise.resolve();
         if (this.useStudyCard) {
             this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
             this.openSubjectStudy = false;
@@ -265,17 +267,22 @@ export class ClinicalContextComponent implements OnDestroy {
                         let opt = new Option(sc, sc.name);
                         if (sc.acquisitionEquipment) {
                             let scEq = studyEquipments.find(se => se.id == sc.acquisitionEquipment.id);
-                            if (this.importMode == 'DICOM') opt.compatible = this.acqEqCompatible(scEq);
+                            if (this.importMode == 'DICOM') {
+                                opt.compatible = this.acqEqCompatible(scEq);
+                            }
                             if (!this.studycard && opt.compatible) {
                                 this.studycard = sc;
-                                this.onSelectStudyCard();
                             }
-                        } else if (this.importMode == 'DICOM') opt.compatible = false;
+                        } else if (this.importMode == 'DICOM') {
+                            opt.compatible = false;
+                        }
                         return opt;
                     });
-                    if (!this.studycard && studycards && studycards.length == 1) {
+                    if (this.studycard) {
+                        return this.onSelectStudyCard();
+                    } else if (!this.studycard && studycards && studycards.length == 1) {
                         this.studycard = studycards[0];
-                        this.onSelectStudyCard();
+                        return this.onSelectStudyCard();
                     }
                 });
             }
@@ -293,16 +300,23 @@ export class ClinicalContextComponent implements OnDestroy {
                     if (!foundCompatibleCenter && centerOption.compatible) {
                         foundCompatibleCenter = true;
                         this.center = centerOption.value;
-                        this.onSelectCenter();
+                        end = Promise.all([end, this.onSelectCenter()]);
                     }
                 }
                 this.centerOptions.push(centerOption);
             }
         }
-        return end.then(() => this.onContextChange());
+        return end.then(() => {
+            this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
+        });
     }
 
-    public onSelectStudyCard(): void {
+    public onSelectStudyCard(): Promise<any> {
+        this.loading = true;
+        let end: Promise<any> = Promise.resolve();
         if (this.study && this.studycard && this.studycard.acquisitionEquipment) {
             this.acquisitionEquipment = null;
             let scFound = this.study.studyCenterList.find(sc => {
@@ -310,16 +324,27 @@ export class ClinicalContextComponent implements OnDestroy {
                 if (eqFound) return true;
                 else return false;
             })
-            this.center = scFound ? scFound.center : null;
+            if (scFound) {
+                this.center = scFound.center;
+            } else {
+                this.center = this.studycard?.acquisitionEquipment?.center;
+            }
             this.onSelectCenter();
             this.acquisitionEquipment = this.studycard.acquisitionEquipment;
-            this.onSelectAcquisitonEquipment();
             this.niftiConverter = this.studycard.niftiConverter;
-            
+            end = Promise.all([
+                this.onSelectCenter(),
+                this.onSelectAcquisitonEquipment()
+            ]);
         }
         this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
         this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
-        this.onContextChange();
+        return end.then(() => {
+            this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
+        });
     }
 
     onToggleUseStudyCard() {
@@ -335,68 +360,96 @@ export class ClinicalContextComponent implements OnDestroy {
         this.importDataService.contextBackup.useStudyCard = this.useStudyCard;
     }
 
-    public onSelectCenter(): void {
+    public onSelectCenter(): Promise<any> {
+        this.loading = true;
         this.acquisitionEquipment = this.subject = this.examination = null;
         if (this.center) {
             let index = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id === this.center.id);
-            this.subjectNamePrefix = this.study.studyCenterList[index].subjectNamePrefix;
+            if (index > -1) this.subjectNamePrefix = this.study.studyCenterList[index].subjectNamePrefix;
         }
         this.openSubjectStudy = false;
-        this.acquisitionEquipmentOptions =  [];
+        this.acquisitionEquipmentOptions = [];
         this.subjects =  [];
         this.examinations = [];
-        if (this.center && this.center.acquisitionEquipments) {
-            for (let acqEq of this.center.acquisitionEquipments) {
-                let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
-                if (this.importMode == 'DICOM') {
-                    option.compatible = this.acqEqCompatible(acqEq);
-                    if (option.compatible) {
-                        this.acquisitionEquipment = option.value;
-                        this.onSelectAcquisitonEquipment();
+        let end: Promise<any> = Promise.resolve();
+        if (this.useStudyCard) {
+             this.acquisitionEquipment = this.studycard?.acquisitionEquipment;
+             end = Promise.all([end, this.onSelectAcquisitonEquipment()]);
+        } else {
+            if (this.center && this.center.acquisitionEquipments) {
+                for (let acqEq of this.center.acquisitionEquipments) {
+                    let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
+                    if (this.importMode == 'DICOM') {
+                        option.compatible = this.acqEqCompatible(acqEq);
+                        if (option.compatible) {
+                            this.acquisitionEquipment = option.value;
+                            end = Promise.all([end, this.onSelectAcquisitonEquipment()]);
+                        }
                     }
+                    this.acquisitionEquipmentOptions.push(option);
                 }
-                this.acquisitionEquipmentOptions.push(option);
             }
         }
-        this.onContextChange();
+        return end.then(() => {
+            this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
+        });
     }
 
-    public onSelectAcquisitonEquipment(): void {
+    public onSelectAcquisitonEquipment(): Promise<any> {
+        this.loading = true;
         this.subject = this.examination = null;
         this.openSubjectStudy = false;
         this.subjects =  [];
         this.examinations = [];
+        let end: Promise<any> = Promise.resolve();
         if (this.acquisitionEquipment) {
             if(this.importMode == 'BRUKER') {
-                this.studyService
-                .findSubjectsByStudyIdPreclinical(this.study.id, true)
-                .then(subjects => this.subjects = subjects);
+                end = this.studyService
+                    .findSubjectsByStudyIdPreclinical(this.study.id, true)
+                    .then(subjects => this.subjects = subjects);
             } else {
-                this.studyService
+                end = this.studyService
                     .findSubjectsByStudyId(this.study.id)
                     .then(subjects => this.subjects = subjects);
             }
         }
-        this.onContextChange();
+        return end.then(() => {
+            this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
+        });
     }
 
-    public onSelectSubject(): void {
+    public onSelectSubject(): Promise<any> {
+        this.loading = true;
         if (this.subject && !this.subject.subjectStudy) this.subject = null;
         this.examination = null;
         this.examinations = [];
+        let end: Promise<any> = Promise.resolve();
         if (this.subject) {
             if(this.importMode == 'BRUKER') {
-            this.animalSubjectService
-        		.findAnimalSubjectBySubjectId(this.subject.id)
-        		.then(animalSubject => this.animalSubject = animalSubject);
+                end = this.animalSubjectService
+                    .findAnimalSubjectBySubjectId(this.subject.id)
+                    .then(animalSubject => this.animalSubject = animalSubject);
             }
-            this.examinationService
+            end = Promise.all([end,
+                this.examinationService
                 .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
-                .then(examinations => this.examinations = examinations);
+                .then(examinations => this.examinations = examinations)
+            ]);
         } else {
             this.openSubjectStudy = false;
         }
-        this.onContextChange();
+        return end.then(() => {
+            this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
+        });
     }
 
     public onSelectExam(): void {

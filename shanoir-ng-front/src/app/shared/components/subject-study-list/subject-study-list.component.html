@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <tool-tip>You can choose one or more {{legend | lowercase}} from the list</tool-tip>
 </legend>
 <ol>
-    <li>
+    <li *ngIf="mode != 'view'">
         <label>List of {{legend | lowercase}} available</label>
         <span class="right-col">
             <select-box [(ngModel)]="selected" [ngModelOptions]="{standalone: true}" placeholder="Please select ..." (onAddClick)="onAdd()" [addDisabled]="!selected" (blur)="onTouch()" [options]="optionList">
@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <th class="input-col">Subject id for this study</th>
                     <th class="chkbx-col" title="Physically Involved">PI</th>
                     <th *ngIf="displaySubjectType" class="dropdown-col">Subject Type</th>
-                    <th class="buttons-col"></th>
+                    <th *ngIf="mode != 'view'" class="buttons-col"></th>
                 </tr>
             </thead>  
             <tbody>
@@ -45,22 +45,31 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span *ngIf="compMode == 'subject'">{{subjectStudy.study.name}}</span>
                     </td>
                     <td class="dropdown-col tag-cell" *ngIf="hasTags">
-                        <tag-list [(ngModel)]="subjectStudy.tags" [availableTags]="subjectStudy.study?.tags" [ngModelOptions]="{standalone: true}" (onChange)="onChange()"></tag-list>
+                        <tag-list *ngIf="mode != 'view'" [(ngModel)]="subjectStudy.tags" [availableTags]="subjectStudy.study?.tags" [ngModelOptions]="{standalone: true}" (onChange)="onChange()"></tag-list>
+                        <ng-container *ngIf="mode == 'view'">
+                            <span class="tag" [class.dark]="getFontColor(tag.color)" [style.background]="tag.color" *ngFor="let tag of subjectStudy.tags">
+                                {{tag.name}}
+                            </span>
+                        </ng-container>
                     </td>
                     <td class="input-col">
-                        <input type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()"/>
+                        <input *ngIf="mode != 'view'" type="text" id="subjectStudyIdentifier-{{i}}" [(ngModel)]="subjectStudy.subjectStudyIdentifier" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()"/>
+                        <span  *ngIf="mode == 'view'">{{subjectStudy.subjectStudyIdentifier}}</span>
                     </td>
                     <td class="chkbx-col">
-                        <checkbox [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}" (onChange)="onChange()" (blur)="onTouch()"></checkbox>
+                        <checkbox *ngIf="mode != 'view'" [(ngModel)]="subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}" (onChange)="onChange()" (blur)="onTouch()"></checkbox>
+                        <span *ngIf="mode == 'view' && subjectStudy.physicallyInvolved" class="bool-true"><i class="fas fa-check"></i></span>
+                        <span *ngIf="mode == 'view' && !subjectStudy.physicallyInvolved" class="bool-false"><i class="fas fa-times"></i></span>
                     </td>
                     <td *ngIf="displaySubjectType" class="dropdown-col">
-                        <select id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()">
+                        <select *ngIf="mode != 'view'" id="subjectType-{{i}}" [(ngModel)]="subjectStudy.subjectType" [ngModelOptions]="{standalone: true}" (change)="onChange()" (blur)="onTouch()">
                             <option [value]="'HEALTHY_VOLUNTEER'" i18n="Subject Types Healthy Volunteer|Type label@@SubjectTypeHealthyVolunteer">Healthy Volunteer</option>
                             <option [value]="'PATIENT'" i18n="Subject Types Patient|Type label@@SubjectTypePatient">Patient</option>
                             <option [value]="'PHANTOM'" i18n="Subject Types Phantom|Type label@@SubjectTypePhantom">Phantom</option>
                         </select>
+                        <span *ngIf="mode == 'view'">{{subjectStudy.subjectType}}</span>
                     </td>
-                    <td class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-times"></i></span>
+                    <td *ngIf="mode != 'view'" class="buttons-col"><span class="button" (click)="removeSubjectStudy(subjectStudy)"><i class="fas fa-times"></i></span>
                 </tr>
             </tbody>
         </table>

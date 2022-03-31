@@ -30,8 +30,8 @@ import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
 
 export class ToggleSwitchComponent implements ControlValueAccessor { 
     
-    @Input() @HostBinding('class.on') state: boolean = null;
-    @Output() userChange = new EventEmitter();
+    @HostBinding('class.on') toggle: boolean = null;
+    @Output() onChange = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
@@ -43,36 +43,36 @@ export class ToggleSwitchComponent implements ControlValueAccessor {
     @HostListener('click', []) 
     onClick() {
         if (this.disabled) return; 
-        this.state = !this.state;
-        this.onChangeCallback(this.state);
-        this.userChange.emit(this.state);
+        this.toggle = !this.toggle;
+        this.onChangeCallback(this.toggle);
+        this.onChange.emit(this.toggle);    
     }
 
     @HostListener('keydown', ['$event']) 
     onKeyPress(event: any) {
         if (this.disabled) return;
         if (' ' == event.key) {
-            this.state = !this.state;
-            this.onChangeCallback(this.state);
-            this.userChange.emit(this.state);
+            this.toggle = !this.toggle;
+            this.onChangeCallback(this.toggle);
+        this.onChange.emit(this.toggle);
             event.preventDefault();
         } else if ('ArrowLeft' == event.key) {
-            if (this.state) {
-                this.state = false;
-                this.userChange.emit(this.state);
-                this.onChangeCallback(this.state);    
+            if (this.toggle) {
+                this.toggle = false;
+                this.onChangeCallback(this.toggle);
+        this.onChange.emit(this.toggle);
             }
         } else if ('ArrowRight' == event.key) {
-            if (!this.state) {
-                this.state = true;
-                this.onChangeCallback(this.state);    
-                this.userChange.emit(this.state);
+            if (!this.toggle) {
+                this.toggle = true;
+                this.onChangeCallback(this.toggle);
+                this.onChange.emit(this.toggle);
             }
         }
     }
 
     writeValue(obj: any): void {
-        this.state = obj;
+        this.toggle = obj;
     }
     
     registerOnChange(fn: any): void {

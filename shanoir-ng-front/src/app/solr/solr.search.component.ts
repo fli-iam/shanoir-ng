@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { DatePipe } from '@angular/common';
-import { Component, ViewChild } from '@angular/core';
+import { AfterContentInit, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -32,10 +32,13 @@ import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { MsgBoxService } from '../shared/msg-box/msg-box.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
-import { FacetField, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
+import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { Range } from '../shared/models/range.model';
+import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
 
-
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
+const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
+export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
     selector: 'solr-search',
     templateUrl: 'solr.search.component.html',
@@ -44,13 +47,10 @@ import { Range } from '../shared/models/range.model';
     providers: [DatePipe]
 })
 
-export class SolrSearchComponent implements AfterViewChecked{
+export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
-
-    facetResultPages: FacetResultPage[] = [];
-    keyword: string;
-    expertMode: boolean = false;
+    @ViewChildren(SolrPagingCriterionComponent) pagingCriterion: QueryList<SolrPagingCriterionComponent>;
     selections: SelectionBlock[] = [];
     columnDefs: any[];
     selectionColumnDefs: any[];
@@ -60,31 +60,17 @@ export class SolrSearchComponent implements AfterViewChecked{
     @ViewChild('table', { static: false }) table: TableComponent;
     @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     selectedDatasetIds: Set<number> = new Set();
-    allFacetResultPages: FacetResultPage[] = [];
-    clearTextSearch: (text?: string, expertMode?: boolean) => void = () => {};
     syntaxError: boolean = false;
-    datasetStartDate: Date | 'invalid';
-    datasetEndDate: Date | 'invalid';
     dateOpen: boolean = false;
-    sliceThicknessRange: Range = new Range(null, null);
-    pixelBandwidthRange: Range = new Range(null, null);
-    magneticFieldStrengthRange: Range = new Range(null, null);
 
     tab: 'results' | 'selected' = 'results';
     role: 'admin' | 'expert' | 'user';
     rights: Map<number, StudyUserRight[]>;
     loaded: boolean = false;
+    firstPageLoaded: boolean = false;
     viewChecked: boolean = false;
-
-    private requestKeys: string[] = [
-        'studyName',
-        'subjectName',
-        'examinationComment',
-        'datasetName',
-        'datasetType',
-        'datasetNature',
-        'tags'
-    ];
+    solrRequest: SolrRequest = new SolrRequest();
+    private facetPageable: Map<string, FacetPageable>;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
@@ -97,15 +83,6 @@ export class SolrSearchComponent implements AfterViewChecked{
                 
         this.breadcrumbsService.markMilestone();
         this.breadcrumbsService.nameStep('Solr Search'); 
-        
-        this.getFacets().then(() => {
-            if (this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.data.solrRequest) {
-                let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
-                this.loadState(savedRequest);
-                this.updateSelections();
-            }
-            this.loaded = true;
-        });
 
         this.form = this.buildForm();
         this.columnDefs = this.getColumnDefs();
@@ -151,12 +128,20 @@ export class SolrSearchComponent implements AfterViewChecked{
             });
         }
     }
-    
+
+    ngAfterContentInit(): void {
+        if (this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.data.solrRequest) {
+            this.loadState();
+            this.updateSelections();
+        }
+        this.loaded = true;
+    }
+
     buildForm(): FormGroup {
         const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
-            'startDate': [this.datasetStartDate, [DatepickerComponent.validator]],
-            'endDate': [this.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
+            'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
+            'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
         });
         return formGroup;
     }
@@ -180,111 +165,64 @@ export class SolrSearchComponent implements AfterViewChecked{
     }
 
     dateOrderValidator = (control: AbstractControl): ValidationErrors | null => {
-        if (this.datasetStartDate && this.datasetEndDate 
-            && this.datasetStartDate > this.datasetEndDate) {
+        if (this.solrRequest.datasetStartDate && this.solrRequest.datasetEndDate 
+            && this.solrRequest.datasetStartDate > this.solrRequest.datasetEndDate) {
                 return { order: true }
         }
         return null;
     }
 
-    updateWithKeywords(solrRequest: SolrRequest): SolrRequest {
-        solrRequest.searchText = this.keyword.trim();
-        solrRequest.expertMode = this.expertMode;
-        return solrRequest;
+    private saveState() {
+        this.breadcrumbsService.currentStep.data.solrRequest = this.solrRequest;
     }
 
-    updateWithFields(solrRequest: SolrRequest): SolrRequest {
-        this.allFacetResultPages.forEach(facetResultPage => {
-            facetResultPage.content.forEach(facetResult => {
-                if (facetResult.checked) {
-                    const key: string = facetResult.key.name.split('_')[0];
-                    if (!solrRequest[key]) solrRequest[key] = [];
-                    solrRequest[key].push(facetResult.value);
-                }
-            });
-        });
-        if (this.datasetStartDate && this.datasetStartDate != 'invalid') {
-            solrRequest.datasetStartDate = this.datasetStartDate;
-        }
-        if (this.datasetEndDate && this.datasetEndDate != 'invalid') {
-            solrRequest.datasetEndDate = this.datasetEndDate;
-        }
-        if (this.sliceThicknessRange.hasBound()) {
-            solrRequest.sliceThickness = this.sliceThicknessRange;
-        }
-        if (this.pixelBandwidthRange.hasBound()) {
-            solrRequest.pixelBandwidth = this.pixelBandwidthRange;
-        }
-        if (this.magneticFieldStrengthRange.hasBound()) {
-            solrRequest.magneticFieldStrength = this.magneticFieldStrengthRange;
-        }
-        return solrRequest;
-    }
-
-    private saveState(solrRequest: SolrRequest) {
-        this.breadcrumbsService.currentStep.data.solrRequest = solrRequest;
-    }
-
-    private loadState(solrRequest: SolrRequest) {
-        if (solrRequest && Object.keys(solrRequest).length != 0) {
-            this.allFacetResultPages.forEach(facetResult => {
-                if (facetResult.content.length > 0) {
-                    let key: string = facetResult.content[0].field.name.replace('_str', '');
-                    facetResult.content.forEach(field => {
-                        field.checked = solrRequest[key] && solrRequest[key].includes(field.value);
-                    })
-                }
-            });
-            if (solrRequest.datasetStartDate) this.datasetStartDate = solrRequest.datasetStartDate;
-            if (solrRequest.datasetEndDate) this.datasetEndDate = solrRequest.datasetEndDate;
-            if (solrRequest.sliceThickness) this.sliceThicknessRange = solrRequest.sliceThickness;
-            if (solrRequest.pixelBandwidth) this.pixelBandwidthRange = solrRequest.pixelBandwidth;
-            if (solrRequest.magneticFieldStrength) this.magneticFieldStrengthRange = solrRequest.magneticFieldStrength;
-            this.clearTextSearch(solrRequest.searchText, solrRequest.expertMode);
-            this.keyword = solrRequest.searchText;
-            this.expertMode = solrRequest.expertMode;
-        }
+    private loadState() {
+        let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
+        this.solrRequest = savedRequest;
     }
     
     updateSelections() {
         this.selections = [];
-        if (this.datasetStartDate && this.datasetStartDate != 'invalid') {
+        if (this.solrRequest.datasetStartDate && this.solrRequest.datasetStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'from: ' + this.datePipe.transform(this.datasetStartDate, 'dd/MM/yyy'),
-                    () => this.datasetStartDate = null
+                    'from: ' + this.datePipe.transform(this.solrRequest.datasetStartDate, 'dd/MM/yyy'),
+                    () => this.solrRequest.datasetStartDate = null
             ));
         }
-        if (this.datasetEndDate && this.datasetEndDate != 'invalid') {
+        if (this.solrRequest.datasetEndDate && this.solrRequest.datasetEndDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'to: ' + this.datePipe.transform(this.datasetEndDate, 'dd/MM/yyy'),
-                    () => this.datasetEndDate = null 
+                    'to: ' + this.datePipe.transform(this.solrRequest.datasetEndDate, 'dd/MM/yyy'),
+                    () => this.solrRequest.datasetEndDate = null 
             ));
         }
-        this.allFacetResultPages.forEach(facetRes => {
-            this.selections = this.selections.concat(
-                facetRes.content
-                    .filter(facetField => facetField.checked)
-                    .map(facetField => new FacetSelectionBlock(facetField))
-            );
+        TextualFacetNames.forEach(facetName => {
+            if (this.solrRequest[facetName] && Array.isArray(this.solrRequest[facetName])) {
+                (this.solrRequest[facetName] as []).forEach((facetVal, index) => {
+                    this.selections = this.selections.concat(
+                        new SimpleValueSelectionBlock(facetVal, () => { 
+                            this.solrRequest[facetName].splice(index, 1);
+                        })
+                    );
+
+                })
+            }
         })
-        if (this.sliceThicknessRange.hasBound()) {
-            this.selections.push(new RangeSelectionBlock('S. Thickness', this.sliceThicknessRange));
+        
+        if (this.solrRequest.sliceThickness?.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('S. Thickness', this.solrRequest.sliceThickness));
         }
-        if (this.pixelBandwidthRange.hasBound()) {
-            this.selections.push(new RangeSelectionBlock('P. Bandwidth', this.pixelBandwidthRange));
+        if (this.solrRequest.pixelBandwidth?.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('P. Bandwidth', this.solrRequest.pixelBandwidth));
         }
-        if (this.magneticFieldStrengthRange.hasBound()) {
-            this.selections.push(new RangeSelectionBlock('Mag. Strength', this.magneticFieldStrengthRange));
+        if (this.solrRequest.magneticFieldStrength?.hasBound()) {
+            this.selections.push(new RangeSelectionBlock('Mag. Strength', this.solrRequest.magneticFieldStrength));
         }
     }
 
-    refreshTable() {
-        if (this.tab != 'results') {
-            this.openResultTab();
-            this.table.refresh(1);
-        } else {
-            this.table.refresh(1);
-        }
+    refreshTable(updatedFacetName?: string) {
+        this.facetPageable = this.buildFacetPageable(updatedFacetName);
+        if (this.tab != 'results') this.openResultTab();
+        this.table.refresh(1);
     }
 
     openResultTab() {
@@ -308,7 +246,7 @@ export class SolrSearchComponent implements AfterViewChecked{
     removeAllFacets() {
         this.selections.forEach(selection => selection.remove());
         this.selections = [];
-        this.clearTextSearch();
+        this.solrRequest = new SolrRequest();
     }
 
     removeSelection(index: number) {
@@ -318,26 +256,62 @@ export class SolrSearchComponent implements AfterViewChecked{
 
     getPage(pageable: Pageable): Promise<SolrResultPage> {
         if (this.form.valid) {
-            let solrRequest: SolrRequest = new SolrRequest();
-            if (this.keyword) solrRequest = this.updateWithKeywords(solrRequest);
-            solrRequest = this.updateWithFields(solrRequest);
-            this.saveState(solrRequest);
-
-            return this.solrService.search(solrRequest, pageable).then(solrResultPage => {
-                if (solrResultPage) { 
-                    solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
-                    this.facetResultPages = solrResultPage.facetResultPages;
+            this.saveState();
+            this.solrRequest.facetPaging = this.facetPageable ? this.facetPageable : this.buildFacetPageable();
+            return this.solrService.search(this.solrRequest, pageable).then(solrResultPage => {
+                // populate criteria
+                if (solrResultPage) {
+                    this.pagingCriterion.forEach(criterionComponent => {
+                        if (this.solrRequest.facetPaging.has(criterionComponent.facetName)) {
+                            let facetPage: FacetResultPage = solrResultPage.facetResultPages.find(facetResPage => facetResPage.content[0]?.key?.name == criterionComponent.facetName)
+                            if (!facetPage) facetPage = new FacetResultPage();
+                            criterionComponent.refresh(facetPage);
+                        }
+                    });
                 }
+                this.firstPageLoaded = true;
                 return solrResultPage;
             }).catch(reason => {
                 if (reason.error.code == 422 && reason.error.message == 'solr query failed') {
                     this.syntaxError = true;
                     return new SolrResultPage();
                 } else throw reason;
+            }).finally(() => {
+                this.solrRequest.facetPaging = null;
+                this.facetPageable = null;
             });
         } else {
             return Promise.resolve(new SolrResultPage());
         }
+    }
+
+    private buildFacetPageable(updatedFacetName?: string): Map<string, FacetPageable> {
+        let map = new Map();
+        if (!this.firstPageLoaded) { // dig into criterion save states before they load to avoid unneeded requests
+            TextualFacetNames.forEach(facetName => {
+                let hash: string = SolrPagingCriterionComponent.getHash(facetName, this.router.url);
+                let prefStr: string = localStorage.getItem(hash);
+                if (prefStr) {
+                    let pref: FacetPreferences = JSON.parse(prefStr);
+                    if (pref.open) {
+                        map.set(facetName, new FacetPageable(1, SolrPagingCriterionComponent.PAGE_SIZE, pref.sortMode ? pref.sortMode : 'INDEX'));
+                    }
+                }
+            });
+        } else {
+            if (this.pagingCriterion) { // add facet request
+                this.pagingCriterion.forEach(criterion => {
+                    if (criterion.open) {
+                        if (updatedFacetName && updatedFacetName == criterion.facetName) {
+                            map.set(criterion.facetName, criterion.getCurrentPageable());
+                        } else {
+                            map.set(criterion.facetName, criterion.getCurrentPageable(1));
+                        }
+                    }
+                });
+            }
+        }
+        return map;
     }
 
     protected openDeleteConfirmDialog = (solrDocument: SolrDocument) => {
@@ -395,7 +369,7 @@ export class SolrSearchComponent implements AfterViewChecked{
 
         let columnDefs: any = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
-            {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-shield-alt", color: "goldenrod", suppressSorting: true},
+            {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", suppressSorting: true},
             {headerName: "Name", field: "datasetName"},
             {headerName: "Tags", field: "tags"},
             {headerName: "Type", field: "datasetType"},
@@ -409,7 +383,7 @@ export class SolrSearchComponent implements AfterViewChecked{
             {headerName: "Slice", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
-            {headerName: "", type: "button", awesome: "fa-eye", action: item => this.router.navigate(['/dataset/details/' + item.id])}
+            {headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.router.navigate(['/dataset/details/' + item.id])}
         ];
         return columnDefs;
     }
@@ -418,16 +392,16 @@ export class SolrSearchComponent implements AfterViewChecked{
     getColumnDefs() {
         let columnDefs: any[] = this.getCommonColumnDefs();
         if (this.role == 'admin') {
-            columnDefs.push({headerName: "", type: "button", awesome: "fa-trash", action: this.openDeleteConfirmDialog});
+            columnDefs.push({headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: this.openDeleteConfirmDialog});
         } else if (this.role == 'expert') {
-            columnDefs.push({headerName: "", type: "button", awesome: "fa-trash", action: this.openDeleteConfirmDialog, condition: solrDoc => this.hasAdminRight(solrDoc.studyId)});
+            columnDefs.push({headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: this.openDeleteConfirmDialog, condition: solrDoc => this.hasAdminRight(solrDoc.studyId)});
         }
         return columnDefs;
     }
 
     getSelectionColumnDefs() {
         let columnDefs: any[] = this.getCommonColumnDefs();
-        columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-ban", action: item => {
+        columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-solid fa-ban", action: item => {
             this.selectedDatasetIds.delete(item.id);
             this.selectionTable.refresh();
         }}) 
@@ -440,9 +414,11 @@ export class SolrSearchComponent implements AfterViewChecked{
             {title: "Clear selection", awesome: "fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
             {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
             {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
+            {title: "Download as EEG", awesome: "fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
+            {title: "Download as BIDS", awesome: "fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
         );
-        return customActionDefs;
+        return customActionDefs; 
     }
 
     getSelectionCustomActionsDefs(): any[] {
@@ -455,6 +431,8 @@ export class SolrSearchComponent implements AfterViewChecked{
             }, disabledIfNoResult: true},
             {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
             {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
+            {title: "Download as EEG", awesome: "fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
+            {title: "Download as BIDS", awesome: "fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
             {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
         );
         return customActionDefs;
@@ -474,35 +452,31 @@ export class SolrSearchComponent implements AfterViewChecked{
         this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
     }
 
-    onSearchTextChange(search: {searchTxt: string, expertMode: boolean}) {
-        this.keyword = search.searchTxt;
-        this.expertMode = search.expertMode;
-        this.refreshTable();
-    }
-
-    getFacets(): Promise<SolrResultPage> {
-        return this.solrService.getFacets().then(solrResultPage => {
-            if (solrResultPage) { 
-                solrResultPage.content.map(solrDoc => solrDoc.id = solrDoc.datasetId);
-                this.allFacetResultPages = solrResultPage.facetResultPages;
-            }
-            return solrResultPage;
-        });
-    }
-
     getSelectedPage(pageable: Pageable): Promise<Page<any>> {
-        return this.solrService.getByDatasetIds([...this.selectedDatasetIds], pageable);
+        if (this.selectedDatasetIds && this.selectedDatasetIds.size > 0) {
+            return this.solrService.getByDatasetIds([...this.selectedDatasetIds], pageable);
+        } else {
+            return Promise.resolve(null);
+        }
     }
 
-    registerTextResetCallback(resetTextCallback: () => void) {
-        this.clearTextSearch = resetTextCallback;
+    getFacetFieldPage(pageable: FacetPageable, facetName: string): Promise<FacetResultPage> {
+        return this.solrService.getFacet(facetName, pageable, this.solrRequest);
     }
-
 }
 
 export interface SelectionBlock {
     label: string;
     remove(): void;
+}
+
+export class SimpleValueSelectionBlock implements SelectionBlock {
+
+    constructor(private _label: string, public remove: () => void) {}
+
+    get label(): string {
+        return this._label;
+    }
 }
 
 export class FacetSelectionBlock implements SelectionBlock {

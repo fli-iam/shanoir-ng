@@ -12,12 +12,15 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="title">
-    {{label}}
-    <span *ngIf="!open" class="colapse" (click)="open = true"><i class="fas fa-chevron-down"></i></span>
-    <span *ngIf="open" class="colapse" (click)="open = false"><i class="fas fa-chevron-up"></i></span>
+<div class="title" (click)="open = !open">
+    <span class="left-icon">
+        <i *ngIf="awesome" [class]="awesome"></i>
+        {{label}}
+    </span>
+    <span *ngIf="!open" class="colapse"><i class="fas fa-chevron-down"></i></span>
+    <span *ngIf="open" class="colapse"><i class="fas fa-chevron-up"></i></span>
 </div>
-<div class="body content" *ngIf="open" @slideDown>
+<div class="body content" *ngIf="open && range" @slideDown>
     <span>from : </span>
     <input type="number" [(ngModel)]="range.lowerBound" (change)="change()"/>
     <span>to : </span>

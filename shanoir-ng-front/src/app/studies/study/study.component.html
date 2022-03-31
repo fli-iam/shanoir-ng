@@ -26,7 +26,26 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<h2 class="header command-zone" i18n="Create study|Title@@studyDetailCreateTitle">Create study</h2>
 				</ng-template>
 			</span>
-			<fieldset>
+
+			<ul class="tabs">
+				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'"skipLocationChange>General</li>
+				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" skipLocationChange>Files</li>
+				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" skipLocationChange>Subjects</li>
+				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" skipLocationChange>Centers</li>
+				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" skipLocationChange>Members</li>
+				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" skipLocationChange>Tags</li>
+				<ng-container *ngIf="mode == 'view'">
+					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'">Tree</li>
+					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" skipLocationChange>BIDS</li>
+				</ng-container>
+				<ng-container *ngIf="mode != 'view'">
+					<li [class.active]="activeTab == 'tree'" class="disabled" skipLocationChange>Tree</li>
+					<li [class.active]="activeTab == 'bids'" class="disabled" skipLocationChange>BIDS</li>
+				</ng-container>
+				
+			</ul>
+
+			<fieldset [class.hidden]="activeTab != 'general'">
 				<legend i18n="Study detail|Name label@@studyDetailGeneral">General</legend>
 				<ol>
 					<li>
@@ -119,7 +138,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<fieldset [class.hidden]="activeTab != 'files'">
 				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
 					Data User Agreement (DUA)
 					<tool-tip class="larger">
@@ -140,7 +159,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					 	<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
 					 		{{study.dataUserAgreementPaths[0]}}
 							<button class="dl-button" (click)="deleteDataUserAgreement()">
-								<i class="fas fa-trash"></i>
+								<i class="fa-regular fa-trash-can"></i>
 							</button>
 						</span>
 					</li>
@@ -159,7 +178,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<fieldset [class.hidden]="activeTab != 'general'">
 				<legend i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Default access level</legend>
 				<ol>
 					<li>
@@ -188,10 +207,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset *ngIf="mode !== 'view' && study?.subjectStudyList">
-				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList"></subject-study-list>
+			<fieldset [class.hidden]="activeTab != 'subjects'">
+				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
 			</fieldset>
-			<fieldset>
+			<fieldset [class.hidden]="activeTab != 'centers'">
 				<legend i18n="Study detail|Name label@@studyDetailCentersAndPITitle">List of centers</legend>
 				<ol>
 					<li>
@@ -203,7 +222,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<span [class.disabled]="study.studyCenterList?.length > 1">Single center</span>
-								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (userChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
+								<toggle-switch formControlName="monoCenter" [(ngModel)]="study.monoCenter" (onChange)="onMonoMultiChange()" [reverse]="true"></toggle-switch>
 								<span>Multicenter</span>
 							</ng-template>
 						</span>
@@ -255,7 +274,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<fieldset [class.hidden]="activeTab != 'files'">
 				<legend i18n="Study detail|Protocol files label@@studyDetailProtocolFiles">Study files</legend>
 				<ol>
 					<li *ngIf="mode != 'view'">
@@ -263,7 +282,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <input #input hidden type="file" (change)="attachNewFile($event)"/>
                             <button class="left-icon" (click)="setFile()"><i class="fas fa-upload"></i>Upload a new file</button>
                             <ul class="files">
-                                <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="deleteFile(file)"><i class="fas fa-trash"></i></button>
+                                <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
                                 </li>
                             </ul>
                         </span>
@@ -284,7 +303,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </li>
 				</ol>
 			</fieldset>
-			<fieldset>
+			<fieldset [class.hidden]="activeTab != 'members'">
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 				<studyuser-list
 				    formControlName="studyUserList"
@@ -293,16 +312,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[mode]="mode">					
 				</studyuser-list>
 			</fieldset>
-			<fieldset *ngIf="mode == 'view'">
+			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">
 				<legend>Tree</legend>
 				<study-node [input]="breadcrumbsService.currentStep.data.studyNode ? breadcrumbsService.currentStep.data.studyNode : study" 
 						(selectedChange)="onTreeSelectedChange($event)" (nodeInit)="onStudyNodeInit($event)" [hasBox]="true"></study-node>
 			</fieldset>
-            <fieldset *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
+            <fieldset [class.hidden]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
                 <legend>Study tags</legend>
                 <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
             </fieldset>
-            <fieldset *ngIf="mode == 'view'">
+            <fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'bids'">
 				        <legend>BIDS tree</legend>
                 <bids-tree [studyId]="id"></bids-tree>
             </fieldset>

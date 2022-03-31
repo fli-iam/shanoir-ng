@@ -18,7 +18,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <body>
     <p>Dear <span th:text="${firstname}"></span> <span th:text="${lastname}"></span>,</p>
     <p>Your account (on <a th:href="${serverAddress}">Shanoir</a>) will expire on <b><span th:text="${expirationDate}"></span></b>.</p>
-    <p>If you need to extend the validity of your account, request an extension on Shanoir home page.</p>
+    <p>If you need to extend your account, request an extension using <a th:href="${serverAddress}">Shanoir login page</a> and click on Account expired?.</p>
     <p>Regards,<br/>
     Shanoir administrator</p>
 </body>
