@@ -77,36 +77,32 @@ public class StudyInstanceUIDHandler {
 	 */
 	public void replaceStudyInstanceUIDsWithExaminationIds(JsonNode root, Long examinationId, boolean studyLevel) {
 		if (root.isObject()) {
-			Iterator<String> fieldNames = root.fieldNames();
-			while (fieldNames.hasNext()) {
-				String fieldName = fieldNames.next();
-				// find attribute: StudyInstanceUID
-				if (fieldName.equals(DICOM_TAG_STUDY_INSTANCE_UID)) {
-					JsonNode studyInstanceUIDNode = root.get(fieldName);
-					ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path(VALUE);
-					for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
-						studyInstanceUIDArray.remove(i);
-						studyInstanceUIDArray.insert(i, examinationId.toString());
+			// find attribute: StudyInstanceUID
+			JsonNode studyInstanceUIDNode = root.get(DICOM_TAG_STUDY_INSTANCE_UID);
+			if (studyInstanceUIDNode != null) {
+				ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path(VALUE);
+				for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
+					studyInstanceUIDArray.remove(i);
+					studyInstanceUIDArray.insert(i, examinationId.toString());
+				}				
+			}
+			// find attribute: RetrieveURL
+			JsonNode retrieveURLNode = root.get(DICOM_TAG_RETRIEVE_URL);
+			if (retrieveURLNode != null) {
+				ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path(VALUE);
+				for (int i = 0; i < retrieveURLArray.size(); i++) {
+					JsonNode arrayElement = retrieveURLArray.get(i);
+					String retrieveURL = arrayElement.asText();
+					if (studyLevel) { // study level
+						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + examinationId);
+						retrieveURLArray.remove(i);
+						retrieveURLArray.insert(i, retrieveURL);
+					} else { // serie level
+						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + examinationId + SERIES);
+						retrieveURLArray.remove(i);
+						retrieveURLArray.insert(i, retrieveURL);
 					}
-				}
-				// find attribute: RetrieveURL
-				if (fieldName.equals(DICOM_TAG_RETRIEVE_URL)) {
-					JsonNode retrieveURLNode = root.get(fieldName);
-					ArrayNode retrieveURLArray = (ArrayNode) retrieveURLNode.path(VALUE);
-					for (int i = 0; i < retrieveURLArray.size(); i++) {
-						JsonNode arrayElement = retrieveURLArray.get(i);
-						String retrieveURL = arrayElement.asText();
-						if (studyLevel) { // study level
-							retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + examinationId);
-							retrieveURLArray.remove(i);
-							retrieveURLArray.insert(i, retrieveURL);
-						} else { // serie level
-							retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + examinationId + SERIES);
-							retrieveURLArray.remove(i);
-							retrieveURLArray.insert(i, retrieveURL);
-						}
-					}
-				}
+				}				
 			}
 		} else if (root.isArray()) {
 			ArrayNode arrayNode = (ArrayNode) root;
