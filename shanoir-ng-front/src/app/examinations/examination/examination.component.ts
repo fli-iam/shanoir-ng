@@ -59,6 +59,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
+    examNode: Examination | ExaminationNode;
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
@@ -85,7 +86,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.fileInput.nativeElement.click();
     }
     
-    set examination(examination: Examination) { this.entity = examination; }
+    set examination(examination: Examination) {
+        this.entity = examination;
+        this.examNode = this.breadcrumbsService.currentStep.data.examinationNode ? this.breadcrumbsService.currentStep.data.examinationNode : examination;
+    }
     get examination(): Examination { return this.entity; }
     
     getService(): EntityService<Examination> {
