@@ -15,11 +15,15 @@
 package org.shanoir.ng.study.service;
 
 import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import javax.transaction.Transactional;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
@@ -72,8 +76,22 @@ public class RabbitMQStudiesService {
 		try {
 			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
 			Long examinationId = Long.valueOf(event.getObjectId());
-			Long studyId = Long.valueOf(event.getMessage());
-			this.studyService.addExaminationToStudy(examinationId, studyId);
+			Long studyId = event.getStudyId();
+			String message = event.getMessage();
+			Pattern pat = Pattern.compile("centerId:(\\d+);subjectId:(\\d+)");
+			Matcher mat = pat.matcher(message);
+			
+			Long centerId = null;
+			Long subjectId = null;
+			if (mat.matches()) {
+				centerId = Long.valueOf(mat.group(1));
+				subjectId = Long.valueOf(mat.group(2));
+			} else {
+				LOG.error("Something wrong happend while updating study examination list.");
+				throw new ShanoirException("Could not read subject ID and center ID from event message");
+			}
+
+			this.studyService.addExaminationToStudy(examinationId, studyId, centerId, subjectId);
 
 		} catch (Exception e) {
 			LOG.error("Could not index examination on given study ", e);
