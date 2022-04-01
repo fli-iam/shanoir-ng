@@ -20,7 +20,7 @@ import { Subject, Subscription } from 'rxjs';
 
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { Router } from '../../../breadcrumbs/router';
+import { Router } from '@angular/router';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
@@ -393,7 +393,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * It is called after initialization so the entity value can be used inside.
      */
     public async hasEditRight(): Promise<boolean> {
-        return true;
+        return this.keycloakService.isUserAdminOrExpert();
     }
 
     /**

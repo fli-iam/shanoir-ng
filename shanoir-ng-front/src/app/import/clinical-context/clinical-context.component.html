@@ -28,7 +28,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         (userChange)="onSelectStudy(); onContextChange();" 
                         (onViewClick)="showStudyDetails()" 
                         [viewDisabled]="!study" 
-                        [options]="studyOptions">
+                        [options]="studyOptions"
+                        [disabled]="loading">
                 </select-box>
             </span>
         </li>
@@ -50,7 +51,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         (userChange)="onSelectStudyCard(); onContextChange();" 
                         (onViewClick)="showStudyCardDetails()" 
                         [viewDisabled]="!studycard" 
-                        [options]="studycardOptions">
+                        [options]="studycardOptions"
+                        [disabled]="loading">
                 </select-box>
             </span>
         </li>
@@ -86,7 +88,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         (userChange)="onSelectCenter(); onContextChange();" 
                         (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
                         (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
-                        [options]="centerOptions">
+                        [options]="centerOptions"
+                        [disabled]="loading">
                 </select-box>
             </span>
         </li>
@@ -98,7 +101,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 {{patient?.studies[0]?.series[0]?.institution?.institutionName}} - 
                 {{patient?.studies[0]?.series[0]?.institution?.institutionAddress}}
             </code>
-            <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
+            <ng-container *ngIf="!useStudyCard">
+                <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
+            </ng-container>
         </li>
         <li>
             <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label> 
@@ -110,7 +115,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         (userChange)="onSelectAcquisitonEquipment(); onContextChange();"
                         (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
                         (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
-                        [options]="acquisitionEquipmentOptions">
+                        [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe"
+                        [disabled]="loading">
                 </select-box>
             </span>
         </li>
@@ -142,7 +148,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         (userChange)="onSelectSubject(); onContextChange();" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
                         (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
-                        [optionArr]="subjects">
+                        [optionArr]="subjects"
+                        [disabled]="loading">
                 </select-box>
             </span>
         </li>

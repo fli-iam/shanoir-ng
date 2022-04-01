@@ -137,6 +137,17 @@ public interface ImporterApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> startImportJob(@ApiParam(value = "ImportJob", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
 
+    @ApiOperation(value = "Start analysis of EEG job", notes = "Start analysis eeg job", response = Void.class, tags={ "Start analysis eeg job", })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "import eeg job analysed", response = Void.class),
+        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+    @PostMapping(value = "/start_analysis_eeg_job/",
+        produces = { "application/json" },
+        consumes = { "application/json" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
+    ResponseEntity<EegImportJob> analyzeEegZipFile(@ApiParam(value = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException;
+
     @ApiOperation(value = "Start import EEG job", notes = "Start import eeg job", response = Void.class, tags={ "Start import eeg job", })
     @ApiResponses(value = {
         @ApiResponse(code = 200, message = "import eeg job started", response = Void.class),
@@ -168,5 +179,6 @@ public interface ImporterApi {
     @GetMapping(value = "/get_dicom/", produces = { "application/dicom" })
         @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<ByteArrayResource> getDicomImage(@ApiParam(value = "path", required=true) @RequestParam(value = "path", required = true) String path) throws RestServiceException, IOException;
+
 
 }
