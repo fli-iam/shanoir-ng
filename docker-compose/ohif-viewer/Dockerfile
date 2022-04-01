@@ -10,12 +10,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM nginx
+FROM ohif/viewer:v4.12.9.17613
 
-COPY nginx.conf http.conf https.conf shanoir.template.conf shanoir.template.dev.conf shanoir.template.prod.conf ohif-viewer.template.conf /etc/nginx/
-COPY entrypoint entrypoint_common /bin/
+COPY entrypoint_common /bin/
 
-COPY webapp/ /etc/nginx/html/
+COPY entrypoint.sh /usr/src/
 
-ENTRYPOINT ["/bin/entrypoint"]
-CMD ["nginx", "-g", "daemon off;"]
+RUN chmod 777 /usr/src/entrypoint.sh
+
+COPY default.conf /etc/nginx/conf.d/
+
+COPY app-config.js /usr/share/nginx/html/
