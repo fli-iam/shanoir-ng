@@ -24,6 +24,7 @@ import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.events.UserDeleteEvent;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.role.repository.RoleRepository;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -44,6 +45,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * User service implementation.
@@ -84,6 +87,9 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	ShanoirEventService eventService;
 
+	@Autowired
+	ObjectMapper mapper;
+	
 	@Override
 	public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {
 		final User userDb = userRepository.findById(user.getId()).orElse(null);
@@ -127,6 +133,8 @@ public class UserServiceImpl implements UserService {
 		
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_USER_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);
 		eventService.publishEvent(event);
+		
+		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_USER_QUEUE, mapper.writeValueAsString(event));
 
 		keycloakClient.deleteUser(user.getKeycloakId());
 	}

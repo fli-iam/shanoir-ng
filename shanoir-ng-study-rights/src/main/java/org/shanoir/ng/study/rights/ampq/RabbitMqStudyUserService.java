@@ -16,16 +16,24 @@ package org.shanoir.ng.study.rights.ampq;
 
 import java.util.Arrays;
 
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Service
 public class RabbitMqStudyUserService {
@@ -51,4 +59,20 @@ public class RabbitMqStudyUserService {
 			throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
 		}
     }
+
+	@RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		try {
+			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
+			Long userId = Long.valueOf(event.getObjectId());
+			service.deleteUser(userId);
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
 }

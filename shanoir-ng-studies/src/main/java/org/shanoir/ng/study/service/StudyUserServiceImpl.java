@@ -32,6 +32,7 @@ import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -89,12 +90,8 @@ public class StudyUserServiceImpl implements StudyUserService {
 		return false;
 	}
 
-	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.DELETE_USER_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.DELETE_USER_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
-			)
+	@RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE)
+	@RabbitHandler
 	@Transactional
 	@Override
 	public void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException {
