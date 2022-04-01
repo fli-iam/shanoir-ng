@@ -393,7 +393,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * It is called after initialization so the entity value can be used inside.
      */
     public async hasEditRight(): Promise<boolean> {
-        return true;
+        return this.keycloakService.isUserAdminOrExpert();
     }
 
     /**
