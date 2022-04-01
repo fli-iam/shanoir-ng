@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, Input } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core';
 
 
 @Component({
@@ -25,7 +25,11 @@ export class LoadingBarComponent {
 
     @Input() progress: number = 0;
     @Input() text: string = "";
-    width: number = 200;
+    @Input() width: number = 200;
+
+    @HostBinding('style.width') get pixelWidth() {
+        return this.width + 'px';
+     }
 
     getProgressText(): string {
         if (this.progress === -1 && this.text) {

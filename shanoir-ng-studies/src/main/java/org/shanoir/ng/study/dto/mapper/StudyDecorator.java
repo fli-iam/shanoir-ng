@@ -57,8 +57,8 @@ public abstract class StudyDecorator implements StudyMapper {
 			if (study.getSubjectStudyList() != null) {
 				studyDTO.setNbSujects(study.getSubjectStudyList().size());
 			}
-			if (study.getExaminationIds() != null) {
-				studyDTO.setNbExaminations(study.getExaminationIds().size());
+			if (study.getExaminations() != null) {
+				studyDTO.setNbExaminations(study.getExaminations().size());
 			}
 			studyDTOs.add(studyDTO);
 		}

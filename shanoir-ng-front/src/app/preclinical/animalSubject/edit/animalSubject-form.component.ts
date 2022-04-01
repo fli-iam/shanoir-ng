@@ -328,31 +328,30 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         super.goToEdit(this.preclinicalSubject.animalSubject.id);
     }
 
-    public save(): Promise<void> {
-        return new  Promise<void>(resolve => {
-            if (this.preclinicalSubject.animalSubject.id){
-                this.updateSubject().then(() => {
-                    this.onSave.next(this.preclinicalSubject);
-                    this.chooseRouteAfterSave(this.entity.animalSubject);
-                    this.msgBoxService.log('info', 'The preclinical-subject n°' + this.preclinicalSubject.animalSubject.id + ' has been successfully updated');
-                });
-            }else{
-                this.addSubject().then(() => {
-                    this.onSave.next(this.preclinicalSubject);
-                    if (this.breadcrumbsService.previousStep && this.breadcrumbsService.previousStep.isWaitingFor(this.breadcrumbsService.currentStep)) {
-                        this.chooseRouteAfterSave(this.preclinicalSubject.subject);
-                    } else {
-                        this.chooseRouteAfterSave(this.preclinicalSubject.animalSubject);
-                    }
-                    this.msgBoxService.log('info', 'The new preclinical-subject has been successfully saved under the number ' + this.preclinicalSubject.animalSubject.id);
-                });
-                
-            }
-            resolve();
-        });
+    public save(): Promise<PreclinicalSubject> {
+        if (this.preclinicalSubject.animalSubject.id){
+            return this.updateSubject().then(() => {
+                this.onSave.next(this.preclinicalSubject);
+                this.chooseRouteAfterSave(this.entity.animalSubject);
+                this.msgBoxService.log('info', 'The preclinical-subject n°' + this.preclinicalSubject.animalSubject.id + ' has been successfully updated');
+                return this.entity;
+            });
+        }else{
+            return this.addSubject().then(subject => {
+                this.onSave.next(this.preclinicalSubject);
+                if (this.breadcrumbsService.previousStep && this.breadcrumbsService.previousStep.isWaitingFor(this.breadcrumbsService.currentStep)) {
+                    this.chooseRouteAfterSave(this.preclinicalSubject.subject);
+                } else {
+                    this.chooseRouteAfterSave(this.preclinicalSubject.animalSubject);
+                }
+                this.msgBoxService.log('info', 'The new preclinical-subject has been successfully saved under the number ' + this.preclinicalSubject.animalSubject.id);
+                return subject;
+            });
+            
+        }
     }
 
-    addSubject(): Promise<void> {
+    addSubject(): Promise<PreclinicalSubject> {
         if (!this.preclinicalSubject ) { 
             return Promise.resolve(null);
         }
@@ -385,11 +384,13 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                         this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
                     }
                 }
+                return animalSubject;
             }, this.catchSavingErrors);
+            return subject;
         }, this.catchSavingErrors);
     }
 
-    updateSubject(): Promise<void> {
+    updateSubject(): Promise<AnimalSubject> {
             if (this.preclinicalSubject && this.preclinicalSubject.subject){	
                 this.generateSubjectIdentifier();
                 this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
@@ -429,8 +430,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                                 this.subjectPathologyService.deleteSubjectPathology(this.preclinicalSubject, pathology);
                             }
                         }
-                    }
-                ).catch(this.catchSavingErrors);
+                        return this.preclinicalSubject.animalSubject;
+                    }).catch(this.catchSavingErrors);
             }
     }
 

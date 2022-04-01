@@ -17,6 +17,7 @@ package org.shanoir.ng.acquisitionequipment.controler;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
@@ -59,6 +60,9 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	public ResponseEntity<Void> deleteAcquisitionEquipment(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		try {
+			if (acquisitionEquipmentId.equals(0L)) {
+				throw new EntityNotFoundException("Cannot update unknown equipment");
+			}
 			acquisitionEquipmentService.deleteById(acquisitionEquipmentId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EQUIPEMENT_EVENT, acquisitionEquipmentId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -79,7 +83,9 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Override
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments() {
-		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAll();
+		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAll();
+		// Remove "unknown" equipment
+		equipments = equipments.stream().filter(equipment -> equipment.getId() != 0).collect(Collectors.toList());
 		if (equipments.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -97,7 +103,9 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	}
 	
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByStudyId(studyId);
+		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByStudyId(studyId);
+		// Remove "unknown" equipment
+		equipments = equipments.stream().filter(equipment -> equipment.getId() != 0).collect(Collectors.toList());
 		if (equipments.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -135,6 +143,9 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 		/* Update user in db. */
 		try {
+			if (acquisitionEquipmentId.equals(0L)) {
+				throw new EntityNotFoundException("Cannot update unknown equipment");
+			}
 			acquisitionEquipmentService.update(acquisitionEquipment);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_EQUIPEMENT_EVENT, acquisitionEquipmentId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

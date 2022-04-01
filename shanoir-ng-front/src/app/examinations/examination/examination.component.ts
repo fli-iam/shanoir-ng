@@ -1,3 +1,4 @@
+
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -57,12 +58,16 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasAdministrateRight: boolean = false;
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
+    pattern: string = '[^:|<>&\/]+';
+    examNode: Examination | ExaminationNode;
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
 	hasEEG: boolean = false;
 	hasDicom: boolean = false;
+    hasBids: boolean = false;
+
 
     constructor(
             private route: ActivatedRoute,
@@ -81,7 +86,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.fileInput.nativeElement.click();
     }
     
-    set examination(examination: Examination) { this.entity = examination; }
+    set examination(examination: Examination) {
+        this.entity = examination;
+        this.examNode = this.breadcrumbsService.currentStep.data.examinationNode ? this.breadcrumbsService.currentStep.data.examinationNode : examination;
+    }
     get examination(): Examination { return this.entity; }
     
     getService(): EntityService<Examination> {
@@ -136,7 +144,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             'subject': [{value: this.examination.subject, disabled: this.inImport}],
             'center': [{value: this.examination.center, disabled: this.inImport}, Validators.required],
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
-            'comment': [this.examination.comment],
+            'comment': [this.examination.comment, Validators.pattern(this.pattern)],
             'note': [this.examination.note],
             'subjectWeight': [this.examination.subjectWeight]
         });
@@ -187,6 +195,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
          return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 
+    public isAdmin(): boolean {
+         return this.keycloakService.isUserAdmin();
+    }
+
     public deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
@@ -202,14 +214,19 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.form.updateValueAndValidity();
     }
 
-    public save(): Promise<void> {
-        let prom = super.save().then(result => {
+    public save(): Promise<Examination> {
+        return super.save().then(result => {
             // Once the exam is saved, save associated files
             for (let file of this.files) {
                 this.examinationService.postFile(file, this.entity.id);
-            }            
-        });
-        return prom;
+            }
+            return result;            
+        }).catch(reason => { if (reason.status == 403) {
+            this.msgBoxService.log('error', 'Updating study, subject or center of an examination is forbiden. Please contact an administrator.');
+            return null;
+        } else {
+            throw reason;
+        }});
     }
 
     getFileName(element): string {
@@ -236,7 +253,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
                             datasetIds.push(ds.id);
 							if (ds.type == 'Eeg') {
 								this.hasEEG = true;
-							} else {
+							} else if (ds.type == 'BIDS') {
+                                this.hasBids = true;
+                            } else {
 								this.hasDicom = true;
 							}
                         });

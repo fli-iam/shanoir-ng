@@ -66,10 +66,9 @@ export class ExtraDataService extends EntityService<ExtraData>{
         return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
     }
     
-    createExtraData(datatype:string,extradata: any): Observable<any> {
+    createExtraData(datatype:string,extradata: any): Promise<any> {
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${extradata.examination_id}/${datatype}`;
-        return this.http
-        .post<ExtraData>(url, JSON.stringify(extradata));
+        return this.http.post<ExtraData>(url, JSON.stringify(extradata)).toPromise();
     }
         
         

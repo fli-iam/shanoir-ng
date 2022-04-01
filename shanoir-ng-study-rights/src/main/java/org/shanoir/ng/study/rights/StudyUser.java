@@ -33,8 +33,8 @@ public class StudyUser implements StudyUserInterface {
 	@Id
 	private Long id;
 
-	/** Is the anonymization report to be sent to the user. */
-	private boolean receiveAnonymizationReport;
+	/** Inform an user about changes on study_user: creation */
+	private boolean receiveStudyUserReport;
 
 	/** Advice the user when new import done in the study. */
 	private boolean receiveNewImportReport;
@@ -62,20 +62,20 @@ public class StudyUser implements StudyUserInterface {
 	private String userName;
 
 	/**
-	 * @return the receiveAnonymizationReport
+	 * @return the receiveStudyUserReport
 	 */
 	@Override
-	public boolean isReceiveAnonymizationReport() {
-		return receiveAnonymizationReport;
+	public boolean isReceiveStudyUserReport() {
+		return receiveStudyUserReport;
 	}
 
 	/**
-	 * @param receiveAnonymizationReport
-	 *            the receiveAnonymizationReport to set
+	 * @param receiveStudyUserReport
+	 *            the receiveStudyUserReport to set
 	 */
 	@Override
-	public void setReceiveAnonymizationReport(boolean receiveAnonymizationReport) {
-		this.receiveAnonymizationReport = receiveAnonymizationReport;
+	public void setReceiveStudyUserReport(boolean receiveStudyUserReport) {
+		this.receiveStudyUserReport = receiveStudyUserReport;
 	}
 
 	/**

@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
-import org.shanoir.ng.processing.DatasetProcessingType;
+import org.shanoir.ng.processing.model.DatasetProcessingType;
 
 
 /**
@@ -29,16 +29,27 @@ import org.shanoir.ng.processing.DatasetProcessingType;
  */
 public class DatasetProcessingDTO {
 
+	private Long id;
 
 	private String comment;
 
 	private DatasetProcessingType datasetProcessingType;
 	
+	private List<DatasetDTO> inputDatasets;
+
 	private List<DatasetDTO> outputDatasets;
 	
 	private LocalDate processingDate;
 	
 	private Long studyId;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(final Long id) {
+		this.id = id;
+	}
 
 	public String getComment() {
 		return comment;
@@ -55,6 +66,15 @@ public class DatasetProcessingDTO {
 	public void setDatasetProcessingType(DatasetProcessingType datasetProcessingType) {
 		this.datasetProcessingType = datasetProcessingType;
 	}
+
+	public List<DatasetDTO> getInputDatasets() {
+		return inputDatasets;
+	}
+
+	public void setInputDatasets(List<DatasetDTO> inputDatasets) {
+		this.inputDatasets = inputDatasets;
+	}
+
 
 	public List<DatasetDTO> getOutputDatasets() {
 		return outputDatasets;

@@ -19,6 +19,10 @@ import { slideDown } from '../../shared/animations/animations';
 import { ImportJob } from '../shared/dicom-data.model';
 import { ImportService } from '../shared/import.service';
 import { StudyService } from '../../studies/shared/study.service';
+import { Study } from '../../studies/shared/study.model';
+import { Option } from '../../shared/select/select.component';
+import { Center } from '../../centers/shared/center.model';
+import { CenterService } from '../../centers/shared/center.service';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -32,14 +36,39 @@ export class BidsUploadComponent {
     
     public archiveStatus: Status = 'none';
     protected extensionError: boolean;
-    private modality: string;
     public errorMessage: string;
+    public studyOptions: Option<Study>[] = [];
+    public study: Study;
+    public center: Center;
+    public centerOptions: Option<Center>[] = [];
 
     constructor(
             private importService: ImportService,
+            private centerService: CenterService,
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private studyService: StudyService) {
+                
+    Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
+            .then(([allStudies, allCenters]) => {
+                this.studyOptions = [];
+                for (let study of allStudies) {
+                    let studyOption: Option<Study> = new Option(study, study.name);
+                    if (study.studyCenterList) {
+                        for (let studyCenter of study.studyCenterList) {
+                            let center: Center = allCenters.find(center => center.id === studyCenter.center.id);
+                            if (center) {
+                                studyCenter.center = center;
+                            } 
+                        }
+                        this.studyOptions.push(studyOption);
+                        // update the selected study as well
+                        if (this.study && this.study.id == study.id) {
+                            this.study.studyCenterList = study.studyCenterList; 
+                        }
+                    }
+                }
+            });
         
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
@@ -48,6 +77,19 @@ export class BidsUploadComponent {
             breadcrumbsService.currentStep.importMode = 'BIDS';
         });
     }
+    
+    public onSelectStudy() {
+        this.centerOptions = [];
+        if (this.study && this.study.id && this.study.studyCenterList) {
+            for (let studyCenter of this.study.studyCenterList) {
+                let centerOption = new Option<Center>(studyCenter.center, studyCenter.center.name);
+                this.centerOptions.push(centerOption);
+            }
+        }
+        if (this.study.monoCenter || this.study.studyCenterList.length == 1) {
+            this.center = this.study.studyCenterList[0].center;
+        }
+    }
 
     public uploadArchive(fileEvent: any): void {
         if (fileEvent.target.files.length > 0) {
@@ -55,17 +97,15 @@ export class BidsUploadComponent {
             this.uploadToServer(fileEvent.target.files);
         } else {
             this.setArchiveStatus('none');
-            this.modality = null;
         }
     }
 
     private uploadToServer(file: any) {
         this.extensionError = file[0].name.substring(file[0].name.lastIndexOf("."), file[0].name.length) != '.zip';
 
-        this.modality = null;
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
-        this.importService.uploadBidsFile(formData)
+        this.importService.uploadBidsFile(formData, this.study.id, this.study.name, this.center.id)
             .then((importJob: ImportJob) => {
                 this.setArchiveStatus('uploaded');
                 this.errorMessage = "";
@@ -84,7 +124,13 @@ export class BidsUploadComponent {
     get valid(): boolean {
         return this.archiveStatus == 'uploaded';
     }
+    
+    public showStudyDetails() {
+        window.open('study/details/' + this.study.id, '_blank');
+    }
 
-    data = {'studyId': 10,'studyCardId': 68,'acquisitionEquipmentId': '1','centerId': '1','patients': [{'patientID':'BidsCreated','studies' : [ {'series': [{'images': [{'path':'pathToDicomImage'}]}]}]}]};
+    public showCenterDetails() {
+        window.open('center/details/' + this.center.id, '_blank');
+    }
 }
     

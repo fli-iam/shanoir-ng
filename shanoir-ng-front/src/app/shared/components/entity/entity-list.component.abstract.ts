@@ -85,13 +85,13 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
 
     private completeColDefs(): void {
         if (this.edit) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
         }
         if (this.view) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-eye", action: item => this.goToView(item.id) });
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item.id) });
         }
         if (this.delete) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
         }
         if (this.showId && this.keycloakService.isUserAdmin && !this.columnDefs.find(col => col.field == 'id')) {
             this.columnDefs.unshift({ headerName: 'Id', field: 'id', type: 'number', width: '30px'});
@@ -101,7 +101,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private completeCustomActions(): void {
         if (this.new) {
             this.customActionDefs.push({
-                title: "New",awesome: "fa-plus", action: item => this.router.navigate([this.entityRoutes.getRouteToCreate()])
+                title: "New",awesome: "fa-solid fa-plus", action: item => this.router.navigate([this.entityRoutes.getRouteToCreate()])
             });
         }
     }

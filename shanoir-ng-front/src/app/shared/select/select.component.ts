@@ -108,12 +108,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this.searchText = null;
             this.options = [];
             this.optionArr.forEach(item => {
-                let label: string = '';
-                if (this.pipe) label = this.pipe.transform(item);
-                else if (typeof(item) == 'string') label = item;
-                else if (item.label) label = item.label;
-                else if (item.name) label = item.name;
-                else if (item.value) label = item.value;
+                let label: string = this.getLabel(item);
                 let newOption: Option<any> = new Option<any>(item, label);
                 if (item.color) newOption.color = item.color;
                 if (item.backgroundColor) newOption.color = item.backgroundColr;
@@ -141,6 +136,16 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
     }
 
+    private getLabel(item: any): string {
+        let label: string = '';
+        if (this.pipe) label = this.pipe.transform(item);
+        else if (typeof(item) == 'string') label = item;
+        else if (item.label) label = item.label;
+        else if (item.name) label = item.name;
+        else if (item.value) label = item.value;
+        return label;
+    }
+
     private initSelectedOption() {
         if (this.selectedOption || this.inputValue) {
             let index: number;
@@ -163,22 +168,25 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     writeValue(value: any): void {
         this.searchText = null;
         this.inputValue = value;
-        if (this.options && value) {
+        if (value && this.options?.length > 0) {
             let index = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, value))
             if (index > -1) {
                 this.selectedOptionIndex = index;
-                return;
+            } else {
+                this.selectedOptionIndex = null;
             }
         } else {
             this.selectedOptionIndex = null;
         }
+        this.inputText = this.selectedOption?.label;
     }
 
     public get selectedOption(): Option<any> {
         return this.options 
             && this.selectedOptionIndex != null 
             && this.selectedOptionIndex != undefined
-            && this.options[this.selectedOptionIndex] ? this.options[this.selectedOptionIndex] : new Option(this.inputValue, this.inputValue);
+            && this.options[this.selectedOptionIndex] ? this.options[this.selectedOptionIndex] : (
+                this.inputValue ? new Option(this.inputValue, this.getLabel(this.inputValue)) : null);
     }
 
     private get selectedOptionIndex(): number {
@@ -232,7 +240,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                     }
                 }
             })
-            this.hiddenOption.nativeElement.innerText = maxOption.label;
+            this.hiddenOption.nativeElement.innerText = maxOption?.label;
             this.maxWidth = this.hiddenOption.nativeElement.offsetWidth;
             this.hiddenOption.nativeElement.innerText = '';
         }

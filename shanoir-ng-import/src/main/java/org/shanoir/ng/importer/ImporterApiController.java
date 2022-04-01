@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -152,7 +154,7 @@ public class ImporterApiController implements ImporterApi {
 
 	public ResponseEntity<Void> uploadFiles(
 			@ApiParam(value = "file detail") @RequestPart("files") final MultipartFile[] files)
-			throws RestServiceException {
+					throws RestServiceException {
 		if (files.length == 0) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
@@ -172,7 +174,7 @@ public class ImporterApiController implements ImporterApi {
 	@Override
 	public ResponseEntity<ImportJob> uploadDicomZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile dicomZipFile)
-			throws RestServiceException {
+					throws RestServiceException {
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
@@ -193,7 +195,7 @@ public class ImporterApiController implements ImporterApi {
 			if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
 				createDicomDir = true;
 			}
-			
+
 			File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
 
 			if (createDicomDir) {
@@ -216,7 +218,7 @@ public class ImporterApiController implements ImporterApi {
 			 * from first dicom file of each serie, meta-data missing in dicomdir.
 			 */
 			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
-	
+
 			/**
 			 * . STEP: create ImportJob
 			 */
@@ -256,7 +258,7 @@ public class ImporterApiController implements ImporterApi {
 	@Override
 	public ResponseEntity<Void> startImportJob(
 			@ApiParam(value = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
-			throws RestServiceException {
+					throws RestServiceException {
 		File userImportDir = ImportUtils.getUserImportDir(importDir);
 		final Long userId = KeycloakUtil.getTokenUserId();
 		String tempDirId = importJob.getWorkFolder();
@@ -296,7 +298,7 @@ public class ImporterApiController implements ImporterApi {
 	@Override
 	public ResponseEntity<ImportJob> queryPACS(
 			@ApiParam(value = "DicomQuery", required = true) @Valid @RequestBody final DicomQuery dicomQuery)
-			throws RestServiceException {
+					throws RestServiceException {
 		ImportJob importJob;
 		try {
 			importJob = queryPACSService.queryCFIND(dicomQuery);
@@ -346,7 +348,7 @@ public class ImporterApiController implements ImporterApi {
 	 */
 	public ResponseEntity<EegImportJob> uploadEEGZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile eegFile)
-			throws RestServiceException {
+					throws RestServiceException {
 		try {
 			// Do some checks about the file, must be != null and must be a .zip file
 			if (eegFile == null) {
@@ -375,13 +377,25 @@ public class ImporterApiController implements ImporterApi {
 			File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, eegFile, false);
 
 			EegImportJob importJob = new EegImportJob();
-			importJob.setWorkFolder(importJobDir.getName());
+			importJob.setArchive(eegFile.getOriginalFilename());
+			importJob.setWorkFolder(importJobDir.getAbsolutePath());
+			return new ResponseEntity<>(importJob, HttpStatus.OK);
+		} catch (IOException ioe) {
+			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
+		}
+	}
 
+	@Override
+    public ResponseEntity<EegImportJob> analyzeEegZipFile(@ApiParam(value = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException {
+		try {
 			List<EegDataset> datasets = new ArrayList<>();
+			
+			File dataFileDir = new File(importJob.getWorkFolder() + File.separator
+					+ importJob.getArchive().replace(".zip", ""));
 
-			File dataFileDir = new File(importJobDir.getAbsolutePath() + File.separator
-					+ eegFile.getOriginalFilename().replace(".zip", ""));
+			LOG.error(dataFileDir.getAbsolutePath());
 
+			
 			// Get .VHDR file
 			File[] bvMatchingFiles = dataFileDir.listFiles(new FilenameFilter() {
 				@Override
@@ -413,10 +427,76 @@ public class ImporterApiController implements ImporterApi {
 			importJob.setDatasets(datasets);
 
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
-		} catch (IOException ioe) {
-			throw new RestServiceException(ioe, new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Invalid file"));
 		} catch (ShanoirImportException e) {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.BAD_REQUEST.value(), e.getMessage()));
+		}
+	}
+
+	private File convertAnalyzeToNifti(File imageFile, File headerFile) throws IOException, InterruptedException {
+		String imageName = imageFile.getAbsolutePath();
+		String newImageName = imageName.replace(".img", ".nii.gz");
+		File parentFolder = imageFile.getParentFile().getAbsoluteFile();
+		String[] command = { "/bin/bash", "-c", "animaConvertImage -i " + imageName + " -o " + newImageName};
+		ProcessBuilder processBuilder = new ProcessBuilder(command);
+		processBuilder.directory(parentFolder);
+		Process process = processBuilder.start();
+
+		int exitCode = process.waitFor();
+		if(exitCode != 0) {
+			throw new IOException("Impossible to convert Analyze image to nifti.");
+		}
+		return new File(parentFolder, newImageName);
+	}
+
+	@Override
+	/**
+	 * This method imports dataset file, and converts them to nifti if necessary (in case of a Analyze file format from .hdr/.img files)
+	 */
+	public ResponseEntity<String> uploadProcessedDataset(
+			@ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, 
+			@ApiParam(value = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
+					throws RestServiceException {
+
+		String imageFileName = imageFile == null ? "" : imageFile.getOriginalFilename();
+		String headerFileName = headerFile == null ? "" : headerFile.getOriginalFilename();
+		Boolean isNifti = imageFileName.endsWith(".nii") || imageFileName.endsWith(".nii.gz");
+		Boolean isAnalyze = imageFileName.endsWith(".img") && headerFileName.endsWith(".hdr");
+
+		if (!isNifti && !isAnalyze) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
+					"Wrong content type of file upload.", null));
+		}
+
+		try {
+
+			// 1. Save files to user directory
+
+			//    - Create user directory
+
+			long n = ImportUtils.createRandomLong();
+			final Long userId = KeycloakUtil.getTokenUserId();
+			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId) + File.separator + Long.toString(n);
+			final File userImportDir = new File(userImportDirFilePath);
+			if (!userImportDir.exists()) {
+				userImportDir.mkdirs();
+			}
+
+			//    - Save files
+			File destinationImageFile = new File(userImportDir.getAbsolutePath(), imageFileName);
+			imageFile.transferTo(destinationImageFile);
+			if(headerFile != null) {
+				File destinationHeaderFile = new File(userImportDir.getAbsolutePath(), headerFileName);
+				headerFile.transferTo(destinationHeaderFile);
+
+				// Convert Analyze format to nifti format
+				destinationImageFile = convertAnalyzeToNifti(destinationImageFile, destinationHeaderFile);
+			}
+
+			return new ResponseEntity<String>(destinationImageFile.getAbsolutePath(), HttpStatus.OK);
+		} catch (IOException | InterruptedException e) {
+			LOG.error(e.getMessage(), e);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
 		}
 	}
 
@@ -705,10 +785,10 @@ public class ImporterApiController implements ImporterApi {
 		while ((nRead = is.read(data, 0, data.length)) != -1) {
 			buffer.write(data, 0, nRead);
 		}
-	 
+
 		buffer.flush();
 		byte[] byteArray = buffer.toByteArray();
-		
+
 		ByteArrayResource resource = new ByteArrayResource(byteArray);
 
 		return ResponseEntity.ok()

@@ -26,8 +26,7 @@ import { Option } from '../../../shared/select/select.component';
 import { DatasetModalityType } from '../../../enum/dataset-modality-type.enum';
 import { DatasetProcessingType } from '../../../enum/dataset-processing-type.enum';
 import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum';
-import { DatasetType, DatasetTypes } from '../../shared/dataset-type.model';
-
+import { DatasetType } from '../../shared/dataset-type.model';
 
 @Component({
     selector: 'common-dataset-details',
@@ -51,7 +50,7 @@ export class CommonDatasetComponent implements OnChanges {
             private formBuilder: FormBuilder) {
 
         this.exploredEntityOptions = ExploredEntity.options;
-        this.datasetTypes = DatasetTypes.map(prop => new Option<DatasetType>(prop, prop));
+        this.datasetTypes = DatasetType.options;
         this.processedDatasetTypeOptions = ProcessedDatasetType.options;
     }
 
@@ -81,9 +80,12 @@ export class CommonDatasetComponent implements OnChanges {
             if (changes['dataset'].firstChange || changes['dataset'].previousValue.studyId != changes['dataset'].currentValue.studyId) {
                 this.fetchOneStudy();
             }
-        } else if(changes['dataset'] && this.mode == 'edit') {
-            this.parentFormGroup.updateValueAndValidity();
         }
+    }
+
+    updateForm() {
+        this.parentFormGroup.markAsDirty();
+        this.parentFormGroup.updateValueAndValidity();
     }
 
     private fetchOneSubject() {

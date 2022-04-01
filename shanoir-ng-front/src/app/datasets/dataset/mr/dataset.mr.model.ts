@@ -15,6 +15,7 @@ import { Option } from '../../../shared/select/select.component';
 import { allOfEnum, capitalsAndUnderscoresToDisplayable } from '../../../utils/app.utils';
 import { Dataset } from '../../shared/dataset.model';
 import { DiffusionGradient } from '../../../dataset-acquisitions/modality/mr/mr-protocol.model';
+import { DatasetType } from '../../shared/dataset-type.model';
 
 export class MrDataset extends Dataset {
     diffusionGradients: DiffusionGradient[];
@@ -27,6 +28,10 @@ export class MrDataset extends Dataset {
     updatedMrMetadata: MrDatasetMetadata = new MrDatasetMetadata();
 	firstImageAcquisitionTime: string;
     lastImageAcquisitionTime: string;
+    constructor() {
+        super();
+        this.type = DatasetType.Mr;
+    }
 }
 
 export class EchoTime {

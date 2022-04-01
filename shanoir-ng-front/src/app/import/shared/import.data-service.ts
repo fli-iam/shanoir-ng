@@ -22,6 +22,10 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ImportJob, PatientDicom } from './dicom-data.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { EegImportJob } from './eeg-data.model';
+import { ProcessedDatasetImportJob } from './processed-dataset-data.model';
+import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
+import { DatasetType } from '../../datasets/shared/dataset-type.model';
+import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 
 export class ContextData {
     
@@ -34,7 +38,13 @@ export class ContextData {
         public subject: SubjectWithSubjectStudy,
         public examination: SubjectExamination,
         public niftiConverter: NiftiConverter,
-        public coordinatesSystem: string
+        public coordinatesSystem: string,
+        public datasetType: DatasetType,
+        public processedDatasetFilePath: string,
+        public processedDatasetType: ProcessedDatasetType,
+        public processedDatasetName: string,
+        public processedDatasetComment: string,
+        public datasetProcessing: DatasetProcessing,
     ) {}
 }
 
@@ -44,6 +54,7 @@ export class ImportDataService {
     private _archiveUploaded: ImportJob;  // 1. upload    
     private _patientList: ImportJob;   // 1. upload or pacs
     private _eegImportJob: EegImportJob;   // 1. upload
+    private _processedDatasetImportJob: ProcessedDatasetImportJob;   // 1. upload
     private _patients: PatientDicom[];    // 2. series
     private _contextData: ContextData;    // 3. context
     public contextBackup: ContextData;
@@ -54,6 +65,7 @@ export class ImportDataService {
         this._patientList = undefined;
         this._patients = undefined;
         this._eegImportJob = undefined;
+        this._processedDatasetImportJob = undefined;
         this._contextData = undefined;
         this.contextBackup = undefined;
     }
@@ -72,6 +84,14 @@ export class ImportDataService {
 
     public set eegImportJob(job: EegImportJob) {
         this._eegImportJob = job;
+    }
+
+    public get processedDatasetImportJob(): ProcessedDatasetImportJob {
+        return this._processedDatasetImportJob;
+    }
+
+    public set processedDatasetImportJob(processedFilePath: ProcessedDatasetImportJob) {
+        this._processedDatasetImportJob = processedFilePath;
     }
 
     public get patientList(): ImportJob {
