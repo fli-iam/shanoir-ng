@@ -41,6 +41,7 @@ import org.shanoir.ng.utils.PasswordUtils;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -124,17 +125,20 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		final User user = userRepository.findById(id).orElse(null);
+		final User user = (User) userRepository.findById(id).orElse(null);
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, id);
 		}
 		userRepository.deleteById(id);
 		publisher.publishEvent(new UserDeleteEvent(id));
 		
-		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_USER_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);
-		eventService.publishEvent(event);
-		
-		rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_USER_QUEUE, mapper.writeValueAsString(event));
+		try {
+			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DELETE_USER_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS);
+			eventService.publishEvent(event);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.DELETE_USER_QUEUE, mapper.writeValueAsString(event));
+		} catch (Exception e) {
+			LOG.error("Error while deleting user.");
+		}
 
 		keycloakClient.deleteUser(user.getKeycloakId());
 	}

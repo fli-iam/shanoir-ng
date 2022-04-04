@@ -59,20 +59,4 @@ public class RabbitMqStudyUserService {
 			throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
 		}
     }
-
-	@RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE)
-	@RabbitHandler
-	@Transactional
-	public void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-		try {
-			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
-			Long userId = Long.valueOf(event.getObjectId());
-			service.deleteUser(userId);
-		} catch (Exception e) {
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
 }

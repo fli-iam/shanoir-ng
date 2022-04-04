@@ -19,12 +19,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyUserRepository;
+import org.shanoir.ng.study.rights.command.CommandType;
+import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -53,6 +56,9 @@ public class StudyUserServiceImpl implements StudyUserService {
 	@Autowired
 	private StudyUserRepository studyUserRepository;
 
+	@Autowired
+	private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
+	
 	@Override
 	public List<StudyUserRight> getRightsForStudy(Long studyId) {
 		Long userId = KeycloakUtil.getTokenUserId();
@@ -102,6 +108,12 @@ public class StudyUserServiceImpl implements StudyUserService {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 			Long userId = Long.valueOf(event.getObjectId());
 			List<StudyUser> sus =  this.studyUserRepository.findByUserId(userId);
+			List<StudyUserCommand> commands = new ArrayList<>();
+			for (StudyUser su : sus) {
+				StudyUserCommand command = new StudyUserCommand(CommandType.DELETE, su.getId());
+				commands.add(command);
+			}
+			this.studyUserUpdateBroadcastService.broadcast(commands);
 			this.studyUserRepository.deleteAll(sus);
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(e);
