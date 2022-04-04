@@ -19,12 +19,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyUserRepository;
+import org.shanoir.ng.study.rights.command.CommandType;
+import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * Implementation of study service.
@@ -38,6 +56,9 @@ public class StudyUserServiceImpl implements StudyUserService {
 	@Autowired
 	private StudyUserRepository studyUserRepository;
 
+	@Autowired
+	private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
+	
 	@Override
 	public List<StudyUserRight> getRightsForStudy(Long studyId) {
 		Long userId = KeycloakUtil.getTokenUserId();
@@ -75,5 +96,27 @@ public class StudyUserServiceImpl implements StudyUserService {
 		return false;
 	}
 
-	
+	@RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE)
+	@RabbitHandler
+	@Transactional
+	@Override
+	public void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException {
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		try {
+			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
+			Long userId = Long.valueOf(event.getObjectId());
+			List<StudyUser> sus =  this.studyUserRepository.findByUserId(userId);
+			List<StudyUserCommand> commands = new ArrayList<>();
+			for (StudyUser su : sus) {
+				StudyUserCommand command = new StudyUserCommand(CommandType.DELETE, su.getId());
+				commands.add(command);
+			}
+			this.studyUserUpdateBroadcastService.broadcast(commands);
+			this.studyUserRepository.deleteAll(sus);
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
 }
