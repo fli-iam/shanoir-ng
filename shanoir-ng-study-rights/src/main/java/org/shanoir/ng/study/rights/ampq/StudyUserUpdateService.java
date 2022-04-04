@@ -41,20 +41,6 @@ public class StudyUserUpdateService {
 	@Autowired
 	private StudyUserRightsRepository studyUserRepository;
 
-	/**
-	 * Deletes all the linked study users linked to a given deleted user.
-	 * @param userId the deleted used id
-	 */
-	public void deleteUser(Long userId) {
-		List<StudyUser> studyUsers = Utils.toList(studyUserRepository.findByUserId(userId));
-		List<StudyUserCommand> commands = new ArrayList<>();
-		
-		for (StudyUser su : studyUsers) {
-			commands.add(new StudyUserCommand(CommandType.DELETE, su.getId()));
-		}
-		this.processCommands(commands);
-	}
-
     public void processCommands(Iterable<StudyUserCommand> commands) {
         
         List<StudyUser> toBeCreated = new ArrayList<>();
