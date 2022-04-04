@@ -45,6 +45,9 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 
 		user.setExpirationDate(null);
 		user.setAccountRequestDemand(true);
+		user.setFirstExpirationNotificationSent(Boolean.FALSE);
+		user.setSecondExpirationNotificationSent(Boolean.FALSE);
+		user.setExtensionRequestDemand(Boolean.FALSE);
 
 		validate(user, result);
 		

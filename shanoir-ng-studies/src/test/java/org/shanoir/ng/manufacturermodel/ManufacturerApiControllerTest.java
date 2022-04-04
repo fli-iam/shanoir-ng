@@ -71,10 +71,12 @@ public class ManufacturerApiControllerTest {
 
 	@Before
 	public void setup() {
+		Manufacturer manuf = new Manufacturer();
+		manuf.setId(1L);
 		gson = new GsonBuilder().create();
-		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(new Manufacturer()));
-		given(manufacturerServiceMock.findById(1L)).willReturn(Optional.of(new Manufacturer()));
-		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(new Manufacturer());
+		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(manuf));
+		given(manufacturerServiceMock.findById(1L)).willReturn(Optional.of(manuf));
+		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(manuf);
 		given(uniqueConstraintManager.validate(Mockito.any(Manufacturer.class))).willReturn(new FieldErrorMap());
 	}
 

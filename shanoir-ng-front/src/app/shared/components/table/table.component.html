@@ -113,7 +113,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="vars.boolean && (!editMode || !vars.editable)">
                     <span *ngIf="vars.cellValue && !col.awesome" class="bool-true"><i class="fas fa-check"></i></span>
                     <span *ngIf="!vars.cellValue && !col.awesome" class="bool-false"><i class="fas fa-times"></i></span>
-                    <span *ngIf="vars.cellValue && col.awesome" class="bool-true"><i class="fas {{col.awesome}}" [style.color]="col.color"></i></span>
+                    <span *ngIf="vars.cellValue && col.awesome" class="bool-true"><i [class]="col.awesome" [style.color]="col.color"></i></span>
                 </span>
 
                 <!-- editable boolean -->
@@ -125,7 +125,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item)">
                     <span *ngIf="col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
                         <img *ngIf="col.img" src="{{col.img}}" />
-                        <span *ngIf="col.awesome" class="awesome"><i class="fas {{col.awesome}}"></i></span>
+                        <span *ngIf="col.awesome" class="awesome"><i [class]="col.awesome"></i></span>
                     </span>
                 </span>
 

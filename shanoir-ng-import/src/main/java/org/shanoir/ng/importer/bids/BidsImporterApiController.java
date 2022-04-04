@@ -14,44 +14,51 @@
 package org.shanoir.ng.importer.bids;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.zip.ZipOutputStream;
+import java.util.Map;
 
 import org.shanoir.ng.importer.ImporterApiController;
-import org.shanoir.ng.importer.dicom.DicomDirCreator;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
-import org.shanoir.ng.importer.dto.StudyCardDTO;
 import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.study.rights.StudyUser;
-import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.utils.ImportUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvParser;
 
 import io.swagger.annotations.ApiParam;
 
@@ -61,246 +68,310 @@ public class BidsImporterApiController implements BidsImporterApi {
 	@Value("${shanoir.import.directory}")
 	private String importDir;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
 	private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
 
 	private static final String NO_FILE_UPLOADED = "No file uploaded.";
+	
+	private static final String NOT_SUBJECT_BASED_SUBJECT = "The zip has to contain an unique 'sub-XXX' subject folder with data following the BIDS specification.";
 
-	private static final String APPLICATION_ZIP = "application/zip";
+	private static final String SUBJECT_CREATION_ERROR = "An error occured during the subject creation, please check your rights.";
+
+	private static final String EXAMINATION_CREATION_ERROR = "An error occured during the examination creation, please check your rights.";
+
+	private static final String CSV_SEPARATOR = "\t";
 
 	@Autowired
 	ImporterApiController importer;
 
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
+	private static final Logger LOG = LoggerFactory.getLogger(BidsImporterApiController.class);
+
+	
 	/**
-	 * This methods import a bunch of datasets from a Shanoir Exchange Format (based
-	 * on BIDS format)
-	 * 
-	 * @param bidsFile
-	 *            the file
-	 * @throws ShanoirException
-	 *             when something gets wrong during the import
-	 * @throws IOException
-	 *             when IO fails
-	 * @throws RestServiceException
+	 * This method import a BIDS subject folder.
 	 */
 	@Override
 	public ResponseEntity<ImportJob> importAsBids(
-			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile bidsFile)
-			throws RestServiceException, ShanoirException, IOException {
-		// Check that the file is not null and well zipped
+			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile bidsFile,
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") String studyName,
+			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId)
+					throws RestServiceException, ShanoirException, IOException {
+
+		// STEP 1: Analyze folder and unzip it.
 		if (bidsFile == null) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
 		}
 		if (!ImportUtils.isZipFile(bidsFile)) {
-			// .SEF ?
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
 		}
-		// Todo: what if we are coming from SHUP ?
 
+		// Set user ID for further rabbit calls
+		rabbitTemplate.setBeforePublishPostProcessors(message -> {
+			message.getMessageProperties().setHeader("x-user-id", KeycloakUtil.getTokenUserId());
+			return message;
+		});
+
+		ImportJob importJob = new ImportJob();
+		importJob.setStudyId(studyId);
+		
 		// Create tmp folder and unzip archive
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);
-
 		File tempFile = ImportUtils.saveTempFile(userImportDir, bidsFile);
-
 		File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, bidsFile, false);
-		// Deserialize participants.tsv => Do a call to studies API to create
-		// corresponding subjects
-		File participantsFile = new File(importJobDir.getAbsolutePath() + "/participants.tsv");
-		if (!participantsFile.exists()) {
-			throw new ShanoirException("participants.tsv file is mandatory");
-		}
+		
+		// Get equipment from file if existing, otherwise, set the "UNKNOWN EQUIPMENT"
+		importJob.setAcquisitionEquipmentId(0L);
+		importJob.setWorkFolder(importJobDir.getAbsolutePath());
 
-		ObjectMapper mapper = new ObjectMapper();
-
-		SimpleModule module = new SimpleModule();
-		module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
-		mapper.registerModule(module);
-
-		// Here we wait for the response => to be sure that the subjects are created
-		String participantString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, participantsFile.getAbsolutePath());
-		List<IdName> participants = Arrays.asList(mapper.readValue(participantString, IdName[].class));
-		// If we receive a unique subject with no ID => It's an error
-		if (participants.size() == 1 && participants.get(0).getId() == null) {
-			throw new ShanoirException(participants.get(0).getName());
-		}
-
-		File studyDescriptionFile = new File(importJobDir.getAbsolutePath() + "/dataset_description.json");
-		if (!studyDescriptionFile.exists()) {
-			throw new ShanoirException("studyDescriptionFile file is mandatory");
-		}
-
-		// Then import data
-		File sourceData = new File(importJobDir.getAbsolutePath() + "/sourcedata");
-		if (!sourceData.exists()) {
-			throw new ShanoirException("sourcedata folder is mandatory");
-		}
-
-		// 2) Import Datasets
-		File[] subjectFiles = sourceData.listFiles(new FilenameFilter() {
-			@Override
-			public boolean accept(File dir, String name) {
-				return name.startsWith("sub-");
-			}
-		});
-		ImportJob job = null;
-
-		for (File subjFile : subjectFiles) {
-			// Get subjectName
-			String subjectName = subjFile.getName().substring("sub-".length());
-
-			// Read shanoirImportFile
-			File shanoirImportFile = new File(subjFile.getAbsolutePath() + "/shanoir-import.json");
-
-			if (!shanoirImportFile.exists()) {
-				throw new ShanoirException("shanoir-import.json file is mandatory in subject folder");
-			}
-
-			ObjectMapper objectMapper = new ObjectMapper();
-			ImportJob sid = objectMapper.readValue(shanoirImportFile, ImportJob.class);
-
-			String studyCardAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.FIND_STUDY_CARD_QUEUE, sid.getStudyCardId());
-
-			if (studyCardAsString == null) {
-				throw new ShanoirException(
-						"StudyCard with ID " + sid.getStudyCardId() + " does not exists.");
-			}
-
-			StudyCardDTO studyCard = objectMapper.readValue(studyCardAsString, StudyCardDTO.class);
-
-			if (!studyCard.getStudyId().equals(sid.getStudyId())) {
-				throw new ShanoirException("Study with ID " + sid.getStudyId() + " does not exists.");
-			}
-			if (studyCard.isDisabled()) {
-				throw new ShanoirException("StudyCard with ID " + sid.getStudyCardId() + " is currently disabled, please select another one.");
-			}
-			
-			// Subject based on folder name
-			Long subjectId = getSubjectIdByName(subjectName, participants);
-			if (subjectId == null) {
-				throw new ShanoirException(
-						"Subject " + subjectName + " could not be created. Please check participants.tsv file.");
-			}
-			
-			// Create subjectStudy
-			IdName participantsInfo = new IdName(subjectId, studyCard.getStudyId().toString());
-			String studyName = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.DATASET_SUBJECT_STUDY_QUEUE, mapper.writeValueAsString(participantsInfo));
-
-			if (studyName == null) {
-				throw new ShanoirException("An error occured while linking subject to study. Please contact an administrator");
-			}
-
-			// If there is no DICOMDIR: create it
-			File dicomDir = new File(subjFile.getAbsolutePath() + "/DICOM/DICOMDIR");
-			if (!dicomDir.exists()) {
-				DicomDirCreator creator = new DicomDirCreator(subjFile.getAbsolutePath() + "/DICOMDIR",
-						subjFile.getAbsolutePath() + "/DICOM");
-				creator.start();
-			}
-
-			// Zip data folders to be able to call ImporterAPIController.uploadDicomZipFile
-			FileOutputStream fos = new FileOutputStream(subjFile.getAbsolutePath() + ".zip");
-			ZipOutputStream zipOut = new ZipOutputStream(fos);
-
-			ImportUtils.zipFile(subjFile, subjFile.getName(), zipOut, true);
-
-			zipOut.close();
-			fos.close();
-			MockMultipartFile multiPartFile = new MockMultipartFile(subjFile.getName(), subjFile.getName() + ".zip",
-					APPLICATION_ZIP, new FileInputStream(subjFile.getAbsolutePath() + ".zip"));
-
-			// Send data folder to import API and get import job
-			ResponseEntity<ImportJob> entity = importer.uploadDicomZipFile(multiPartFile);
-
-			// Complete ImportJob to use startImportJob
-			job = entity.getBody();
-
-			// Construire l'arborescence
-			job.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
-			job.setStudyId(sid.getStudyId());
-			job.setStudyCardId(sid.getStudyCardId());
-			job.setSubjectName(subjectName);
-			job.setStudyName(studyName);
-
-			job.setFromPacs(false);
-			job.setFromShanoirUploader(false);
-			job.setFromDicomZip(true);
-			job.setConverterId(studyCard.getNiftiConverterId());
-
-			for (Patient pat : job.getPatients()) {
-				pat.setPatientName(subjectName);
+		// STEP 2: Subject level, analyze and create the new subject if necessary
+		Long subjectId = null;
+		for (File subjectFile : importJobDir.listFiles()) {
+			String fileName = subjectFile.getName();
+			if (fileName.startsWith("sub-")) {
+				// We found a subject
+				String subjectName = studyName + "_" + subjectFile.getName().split("sub-")[1];
 				Subject subject = new Subject();
-				subject.setId(subjectId);
 				subject.setName(subjectName);
-				pat.setSubject(subject);
+				// Be carefull here, ID field is used to carry study id information
+				subject.setId(studyId);
+				importJob.setSubjectName(subjectName);
 
-				// Select all series to be imported
-				for (Study study : pat.getStudies()) {
-					for (Serie serie : study.getSeries()) {
-						serie.setSelected(Boolean.TRUE);
+				LOG.debug("We found a subject " + subjectName);
+
+				// Create subject
+				subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
+				if (subjectId == null) {
+					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), SUBJECT_CREATION_ERROR, null));
+				}
+
+				importJob.setSubjectName(subjectName);
+
+			} else {
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NOT_SUBJECT_BASED_SUBJECT, null));
+			}
+
+
+			// STEP 3: Examination level, check if there are session, otherwise create examinations
+			Map<String, LocalDate> examDates = checkDatesFromSessionFile(subjectFile);
+			// Filter scans.tsv and sessions.tsv files
+			File[] examFiles = subjectFile.listFiles(new FilenameFilter() {
+				@Override
+				public boolean accept(File arg0, String name) {
+					return !name.endsWith("_scans.tsv") && !name.endsWith("_sessions.tsv");
+				}
+			});
+
+			// Iterate over session files
+			boolean examCreated = false;
+			for (File sessionFile : examFiles) {
+				FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(sessionFile.getAbsolutePath()), "creationTime");
+				ExaminationDTO examination = null;
+				Long examId = null;
+
+				// STEP 3.1 There is a session level
+				if (sessionFile.getName().startsWith("ses-")) {
+					String sessionLabel = sessionFile.getName().substring(sessionFile.getName().indexOf("ses-") + "ses-".length());
+					LocalDate examDate = examDates.get(sessionLabel);
+
+					// Check for scans.tsv if session does not exist
+					if (examDate == null) {
+						examDate = checkDateFromScansFile(sessionFile);
 					}
+
+					// Set file creation as default
+					if (examDate == null) {
+						examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneId.systemDefault());
+					}
+					examination = createExam(studyId, centerId, subjectId, sessionLabel, examDate);
+					examCreated = true;
+
+					// Create multiple examinations for every session folder
+					examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+					
+					if (examId == null) {
+						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
+					}
+					
+					LOG.debug("We found a session " + sessionFile.getName());
+					importJob.setExaminationId(examId);
+
+					// STEP 4: Finish import from every bids data folder
+					for (File dataTypeFile : sessionFile.listFiles()) {
+						importSession(dataTypeFile, importJob);
+					}
+				} else {
+					// STEP 3.2 No session level
+					if (!examCreated) {
+						// Try to find acqusition_time in _scans.tsv file
+						LocalDate examDate = checkDateFromScansFile(subjectFile);
+						if (examDate == null) {
+							// Set exam date by default using file creation date
+							examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneOffset.UTC);
+						}
+						examination = createExam(studyId, centerId, subjectId, null, examDate);
+						examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
+						
+						if (examId == null) {
+							throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
+						}
+						
+						importJob.setExaminationId(examId);
+						examCreated = true;
+					}
+					// STEP 4: Finish impor from bids data folder
+					importSession(sessionFile, importJob);
 				}
 			}
-
-			// Create a new examination if not existing
-			if (sid.getExaminationId() == null || sid.getExaminationId().equals(Long.valueOf(0l))) {
-				// Create examination => We actually need its ID so do a direct API call
-				
-				// Get center ID
-				String centerAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CENTER_QUEUE, studyCard.getAcquisitionEquipmentId());
-				IdName center = objectMapper.readValue(centerAsString, IdName.class);
-
-				ExaminationDTO examDTO = new ExaminationDTO();
-				// Construct DTO
-				// get center from study card => equipment => center
-				examDTO.setCenter(new IdName(center.getId(), center.getName()));
-				examDTO.setPreclinical(false); // Pour le moment on fait que du DICOM
-				examDTO.setStudy(new IdName(sid.getStudyId(), sid.getStudyName()));
-				examDTO.setSubject(new IdName(subjectId, subjectName));
-				examDTO.setExaminationDate(job.getPatients().get(0).getStudies().get(0).getStudyDate());
-				examDTO.setComment(job.getPatients().get(0).getStudies().get(0).getStudyDescription());
-				
-				mapper.registerModule(new JavaTimeModule());
-				String examAsString = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, mapper.writeValueAsString(examDTO));
-
-				examDTO = mapper.readValue(examAsString, ExaminationDTO.class);
-				job.setExaminationId(examDTO.getId());
-			}
-
-			// Next API call => StartImportJob
-			ResponseEntity<Void> result = importer.startImportJob(job);
-			if (!result.getStatusCode().equals(HttpStatus.OK)) {
-				throw new ShanoirException("Error while importing subject: " + subjectName);
-			}
 		}
-
-		// TODO ONE DAY: Copy "other" files to the bids folder
-		// Copy non datasets elements
-		// Don't copy "data" folder
-		// Don't copy examination_description.json
-		// copy /sourceData??, /code and / files (readme, changes, participants.tsv,
-		// participants.json, etc..)
-		return new ResponseEntity<>(job, HttpStatus.OK);
+		
+		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 
 	/**
-	 * Get the ID of a subject from its name and a list of subject
-	 * 
-	 * @param name
-	 *            the name of the subject to find
-	 * @param subjects
-	 *            the list of subjects to supply
-	 * @return the ID of the subject corresponding to the name, null otherwise
+	 * This methods check if a _scans.tsv exists in the folder, and load the date of the first reference
+	 * @param parentFile the parent folder where the scancs.tsv file can be found
+	 * @return the first found date in the tsv file, null otherwise
+	 * @throws IOException when the file reading fails.
 	 */
-	public static Long getSubjectIdByName(String name, List<IdName> subjects) {
-		for (IdName sub : subjects) {
-			if (sub.getName().equals(name)) {
-				return sub.getId();
+	private LocalDate checkDateFromScansFile(File parentFile) throws IOException {
+		File[] scansFiles = parentFile.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith("_scans.tsv");
 			}
+		});
+
+		// We found _scans.tsv file
+		if (scansFiles.length != 1) {
+			return null;
 		}
-		return null;
+
+		File scanFile = scansFiles[0];
+
+		CsvMapper mapper = new CsvMapper();
+		mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+		MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(scanFile);
+
+		// Check that the list of column is known
+		List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
+
+		int dateIndex = columns.indexOf("acq_time");
+
+		// If there is no date, just give up
+		if (dateIndex == -1) {
+			return null;
+		}
+		try {
+			// Legal format in BIDS (are we up to date ? I don't think so)
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[SSSSSS][Z]");
+			String[] row = it.next()[0].split(CSV_SEPARATOR);
+			String dateAsString = row[dateIndex];
+			TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from, LocalDateTime::from);
+			return LocalDate.from(date);
+		} catch (Exception e) {
+			LOG.warn("Could not parse date for csv.");
+			return null;
+		}
 	}
+
+	/**
+	 * This methods check if a _sessions.tsv file exists in the folder, and load the dates for every referenced session
+	 * @param parentFile the parent folder where the sessions.tsv file can be found
+	 * @return a Map of sessionID -> Date, an empty Hashset otherwise.
+	 * @throws IOException when the file reading fails.
+	 */
+	private Map<String, LocalDate> checkDatesFromSessionFile(File parentFile) throws IOException {
+		// Try to find sub-<label>_sessions.tsv file
+		Map<String, LocalDate> examDates = new HashMap<String, LocalDate>();
+		File[] sessionFiles = parentFile.listFiles(new FilenameFilter() {
+			@Override
+			public boolean accept(File dir, String name) {
+				return name.endsWith("_sessions.tsv");
+			}
+		});
+
+		// We found session_tsv file
+		if (sessionFiles.length != 1) {
+			return examDates;
+		}
+		File sessionFile = sessionFiles[0];
+
+		// session_id;acq_time;pathology
+		// analyze date for every session
+		CsvMapper mapper = new CsvMapper();
+		mapper.enable(CsvParser.Feature.WRAP_AS_ARRAY);
+		MappingIterator<String[]> it = mapper.readerFor(String[].class).readValues(sessionFile);
+
+		// Check that the list of column is known
+		List<String> columns = Arrays.asList(it.next()[0].split(CSV_SEPARATOR));
+		int sessionIdIndex = columns.indexOf("session_id");
+		int dateIndex = columns.indexOf("acq_time");
+
+		// If there is no date, just give up
+		if (dateIndex == -1) {
+			return examDates;
+		}
+
+		// Legal format in BIDS (are we up to date ? I don't think so)
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYY-MM-DDThh:mm:ss[.000000][Z]");
+
+		while (it.hasNext()) {
+			String[] row = it.next()[0].split(CSV_SEPARATOR);
+			String sessionLabel = row[sessionIdIndex];
+			String dateAsString = row[dateIndex];
+			TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from);
+			examDates.put(sessionLabel, LocalDate.from(date));
+		}
+		return examDates;
+	}
+
+	/**
+	 * Create an exam from fiew attributes
+	 * @return the created exam
+	 */
+	private ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, String comment, LocalDate examDate) {
+		// Create one examination
+		ExaminationDTO examination = new ExaminationDTO();
+		IdName study = new IdName();
+		study.setId(studyId);
+		examination.setStudy(study);
+
+		IdName subj = new IdName();
+		subj.setId(subjectId);
+		examination.setSubject(subj);
+
+		IdName center = new IdName();
+		center.setId(centerId);
+		examination.setCenter(center);
+
+		examination.setComment(comment);
+
+		examination.setExaminationDate(examDate);
+
+		return examination;
+	}
+
+	/**
+	 * Import a session from a data type file.
+	 * @param dataTypeFile
+	 * @param importJob
+	 */
+	private void importSession(File dataTypeFile, ImportJob importJob) throws AmqpException, JsonProcessingException {
+		if (dataTypeFile.isDirectory()) {
+			importJob.setWorkFolder(dataTypeFile.getAbsolutePath());
+			LOG.debug("We found a data folder " + dataTypeFile.getName());
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_BIDS_DATASET_QUEUE, objectMapper.writeValueAsString(importJob));
+		} else {
+			LOG.debug("We found an examination extra-data " + dataTypeFile.getAbsolutePath());
+			IdName extraData = new IdName(importJob.getExaminationId(), dataTypeFile.getAbsolutePath());
+			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, objectMapper.writeValueAsString(extraData));			
+		}
+	}
+
 }

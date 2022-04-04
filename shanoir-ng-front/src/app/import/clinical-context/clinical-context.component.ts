@@ -49,6 +49,11 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { EquipmentDicom, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportMode } from '../../import/import.component';
+import { SimpleSubject } from '../../subjects/shared/subject.model';
+import { ImportJob } from '../shared/dicom-data.model';
+import { ImportService } from '../shared/import.service';
+import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+
 
 @Component({
     selector: 'clinical-context',
@@ -76,6 +81,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public niftiConverter: NiftiConverter;
     private animalSubject: AnimalSubject = new AnimalSubject();
     public importMode: ImportMode;
+    public subjectNamePrefix: string;
     private subscribtions: Subscription[] = [];
     public subjectTypes: Option<string>[] = [
         new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
@@ -89,6 +95,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public scHasDifferentModality: string;
     public modality: string;
     openSubjectStudy: boolean = false;
+    loading: boolean = false;
     
     constructor(
             public studyService: StudyService,
@@ -101,10 +108,12 @@ export class ClinicalContextComponent implements OnDestroy {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
             public subjectExaminationLabelPipe: SubjectExaminationPipe,
-            private acqEqPipe: AcquisitionEquipmentPipe,
+            public acqEqPipe: AcquisitionEquipmentPipe,
             public studycardService: StudyCardService,
             public studyRightsService: StudyRightsService,
-            private keycloakService: KeycloakService) {
+            private keycloakService: KeycloakService,
+            private msgService: MsgBoxService,
+            private importService: ImportService) {
 
         if (!importDataService.patients || !importDataService.patients[0]) {
             this.router.navigate(['imports'], {replaceUrl: true});
@@ -220,7 +229,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     private equipmentsEquals(eq1: AcquisitionEquipment, eq2: EquipmentDicom): boolean {
-        return eq2.deviceSerialNumber != null && (eq1.serialNumber === eq2.deviceSerialNumber)
+        return eq2?.deviceSerialNumber && (eq1?.serialNumber == eq2?.deviceSerialNumber);
     }
 
     public acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean {
@@ -232,6 +241,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public onSelectStudy(): Promise<void> {
+        this.loading = true;
         this.studycardOptions = null;
         if (this.study && this.isAdminOfStudy[this.study.id] == undefined) {
             if (this.keycloakService.isUserAdmin) {
@@ -240,7 +250,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[this.study.id] = result);
             }
         }
-        let end: Promise<void> = Promise.resolve();
+        let end: Promise<any> = Promise.resolve();
         if (this.useStudyCard) {
             this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
             this.openSubjectStudy = false;
@@ -257,17 +267,22 @@ export class ClinicalContextComponent implements OnDestroy {
                         let opt = new Option(sc, sc.name);
                         if (sc.acquisitionEquipment) {
                             let scEq = studyEquipments.find(se => se.id == sc.acquisitionEquipment.id);
-                            if (this.importMode == 'DICOM') opt.compatible = this.acqEqCompatible(scEq);
+                            if (this.importMode == 'DICOM') {
+                                opt.compatible = this.acqEqCompatible(scEq);
+                            }
                             if (!this.studycard && opt.compatible) {
                                 this.studycard = sc;
-                                this.onSelectStudyCard();
                             }
-                        } else if (this.importMode == 'DICOM') opt.compatible = false;
+                        } else if (this.importMode == 'DICOM') {
+                            opt.compatible = false;
+                        }
                         return opt;
                     });
-                    if (!this.studycard && studycards && studycards.length == 1) {
+                    if (this.studycard) {
+                        return this.onSelectStudyCard();
+                    } else if (!this.studycard && studycards && studycards.length == 1) {
                         this.studycard = studycards[0];
-                        this.onSelectStudyCard();
+                        return this.onSelectStudyCard();
                     }
                 });
             }
@@ -285,16 +300,23 @@ export class ClinicalContextComponent implements OnDestroy {
                     if (!foundCompatibleCenter && centerOption.compatible) {
                         foundCompatibleCenter = true;
                         this.center = centerOption.value;
-                        this.onSelectCenter();
+                        end = Promise.all([end, this.onSelectCenter()]);
                     }
                 }
                 this.centerOptions.push(centerOption);
             }
         }
-        return end.then(() => this.onContextChange());
+        return end.then(() => {
+            this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
+        });
     }
 
-    public onSelectStudyCard(): void {
+    public onSelectStudyCard(): Promise<any> {
+        this.loading = true;
+        let end: Promise<any> = Promise.resolve();
         if (this.study && this.studycard && this.studycard.acquisitionEquipment) {
             this.acquisitionEquipment = null;
             let scFound = this.study.studyCenterList.find(sc => {
@@ -302,16 +324,27 @@ export class ClinicalContextComponent implements OnDestroy {
                 if (eqFound) return true;
                 else return false;
             })
-            this.center = scFound ? scFound.center : null;
+            if (scFound) {
+                this.center = scFound.center;
+            } else {
+                this.center = this.studycard?.acquisitionEquipment?.center;
+            }
             this.onSelectCenter();
             this.acquisitionEquipment = this.studycard.acquisitionEquipment;
-            this.onSelectAcquisitonEquipment();
             this.niftiConverter = this.studycard.niftiConverter;
-            
+            end = Promise.all([
+                this.onSelectCenter(),
+                this.onSelectAcquisitonEquipment()
+            ]);
         }
         this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
         this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
-        this.onContextChange();
+        return end.then(() => {
+            this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
+        });
     }
 
     onToggleUseStudyCard() {
@@ -327,64 +360,96 @@ export class ClinicalContextComponent implements OnDestroy {
         this.importDataService.contextBackup.useStudyCard = this.useStudyCard;
     }
 
-    public onSelectCenter(): void {
+    public onSelectCenter(): Promise<any> {
+        this.loading = true;
         this.acquisitionEquipment = this.subject = this.examination = null;
+        if (this.center) {
+            let index = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id === this.center.id);
+            if (index > -1) this.subjectNamePrefix = this.study.studyCenterList[index].subjectNamePrefix;
+        }
         this.openSubjectStudy = false;
-        this.acquisitionEquipmentOptions =  [];
+        this.acquisitionEquipmentOptions = [];
         this.subjects =  [];
         this.examinations = [];
-        if (this.center && this.center.acquisitionEquipments) {
-            for (let acqEq of this.center.acquisitionEquipments) {
-                let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
-                if (this.importMode == 'DICOM') {
-                    option.compatible = this.acqEqCompatible(acqEq);
-                    if (option.compatible) {
-                        this.acquisitionEquipment = option.value;
-                        this.onSelectAcquisitonEquipment();
+        let end: Promise<any> = Promise.resolve();
+        if (this.useStudyCard) {
+             this.acquisitionEquipment = this.studycard?.acquisitionEquipment;
+             end = Promise.all([end, this.onSelectAcquisitonEquipment()]);
+        } else {
+            if (this.center && this.center.acquisitionEquipments) {
+                for (let acqEq of this.center.acquisitionEquipments) {
+                    let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
+                    if (this.importMode == 'DICOM') {
+                        option.compatible = this.acqEqCompatible(acqEq);
+                        if (option.compatible) {
+                            this.acquisitionEquipment = option.value;
+                            end = Promise.all([end, this.onSelectAcquisitonEquipment()]);
+                        }
                     }
+                    this.acquisitionEquipmentOptions.push(option);
                 }
-                this.acquisitionEquipmentOptions.push(option);
             }
         }
-        this.onContextChange();
+        return end.then(() => {
+            this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
+        });
     }
 
-    public onSelectAcquisitonEquipment(): void {
+    public onSelectAcquisitonEquipment(): Promise<any> {
+        this.loading = true;
         this.subject = this.examination = null;
         this.openSubjectStudy = false;
         this.subjects =  [];
         this.examinations = [];
+        let end: Promise<any> = Promise.resolve();
         if (this.acquisitionEquipment) {
             if(this.importMode == 'BRUKER') {
-                this.studyService
-                .findSubjectsByStudyIdPreclinical(this.study.id, true)
-                .then(subjects => this.subjects = subjects);
+                end = this.studyService
+                    .findSubjectsByStudyIdPreclinical(this.study.id, true)
+                    .then(subjects => this.subjects = subjects);
             } else {
-                this.studyService
+                end = this.studyService
                     .findSubjectsByStudyId(this.study.id)
                     .then(subjects => this.subjects = subjects);
             }
         }
-        this.onContextChange();
+        return end.then(() => {
+            this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
+        });
     }
 
-    public onSelectSubject(): void {
+    public onSelectSubject(): Promise<any> {
+        this.loading = true;
         if (this.subject && !this.subject.subjectStudy) this.subject = null;
         this.examination = null;
         this.examinations = [];
+        let end: Promise<any> = Promise.resolve();
         if (this.subject) {
             if(this.importMode == 'BRUKER') {
-            this.animalSubjectService
-        		.findAnimalSubjectBySubjectId(this.subject.id)
-        		.then(animalSubject => this.animalSubject = animalSubject);
+                end = this.animalSubjectService
+                    .findAnimalSubjectBySubjectId(this.subject.id)
+                    .then(animalSubject => this.animalSubject = animalSubject);
             }
-            this.examinationService
+            end = Promise.all([end,
+                this.examinationService
                 .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
-                .then(examinations => this.examinations = examinations);
+                .then(examinations => this.examinations = examinations)
+            ]);
         } else {
             this.openSubjectStudy = false;
         }
-        this.onContextChange();
+        return end.then(() => {
+            this.onContextChange();
+            this.loading = false;
+        }).catch(() => {
+            this.loading = false;
+        });
     }
 
     public onSelectExam(): void {
@@ -462,6 +527,7 @@ export class ClinicalContextComponent implements OnDestroy {
             this.breadcrumbsService.currentStep.data.lastName = this.computeNameFromDicomTag(this.patient.patientName)[2];
             this.breadcrumbsService.currentStep.data.patientName = this.patient.patientName;
             this.breadcrumbsService.currentStep.data.forceStudy = this.study;
+            this.breadcrumbsService.currentStep.data.subjectNamePrefix = this.subjectNamePrefix;
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     if (this.importMode == 'BRUKER') {
@@ -624,11 +690,87 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public next() {
-        if (this.importMode != 'BRUKER') {
-            this.router.navigate(['imports/finish']);
-        } else {
-            this.router.navigate(['imports/brukerfinish']);
-        }
+        this.startImportJob();
+    }
+
+    startImportJob(): void {
+        let context = this.importDataService.contextData;
+        this.subjectService
+            .updateSubjectStudyValues(context.subject.subjectStudy)
+            .then(() => {
+                let that = this;
+                (this.importMode != 'BRUKER' ? this.importData() : this.importDataBruker())
+                    .then(() => {
+                        this.importDataService.reset();
+                        setTimeout(function () {
+                            that.msgService.log('info', 'The import successfully started.')
+                        }, 0);
+                        // go back to the first step of import
+                        if (this.importMode == 'PACS') this.router.navigate(['/imports/pacs']);
+                        else if (this.importMode == 'DICOM') this.router.navigate(['/imports/upload']);
+                        else if (this.importMode == 'BRUKER') this.router.navigate(['/imports/bruker']);
+                        else this.router.navigate(['/home']);
+                    }).catch(error => {
+                        throw error;
+                    });
+            }).catch(error => {
+                throw new Error('Could not save the subjectStudy object, the import job has been stopped. Cause : ' + error);
+            });
+    }
+
+    private importData(): Promise<any> {
+        let importJob = new ImportJob();
+        let context = this.importDataService.contextData;
+        importJob.patients = new Array<PatientDicom>();
+        let simpleSubject: SimpleSubject = {
+            id: context.subject.id,
+            name: context.subject.name,
+            identifier: context.subject.identifier, 
+            subjectStudyList: [context.subject.subjectStudy]
+        };
+        this.patient.subject = simpleSubject;
+        let filteredPatient: PatientDicom = this.patient;
+        filteredPatient.studies = this.patient.studies.map(study => {
+            study.series = study.series.filter(serie => serie.selected);
+            return study;
+        });
+        importJob.patients.push(filteredPatient);
+        importJob.workFolder = this.importDataService.patientList.workFolder;
+        if (this.importMode == 'DICOM') importJob.fromDicomZip = true;
+        else if (this.importMode == 'PACS') importJob.fromPacs = true;
+        importJob.examinationId = context.examination.id;
+        importJob.studyId = context.study.id;
+        importJob.studyCardId = context.studyCard ? context.studyCard.id : null;
+        importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
+        importJob.converterId = context.niftiConverter.id;
+        importJob.subjectName = context.subject.name;
+        importJob.studyName = context.study.name;
+        return this.importService.startImportJob(importJob);
+    }
+
+    private importDataBruker (): Promise<any> {
+        let context = this.importDataService.contextData;
+        let contextImportJob = this.importDataService.archiveUploaded;
+
+        let importJob = new ImportJob();
+        importJob.patients = new Array<PatientDicom>();
+        // this.patient.subject = new IdName(this.context.subject.id, this.context.subject.name);
+        this.patient.subject = Subject.makeSubject(
+                context.subject.id,
+                context.subject.name, 
+                context.subject.identifier, 
+                context.subject.subjectStudy);
+        importJob.patients.push(this.patient);
+        importJob.workFolder = contextImportJob.workFolder;
+        importJob.fromDicomZip = true;
+        importJob.subjectName = context.subject.name;
+        importJob.studyName = context.study.name;
+        importJob.examinationId = context.examination.id;
+        importJob.studyId = context.study.id;
+        importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
+        importJob.converterId = context.niftiConverter.id;
+        importJob.archive = contextImportJob.archive;
+        return this.importService.startImportJob(importJob);
     }
 
     private hasCoilToUpdate(studycard: StudyCard): boolean {

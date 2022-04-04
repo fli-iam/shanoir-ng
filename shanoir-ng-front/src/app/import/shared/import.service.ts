@@ -31,12 +31,14 @@ export class ImportService {
                 observe: 'events'});
     }
 
-    uploadEegFile(formData: FormData): Promise<EegImportJob> {
-        return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData).toPromise();
+    uploadEegFile(formData: FormData): Observable<HttpEvent<EegImportJob>> {
+        return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData,
+        {reportProgress: true,
+                observe: 'events'});
     }
 
-    uploadBidsFile(formData: FormData): Promise<Object> {
-        return this.http.post<Object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL, formData).toPromise();
+    uploadBidsFile(formData: FormData, studyId: number, studyName: string, centerId: number): Promise<Object> {
+        return this.http.post<Object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL + studyId + '/' + studyName + '/' + centerId, formData).toPromise();
     }
 
     uploadProcessedDataset(formData: FormData): Promise<string> {

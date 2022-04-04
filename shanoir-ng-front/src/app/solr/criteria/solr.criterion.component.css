@@ -1,18 +1,16 @@
-:host() { display: block; border: 1px solid var(--grey); border-radius: 2px; padding: 5px 10px; position: relative; }
+:host() { display: block; border: 1px solid var(--color-b-light); border-radius: 2px; padding: 5px 10px; position: relative; }
 checkbox { transform: scale(0.8); margin-right: 7px; vertical-align: -4px; }
 
-.title { font-size: 20px; color: var(--color-a); margin-bottom: 2px; }
+.title { font-size: 18px; color: var(--color-a); margin-bottom: 2px; text-align: left; }
+.title i {opacity: 0.8; }
 .content { margin-top: 10px; }
 
 .filter-frame { position: relative; display: inline-block; margin-bottom: 10px; }
 .filter-frame .clear { position: absolute; top: 2px; right: 0px; color: #757575; }
 .filter-frame input { width: calc(200px - 65px); padding-right: 65px; }
 
-.clear-selection { margin-bottom: 10px; }
-
 .clickable { cursor: pointer; }
 
-.non-visible { visibility: hidden; }
 .min-list { max-height: 380px; overflow-y: auto; overflow-x: hidden; }
 
 .min-list, .selected-list { margin: 0 0 0 -2px; }
@@ -27,4 +25,4 @@ checkbox { transform: scale(0.8); margin-right: 7px; vertical-align: -4px; }
 
 .more, .less { color: var(--greyer); margin-left: 1px; }
 
-.colapse { float: right; cursor: pointer; font-size: 10px; height: 20px; line-height: 30px; color: var(--dark-grey);}
+.colapse { float: right; cursor: pointer; font-size: 10px; height: 20px; line-height: 30px; color: var(--dark-grey); }

@@ -62,6 +62,9 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 			throw new EntityNotFoundException(Center.class, id);
 		}
 		final List<FieldError> errors = new ArrayList<>();
+		if (centerOpt.get().getId() == 0) {
+			errors.add(new FieldError("unauthorized", "Cannot delete unknown center", ""));
+		}
 		if (!centerOpt.get().getAcquisitionEquipments().isEmpty()) {
 			errors.add(new FieldError("unauthorized", "Center linked to entities", "acquisitionEquipments"));
 		}

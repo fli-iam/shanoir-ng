@@ -31,6 +31,7 @@ export enum DatasetType {
   Spect = 'Spect',
   Statistical = 'Statistical',
   Template = 'Template',
+  BIDS = 'BIDS',
 } export namespace DatasetType {
   
   export function all(): Array<DatasetType> {
