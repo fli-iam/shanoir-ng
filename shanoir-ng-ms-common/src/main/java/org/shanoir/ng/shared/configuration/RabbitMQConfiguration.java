@@ -156,8 +156,6 @@ public class RabbitMQConfiguration {
 
 	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
 	
-	private static final String NULL = "";
-
 	////////////////// EXCHANGES //////////////////
 
 	/** Exchange used to publish / treat all sort of shanoir events. */
