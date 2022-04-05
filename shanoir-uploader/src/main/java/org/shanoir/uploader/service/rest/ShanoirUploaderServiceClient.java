@@ -435,12 +435,13 @@ public class ShanoirUploaderServiceClient {
 			URIBuilder b = new URIBuilder(this.serviceURLDatasets + "download/" + datasetId);
 			b.addParameter("format", format);
 			URL url = b.build().toURL();
-			CloseableHttpResponse response = httpService.get(url.toString());
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				return response;
-			} else {
-				logger.error("Could not get dataset id " + datasetId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			try (CloseableHttpResponse response = httpService.get(url.toString())) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					return response;
+				} else {
+					logger.error("Could not get dataset id " + datasetId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
 			}
 		}
 		return null;
@@ -450,12 +451,13 @@ public class ShanoirUploaderServiceClient {
 		if (datasetIds != null) {
 			String datasetIdsString = datasetIds.stream().map(Object::toString).collect(Collectors.joining(","));
 			String url = this.serviceURLDatasets + "massiveDownload?datasetIds=" + datasetIdsString + "&format=" + format;
-			CloseableHttpResponse response = httpService.get(url.toString());
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				return response;
-			} else {
-				logger.error("Could not get dataset ids " + datasetIds + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			try (CloseableHttpResponse response = httpService.get(url.toString())) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					return response;
+				} else {
+					logger.error("Could not get dataset ids " + datasetIds + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
 			}
 		}
 		return null;
@@ -467,12 +469,13 @@ public class ShanoirUploaderServiceClient {
 			b.addParameter("studyId", Long.toString(studyId));
 			b.addParameter("format", format);
 			URL url = b.build().toURL();
-			CloseableHttpResponse response = httpService.get(url.toString());
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-				return response;
-			} else {
-				logger.error("Could not get dataset of study " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			try (CloseableHttpResponse response = httpService.get(url.toString())) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					return response;
+				} else {
+					logger.error("Could not get dataset of study " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
 			}
 		}
 		return null;
