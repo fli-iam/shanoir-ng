@@ -18,8 +18,7 @@
 .button { background-color: transparent; }
 .button .tab { position: absolute;  color: var(--light-grey); text-align: center; cursor: pointer; }
 .button i { padding: 4px; }
-.button-top .tab {  right: 40%; left: 40%; top: 0; 
-    border-bottom: 20px solid var(--dark-grey); border-left: 10px solid transparent; border-right: 10px solid transparent; height: 0; }
+.button-top .tab { top: 0; border-bottom: 20px solid var(--dark-grey); border-right: 10px solid transparent; height: 0; }
 .right-tab { float: right; color: var(--light-grey); margin-right: -6px; cursor: pointer; }
 
 i { vertical-align: 1px; }

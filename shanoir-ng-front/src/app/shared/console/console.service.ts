@@ -15,6 +15,7 @@
 import { formatDate } from '@angular/common';
 import { Injectable } from '@angular/core';
 import { Observable, Observer } from 'rxjs';
+import { MsgBoxService } from '../msg-box/msg-box.service';
 
 type MsgType = 'error' | 'warn' | 'info';
 export class Message { 
@@ -37,7 +38,7 @@ export class ConsoleService {
     deployed: boolean = false;
     readonly MAX: number = 200;
 
-    constructor() {}
+    constructor(private msgBoxService: MsgBoxService) {}
 
     public log(type: MsgType, txt: string, details?: string[]) {
         let dateStr: string = formatDate(new Date(), 'HH:mm', 'en');
@@ -47,6 +48,7 @@ export class ConsoleService {
         if (this.messages.length > this.MAX) {
             this.messages.splice(this.MAX);
         }
+        this.msgBoxService.log(type, txt);
     } 
 }
 

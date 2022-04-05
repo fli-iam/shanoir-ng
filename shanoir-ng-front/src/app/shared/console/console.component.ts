@@ -40,12 +40,12 @@ export class ConsoleComponent implements OnDestroy {
         this.contentOpen = this._open;
         this.subscription = consoleService.messageObservable.subscribe(message => {
             this.messages.unshift(message);
-            if (!this.open) {
-                this.open = true; 
-                this.closeTimeout = this.setCloseTimeout();
-            } else if (this.closeTimeout) {
-                this.closeTimeout = this.setCloseTimeout();
-            }
+            // if (!this.open) {
+            //     this.open = true; 
+            //     this.closeTimeout = this.setCloseTimeout();
+            // } else if (this.closeTimeout) {
+            //     this.closeTimeout = this.setCloseTimeout();
+            // }
             if (this.messages.length > consoleService.MAX) {
                 this.messages.splice(consoleService.MAX);
             }
