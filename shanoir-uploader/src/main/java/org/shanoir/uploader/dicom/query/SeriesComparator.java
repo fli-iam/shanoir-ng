@@ -3,8 +3,8 @@ package org.shanoir.uploader.dicom.query;
 import java.util.Comparator;
 import java.util.Map.Entry;
 
-import org.shanoir.dicom.importer.Serie;
-import org.shanoir.dicom.model.DicomTreeNode;
+import org.shanoir.uploader.dicom.DicomTreeNode;
+import org.shanoir.uploader.dicom.Serie;
 
 /**
  * Dicom Serie comparator based on their serie number.
