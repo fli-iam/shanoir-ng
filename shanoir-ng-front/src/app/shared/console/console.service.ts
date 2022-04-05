@@ -21,6 +21,7 @@ type MsgType = 'error' | 'warn' | 'info';
 export class Message { 
     fresh: boolean;
     detailsOpened: boolean = false;
+    nb: number = 1;
 
     constructor(public type: MsgType, public txt: string, public details: string[]) {
         this.fresh = true;

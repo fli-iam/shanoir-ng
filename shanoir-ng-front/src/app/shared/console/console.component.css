@@ -22,3 +22,4 @@
 .right-tab { float: right; color: var(--light-grey); margin-right: -6px; cursor: pointer; }
 
 i { vertical-align: 1px; }
+.number { color: violet; }

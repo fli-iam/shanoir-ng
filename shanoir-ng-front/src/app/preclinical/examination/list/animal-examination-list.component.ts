@@ -97,12 +97,12 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
             ).then(res => {
                 if (res) {
                     this.getService().delete(selectedExamination.id).then(() => {
-                        this.onDelete.next(selectedExamination);
+                        this.onDelete.next({entity: selectedExamination});
                         this.table.refresh();
                         this.consoleService.log('info', 'The preclinical-examination sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({entity: selectedExamination, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
                     });                    
@@ -121,7 +121,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     private manageDelete() {
         this.subscribtions.push(
             this.onDelete.subscribe(response => {
-                this.deleteExamination(response.id)
+                this.deleteExamination(response.entity.id)
             })
         );
     }

@@ -41,7 +41,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected consoleService: ConsoleService;
     protected breadcrumbsService: BreadcrumbsService;
     public windowService: WindowService;
-    public onDelete: Subject<any> =  new Subject<any>();
+    public onDelete: Subject<{entity: Entity, error?: ShanoirError}> =  new Subject();
     public onAdd: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
     private selectedId:  number;
@@ -123,13 +123,13 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
             ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
-                        this.onDelete.next(entity);
+                        this.onDelete.next({entity: entity});
                         this.table.refresh().then(() => {
                             this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
                         });
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({error: new ShanoirError(reason), entity: entity});
                             if (reason.error.code != 422) throw Error(reason);
                         } else {
                             console.error(reason);

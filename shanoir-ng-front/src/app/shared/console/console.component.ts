@@ -38,19 +38,25 @@ export class ConsoleComponent implements OnDestroy {
         this._open = consoleService.open;
         this.deployed = consoleService.deployed;
         this.contentOpen = this._open;
-        this.subscription = consoleService.messageObservable.subscribe(message => {
-            this.messages.unshift(message);
-            // if (!this.open) {
-            //     this.open = true; 
-            //     this.closeTimeout = this.setCloseTimeout();
-            // } else if (this.closeTimeout) {
-            //     this.closeTimeout = this.setCloseTimeout();
-            // }
-            if (this.messages.length > consoleService.MAX) {
-                this.messages.splice(consoleService.MAX);
-            }
-        });
+        this.subscription = consoleService.messageObservable.subscribe(this.processNewMsg);
         setTimeout(() => this.appRef = Promise.resolve(this.injector.get(ApplicationRef)));
+    }
+
+    private processNewMsg = (message: Message) => {
+        if (this.messages.length > 0 && this.messages[0].txt == message.txt) {
+            this.messages[0].nb ++;
+        } else {
+            this.messages.unshift(message);
+        }
+        // if (!this.open) {
+        //     this.open = true; 
+        //     this.closeTimeout = this.setCloseTimeout();
+        // } else if (this.closeTimeout) {
+        //     this.closeTimeout = this.setCloseTimeout();
+        // }
+        if (this.messages.length > this.consoleService.MAX) {
+            this.messages.splice(this.consoleService.MAX);
+        }
     }
 
     private setCloseTimeout(): any {

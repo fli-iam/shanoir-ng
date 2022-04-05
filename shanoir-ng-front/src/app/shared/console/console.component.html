@@ -28,6 +28,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i *ngIf="msg.type == 'warn'" class="fas fa-exclamation-circle"></i>
         <i *ngIf="msg.type == 'error'" class="fas fa-times-circle"></i>
         {{msg.txt}}
+        <span *ngIf="msg.nb > 1" class="number">x{{msg.nb}}</span>
         <span *ngIf="msg.details" (click)="toggleDetails(msg)" class="details-button">
             <i class="fas fa-info"></i>
         </span>
