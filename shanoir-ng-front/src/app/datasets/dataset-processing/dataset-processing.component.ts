@@ -216,7 +216,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         ];
 
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            this.inputDatasetsColumnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeInputDataset(item) });
+            this.inputDatasetsColumnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeInputDataset(item) });
         }
 
         this.outputDatasetsColumnDefs = [
@@ -242,12 +242,12 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
             this.outputDatasetsColumnDefs.push({
-                title: "Add", awesome: "fa-plus", action: item => this.router.navigate(['dataset-processing/edit-input-datasets/' + this.id])
+                title: "Add", awesome: "fa-solid fa-plus", action: item => this.router.navigate(['dataset-processing/edit-input-datasets/' + this.id])
             });
         }
 
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            this.outputDatasetsColumnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeOutputDataset(item) });
+            this.outputDatasetsColumnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeOutputDataset(item) });
         }
     }
 

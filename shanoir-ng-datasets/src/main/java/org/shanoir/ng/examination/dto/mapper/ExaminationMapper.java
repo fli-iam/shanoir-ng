@@ -42,14 +42,13 @@ public interface ExaminationMapper {
 	 * @return list of examinations DTO.
 	 */
 	PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> examinations);
-
+	
 	/**
 	 * Map list of @Examination to not pageable list of @ExaminationDTO.
 	 * 
 	 * @param examinations list of examinations.
 	 * @return list of examinations DTO.
 	 */
-
 	List<ExaminationDTO> examinationsToExaminationDTOs(List<Examination> examinations);
 	
     

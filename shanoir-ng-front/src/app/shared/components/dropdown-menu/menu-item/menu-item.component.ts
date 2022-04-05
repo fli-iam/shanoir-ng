@@ -26,7 +26,6 @@ import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/anima
 export class MenuItemComponent {
 
     @Input() label: string;
-    @Input() link: string;
     @Input() boolVar: boolean;
     @Input() awesome: string;
     @Input() disabled: boolean;

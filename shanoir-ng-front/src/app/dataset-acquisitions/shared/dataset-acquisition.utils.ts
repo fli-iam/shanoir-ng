@@ -16,6 +16,7 @@ import { EegDatasetAcquisition } from '../modality/eeg/eeg-dataset-acquisition.m
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { PetDatasetAcquisition } from '../modality/pet/pet-dataset-acquisition.model';
 import { GenericDatasetAcquisition } from '../modality/generic-dataset-acquisition.model';
+import { BidsDatasetAcquisition } from '../modality/bids/bids-dataset-acquisition.model';
 
 import { DatasetAcquisition } from './dataset-acquisition.model';
 
@@ -28,6 +29,7 @@ export abstract class DatasetAcquisitionUtils {
             case 'Pet': return new PetDatasetAcquisition();
             case 'Ct': return new CtDatasetAcquisition();
             case 'Generic': return new GenericDatasetAcquisition();
+            case 'BIDS': return new BidsDatasetAcquisition();
             case 'Eeg': return new EegDatasetAcquisition();
             default: throw new Error('Received dataset acquisition has no valid "type" property');
         }

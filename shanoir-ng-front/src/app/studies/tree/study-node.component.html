@@ -16,14 +16,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         *ngIf="node"
         [class.selected]="showDetails && this.menuOpened"
         [label]="node.label" 
-        awesome="fas fa-folder-open"
+        awesome="fa-regular fa-folder-open"
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
         [hasChildren]="true"
         [clickable]="showDetails">
 
         <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened">
-            <menu-item label="Details..." awesome="fas fa-eye" (click)="showStudyDetails()"></menu-item>
+            <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showStudyDetails()"></menu-item>
         </dropdown-menu>
 
     <node
@@ -50,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             *ngIf="node.open"
             class="centers"
             label="Centers" 
-            awesome="fas fa-hospital"
+            awesome="fa-regular fa-hospital"
             [(opened)]="node.centersOpen"
             [hasChildren]="hasDependency(this.node.centers)">     
 

@@ -1,3 +1,4 @@
+
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -33,7 +34,7 @@ import { ExaminationNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-
+import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'examination',
@@ -58,12 +59,15 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasImportRight: boolean = false;
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
+    examNode: Examination | ExaminationNode;
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
 	hasEEG: boolean = false;
 	hasDicom: boolean = false;
+    hasBids: boolean = false;
+
 
     constructor(
             private route: ActivatedRoute,
@@ -82,7 +86,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.fileInput.nativeElement.click();
     }
     
-    set examination(examination: Examination) { this.entity = examination; }
+    set examination(examination: Examination) {
+        this.entity = examination;
+        this.examNode = this.breadcrumbsService.currentStep.data.examinationNode ? this.breadcrumbsService.currentStep.data.examinationNode : examination;
+    }
     get examination(): Examination { return this.entity; }
     
     getService(): EntityService<Examination> {
@@ -148,6 +155,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             this.datasetService.downloadDatasets(ids, format, this.progressBar);
         });
     }
+    
+    openViewer() {
+	    window.open(environment.viewerUrl + '/viewer/' + this.entity.id, '_blank');
+    }
 
     getCenters(): void {
         this.centerService
@@ -188,6 +199,10 @@ export class ExaminationComponent extends EntityComponent<Examination> {
          return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
     }
 
+    public isAdmin(): boolean {
+         return this.keycloakService.isUserAdmin();
+    }
+
     public deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
@@ -210,7 +225,12 @@ export class ExaminationComponent extends EntityComponent<Examination> {
                 this.examinationService.postFile(file, this.entity.id);
             }
             return result;            
-        });
+        }).catch(reason => { if (reason.status == 403) {
+            this.msgBoxService.log('error', 'Updating study, subject or center of an examination is forbiden. Please contact an administrator.');
+            return null;
+        } else {
+            throw reason;
+        }});
     }
 
     getFileName(element): string {
@@ -237,7 +257,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
                             datasetIds.push(ds.id);
 							if (ds.type == 'Eeg') {
 								this.hasEEG = true;
-							} else {
+							} else if (ds.type == 'BIDS') {
+                                this.hasBids = true;
+                            } else {
 								this.hasDicom = true;
 							}
                         });
