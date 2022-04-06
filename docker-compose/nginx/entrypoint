@@ -28,7 +28,7 @@ x_forwarded_headers() {
 (
 	x_forwarded_headers
 
-	cat /etc/nginx/ohif-viewer.template.conf
+	cat /etc/nginx/viewer/ohif-viewer.template.conf
 
 ) >/etc/nginx/ohif-viewer.conf
 
@@ -40,17 +40,18 @@ require SHANOIR_VIEWER_OHIF_URL_SCHEME
 optional SHANOIR_PREFIX
 
 cp "/etc/nginx/$SHANOIR_URL_SCHEME.conf" /etc/nginx/server.conf
+cp "/etc/nginx/viewer/app-config.js" /etc/nginx/viewer/html/
 
 sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 	s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
-" /etc/nginx/server.conf /etc/nginx/shanoir.conf /etc/nginx/html/assets/env.js
-
-sed -i "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
-" /etc/nginx/server.conf
-
-sed -i "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g
-" /etc/nginx/shanoir.conf /etc/nginx/ohif-viewer.conf
-
+	s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
+	s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g
+	s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g
+"	/etc/nginx/server.conf \
+	/etc/nginx/shanoir.conf \
+	/etc/nginx/viewer/html/app-config.js \
+	/etc/nginx/ohif-viewer.conf \
+	/etc/nginx/html/assets/env.js
 
 configure_instance()
 {
