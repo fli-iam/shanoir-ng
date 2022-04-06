@@ -137,6 +137,9 @@ public class WADODownloaderService {
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
 					String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
 					String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
+					if (name.contains(File.separator)) {
+						name = name.replaceAll(File.separator, "_");
+					}
 					File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
 					ByteArrayInputStream bIS = null;
 					try {

@@ -29,7 +29,7 @@ import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.upload.UploadServiceJob;
-import org.shanoir.util.ShanoirUtil;
+import org.shanoir.uploader.utils.Util;
 
 public class ReadyState implements State {
 
@@ -87,13 +87,13 @@ public class ReadyState implements State {
 	 * percentage upload percentage < 100 % must be 0%
 	 */
 	private void initNominativeDataFilesBeforeLaunchingJobs() {
-		final List<File> folders = ShanoirUtil.listFolders(ShUpOnloadConfig.getWorkFolder());
+		final List<File> folders = Util.listFolders(ShUpOnloadConfig.getWorkFolder());
 		logger.info("Update Nominative DataFiles Before Closing " + folders.size() + " folders in work folder.");
 		for (Iterator foldersIt = folders.iterator(); foldersIt.hasNext();) {
 			NominativeDataUploadJobManager dataJobManager = null;
 			final File folder = (File) foldersIt.next();
 			// initDataJobManager
-			final Collection<File> files = ShanoirUtil.listFiles(folder, null, false);
+			final Collection<File> files = Util.listFiles(folder, null, false);
 			for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
 				final File file = (File) filesIt.next();
 				if (file.getName().equals(

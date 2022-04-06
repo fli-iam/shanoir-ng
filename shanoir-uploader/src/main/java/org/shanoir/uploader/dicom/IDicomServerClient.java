@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
-import org.shanoir.dicom.importer.Serie;
 import org.shanoir.uploader.dicom.query.Media;
 
 public interface IDicomServerClient {

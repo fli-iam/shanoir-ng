@@ -31,6 +31,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
+import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -78,7 +79,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 		@JsonSubTypes.Type(value = SegmentationDataset.class, name = "Segmentation"),
 		@JsonSubTypes.Type(value = SpectDataset.class, name = "Spect"),
 		@JsonSubTypes.Type(value = StatisticalDataset.class, name = "Statistical"),
-		@JsonSubTypes.Type(value = TemplateDataset.class, name = "Template") })
+		@JsonSubTypes.Type(value = TemplateDataset.class, name = "Template"),
+		@JsonSubTypes.Type(value = BidsDataset.class, name = "BIDS") })
 public abstract class Dataset extends AbstractEntity {
 
 	/**

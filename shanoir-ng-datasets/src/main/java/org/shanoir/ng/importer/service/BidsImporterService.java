@@ -11,13 +11,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.tomcat.util.json.JSONParser;
 import org.apache.tomcat.util.json.ParseException;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
@@ -37,6 +41,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +58,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mysql.cj.xdevapi.JsonParser;
 
 @Service
 public class BidsImporterService {
@@ -76,11 +80,12 @@ public class BidsImporterService {
 
 	@Autowired
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
-
+	
 	@Value("${datasets-data}")
 	private String niftiStorageDir;
 
 	private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
+
 
 	/**
 	 * Create BIDS dataset.
@@ -184,11 +189,14 @@ public class BidsImporterService {
 		Examination examination = examinationRepository.findById(importJob.getExaminationId()).get();
 		datasetAcquisition.setExamination(examination);
 
-		List<Dataset> datasets = new ArrayList<>();
+		Set<Dataset> datasets = new HashSet<>();
 		float progress = 0f;
 
 		File[] filesToImport = new File(importJob.getWorkFolder()).listFiles();
 		
+		Map<String, BidsDataset> datasetsByName = new HashMap<>();
+		
+		Map<String, Integer> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE, "all"), Map.class);
 		Long equipmentId = 0L;
 
 		for (File importedFile : filesToImport) {
@@ -197,22 +205,46 @@ public class BidsImporterService {
 			event.setProgress(progress);
 			eventService.publishEvent(event);
 
-			// Metadata
-			DatasetMetadata originMetadata = new DatasetMetadata();
-			originMetadata.setDatasetModalityType(modalityType);
-			originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+			String name = FilenameUtils.removeExtension(importedFile.getName());
+			if (name.endsWith(".nii")) {
+				name = FilenameUtils.removeExtension(name);
+			}
 
-			// Create the dataset with informations from job
-			BidsDataset datasetToCreate = new BidsDataset();
-			datasetToCreate.setSubjectId(examination.getSubjectId());
+			// Parse name to get acquisition / session / run / task
+			
+			BidsDataset datasetToCreate;
+			DatasetExpression expression;
 
-			// DatasetExpression with list of files
-			DatasetExpression expression = new DatasetExpression();
-			expression.setCreationDate(LocalDateTime.now());
-			expression.setDatasetExpressionFormat(DatasetExpressionFormat.BIDS);
-			expression.setDataset(datasetToCreate);
+			if (datasetsByName.get(name) != null) {
+				datasetToCreate = datasetsByName.get(name);
+				expression = datasetToCreate.getDatasetExpressions().get(0);
+			} else {
+				// Create the dataset with informations from job
+				datasetToCreate = new BidsDataset();
+				datasetToCreate.setSubjectId(examination.getSubjectId());
+				datasetToCreate.setCreationDate(LocalDate.now());
+				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 
-			List<DatasetFile> files = new ArrayList<>();
+				// Metadata
+				DatasetMetadata originMetadata = new DatasetMetadata();
+				originMetadata.setName(name);
+				originMetadata.setDatasetModalityType(modalityType);
+				originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
+				
+				datasetToCreate.setOriginMetadata(originMetadata);
+				datasetToCreate.setUpdatedMetadata(originMetadata);
+				datasetToCreate.setBidsDataType(bidsDataType.getFolderName());
+				
+				// DatasetExpression with list of files
+				expression = new DatasetExpression();
+				expression.setCreationDate(LocalDateTime.now());
+				expression.setDatasetExpressionFormat(DatasetExpressionFormat.BIDS);
+				expression.setDataset(datasetToCreate);
+				expression.setDatasetFiles(new ArrayList<>());
+				datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
+			}
+
+			List<DatasetFile> files = expression.getDatasetFiles();
 
 			// Copy the data to "BIDS" folder
 			final String subLabel = SUBJECT_PREFIX + importJob.getSubjectName();
@@ -232,32 +264,21 @@ public class BidsImporterService {
 				// Check equipment in json file
 				JSONParser json = new JSONParser(new FileReader(importedFile));
 				LinkedHashMap jsonObject = (LinkedHashMap) json.parse();
-				
 				if (jsonObject.get("DeviceSerialNumber") != null) {
-					String value = (String) jsonObject.get("DeviceSerialNumber");
-					Long equipId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE, value);
-					if (equipId != null) {
-						equipmentId = equipId;
-					}
+					String code = (String) jsonObject.get("DeviceSerialNumber");
+					equipmentId = equipments.get(code) != null ? Long.valueOf(equipments.get(code)) : 0L;
 				}
 			}
-
+			
 			expression.setDatasetFiles(files);
-			datasetToCreate.setDatasetExpressions(Collections.singletonList(expression));
-
-			// Fill dataset with informations
-			datasetToCreate.setCreationDate(LocalDate.now());
-			datasetToCreate.setDatasetAcquisition(datasetAcquisition);
-			datasetToCreate.setOriginMetadata(originMetadata);
-			datasetToCreate.setUpdatedMetadata(originMetadata);
-			datasetToCreate.setBidsDataType(bidsDataType.getFolderName());
-
 			datasets.add(datasetToCreate);
+			datasetsByName.put(name, datasetToCreate);
 		}
 
-		datasetAcquisition.setDatasets(datasets);
+		datasetAcquisition.setDatasets(new ArrayList<>(datasets));
 		datasetAcquisition.setAcquisitionEquipmentId(equipmentId);
 		datasetAcquisitionRepository.save(datasetAcquisition);
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
 		
 		event.setStatus(ShanoirEvent.SUCCESS);
 		event.setMessage("(" + importJob.getStudyId() + ")"

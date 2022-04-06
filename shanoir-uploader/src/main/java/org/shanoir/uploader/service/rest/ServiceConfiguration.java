@@ -79,7 +79,7 @@ public class ServiceConfiguration {
 		}
 	}
 
-	public Boolean isProxyEnable() {
+	public Boolean isProxyEnabled() {
 		if (ShUpConfig.proxyProperties.getProperty("proxy.enabled") != null
 				&& Boolean.valueOf(ShUpConfig.proxyProperties.getProperty("proxy.enabled"))) {
 			return true;

@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.examination.dto;
 
-
-
 import java.time.LocalDate;
 import java.util.List;
 

@@ -106,7 +106,7 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
 			Study study = studyService.findById(studyId);
-			if (study.getExaminationIds() != null && !study.getExaminationIds().isEmpty()) {
+			if (study.getExaminations() != null && !study.getExaminations().isEmpty()) {
 				// Error => should not be able to do this see #793
 				return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 			}

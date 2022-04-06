@@ -127,7 +127,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             { headerName: 'Receive Member Mail', type: 'boolean', field: 'receiveStudyUserReport', editable: true, width: '54px' },
         ];
         if (deleteButton) {
-            this.columnDefs.push({ headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)});
+            this.columnDefs.push({ headerName: '', type: 'button', awesome: 'fa-regular fa-trash-can', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)});
         }
     }
 

@@ -52,6 +52,15 @@ public interface ExaminationService {
 	void deleteFromRabbit(Examination exam) throws EntityNotFoundException;
 
 	/**
+	 * Get all examinations for a specific user to support DICOMweb.
+	 * 
+	 * @return
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
+	List<Examination> findAll();
+	
+	/**
 	 * Get a paginated list of examinations reachable by connected user.
 	 * 
 	 * @param pageable pagination data.
@@ -60,6 +69,16 @@ public interface ExaminationService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
 	Page<Examination> findPage(final Pageable pageable, boolean preclinical);
+	
+	/**
+	 * Get a paginated list of examinations reachable by connected user.
+	 * 
+	 * @param pageable pagination data.
+	 * @return list of examinations.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
+	Page<Examination> findPage(final Pageable pageable, String patientName);
 
 	/**
 	 * Find examination by its id.
