@@ -315,7 +315,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     this.datasetService.delete(parseInt(solrDocument.datasetId)).then(() => {
                         this.selectedDatasetIds.delete(parseInt(solrDocument.datasetId));
                         this.table.refresh().then(() => {
-                            this.consoleService.log('info', 'Dataset sucessfully deleted');
+                            this.consoleService.log('info', 'Dataset n°' + solrDocument.datasetId + 'was sucessfully deleted');
                         });
                     });                    
                 }
@@ -333,7 +333,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                         this.selectedDatasetIds = new Set();
                         if (this.tab == 'selected') this.selectionTable.refresh();
                         this.table.refresh().then(() => {
-                            this.consoleService.log('info', 'Datasets sucessfully deleted');
+                            this.consoleService.log('info', 'Datasets sucessfully deleted', ['ids : ' + [...this.selectedDatasetIds].join(', ')]);
                         });
                     }).catch(reason => {
                         if(reason.error.code == 403) {

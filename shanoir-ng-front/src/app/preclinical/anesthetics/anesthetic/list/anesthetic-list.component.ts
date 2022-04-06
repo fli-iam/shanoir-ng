@@ -115,12 +115,12 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
             ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
-                        this.onDelete.next(entity);
+                        this.onDelete.next({entity: entity});
                         this.table.refresh();
-                        this.consoleService.log('info', 'The preclinical-anesthetic sucessfully deleted');
+                        this.consoleService.log('info', 'Preclinical-anesthetic n°' + entity.id + ' sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({entity: entity, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
                     });                    

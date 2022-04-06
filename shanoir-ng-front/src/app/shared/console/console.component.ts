@@ -43,7 +43,16 @@ export class ConsoleComponent implements OnDestroy {
     }
 
     private processNewMsg = (message: Message) => {
-        if (this.messages.length > 0 && this.messages[0].txt == message.txt) {
+        if (this.messages.length > 0 && this.messages[0].txt == message.txt 
+                && (
+                    (!this.messages[0].details && !message.details)
+                    || (
+                        this.messages[0].details && message.details
+                        && this.messages[0].details.length == message.details.length 
+                        && this.messages[0].details.every((value, index) => value == message.details[index])
+                    )
+                )
+        ){
             this.messages[0].nb ++;
         } else {
             this.messages.unshift(message);

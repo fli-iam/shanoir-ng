@@ -33,7 +33,7 @@ export class AuthAdminGuard implements CanActivate {
             return true;
         } else {
             this.router.navigate(['/home']);
-            this.consoleService.log('warn', 'Sorry, you have no right to visit to this page.');
+            this.consoleService.log('warn', 'Sorry, you have no right to visit to this page.', ['route : ' + this.router.url]);
             return false;
         }
     }

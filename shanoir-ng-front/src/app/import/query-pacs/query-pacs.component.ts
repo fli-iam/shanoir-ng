@@ -60,7 +60,7 @@ export class QueryPacsComponent{
                 this.importDataService.patientList = importJob;
                 this.router.navigate(['imports/series']);
             } else {
-                this.consoleService.log('warn', 'Nothing found. Please change your query parameters.'); 
+                this.consoleService.log('warn', 'Nothing found. Please change your query parameters.', ['query : ' + JSON.stringify(this.dicomQuery)]); 
             }
         })
     }

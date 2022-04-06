@@ -125,7 +125,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                     this.getService().delete(entity.id).then(() => {
                         this.onDelete.next({entity: entity});
                         this.table.refresh().then(() => {
-                            this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                            this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
                         });
                     }).catch(reason => {
                         if (reason && reason.error) {

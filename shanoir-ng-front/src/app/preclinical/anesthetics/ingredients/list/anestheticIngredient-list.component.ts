@@ -140,14 +140,14 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
                     if (res) {
                         this.ingredientsService.deleteAnestheticIngredient(this.anesthetic.id, entity.id).then((response) => {
                             this.getAnestheticIngredient(selectedIngredient)
-                            this.onDelete.next(selectedIngredient);
+                            this.onDelete.next({entity: selectedIngredient});
                             let index = this.anesthetic.ingredients.findIndex(i => i.id === entity.id); //find index in your array
                             this.anesthetic.ingredients.splice(index, 1);
                             this.table.refresh();
-                            this.consoleService.log('info', 'The preclinical-anesthetic-ingredient sucessfully deleted');
+                            this.consoleService.log('info', 'The preclinical-anesthetic-ingredient n° ' + entity.id + ' sucessfully deleted');
                         }).catch(reason => {
                             if (reason && reason.error) {
-                                this.onDelete.next(new ShanoirError(reason));
+                                this.onDelete.next({entity: entity, error: new ShanoirError(reason)});
                                 if (reason.error.code != 422) throw Error(reason);
                             }
                         });                    

@@ -99,7 +99,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
                     this.getService().delete(selectedExamination.id).then(() => {
                         this.onDelete.next({entity: selectedExamination});
                         this.table.refresh();
-                        this.consoleService.log('info', 'The preclinical-examination sucessfully deleted');
+                        this.consoleService.log('info', 'The preclinical-examination n°' + entity.id + ' was sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
                             this.onDelete.next({entity: selectedExamination, error: new ShanoirError(reason)});

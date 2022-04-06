@@ -135,7 +135,7 @@ export class ExaminationNodeComponent implements OnChanges {
         if (this.node.datasetAcquisitions == 'UNLOADED') {
             datasetIdsReady = this.loadDatasetAcquisitions();
             if (!this.datasetIds || this.datasetIds.length == 0) {
-                this.consoleService.log('warn', 'Sorry, no dataset for this examination');
+                this.consoleService.log('warn', 'Sorry, no dataset for examination n°' + this.node?.id);
                 return;
             }
         } else {
