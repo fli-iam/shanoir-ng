@@ -14,7 +14,6 @@
 import { Component, HostListener, ViewChild} from '@angular/core';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { Router } from '../../breadcrumbs/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
 import { EegDataset } from '../../datasets/dataset/eeg/dataset.eeg.model';
@@ -22,6 +21,7 @@ import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { TreeNodeComponent } from '../../shared/components/tree/tree-node.component';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'eeg-select-series',

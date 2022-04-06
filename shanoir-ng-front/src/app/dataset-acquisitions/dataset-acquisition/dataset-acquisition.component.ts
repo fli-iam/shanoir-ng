@@ -37,7 +37,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public studyCards: StudyCard[];
     public acquisitionEquipments: AcquisitionEquipment[];
-    
+    acquisitionNode: DatasetAcquisition | DatasetAcquisitionNode;
     
     constructor(
             private route: ActivatedRoute,
@@ -53,7 +53,10 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
     
     get datasetAcquisition(): DatasetAcquisition { return this.entity; }
-    set datasetAcquisition(datasetAcquisition: DatasetAcquisition) { this.entity = datasetAcquisition; }
+    set datasetAcquisition(datasetAcquisition: DatasetAcquisition) { 
+        this.acquisitionNode = this.breadcrumbsService.currentStep.data.datasetAcquisitionNode ? this.breadcrumbsService.currentStep.data.datasetAcquisitionNode : datasetAcquisition;
+        this.entity = datasetAcquisition; 
+    }
 
     initView(): Promise<void> {
         return this.datasetAcquisitionService.get(this.id).then(dsAcq => {

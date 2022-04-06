@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -74,6 +75,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Autowired
 	private DatasetService datasetService;
 	
+	@Value("${datasets-data}")
+	private String dataDir;
+	
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException, ShanoirException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
@@ -116,9 +120,17 @@ public class ExaminationServiceImpl implements ExaminationService {
 		examinationRepository.deleteById(exam.getId());
 	}
 
-	@Value("${datasets-data}")
-	private String dataDir;
-
+	@Override
+	public List<Examination> findAll() {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return examinationRepository.findAll();
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			return examinationRepository.findByStudyIdIn(studyIds);
+		}
+	}
+	
 	@Override
 	public Page<Examination> findPage(final Pageable pageable, boolean preclinical) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -127,6 +139,25 @@ public class ExaminationServiceImpl implements ExaminationService {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			return examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable);
+		}
+	}
+	
+	@Override
+	public Page<Examination> findPage(final Pageable pageable, String patientName) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			if (StringUtils.isNotEmpty(patientName) && patientName.length() <= 64) {
+				return examinationRepository.findAllBySubjectName(patientName, pageable);
+			} else {
+				return examinationRepository.findAll(pageable);
+			}
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			if (StringUtils.isNotEmpty(patientName) && patientName.length() <= 64) {
+				return examinationRepository.findByStudyIdInAndBySubjectName(studyIds, patientName, pageable);
+			} else {
+				return examinationRepository.findByStudyIdIn(studyIds, pageable);
+			}
 		}
 	}
 
