@@ -428,7 +428,7 @@ export class EegClinicalContextComponent implements OnInit {
                     .then((importJob: EegImportJob) => {
                         this.importDataService.reset();
                         setTimeout(function () {
-                            that.consoleService.log('info', 'Import successfully started')
+                            that.consoleService.log('info', 'Import successfully started for subject "' + that.subject.name + '" in study "' + that.study.name + '"');
                         }, 0);
                         // go back to the first step of import
                         this.router.navigate(['/imports/eeg']);
