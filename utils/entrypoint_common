@@ -74,6 +74,8 @@ require()
             SHANOIR_ADMIN_EMAIL)    ;;
             SHANOIR_ADMIN_NAME)     ;;
             SHANOIR_SMTP_HOST)      ;;
+            SHANOIR_CERTIFICATE_PEM_CRT) ;;
+            SHANOIR_CERTIFICATE_PEM_KEY) ;;
             *)
                 error "unknown var: $name"
                 ;;

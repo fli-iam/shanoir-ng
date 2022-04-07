@@ -37,9 +37,16 @@ require SHANOIR_URL_HOST
 require SHANOIR_URL_SCHEME
 require SHANOIR_VIEWER_OHIF_URL_HOST
 require SHANOIR_VIEWER_OHIF_URL_SCHEME
+require SHANOIR_CERTIFICATE_PEM_CRT
+require SHANOIR_CERTIFICATE_PEM_KEY
 optional SHANOIR_PREFIX
 
-cp "/etc/nginx/$SHANOIR_URL_SCHEME.conf" /etc/nginx/server.conf
+if [ "$SHANOIR_CERTIFICATE_PEM_CRT" = none ] && [ "$SHANOIR_CERTIFICATE_PEM_KEY" = none ]
+then
+	cp "/etc/nginx/http.conf" /etc/nginx/server.conf
+else
+	cp "/etc/nginx/https.conf" /etc/nginx/server.conf
+fi
 cp "/etc/nginx/viewer/app-config.js" /etc/nginx/viewer/html/
 
 sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
@@ -47,6 +54,8 @@ sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 	s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
 	s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g
 	s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g
+	s/SHANOIR_CERTIFICATE_PEM_CRT/$SHANOIR_CERTIFICATE_PEM_CRT/g
+	s/SHANOIR_CERTIFICATE_PEM_KEY/$SHANOIR_CERTIFICATE_PEM_KEY/g
 "	/etc/nginx/server.conf \
 	/etc/nginx/shanoir.conf \
 	/etc/nginx/viewer/html/app-config.js \

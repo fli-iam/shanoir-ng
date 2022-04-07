@@ -90,6 +90,8 @@ services:
       - SHANOIR_SMTP_HOST
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_CERTIFICATE
+      - SHANOIR_CERTIFICATE_PEM_CRT
+      - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -301,6 +303,8 @@ services:
       - SHANOIR_X_FORWARDED
       - SHANOIR_INSTANCE_NAME
       - SHANOIR_INSTANCE_COLOR
+      - SHANOIR_CERTIFICATE_PEM_CRT
+      - SHANOIR_CERTIFICATE_PEM_KEY
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
