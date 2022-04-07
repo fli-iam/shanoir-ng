@@ -72,11 +72,14 @@ public class ManufacturerModelApiControllerTest {
 	@Before
 	public void setup() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		gson = new GsonBuilder().create();
+		
+		ManufacturerModel model = new ManufacturerModel();
+		model.setId(1L);
 
-		given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(new ManufacturerModel()));
-		given(manufacturerModelServiceMock.findById(1L)).willReturn(Optional.of(new ManufacturerModel()));
+		given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(model));
+		given(manufacturerModelServiceMock.findById(1L)).willReturn(Optional.of(model));
 		given(manufacturerModelServiceMock.create(Mockito.mock(ManufacturerModel.class)))
-				.willReturn(new ManufacturerModel());
+				.willReturn(model);
 		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(ManufacturerModel.class))).willReturn(true);
 	}
 

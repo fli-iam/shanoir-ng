@@ -89,8 +89,6 @@ ms.url:
   shanoir-ng-bids: http://${SHANOIR_PREFIX}datasets:9904/bids
 # data paths
 studies-data: /var/studies-data
-# Data folder configuration
-bids-data-folder: /var/datasets-data/bids-data
 # logging configuration
 logging:
   file:

@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.solr.common.SolrDocument;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.SubjectStudy;
@@ -37,7 +36,7 @@ import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
-import org.shanoir.ng.solr.model.ShanoirSolrFacet;
+import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
 import org.shanoir.ng.solr.repository.SolrRepository;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -51,6 +50,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
@@ -124,8 +125,8 @@ public class SolrServiceImpl implements SolrService {
 		indexDocumentsInSolr(shanoirMetadatas);
 	}
 
-	@Transactional
 	@Override
+	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public void indexDataset(Long datasetId) {
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
 		if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
@@ -199,31 +200,14 @@ public class SolrServiceImpl implements SolrService {
 
 	@Transactional
 	@Override
-	public SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable) {
+	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException {
 		SolrResultPage<ShanoirSolrDocument> result = null;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findAllDocsAndFacets(pageable);
+			result = solrRepository.findByFacetCriteria(query, pageable);
 		} else {
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			if (studyIds.isEmpty()) {
-				return new SolrResultPage<>(Collections.emptyList());
-			}
-			result = solrRepository.findByStudyIdIn(studyIds, pageable);
-		}
-		return result;
-	}
-
-	@Transactional
-	@Override
-	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
-		SolrResultPage<ShanoirSolrDocument> result = null;
-		pageable = prepareTextFields(pageable);
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByFacetCriteria(facet, pageable);
-		} else {
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, facet, pageable);
+			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, query, pageable);
 		}
 		return result;
 	}
@@ -235,7 +219,7 @@ public class SolrServiceImpl implements SolrService {
 					|| order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")
 					|| order.getProperty().equals("tags")) {
 				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-						order.getDirection(), order.getProperty().concat("_str"));
+						order.getDirection(), order.getProperty());
 			} else if (order.getProperty().equals("id")) {
 				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
 						order.getDirection(), "datasetId");

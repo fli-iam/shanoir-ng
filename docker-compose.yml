@@ -29,8 +29,10 @@ services:
     environment:
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_ADMIN_NAME
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_SMTP_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
@@ -80,15 +82,15 @@ services:
     container_name: "${SHANOIR_PREFIX}users"
     build: ./docker-compose/users
     environment:
-      - SHANOIR_URL_HOST
+      - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_SMTP_HOST
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_CERTIFICATE
       - SHANOIR_MIGRATION
-      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java
@@ -107,14 +109,13 @@ services:
     container_name: "${SHANOIR_PREFIX}studies"
     build: ./docker-compose/studies
     environment:
-      - SHANOIR_URL_HOST
-      - SHANOIR_URL_SCHEME
-      - SHANOIR_MIGRATION
       - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
-      - "datasets-data:/var/datasets-data"
       - "studies-data:/var/studies-data"
       - "tmp:/tmp"
     networks:
@@ -133,10 +134,10 @@ services:
     container_name: "${SHANOIR_PREFIX}import"
     build: ./docker-compose/import
     environment:
-      - SHANOIR_URL_HOST
-      - SHANOIR_URL_SCHEME
-      - SHANOIR_MIGRATION
       - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -157,10 +158,12 @@ services:
     container_name: "${SHANOIR_PREFIX}datasets"
     build: ./docker-compose/datasets
     environment:
-      - SHANOIR_URL_HOST
-      - SHANOIR_URL_SCHEME
-      - SHANOIR_MIGRATION
       - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -180,10 +183,10 @@ services:
     container_name: "${SHANOIR_PREFIX}preclinical"
     build: ./docker-compose/preclinical
     environment:
-      - SHANOIR_URL_HOST
-      - SHANOIR_URL_SCHEME
-      - SHANOIR_MIGRATION
       - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -284,6 +287,21 @@ services:
       - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
       - "dcm4chee-arc-storage-data:/storage"
   #
+  # OHIF-Viewer, version 2.0
+  #
+  ohif-viewer:
+    container_name: "${SHANOIR_PREFIX}ohif-viewer"
+    build: ./docker-compose/ohif-viewer 
+    environment:
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
+    networks:
+      - shanoir_ng_network
+    ports:
+      - "9905:9905"
+  #
   # Nginx
   #
   nginx:
@@ -291,8 +309,10 @@ services:
     build: ./docker-compose/nginx
     environment:
       - SHANOIR_PREFIX
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_X_FORWARDED
       - SHANOIR_INSTANCE_NAME
       - SHANOIR_INSTANCE_COLOR

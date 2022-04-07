@@ -17,6 +17,7 @@ import { Injectable } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Event, NavigationEnd, Router } from '@angular/router';
 import { Subject } from 'rxjs';
+import { ImportMode } from '../import/import.component';
 
 @Injectable()
 export class BreadcrumbsService {
@@ -24,7 +25,6 @@ export class BreadcrumbsService {
     public steps: Step[] = [];
     
     private popFoundedStepIndex: number;
-    public replace: boolean = false;
     public currentStepIndex: number;
     private nextLabel: string;
     private nextMilestone: boolean = false;
@@ -53,7 +53,7 @@ export class BreadcrumbsService {
                     return;
                 }
                 const timestamp: number = new Date().getTime();
-                if (this.replace) this.steps.pop();
+                if (this.router.getCurrentNavigation().extras?.replaceUrl) this.steps.pop();
                 if (this.popFoundedStepIndex != undefined && this.popFoundedStepIndex != null && this.popFoundedStepIndex >= 0 && this.popFoundedStepIndex < this.steps.length) {
                     this.focusStep(this.popFoundedStepIndex);
                     this.currentStepIndex = this.popFoundedStepIndex;
@@ -184,7 +184,7 @@ export class BreadcrumbsService {
     //     this.ignoreNavigationEnd = true;
     // }
 
-    public findImportMode(): 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS' {
+    public findImportMode(): ImportMode {
         for (let i=this.currentStepIndex; i>=0; i--) {
             if (this.steps[i].importStart) return this.steps[i].importMode;
         }
@@ -212,7 +212,7 @@ export class Step {
     public entity: any;
     public data: any = {};
     public importStart: boolean = false;
-    public importMode: 'DICOM' | 'PACS' | 'EEG' | 'BRUKER' | 'BIDS';
+    public importMode: ImportMode;
 
     private onSave(): Subject<any> {
         this.subscribers++;

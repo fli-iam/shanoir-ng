@@ -40,8 +40,7 @@ export class StudyNodeComponent implements OnChanges {
     constructor(
             private router: Router,
             private subjectStudyPipe: SubjectStudyPipe,
-            private studyCardService: StudyCardService) {
-    }
+            private studyCardService: StudyCardService) {}
     
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {

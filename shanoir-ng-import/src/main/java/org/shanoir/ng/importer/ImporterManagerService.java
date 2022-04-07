@@ -141,7 +141,7 @@ public class ImporterManagerService {
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
-			event.setMessage("Analyzing series..");
+			event.setMessage("Anonymizing dicom..");
 			eventService.publishEvent(event);
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = patientsIt.next();
@@ -157,7 +157,7 @@ public class ImporterManagerService {
 					}
 				}
 				Long converterId = importJob.getConverterId();
-				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId);
+				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
 			}
 	        rabbitTemplate.setBeforePublishPostProcessors(message -> {
 	            message.getMessageProperties().setHeader("x-user-id",

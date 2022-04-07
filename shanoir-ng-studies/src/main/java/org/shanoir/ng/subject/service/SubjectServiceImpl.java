@@ -101,7 +101,7 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public List<IdName> findNames() {
 		Iterable<Subject> subjects;
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") || KeycloakUtil.getTokenRoles().contains("ROLE_EXPERT")) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			subjects = subjectRepository.findAll();
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
@@ -223,7 +223,7 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.subjectNameUpdateQueue().getName(),
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE,
 					new ObjectMapper().writeValueAsString(subject));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {

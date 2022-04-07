@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
@@ -43,6 +45,9 @@ import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.studyexamination.StudyExamination;
+import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.tag.model.Tag;
@@ -77,6 +82,12 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private StudyRepository studyRepository;
+	
+	@Autowired
+	private CenterRepository centerRepository;
+
+	@Autowired
+	private SubjectRepository subjectRepository;
 
 	@Autowired
 	private StudyUserUpdateBroadcastService studyUserCom;
@@ -428,7 +439,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		// do nothing, in case no users should receive study user report/mail
-		if (!recipients.isEmpty() && !created.isEmpty()) {
+		if (!created.isEmpty()) {
 			EmailStudyUsersAdded emailStudyUserAdded = new EmailStudyUsersAdded();
 			emailStudyUserAdded.setRecipients(recipients);
 			final Long userId = KeycloakUtil.getTokenUserId();
@@ -476,17 +487,21 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public void addExaminationToStudy(Long examinationId, Long studyId) {
+	public void addExaminationToStudy(Long examinationId, Long studyId, Long centerId, Long subjectId) {
 		// Update study_examination table
 		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
-		if (studyOpt.isPresent()) {
+		Optional<Center> centerOpt = this.centerRepository.findById(centerId);
+		Optional<Subject> subjectOpt = this.subjectRepository.findById(subjectId);
+
+		if (studyOpt.isPresent() && centerOpt.isPresent() && subjectOpt.isPresent()) {
 			Study study = studyOpt.get();
-			Set<Long> exams = study.getExaminationIds();
+			Set<StudyExamination> exams = study.getExaminations();
 			if (exams == null) {
 				exams = new HashSet<>();
-				study.setExaminationIds(exams);
+				study.setExaminations(exams);
 			}
-			exams.add(examinationId);
+			StudyExamination studyExam = new StudyExamination(examinationId, study, centerOpt.get(), subjectOpt.get());
+			exams.add(studyExam);
 			this.studyRepository.save(study);
 		}
 	}
@@ -497,13 +512,13 @@ public class StudyServiceImpl implements StudyService {
 		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
 		if (studyOpt.isPresent()) {
 			Study study = studyOpt.get();
-			Set<Long> exams = study.getExaminationIds();
+			Set<StudyExamination> exams = study.getExaminations();
 			if (exams == null) {
 				exams = new HashSet<>();
 			} else {
-				exams.remove(examinationId);
+				exams = exams.stream().filter(studyExam -> !studyExam.getExaminationId().equals(examinationId)).collect(Collectors.toSet());
 			}
-			study.setExaminationIds(exams);
+			study.setExaminations(exams);
 			this.studyRepository.save(study);
 		}
 	}

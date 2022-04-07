@@ -13,7 +13,6 @@
  */
 import { Center } from '../../centers/shared/center.model';
 import { IdName } from '../../shared/models/id-name.model';
-import { Id } from '../../shared/models/id.model';
 import { Study } from './study.model';
 
 
@@ -21,6 +20,7 @@ export class StudyCenter {
     center: Center;
     id: number;
     study: Study;
+    subjectNamePrefix: string;
 }
 
 export class StudyCenterDTO {
@@ -28,10 +28,12 @@ export class StudyCenterDTO {
     id: number;
     center: IdName;
     study: IdName;
+    subjectNamePrefix: string;
    
     constructor(studyCenter: StudyCenter) {
         this.id = studyCenter.id;
         this.center = studyCenter.center ? new IdName(studyCenter.center.id, studyCenter.center.name) : null;
         this.study = studyCenter.study ? new IdName(studyCenter.study.id, studyCenter.study.name) : null;
+        this.subjectNamePrefix = studyCenter.subjectNamePrefix;
     }
 }

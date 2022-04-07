@@ -17,6 +17,8 @@ package org.shanoir.ng.datasetacquisition.model.mr;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.shanoir.ng.dataset.modality.BidsDataType;
+
 @Entity
 @DiscriminatorValue("2")
 public class MrProtocolSCMetadata extends MrProtocolMetadata {
@@ -46,6 +48,9 @@ public class MrProtocolSCMetadata extends MrProtocolMetadata {
 	 */
 	private Integer mrSequencePhysics;
 	
+	/** Bids dataset type folder. **/
+	private String bidsDataType;
+
 	/**
 	 * @return the comment
 	 */
@@ -130,5 +135,17 @@ public class MrProtocolSCMetadata extends MrProtocolMetadata {
 		} else {
 			this.mrSequencePhysics = mrSequencePhysics.getId();
 		}
+	}
+
+	public String getBidsDataType() {
+		return bidsDataType;
+	}
+
+	public void setBidsDataType(String bidsDataType) {
+		this.bidsDataType = bidsDataType;
+	}
+
+	public void setBidsDataType(BidsDataType bidsDataType) {
+		this.bidsDataType = bidsDataType.getFolderName();
 	}
 }

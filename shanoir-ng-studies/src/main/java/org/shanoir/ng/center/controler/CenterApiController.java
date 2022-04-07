@@ -16,6 +16,8 @@ package org.shanoir.ng.center.controler;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -45,6 +47,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 import io.swagger.annotations.ApiParam;
 
 @Controller
@@ -58,7 +62,7 @@ public class CenterApiController implements CenterApi {
 
 	@Autowired
 	private CenterFieldEditionSecurityManager fieldEditionSecurityManager;
-	
+
 	@Autowired
 	private CenterUniqueConstraintManager uniqueConstraintManager;
 
@@ -68,9 +72,11 @@ public class CenterApiController implements CenterApi {
 	@Override
 	public ResponseEntity<Void> deleteCenter(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
-			throws RestServiceException {
-
+					throws RestServiceException {
 		try {
+			if (centerId.equals(0L)) {
+				throw new EntityNotFoundException("Cannot update unknown center");
+			}
 			centerService.deleteByIdCheckDependencies(centerId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -94,7 +100,9 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<List<CenterDTO>> findCenters() {
-		final List<Center> centers = centerService.findAll();
+		List<Center> centers = centerService.findAll();
+		// Remove "unknown" center
+		centers = centers.stream().filter(center -> center.getId() != 0).collect(Collectors.toList());
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -103,13 +111,15 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<List<IdName>> findCentersNames() {
-		final List<IdName> centers = centerService.findIdsAndNames();
+		List<IdName> centers = centerService.findIdsAndNames();
+		// Remove "unknown" center
+		centers = centers.stream().filter(center -> center.getId() != 0).collect(Collectors.toList());
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(centers, HttpStatus.OK);
 	}
-	
+
 
 	@Override
 	public ResponseEntity<List<IdName>> findCentersNames(
@@ -125,7 +135,7 @@ public class CenterApiController implements CenterApi {
 	public ResponseEntity<CenterDTO> saveNewCenter(
 			@ApiParam(value = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
-		
+
 		forceCentersOfStudyCenterList(center);
 		validate(center, result);
 
@@ -140,21 +150,23 @@ public class CenterApiController implements CenterApi {
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
 			@ApiParam(value = "the center to update", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
-		
-		forceCentersOfStudyCenterList(center);
-		validate(center, result);
-
 		try {
+			if (centerId.equals(0L)) {
+				throw new EntityNotFoundException("Cannot update unknown center");
+			}
+			forceCentersOfStudyCenterList(center);
+			validate(center, result);
+
 			/* Update center in db. */
 			centerService.update(center);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_CENTER_EVENT, centerId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
+
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} 
 	}
-	
+
 	private void validate(Center center, BindingResult result) throws RestServiceException {
 		final FieldErrorMap errors = new FieldErrorMap()
 				.add(fieldEditionSecurityManager.validate(center))
@@ -165,7 +177,7 @@ public class CenterApiController implements CenterApi {
 			throw new RestServiceException(error);
 		}
 	}
-	
+
 	private void forceCentersOfStudyCenterList(Center center) {
 		if (center.getStudyCenterList() != null) {
 			for (StudyCenter sc : center.getStudyCenterList()) {

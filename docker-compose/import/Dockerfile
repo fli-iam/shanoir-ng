@@ -46,11 +46,16 @@ RUN apt-get update -qq \
     lib32stdc++6 \
     libtiff5 \
     libglib2.0-0:i386 \
+    locales \
+    locales-all \
     python
 
 # Compile DCM2NIIX from source
 ENV DCMCOMMIT_VERSION=v1.0.20210317
 ENV DCMCOMMIT=1.0.20210317
+ENV LC_ALL fr_FR.UTF-8
+ENV LANG fr_FR.UTF-8
+ENV LANGUAGE fr_FR.UTF-8
 
 WORKDIR /usr/local/
 RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCMCOMMIT_VERSION.zip | bsdtar -xf- -C .
@@ -98,6 +103,9 @@ RUN install -m 644 external/dcmtk/dcmdjpeg/linux/lib/dicom.dic /usr/local/lib/
 
 # install dicom tool dcm2pnm
 RUN install -m 755 external/dcmtk/dcm2pnm/linux/dcm2pnm /usr/local/bin/
+
+# install animaConvertImage to convert Analyze format into nifti
+RUN install -m 755 external/anima/animaConvertImage /usr/local/bin/
 
 
 RUN mkdir -pv /var/log/shanoir-ng-logs

@@ -22,13 +22,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.UploadJob;
-import org.shanoir.dicom.importer.UploadJobManager;
-import org.shanoir.dicom.importer.UploadState;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.DeleteDirectory;
 import org.shanoir.uploader.gui.CurrentUploadsWindowTable;
-import org.shanoir.util.ShanoirUtil;
+import org.shanoir.uploader.upload.UploadJob;
+import org.shanoir.uploader.upload.UploadJobManager;
+import org.shanoir.uploader.upload.UploadState;
+import org.shanoir.uploader.utils.Util;
 
 public class CurrentNominativeDataController {
 
@@ -181,7 +180,7 @@ public class CurrentNominativeDataController {
 	 * @param workFolder
 	 */
 	private void processWorkFolder(File workFolder) {
-		final List<File> folders = ShanoirUtil.listFolders(workFolder);
+		final List<File> folders = Util.listFolders(workFolder);
 		logger.info("Display function: found " + folders.size() + " folders in work folder.");
 		Map<String, NominativeDataUploadJob> currentUploads = new HashMap<String, NominativeDataUploadJob>();
 		for (File f : folders) {
@@ -238,7 +237,7 @@ public class CurrentNominativeDataController {
 	 * @param dicomFiles
 	 */
 	private void initNominativeDataUploadJobManager(final File folder) {
-		final Collection<File> files = ShanoirUtil.listFiles(folder, null, false);
+		final Collection<File> files = Util.listFiles(folder, null, false);
 		for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
 			final File file = (File) filesIt.next();
 			if (file.getName().equals(NominativeDataUploadJobManager.NOMINATIVE_DATA_JOB_XML)) {
@@ -248,7 +247,7 @@ public class CurrentNominativeDataController {
 	}
 
 	private void initUploadJobManager(final File folder) {
-		final Collection<File> files = ShanoirUtil.listFiles(folder, null, false);
+		final Collection<File> files = Util.listFiles(folder, null, false);
 		for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
 			final File file = (File) filesIt.next();
 			if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)) {

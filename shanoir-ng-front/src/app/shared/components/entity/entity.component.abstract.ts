@@ -20,7 +20,7 @@ import { Subject, Subscription } from 'rxjs';
 
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { Router } from '../../../breadcrumbs/router';
+import { Router } from '@angular/router';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
@@ -45,6 +45,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
     @ViewChild('formContainer', { static: false }) formContainerElement: ElementRef;
+    activeTab: string;
 
     /* services */
     protected confirmDialogService: ConfirmDialogService;
@@ -87,25 +88,39 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     ngOnInit(): void {
-        if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
-        const choose = (): Promise<void> => {
-            switch (this.mode) { 
-                case 'create' : return this.initCreate();
-                case 'edit' : return this.initEdit();
-                case 'view' : return this.initView();
-                default: throw Error('mode has to be set!');
+        //if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
+        this.subscribtions.push(this.activatedRoute.params.subscribe(
+            params => {
+                const id = +params['id'];
+                this.id = id;
+                const choose = (): Promise<void> => {
+                    switch (this.mode) { 
+                        case 'create' : return this.initCreate();
+                        case 'edit' : return this.initEdit();
+                        case 'view' : return this.initView();
+                        default: throw Error('mode has to be set!');
+                    }
+                }
+                choose().then(() => {
+                    this.footerState = new FooterState(this.mode);
+                    this.hasEditRight().then(right => this.footerState.canEdit = right);
+                    this.hasDeleteRight().then(right => this.footerState.canDelete = right);
+                    if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
+                        this.entity = this.breadcrumbsService.currentStep.entity as T;
+                    }
+                    this.breadcrumbsService.currentStep.entity = this.entity;
+                    this.manageFormSubscriptions();
+                });
             }
-        }
-        choose().then(() => {
-            this.footerState = new FooterState(this.mode);
-            this.hasEditRight().then(right => this.footerState.canEdit = right);
-            this.hasDeleteRight().then(right => this.footerState.canDelete = right);
-            if ((this.mode == 'create' || this.mode == 'edit') && this.breadcrumbsService.currentStep.entity) {
-                this.entity = this.breadcrumbsService.currentStep.entity as T;
-            }
-            this.breadcrumbsService.currentStep.entity = this.entity;
-            this.manageFormSubscriptions();
-        });
+        ));
+        // load called tab
+        this.subscribtions.push(
+            this.activatedRoute.fragment.subscribe(fragment => { 
+                if (fragment) {
+                    this.activeTab = fragment;
+                } 
+            })
+        );
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -193,7 +208,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     formErrors(field: string): any {
         if (!this.form) return;
         const control = this.form.get(field);
-        if (control && (control.touched || this.mode != 'create') && !control.valid) {
+        if (control && control.touched && !control.valid) {
             return control.errors;
         }
     }
@@ -331,12 +346,13 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             else if (this.mode == 'edit') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToView method');
         }
+        let currentRoute: string = this.breadcrumbsService.currentStep?.route?.split('#')[0];
         let replace: boolean = this.breadcrumbsService.currentStep && (
-                this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToEdit(id)
-                || this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToCreate()
+                currentRoute == this.entityRoutes.getRouteToEdit(id)
+                || currentRoute == this.entityRoutes.getRouteToCreate()
                 // Create route can be contained in incoming route (more arguments for example)
-                || this.breadcrumbsService.currentStep.route.indexOf(this.entityRoutes.getRouteToCreate()) != -1);
-        this.router.navigate([this.entityRoutes.getRouteToView(id)], {replaceUrl: replace});
+                || currentRoute.indexOf(this.entityRoutes.getRouteToCreate()) != -1);
+        this.router.navigate([this.entityRoutes.getRouteToView(id)], {replaceUrl: replace, fragment: this.activeTab});
     }
 
     goToEdit(id?: number): void {
@@ -345,8 +361,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             else if (this.mode == 'view') id = this.entity.id;
             else throw new Error('Cannot infer id in create mode, maybe you should give an id to the goToEdit method');
         }
-        let replace: boolean = this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.route == this.entityRoutes.getRouteToView(id);
-        this.router.navigate([this.entityRoutes.getRouteToEdit(id)], {replaceUrl: replace});
+        let replace: boolean = this.breadcrumbsService.currentStep && this.breadcrumbsService.currentStep.route?.split('#')[0] == this.entityRoutes.getRouteToView(id);
+        this.router.navigate([this.entityRoutes.getRouteToEdit(id)], {replaceUrl: replace, fragment: this.activeTab});
     }
 
     goToCreate(): void {
@@ -377,7 +393,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
      * It is called after initialization so the entity value can be used inside.
      */
     public async hasEditRight(): Promise<boolean> {
-        return true;
+        return this.keycloakService.isUserAdminOrExpert();
     }
 
     /**

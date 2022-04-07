@@ -65,6 +65,9 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
 	@Override
 	public DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
 			final DatasetAcquisition datasetAcquisition) {
+		if (datasetAcquisition == null) {
+			return null;
+		}
 		final DatasetAcquisitionDTO datasetAcquisitionDTO = delegate
 				.datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition);
         if (datasetAcquisition.getType().equals("Mr")) {

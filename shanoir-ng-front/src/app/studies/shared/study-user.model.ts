@@ -22,6 +22,7 @@ export class StudyUser {
     id: number;
     study: Study;
     userId: number;
+    studyId: number;
     receiveStudyUserReport: boolean;
     receiveNewImportReport: boolean;
     studyUserRights: StudyUserRight[];
@@ -34,12 +35,8 @@ export class StudyUser {
     }
 
     public static completeMember(studyUser: StudyUser, users: User[]) {
-        for (let user of users) {
-            if (studyUser.userId == user.id) {
-                studyUser.user = user;
-                user.selected = true;
-            }
-        }
+        let user: User = users.find(u => u.id == studyUser.userId);
+        if (user) studyUser.user = user;
     }
 }
 
