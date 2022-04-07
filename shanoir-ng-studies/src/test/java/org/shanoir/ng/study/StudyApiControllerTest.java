@@ -127,7 +127,7 @@ public class StudyApiControllerTest {
 	public void setup() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		given(studyMapperMock.studiesToStudyDTOs(Mockito.anyListOf(Study.class)))
+		given(studyMapperMock.studiesToStudyDTOs(Mockito.anyList()))
 		.willReturn(Arrays.asList(new StudyDTO()));
 		given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
 

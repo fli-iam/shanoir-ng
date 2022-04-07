@@ -86,7 +86,7 @@ public class ExaminationServiceTest {
 		// 		.willReturn(Arrays.asList(ModelsUtil.createExamination()));
 		given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(ModelsUtil.createExamination()));
 		given(examinationRepository.save(Mockito.any(Examination.class))).willReturn(ModelsUtil.createExamination());
-		given(examinationRepository.findByStudyIdIn(Mockito.anyListOf(Long.class), Mockito.any(Pageable.class))).willReturn(new PageImpl<Examination>(Arrays.asList(ModelsUtil.createExamination())));
+		given(examinationRepository.findByStudyIdIn(Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<Examination>(Arrays.asList(ModelsUtil.createExamination())));
 
 		PowerMockito.mockStatic(KeycloakUtil.class);
 		when(KeycloakUtil.getKeycloakHeader()).thenReturn(null);

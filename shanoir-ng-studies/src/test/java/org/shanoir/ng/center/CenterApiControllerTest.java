@@ -95,7 +95,7 @@ public class CenterApiControllerTest {
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		given(centerMapperMock.centersToCenterDTOs(Mockito.anyListOf(Center.class)))
+		given(centerMapperMock.centersToCenterDTOs(Mockito.anyList()))
 				.willReturn(Arrays.asList(new CenterDTO()));
 		Center center = new Center();
 		center.setId(Long.valueOf(123));

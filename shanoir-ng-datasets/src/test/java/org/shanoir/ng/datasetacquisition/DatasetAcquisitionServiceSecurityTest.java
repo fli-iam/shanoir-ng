@@ -79,7 +79,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		Set<Long> ids = Mockito.anySetOf(Long.class);
+		Set<Long> ids = Mockito.anySet();
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		assertAccessDenied(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findByStudyCard, 1L);
@@ -97,12 +97,12 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findById, 3L);
 		
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
+		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<Long>());
 		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
 		assertEquals(0, service.findPage(PageRequest.of(0, 10)).getTotalElements());
 		assertEquals(0, service.findByStudyCard(1L).size());
 		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
+		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(ids);
 		//assertEquals(2, service.findPage(PageRequest.of(0, 10)).getTotalElements());
 		assertEquals(2, service.findByStudyCard(1L).size());
 		
@@ -118,13 +118,13 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessDenied(service::findById, 3L);
 		
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
+		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<Long>());
 		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10));
 		assertAccessAuthorized(service::findByStudyCard, 1L);
 		assertEquals(0, service.findPage(PageRequest.of(0, 10)).getTotalElements());
 		assertEquals(0, service.findByStudyCard(1L).size());
 		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
+		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(ids);
 		//assertEquals(2, service.findPage(PageRequest.of(0, 10)).getTotalElements());
 		assertEquals(2, service.findByStudyCard(1L).size());
 		
@@ -152,7 +152,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		Set<Long> ids = Mockito.anySetOf(Long.class);
+		Set<Long> ids = Mockito.anySet();
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		assertAccessAuthorized(service::findById, ENTITY_ID);
 		assertAccessAuthorized(service::findByStudyCard, 1L);

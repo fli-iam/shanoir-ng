@@ -102,7 +102,7 @@ public class UserApiControllerTest {
 		given(userService.findById(1L)).willReturn(mockUser);
 		given(userService.findByIds(Arrays.asList(1L))).willReturn(Arrays.asList(new IdName()));
 		given(userService.create(Mockito.mock(User.class))).willReturn(new User());
-		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(Arrays.asList(mockUser));
+		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), (Class) Mockito.any())).willReturn(Arrays.asList(mockUser));
 		given(userRepository.findById(1L)).willReturn(Optional.of(mockUser));
 	}
 
@@ -164,7 +164,7 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void saveNewUserTest() throws Exception {
-		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(new ArrayList<User>());
+		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), Mockito.any())).willReturn(new ArrayList<User>());
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser())))
 				.andExpect(status().isOk());
