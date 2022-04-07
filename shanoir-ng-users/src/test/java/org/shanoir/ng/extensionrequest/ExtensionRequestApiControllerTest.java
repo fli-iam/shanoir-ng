@@ -100,7 +100,7 @@ public class ExtensionRequestApiControllerTest {
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void extensionRequestNoUserTest() throws Exception {
 		// GIVEN a non existing user
-		Mockito.when(userService.findByEmailForExtension(EMAIL)).thenReturn(Optional.ofNullable(null));
+		Mockito.when(userService.findByEmailForExtension(EMAIL)).thenReturn(null);
 		
 		// WHEN we request for an extension
 		ExtensionRequestInfo extensionRequest = new ExtensionRequestInfo();
@@ -111,8 +111,8 @@ public class ExtensionRequestApiControllerTest {
 				.andExpect(status().isBadRequest());
 	
 		// THEN a 404 is returned
-		Mockito.verifyZeroInteractions(keycloakClient);
-		Mockito.verifyZeroInteractions(emailService);
+		Mockito.verifyNoInteractions(keycloakClient);
+		Mockito.verifyNoInteractions(emailService);
 	}
 	
 	@Test
@@ -132,8 +132,8 @@ public class ExtensionRequestApiControllerTest {
 				.andExpect(status().isNotAcceptable());
 	
 		// THEN a NOT acceptable error is sent
-		Mockito.verifyZeroInteractions(keycloakClient);
-		Mockito.verifyZeroInteractions(emailService);	}
+		Mockito.verifyNoInteractions(keycloakClient);
+		Mockito.verifyNoInteractions(emailService);	}
 	
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
@@ -153,7 +153,7 @@ public class ExtensionRequestApiControllerTest {
 				.andExpect(status().isNotAcceptable());
 	
 		// THEN a NOT acceptable error is sent
-		Mockito.verifyZeroInteractions(keycloakClient);
-		Mockito.verifyZeroInteractions(emailService);
+		Mockito.verifyNoInteractions(keycloakClient);
+		Mockito.verifyNoInteractions(emailService);
 	}
 }

@@ -82,7 +82,7 @@ public class DatasetAcquisitionApiSecurityTest {
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException, RestServiceException {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		Set<Long> ids = Mockito.anySetOf(Long.class);
+		Set<Long> ids = Mockito.anySet();
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
 		assertAccessDenied(api::findDatasetAcquisitionById, 1L);
@@ -100,13 +100,13 @@ public class DatasetAcquisitionApiSecurityTest {
 		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
 		assertAccessDenied(api::findDatasetAcquisitionById, 3L);
 		
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
+		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<Long>());
 		assertAccessAuthorized(t -> { try { api.findDatasetAcquisitions(t); } catch (RestServiceException e2) { }}, PageRequest.of(0, 10));
 		assertAccessAuthorized(api::findByStudyCard, 1L);
 		assertNull(api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody());
 		assertNull(api.findByStudyCard(new Long(1L)).getBody());
 		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
+		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(ids);
 		
 		//assertEquals(2, api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody().getTotalElements());
 		//assertEquals(2, api.findByStudyCard(new Long(1L)).getBody().size());
@@ -125,13 +125,13 @@ public class DatasetAcquisitionApiSecurityTest {
 		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
 		assertAccessDenied(api::findDatasetAcquisitionById, 3L);
 		
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(new HashSet<Long>());
+		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<Long>());
 		assertAccessAuthorized(t -> { try { api.findDatasetAcquisitions(t); } catch (RestServiceException e2) { }}, PageRequest.of(0, 10));
 		assertAccessAuthorized(api::findByStudyCard, 1L);
 		assertNull(api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody());
 		assertNull(api.findByStudyCard(new Long(1L)).getBody());
 		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
+		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(ids);
 		//assertEquals(2, api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody().getTotalElements());
 		//assertEquals(2, api.findByStudyCard(new Long(1L)).getBody().size());
 		
@@ -163,7 +163,7 @@ public class DatasetAcquisitionApiSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		Set<Long> ids = Mockito.anySetOf(Long.class);
+		Set<Long> ids = Mockito.anySet();
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
 		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
