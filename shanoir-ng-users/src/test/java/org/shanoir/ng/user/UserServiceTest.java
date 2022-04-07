@@ -94,7 +94,7 @@ public class UserServiceTest {
 	public void setup() throws SecurityException {
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
-		given(userRepository.findByIdIn(Mockito.anyListOf(Long.class)))
+		given(userRepository.findByIdIn(Mockito.anyList()))
 				.willReturn(Arrays.asList(createUser()));
 		given(userRepository.findById(USER_ID)).willReturn(Optional.of(ModelsUtil.createUser(USER_ID)));
 		given(userRepository

@@ -115,4 +115,10 @@ public class FacetPageableImpl implements FacetPageable {
 			this.facetOrder = FacetOrder.valueOf(facetOrder);			
 		} catch (IllegalArgumentException e) {}
 	}
+
+	@Override
+	public Pageable withPage(int pageNumber) {
+		this.pageNumber = pageNumber;
+		return this;
+	}
 }

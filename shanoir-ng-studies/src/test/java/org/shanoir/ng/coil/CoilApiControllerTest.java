@@ -84,7 +84,7 @@ public class CoilApiControllerTest {
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		given(coilMapperMock.coilsToCoilDTOs(Mockito.anyListOf(Coil.class)))
+		given(coilMapperMock.coilsToCoilDTOs(Mockito.anyList()))
 				.willReturn(Arrays.asList(new CoilDTO()));
 		given(coilMapperMock.coilToCoilDTO(Mockito.any(Coil.class))).willReturn(new CoilDTO());
 

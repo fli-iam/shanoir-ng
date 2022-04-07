@@ -84,7 +84,7 @@ public class AcquisitionEquipmentApiControllerTest {
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 		given(acquisitionEquipmentMapper
-				.acquisitionEquipmentsToAcquisitionEquipmentDTOs(Mockito.anyListOf(AcquisitionEquipment.class)))
+				.acquisitionEquipmentsToAcquisitionEquipmentDTOs(Mockito.anyList()))
 						.willReturn(Arrays.asList(new AcquisitionEquipmentDTO()));
 		AcquisitionEquipmentDTO acqEq = new AcquisitionEquipmentDTO();
 		acqEq.setId(Long.valueOf(123));
