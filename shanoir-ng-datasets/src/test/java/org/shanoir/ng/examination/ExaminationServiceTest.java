@@ -43,8 +43,10 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Examination service test.
@@ -52,8 +54,9 @@ import org.springframework.data.domain.Pageable;
  * @author ifakhfakh
  * 
  */
-@RunWith(PowerMockRunner.class)
+@SpringBootTest
 @PrepareForTest(KeycloakUtil.class)
+@ActiveProfiles("test")
 public class ExaminationServiceTest {
 
 	private static final Long EXAMINATION_ID = 1L;
