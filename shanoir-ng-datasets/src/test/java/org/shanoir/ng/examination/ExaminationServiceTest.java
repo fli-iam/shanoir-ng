@@ -15,10 +15,8 @@
 package org.shanoir.ng.examination;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -28,9 +26,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
@@ -39,14 +34,14 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.rights.StudyRightsService;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Examination service test.
@@ -54,8 +49,8 @@ import org.springframework.test.context.ActiveProfiles;
  * @author ifakhfakh
  * 
  */
-@SpringBootTest
-@PrepareForTest(KeycloakUtil.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class ExaminationServiceTest {
 
@@ -64,15 +59,9 @@ public class ExaminationServiceTest {
 
 	@Mock
 	private ExaminationRepository examinationRepository;
-	
-	@Mock
-	private KeycloakUtil keycloakUtil;
 
 	@Mock
 	private MicroserviceRequestsService microservicesRequestsService;
-
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks
 	private ExaminationServiceImpl examinationService;
@@ -90,12 +79,10 @@ public class ExaminationServiceTest {
 		given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(ModelsUtil.createExamination()));
 		given(examinationRepository.save(Mockito.any(Examination.class))).willReturn(ModelsUtil.createExamination());
 		given(examinationRepository.findByStudyIdIn(Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<Examination>(Arrays.asList(ModelsUtil.createExamination())));
-
-		PowerMockito.mockStatic(KeycloakUtil.class);
-		when(KeycloakUtil.getKeycloakHeader()).thenReturn(null);
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void deleteByIdTest() throws ShanoirException {
 		examinationService.deleteById(EXAMINATION_ID);
 
@@ -103,6 +90,7 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void findByIdTest() throws ShanoirException {
 		final Examination examination = examinationService.findById(EXAMINATION_ID);
 		Assert.assertNotNull(examination);
@@ -110,6 +98,7 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void saveTest() throws ShanoirException {
 		examinationService.save(createExamination());
 
@@ -117,9 +106,8 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void updateTest() throws ShanoirException {
-		when(KeycloakUtil.getTokenRoles()).thenReturn(Collections.singleton("ROLE_EXPERT"));
-
 		final Examination updatedExamination = examinationService.update(createExamination());
 		Assert.assertNotNull(updatedExamination);
 		Assert.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
@@ -128,9 +116,9 @@ public class ExaminationServiceTest {
 	}
 
 	@Test(expected = ShanoirException.class)
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
 	public void updateTestFails() throws ShanoirException {
 		// We update the subject -> Not admin -> Failure
-		when(KeycloakUtil.getTokenRoles()).thenReturn(Collections.singleton("ROLE_EXPERT"));
 		Examination updatedExam = createExamination();
 		updatedExam.setSubjectId(null);
 		final Examination updatedExamination = examinationService.update(updatedExam);
@@ -139,9 +127,9 @@ public class ExaminationServiceTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void updateAsAdminTest() throws ShanoirException {
 		// We update the subject -> admin -> SUCCESS
-		when(KeycloakUtil.getTokenRoles()).thenReturn(Collections.singleton("ROLE_ADMIN"));
 		Examination updatedExam = createExamination();
 		updatedExam.setSubjectId(null);
 		final Examination updatedExamination = examinationService.update(updatedExam);

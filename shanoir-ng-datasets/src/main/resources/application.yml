@@ -20,13 +20,14 @@ server:
       enabled: false
 ##### Database #####
 spring:
+  sql:
+    init.mode: never
+    init.data-locations: classpath:/scripts/import.sql
   datasource:
     url: jdbc:mysql://${SHANOIR_PREFIX}database:3306/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
     username: datasets
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
-    initialization-mode: never
-    data: classpath:/scripts/import.sql
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
@@ -137,7 +138,6 @@ spring:
   config.activate.on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3307/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
-    initialization-mode: always
   jpa:
     generate-ddl: true
     hibernate:
