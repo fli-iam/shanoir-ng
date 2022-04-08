@@ -132,6 +132,8 @@ dcm4chee-arc:
 server:
   port: 9924
 spring:
+  sql:
+    init.mode: always
   config.activate.on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3307/datasets?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
@@ -170,7 +172,7 @@ logging:
     
 ---
 spring:
-  config.activate.on-profile: test  
+  config.activate.on-profile: test
   main:
     allow-bean-definition-overriding: true
     allow-circular-references: true
