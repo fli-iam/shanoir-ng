@@ -25,7 +25,10 @@ spring:
     username: preclinical
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
+    initialization-mode: never
+    data: classpath:/scripts/import.sql
   jpa:
+    defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -38,6 +41,15 @@ spring:
           charset: UTF-8
         hbm2ddl:
           import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  sql:
+    init:
+      mode: never
+      data-locations: classpath:/scripts/import.sql
 ##### Others #####
   jackson:
     mapper:
@@ -53,7 +65,7 @@ spring:
     multipart:
       enabled: true
       max-file-size: -1
-      max-request-size: -1  sql:    init:      mode: never      data-locations: classpath:/scripts/import.sql
+      max-request-size: -1
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
@@ -115,6 +127,8 @@ spring:
     username: sa
     password: 
     driver-class-name: org.h2.Driver
+    initialization-mode: always
+    data: classpath:/scripts/test-data-preclinical-h2.sql
   jpa:
     defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.H2Dialect
@@ -136,7 +150,10 @@ logging:
 ######################################
 spring:
   config.activate.on-profile: dev
+  datasource:
+    initialization-mode: always
   jpa:
+    defer-datasource-initialization: true
     generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
@@ -144,6 +161,11 @@ spring:
     # Show or not log for each sql query
     show-sql: true
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration  sql:    init:      mode: always
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
 
 # logging configuration
 logging:

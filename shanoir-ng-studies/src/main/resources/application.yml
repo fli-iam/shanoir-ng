@@ -25,7 +25,10 @@ spring:
     username: studies
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
+    initialization-mode: never
+    data: classpath:/scripts/import.sql
   jpa:
+    defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
@@ -38,6 +41,15 @@ spring:
           charset: UTF-8
         hbm2ddl:
           import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  sql:
+    init:
+      mode: never
+      data-locations: classpath:/scripts/import.sql
 ##### Others #####
   jackson:
     mapper:
@@ -56,10 +68,7 @@ spring:
       enabled: true
       max-file-size: 6000MB
       max-request-size: 6000MB
-  sql:
-    init:
-      mode: never
-      data-locations: classpath:/scripts/import.sql
+
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
@@ -110,7 +119,9 @@ spring:
   config.activate.on-profile: dev
   datasource:
     url: jdbc:mysql://localhost:3307/studies?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
+    initialization-mode: always
   jpa:
+    defer-datasource-initialization: true
     generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
@@ -120,8 +131,12 @@ spring:
   rabbitmq:
     host: localhost
   sql:
-    init:
-      mode: always
+    init.mode: always
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
 front.server:
   address: https://shanoir-ng-nginx/shanoir-ng/
   url: https://shanoir-ng-nginx
@@ -160,6 +175,8 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+    initialization-mode: always
+    data: classpath:/scripts/test-data-h2.sql
   jpa:
     defer-datasource-initialization: true
     generate-ddl: true
