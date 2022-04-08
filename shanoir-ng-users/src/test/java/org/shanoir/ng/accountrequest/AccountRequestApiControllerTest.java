@@ -51,6 +51,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = AccountRequestApiController.class)
 @ActiveProfiles("test")
+@AutoConfigureMockMvc(addFilters = false)
 //@AutoConfigureMockMvc(addFilters = false)
 public class AccountRequestApiControllerTest {
 

@@ -122,6 +122,10 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create-drop
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+
 logging:
   file:
     name: /tmp/shanoir-ng-import.log
@@ -140,7 +144,6 @@ spring:
     # Show or not log for each sql query
     show-sql: true
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration  sql:    init:      mode: always
-
 
 # logging configuration
 logging:

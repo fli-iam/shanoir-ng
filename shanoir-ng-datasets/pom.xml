@@ -19,7 +19,7 @@
 		<version>2.6.6</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
-
+	
 	<artifactId>shanoir-ng-datasets</artifactId>
 	<packaging>jar</packaging>
 

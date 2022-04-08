@@ -102,7 +102,7 @@ public class ExtensionRequestApiControllerTest {
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void extensionRequestNoUserTest() throws Exception {
 		// GIVEN a non existing user
-		Mockito.when(userService.findByEmailForExtension(EMAIL)).thenReturn(null);
+		Mockito.when(userService.findByEmailForExtension(EMAIL)).thenReturn(Optional.ofNullable(null));
 		
 		// WHEN we request for an extension
 		ExtensionRequestInfo extensionRequest = new ExtensionRequestInfo();

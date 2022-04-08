@@ -232,6 +232,9 @@ spring:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
 # keep for Spring Boot 2.5
 #  sql:
 #    init:
