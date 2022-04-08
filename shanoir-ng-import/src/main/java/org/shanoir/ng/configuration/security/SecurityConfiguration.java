@@ -84,11 +84,6 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	}
 
 	@Bean
-	public KeycloakConfigResolver keycloakConfigResolver() {
-		return new KeycloakSpringBootConfigResolver();
-	}
-
-	@Bean
 	public FilterRegistrationBean corsFilter() {
 		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		final CorsConfiguration config = new CorsConfiguration();
