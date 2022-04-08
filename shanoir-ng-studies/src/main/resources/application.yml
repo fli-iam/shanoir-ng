@@ -168,4 +168,7 @@ spring:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create-drop
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
 
