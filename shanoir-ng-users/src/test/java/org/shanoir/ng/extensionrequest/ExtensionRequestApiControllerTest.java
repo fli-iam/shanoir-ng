@@ -27,6 +27,7 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -39,6 +40,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {ExtensionRequestApiController.class, UserUniqueConstraintManager.class, UserRepository.class})
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class ExtensionRequestApiControllerTest {
 
 	private static final String REQUEST_PATH = "/extensionrequest";
