@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
+import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -49,6 +50,8 @@ public class StudyInstanceUIDHandler {
 	private static final String STUDIES = "/studies/";
 
 	private static final String SERIES = "/series/";
+	
+	public static final String PREFIX = UIDGeneration.ROOT + ".";
 
 	@Autowired
 	private ExaminationService examinationService;
@@ -83,7 +86,7 @@ public class StudyInstanceUIDHandler {
 				ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path(VALUE);
 				for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
 					studyInstanceUIDArray.remove(i);
-					studyInstanceUIDArray.insert(i, examinationId.toString());
+					studyInstanceUIDArray.insert(i,  PREFIX + examinationId.toString());
 				}				
 			}
 			// find attribute: RetrieveURL
@@ -94,11 +97,11 @@ public class StudyInstanceUIDHandler {
 					JsonNode arrayElement = retrieveURLArray.get(i);
 					String retrieveURL = arrayElement.asText();
 					if (studyLevel) { // study level
-						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + examinationId);
+						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + PREFIX + examinationId);
 						retrieveURLArray.remove(i);
 						retrieveURLArray.insert(i, retrieveURL);
 					} else { // serie level
-						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + examinationId + SERIES);
+						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + PREFIX + examinationId + SERIES);
 						retrieveURLArray.remove(i);
 						retrieveURLArray.insert(i, retrieveURL);
 					}
@@ -195,6 +198,13 @@ public class StudyInstanceUIDHandler {
 			return m.group(1);
 		}
 		return null;
+	}
+	
+	public Long extractExaminationId(String examinationIdWithPrefix) {
+		String prefix = UIDGeneration.ROOT + ".";
+		String examinationIdWithoutPrefix = examinationIdWithPrefix.substring(prefix.length());
+		Long id = Long.parseLong(examinationIdWithoutPrefix);
+		return id;
 	}
 	
 }
