@@ -191,3 +191,6 @@ spring:
       ddl-auto: create-drop
       use-new-id-generator-mappings: false
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
