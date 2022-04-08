@@ -22,15 +22,11 @@ import javax.swing.SwingWorker;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.Serie;
-import org.shanoir.dicom.importer.UploadJob;
-import org.shanoir.dicom.importer.UploadJobManager;
-import org.shanoir.dicom.importer.UploadState;
-import org.shanoir.dicom.model.DicomTreeNode;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.Serie;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.Patient;
 import org.shanoir.uploader.dicom.query.Study;
@@ -48,9 +44,11 @@ import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.upload.UploadJob;
+import org.shanoir.uploader.upload.UploadJobManager;
+import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
-import org.shanoir.util.ShanoirUtil;
 
 public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
@@ -101,12 +99,12 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			idealist.setIdList(new ArrayList<>(idList));
 			List<StudyCard> studyCards = shanoirUploaderServiceClientNG.findStudyCardsByStudyIds(idealist);
 			if (studyCards == null) {
-				throw new ShanoirException(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
+				throw new Exception(resourceBundle.getString("shanoir.uploader.import.csv.error.studycard"));
 			}
 
 			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClientNG.findAcquisitionEquipments();
 			if (acquisitionEquipments == null) {
-				throw new ShanoirException("Error while retrieving acquisition equipments");
+				throw new Exception("Error while retrieving acquisition equipments");
 			}
 
 			// Iterate over study cards to get equipment + fill study => SC map
@@ -309,7 +307,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			// Change birth date to first day of year
 			final String dicomBirthDate = pat.getDescriptionMap().get("birthDate");
 			if (!StringUtils.isEmpty(dicomBirthDate)) {
-				Date dicomBirthDateAsDate = ShanoirUtil.convertStringDicomDateToDate(dicomBirthDate);
+				Date dicomBirthDateAsDate = Util.convertStringDicomDateToDate(dicomBirthDate);
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(dicomBirthDateAsDate);
 				cal.set(Calendar.MONTH, Calendar.JANUARY);

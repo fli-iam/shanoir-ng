@@ -12,12 +12,10 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.Serie;
-import org.shanoir.dicom.importer.UploadJob;
-import org.shanoir.dicom.importer.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DicomDataTransferObject;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.Serie;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -27,8 +25,8 @@ import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.model.rest.importer.Instance;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
-import org.shanoir.util.ShanoirUtil;
-import org.shanoir.util.file.FileUtil;
+import org.shanoir.uploader.upload.UploadJob;
+import org.shanoir.uploader.upload.UploadState;
 
 /**
  * This class contains usefull methods for data upload that are used multiple times in the application.
@@ -78,7 +76,7 @@ public class ImportUtils {
 	 * @return the created folder
 	 */
 	public static File createUploadFolder(final File workFolder, final DicomDataTransferObject dicomData) {
-		final String timeStamp = ShanoirUtil.getCurrentTimeStampForFS();
+		final String timeStamp = Util.getCurrentTimeStampForFS();
 		final String folderName = workFolder.getAbsolutePath() + File.separator + dicomData.getSubjectIdentifier()
 		+ "_" + timeStamp;
 		File uploadFolder = new File(folderName);
@@ -93,10 +91,10 @@ public class ImportUtils {
 	 * @param dicomData
 	 * @param uploadJob
 	 */
-	public static void initUploadJob(final Set<org.shanoir.dicom.importer.Serie> selectedSeries,
+	public static void initUploadJob(final Set<org.shanoir.uploader.dicom.Serie> selectedSeries,
 			final DicomDataTransferObject dicomData, UploadJob uploadJob) {
 		uploadJob.setUploadState(UploadState.READY);
-		uploadJob.setUploadDate(ShanoirUtil.formatTimePattern(new Date()));
+		uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 		/**
 		 * Patient level
 		 */
@@ -193,7 +191,7 @@ public class ImportUtils {
 		// handle series for study
 		final Collection<Serie> seriesShUp = uploadJob.getSeries();
 		final List<org.shanoir.uploader.model.rest.importer.Serie> seriesImportJob = new ArrayList<org.shanoir.uploader.model.rest.importer.Serie>();
-		for (org.shanoir.dicom.importer.Serie serieShUp : seriesShUp){
+		for (org.shanoir.uploader.dicom.Serie serieShUp : seriesShUp){
 			org.shanoir.uploader.model.rest.importer.Serie serieImportJob = new org.shanoir.uploader.model.rest.importer.Serie();
 			serieImportJob.setSelected(true);
 			serieImportJob.setSeriesInstanceUID(serieShUp.getId());
@@ -219,7 +217,7 @@ public class ImportUtils {
 	 * Initializes UploadStatusServiceJob object
 	 * 
 	 */
-	public static void initDataUploadJob(final Set<org.shanoir.dicom.importer.Serie> selectedSeries,
+	public static void initDataUploadJob(final Set<org.shanoir.uploader.dicom.Serie> selectedSeries,
 			final DicomDataTransferObject dicomData, NominativeDataUploadJob dataUploadJob) {
 		dataUploadJob.setPatientName(dicomData.getFirstName() + " " + dicomData.getLastName());
 		dataUploadJob.setPatientPseudonymusHash(dicomData.getSubjectIdentifier());
@@ -270,9 +268,9 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static List<String> copyFilesToUploadFolder(Set<org.shanoir.dicom.importer.Serie> selectedSeries, final File uploadFolder, String filePathDicomDir) {
+	public static List<String> copyFilesToUploadFolder(Set<org.shanoir.uploader.dicom.Serie> selectedSeries, final File uploadFolder, String filePathDicomDir) {
 		List<String> allFileNames = new ArrayList<String>();
-		for (org.shanoir.dicom.importer.Serie serie : selectedSeries) {
+		for (org.shanoir.uploader.dicom.Serie serie : selectedSeries) {
 			List<String> newFileNamesOfSerie = new ArrayList<String>();
 			List<String> oldFileNamesOfSerie = serie.getFileNames();
 			File sourceFile;

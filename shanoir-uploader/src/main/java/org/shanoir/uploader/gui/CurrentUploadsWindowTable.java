@@ -14,9 +14,9 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import org.shanoir.dicom.importer.UploadState;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataModel;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
+import org.shanoir.uploader.upload.UploadState;
 
 public class CurrentUploadsWindowTable implements Observer {
 
