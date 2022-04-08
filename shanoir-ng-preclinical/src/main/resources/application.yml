@@ -25,8 +25,6 @@ spring:
     username: preclinical
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
-    initialization-mode: never
-    data: classpath:/scripts/import.sql
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
@@ -55,7 +53,7 @@ spring:
     multipart:
       enabled: true
       max-file-size: -1
-      max-request-size: -1
+      max-request-size: -1  sql:    init:      mode: never      data-locations: classpath:/scripts/import.sql
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
@@ -106,14 +104,19 @@ preclinical:
 #################
 spring:
   config.activate.on-profile: test
+  main:
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
+  sql:
+    init.mode: always
+    init.data-locations: classpath:/scripts/test-data-preclinical-h2.sql
   datasource:
-    url: jdbc:h2:mem:SHANOIR_NG_PRECLINICAL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:SHANOIR_NG_PRECLINICAL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
     username: sa
     password: 
     driver-class-name: org.h2.Driver
-    initialization-mode: always
-    data: classpath:/scripts/test-data-preclinical-h2.sql
   jpa:
+    defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.H2Dialect
     generate-ddl: true
     hibernate:
@@ -129,8 +132,6 @@ logging:
 ######################################
 spring:
   config.activate.on-profile: dev
-  datasource:
-    initialization-mode: always
   jpa:
     generate-ddl: true
     hibernate:
@@ -138,7 +139,7 @@ spring:
       ddl-auto: create
     # Show or not log for each sql query
     show-sql: true
-  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration  sql:    init:      mode: always
 
 
 # logging configuration

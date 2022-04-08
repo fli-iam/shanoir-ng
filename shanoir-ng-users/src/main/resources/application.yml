@@ -27,8 +27,6 @@ spring:
     username: users
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
-    initialization-mode: never
-    data: classpath:/scripts/import.sql
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
@@ -58,6 +56,10 @@ spring:
     port: 25
     properties:
       mail.smtp.from: do-not-reply@inria.fr
+  sql:
+    init:
+      mode: never
+      data-locations: classpath:/scripts/import.sql
 front:
   server:
     address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
@@ -104,8 +106,6 @@ logging:
 ######################################
 spring:
   config.activate.on-profile: dev
-  datasource:
-    initialization-mode: always
   jpa:
     generate-ddl: true
     hibernate:
@@ -113,6 +113,9 @@ spring:
       ddl-auto: create
     # Show or not log for each sql query
     show-sql: true
+  sql:
+    init:
+      mode: always
 
 # logging configuration
 logging:
@@ -126,16 +129,18 @@ logging:
 ---
 spring:
   config.activate.on-profile: test
+  sql.init.mode: always
+  sql.init.data-locations: classpath:/scripts/test-data-h2.sql
   main:
     allow-bean-definition-overriding: true
+    allow-circular-references: true
   datasource:
-    url: jdbc:h2:mem:shanoirNgUsers;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:shanoirNgUsers;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
     username: sa
     password: 
     driver-class-name: org.h2.Driver
-    initialization-mode: always
-    data: classpath:/scripts/test-data-h2.sql
   jpa:
+    defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.H2Dialect
     generate-ddl: true
     hibernate:
