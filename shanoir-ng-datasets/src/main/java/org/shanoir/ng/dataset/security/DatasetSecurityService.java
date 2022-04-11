@@ -729,8 +729,8 @@ public class DatasetSecurityService {
         return commService.hasRightOnStudy(exam.getStudyId(), rightStr);
     }
     
-    public boolean hasRightOnExamination(String examinationIdWithPrefix, String rightStr) throws EntityNotFoundException {
-		Long id = studyInstanceUIDHandler.extractExaminationId(examinationIdWithPrefix);
+    public boolean hasRightOnExamination(String examinationUID, String rightStr) throws EntityNotFoundException {
+		Long id = studyInstanceUIDHandler.extractExaminationId(examinationUID);
 		return hasRightOnExamination(id, rightStr);
     }
    
