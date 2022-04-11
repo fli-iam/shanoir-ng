@@ -30,6 +30,7 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -65,6 +66,9 @@ public class DatasetSecurityService {
 
 	@Autowired
 	StudyRepository studyRepository;
+	
+	@Autowired
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	
 	/**
 	 * Check that the connected user has the given right for the given study.
@@ -723,6 +727,11 @@ public class DatasetSecurityService {
 			return false;
 		}
         return commService.hasRightOnStudy(exam.getStudyId(), rightStr);
+    }
+    
+    public boolean hasRightOnExamination(String examinationUID, String rightStr) throws EntityNotFoundException {
+		Long id = studyInstanceUIDHandler.extractExaminationId(examinationUID);
+		return hasRightOnExamination(id, rightStr);
     }
    
 }

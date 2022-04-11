@@ -305,6 +305,7 @@ services:
       - SHANOIR_INSTANCE_COLOR
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
+      - SHANOIR_KEYCLOAK_ADAPTER_MODE
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
