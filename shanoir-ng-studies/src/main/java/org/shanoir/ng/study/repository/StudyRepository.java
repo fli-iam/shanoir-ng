@@ -22,7 +22,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StudyRepository extends JpaRepository<Study, Long> {
+public interface StudyRepository extends CrudRepository<Study, Long> {
 
 	/**
 	 * Get all studies
