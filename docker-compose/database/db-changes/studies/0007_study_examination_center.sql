@@ -18,5 +18,8 @@ CREATE TABLE `study_examination` (
   CONSTRAINT `FKr0jikjmvsarpch5rtg9te0fys` FOREIGN KEY (`center_id`) REFERENCES `center` (`id`)
 );
 
+# Clean data: exams with missing center_ids
+UPDATE datasets.examination SET center_id = 0 WHERE center_id NOT IN (SELECT id FROM center);
+
 # Fill it with data
 INSERT INTO study_examination (study_id, examination_id, center_id, subject_id) SELECT study_id, id, center_id, subject_id from datasets.examination;
