@@ -25,6 +25,7 @@ let url = window.location;
 const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
 export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
 export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
+export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/assets/silent-check-sso.html";
 
 
 // Users http api
