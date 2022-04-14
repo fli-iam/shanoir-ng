@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;

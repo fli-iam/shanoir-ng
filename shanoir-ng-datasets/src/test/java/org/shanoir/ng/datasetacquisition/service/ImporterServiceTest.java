@@ -25,8 +25,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -54,15 +52,15 @@ import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
-import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@PrepareForTest(KeycloakUtil.class)
 public class ImporterServiceTest {
 
 	@InjectMocks
@@ -97,12 +95,11 @@ public class ImporterServiceTest {
 		exam = new Examination();
 		exam.setExaminationDate(LocalDate.now());
 		exam.setId(1l);
-        PowerMockito.mockStatic(KeycloakUtil.class);
-        given(KeycloakUtil.getKeycloakHeader()).willReturn(null);
         given(examinationService.findById(Mockito.anyLong())).willReturn(exam);
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testCreateEegDataset() throws IOException {
 		// Create a complete import job with some files and channels and events...
 		EegImportJob importJob = new EegImportJob();
@@ -169,6 +166,7 @@ public class ImporterServiceTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void createAllDatasetAcquisition() throws Exception {
 		// GIVEN an importJob with series and patients
 		List<Patient> patients = new ArrayList<Patient>();

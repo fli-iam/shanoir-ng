@@ -57,6 +57,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -71,6 +72,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @WebMvcTest(controllers = {UserApiController.class, ControlerSecurityService.class, UserPrivacySecurityService.class,
 		IsMeSecurityService.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class})
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class UserApiControllerTest {
 
 	private static final String REQUEST_PATH = "/users";
@@ -102,7 +104,7 @@ public class UserApiControllerTest {
 		given(userService.findById(1L)).willReturn(mockUser);
 		given(userService.findByIds(Arrays.asList(1L))).willReturn(Arrays.asList(new IdName()));
 		given(userService.create(Mockito.mock(User.class))).willReturn(new User());
-		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(Arrays.asList(mockUser));
+		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), (Class) Mockito.any())).willReturn(Arrays.asList(mockUser));
 		given(userRepository.findById(1L)).willReturn(Optional.of(mockUser));
 	}
 
@@ -164,7 +166,7 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void saveNewUserTest() throws Exception {
-		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(new ArrayList<User>());
+		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), Mockito.any())).willReturn(new ArrayList<User>());
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser())))
 				.andExpect(status().isOk());
