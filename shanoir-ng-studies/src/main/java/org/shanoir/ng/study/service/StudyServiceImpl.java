@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
+import org.assertj.core.util.Arrays;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
@@ -49,6 +50,7 @@ import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
@@ -161,15 +163,35 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		
-		List<SubjectStudy> subjectStudyListSave = study.getSubjectStudyList();
+		List<SubjectStudy> subjectStudyListSave = new ArrayList<SubjectStudy>(study.getSubjectStudyList());
+		Map<Long, List<SubjectStudyTag>> subjectStudyTagSave = new HashMap<>();
 		study.setSubjectStudyList(null);
 		Study studyDb = studyRepository.save(study);
-		studyDb.setSubjectStudyList(new ArrayList<SubjectStudy>());
+		//studyDb.setSubjectStudyList(new ArrayList<SubjectStudy>());
 		
 		if (subjectStudyListSave != null) {
-			study.setSubjectStudyList(subjectStudyListSave);
-			updateTags(study, studyDb);
-			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
+			updateTags(subjectStudyListSave, studyDb.getTags());
+			//ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), subjectStudyListSave);
+			studyDb.setSubjectStudyList(new ArrayList<>());
+			for (SubjectStudy subjectStudy : subjectStudyListSave) {
+				SubjectStudy newSubjectStudy = new SubjectStudy();
+				newSubjectStudy.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
+ 				newSubjectStudy.setSubject(subjectStudy.getSubject());
+				newSubjectStudy.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
+				newSubjectStudy.setSubjectType(subjectStudy.getSubjectType());
+				newSubjectStudy.setStudy(studyDb);
+				subjectStudyTagSave.put(subjectStudy.getSubject().getId(), subjectStudy.getSubjectStudyTags());
+				//newSubjectStudy.setSubjectStudyTags(subjectStudy.getSubjectStudyTags());
+				studyDb.getSubjectStudyList().add(newSubjectStudy);
+			}
+			studyDb = studyRepository.save(studyDb);
+			
+			for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
+				subjectStudy.setSubjectStudyTags(subjectStudyTagSave.get(subjectStudy.getSubject().getId()));
+				for (SubjectStudyTag ssTag : subjectStudy.getSubjectStudyTags()) {
+					ssTag.setSubjectStudy(subjectStudy);
+				}
+			}
 			studyDb = studyRepository.save(studyDb);
 		}
 		
@@ -254,7 +276,7 @@ public class StudyServiceImpl implements StudyService {
 		studyDb = studyRepository.save(studyDb);
 
 		if (study.getSubjectStudyList() != null) {
-			updateTags(study, studyDb);
+			updateTags(study.getSubjectStudyList(), studyDb.getTags());
 			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
 			for (SubjectStudy dbSubjectStudy : studyDb.getSubjectStudyList()) {
 				dbSubjectStudy.setStudy(studyDb);
@@ -278,13 +300,13 @@ public class StudyServiceImpl implements StudyService {
 	 * @param studyDb
 	 * @return updated study
 	 */
-	private void updateTags(Study study, Study studyDb) {
-		if (study.getSubjectStudyList() != null) {
-			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+	private void updateTags(List<SubjectStudy> subjectStudyList, List<Tag> dbStudyTags) {
+		if (subjectStudyList != null && dbStudyTags != null) {
+			for (SubjectStudy subjectStudy : subjectStudyList) {
 				if (subjectStudy.getTags() != null) {
 					for (Tag tag : subjectStudy.getTags()) {
 						if (tag.getId() == null) {
-							Tag dbTag = studyDb.getTags().stream().filter(upTag -> 
+							Tag dbTag = dbStudyTags.stream().filter(upTag -> 
 							upTag.getColor().equals(tag.getColor()) && upTag.getName().equals(tag.getName())
 									).findFirst().orElse(null);
 							if (dbTag != null) {

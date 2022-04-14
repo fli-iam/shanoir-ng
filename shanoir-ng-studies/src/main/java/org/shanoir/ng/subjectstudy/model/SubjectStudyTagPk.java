@@ -45,7 +45,7 @@ public class SubjectStudyTagPk implements Serializable {
     
     @Override
     public int hashCode() {
-    	return (int) getTag().hashCode() * getSubjectStudy().hashCode() ;
+    	return (int) getTag().hashCode() * (getSubjectStudy() != null ? getSubjectStudy().hashCode() : null);
     }
 
 	public Tag getTag() {
