@@ -284,8 +284,10 @@ public class StudyServiceImpl implements StudyService {
 			studyDb = studyRepository.save(studyDb);
 		}
 		
-		studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
-		studyDb = studyRepository.save(studyDb);
+		if (studyDb.getTags() != null) {
+			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
+			studyDb = studyRepository.save(studyDb);			
+		}
 
 		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
 
