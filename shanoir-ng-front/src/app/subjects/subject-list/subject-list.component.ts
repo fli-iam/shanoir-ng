@@ -82,7 +82,7 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
 
     getOptions() {
         return {
-            new: false,
+            new: this.keycloakService.isUserAdminOrExpert(),
             view: true, 
             edit: this.keycloakService.isUserAdminOrExpert(), 
             delete: this.keycloakService.isUserAdminOrExpert()
