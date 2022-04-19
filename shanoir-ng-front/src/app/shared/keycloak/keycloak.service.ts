@@ -53,6 +53,18 @@ export class KeycloakService {
             clientId: 'shanoir-ng-front',
         });
         KeycloakService.auth.loggedIn = true; // false;
+        function maybe_redirect_to_login_page()
+        {
+                if (!USE_LOGIN_REQUIRED) {
+                        // When the session cookie is invalid or when the
+                        // login-status iframe detects a single sign-out,
+                        // 'login-required' automatically redirects to the
+                        // login form.
+                        // But 'check-sso' only sets/clears the token, we have
+                        // to do the redirection explicitely
+                        window.location.replace(keycloakAuth.createLoginUrl());
+                }
+        }
 
         return new Promise((resolve, reject) => {
             keycloakAuth.init(
@@ -68,15 +80,10 @@ export class KeycloakService {
                         KeycloakService.auth.userId = keycloakAuth.tokenParsed.userId;
                         KeycloakService.auth.logoutUrl = keycloakAuth.authServerUrl + '/realms/shanoir-ng/protocol/openid-connect/logout?redirect_uri='
                             + AppUtils.LOGOUT_REDIRECT_URL;
+                        keycloakAuth.onAuthLogout = maybe_redirect_to_login_page;
                         resolve(null);
                     } else {
-                        if (!USE_LOGIN_REQUIRED) {
-                            // When the session cookie is invalid 'login-required'
-                            // automatically redirects to the login form.
-                            // But 'check-sso' only checks the cookie, we have
-                            // to do an explicit redirection
-                            window.location.replace(keycloakAuth.createLoginUrl());
-                        }
+                        maybe_redirect_to_login_page();
                         reject();
                     }
                 })
