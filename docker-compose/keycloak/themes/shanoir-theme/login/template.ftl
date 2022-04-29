@@ -8,7 +8,6 @@
     <meta name="robots" content="noindex, nofollow">
 	<link rel="stylesheet" href="${properties.assets!}/css/common.css" />
 	<link rel="stylesheet" href="${properties.assets!}/css/login.css" />
-	<link rel="icon" type="image/png" href="${properties.assets!}/images/simpleLogo.png" />
 
     <#if properties.meta?has_content>
         <#list properties.meta?split(' ') as meta>
@@ -16,7 +15,7 @@
         </#list>
     </#if>
     <title>${msg("loginTitle",(realm.displayName!''))}</title>
-    <link rel="icon" href="${url.resourcesPath}/img/favicon.ico" />
+    <link rel="icon" href="/assets/images/favicon.png" type="image/png" />
     <#if properties.styles?has_content>
         <#list properties.styles?split(' ') as style>
             <link href="${url.resourcesPath}/${style}" rel="stylesheet" />
