@@ -35,6 +35,11 @@ import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 /**
@@ -42,8 +47,9 @@ import org.springframework.test.util.ReflectionTestUtils;
  * @author JCome
  *
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(KeycloakUtil.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public class BidsServiceTest {
 
 	@Mock
@@ -65,9 +71,6 @@ public class BidsServiceTest {
 
 	@Before
 	public void setUp() throws IOException {
-        PowerMockito.mockStatic(KeycloakUtil.class);
-        given(KeycloakUtil.getKeycloakHeader()).willReturn(null);
-
         String property = "java.io.tmpdir";
         tempFolderPath = System.getProperty(property) + "/tmpTest/";
         File tempFile = new File(tempFolderPath);
@@ -109,6 +112,7 @@ public class BidsServiceTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 1, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testExportAsBids() throws IOException, InterruptedException {
 		//GIVEN a study full of data
 

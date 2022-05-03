@@ -96,7 +96,7 @@ public class SubjectApiControllerTest {
 	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		given(subjectMapperMock.subjectsToSubjectDTOs(Mockito.anyListOf(Subject.class)))
+		given(subjectMapperMock.subjectsToSubjectDTOs(Mockito.anyList()))
 		.willReturn(Arrays.asList(new SubjectDTO()));
 		
 		doNothing().when(subjectServiceMock).deleteById(1L);

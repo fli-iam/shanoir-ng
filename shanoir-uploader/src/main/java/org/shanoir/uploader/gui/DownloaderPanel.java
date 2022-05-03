@@ -1,13 +1,12 @@
 package org.shanoir.uploader.gui;
 
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
 import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.ResourceBundle;
-import org.apache.log4j.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -23,6 +22,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import org.apache.log4j.Logger;
 import org.shanoir.downloader.ShanoirDownloader;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;

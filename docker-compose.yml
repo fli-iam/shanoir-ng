@@ -90,6 +90,8 @@ services:
       - SHANOIR_SMTP_HOST
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_CERTIFICATE
+      - SHANOIR_CERTIFICATE_PEM_CRT
+      - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
@@ -287,21 +289,6 @@ services:
       - "dcm4chee-arc-wildfly-data:/opt/wildfly/standalone"
       - "dcm4chee-arc-storage-data:/storage"
   #
-  # OHIF-Viewer, version 2.0
-  #
-  ohif-viewer:
-    container_name: "${SHANOIR_PREFIX}ohif-viewer"
-    build: ./docker-compose/ohif-viewer 
-    environment:
-      - SHANOIR_URL_SCHEME
-      - SHANOIR_URL_HOST
-      - SHANOIR_VIEWER_OHIF_URL_SCHEME
-      - SHANOIR_VIEWER_OHIF_URL_HOST
-    networks:
-      - shanoir_ng_network
-    ports:
-      - "9905:9905"
-  #
   # Nginx
   #
   nginx:
@@ -316,6 +303,9 @@ services:
       - SHANOIR_X_FORWARDED
       - SHANOIR_INSTANCE_NAME
       - SHANOIR_INSTANCE_COLOR
+      - SHANOIR_CERTIFICATE_PEM_CRT
+      - SHANOIR_CERTIFICATE_PEM_KEY
+      - SHANOIR_KEYCLOAK_ADAPTER_MODE
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro
