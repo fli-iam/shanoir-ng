@@ -49,6 +49,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -80,6 +81,9 @@ public class ExaminationApiController implements ExaminationApi {
 	
 	@Autowired
 	private SubjectRepository subjectRepository;
+	
+	@Autowired
+	private CenterRepository centerRepository;
 
 	@Autowired
 	ShanoirEventService eventService;
@@ -273,9 +277,14 @@ public class ExaminationApiController implements ExaminationApi {
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+
 		
 		Optional<Subject> subject = subjectRepository.findById(subjectId);
 		if (subject.isEmpty() || subject.get().getSubjectStudyList().size() != 1) {
+			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+		
+		if (centerRepository.findById(centerId).isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 		}
 

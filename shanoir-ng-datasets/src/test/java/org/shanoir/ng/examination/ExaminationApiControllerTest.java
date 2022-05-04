@@ -47,6 +47,7 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -114,6 +115,9 @@ public class ExaminationApiControllerTest {
 	
 	@MockBean
 	private SubjectRepository subjectRepository;
+	
+	@MockBean
+	private CenterRepository centerRepository;
 
 	@MockBean
 	private Pageable pageable;
