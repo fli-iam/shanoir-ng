@@ -166,6 +166,21 @@ public interface ExaminationApi {
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 
+	@ApiOperation(value = "", notes = "Create an examination and add extra data", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "examination created and data added", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@PostMapping(value = "extra-data-upload/new-exam/subject/{subjectId}/center/{centerId}",
+	produces = { "application/json" },
+    consumes = { "multipart/form-data" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnSubjectId(#subjectId, 'CAN_IMPORT'))")
+	ResponseEntity<Void> createExaminationAndAddExtraData(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
+	
 	@ApiOperation(value = "", notes = "Download extra data from an examination", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 204, message = "examination updated"),

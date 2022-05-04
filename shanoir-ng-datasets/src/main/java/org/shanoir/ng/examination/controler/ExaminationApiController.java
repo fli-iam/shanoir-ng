@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.time.LocalDate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,7 +48,9 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +77,9 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Autowired
 	private ExaminationService examinationService;
+	
+	@Autowired
+	private SubjectRepository subjectRepository;
 
 	@Autowired
 	ShanoirEventService eventService;
@@ -260,8 +267,40 @@ public class ExaminationApiController implements ExaminationApi {
 		if (examinationService.addExtraData(examinationId, file) != null) {
 			return new ResponseEntity<>(HttpStatus.OK);
 		}
-		return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+		return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
+	
+	@Override
+	public ResponseEntity<Void> createExaminationAndAddExtraData(
+			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+		
+		Optional<Subject> subject = subjectRepository.findById(subjectId);
+		if (subject.isEmpty() || subject.get().getSubjectStudyList().size() != 1) {
+			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+
+		Examination examination = new Examination();
+		examination.setComment("examination of " + subject.get().getName());
+		examination.setCenterId(centerId);
+		examination.setSubjectId(subjectId);
+		examination.setStudyId(subject.get().getSubjectStudyList().get(0).getStudy().getId());
+		examination.setExaminationDate(LocalDate.now());
+		List<String> pathList = new ArrayList<>();
+		pathList.add(file.getOriginalFilename());
+		examination.setExtraDataFilePathList(pathList);
+		Examination dbExamination = examinationService.save(examination);
+		
+		String path = examinationService.addExtraData(dbExamination.getId(), file);
+		
+		if (path != null) {
+			return new ResponseEntity<>(HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}		
+	}
+	
 
 	@Override
 	public void downloadExtraData(
