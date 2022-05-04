@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,7 +36,10 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
@@ -62,6 +66,9 @@ public class DatasetSecurityService {
 	ExaminationRepository examinationRepository;
 	
 	@Autowired
+	SubjectRepository subjectRepository;
+	
+	@Autowired
 	StudyRightsService commService;
 
 	@Autowired
@@ -85,6 +92,30 @@ public class DatasetSecurityService {
 			return false;
 		}
         return commService.hasRightOnStudy(studyId, rightStr);
+    }
+    
+    /**
+	 * Check that the connected user has the given right for the given subject.
+	 * 
+	 * @param studyId the study id
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+    public boolean hasRightOnSubjectId(Long subjectId, String rightStr) {
+    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+    	Optional<Subject> subject = subjectRepository.findById(subjectId);
+    	if (subject.isEmpty()) {
+    		return false;
+    	}
+    	for (SubjectStudy subjectStudy : subject.get().getSubjectStudyList()) {
+    		boolean hasRight = commService.hasRightOnStudy(subjectStudy.getStudy().getId(), rightStr);
+    		if (hasRight) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
     
     /**
