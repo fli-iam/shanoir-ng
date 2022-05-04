@@ -24,6 +24,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -54,6 +55,9 @@ public class CStoreDicomService implements DicomServiceApi {
 
 	@Value("${dcm4chee-arc.dicom.c-store.aet.called}")
 	private String dcm4cheeCStoreAETCalled;
+	
+	@Autowired
+	private GenericDicomService dicomService;
 
 	@Override
 	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
@@ -108,7 +112,7 @@ public class CStoreDicomService implements DicomServiceApi {
 
 	@Override
 	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
-		throw new NotImplementedException("Dicom cannot be deleted: " + url + "\n. This should not happen.");
+		dicomService.deleteDicomFilesFromPacs(url);
 	}
 
 }
