@@ -120,7 +120,7 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
             }
         }
         this.onEvent.emit("delete");
-        this.onDelete.next(item);
+        this.onDelete.next({entity: item});
         this.table.refresh();
     }
 

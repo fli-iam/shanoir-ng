@@ -36,7 +36,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     };
     constructor(protected http: HttpClient) {
-        super(http)
+        super(http);
     }
 
     private datasetDTOService: DatasetDTOService = ServiceLocator.injector.get(DatasetDTOService);

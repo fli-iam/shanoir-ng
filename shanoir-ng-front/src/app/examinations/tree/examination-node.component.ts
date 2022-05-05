@@ -18,7 +18,7 @@ import { DatasetProcessing } from '../../datasets/shared/dataset-processing.mode
 import { Dataset } from '../../datasets/shared/dataset.model';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 
 import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
@@ -55,7 +55,7 @@ export class ExaminationNodeComponent implements OnChanges {
         private datasetAcquisitionService: DatasetAcquisitionService,
         private examPipe: ExaminationPipe,
         private datasetService: DatasetService,
-        private msgService: MsgBoxService) {
+        private consoleService: ConsoleService) {
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -140,7 +140,7 @@ export class ExaminationNodeComponent implements OnChanges {
         if (this.node.datasetAcquisitions == 'UNLOADED') {
             datasetIdsReady = this.loadDatasetAcquisitions();
             if (!this.datasetIds || this.datasetIds.length == 0) {
-                this.msgService.log('warn', 'Sorry, no dataset for this examination');
+                this.consoleService.log('warn', 'Sorry, no dataset for examination n°' + this.node?.id);
                 this.downloading = false;
                 return;
             }
