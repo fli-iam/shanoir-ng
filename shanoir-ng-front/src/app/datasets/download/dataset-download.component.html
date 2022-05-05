@@ -8,11 +8,9 @@
     <div class="header">Massive download</div>
     <div *ngIf="inError" class="body">{{errorMessage}}</div>
     <div *ngIf="!inError" class="body">
-        <ng-container *ngIf="mode == 'all'">
-            <p> Please select dataset type (only for DICOM / NIFTI datasets) :</p>
-            <select-box [(ngModel)]="type" [options]="[{value: 'nii', label: 'Nifti'}, {value: 'dcm', label: 'Dicom'}]">
-            </select-box>
-        </ng-container>
+        <p> Please select dataset type (only for DICOM / NIFTI datasets) :</p>
+        <select-box [(ngModel)]="type" [options]="[{value: 'nii', label: 'Nifti'}, {value: 'dcm', label: 'Dicom'}]">
+        </select-box>
     </div>
     <div class="footer">
         <button type="button" *ngIf="!inError" type="button" (click)="download()" [disabled]="!type">OK</button>
