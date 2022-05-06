@@ -24,7 +24,6 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -38,10 +37,10 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component(value = "cstore")
-public class CStoreDicomService implements DicomServiceApi {
+public class DIMSEService implements DicomServiceApi {
 	
 	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(CStoreDicomService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DIMSEService.class);
 
 	private static final String STORESCU = "storescu";
 
@@ -56,9 +55,6 @@ public class CStoreDicomService implements DicomServiceApi {
 	@Value("${dcm4chee-arc.dicom.c-store.aet.called}")
 	private String dcm4cheeCStoreAETCalled;
 	
-	@Autowired
-	private GenericDicomService dicomService;
-
 	@Override
 	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
 		if (directoryWithDicomFiles != null && directoryWithDicomFiles.exists()
@@ -112,7 +108,7 @@ public class CStoreDicomService implements DicomServiceApi {
 
 	@Override
 	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
-		dicomService.deleteDicomFilesFromPacs(url);
+		throw new NotImplementedException("Cannot delete datasets from PACS with CSTORE methods.");
 	}
 
 }
