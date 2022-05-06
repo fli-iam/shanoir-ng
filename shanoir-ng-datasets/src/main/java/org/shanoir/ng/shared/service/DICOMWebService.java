@@ -43,10 +43,10 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component(value = "stowrs")
-public class StowRsDicomService implements DicomServiceApi {
+public class DICOMWebService implements DicomServiceApi {
 
 	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(StowRsDicomService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebService.class);
 
 	/** Mime type */
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
