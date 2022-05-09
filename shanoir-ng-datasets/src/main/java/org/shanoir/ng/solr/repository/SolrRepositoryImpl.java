@@ -126,7 +126,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Collection<Long> studyIds,
 			ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
 		if (studyIds == null || studyIds.isEmpty()) {
-			throw new IllegalArgumentException("Due to security considerations, providing a study id list is mandatory at this point");
+			return new SolrResultPage<>(new ArrayList<>());
 		} else {
 			return getSearchResultsWithFacets(facet, pageable, studyIds);			
 		}
