@@ -63,7 +63,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * Implementation of study service.
@@ -103,6 +102,9 @@ public class StudyServiceImpl implements StudyService {
 
 	@Value("${studies-data}")
 	private String dataDir;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -440,7 +442,7 @@ public class StudyServiceImpl implements StudyService {
 	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
-					new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(study));
+					objectMapper.writeValueAsString(study));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
