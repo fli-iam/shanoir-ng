@@ -118,7 +118,7 @@ public class StudyServiceImpl implements StudyService {
 			try {
 				studyUserCom.broadcast(commands);
 			} catch (MicroServiceCommunicationException e) {
-				LOG.error("Could not transmit study-user delete info through RabbitMQ");
+				LOG.error("Could not transmit study-user delete info through RabbitMQ", e);
 			}
 		}
 
@@ -177,7 +177,7 @@ public class StudyServiceImpl implements StudyService {
 			try {
 				studyUserCom.broadcast(commands);
 			} catch (MicroServiceCommunicationException e) {
-				LOG.error("Could not transmit study-user create info through RabbitMQ");
+				LOG.error("Could not transmit study-user create info through RabbitMQ", e);
 			}
 			
 			// Use newly created study "studyDb" to decide, to send email to which user
@@ -382,7 +382,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 			studyUserCom.broadcast(commands);
 		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not transmit study-user update info through RabbitMQ");
+			LOG.error("Could not transmit study-user update info through RabbitMQ", e);
 		}
 
 		// Use updated study "study" to decide, to send email to which user
@@ -427,7 +427,7 @@ public class StudyServiceImpl implements StudyService {
 			commands.add(new StudyUserCommand(CommandType.CREATE, studyUser));
 			studyUserCom.broadcast(commands);
 		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not transmit study-user create info through RabbitMQ");
+			LOG.error("Could not transmit study-user create info through RabbitMQ", e);
 		}
 		
 		// Use study "study" to decide, to send email to which user
@@ -443,7 +443,7 @@ public class StudyServiceImpl implements StudyService {
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
-					"Error while communicating with datasets MS to update study name.");
+					"Error while communicating with datasets MS to update study name.", e);
 		}
 	}
 
