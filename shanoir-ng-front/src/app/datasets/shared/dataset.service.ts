@@ -99,7 +99,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         }
     }
 
-    public downloadDatasets(ids: number[], format: string, progressBar: LoadingBarComponent): Promise<HttpEvent<any>> {
+    public downloadDatasets(ids: number[], format: string, progressBar: LoadingBarComponent) {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
@@ -119,7 +119,6 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 }
             )
         );
-        return postResponse.toPromise();
     }
 
     public downloadDatasetsByStudy(studyId: number, format: string, progressBar: LoadingBarComponent) {
