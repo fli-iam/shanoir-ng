@@ -47,6 +47,9 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.mockito.junit.MockitoJUnitRunner;
 
 
@@ -73,6 +76,9 @@ public class SubjectServiceTest {
 
 	@InjectMocks
 	private SubjectServiceImpl subjectService;
+	
+	@Mock
+	private ObjectMapper objectMapper;
 
 	@Before
 	public void setup() {

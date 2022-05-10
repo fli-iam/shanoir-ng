@@ -55,9 +55,12 @@ import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Study service test.
@@ -96,6 +99,9 @@ public class StudyServiceTest {
 	
 	@Mock
 	private StudyMapper studyMapperMock;
+	
+	@Mock
+	private ObjectMapper objectMapper;
 
 	@ClassRule
 	public static TemporaryFolder tempFolder = new TemporaryFolder();

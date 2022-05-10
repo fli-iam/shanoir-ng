@@ -22,7 +22,6 @@ import java.util.Map;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyUserRepository;
@@ -31,10 +30,6 @@ import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
-import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +53,9 @@ public class StudyUserServiceImpl implements StudyUserService {
 
 	@Autowired
 	private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
+	
+	@Autowired
+	private ObjectMapper mapper;
 	
 	@Override
 	public List<StudyUserRight> getRightsForStudy(Long studyId) {
@@ -101,8 +99,6 @@ public class StudyUserServiceImpl implements StudyUserService {
 	@Transactional
 	@Override
 	public void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);

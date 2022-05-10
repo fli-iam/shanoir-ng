@@ -43,11 +43,13 @@ public class RabbitMqStudyUserService {
 	@Autowired
 	private StudyUserUpdateService service;
 	
+	@Autowired
+	private ObjectMapper mapper;
+	
     public void receiveMessageImport(String commandArrStr) throws AmqpRejectAndDontRequeueException {
     	StudyUserCommand[] commands;
     	try {
     		LOG.debug("Received study-user commands : {}", commandArrStr);
-			ObjectMapper mapper = new ObjectMapper();
 			
 			SimpleModule module = new SimpleModule();
 			module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
