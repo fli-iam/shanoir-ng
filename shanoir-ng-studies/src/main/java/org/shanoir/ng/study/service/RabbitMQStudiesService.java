@@ -57,6 +57,9 @@ public class RabbitMQStudiesService {
 	
 	@Autowired
 	private DataUserAgreementService dataUserAgreementService;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	/**
 	 * Receives a shanoirEvent as a json object, concerning an examination creation
@@ -72,7 +75,6 @@ public class RabbitMQStudiesService {
 	@Transactional
 	public void linkExamination(final String eventStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
 			Long examinationId = Long.valueOf(event.getObjectId());
@@ -113,7 +115,6 @@ public class RabbitMQStudiesService {
 	@Transactional
 	public void deleteExaminationStudy(final String eventStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
 			Long examinationId = Long.valueOf(event.getObjectId());
@@ -139,7 +140,6 @@ public class RabbitMQStudiesService {
 	@Transactional
 	public void challengeSubscription(final String studyStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
 			Long userId = event.getUserId();

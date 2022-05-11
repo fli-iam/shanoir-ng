@@ -42,6 +42,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Test class for BIDS service class.
  * @author JCome
@@ -61,6 +63,9 @@ public class BidsServiceTest {
 	@InjectMocks
 	@Spy
 	private BIDSServiceImpl service = new BIDSServiceImpl();
+	
+	@Mock
+	private ObjectMapper objectMapper;
 	
 	String studyName = "STUDY";
 

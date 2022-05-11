@@ -81,6 +81,9 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Autowired SubjectMapper subjectMapper;
 	
+	@Autowired
+	private ObjectMapper objectMapper;
+	
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
 	@Override
@@ -224,7 +227,7 @@ public class SubjectServiceImpl implements SubjectService {
 	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE,
-					new ObjectMapper().writeValueAsString(subject));
+					objectMapper.writeValueAsString(subject));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");

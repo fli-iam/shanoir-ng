@@ -102,6 +102,9 @@ public class StudyServiceImpl implements StudyService {
 
 	@Value("${studies-data}")
 	private String dataDir;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -411,7 +414,7 @@ public class StudyServiceImpl implements StudyService {
 			emailStudyUserAdded.setStudyUsers(studyUserIds);
 			try {
 				rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE,
-						new ObjectMapper().writeValueAsString(emailStudyUserAdded));
+						objectMapper.writeValueAsString(emailStudyUserAdded));
 			} catch (AmqpException | JsonProcessingException e) {
 				LOG.error("Could not send email for study user report. ", e);
 			}
@@ -439,7 +442,7 @@ public class StudyServiceImpl implements StudyService {
 	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
-					new ObjectMapper().writeValueAsString(study));
+					objectMapper.writeValueAsString(study));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
