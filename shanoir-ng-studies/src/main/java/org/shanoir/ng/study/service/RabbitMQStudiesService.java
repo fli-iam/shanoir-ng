@@ -116,11 +116,12 @@ public class RabbitMQStudiesService {
 	public void deleteExaminationStudy(final String eventStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
+			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+			ObjectMapper objectMapper = new ObjectMapper();
 			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
 			Long examinationId = Long.valueOf(event.getObjectId());
 			Long studyId = Long.valueOf(event.getMessage());
 			this.studyService.deleteExamination(examinationId, studyId);
-
 		} catch (Exception e) {
 			LOG.error("Could not index examination on given study ", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage());

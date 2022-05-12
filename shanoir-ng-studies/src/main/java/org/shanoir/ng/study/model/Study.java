@@ -233,7 +233,12 @@ public class Study extends HalEntity {
 	 *            the examinationIds to set
 	 */
 	public void setExaminations(Set<StudyExamination> examinations) {
-		this.examinations = examinations;
+		if (this.examinations == null) {
+			this.examinations = examinations;
+		} else {
+			this.examinations.retainAll(examinations);
+			this.examinations.addAll(examinations);
+		}
 	}
 
 	/**

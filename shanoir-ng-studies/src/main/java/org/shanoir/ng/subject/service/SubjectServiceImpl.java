@@ -17,6 +17,7 @@ package org.shanoir.ng.subject.service;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -26,6 +27,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
+import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
@@ -44,6 +46,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -83,14 +86,23 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private StudyExaminationRepository studyExaminationRepository;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
 	@Override
+	@Transactional
 	public void deleteById(final Long id) throws EntityNotFoundException {
-		if (subjectRepository.findById(id) == null) {
+		Optional<Subject> subject = subjectRepository.findById(id);
+		if (subject.isEmpty()) {
 			throw new EntityNotFoundException(Subject.class, id);
 		}
+		
+		// Delete all associated study_examination
+		studyExaminationRepository.deleteBySubject(subject.get());
+		
 		subjectRepository.deleteById(id);
 	}
 
