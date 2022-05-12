@@ -40,7 +40,8 @@ public class DICOMWebApiController implements DICOMWebApi {
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	
-	private ObjectMapper mapper = new ObjectMapper();
+	@Autowired
+	private ObjectMapper mapper;
 	
 	@Override
 	public ResponseEntity<String> findPatients() throws RestServiceException {

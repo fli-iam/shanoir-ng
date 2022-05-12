@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, ViewContainerRef, HostBinding, HostListener } from '@angular/core';
+import { Component, ElementRef, ViewContainerRef, HostBinding, HostListener, ViewChild } from '@angular/core';
 
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { ModalService } from './shared/components/modals/modal.service';
@@ -25,6 +25,7 @@ import { KeycloakSessionService } from './shared/session/keycloak-session.servic
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
 import { NavigationEnd, Router } from '@angular/router';
 import { StudyService } from './studies/shared/study.service';
+import { ConsoleComponent } from './shared/console/console.component';
 
 
 @Component({
@@ -37,6 +38,7 @@ import { StudyService } from './studies/shared/study.service';
 export class AppComponent {
 
     @HostBinding('@parent') public menuOpen: boolean = true;
+    @ViewChild('console') consoleComponenent: ConsoleComponent;
 
     constructor(
             public viewContainerRef: ViewContainerRef,

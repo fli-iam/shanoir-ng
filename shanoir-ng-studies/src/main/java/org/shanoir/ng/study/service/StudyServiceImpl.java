@@ -102,6 +102,9 @@ public class StudyServiceImpl implements StudyService {
 
 	@Value("${studies-data}")
 	private String dataDir;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -118,7 +121,7 @@ public class StudyServiceImpl implements StudyService {
 			try {
 				studyUserCom.broadcast(commands);
 			} catch (MicroServiceCommunicationException e) {
-				LOG.error("Could not transmit study-user delete info through RabbitMQ");
+				LOG.error("Could not transmit study-user delete info through RabbitMQ", e);
 			}
 		}
 
@@ -177,7 +180,7 @@ public class StudyServiceImpl implements StudyService {
 			try {
 				studyUserCom.broadcast(commands);
 			} catch (MicroServiceCommunicationException e) {
-				LOG.error("Could not transmit study-user create info through RabbitMQ");
+				LOG.error("Could not transmit study-user create info through RabbitMQ", e);
 			}
 			
 			// Use newly created study "studyDb" to decide, to send email to which user
@@ -382,7 +385,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 			studyUserCom.broadcast(commands);
 		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not transmit study-user update info through RabbitMQ");
+			LOG.error("Could not transmit study-user update info through RabbitMQ", e);
 		}
 
 		// Use updated study "study" to decide, to send email to which user
@@ -411,7 +414,7 @@ public class StudyServiceImpl implements StudyService {
 			emailStudyUserAdded.setStudyUsers(studyUserIds);
 			try {
 				rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE,
-						new ObjectMapper().writeValueAsString(emailStudyUserAdded));
+						objectMapper.writeValueAsString(emailStudyUserAdded));
 			} catch (AmqpException | JsonProcessingException e) {
 				LOG.error("Could not send email for study user report. ", e);
 			}
@@ -427,7 +430,7 @@ public class StudyServiceImpl implements StudyService {
 			commands.add(new StudyUserCommand(CommandType.CREATE, studyUser));
 			studyUserCom.broadcast(commands);
 		} catch (MicroServiceCommunicationException e) {
-			LOG.error("Could not transmit study-user create info through RabbitMQ");
+			LOG.error("Could not transmit study-user create info through RabbitMQ", e);
 		}
 		
 		// Use study "study" to decide, to send email to which user
@@ -439,11 +442,11 @@ public class StudyServiceImpl implements StudyService {
 	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_NAME_UPDATE_QUEUE,
-					new ObjectMapper().writeValueAsString(study));
+					objectMapper.writeValueAsString(study));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
-					"Error while communicating with datasets MS to update study name.");
+					"Error while communicating with datasets MS to update study name.", e);
 		}
 	}
 

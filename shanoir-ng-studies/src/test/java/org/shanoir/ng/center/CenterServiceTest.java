@@ -36,6 +36,9 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.mockito.junit.MockitoJUnitRunner;
 
 /**
@@ -61,6 +64,9 @@ public class CenterServiceTest {
 
 	@InjectMocks
 	private CenterServiceImpl centerService;
+	
+	@Mock
+	private ObjectMapper objectMapper;
 
 	@Before
 	public void setup() {

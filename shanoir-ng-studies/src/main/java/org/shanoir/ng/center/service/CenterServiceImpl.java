@@ -17,7 +17,6 @@ package org.shanoir.ng.center.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -29,9 +28,6 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
-import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.study.repository.StudyRepository;
-import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.utils.Utils;
@@ -62,6 +58,9 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CenterServiceImpl.class);
 	
@@ -156,7 +155,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	private boolean updateName(IdName idName) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE,
-					new ObjectMapper().writeValueAsString(idName));
+					objectMapper.writeValueAsString(idName));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center name.");
