@@ -32,10 +32,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.studyexamination.StudyExaminationRepository;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
@@ -49,8 +51,6 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.mockito.junit.MockitoJUnitRunner;
 
 
 /**
@@ -79,6 +79,9 @@ public class SubjectServiceTest {
 	
 	@Mock
 	private ObjectMapper objectMapper;
+	
+	@Mock
+	private StudyExaminationRepository studyExaminationRepository;
 
 	@Before
 	public void setup() {

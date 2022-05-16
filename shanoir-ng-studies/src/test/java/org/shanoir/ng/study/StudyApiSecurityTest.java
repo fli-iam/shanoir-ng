@@ -142,6 +142,7 @@ public class StudyApiSecurityTest {
 		assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
 		assertAccessAuthorized(api::findStudies);
 		assertAccessAuthorized(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) {} }, null);
+		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
 		assertAccessAuthorized(api::findStudyById, ENTITY_ID);
 		assertAccessAuthorized((t, u) -> { try { api.saveNewStudy(t, u); } catch (RestServiceException e) {}}, mockNew, mockBindingResult);
 		assertAccessAuthorized((t, u, v) -> { try { api.updateStudy(t, u, v); } catch (RestServiceException e) {}}, ENTITY_ID, mockExisting, mockBindingResult);
