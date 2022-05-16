@@ -1,4 +1,5 @@
 :host() { height: 100vh; background-color: var(--color-a); color: white; display: block; }
+:host().reduce-height { height: calc(100vh - 108px); background-color: var(--color-a); color: white; display: block; }
 :host()::-webkit-scrollbar { width: 0 !important }
 
 .logo { margin-bottom: 20px; display: flex; justify-content: center; min-width: 300px; position: relative; }

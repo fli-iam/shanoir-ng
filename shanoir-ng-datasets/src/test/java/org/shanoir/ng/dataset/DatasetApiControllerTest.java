@@ -61,7 +61,6 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -75,7 +74,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -145,6 +143,9 @@ public class DatasetApiControllerTest {
 	
 	@MockBean
 	private ImporterService importerService;
+	
+	@Autowired
+	private ObjectMapper mapper;
 
 	private Subject subject = new Subject(3L, "name");
 	private Study study = new Study(1L, "studyName");
@@ -186,7 +187,6 @@ public class DatasetApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void updateDatasetTest() throws Exception {
-		ObjectMapper mapper = new ObjectMapper();
 		Dataset ds = ModelsUtil.createMrDataset();
 		ds.setId(1L);
 		String json = mapper.writeValueAsString(ds);

@@ -455,10 +455,7 @@ public class StudySecurityService {
 	 * @return true or false
 	 */
 	private boolean hasPrivilege(Study study, StudyUserRight neededRight) {
-		if (study == null) {
-			throw new IllegalArgumentException("study cannot be null");
-		}
-		return hasPrivilege(study.getStudyUserList(), neededRight);
+		return study != null && hasPrivilege(study.getStudyUserList(), neededRight);
 	}
 
 	/**

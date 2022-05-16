@@ -29,7 +29,7 @@ import { SolrService } from "./solr.service";
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { Page } from '../shared/components/table/pageable.model';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
-import { MsgBoxService } from '../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../shared/console/console.service';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
@@ -76,7 +76,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
-            private confirmDialogService: ConfirmDialogService, private msgBoxService: MsgBoxService) {
+            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
@@ -326,7 +326,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     this.datasetService.delete(parseInt(solrDocument.datasetId)).then(() => {
                         this.selectedDatasetIds.delete(parseInt(solrDocument.datasetId));
                         this.table.refresh().then(() => {
-                            this.msgBoxService.log('info', 'Dataset sucessfully deleted');
+                            this.consoleService.log('info', 'Dataset n°' + solrDocument.datasetId + 'was sucessfully deleted');
                         });
                     });                    
                 }
@@ -344,7 +344,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                         this.selectedDatasetIds = new Set();
                         if (this.tab == 'selected') this.selectionTable.refresh();
                         this.table.refresh().then(() => {
-                            this.msgBoxService.log('info', 'Datasets sucessfully deleted');
+                            this.consoleService.log('info', 'Datasets sucessfully deleted', ['ids : ' + [...this.selectedDatasetIds].join(', ')]);
                         });
                     }).catch(reason => {
                         if(reason.error.code == 403) {
@@ -411,10 +411,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getCustomActionsDefs(): any[] {
         let customActionDefs:any = [];
         customActionDefs.push(
-            {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
-            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
-            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
-            {title: "Delete selected", awesome: "fa-regular fa-trash-can", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
+            {title: "Clear selection", awesome: "fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
+            {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
+            {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
+            {title: "Download as EEG", awesome: "fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
+            {title: "Download as BIDS", awesome: "fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
+            {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
         );
         return customActionDefs; 
     }
@@ -422,14 +424,16 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getSelectionCustomActionsDefs(): any[] {
         let customActionDefs:any = [];
         customActionDefs.push(
-            {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => {
+            {title: "Clear selection", awesome: "fa-snowplow", action: () => {
                 this.selectedDatasetIds = new Set();
                 this.table.clearSelection();
                 this.selectionTable.refresh();
             }, disabledIfNoResult: true},
-            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
-            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
-            {title: "Delete selected", awesome: "fa-regular fa-trash-can", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
+            {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
+            {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
+            {title: "Download as EEG", awesome: "fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
+            {title: "Download as BIDS", awesome: "fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
+            {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
         );
         return customActionDefs;
     }

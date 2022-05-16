@@ -431,7 +431,5 @@ public class MrProtocolMetadata extends AbstractEntity {
 	public void setTransmittingCoilId(Long transmittingCoilId) {
 		this.transmittingCoilId = transmittingCoilId;
 	}
-	
-	
 
 }

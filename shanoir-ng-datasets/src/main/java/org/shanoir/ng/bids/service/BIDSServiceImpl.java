@@ -257,7 +257,6 @@ public class BIDSServiceImpl implements BIDSService {
 		// 2. Create dataset_description.json and README
 		DatasetDescription datasetDescription = new DatasetDescription();
 		datasetDescription.setName(studyName);
-		ObjectMapper objectMapper = new ObjectMapper();
 		try {
 			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + DATASET_DESCRIPTION_FILE), datasetDescription);
 			objectMapper.writeValue(new File(workFolder.getAbsolutePath() + File.separator + README_FILE), studyName);
@@ -564,7 +563,6 @@ public class BIDSServiceImpl implements BIDSService {
 		EegDataSetDescription datasetDescription = new EegDataSetDescription();
 		datasetDescription.setTaskName(studyName);
 		datasetDescription.setSamplingFrequency(String.valueOf(dataset.getSamplingFrequency()));
-		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.writeValue(new File(destFile), datasetDescription);
 
 		// Create the folder where we are currently working if necessary.

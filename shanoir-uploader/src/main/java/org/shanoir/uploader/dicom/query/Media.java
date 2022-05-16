@@ -9,7 +9,7 @@ import javax.swing.tree.TreeNode;
 
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
-import org.shanoir.dicom.model.DicomTreeNode;
+import org.shanoir.uploader.dicom.DicomTreeNode;
 
 /**
  * The Class Media. Containing the data for the DICOM tree.

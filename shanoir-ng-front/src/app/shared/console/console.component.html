@@ -1,0 +1,41 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<div class="button button-top">
+    <div class="tab" (click)="open = !open" title="open console">
+        <i class="fa-solid fa-chevron-up" *ngIf="!open"></i>
+        <i class="fa-solid fa-chevron-down" *ngIf="open"></i>
+    </div>
+</div>
+<div *ngIf="contentOpen" class="content">
+    <div class="right-tab">
+        <i class="fa-solid fa-chevron-right" *ngIf="!deployed" (click)="deployed = true"></i>
+        <i class="fa-solid fa-chevron-left" *ngIf="deployed" (click)="deployed = false"></i>
+    </div>
+    <div *ngFor="let msg of messages" [class]="msg.type" [class.fresh]="msg.fresh">
+        <i *ngIf="msg.type == 'info'" class="fas fa-check-circle"></i>
+        <i *ngIf="msg.type == 'warn'" class="fas fa-exclamation-circle"></i>
+        <i *ngIf="msg.type == 'error'" class="fas fa-times-circle"></i>
+        {{msg.txt}}
+        <span *ngIf="msg.nb > 1" class="number">x{{msg.nb}}</span>
+        <span *ngIf="msg.details" (click)="toggleDetails(msg)" class="details-button">
+            <i class="fas fa-info"></i>
+        </span>
+        <span *ngIf="msg.detailsOpened" class="details">
+            <ul>
+                <li *ngFor="let det of msg.details">{{det}}</li>
+            </ul>
+        </span>
+    </div>
+</div>

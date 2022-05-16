@@ -80,11 +80,13 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -185,6 +187,9 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (Exception e) {
+			LOG.error("Error while deleting dataset. Please check DICOM server configuration.", e);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
 
@@ -327,7 +332,9 @@ public class DatasetApiController implements DatasetApi {
 		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
 			datasetName += "-" + dataset.getUpdatedMetadata().getComment();
 		}
-
+		if (datasetName.contains(File.separator)) {
+			datasetName = datasetName.replaceAll(File.separator, "_");
+		}
 		String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
 
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -341,8 +348,8 @@ public class DatasetApiController implements DatasetApi {
 			if (subjectOpt.isPresent()) {
 				subjectName = subjectOpt.get().getName();
 			}
-			if (subjectName.contains("/")) {
-				subjectName = subjectName.replaceAll("/", "_");
+			if (subjectName.contains(File.separator)) {
+				subjectName = subjectName.replaceAll(File.separator, "_");
 			}
 
 			if (DCM.equals(format)) {
@@ -371,14 +378,14 @@ public class DatasetApiController implements DatasetApi {
 					workFolder = new File(tmpFile.getAbsolutePath() + File.separator + "result");
 				} else  {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, false);
 				}
 			} else if (EEG.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, false);
 			} else if (BIDS.equals(format)) {
 				getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
-				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+				copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, true);
 			} else {
 				throw new RestServiceException(
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -503,8 +510,8 @@ public class DatasetApiController implements DatasetApi {
 				}
 				// Create a new folder organized by subject / examination
 				String subjectName = subjectRepo.findById(dataset.getSubjectId()).orElse(null).getName();
-				if (subjectName.contains("/")) {
-					subjectName = subjectName.replaceAll("/", "_");
+				if (subjectName.contains(File.separator)) {
+					subjectName = subjectName.replaceAll(File.separator, "_");
 				}
 				String studyName = studyRepo.findById(dataset.getStudyId()).orElse(null).getName();
 
@@ -527,16 +534,16 @@ public class DatasetApiController implements DatasetApi {
 
 				if (dataset instanceof EegDataset) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName, false);
 				} else if (DCM.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName, dataset);
 				} else if (NII.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName, false);
 				} else if (BIDS.equals(format)) {
 					getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
-					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName);
+					copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName, true);
 				} else {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Please choose either nifti, dicom or eeg file type.", null));
@@ -617,7 +624,7 @@ public class DatasetApiController implements DatasetApi {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName) throws IOException {
+	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName, boolean keepName) throws IOException {
 		int index = 0;
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
@@ -630,33 +637,37 @@ public class DatasetApiController implements DatasetApi {
 				index++;
 				continue;
 			}
-
+			
 			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
 			StringBuilder name = new StringBuilder("");
 
-			name.append(subjectName).append("_");
-			if (dataset instanceof EegDataset) {
-				name.append(dataset.getName()).append("_");
+			if (keepName) {
+				name.append(srcFile.getName());
 			} else {
-				if (dataset.getUpdatedMetadata().getComment() != null) {
-					name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+				name.append(subjectName).append("_");
+				if (dataset instanceof EegDataset) {
+					name.append(dataset.getName()).append("_");
+				} else {
+					if (dataset.getUpdatedMetadata().getComment() != null) {
+						name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+					}
+					name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
+					if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
+						name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+					}
 				}
-				name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
-				if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
-					name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+				name.append(dataset.getDatasetAcquisition().getRank()).append("_")
+				.append(index)
+				.append(".");
+				if (srcFile.getName().endsWith(".nii.gz")) {
+					name.append("nii.gz");
+				} else {
+					name.append(FilenameUtils.getExtension(srcFile.getName()));
 				}
-			}
-			name.append(dataset.getDatasetAcquisition().getRank()).append("_")
-			.append(index)
-			.append(".");
-			if (srcFile.getName().endsWith(".nii.gz")) {
-				name.append("nii.gz");
-			} else {
-				name.append(FilenameUtils.getExtension(srcFile.getName()));
 			}
 			String fileName = name.toString();
-			if (fileName.contains("/")) {
-				fileName = fileName.replaceAll("/", "_");
+			if (fileName.contains(File.separator)) {
+				fileName = fileName.replaceAll(File.separator, "_");
 			}
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + fileName);
 			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);

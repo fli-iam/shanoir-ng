@@ -21,6 +21,9 @@ public class ShanoirEventService {
 
 	@Autowired
 	RabbitTemplate rabbitTemplate;
+	
+	@Autowired
+	private ObjectMapper mapper;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirEventService.class);
 
@@ -29,8 +32,6 @@ public class ShanoirEventService {
 	 * @param event
 	 */
 	public void publishEvent(ShanoirEvent event) {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
 		StringBuilder builder = new StringBuilder("Event:[")
 			.append("id=").append(event.getId()).append(";")
 			.append("user_id=").append(event.getUserId()).append(";")

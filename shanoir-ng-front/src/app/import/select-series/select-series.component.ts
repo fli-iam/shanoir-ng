@@ -14,7 +14,7 @@
 import { Component, HostListener } from '@angular/core';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { Router } from '../../breadcrumbs/router';
+import { Router } from '@angular/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
 import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';

@@ -35,9 +35,12 @@ public class StudyUserUpdateBroadcastService {
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
 	
+	@Autowired
+	private ObjectMapper objectMapper;
+	
 	public void broadcast(Iterable<StudyUserCommand> commands) throws MicroServiceCommunicationException {
 		try {
-			String str = new ObjectMapper().writeValueAsString(commands);
+			String str = objectMapper.writeValueAsString(commands);
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_USER_EXCHANGE, RabbitMQConfiguration.STUDY_USER_QUEUE, str);
 			LOG.debug("Brodcasted study-user changes : {}", str);
 		} catch (AmqpException | JsonProcessingException e) {

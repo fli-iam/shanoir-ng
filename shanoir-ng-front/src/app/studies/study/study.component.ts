@@ -58,6 +58,7 @@ export class StudyComponent extends EntityComponent<Study> {
     subjects: IdName[];
     selectedCenter: IdName;
     users: User[] = [];
+    studyNode: Study | StudyNode;
     
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
@@ -86,7 +87,10 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public get study(): Study { return this.entity; }
-    public set study(study: Study) { this.entity = study; }
+    public set study(study: Study) {
+        this.studyNode = this.breadcrumbsService.currentStep.data.studyNode ? this.breadcrumbsService.currentStep.data.studyNode : study;
+        this.entity = study; 
+    }
 
     getService(): EntityService<Study> {
         return this.studyService;
@@ -105,12 +109,6 @@ export class StudyComponent extends EntityComponent<Study> {
                     return aname.localeCompare(bname);
                 });
             return study;
-        });
-        Promise.all([
-            studyPromise,
-            this.fetchUsers()
-        ]).then(([study, users]) => {
-            Study.completeMembers(study, users);
         });
         return studyPromise.then(() => null);
     }
@@ -393,6 +391,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.dataUserAgreementPaths = [];
             this.dataUserAgreement = null;           
         }
+
     }
 
     public downloadDataUserAgreement() {
@@ -402,14 +401,15 @@ export class StudyComponent extends EntityComponent<Study> {
     public attachDataUserAgreement(event: any) {
         this.dataUserAgreement = event.target.files[0];
         if (this.dataUserAgreement.name.indexOf(".pdf", this.dataUserAgreement.name.length - ".pdf".length) == -1) {
-            this.msgBoxService.log("error", "Only .pdf files are accepted");
+            this.consoleService.log("error", "Attaching DUA to study \"" + this.study.name + "\" : Only .pdf files are accepted");
             this.dataUserAgreement = null;
         } else if (this.dataUserAgreement.size > 50000000) {
-            this.msgBoxService.log("error", "File must be less than 50Mb.");
+            this.consoleService.log("error", "Attaching DUA to study \"" + this.study.name + "\" : File must be less than 50Mb.");
             this.dataUserAgreement = null;
         } else {
             this.study.dataUserAgreementPaths = ['DUA-' + this.dataUserAgreement.name];
         }
+        this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 

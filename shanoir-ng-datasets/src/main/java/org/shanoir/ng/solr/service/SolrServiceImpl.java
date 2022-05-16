@@ -210,7 +210,7 @@ public class SolrServiceImpl implements SolrService {
 		SolrResultPage<ShanoirSolrDocument> result = null;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByFacetCriteria(query, pageable);
+			result = solrRepository.findByFacetCriteriaForAdmin(query, pageable);
 		} else {
 			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(KeycloakUtil.getTokenUserId()));
 			Map<Long, List<String>> studiesCenter = new HashMap<>();

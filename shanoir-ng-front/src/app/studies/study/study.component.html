@@ -28,19 +28,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 
 			<ul class="tabs">
-				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'">General</li>
-				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'">Files</li>
-				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'">Subjects</li>
-				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'">Centers</li>
-				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'">Members</li>
-				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'">Tags</li>
+				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'" skipLocationChange replaceUrl="true">General</li>
+				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" skipLocationChange replaceUrl="true">Files</li>
+				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" skipLocationChange replaceUrl="true">Subjects</li>
+				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" skipLocationChange replaceUrl="true">Centers</li>
+				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" skipLocationChange replaceUrl="true">Members</li>
+				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" skipLocationChange replaceUrl="true">Tags</li>
 				<ng-container *ngIf="mode == 'view'">
-					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'">Tree</li>
-					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'">BIDS</li>
+					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" skipLocationChange replaceUrl="true">Tree</li>
+					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" skipLocationChange replaceUrl="true">BIDS</li>
 				</ng-container>
 				<ng-container *ngIf="mode != 'view'">
-					<li [class.active]="activeTab == 'tree'" class="disabled">Tree</li>
-					<li [class.active]="activeTab == 'bids'" class="disabled">BIDS</li>
+					<li [class.active]="activeTab == 'tree'" class="disabled" skipLocationChange replaceUrl="true">Tree</li>
+					<li [class.active]="activeTab == 'bids'" class="disabled" skipLocationChange replaceUrl="true">BIDS</li>
 				</ng-container>
 				
 			</ul>
@@ -152,13 +152,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Study detail|Attach dua label@@studyDetailAttachDataUserAgreement">Attach DUA file</label>
 						<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]" class="right-col">
 							<input #duaInput hidden formControlName="dataUserAgreement" type="file" (change)="attachDataUserAgreement($event)" />
-							<button class="left-icon" (click)="setDuaFile()">
+							<button type="button" class="left-icon" (click)="setDuaFile()">
 								<i class="fas fa-upload"></i>Choose file
 							</button>
 						</span>
 					 	<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]" class="right-col">
 					 		{{study.dataUserAgreementPaths[0]}}
-							<button class="dl-button" (click)="deleteDataUserAgreement()">
+							<button type="button" class="dl-button" (click)="deleteDataUserAgreement()">
 								<i class="fa-regular fa-trash-can"></i>
 							</button>
 						</span>
@@ -171,7 +171,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col">
 							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
 								{{study.dataUserAgreementPaths[0]}}
-								<button class="dl-button" (click)="downloadDataUserAgreement()"><i class="fas fa-download"></i></button>
+								<button type="button" class="dl-button" (click)="downloadDataUserAgreement()"><i class="fas fa-download"></i></button>
 							</span>
 							<span *ngIf="!study.dataUserAgreementPaths || !study.dataUserAgreementPaths[0]">-</span>
 						</span>
@@ -280,9 +280,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode != 'view'">
                         <span class="right-col" [ngSwitch]="mode">
                             <input #input hidden type="file" (change)="attachNewFile($event)"/>
-                            <button class="left-icon" (click)="setFile()"><i class="fas fa-upload"></i>Upload a new file</button>
+                            <button type="button" class="left-icon" (click)="setFile()"><i class="fas fa-upload"></i>Upload a new file</button>
                             <ul class="files">
-                                <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
+                                <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button type="button" class="dl-button" (click)="deleteFile(file)"><i class="fa-regular fa-trash-can"></i></button>
                                 </li>
                             </ul>
                         </span>
@@ -294,7 +294,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col">
                             <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
                                 <ul>
-                                  <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button class="dl-button" (click)="downloadFile(file)"><i class="fas fa-download"></i></button>
+                                  <li *ngFor="let file of study.protocolFilePaths">{{getFileName(file)}}<button type="button" class="dl-button" (click)="downloadFile(file)"><i class="fas fa-download"></i></button>
                                   </li>
                                 </ul>
 							</span>
@@ -314,8 +314,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">
 				<legend>Tree</legend>
-				<study-node [input]="breadcrumbsService.currentStep.data.studyNode ? breadcrumbsService.currentStep.data.studyNode : study" 
-						(selectedChange)="onTreeSelectedChange($event)" (nodeInit)="onStudyNodeInit($event)" [hasBox]="true"></study-node>
+				<study-node [input]="studyNode" 
+						(selectedChange)="onTreeSelectedChange($event)" 
+						(nodeInit)="onStudyNodeInit($event)" 
+						[hasBox]="true">
+				</study-node>
 			</fieldset>
             <fieldset [class.hidden]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
                 <legend>Study tags</legend>

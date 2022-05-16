@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.solr.config.SolrConfig;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Range;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,14 +115,22 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 
 
 	@Override
-	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteria(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
-		return getSearchResultsWithFacets(facet, pageable);
+	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return getSearchResultsWithFacetsForAdmin(facet, pageable);			
+		} else {
+			throw new IllegalStateException("This method cannot be called by a non-admin user");
+		}
 	}
 
 	@Override
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Map<Long, List<String>> studyIds,
 			ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
-		return getSearchResultsWithFacets(facet, pageable, studyIds);
+		if (studyIds == null || studyIds.isEmpty()) {
+			return new SolrResultPage<>(new ArrayList<>());
+		} else {
+			return getSearchResultsWithFacets(facet, pageable, studyIds);			
+		}
 
 	}
 
@@ -186,7 +195,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		}
 	}
 
-	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException {
+	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacetsForAdmin(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException {
 		return getSearchResultsWithFacets(query, pageable, null);
 	}
 
@@ -333,8 +342,9 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 
 	private void addSearchInAllClause(SolrQuery query, String searchStr) {
 		if (searchStr != null && !searchStr.isEmpty()) {
-			String[] searchTerms = ClientUtils.escapeQueryChars(searchStr).trim().split(" ");		
+			String[] searchTerms = searchStr.trim().split(" ");		
 			for (String term : searchTerms) {
+				term = ClientUtils.escapeQueryChars(term);
 				List<String> termInFieldFormattedStrList = new ArrayList<>();
 				for (String field : TEXTUAL_FACET_LIST) {
 					StringBuilder termInField = new StringBuilder()

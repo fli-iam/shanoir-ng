@@ -106,7 +106,7 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<Void> deleteStudy(@PathVariable("studyId") Long studyId) {
 		try {
 			Study study = studyService.findById(studyId);
-			if (study.getExaminationIds() != null && !study.getExaminationIds().isEmpty()) {
+			if (study.getExaminations() != null && !study.getExaminations().isEmpty()) {
 				// Error => should not be able to do this see #793
 				return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 			}
@@ -187,7 +187,7 @@ public class StudyApiController implements StudyApi {
 					createdStudy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (MicroServiceCommunicationException e) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", e));
 		}
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
 	}
@@ -206,7 +206,7 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (MicroServiceCommunicationException e) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", e));
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}

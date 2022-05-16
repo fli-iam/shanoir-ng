@@ -33,10 +33,9 @@ import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
 import { DatasetProcessingPipe } from '../../datasets/dataset-processing/dataset-processing.pipe';
 import { ImportMode } from '../../import/import.component';
-import { SimpleSubject } from '../../subjects/shared/subject.model';
 import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
 import { ImportService } from '../shared/import.service';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 
 @Component({
     selector: 'processed-dataset-clinical-context',
@@ -79,7 +78,7 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             private importDataService: ImportDataService,
             public studyRightsService: StudyRightsService,
             private keycloakService: KeycloakService,
-            private msgService: MsgBoxService,
+            private consoleService: ConsoleService,
             private importService: ImportService
             ) {
 
@@ -270,26 +269,20 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
 
     public startImportJob(): void {
         let context = this.importDataService.contextData;
-        this.subjectService
-            .updateSubjectStudyValues(context.subject.subjectStudy)
-            .then(() => {
-                let that = this;
-                this.importData()
-                    .then((importJob: ProcessedDatasetImportJob) => {
-                        this.importDataService.reset();
-                        setTimeout(function () {
-                            that.msgService.log('info', 'The import successfully started')
-                        }, 0);
-                        // go back to the first step of import
-                        this.router.navigate(['/imports/processed-dataset']);
-                    }).catch(error => {
-                        // Clean context
-                        this.importDataService.reset();
-                        throw error;
-                    });
-            }).catch(error => {
-                throw new Error('Could not save the subjectStudy object, the import job has been stopped. Cause : ' + error);
-            });
+            let that = this;
+            this.importData()
+                .then((importJob: ProcessedDatasetImportJob) => {
+                    this.importDataService.reset();
+                    setTimeout(function () {
+                        that.consoleService.log('info', 'Import successfully started for subject "' + that.subject.name + '" in study "' + that.study.name + '"');
+                    }, 0);
+                    // go back to the first step of import
+                    this.router.navigate(['/imports/processed-dataset']);
+                }).catch(error => {
+                    // Clean context
+                    this.importDataService.reset();
+                    throw error;
+        });
     }
 
     private importData(): Promise<any> {
