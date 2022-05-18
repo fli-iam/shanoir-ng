@@ -110,7 +110,12 @@ export class StudyComponent extends EntityComponent<Study> {
                 });
             return study;
         });
-        return studyPromise.then(() => null);
+        return Promise.all([
+            studyPromise,
+            this.fetchUsers()
+        ]).then(([study, users]) => {
+            Study.completeMembers(study, users);
+        });
     }
 
     initEdit(): Promise<void> {
