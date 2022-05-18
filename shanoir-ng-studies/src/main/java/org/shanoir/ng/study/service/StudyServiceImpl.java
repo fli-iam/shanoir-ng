@@ -48,7 +48,9 @@ import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
@@ -99,12 +101,18 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private StudyMapper studyMapper;
-
+	
 	@Value("${studies-data}")
 	private String dataDir;
 	
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private SubjectService subjectService;
+
+	@Autowired
+	private SubjectStudyRepository subjectStudyRepository;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -228,9 +236,39 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		if (study.getSubjectStudyList() != null) {
+			
+			// Find updated ids
+			Set<Long> updatedIds = new HashSet<>();
+			for (SubjectStudy entity : study.getSubjectStudyList()) {
+				updatedIds.add(entity.getId());
+			}
+
+			// Find deleted subject study so we can eventualy delete subjects
+			List<Subject> removed = new ArrayList<Subject>();
+
+			for (SubjectStudy subjectStudyDb : studyDb.getSubjectStudyList()) {
+				 if(!updatedIds.contains(subjectStudyDb.getId())) {
+					 removed.add(subjectStudyDb.getSubject());
+				 }
+			}
+			
+			List<Subject> toBeDeleted = new ArrayList<Subject>();
+			
+			for (Subject subject : removed) {
+				if (this.subjectStudyRepository.countBySubject(subject) == 1L) {
+					toBeDeleted.add(subject);
+				}
+				
+			}
+
 			ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), study.getSubjectStudyList());
 			for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
 				subjectStudy.setStudy(studyDb);
+			}
+
+			// Actually delete subjects
+			for (Subject subjectToDelete : toBeDeleted) {
+				subjectService.deleteById(subjectToDelete.getId());
 			}
 		}
 

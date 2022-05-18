@@ -20,6 +20,7 @@ import { Subject } from '../../../subjects/shared/subject.model';
 import { AbstractInput } from '../../form/input.abstract';
 import { Option } from '../../select/select.component';
 import { Mode } from '../entity/entity.component.abstract';
+import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 
 @Component({
   selector: 'subject-study-list',
@@ -44,6 +45,12 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
     hasTags: boolean;
+    warningDisplayed: boolean = false;
+    
+    constructor(
+            private confirmDialogService: ConfirmDialogService) {
+                super();
+    }
 
     get legend(): string {
         return this.compMode == 'study' ? 'Subjects' : 'Studies';
@@ -120,7 +127,22 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         this.propagateChange(this.model);
     }
 
-    removeSubjectStudy(subjectStudy: SubjectStudy):void {
+    removeSubjectStudy(subjectStudy: SubjectStudy) {
+        if (!this.warningDisplayed) {
+            this.confirmDialogService.confirm('Deleting subject', 
+            'Warning: If this subject is only linked to this study, it will be completely deleted from the database.')
+            .then(userChoice => {
+                if (userChoice) {
+                    this.removeSubjectStudyOk(subjectStudy);
+                    this.warningDisplayed = true;
+                }
+            });
+        } else {
+            this.removeSubjectStudyOk(subjectStudy);
+        }
+    }
+
+    removeSubjectStudyOk(subjectStudy: SubjectStudy):void {
         const index: number = this.model.indexOf(subjectStudy);
         if (index > -1) {
             this.model.splice(index, 1);

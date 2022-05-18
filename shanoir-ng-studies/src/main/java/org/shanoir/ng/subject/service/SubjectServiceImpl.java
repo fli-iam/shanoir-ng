@@ -21,6 +21,9 @@ import java.util.Optional;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -90,6 +93,9 @@ public class SubjectServiceImpl implements SubjectService {
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
 	
+	@Autowired
+	private ShanoirEventService eventService;
+	
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
 	@Override
@@ -104,6 +110,8 @@ public class SubjectServiceImpl implements SubjectService {
 		studyExaminationRepository.deleteBySubject(subject.get());
 		
 		subjectRepository.deleteById(id);
+		
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 	}
 
 	@Override
