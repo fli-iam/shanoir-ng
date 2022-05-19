@@ -147,7 +147,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PutMapping(value = "/{examinationId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_IMPORT'))")
 	ResponseEntity<Void> updateExamination(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
