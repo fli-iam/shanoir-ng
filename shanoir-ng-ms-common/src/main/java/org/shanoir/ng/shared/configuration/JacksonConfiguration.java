@@ -14,21 +14,60 @@
 
 package org.shanoir.ng.shared.configuration;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.Page;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Configuration
 public class JacksonConfiguration {
 
-    @Bean
-    public ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper()
-        		.registerModule(new JavaTimeModule())
-        		.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return mapper;
+    /**
+     * Allows to configure the Jackson object mapper.
+     *
+     * @param objectMapper
+     *            an instance of {@link ObjectMapper}.
+     */
+    @Autowired
+    public void configureJacksonObjectMapper(final ObjectMapper objectMapper) {
+        objectMapper
+        		.registerModule(preparePageModule())
+		        .registerModule(new JavaTimeModule())
+		        .registerModule(new Jdk8Module())
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+
+    /**
+     * Allows to configure a {@link JsonSerializer} for pagination.
+     *
+     * @return an instance of {@link Module}.
+     */
+    private Module preparePageModule() {
+        return new SimpleModule().addSerializer(Page.class, new JsonSerializer<>() {
+            @Override
+            public void serialize(@SuppressWarnings("rawtypes") final Page page, final JsonGenerator jsonGenerator,
+                    final SerializerProvider serializers) throws IOException {
+
+                jsonGenerator.writeStartObject();
+                jsonGenerator.writeObjectField("content", page.getContent());
+                jsonGenerator.writeNumberField("number", page.getNumber() + 1);
+                jsonGenerator.writeNumberField("totalPages", page.getTotalPages());
+                jsonGenerator.writeNumberField("totalElements", page.getTotalElements());
+                jsonGenerator.writeNumberField("size", page.getSize());
+                jsonGenerator.writeEndObject();
+            }
+        });
     }
 }
