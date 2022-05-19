@@ -272,7 +272,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 this.firstPageLoaded = true;
                 return solrResultPage;
             }).catch(reason => {
-                if (reason.error.code == 422 && reason.error.message == 'solr query failed') {
+                if (reason?.error?.code == 422 && reason.error.message == 'solr query failed') {
                     this.syntaxError = true;
                     return new SolrResultPage();
                 } else throw reason;
@@ -347,7 +347,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                             this.consoleService.log('info', 'Datasets sucessfully deleted', ['ids : ' + [...this.selectedDatasetIds].join(', ')]);
                         });
                     }).catch(reason => {
-                        if(reason.error.code == 403) {
+                        if(reason?.error?.code == 403) {
                             this.confirmDialogService.error('Impossible', 
                                 'Some of the selected datasets belong to studies that you don\'t administrate. '
                                 + 'You cannot delete those datasets. Please select only datasets that you can administrate (see the yellow shield icon) and try again. ' 
