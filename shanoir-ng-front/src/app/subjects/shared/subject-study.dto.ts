@@ -38,6 +38,6 @@ export class SubjectStudyDTO {
         this.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
         this.subjectType = subjectStudy.subjectType;
         this.physicallyInvolved = subjectStudy.physicallyInvolved;
-        this.subjectStudyTags = subjectStudy.tags.map(tag => new SubjectStudyTagDTO(new Id(this.id), tag));
+        this.subjectStudyTags = subjectStudy.tags ? subjectStudy.tags.map(tag => new SubjectStudyTagDTO(new Id(this.id), tag)) : null;
     }
 }
