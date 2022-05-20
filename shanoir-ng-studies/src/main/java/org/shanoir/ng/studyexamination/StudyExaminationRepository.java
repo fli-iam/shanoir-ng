@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.studyexamination;
 
+import org.shanoir.ng.subject.model.Subject;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -25,4 +26,6 @@ public interface StudyExaminationRepository extends CrudRepository<StudyExaminat
 
 	
 	public Iterable<StudyExamination> findByCenterId(Long centerId);
+
+	public void deleteBySubject(Subject subject);
 }

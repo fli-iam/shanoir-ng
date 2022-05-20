@@ -36,8 +36,8 @@ VALUES
     (3, 4),
     (4, 1);
 	
-insert into `center`(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`) values (1,'France','CHU Rennes','','','','Rennes','');
-insert into `center`(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`) values (2,'France','CHU Reims','','','','Reims','');
+insert into `center`(`id`,`country`,`name`,`phone_number`,`postal_code`,`street`,`city`,`website`) values (1,'France','CHU Rennes','','','','Rennes','');
+insert into `center`(`id`,`country`,`name`,`phone_number`,`postal_code`,`street`,`city`,`website`) values (2,'France','CHU Reims','','','','Reims','');
 
 insert into study_center 
 	(id, center_id, study_id) 

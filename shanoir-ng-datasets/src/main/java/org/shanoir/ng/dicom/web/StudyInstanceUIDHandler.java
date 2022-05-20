@@ -1,13 +1,13 @@
 package org.shanoir.ng.dicom.web;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
+import org.shanoir.ng.anonymization.uid.generation.UIDGeneration;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -27,6 +27,23 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+/**
+ * The StudyInstanceUIDHandler component manages the translation between
+ * examinationIds (Long) in the Shanoir database and the need for StudyInstanceUIDs
+ * in the DICOM world, when querying the backup PACS of Shanoir.
+ * The StudyInstanceUID is part of the DICOM WADO link in the table dataset_file,
+ * that actually points to the DICOMs. The StudyInstanceUID is either extracted from
+ * a WADO-URI link or from a WADO-RS link in the path colum of dataset_file.
+ * Furthermore the StudyInstanceUIDHandler replaces the StudyInstanceUIDs + retrieveURLs
+ * send from the backup PACS in the DICOMWeb Json, to match the examinationId.
+ * 
+ * StudyInstanceUIDHandler contains a internal cache, that is cleaned at 6:00h every
+ * morning, to accelerate the resolution between examinationUID and StudyInstanceUID;
+ * what avoids database look ups for every request.
+ * 
+ * @author mkain
+ *
+ */
 @Component
 public class StudyInstanceUIDHandler {
 	
@@ -49,22 +66,24 @@ public class StudyInstanceUIDHandler {
 	private static final String STUDIES = "/studies/";
 
 	private static final String SERIES = "/series/";
+	
+	public static final String PREFIX = UIDGeneration.ROOT + ".";
 
 	@Autowired
 	private ExaminationService examinationService;
 	
-	private HashMap<Long, String> examinationIdToStudyInstanceUIDCache;
+	private HashMap<String, String> examinationUIDToStudyInstanceUIDCache;
 	
 	@PostConstruct
 	public void init() {
-		examinationIdToStudyInstanceUIDCache = new HashMap<Long, String>(1000);
-		LOG.info("DICOMWeb cache created: examinationIdToStudyInstanceUIDCache");
+		examinationUIDToStudyInstanceUIDCache = new HashMap<String, String>(1000);
+		LOG.info("DICOMWeb cache created: examinationUIDToStudyInstanceUIDCache");
 	}
 	
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
 	public void clearExaminationIdToStudyInstanceUIDCache() {
-		examinationIdToStudyInstanceUIDCache.clear();
-		LOG.info("DICOMWeb cache cleared: examinationIdToStudyInstanceUIDCache");
+		examinationUIDToStudyInstanceUIDCache.clear();
+		LOG.info("DICOMWeb cache cleared: examinationUIDToStudyInstanceUIDCache");
 	}
 	
 	/**
@@ -75,7 +94,7 @@ public class StudyInstanceUIDHandler {
 	 * @param examinationId
 	 * @param studyLevel
 	 */
-	public void replaceStudyInstanceUIDsWithExaminationIds(JsonNode root, Long examinationId, boolean studyLevel) {
+	public void replaceStudyInstanceUIDsWithExaminationUIDs(JsonNode root, String examinationUID, boolean studyLevel) {
 		if (root.isObject()) {
 			// find attribute: StudyInstanceUID
 			JsonNode studyInstanceUIDNode = root.get(DICOM_TAG_STUDY_INSTANCE_UID);
@@ -83,7 +102,7 @@ public class StudyInstanceUIDHandler {
 				ArrayNode studyInstanceUIDArray = (ArrayNode) studyInstanceUIDNode.path(VALUE);
 				for (int i = 0; i < studyInstanceUIDArray.size(); i++) {
 					studyInstanceUIDArray.remove(i);
-					studyInstanceUIDArray.insert(i, examinationId.toString());
+					studyInstanceUIDArray.insert(i,  examinationUID);
 				}				
 			}
 			// find attribute: RetrieveURL
@@ -94,11 +113,11 @@ public class StudyInstanceUIDHandler {
 					JsonNode arrayElement = retrieveURLArray.get(i);
 					String retrieveURL = arrayElement.asText();
 					if (studyLevel) { // study level
-						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + examinationId);
+						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_STUDY_LEVEL, STUDIES + examinationUID);
 						retrieveURLArray.remove(i);
 						retrieveURLArray.insert(i, retrieveURL);
 					} else { // serie level
-						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + examinationId + SERIES);
+						retrieveURL = retrieveURL.replaceFirst(RETRIEVE_URL_SERIE_LEVEL, STUDIES + examinationUID + SERIES);
 						retrieveURLArray.remove(i);
 						retrieveURLArray.insert(i, retrieveURL);
 					}
@@ -108,7 +127,7 @@ public class StudyInstanceUIDHandler {
 			ArrayNode arrayNode = (ArrayNode) root;
 			for (int i = 0; i < arrayNode.size(); i++) {
 				JsonNode arrayElement = arrayNode.get(i);
-				replaceStudyInstanceUIDsWithExaminationIds(arrayElement, examinationId, studyLevel);
+				replaceStudyInstanceUIDsWithExaminationUIDs(arrayElement, examinationUID, studyLevel);
 			}
 		}
 	}
@@ -121,16 +140,17 @@ public class StudyInstanceUIDHandler {
 	 * @param examinationId
 	 * @return
 	 */
-	public String findStudyInstanceUIDFromCacheOrDatabase(Long examinationId) {
-		String studyInstanceUID = examinationIdToStudyInstanceUIDCache.get(examinationId);
+	public String findStudyInstanceUIDFromCacheOrDatabase(String examinationUID) {
+		String studyInstanceUID = examinationUIDToStudyInstanceUIDCache.get(examinationUID);
 		if (studyInstanceUID == null) {
+			Long examinationId = extractExaminationId(examinationUID);
 			Examination examination = examinationService.findById(examinationId);
 			if (examination != null) {
 				studyInstanceUID = findStudyInstanceUID(examination);
 				if (studyInstanceUID != null) {
-					examinationIdToStudyInstanceUIDCache.put(examination.getId(), studyInstanceUID);
-					LOG.info("DICOMWeb cache adding: " + examinationId + ", " + studyInstanceUID);
-					LOG.info("DICOMWeb cache, size: " + examinationIdToStudyInstanceUIDCache.size());
+					examinationUIDToStudyInstanceUIDCache.put(examinationUID, studyInstanceUID);
+					LOG.info("DICOMWeb cache adding: " + examinationUID + ", " + studyInstanceUID);
+					LOG.info("DICOMWeb cache, size: " + examinationUIDToStudyInstanceUIDCache.size());
 				}
 			}
 		}
@@ -195,6 +215,12 @@ public class StudyInstanceUIDHandler {
 			return m.group(1);
 		}
 		return null;
+	}
+	
+	public Long extractExaminationId(String examinationUID) {
+		String examinationUIDWithoutPrefix = examinationUID.substring(PREFIX.length());
+		Long id = Long.parseLong(examinationUIDWithoutPrefix);
+		return id;
 	}
 	
 }

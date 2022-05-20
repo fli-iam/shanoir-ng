@@ -157,7 +157,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
     
     openViewer() {
-	    window.open(environment.viewerUrl + '/viewer/' + this.entity.id, '_blank');
+	    window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
     getCenters(): void {
@@ -226,7 +226,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             }
             return result;            
         }).catch(reason => { if (reason.status == 403) {
-            this.msgBoxService.log('error', 'Updating study, subject or center of an examination is forbiden. Please contact an administrator.');
+            this.consoleService.log('error', 'Examination ' + this.examination.id + ' Updating study / subject / center of an examination is forbiden.');
             return null;
         } else {
             throw reason;

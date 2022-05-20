@@ -211,7 +211,7 @@ public class ImporterManagerService {
 		email.setRecipients(recipients);
 
 		try {
-			rabbitTemplate.convertAndSend(queue, new ObjectMapper().writeValueAsString(email));
+			rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(email));
 		} catch (AmqpException | JsonProcessingException e) {
 			LOG.error("Could not send email for this import. ", e);
 		}

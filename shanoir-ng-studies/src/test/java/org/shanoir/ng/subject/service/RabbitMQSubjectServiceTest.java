@@ -16,7 +16,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -26,6 +25,7 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -110,7 +110,7 @@ public class RabbitMQSubjectServiceTest {
 		String name = rabbitMQSubjectService.updateSubjectStudy(message);
 		
 		// THEN nothing is created
-		Mockito.verifyZeroInteractions(subjectStudyRepository);
+		Mockito.verifyNoInteractions(subjectStudyRepository);
 		assertEquals(name, studyName);
 	}
 

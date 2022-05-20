@@ -23,7 +23,7 @@ import { TableComponent } from '../../../shared/components/table/table.component
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
 import { ShanoirError } from '../../../shared/models/error.model';
 import { ServiceLocator } from '../../../utils/locator.service';
-import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 
@@ -97,12 +97,12 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
             ).then(res => {
                 if (res) {
                     this.getService().delete(selectedExamination.id).then(() => {
-                        this.onDelete.next(selectedExamination);
+                        this.onDelete.next({entity: selectedExamination});
                         this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-examination sucessfully deleted');
+                        this.consoleService.log('info', 'The preclinical-examination n°' + entity.id + ' was sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({entity: selectedExamination, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
                     });                    
@@ -121,7 +121,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     private manageDelete() {
         this.subscribtions.push(
             this.onDelete.subscribe(response => {
-                this.deleteExamination(response.id)
+                this.deleteExamination(response.entity.id)
             })
         );
     }

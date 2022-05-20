@@ -39,9 +39,10 @@ public interface ExaminationService {
 	 * 
 	 * @param id examination id.
 	 * @throws EntityNotFoundException
+	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws EntityNotFoundException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
 
 	/**
 	 * Delete an examination from a rabbit MQ call, not identified
@@ -49,7 +50,7 @@ public interface ExaminationService {
 	 * @param exam the examination to delete
 	 * @throws EntityNotFoundException
 	 */
-	void deleteFromRabbit(Examination exam) throws EntityNotFoundException;
+	void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException;
 
 	/**
 	 * Get all examinations for a specific user to support DICOMweb.

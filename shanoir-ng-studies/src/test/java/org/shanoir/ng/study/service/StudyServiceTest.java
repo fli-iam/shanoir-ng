@@ -60,6 +60,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Study service test.
@@ -98,6 +99,9 @@ public class StudyServiceTest {
 	
 	@Mock
 	private StudyMapper studyMapperMock;
+	
+	@Mock
+	private ObjectMapper objectMapper;
 
 	@ClassRule
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
