@@ -162,8 +162,11 @@ public class QueryPACSService {
 			List<Patient> patients = new ArrayList<>();
 			for (int i = 0; i < patientsNbre; i++) {
 				Patient patient = new Patient(attributesPatients.get(i));
-				patients.add(patient);
-				queryStudies(calling, called, dicomQuery, patient);
+				boolean patientExists = patients.stream().anyMatch(p -> p.getPatientID().equals(patient.getPatientID()));
+				if (!patientExists) {
+					patients.add(patient);
+					queryStudies(calling, called, dicomQuery, patient);
+				}
 			}
 			importJob.setPatients(patients);
 		}
