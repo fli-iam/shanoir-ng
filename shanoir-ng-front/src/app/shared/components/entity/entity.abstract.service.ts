@@ -95,7 +95,7 @@ export abstract class EntityService<T extends Entity> {
             // For Date Object, put the json object to a real Date object
             if (String(key).indexOf("Date") > -1 && value) {
                 trueObject[key] = new Date(value);
-            } 
+            }
         });
         return trueObject;
     }
