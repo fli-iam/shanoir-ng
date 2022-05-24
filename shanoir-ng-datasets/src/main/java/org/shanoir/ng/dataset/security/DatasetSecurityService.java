@@ -414,11 +414,8 @@ public class DatasetSecurityService {
     	if (dbDatasetAcq.getExamination() == null || dbDatasetAcq.getExamination().getStudyId() == null) {
 			return false;
 		}
-    	if (datasetAcq.getExamination().getStudyId() == dbDatasetAcq.getExamination().getStudyId()) { // study hasn't changed
-    		return commService.hasRightOnStudy(datasetAcq.getExamination().getStudyId(), rightStr);
-    	} else { // study has changed : check user has right on both studies
-    		return commService.hasRightOnStudy(datasetAcq.getExamination().getStudyId(), rightStr) && commService.hasRightOnStudy(dbDatasetAcq.getExamination().getStudyId(), rightStr);
-    	}
+    	System.err.println(dbDatasetAcq.getExamination().getStudyId());
+    	return commService.hasRightOnStudy(dbDatasetAcq.getExamination().getStudyId(), rightStr);
     }
 
     /**
