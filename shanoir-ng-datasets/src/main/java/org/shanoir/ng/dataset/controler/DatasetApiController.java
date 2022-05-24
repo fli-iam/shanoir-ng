@@ -346,9 +346,9 @@ public class DatasetApiController implements DatasetApi {
 		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
 			datasetName += "-" + dataset.getUpdatedMetadata().getComment();
 		}
-		if (datasetName.contains(File.separator)) {
-			datasetName = datasetName.replaceAll(File.separator, "_");
-		}
+		// Replace all forbidden characters.
+		datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
 		String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
 
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -680,9 +680,9 @@ public class DatasetApiController implements DatasetApi {
 				}
 			}
 			String fileName = name.toString();
-			if (fileName.contains(File.separator)) {
-				fileName = fileName.replaceAll(File.separator, "_");
-			}
+			// Replace all forbidden characters.
+			fileName = fileName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
 			File destFile = new File(workFolder.getAbsolutePath() + File.separator + fileName);
 			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 			index++;

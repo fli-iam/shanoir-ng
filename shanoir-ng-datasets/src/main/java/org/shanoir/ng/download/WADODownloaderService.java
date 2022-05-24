@@ -97,6 +97,8 @@ public class WADODownloaderService {
 
 	private static final String CONTENT_TYPE = "&contentType";
 	
+	private static final char[] FORBIDDEN_FILENAME_CHARS = {'\\', '/', ':', '*', '?', '\"', '<', '>', '|'};
+	
 	@Autowired
 	private RestTemplate restTemplate;
 	
@@ -137,9 +139,10 @@ public class WADODownloaderService {
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
 					String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
 					String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
-					if (name.contains(File.separator)) {
-						name = name.replaceAll(File.separator, "_");
-					}
+
+					// Replace all forbidden characters.
+					name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
 					File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
 					ByteArrayInputStream bIS = null;
 					try {
