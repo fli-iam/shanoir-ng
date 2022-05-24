@@ -28,6 +28,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
@@ -66,6 +67,9 @@ public class DatasetSecurityService {
 
 	@Autowired
 	StudyRepository studyRepository;
+
+	@Autowired
+	DatasetAcquisitionMapper datasetAcquisitionMapper;
 	
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
@@ -372,20 +376,37 @@ public class DatasetSecurityService {
     	if (datasetAcq.getId() == null) {
 			throw new IllegalArgumentException("Dataset acquisition id cannot be null here.");
 		}
-    	if (datasetAcq.getExamination() == null || datasetAcq.getExamination().getStudyId() == null) {
+    	DatasetAcquisition dbDatasetAcq = datasetAcquisitionRepository.findById(datasetAcq.getId()).orElse(null);
+
+    	if (dbDatasetAcq == null) {
+    		throw new EntityNotFoundException("Cannot find dataset acquisition with id " + datasetAcq.getId());
+    	}
+
+    	if (dbDatasetAcq.getExamination() == null || dbDatasetAcq.getExamination().getStudyId() == null) {
 			return false;
 		}
-    	DatasetAcquisition dbDatasetAcq = datasetAcquisitionRepository.findById(datasetAcq.getId()).orElse(null);
-    	if (dbDatasetAcq == null) {
-			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + datasetAcq.getId());
-		}
-    	if (datasetAcq.getExamination().getStudyId() == dbDatasetAcq.getExamination().getStudyId()) { // study hasn't changed
-    		return commService.hasRightOnStudy(datasetAcq.getExamination().getStudyId(), rightStr);
+
+    	if (dbDatasetAcq.getExamination().getStudyId() == dbDatasetAcq.getExamination().getStudyId()) { // study hasn't changed
+    		return commService.hasRightOnStudy(dbDatasetAcq.getExamination().getStudyId(), rightStr);
     	} else { // study has changed : check user has right on both studies
-    		return commService.hasRightOnStudy(datasetAcq.getExamination().getStudyId(), rightStr) && commService.hasRightOnStudy(dbDatasetAcq.getExamination().getStudyId(), rightStr);
+    		return commService.hasRightOnStudy(dbDatasetAcq.getExamination().getStudyId(), rightStr) && commService.hasRightOnStudy(dbDatasetAcq.getExamination().getStudyId(), rightStr);
     	}
     }
-    
+
+    /**
+     * Check the connected user has the given right for the given dataset acquisition.
+     * If the study is updated, check the user has the given right in both former and new studies.
+     * 
+     * @param datasetAcq the dataset acquisition
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasUpdateRightOnDatasetAcquisition(DatasetAcquisitionDTO datasetAcq, String rightStr) throws EntityNotFoundException {
+    	DatasetAcquisition acquisition = datasetAcquisitionMapper.datasetAcquisitionDTOToDatasetAcquisition(datasetAcq);
+    	return hasUpdateRightOnDatasetAcquisition(acquisition, rightStr);
+    }
+
     /**
      * Check the connected user has the given right for the given study card.
      * If the study card is updated, check the user has the given right in both former and new study cards.
