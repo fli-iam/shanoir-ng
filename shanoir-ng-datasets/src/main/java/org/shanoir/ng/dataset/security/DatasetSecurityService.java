@@ -28,7 +28,6 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
-import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
@@ -68,9 +67,6 @@ public class DatasetSecurityService {
 	@Autowired
 	StudyRepository studyRepository;
 
-	@Autowired
-	DatasetAcquisitionMapper datasetAcquisitionMapper;
-	
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	
