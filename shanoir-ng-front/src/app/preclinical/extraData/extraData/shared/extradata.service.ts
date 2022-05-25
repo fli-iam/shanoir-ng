@@ -36,7 +36,7 @@ export class ExtraDataService extends EntityService<ExtraData>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examId}/${PreclinicalUtils.PRECLINICAL_EXTRA_DATA}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<ExtraData[]>(url)
             .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));
+            .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
   
     getExtraData(id:string): Promise<ExtraData>{

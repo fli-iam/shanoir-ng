@@ -33,7 +33,7 @@ export class ContrastAgentService extends EntityService<ContrastAgent>{
         const url = PreclinicalUtils.PRECLINICAL_API_PROTOCOL_URL+"/"+protocolId+"/"+PreclinicalUtils.PRECLINICAL_CONTRASTAGENT_DATA+PreclinicalUtils.PRECLINICAL_ALL_URL;
         return this.http.get<ContrastAgent[]>(url)
             .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));
+            .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
   
     getContrastAgent(protocolId:number): Promise<ContrastAgent>{
