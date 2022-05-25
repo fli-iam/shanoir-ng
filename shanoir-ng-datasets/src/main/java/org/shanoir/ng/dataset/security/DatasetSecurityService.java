@@ -414,7 +414,6 @@ public class DatasetSecurityService {
     	if (dbDatasetAcq.getExamination() == null || dbDatasetAcq.getExamination().getStudyId() == null) {
 			return false;
 		}
-    	System.err.println(dbDatasetAcq.getExamination().getStudyId());
     	return commService.hasRightOnStudy(dbDatasetAcq.getExamination().getStudyId(), rightStr);
     }
 
