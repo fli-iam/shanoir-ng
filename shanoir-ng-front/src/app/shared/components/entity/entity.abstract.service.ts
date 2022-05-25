@@ -77,7 +77,7 @@ export abstract class EntityService<T extends Entity> {
     }
 
     protected mapEntityList = (entities: any[], quickResult?: T[]): Promise<T[]> => {
-        return Promise.resolve(entities ? entities.map(entity => this.toRealObject(entity)) : []);
+        return Promise.resolve(entities?.map(entity => this.toRealObject(entity)) || []);
     }
 
     protected mapPage = (page: Page<T>): Promise<Page<T>> => {

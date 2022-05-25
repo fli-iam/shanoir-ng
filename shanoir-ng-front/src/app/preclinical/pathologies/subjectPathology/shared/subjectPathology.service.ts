@@ -34,7 +34,7 @@ export class SubjectPathologyService extends EntityService<SubjectPathology>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<SubjectPathology[]>(url)
             .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));
+            .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
     
     
@@ -80,7 +80,7 @@ export class SubjectPathologyService extends EntityService<SubjectPathology>{
     	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_PATHOLOGY}/model/${pid}/`;
     	return this.http.get<SubjectPathology[]>(url)
             .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));      
+            .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);      
     }
 
 }
