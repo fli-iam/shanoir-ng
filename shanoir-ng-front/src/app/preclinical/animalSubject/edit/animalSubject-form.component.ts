@@ -270,7 +270,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.preclinicalSubject.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
-            'name': [this.preclinicalSubject.subject.name, [this.registerOnSubmitValidator('unique', 'name')]],
+            'name': [this.preclinicalSubject.subject.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
             'specie': [this.preclinicalSubject.animalSubject.specie, animal ? [Validators.required] : []],
             'strain': [this.preclinicalSubject.animalSubject.strain, animal ? [Validators.required] : []],
             'biotype': [this.preclinicalSubject.animalSubject.biotype, animal ? [Validators.required] : []],
