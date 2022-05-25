@@ -238,7 +238,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.subjectService
             .getSubjectsNames()
             .then(subjects => {
-                this.subjects = subjects.sort(function(a:Subject, b:Subject){
+                this.subjects = subjects?.sort(function(a:Subject, b:Subject){
                     return a.name.localeCompare(b.name);
                 });
         });
