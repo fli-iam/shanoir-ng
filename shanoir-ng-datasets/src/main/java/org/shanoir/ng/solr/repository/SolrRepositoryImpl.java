@@ -142,9 +142,15 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		} 
 	}
 
-	private void addFilterQueryForCenterStudy(SolrQuery query, Map<Long, List<String>> studyIds) {
+	/**
+	 * For the given query in entry, add a filter by study center.
+	 * Looks like 'AND ((study_id = X AND center_id IN (A, B, C)) OR (study_id = Y AND center_id IN (D, E)) OR study_id = Z)
+	 * @param query
+	 * @param studyIdCentersMap
+	 */
+	private void addFilterQueryForCenterStudy(SolrQuery query, Map<Long, List<String>> studyIdCentersMap) {
 		String filter = "";
-		for (Entry<Long, List<String>> entry : studyIds.entrySet()) {
+		for (Entry<Long, List<String>> entry : studyIdCentersMap.entrySet()) {
 			if (!filter.equals("")) {
 				filter+=" OR ";
 			}
@@ -158,7 +164,6 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 				}
 			}
 		}
-		LOG.error(filter);
 		query.addFilterQuery(filter);
 	}
 
