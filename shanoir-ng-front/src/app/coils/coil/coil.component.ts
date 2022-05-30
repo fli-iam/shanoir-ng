@@ -149,10 +149,15 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/manufacturer-model/create']).then(success => {
+        this.router.navigate(['/acquisition-equipment/create']).then(success => {
+            this.breadcrumbsService.currentStep.addPrefilled('center', this.coil.center);
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as Coil).manufacturerModel = entity as ManufacturerModel;
+                    let currentCoil: Coil = currentStep.entity as Coil;
+                    currentCoil.manufacturerModel = (entity as AcquisitionEquipment).manufacturerModel;
+                    if (currentCoil.center.id == (entity as AcquisitionEquipment).center.id) {
+                        currentCoil.center.acquisitionEquipments.unshift(entity);
+                    }
                 })
             );
         });

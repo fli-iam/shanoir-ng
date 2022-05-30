@@ -37,6 +37,10 @@ export class ImportService {
                 observe: 'events'});
     }
 
+    analyseEegFile(importJob: EegImportJob): Promise<EegImportJob> {
+        return this.http.post<EegImportJob>(AppUtils.BACKEND_API_ANALYSE_EEG_URL, importJob).toPromise();
+    }
+
     uploadBidsFile(formData: FormData, studyId: number, studyName: string, centerId: number): Promise<Object> {
         return this.http.post<Object>(AppUtils.BACKEND_API_UPLOAD_BIDS_URL + studyId + '/' + studyName + '/' + centerId, formData).toPromise();
     }
@@ -48,6 +52,7 @@ export class ImportService {
 
     async startImportJob(importJob: ImportJob): Promise<Object> {
         try {
+            importJob.patients.forEach(patient => patient.subject.subjectStudyList.forEach(subjectStudy => subjectStudy.subject = null));
             return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
                 .toPromise();
         }

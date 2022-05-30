@@ -63,9 +63,9 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
     }
     
     onTagAdd(tag: Tag) {
-        if (this.tags.findIndex(element => element.id == tag.id) == -1) {
+        if (this.tags.findIndex(element => element.equals(tag)) == -1) {
             this.tags.push(tag);
-            this.tagOptions = this.tagOptions.filter(opt => opt.value.id != tag.id);
+            this.updateOptions();
             this.onChangeCallback(this.tags);
             this.onChange.emit(this.tags);
             this.onTouchedCallback();
@@ -74,10 +74,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
 
     public deleteTag(tag: Tag) {
         this.tags.splice(this.tags.indexOf(tag), 1);
-        let option: Option<Tag> = new Option(tag, tag.name);
-        option.color = tag.color;
-        this.tagOptions.push(option);
-        this.tagOptions.sort(this.sortTags);
+        this.updateOptions();
         this.onChangeCallback(this.tags);
         this.onChange.emit(this.tags);
         this.onTouchedCallback();
@@ -85,7 +82,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
 
     private updateOptions() {
         this.tagOptions = this.availableTags.reduce((options, tag) => {
-            if (!this.tags.find(ssTag => ssTag.id == tag.id)) {
+            if (!this.tags.find(ssTag => ssTag.equals(tag))) {
                 let option: Option<Tag> = new Option(tag, tag.name);
                 option.color = tag.color;
                 options.push(option);
@@ -95,11 +92,12 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
         this.tagOptions.sort(this.sortTags);
     }
 
-    private sortTags(o1, o2): number {
-        return o1.value.id - o2.value.id;
+    private sortTags(o1: Option<Tag>, o2: Option<Tag>): number {
+        return o1.value.name.localeCompare(o2.value.name);
     }
 
     getFontColor(colorInp: string): boolean {
+        if (!colorInp) return false;
         var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
         var r = parseInt(color.substring(0, 2), 16); // hexToR
         var g = parseInt(color.substring(2, 4), 16); // hexToG

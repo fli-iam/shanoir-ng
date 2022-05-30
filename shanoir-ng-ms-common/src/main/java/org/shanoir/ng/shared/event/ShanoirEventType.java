@@ -67,6 +67,10 @@ public class ShanoirEventType {
 	public static final String UPDATE_PRECLINICAL_REFERENCE_EVENT = "updatePreclinicalReference.event";
 	public static final String DELETE_PRECLINICAL_REFERENCE_EVENT = "deletePreclinicalReference.event";
 	
+	/** User **/
+	public static final String UPDATE_USER_EVENT = "updateUser.event";
+	public static final String DELETE_USER_EVENT = "deleteUser.event";
+	
 	/** Import Dataset **/
 	public static final String IMPORT_DATASET_EVENT = "importDataset.event";
 

@@ -76,6 +76,9 @@ public class RabbitMQConfiguration {
 	/** Delete subject => Delete associated examination / datasets. */
 	public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
 
+	/** Delete user queue. */
+	public static final String DELETE_USER_QUEUE = "delete-user-queue";
+	
 	/** Study deleted => Delete associated datasets. */
 	public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
 	
@@ -153,8 +156,6 @@ public class RabbitMQConfiguration {
 
 	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
 	
-	private static final String NULL = "";
-
 	////////////////// EXCHANGES //////////////////
 
 	/** Exchange used to publish / treat all sort of shanoir events. */
@@ -390,4 +391,8 @@ public class RabbitMQConfiguration {
 		return new Queue(ACQUISITION_EQUIPEMENT_CODE_QUEUE, true);
 	}
 
+	@Bean
+	public static Queue deleteUserQueue() {
+		return new Queue(DELETE_USER_QUEUE, true);
+	}
 }

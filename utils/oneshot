@@ -48,6 +48,7 @@ tee "$fifo2" <"$fifo1" &
 
 set +e
 (	set -e
+	trap 'cat >/dev/null &' EXIT
 	for pattern in "${patterns[@]}"
 	do
 		grep -E -q -m1 -- "$pattern"

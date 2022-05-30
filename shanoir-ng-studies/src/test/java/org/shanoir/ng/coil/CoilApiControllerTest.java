@@ -41,6 +41,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -58,6 +59,7 @@ import com.google.gson.GsonBuilder;
 @WebMvcTest(CoilApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @WithMockKeycloakUser(id = 123)
+@ActiveProfiles("test")
 public class CoilApiControllerTest {
 
 	private static final String REQUEST_PATH = "/coils";
@@ -84,7 +86,7 @@ public class CoilApiControllerTest {
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		given(coilMapperMock.coilsToCoilDTOs(Mockito.anyListOf(Coil.class)))
+		given(coilMapperMock.coilsToCoilDTOs(Mockito.anyList()))
 				.willReturn(Arrays.asList(new CoilDTO()));
 		given(coilMapperMock.coilToCoilDTO(Mockito.any(Coil.class))).willReturn(new CoilDTO());
 
