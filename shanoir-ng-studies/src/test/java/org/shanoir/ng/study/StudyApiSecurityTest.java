@@ -94,10 +94,10 @@ public class StudyApiSecurityTest {
 	public void testAsAnonymous() throws ShanoirException, RestServiceException {
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
 		assertAccessDenied(api::findStudies);
-		assertAccessDenied(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) { fail(e.toString());	} }, null);
+		assertAccessDenied(t -> { api.findStudiesNames(); }, null);
 		assertAccessDenied(api::findStudyById, ENTITY_ID);
-		assertAccessDenied((t, u) -> { try { api.saveNewStudy(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, mockNew, mockBindingResult);
-		assertAccessDenied((t, u, v) -> { try { api.updateStudy(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, ENTITY_ID, mockExisting, mockBindingResult);
+		assertAccessDenied((t, u) -> { api.saveNewStudy(t, u); }, mockNew, mockBindingResult);
+		assertAccessDenied((t, u, v) -> { api.updateStudy(t, u, v); }, ENTITY_ID, mockExisting, mockBindingResult);
 	}
 	
 	@Test
@@ -105,8 +105,8 @@ public class StudyApiSecurityTest {
 	public void testAsUser() throws ShanoirException, RestServiceException {
 		testRead();
 		
-		assertAccessDenied((t, u) -> { try { api.saveNewStudy(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, mockNew, mockBindingResult);
-		assertAccessDenied((t, u, v) -> { try { api.updateStudy(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
+		assertAccessDenied((t, u) -> { api.saveNewStudy(t, u); }, mockNew, mockBindingResult);
+		assertAccessDenied((t, u, v) -> { api.updateStudy(t, u, v); }, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
 		
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
 		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
@@ -123,10 +123,10 @@ public class StudyApiSecurityTest {
 	public void testAsExpert() throws ShanoirException, RestServiceException {
 		testRead();
 
-		assertAccessAuthorized((t, u) -> { try { api.saveNewStudy(t, u); } catch (RestServiceException e) {}}, mockNew, mockBindingResult);
-		assertAccessDenied((t, u, v) -> { try { api.updateStudy(t, u, v); } catch (RestServiceException e) {}}, 1L, buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
+		assertAccessAuthorized((t, u) -> { api.saveNewStudy(t, u); }, mockNew, mockBindingResult);
+		assertAccessDenied((t, u, v) -> { api.updateStudy(t, u, v); }, 1L, buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL), mockBindingResult);
 		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE)));
-		assertAccessAuthorized((t, u, v) -> { try { api.updateStudy(t, u, v); } catch (RestServiceException e) {}}, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD), mockBindingResult);
+		assertAccessAuthorized((t, u, v) -> { api.updateStudy(t, u, v); }, 1L, buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD), mockBindingResult);
 
 		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
@@ -141,11 +141,11 @@ public class StudyApiSecurityTest {
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
 		assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
 		assertAccessAuthorized(api::findStudies);
-		assertAccessAuthorized(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) {} }, null);
+		assertAccessAuthorized(t -> { api.findStudiesNames(); }, null);
 		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
 		assertAccessAuthorized(api::findStudyById, ENTITY_ID);
-		assertAccessAuthorized((t, u) -> { try { api.saveNewStudy(t, u); } catch (RestServiceException e) {}}, mockNew, mockBindingResult);
-		assertAccessAuthorized((t, u, v) -> { try { api.updateStudy(t, u, v); } catch (RestServiceException e) {}}, ENTITY_ID, mockExisting, mockBindingResult);
+		assertAccessAuthorized((t, u) -> { api.saveNewStudy(t, u); }, mockNew, mockBindingResult);
+		assertAccessAuthorized((t, u, v) -> { api.updateStudy(t, u, v); }, ENTITY_ID, mockExisting, mockBindingResult);
 	}
 	
 	private void testRead() throws ShanoirException, RestServiceException {
@@ -156,7 +156,7 @@ public class StudyApiSecurityTest {
 		given(repository.findById(1L)).willReturn(Optional.of(studyMockNoRights));
 		assertAccessAuthorized(api::findStudies);
 		assertEquals(null, api.findStudies().getBody());
-		assertAccessAuthorized(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) {} }, null);
+		assertAccessAuthorized(t -> { api.findStudiesNames(); }, null);
 		assertEquals(null, api.findStudiesNames().getBody());
 		assertAccessDenied(api::findStudyById, 1L);
 		
@@ -167,7 +167,7 @@ public class StudyApiSecurityTest {
 		given(repository.findById(2L)).willReturn(Optional.of(studyMockNoRights));
 		assertAccessAuthorized(api::findStudies);
 		assertEquals(null, api.findStudies().getBody());
-		assertAccessAuthorized(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) {} }, null);
+		assertAccessAuthorized(t -> { api.findStudiesNames(); }, null);
 		assertEquals(null, api.findStudiesNames().getBody());
 		assertAccessDenied(api::findStudyById, 2L);
 		
@@ -180,7 +180,7 @@ public class StudyApiSecurityTest {
 		assertAccessAuthorized(api::findStudies);
 		assertNotNull(api.findStudies().getBody());
 		assertEquals(1, api.findStudies().getBody().size());
-		assertAccessAuthorized(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) {} }, null);
+		assertAccessAuthorized(t -> { api.findStudiesNames(); }, null);
 		assertNotNull(api.findStudiesNames().getBody());
 		assertEquals(1, api.findStudiesNames().getBody().size());
 		assertAccessAuthorized(api::findStudyById, 3L);

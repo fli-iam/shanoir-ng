@@ -34,6 +34,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
+import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -697,35 +698,24 @@ public class DatasetSecurityService {
     	list.removeAll(examsToRemove);
     	return true;
     }
-
-    public boolean filterExaminationByCenter(List<Examination> list, Long studyId) {
-		Long userId = KeycloakUtil.getTokenUserId();
-
-		StudyUser su = studyUserRepository.findByUserIdAndStudyId(userId, studyId);
-		if (su == null || userId == null) {
-			return false;
-		}
-		if (CollectionUtils.isEmpty(su.getCentersIds())) {
-			return true;
-		}
-		// Filter only allowed centers.
-		list.removeIf(exam -> !su.getCentersIds().contains(exam.getCenterId()));
-		return true;
-    }
-
-    public boolean filterExaminationDTOByCenter(List<ExaminationDTO> list, Long studyId) {
-		Long userId = KeycloakUtil.getTokenUserId();
-
-		StudyUser su = studyUserRepository.findByUserIdAndStudyId(userId, studyId);
-		if (su == null || userId == null) {
-			return false;
-		}
-		if (CollectionUtils.isEmpty(su.getCentersIds())) {
-			return true;
-		}
-		// Filter only allowed centers.
-		list.removeIf(exam -> !su.getCentersIds().contains(exam.getCenterId()));
-		return true;
+    
+    /**
+     * Filter examinations in that list checking the connected user has the right on those examinations.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean filterSubjectExaminationDTOList(List<SubjectExaminationDTO> list, String rightStr) {
+	if (list == null) return true;
+    	Set<SubjectExaminationDTO> examsToRemove = new HashSet<>();
+    	for(SubjectExaminationDTO exam : list) {
+    		if (!hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
+    			examsToRemove.add(exam);
+			}
+    	}
+    	list.removeAll(examsToRemove);
+    	return true;
     }
 
     /**

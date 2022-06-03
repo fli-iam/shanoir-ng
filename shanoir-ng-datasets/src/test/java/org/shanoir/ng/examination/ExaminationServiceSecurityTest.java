@@ -143,8 +143,17 @@ public class ExaminationServiceSecurityTest {
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(false);
 		given(examinationRepository.findById(1L)).willReturn(Optional.of(mockExam(1L)));
 		assertAccessDenied(service::findById, 1L);
+		
+		
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		given(examinationRepository.findById(1L)).willReturn(Optional.of(mockExam(1L)));
+		given(examinationRepository.findById(1L)).willReturn(Optional.of(mockExam(1L, 1L)));
+
+		given(rightsService.hasRightOnCenter(1L, 1L)).willReturn(false);
+		Set<Long> studyIds = new HashSet<Long>(); studyIds.add(1L);
+		given(rightsService.hasRightOnCenter(studyIds, 1L)).willReturn(false);
+		assertAccessDenied(service::findById, 1L);
+		
+		given(rightsService.hasRightOnCenter(1L, 1L)).willReturn(true);
 		assertNotNull(service.findById(1L));
 	}
 	
@@ -253,6 +262,12 @@ public class ExaminationServiceSecurityTest {
 		assertAccessAuthorized(service::deleteById, 1L);
 	}
 
+	
+	private Examination mockExam(Long id, Long centerId) {
+		Examination exam = mockExam(id);
+		exam.setCenterId(centerId);
+		return exam;
+	}
 	
 	private Examination mockExam(Long id) {
 		Examination exam = ModelsUtil.createExamination();

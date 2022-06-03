@@ -118,7 +118,7 @@ public interface ExaminationService {
 	 * @return list of examinations.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationByCenter(returnObject, #studyId)")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
 	List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId);
 
 	/**

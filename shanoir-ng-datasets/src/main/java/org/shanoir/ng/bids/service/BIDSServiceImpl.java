@@ -281,8 +281,6 @@ public class BIDSServiceImpl implements BIDSService {
 
 		// Get subject examinations and filter on the one with adapted study only
 		List<Examination> examinationList = examService.findBySubjectIdStudyId(subject.getId(), studyId);
-		
-		datasetSecurityService.filterExaminationByCenter(examinationList, studyId);
 
 		// Create session folder only if there is multiple exmainations
 		boolean useSessionFolder = (examinationList != null && examinationList.size() > 1) ;
