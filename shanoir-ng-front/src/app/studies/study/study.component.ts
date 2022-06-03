@@ -112,12 +112,16 @@ export class StudyComponent extends EntityComponent<Study> {
                 });
             return study;
         });
-        return Promise.all([
-            studyPromise,
-            this.fetchUsers()
-        ]).then(([study, users]) => {
-            Study.completeMembers(study, users);
-        });
+        if (this.keycloakService.isUserAdminOrExpert()) {
+            return Promise.all([
+                studyPromise,
+                this.fetchUsers()
+            ]).then(([study, users]) => {
+                Study.completeMembers(study, users);
+            });
+        } else {
+            return studyPromise.then();
+        }
     }
 
     initEdit(): Promise<void> {
