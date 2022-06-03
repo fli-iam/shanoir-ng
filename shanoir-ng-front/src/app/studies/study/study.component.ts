@@ -110,12 +110,16 @@ export class StudyComponent extends EntityComponent<Study> {
                 });
             return study;
         });
-        return Promise.all([
-            studyPromise,
-            this.fetchUsers()
-        ]).then(([study, users]) => {
-            Study.completeMembers(study, users);
-        });
+        if (this.keycloakService.isUserAdminOrExpert()) {
+            return Promise.all([
+                studyPromise,
+                this.fetchUsers()
+            ]).then(([study, users]) => {
+                Study.completeMembers(study, users);
+            });
+        } else {
+            return studyPromise.then();
+        }
     }
 
     initEdit(): Promise<void> {
@@ -236,7 +240,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.subjectService
             .getSubjectsNames()
             .then(subjects => {
-                this.subjects = subjects.sort(function(a:Subject, b:Subject){
+                this.subjects = subjects?.sort(function(a:Subject, b:Subject){
                     return a.name.localeCompare(b.name);
                 });
         });
