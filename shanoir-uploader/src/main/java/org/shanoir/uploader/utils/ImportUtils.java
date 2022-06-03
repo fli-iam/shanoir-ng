@@ -169,8 +169,10 @@ public class ImportUtils {
 		// MS Datasets does only return StudyCard DTOs without IDs, as name is unique
 		// see: /shanoir-ng-datasets/src/main/java/org/shanoir/ng/studycard/model/StudyCard.java
 		importJob.setStudyCardName(studyCard.getName());
+		importJob.setStudyCardId(studyCard.getId());
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
 		importJob.setConverterId(studyCard.getNiftiConverterId());
+
 		// handle patient and subject
 		org.shanoir.uploader.model.rest.importer.Patient patient = new org.shanoir.uploader.model.rest.importer.Patient();
 		patient.setPatientID(uploadJob.getSubjectIdentifier());
