@@ -146,7 +146,6 @@ public class ExaminationServiceImpl implements ExaminationService {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return examinationRepository.findAllByPreclinical(pageable, preclinical);
 		} else {
-			// Find everything
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			
@@ -162,25 +161,13 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 			// If yes, get all examinations and filter by centers
 			if (hasRestrictions) {
-				List<Examination> exams = examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable.getSort());
-				
-				if (CollectionUtils.isEmpty(exams)) {
-					return new PageImpl<>(exams);
-				}
-
-				exams = exams.stream().filter(exam -> 
-						studyUserCenters.get(exam.getStudyId()) == null ||
-						studyUserCenters.get(exam.getStudyId()).contains(exam.getCenterId())).collect(Collectors.toList());
-				
-				exams = exams.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
-				Page<Examination> page = new PageImpl<>(exams);
-				return page;
+				return examinationRepository.findByPreclinicalAndStudyIdInFilterByCenter(preclinical, studyIds, pageable);
 			} else {
 				return examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable);
 			}
 		}
 	}
-	
+
 	@Override
 	public Page<Examination> findPage(final Pageable pageable, String patientName) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {

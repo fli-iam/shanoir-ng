@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for examination.
@@ -62,16 +63,22 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 */
 	List<Examination> findByStudyIdIn(List<Long> studyIds);
 
-	@Query(value = "SELECT * FROM examination e WHERE e.study_id in #studyIds "
-			+ "JOIN study_user_center suc "
-			+ "ON suc.center_id = e.center_id"
-			+ "AND suc.study_id = e.center_id;",
-			    countQuery = "SELECT count(*) FROM examination e WHERE e.study_id in #studyIds "
-						+ "JOIN study_user_center suc "
-						+ "ON suc.center_id = e.center_id"
-						+ "AND suc.study_id = e.center_id;",
+	@Query(value = "SELECT * FROM examination e "
+			+ "LEFT JOIN study_user su "
+			+ "ON su.study_id = e.study_id "
+			+ "LEFT JOIN study_user_center suc "
+			+ "ON suc.study_user_id = su.id "
+			+ "AND suc.centers_ids = e.center_id "
+			+ "AND e.study_id in :studyIds",
+			    countQuery = "SELECT count(*) FROM examination e "
+						+ "LEFT JOIN study_user su "
+						+ "ON su.study_id = e.study_id "
+						+ "LEFT JOIN study_user_center suc "
+						+ "ON suc.study_user_id = su.id "
+						+ "AND suc.centers_ids = e.center_id "
+						+ "AND e.study_id in :studyIds",
 			    nativeQuery = true)
-	Page<Examination>findByStudyIdInFilterByCenter(List<Long> studyIds, Pageable pageable);
+	Page<Examination>findByStudyIdInFilterByCenter(@Param("studyIds") List<Long> studyIds, Pageable pageable);
 	
 	/**
 	 * Get a paginated list of examinations for a list of studies.
@@ -82,9 +89,26 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 *            pagination data.
 	 * @return list of examinations.
 	 */
-	Page<Examination> findByPreclinicalAndStudyIdIn(Boolean preclinical, List<Long> studyIds, Pageable pageable);
+	@Query(value = "SELECT * FROM examination e "
+			+ "LEFT JOIN study_user su "
+			+ "ON su.study_id = e.study_id "
+			+ "LEFT JOIN study_user_center suc "
+			+ "ON suc.study_user_id = su.id "
+			+ "AND suc.centers_ids = e.center_id "
+			+ "AND e.study_id in :studyIds "
+			+ "AND e.preclinical = :preclinical",
+			    countQuery ="SELECT count(*) FROM examination e "
+						+ "LEFT JOIN study_user su "
+						+ "ON su.study_id = e.study_id "
+						+ "LEFT JOIN study_user_center suc "
+						+ "ON suc.study_user_id = su.id "
+						+ "AND suc.centers_ids = e.center_id "
+						+ "AND e.study_id in :studyIds "
+						+ "AND e.preclinical = :preclinical",
+			    nativeQuery = true)
+	Page<Examination>findByPreclinicalAndStudyIdInFilterByCenter(@Param("preclinical")Boolean preclinical, @Param("studyIds") List<Long> studyIds, Pageable pageable);
 
-	List<Examination> findByPreclinicalAndStudyIdIn(Boolean preclinical, List<Long> studyIds, Sort sort);
+	Page<Examination> findByPreclinicalAndStudyIdIn(Boolean preclinical, List<Long> studyIds, Pageable page);
 
 	/**
 	 * Get a list of examinations for a subject.
