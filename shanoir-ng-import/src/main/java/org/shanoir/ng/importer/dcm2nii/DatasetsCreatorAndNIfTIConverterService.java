@@ -600,8 +600,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					DirectoryFileFilter.DIRECTORY
 				));
 
-		// Get subject folder to delete it after
-		File subjectFolder = diff(existingFiles, directory.getPath()).get(0);
 		for (File file : niiFiles) {
 			try {
 				// Copy all nifti files
@@ -609,10 +607,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			} catch (IOException e) {
 				LOG.error("Error while copying files", e);
 			}
-		}
-		// Delete non used subject folder
-		if (!FileUtils.deleteQuietly(subjectFolder)) {
-			LOG.error("could not delete" + subjectFolder.getAbsolutePath());
 		}
 		
 		return diff(existingFiles, directory.getPath()).stream().filter(file -> file.isFile()).collect(Collectors.toList());
