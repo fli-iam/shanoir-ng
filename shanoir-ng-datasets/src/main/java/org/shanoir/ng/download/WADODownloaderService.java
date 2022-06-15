@@ -20,7 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
@@ -32,11 +31,8 @@ import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
-import javax.xml.crypto.Data;
 
 import org.shanoir.ng.dataset.model.Dataset;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -79,9 +75,6 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class WADODownloaderService {
 
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(WADODownloaderService.class);
-
 	private static final String WADO_REQUEST_TYPE_WADO_RS = "/instances/";
 
 	private static final String WADO_REQUEST_TYPE_WADO_URI = "objectUID=";
@@ -96,9 +89,7 @@ public class WADODownloaderService {
 	private static final String CONTENT_TYPE_DICOM = "application/dicom";
 
 	private static final String CONTENT_TYPE = "&contentType";
-	
-	private static final char[] FORBIDDEN_FILENAME_CHARS = {'\\', '/', ':', '*', '?', '\"', '<', '>', '|'};
-	
+
 	@Autowired
 	private RestTemplate restTemplate;
 	
@@ -119,7 +110,7 @@ public class WADODownloaderService {
 	 * @throws MessagingException
 	 */
 	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
-		for (Iterator iterator = urls.iterator(); iterator.hasNext();) {
+		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			String url = ((URL) iterator.next()).toString();
 			String instanceUID = null;
 			// handle and check at first for WADO-RS URLs by "/instances/"
