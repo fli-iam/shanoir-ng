@@ -71,7 +71,7 @@ public class DicomServerClient implements IDicomServerClient {
 			final String studyDate
 			) throws Exception {
 		DcmQR dcmqr = new DcmQR();
-		DicomQueryHelper dQH = new DicomQueryHelper(dcmqr, config, null);
+		DicomQueryHelper dQH = new DicomQueryHelper(dcmqr, config, "MR");
 		Media media = new Media();
 		media = (Media) dQH.populateDicomTree(
 				patientName,
@@ -90,7 +90,7 @@ public class DicomServerClient implements IDicomServerClient {
 	@Override
 	public synchronized List<String> retrieveDicomFiles(final Collection<Serie> selectedSeries, final File uploadFolder) {
 		final DcmQR dcmqr = new DcmQR();
-		final DicomQueryHelper dQH = new DicomQueryHelper(dcmqr, config, null);
+		final DicomQueryHelper dQH = new DicomQueryHelper(dcmqr, config, "MR");
 		dcmRcvManager.setDestination(uploadFolder.getAbsolutePath());
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		final List<String> oldFileNames = new ArrayList<String>();

@@ -61,16 +61,12 @@ public class Pseudonymizer {
 		if (!pseudonymusFolder.exists()) {
 			throw new PseudonymusException("Pseudonymus folder not existing: " + pseudonymusFolder.getAbsolutePath());
 		}
-		this.pseudonymusExePath = pseudonymusFolderPath + File.separator
-				+ WINDOWS + File.separator + PSEUDONYMUS_SHANOIR_EXE;
-		/*
 		logger.info("Pseudonymizer: pseudonymus used in OS: "
 				+ SystemUtils.OS_NAME);
 		logger.info("Pseudonymizer: pseudonymus used in OS version: "
 				+ SystemUtils.OS_VERSION);
 		logger.info("Pseudonymizer: pseudonymus used in OS architecture: "
 				+ SystemUtils.OS_ARCH);
-
 		if (SystemUtils.IS_OS_LINUX) {
 			if (I386.equals(SystemUtils.OS_ARCH)) {
 				this.pseudonymusExePath = pseudonymusFolderPath + File.separator
@@ -95,7 +91,6 @@ public class Pseudonymizer {
 		}
 		logger.info("Pseudonymizer: pseudonymus exe path: " + pseudonymusExePath);
 		logger.info("Pseudonymizer: initialization finished.");
-		*/
 	}
 	
 	/**
