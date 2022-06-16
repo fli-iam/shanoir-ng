@@ -336,7 +336,7 @@ public class DatasetSecurityService {
     	return commService.hasRightOnStudy(studyId, rightStr) && commService.hasRightOnCenter(studyId, centerId);
     }
 
-    public boolean hasRightOnStudiesCenter(Long centerId, Set<Long> studies, String rightStr) {
+    private boolean hasRightOnStudiesCenter(Long centerId, Set<Long> studies, String rightStr) {
         return !commService.hasRightOnStudies(new HashSet<>(studies), rightStr).isEmpty() && commService.hasRightOnCenter(studies, centerId);
     }
 
@@ -514,6 +514,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationPage(Page<Examination> page, String rightStr) {
+    	if (page == null) return true;
     	Set<Long> studyIds = new HashSet<>();
     	page.forEach((Examination exam) -> studyIds.add(exam.getStudyId()));
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);

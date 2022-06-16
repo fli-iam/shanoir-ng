@@ -51,6 +51,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -228,13 +229,13 @@ public class ExaminationServiceImpl implements ExaminationService {
 			throw new EntityNotFoundException(Examination.class, examination.getId());
 		}
 		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getCenterId().equals(examination.getCenterId())) {
-			throw new ShanoirException("Cannot update the center of the examination, please ask an administrator.", HttpStatus.FORBIDDEN.value());
+			throw new AccessDeniedException("Cannot update the center of the examination, please ask an administrator.");
 		}
 		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getStudyId().equals(examination.getStudyId())) {
-			throw new ShanoirException("Cannot update the study of the examination, please ask an administrator.", HttpStatus.FORBIDDEN.value());
+			throw new AccessDeniedException("Cannot update the study of the examination, please ask an administrator.");
 		}
 		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getSubjectId().equals(examination.getSubjectId())) {
-			throw new ShanoirException("Cannot update the subject of the examination, please ask an administrator.", HttpStatus.FORBIDDEN.value());
+			throw new AccessDeniedException("Cannot update the subject of the examination, please ask an administrator.");
 		}
 		updateExaminationValues(examinationDb, examination);
 		examinationRepository.save(examinationDb);

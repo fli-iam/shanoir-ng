@@ -127,7 +127,7 @@ public interface ExaminationService {
 	 * @param examination  examination to create.
 	 * @return created examination.
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examination.getCenterId(), #examination.getStudyId(), 'CAN_IMPORT'))")
 	Examination save(Examination examination);
 	
 	/**
@@ -151,7 +151,7 @@ public interface ExaminationService {
 
 	String addExtraDataFromFile(Long examinationId, File file);
 
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD') or @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE')))")
 	String getExtraDataFilePath(Long examinationId, String fileName);
 
 }
