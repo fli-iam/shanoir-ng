@@ -481,7 +481,6 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				if (filterToApply.startsWith("!")) {
 					valid =  valid || !filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
 				} else {
-					System.err.println(filterToApply + filterWildCard(searchedElement, filterToApply.replaceAll("!", "")));
 					valid =  valid || filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
 				}
 			}
