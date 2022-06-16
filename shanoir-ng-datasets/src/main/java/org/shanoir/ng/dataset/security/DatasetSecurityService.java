@@ -452,9 +452,15 @@ public class DatasetSecurityService {
     	Set<Long> studyIds = new HashSet<>();
     	page.forEach((Dataset dataset) -> studyIds.add(dataset.getStudyId()));
     	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr); //
+    	
+    	// Also check for centers    	
     	for (Dataset dataset : page) {
     		if (!checkedIds.contains(dataset.getStudyId())) {
     			return false;
+    		} else {
+    			if (!this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr)) {
+    				return false;
+    			}
     		}
     	}
     	return true;
@@ -521,7 +527,11 @@ public class DatasetSecurityService {
     	for (Examination exam : page) {
     		if (!checkedIds.contains(exam.getStudyId())) {
 				return false;
-			}
+			} else {
+    			if (!this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
+    				return false;
+    			}
+    		}
     	}
     	return true;
     }
