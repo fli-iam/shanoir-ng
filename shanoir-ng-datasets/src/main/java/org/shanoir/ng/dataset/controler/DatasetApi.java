@@ -183,8 +183,8 @@ public interface DatasetApi {
     		@ApiParam(value = "Dowloading nifti, decide the nifti converter id") Long converterId,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.",
     			allowableValues = "dcm, nii", defaultValue = "dcm")
-    		@Valid
-    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
+    		@Valid @RequestParam(value = "format", required = false, defaultValue="dcm") String format, 
+    		HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
 
 	@ApiOperation(value = "", notes = "Creates a processed dataset", response = Void.class, tags={  })
 	@ApiResponses(value = {

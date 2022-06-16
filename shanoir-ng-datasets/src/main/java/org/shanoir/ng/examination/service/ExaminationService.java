@@ -88,7 +88,7 @@ public interface ExaminationService {
 	 * @return an examination or null.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudyCenter(returnObject.getCenterId(), returnObject.getStudyId(), 'CAN_SEE_ALL')")
 	Examination findById(Long id);
 
 	/**

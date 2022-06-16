@@ -115,17 +115,6 @@ public class ExaminationServiceTest {
 		Mockito.verify(examinationRepository, Mockito.times(1)).save(Mockito.any(Examination.class));
 	}
 
-	@Test(expected = ShanoirException.class)
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
-	public void updateTestFails() throws ShanoirException {
-		// We update the subject -> Not admin -> Failure
-		Examination updatedExam = createExamination();
-		updatedExam.setSubjectId(null);
-		final Examination updatedExamination = examinationService.update(updatedExam);
-
-		Mockito.verify(examinationRepository, Mockito.times(0)).save(Mockito.any(Examination.class));
-	}
-
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void updateAsAdminTest() throws ShanoirException {

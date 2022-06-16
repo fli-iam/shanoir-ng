@@ -15,12 +15,10 @@
 
 package org.shanoir.ng.dataset;
 
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
-import java.io.IOException;
 import java.util.Set;
 
 import org.junit.Before;
@@ -79,11 +77,11 @@ public class DatasetApiSecurityTest {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		Set<Long> ids = Mockito.anySet();
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
-		assertAccessDenied(t -> { api.deleteDataset(t); }, 1L);
+		assertAccessDenied(api::deleteDataset, 1L);
 		assertAccessDenied(api::findDatasetById, 1L);
-		assertAccessDenied(t -> { api.findDatasets(t); }, PageRequest.of(0, 10));
-		assertAccessDenied((t, u, v) -> { api.downloadDatasetById(t, u, v, response); }, 1L, 1L, "dcm");
-		assertAccessDenied((t, u, v) -> { api.updateDataset(t, u, v); }, 1L, mockDataset(1L), mockBindingResult);
+		assertAccessDenied(api::findDatasets, PageRequest.of(0, 10));
+		assertAccessDenied(api::downloadDatasetById, 1L, 1L, "dcm", new MockHttpServletResponse());
+		assertAccessDenied(api::updateDataset, 1L, mockDataset(1L), mockBindingResult);
 	}
 	
 	@Test
@@ -101,11 +99,11 @@ public class DatasetApiSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
-		assertAccessAuthorized(t -> { api.deleteDataset(t); }, 1L);
+		assertAccessAuthorized(api::deleteDataset, 1L);
 		assertAccessAuthorized(api::findDatasetById, 1L);
-		assertAccessAuthorized(t -> { api.findDatasets(t); }, PageRequest.of(0, 10));
-		assertAccessAuthorized((t, u, v) -> { api.downloadDatasetById(t, u, v, response);}, 1L, 1L, "dcm");
-		assertAccessAuthorized((t, u, v) -> { api.updateDataset(t, u, v); }, 1L, mockDataset(1L), mockBindingResult);
+		assertAccessAuthorized(api::findDatasets, PageRequest.of(0, 10));
+		assertAccessAuthorized(api::downloadDatasetById, 1L, 1L, "dcm", new MockHttpServletResponse());
+		assertAccessAuthorized(api::updateDataset, 1L, mockDataset(1L), mockBindingResult);
 	}
 	
 	private MrDataset mockDataset(Long id) {

@@ -74,7 +74,7 @@ public class SubjectStudyApiSecurityTest {
 		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE)));
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_ADMINISTRATE);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessDenied((t, u, v) -> { api.updateSubjectStudy(t, u, v); }, ENTITY_ID, subjectStudy, bindingResult);
+		assertAccessDenied(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
 	}
 	
 	@Test
@@ -83,7 +83,7 @@ public class SubjectStudyApiSecurityTest {
 		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_SEE_ALL)));
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessDenied((t, u, v) -> { api.updateSubjectStudy(t, u, v); }, ENTITY_ID, subjectStudy, bindingResult);
+		assertAccessDenied(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
 	}
 	
 	@Test
@@ -92,7 +92,7 @@ public class SubjectStudyApiSecurityTest {
 		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_IMPORT)));
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_IMPORT);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessAuthorized((t, u, v) -> { api.updateSubjectStudy(t, u, v); }, ENTITY_ID, subjectStudy, bindingResult);
+		assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
 	}
 	
 	@Test
@@ -101,7 +101,7 @@ public class SubjectStudyApiSecurityTest {
 		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L)));
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessDenied((t, u, v) -> { api.updateSubjectStudy(t, u, v); }, ENTITY_ID, subjectStudy, bindingResult);
+		assertAccessDenied(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
 	}
 	
 	@Test
@@ -110,7 +110,7 @@ public class SubjectStudyApiSecurityTest {
 		given(repository.findById(1L)).willReturn(Optional.of(buildStudyMock(1L, StudyUserRight.CAN_ADMINISTRATE)));
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_ADMINISTRATE);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessAuthorized((t, u, v) -> { api.updateSubjectStudy(t, u, v); }, ENTITY_ID, subjectStudy, bindingResult);
+		assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
 	}
 	
 	@Test
@@ -118,7 +118,7 @@ public class SubjectStudyApiSecurityTest {
 	public void testAsUnauthorizedAdmin() throws ShanoirException, RestServiceException {
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessAuthorized((t, u, v) -> { api.updateSubjectStudy(t, u, v); }, ENTITY_ID, subjectStudy, bindingResult);
+		assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
 	}
 	
 	@Test
@@ -126,7 +126,7 @@ public class SubjectStudyApiSecurityTest {
 	public void testAsAuthorizedAdmin() throws ShanoirException, RestServiceException {
 		SubjectStudy subjectStudy = buildSubjectStudyMock(ENTITY_ID, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_SEE_ALL);
 		BindingResult bindingResult = new BeanPropertyBindingResult(subjectStudy, "subjectStudy");
-		assertAccessAuthorized((t, u, v) -> { api.updateSubjectStudy(t, u, v); }, ENTITY_ID, subjectStudy, bindingResult);
+		assertAccessAuthorized(api::updateSubjectStudy, ENTITY_ID, subjectStudy, bindingResult);
 	}
 	
 	

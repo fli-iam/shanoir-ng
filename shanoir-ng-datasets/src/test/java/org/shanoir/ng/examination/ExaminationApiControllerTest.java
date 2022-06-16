@@ -235,10 +235,9 @@ public class ExaminationApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateExaminationTest() throws Exception {
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-
+		given(examinationServiceMock.findById(1L)).willReturn(ModelsUtil.createExamination(1L));
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
+				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination(1L))))
 		.andExpect(status().isNoContent());
 	}
 

@@ -103,13 +103,13 @@ public class ExaminationApiSecurityTest {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		Set<Long> ids = Mockito.anySet();
 		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
-		assertAccessDenied( api::deleteExamination, 1L);
-		assertAccessDenied(t -> { api.findExaminationById(t); }, 1L);
+		assertAccessDenied(api::deleteExamination, 1L);
+		assertAccessDenied(api::findExaminationById, 1L);
 		assertAccessDenied(api::findExaminations, PageRequest.of(0, 10));
 		assertAccessDenied(api::findExaminationsBySubjectIdStudyId, 1L, 1L);
 		assertAccessDenied(api::findExaminationsBySubjectId, 1L);
-		assertAccessDenied((t, u) -> { api.saveNewExamination(t, u); }, new ExaminationDTO(), mockBindingResult);
-		assertAccessDenied((t, u, v) -> { api.updateExamination(t, u, v); }, 1L, mockExaminationDTO(1L), mockBindingResult);
+		assertAccessDenied(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
+		assertAccessDenied(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult);
 	}
 	
 	@Test
@@ -127,13 +127,13 @@ public class ExaminationApiSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
-		assertAccessAuthorized( api::deleteExamination, 1L);
-		assertAccessAuthorized(t -> { api.findExaminationById(t); }, 1L);
+		assertAccessAuthorized(api::deleteExamination, 1L);
+		assertAccessAuthorized(api::findExaminationById, 1L);
 		assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10));
 		assertAccessAuthorized(api::findExaminationsBySubjectIdStudyId, 1L, 1L);
 		assertAccessAuthorized(api::findExaminationsBySubjectId, 1L);
-		assertAccessAuthorized((t, u) -> { api.saveNewExamination(t, u); }, new ExaminationDTO(), mockBindingResult);
-		assertAccessAuthorized((t, u, v) -> { api.updateExamination(t, u, v); }, 1L, mockExaminationDTO(1L), mockBindingResult);
+		assertAccessAuthorized(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
+		assertAccessAuthorized(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult);
 	}
 	
 	
@@ -229,10 +229,10 @@ public class ExaminationApiSecurityTest {
 		assertAccessDenied(api::deleteExamination, 4L);
 		
 		// findExaminationById(Long)
-		assertAccessAuthorized(t -> { api.findExaminationById(t); }, 1L);
-		assertAccessDenied(t -> { api.findExaminationById(t); }, 2L);
-		assertAccessDenied(t -> { api.findExaminationById(t); }, 3L);
-		assertAccessDenied(t -> { api.findExaminationById(t); }, 4L);
+		assertAccessAuthorized(api::findExaminationById, 1L);
+		assertAccessDenied(api::findExaminationById, 2L);
+		assertAccessDenied(api::findExaminationById, 3L);
+		assertAccessDenied(api::findExaminationById, 4L);
 		
 		// findExaminations(Pageable)
 		assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10));
@@ -280,43 +280,43 @@ public class ExaminationApiSecurityTest {
 		given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(false);
 		
 		// updateExamination(Long, ExaminationDTO, BindingResult)
-		assertAccessDenied((t, u, v) -> { api.updateExamination(t, u, v); }, 1L, examDTO1, mockBindingResult);
-		assertAccessDenied((t, u, v) -> { api.updateExamination(t, u, v); }, 2L, examDTO2, mockBindingResult);
-		assertAccessDenied((t, u, v) -> { api.updateExamination(t, u, v); }, 3L, examDTO3, mockBindingResult);
-		assertAccessDenied((t, u, v) -> { api.updateExamination(t, u, v); }, 4L, examDTO4, mockBindingResult);
+		assertAccessDenied(api::updateExamination, 1L, examDTO1, mockBindingResult);
+		assertAccessDenied(api::updateExamination, 2L, examDTO2, mockBindingResult);
+		assertAccessDenied(api::updateExamination, 3L, examDTO3, mockBindingResult);
+		assertAccessDenied(api::updateExamination, 4L, examDTO4, mockBindingResult);
 		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
 		given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(true);
-		assertAccessAuthorized((t, u, v) -> { api.updateExamination(t, u, v); }, 1L, examDTO1, mockBindingResult);
-		assertAccessDenied((t, u, v) -> { api.updateExamination(t, u, v); }, 2L, examDTO2, mockBindingResult);
-		assertAccessDenied((t, u, v) -> { api.updateExamination(t, u, v); }, 3L, examDTO3, mockBindingResult);
+		assertAccessAuthorized(api::updateExamination, 1L, examDTO1, mockBindingResult);
+		assertAccessDenied(api::updateExamination, 2L, examDTO2, mockBindingResult);
+		assertAccessDenied(api::updateExamination, 3L, examDTO3, mockBindingResult);
 		examDTO3.setCenterId(1L); // try to move the exam to my center
-		assertAccessDenied((t, u, v) -> { api.updateExamination(t, u, v); }, 3L, examDTO3, mockBindingResult);
+		assertAccessDenied(api::updateExamination, 3L, examDTO3, mockBindingResult);
 		examDTO3.setCenterId(3L); // back to center 3
 		examDTO4.setStudyId(1L); // try to move exam to my study
-		assertAccessDenied((t, u, v) -> { api.updateExamination(t, u, v); }, 4L, examDTO4, mockBindingResult);
+		assertAccessDenied(api::updateExamination, 4L, examDTO4, mockBindingResult);
 		examDTO4.setStudyId(4L); //back to study 4
 		
 		// addExtraData(Long, MultipartFile)
 		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
 		given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(false);
-		assertAccessDenied((t, u) -> { api.addExtraData(t, u); }, 1L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
-		assertAccessDenied((t, u) -> { api.addExtraData(t, u); }, 2L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
-		assertAccessDenied((t, u) -> { api.addExtraData(t, u); }, 3L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
-		assertAccessDenied((t, u) -> { api.addExtraData(t, u); }, 4L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
+		assertAccessDenied(api::addExtraData, 1L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
+		assertAccessDenied(api::addExtraData, 2L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
+		assertAccessDenied(api::addExtraData, 3L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
+		assertAccessDenied(api::addExtraData, 4L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
 		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
 		given(rightsService.hasRightOnStudy(2L, "CAN_IMPORT")).willReturn(true);
-		assertAccessAuthorized((t, u) -> { api.addExtraData(t, u); }, 1L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
-		assertAccessDenied((t, u) -> { api.addExtraData(t, u); }, 2L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
-		assertAccessDenied((t, u) -> { api.addExtraData(t, u); }, 3L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
-		assertAccessDenied((t, u) -> { api.addExtraData(t, u); }, 4L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
+		assertAccessAuthorized(api::addExtraData, 1L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
+		assertAccessDenied(api::addExtraData, 2L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
+		assertAccessDenied(api::addExtraData, 3L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
+		assertAccessDenied(api::addExtraData, 4L, new MockMultipartFile("data", "filename.zip", "application/zip", "some xml".getBytes()));
 		
 		// downloadExtraData(Long, String, HttpServletResponse)
 		given(rightsService.hasRightOnStudy(1L, "CAN_DOWNLOAD")).willReturn(true);
 		given(rightsService.hasRightOnStudy(2L, "CAN_DOWNLOAD")).willReturn(true);
-		assertAccessAuthorized((t, u, v) -> { api.downloadExtraData(t, u, v); }, 1L, "test", new MockHttpServletResponse());
-		assertAccessDenied((t, u, v) -> { api.downloadExtraData(t, u, v); }, 2L, "test", new MockHttpServletResponse());
-		assertAccessDenied((t, u, v) -> { api.downloadExtraData(t, u, v); }, 3L, "test", new MockHttpServletResponse());
-		assertAccessDenied((t, u, v) -> { api.downloadExtraData(t, u, v); }, 4L, "test", new MockHttpServletResponse());
+		assertAccessAuthorized(api::downloadExtraData, 1L, "test", new MockHttpServletResponse());
+		assertAccessDenied(api::downloadExtraData, 2L, "test", new MockHttpServletResponse());
+		assertAccessDenied(api::downloadExtraData, 3L, "test", new MockHttpServletResponse());
+		assertAccessDenied(api::downloadExtraData, 4L, "test", new MockHttpServletResponse());
 	}
 	
 	private Examination mockExam(Long id) {
