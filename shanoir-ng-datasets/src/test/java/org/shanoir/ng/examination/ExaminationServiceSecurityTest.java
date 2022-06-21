@@ -185,7 +185,9 @@ public class ExaminationServiceSecurityTest {
 		given(examinationRepository.findByStudyIdIn(Arrays.asList(1L, 2L), pageable)).willReturn(new PageImpl<>(exList2));
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L, 2L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L, 2L)));
 		given(rightsService.hasRightOnStudies(new HashSet<Long>(Arrays.asList(1L)), "CAN_SEE_ALL")).willReturn(new HashSet<Long>(Arrays.asList(1L)));
-		
+		given(rightsService.hasRightOnCenter(1L, 1L)).willReturn(true);
+		given(rightsService.hasRightOnCenter(2L, 1L)).willReturn(true);
+		given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(true);
 		assertAccessAuthorized(service::findPage, pageable, false);
 	}
 	

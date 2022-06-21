@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.dataset.security;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.log;
-
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,15 +38,12 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
-import org.shanoir.ng.study.rights.StudyUser;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class DatasetSecurityService {
@@ -69,9 +64,6 @@ public class DatasetSecurityService {
 	
 	@Autowired
 	StudyRightsService commService;
-	
-	@Autowired
-	private StudyUserRightsRepository studyUserRepository;
 
 	@Autowired
 	StudyRepository studyRepository;
