@@ -220,7 +220,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <ol>
         <legend>Nifti Converter</legend>
         <li>
-            <label label [class.required-label]="!useStudyCard">Select a Nifti converter</label> 
+            <label label [class.required-label]="!useStudyCard">Select a Nifti converter</label>
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || niftiConverter"
                         [(ngModel)]="niftiConverter" 
@@ -228,6 +228,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [optionArr]="niftiConverters"
                         [readOnly]="useStudyCard">
                 </select-box>
+            </span>
+            <span *ngIf="modality == 'CT'">
+            <br/>
+            <br/>
+                Please be careful, some nifti converters are not adapted for CT (dicomifier for example).
+            <br/>
             </span>
         </li>
     </ol>
