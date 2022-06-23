@@ -80,11 +80,13 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.data.domain.Page;
@@ -185,6 +187,9 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (Exception e) {
+			LOG.error("Error while deleting dataset. Please check DICOM server configuration.", e);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
 

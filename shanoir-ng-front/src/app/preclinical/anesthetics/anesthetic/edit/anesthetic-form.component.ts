@@ -282,10 +282,17 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             this.anesthetic.ingredients.splice(index, 1);
         }
         this.ingredientsToDelete.push(item);
+        
+        const createIndex: number = this.ingredientsToCreate.indexOf(item);
+        if (createIndex !== -1) {
+            this.ingredientsToCreate.splice(createIndex, 1);
+        }
+
         this.browserPaging.setItems(this.anesthetic.ingredients);
         this.table.refresh();
+        
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
-    
-    
 }

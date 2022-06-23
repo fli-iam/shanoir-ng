@@ -153,9 +153,9 @@ public class StudyApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteStudyTest() throws Exception {
-		Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn("unexistingFile");
+		Mockito.when(studyServiceMock.findById(Mockito.any(Long.class))).thenReturn(null);
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().is5xxServerError());
+		.andExpect(status().isNotFound());
 	}
 
 	@Test

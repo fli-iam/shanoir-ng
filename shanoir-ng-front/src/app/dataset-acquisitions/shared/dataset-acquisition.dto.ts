@@ -18,7 +18,8 @@ import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared
 import { ExaminationDTO, ExaminationDTOService } from '../../examinations/shared/examination.dto';
 import { Examination } from '../../examinations/shared/examination.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { StudyCardDTO, StudyCardDTOService } from '../../study-cards/shared/study-card.dto';
+import { StudyCardDTOService } from '../../study-cards/shared/study-card.dto';
+import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { CtDatasetAcquisition } from '../modality/ct/ct-dataset-acquisition.model';
 import { CtProtocol } from '../modality/ct/ct-protocol.model';

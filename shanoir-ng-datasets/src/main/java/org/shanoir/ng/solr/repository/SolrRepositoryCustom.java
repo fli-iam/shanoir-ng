@@ -21,7 +21,7 @@ import org.springframework.data.solr.core.query.result.SolrResultPage;
  */
 public interface SolrRepositoryCustom {
 	
-	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteria(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException;
+	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException;
 	
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Collection<Long> studyIds, ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 }

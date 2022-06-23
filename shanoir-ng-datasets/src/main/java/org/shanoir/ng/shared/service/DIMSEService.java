@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +37,10 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component(value = "cstore")
-public class CStoreDicomService implements DicomServiceApi {
+public class DIMSEService implements DicomServiceApi {
 	
 	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(CStoreDicomService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DIMSEService.class);
 
 	private static final String STORESCU = "storescu";
 
@@ -53,7 +54,7 @@ public class CStoreDicomService implements DicomServiceApi {
 
 	@Value("${dcm4chee-arc.dicom.c-store.aet.called}")
 	private String dcm4cheeCStoreAETCalled;
-
+	
 	@Override
 	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
 		if (directoryWithDicomFiles != null && directoryWithDicomFiles.exists()
@@ -103,6 +104,11 @@ public class CStoreDicomService implements DicomServiceApi {
         int exitCode = process.waitFor();
 		if (exitCode != 0)
 			throw new ShanoirException("Send to PACS (c-store) error occured on cmd line.");
+	}
+
+	@Override
+	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
+		throw new NotImplementedException("Cannot delete datasets from PACS with CSTORE methods.");
 	}
 
 }
