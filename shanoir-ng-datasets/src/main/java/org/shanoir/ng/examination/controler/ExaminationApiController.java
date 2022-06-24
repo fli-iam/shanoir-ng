@@ -18,13 +18,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import java.time.LocalDate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -276,25 +275,26 @@ public class ExaminationApiController implements ExaminationApi {
 	
 	@Override
 	public ResponseEntity<Void> createExaminationAndAddExtraData(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
-
 		
-		Optional<Subject> subject = subjectRepository.findById(subjectId);
-		if (subject.isEmpty() || subject.get().getSubjectStudyList().size() != 1) {
-			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+		Subject subject = subjectRepository.findByName(subjectName);
+		if (subject == null) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Couldn't find subject with name " + subjectName);
+			throw new RestServiceException(error);
 		}
 		
 		if (centerRepository.findById(centerId).isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Couldn't find center with id " + centerId);
+			throw new RestServiceException(error);
 		}
 
 		Examination examination = new Examination();
-		examination.setComment("examination of " + subject.get().getName());
+		examination.setComment(file.getOriginalFilename());
 		examination.setCenterId(centerId);
-		examination.setSubjectId(subjectId);
-		examination.setStudyId(subject.get().getSubjectStudyList().get(0).getStudy().getId());
+		examination.setSubjectId(subject.getId());
+		examination.setStudyId(subject.getSubjectStudyList().get(0).getStudy().getId());
 		examination.setExaminationDate(LocalDate.now());
 		List<String> pathList = new ArrayList<>();
 		pathList.add(file.getOriginalFilename());

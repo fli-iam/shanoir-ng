@@ -172,12 +172,12 @@ public interface ExaminationApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@PostMapping(value = "extra-data-upload/new-exam/subject/{subjectId}/center/{centerId}",
+	@PostMapping(value = "extra-data-upload/new-exam/subject/{subjectName}/center/{centerId}",
 	produces = { "application/json" },
     consumes = { "multipart/form-data" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnSubjectId(#subjectId, 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnSubjectName(#subjectName, 'CAN_IMPORT'))")
 	ResponseEntity<Void> createExaminationAndAddExtraData(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 	
