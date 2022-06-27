@@ -139,7 +139,7 @@ public interface ExaminationService {
 	 * @throws EntityNotFoundException
 	 * @throws ShanoirException 
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
 	Examination update(Examination examination) throws EntityNotFoundException, ShanoirException;
 
 	/**

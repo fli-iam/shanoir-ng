@@ -762,7 +762,7 @@ public class DatasetSecurityService {
         if (exam.getStudyId() == null) {
 			return false;
 		}
-    	return this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr);
+        return this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr);
     }
     
     public boolean hasRightOnExamination(String examinationUID, String rightStr) throws EntityNotFoundException {
