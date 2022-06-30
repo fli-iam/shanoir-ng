@@ -60,10 +60,8 @@ public class RabbitMqExaminationService {
 	@Transactional
 	public Long createExamination(Message message) {
 		try {
-			Long userId = Long.valueOf("" + message.getMessageProperties().getHeaders().get("x-user-id"));
 			Examination exam = mapper.readValue(message.getBody(), Examination.class);
 			exam = examRepo.save(exam);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, exam.getId().toString(), userId, "" + exam.getStudyId(), ShanoirEvent.SUCCESS, exam.getStudyId()));
 			return exam.getId();
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(e);

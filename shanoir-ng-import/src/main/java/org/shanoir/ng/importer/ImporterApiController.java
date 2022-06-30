@@ -223,6 +223,7 @@ public class ImporterApiController implements ImporterApi {
 			 */
 			ImportJob importJob = new ImportJob();
 			importJob.setFromDicomZip(true);
+			importJob.setUserId(KeycloakUtil.getTokenUserId());
 			// Work folder is always relative to general import directory
 			importJob.setWorkFolder(importJobDir.getName());
 			importJob.setPatients(patients);
@@ -376,6 +377,7 @@ public class ImporterApiController implements ImporterApi {
 			File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, eegFile, false);
 
 			EegImportJob importJob = new EegImportJob();
+			importJob.setUserId(userId);
 			importJob.setArchive(eegFile.getOriginalFilename());
 			importJob.setWorkFolder(importJobDir.getAbsolutePath());
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
@@ -714,6 +716,7 @@ public class ImporterApiController implements ImporterApi {
 		 * complete with meta-data from files
 		 */
 		ImportJob importJob = new ImportJob();
+		importJob.setUserId(KeycloakUtil.getTokenUserId());
 		List<Patient> patients = preparePatientsForImportJob(tempDir);
 		importJob.setPatients(patients);
 		importJob.setFromDicomZip(true);

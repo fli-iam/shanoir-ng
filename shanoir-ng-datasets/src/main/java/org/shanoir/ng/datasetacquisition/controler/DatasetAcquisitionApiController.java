@@ -106,7 +106,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
 		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
-			createAllDatasetAcquisitions(importJob, importJob.getShanoirEvent().getUserId());
+			createAllDatasetAcquisitions(importJob, importJob.getUserId());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new AmqpRejectAndDontRequeueException(e);

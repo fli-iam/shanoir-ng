@@ -36,6 +36,9 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -89,6 +92,9 @@ public class BidsImporterApiController implements BidsImporterApi {
 	@Autowired
 	private ObjectMapper objectMapper;
 
+	@Autowired
+	private ShanoirEventService eventService;
+
 	private static final Logger LOG = LoggerFactory.getLogger(BidsImporterApiController.class);
 
 	
@@ -110,15 +116,9 @@ public class BidsImporterApiController implements BidsImporterApi {
 		if (!ImportUtils.isZipFile(bidsFile)) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
 		}
-
-		// Set user ID for further rabbit calls
-		rabbitTemplate.setBeforePublishPostProcessors(message -> {
-			message.getMessageProperties().setHeader("x-user-id", KeycloakUtil.getTokenUserId().toString());
-			return message;
-		});
-
 		ImportJob importJob = new ImportJob();
 		importJob.setStudyId(studyId);
+		importJob.setUserId(KeycloakUtil.getTokenUserId());
 		
 		// Create tmp folder and unzip archive
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);
@@ -197,6 +197,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 					if (examId == null) {
 						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
 					}
+					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "" + examination.getStudyId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 					
 					LOG.debug("We found a session " + sessionFile.getName());
 					importJob.setExaminationId(examId);
@@ -220,6 +221,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 						if (examId == null) {
 							throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
 						}
+						eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "" + examination.getStudyId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 						
 						importJob.setExaminationId(examId);
 						examCreated = true;
@@ -353,7 +355,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 		examination.setComment(comment);
 
 		examination.setExaminationDate(examDate);
-
+		
 		return examination;
 	}
 
