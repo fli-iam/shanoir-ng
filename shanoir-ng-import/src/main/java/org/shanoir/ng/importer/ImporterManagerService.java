@@ -159,11 +159,6 @@ public class ImporterManagerService {
 				Long converterId = importJob.getConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
 			}
-	        rabbitTemplate.setBeforePublishPostProcessors(message -> {
-	            message.getMessageProperties().setHeader("x-user-id",
-	            		KeycloakUtil.getTokenUserId());
-	            return message;
-	        });
 			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
 		} catch (Exception e) {
 			LOG.error("Error during import for study {} and examination {}", importJob.getStudyId(), importJob.getExaminationId(), e);

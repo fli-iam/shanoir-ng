@@ -102,7 +102,7 @@ public class BidsImporterService {
 		ShanoirEvent event = null;
 		try {
 			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-			Long userId = (Long) importJobStr.getMessageProperties().getHeaders().get("x-user-id");
+			Long userId = Long.valueOf("" + importJobStr.getMessageProperties().getHeaders().get("x-user-id"));
 			ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 	
 			event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, importJob.getStudyId());

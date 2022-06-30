@@ -113,7 +113,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 		// Set user ID for further rabbit calls
 		rabbitTemplate.setBeforePublishPostProcessors(message -> {
-			message.getMessageProperties().setHeader("x-user-id", KeycloakUtil.getTokenUserId());
+			message.getMessageProperties().setHeader("x-user-id", KeycloakUtil.getTokenUserId().toString());
 			return message;
 		});
 
