@@ -75,7 +75,7 @@ public class ImporterManagerService {
 	/**
 	 * For the moment Spring is not used here to autowire, as we try to keep the
 	 * anonymization project as simple as it is, without Spring annotations, to
-	 * be usable outside a Spring context.
+	 * be usable outside a Spring context, as e.g. in ShanoirUploader.
 	 * Maybe to change and think about deeper afterwards.
 	 */
 	private static final AnonymizationServiceImpl ANONYMIZER = new AnonymizationServiceImpl();
@@ -141,6 +141,9 @@ public class ImporterManagerService {
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
+			
+			// do logging here
+			
 			event.setMessage("Anonymizing dicom..");
 			eventService.publishEvent(event);
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {

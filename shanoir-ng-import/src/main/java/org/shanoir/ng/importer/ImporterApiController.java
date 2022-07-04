@@ -151,25 +151,6 @@ public class ImporterApiController implements ImporterApi {
 	@Autowired
 	private QueryPACSService queryPACSService;
 
-	public ResponseEntity<Void> uploadFiles(
-			@ApiParam(value = "file detail") @RequestPart("files") final MultipartFile[] files)
-					throws RestServiceException {
-		if (files.length == 0) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
-		}
-		try {
-			// not used currently
-			for (int i = 0; i < files.length; i++) {
-				ImportUtils.saveTempFile(new File(importDir), files[i]);
-			}
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (IOException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
-		}
-	}
-
 	@Override
 	public ResponseEntity<ImportJob> uploadDicomZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile dicomZipFile)
