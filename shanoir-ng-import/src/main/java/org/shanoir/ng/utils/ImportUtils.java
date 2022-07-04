@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -173,13 +174,18 @@ public class ImportUtils {
 		if (!destDir.exists()) {
 			destDir.mkdir();
 		}
-		
-		try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath))) {
-			ZipEntry entry = zipIn.getNextEntry();
+
+		try (ZipFile zipFile = new ZipFile(new File(zipFilePath))) {
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+
+
 			String directoryFile;
 			String name;
-			// iterates over entries in the .zip file
-			while (entry != null) {
+
+			while (entries.hasMoreElements()) {
+				ZipEntry entry = entries.nextElement();
+				// iterates over entries in the .zip file
+
 				name = entry.getName();
 				String filePath = destDirectory + File.separator + name;
 				if (!entry.isDirectory()) {
@@ -190,14 +196,12 @@ public class ImportUtils {
 					if (directoryFile != null) {
 						createDirectory(destDir, directoryFile);
 					}
-					extractFile(zipIn, filePath);
+					extractFile(entry, zipFile, filePath);
 				} else {
 					// if the entry is a directory, make the directory
 					File dir = new File(filePath);
 					dir.mkdir();
 				}
-				zipIn.closeEntry();
-				entry = zipIn.getNextEntry();
 			}
 		}
 	}
@@ -209,35 +213,35 @@ public class ImportUtils {
 	 * @param zipOut file touget out
 	 * @throws IOException
 	 */
-    public static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut, boolean first) throws IOException {
-        if (fileToZip.isHidden()) {
-            return;
-        }
-        if (fileToZip.isDirectory()) {
-            if (fileName.endsWith("/") && !first) {
-                zipOut.putNextEntry(new ZipEntry(fileName));
-                zipOut.closeEntry();
-            } else if (!first) {
-                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
-                zipOut.closeEntry();
-            }
-            File[] children = fileToZip.listFiles();
-            for (File childFile : children) {
-                zipFile(childFile, (first? "" : fileName + "/") + childFile.getName(), zipOut, false);
-            }
-            return;
-        }
-        FileInputStream fis = new FileInputStream(fileToZip);
-        ZipEntry zipEntry = new ZipEntry(fileName);
-        zipOut.putNextEntry(zipEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0) {
-            zipOut.write(bytes, 0, length);
-        }
-        fis.close();
-    }
-   
+	public static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut, boolean first) throws IOException {
+		if (fileToZip.isHidden()) {
+			return;
+		}
+		if (fileToZip.isDirectory()) {
+			if (fileName.endsWith("/") && !first) {
+				zipOut.putNextEntry(new ZipEntry(fileName));
+				zipOut.closeEntry();
+			} else if (!first) {
+				zipOut.putNextEntry(new ZipEntry(fileName + "/"));
+				zipOut.closeEntry();
+			}
+			File[] children = fileToZip.listFiles();
+			for (File childFile : children) {
+				zipFile(childFile, (first? "" : fileName + "/") + childFile.getName(), zipOut, false);
+			}
+			return;
+		}
+		FileInputStream fis = new FileInputStream(fileToZip);
+		ZipEntry zipEntry = new ZipEntry(fileName);
+		zipOut.putNextEntry(zipEntry);
+		byte[] bytes = new byte[1024];
+		int length;
+		while ((length = fis.read(bytes)) >= 0) {
+			zipOut.write(bytes, 0, length);
+		}
+		fis.close();
+	}
+
 	/**
 	 * Check if sent file is of type .zip.
 	 *
@@ -277,14 +281,16 @@ public class ImportUtils {
 	 * @param filePath
 	 * @throws IOException
 	 */
-	private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-		try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
-			byte[] bytesIn = new byte[BUFFER_SIZE];
-			int read = 0;
-			while ((read = zipIn.read(bytesIn)) != -1) {
-				bos.write(bytesIn, 0, read);
-			}
-		}
+	private static void extractFile(ZipEntry zipIn, ZipFile zipFile, String filePath) throws IOException {
+		
+		try (InputStream in = zipFile.getInputStream(zipIn);
+				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
+					byte[] bytesIn = new byte[BUFFER_SIZE];
+					int read = 0;
+					while ((read = in.read(bytesIn)) != -1) {
+						bos.write(bytesIn, 0, read);
+					}
+	        }
 	}
 
 	/**
@@ -298,7 +304,7 @@ public class ImportUtils {
 	public static String convertFilePath(final String firstImagePath) {
 		return firstImagePath.replaceAll("\\\\", "/");
 	}
-	
+
 	/**
 	 * List all the folders of the given directory.
 	 *
@@ -320,7 +326,7 @@ public class ImportUtils {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Convert a String with a wildcard to a regular expression.
 	 *
@@ -363,7 +369,7 @@ public class ImportUtils {
 		s.append('$');
 		return s.toString();
 	}
-	
+
 	/**
 	 * copyFiles folder into destination,respecting the hierarchy
 	 * 
@@ -484,7 +490,7 @@ public class ImportUtils {
 		} else if (alphabetList.contains(lastCharacter)) {
 			int index = alphabetList.indexOf(lastCharacter);
 			newName = nameNoExtension.substring(0, nameNoExtension.length() - 1) + alphabetList.get(index + 1)
-					+ extension;
+			+ extension;
 		} else {
 			newName = nameNoExtension + "A" + extension;
 		}

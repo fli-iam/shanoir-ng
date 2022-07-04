@@ -1,9 +1,13 @@
 package org.shanoir.uploader.action;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -21,7 +25,9 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.junit.Test;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.DicomTreeNode;
@@ -200,13 +206,21 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Map<Study, Set<Serie>> selectedSeriesByStudy = new HashMap<>();
 		Study selectedStudy = null;
 
-		Calendar calendar = Calendar.getInstance();
+		Date minDate;
 		if (!StringUtils.isBlank(csvImport.getMinDateFilter())) {
-			calendar.set(Integer.valueOf(csvImport.getMinDateFilter()), 0, 1, 0, 0, 0);
+			
+			String[] acceptedFormats = {"yyyy","yyyy-MM-dd"};
+			try {
+				minDate = DateUtils.parseDate(csvImport.getMinDateFilter(), acceptedFormats);
+			} catch (ParseException e) {
+				csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.date.format"));
+				return false;
+			}
 		} else {
-			calendar.set(1000, 0, 1, 0, 0, 0);
+			Calendar cal = Calendar.getInstance();
+			cal.set(1000, 0, 1, 0, 0, 0);
+			minDate = cal.getTime();
 		}
-		Date minDate = calendar.getTime();
 
 		for (DicomTreeNode item : media.getTreeNodes().values()) {
 			if (foundPatient) {
@@ -221,7 +235,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 					// Select the first study (comparing dates)
 					Study study = (Study) studiesIt.next();
-				// get study date
+					// get study date
 					SimpleDateFormat format1 = new SimpleDateFormat("yyyyMMdd");
 					Date studyDate = new Date();
 					try {
@@ -453,24 +467,62 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		if (StringUtils.isBlank(searchedElement)) {
 			return false;
 		}
-		if (StringUtils.isBlank(filter) || filter.equals(WILDCARD)) {
+		if (StringUtils.isBlank(filter) || filter.equals("*")) {
 			return true;
 		}
-		String[] filters = filter.split(";");
+		String[] filters;
 		boolean valid = true;
-		for (String filterToApply : filters) {
-			// NB: we choose to use AND instead of OF between filters.
-			// This way we are more restrictive
-			// If you want more acquisitions, you have to duplicate the line in the CSV with other filters
+		// NB: It is possible to have AND ";" filters OR OR ";;" filters but not both at the same time for the moment.
 
-			if (filterToApply.startsWith("!")) {
-				valid =  valid && !filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
-			} else {
-				valid =  valid && filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+		if (filter.contains(";;")) {
+			valid = false;
+			filters = filter.split(";;");
+			for (String filterToApply : filters) {
+				if (filterToApply.startsWith("!")) {
+					valid =  valid || !filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+				} else {
+					valid =  valid || filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+				}
 			}
+			return valid;
+		} else if (filter.contains(";")) {
+			filters = filter.split(";");
+			for (String filterToApply : filters) {
+				if (filterToApply.startsWith("!")) {
+					valid =  valid && !filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+				} else {
+					valid =  valid && filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+				}
+			}
+			return valid;
+		} else {
+			if (filter.startsWith("!")) {
+				valid = !filterWildCard(searchedElement, filter.replaceAll("!", ""));
+			} else {
+				valid = filterWildCard(searchedElement, filter.replaceAll("!", ""));
+			}
+			return valid;
 		}
-		return valid;
 	}
+
+	/*
+	@Test
+	public void testSearchField() {
+		assertFalse(searchField("", ""));
+		assertTrue(searchField("tested", ""));
+		assertTrue(searchField("tested", "*"));
+		assertTrue(searchField("tested", "*sted"));
+		assertTrue(searchField("tested", "test*"));
+		assertTrue(searchField("tested", "*est*"));
+		assertFalse(searchField("tested", "*ast*"));
+		assertTrue(searchField("tested", "*st*;*ed"));
+		assertTrue(searchField("tested", "*st*;;*ed"));
+		assertFalse(searchField("tested", "*sta*;*ed"));
+		assertTrue(searchField("tested", "*sta*;;*ed"));
+		assertFalse(searchField("tested", "*sta*;*tad*"));
+		assertFalse(searchField("tested", "*sta*;;*tad*"));
+	}
+	*/
 
 	/**
 	 * Check if filterd elements contains or not the data sent in argument
