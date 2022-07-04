@@ -104,10 +104,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@RabbitHandler
 	@Transactional
 	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
-		Long userId = (Long) importJobStr.getMessageProperties().getHeaders().get("x-user-id");
 		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
-			createAllDatasetAcquisitions(importJob, userId);
+			createAllDatasetAcquisitions(importJob, importJob.getUserId());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new AmqpRejectAndDontRequeueException(e);
