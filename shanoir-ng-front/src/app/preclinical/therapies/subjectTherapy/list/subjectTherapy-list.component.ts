@@ -55,6 +55,10 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
         return this.preclinicalSubject.therapies;
     }
 
+    protected addEntity(subjectEntity: SubjectTherapy) {
+        this.preclinicalSubject.therapies = this.preclinicalSubject.therapies.concat(subjectEntity);
+    }
+
     protected getOptions(): any {
         // Specify that we can't view a therapy
         return {

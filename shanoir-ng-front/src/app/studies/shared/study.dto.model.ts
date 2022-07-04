@@ -11,22 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { SimpleStudy } from '../../studies/shared/study.model';
-import { Tag } from '../../tags/tag.model';
-import { Subject } from './subject.model';
-import { SubjectType } from './subject.types';
+
+import { Tag } from "../../tags/tag.model";
+import { SimpleStudy, Study } from "./study.model";
 
 
-export class SubjectStudy {
+export class SimpleStudyDTO {
     id: number;
-    examinations: SubjectExamination[];
-    subject: Subject;
-    subjectId: number;
-    study: SimpleStudy;
-    studyId: number;
-    subjectStudyIdentifier: string;
-    subjectType: SubjectType;
-    physicallyInvolved: boolean;
+    name: string;
     tags: Tag[];
+
+    constructor(study: Study | SimpleStudy) {
+        this.id = study.id ? study.id : null;
+        this.name = study.name;
+        this.tags = study.tags;
+    }
 }

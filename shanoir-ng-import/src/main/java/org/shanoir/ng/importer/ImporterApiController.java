@@ -151,25 +151,6 @@ public class ImporterApiController implements ImporterApi {
 	@Autowired
 	private QueryPACSService queryPACSService;
 
-	public ResponseEntity<Void> uploadFiles(
-			@ApiParam(value = "file detail") @RequestPart("files") final MultipartFile[] files)
-					throws RestServiceException {
-		if (files.length == 0) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), NO_FILE_UPLOADED, null));
-		}
-		try {
-			// not used currently
-			for (int i = 0; i < files.length; i++) {
-				ImportUtils.saveTempFile(new File(importDir), files[i]);
-			}
-			return new ResponseEntity<>(HttpStatus.OK);
-		} catch (IOException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
-		}
-	}
-
 	@Override
 	public ResponseEntity<ImportJob> uploadDicomZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile dicomZipFile)
@@ -223,6 +204,7 @@ public class ImporterApiController implements ImporterApi {
 			 */
 			ImportJob importJob = new ImportJob();
 			importJob.setFromDicomZip(true);
+			importJob.setUserId(KeycloakUtil.getTokenUserId());
 			// Work folder is always relative to general import directory
 			importJob.setWorkFolder(importJobDir.getName());
 			importJob.setPatients(patients);
@@ -376,6 +358,7 @@ public class ImporterApiController implements ImporterApi {
 			File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, eegFile, false);
 
 			EegImportJob importJob = new EegImportJob();
+			importJob.setUserId(userId);
 			importJob.setArchive(eegFile.getOriginalFilename());
 			importJob.setWorkFolder(importJobDir.getAbsolutePath());
 			return new ResponseEntity<>(importJob, HttpStatus.OK);
@@ -714,6 +697,7 @@ public class ImporterApiController implements ImporterApi {
 		 * complete with meta-data from files
 		 */
 		ImportJob importJob = new ImportJob();
+		importJob.setUserId(KeycloakUtil.getTokenUserId());
 		List<Patient> patients = preparePatientsForImportJob(tempDir);
 		importJob.setPatients(patients);
 		importJob.setFromDicomZip(true);

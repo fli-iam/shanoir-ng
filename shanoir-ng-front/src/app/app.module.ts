@@ -241,6 +241,8 @@ import { ConsoleService } from './shared/console/console.service';
 import { ExtraDataService } from './preclinical/extraData/extraData/shared/extradata.service'
 import { TagCreatorComponent } from './tags/tag.creator.component';
 import { TagInputComponent } from './tags/tag.input.component';
+import { StudyDTOService } from './studies/shared/study.dto';
+import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
 
@@ -502,6 +504,8 @@ import { VarDirective } from './utils/ng-var.directive';
         KeycloakSessionService,
         ConsoleService,
 		ExtraDataService,
+        StudyDTOService,
+        SubjectDTOService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]
