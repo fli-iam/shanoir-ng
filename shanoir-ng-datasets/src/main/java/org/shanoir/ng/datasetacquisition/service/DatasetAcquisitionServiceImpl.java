@@ -14,10 +14,11 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -27,8 +28,8 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUser;
@@ -37,10 +38,13 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
@@ -95,37 +99,22 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 			return repository.findAll(pageable);
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 
 			// Check if user has restrictions.
-			boolean hasRestrictions = false;
-			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(userId));
-			Map<Long, List<Long>> studyUserCenters = new HashMap<>();
+			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_SEE_ALL.getId()));
+			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+			Set<Long> unrestrictedStudies = new HashSet<Long>();
 			for (StudyUser studyUser : studyUsers) {
-				if (! CollectionUtils.isEmpty(studyUser.getCentersIds())) {
-					hasRestrictions = true;
-					studyUserCenters.put(studyUser.getStudyId(), studyUser.getCentersIds());
+				if (CollectionUtils.isEmpty(studyUser.getCentersIds())) {
+					unrestrictedStudies.add(studyUser.getStudyId());
+				} else {
+					for (Long centerId : studyUser.getCentersIds()) {
+						studyCenters.add(new Pair<Long, Long>(studyUser.getStudyId(), centerId));						
+					}
 				}
 			}
-			// If yes, get all acquisitions and filter by centers
-			if (hasRestrictions) {
 
-				List<DatasetAcquisition> acqs = Utils.toList(repository.findByExaminationStudyIdIn(studyIds, pageable.getSort()));
-				
-				if (CollectionUtils.isEmpty(acqs)) {
-					return new PageImpl<>(acqs);
-				}
-				
-				acqs = acqs.stream().filter(acq -> 
-				studyUserCenters.get(acq.getExamination().getStudyId()) == null ||
-				studyUserCenters.get(acq.getExamination().getStudyId()).contains(acq.getExamination().getCenterId())).collect(Collectors.toList());
-
-				acqs = acqs.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
-				Page<DatasetAcquisition> page = new PageImpl<>(acqs);
-				return page;
-			} else {
-				return repository.findByExaminationStudyIdIn(studyIds, pageable);
-			}
+			return repository.findByExaminationByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
 		}
 	}
 

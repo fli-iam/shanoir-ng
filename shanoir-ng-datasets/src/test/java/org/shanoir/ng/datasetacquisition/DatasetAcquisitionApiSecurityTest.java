@@ -14,13 +14,16 @@
 
 package org.shanoir.ng.datasetacquisition;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -30,11 +33,18 @@ import org.mockito.Mockito;
 import org.shanoir.ng.datasetacquisition.controler.DatasetAcquisitionApi;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -44,12 +54,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+
+import com.google.common.collect.Sets;
+import com.mysql.cj.conf.ConnectionUrlParser.Pair;
 
 /**
  * User security service test.
@@ -71,26 +86,35 @@ public class DatasetAcquisitionApiSecurityTest {
 	@MockBean
 	private StudyUserRightsRepository rightsRepository;
 	
-	@MockBean
-	private StudyRightsService commService;
-	
 	private BindingResult mockBindingResult;
+	
+	@MockBean
+	StudyRightsService rightsService;
+	
+	@MockBean
+	private ExaminationRepository examinationRepository;
+	
+	@MockBean
+	private StudyRepository studyRepository;
+	
+	@MockBean
+	private DatasetAcquisitionRepository datasetAcquisitionRepository;
 	
 	
 	@Before
 	public void setup() {
 		mockBindingResult = new BeanPropertyBindingResult(mockDsAcq(1L), "datasetAcquisition");
-		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
-		given(commService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
+		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
+		given(rightsService.hasRightOnStudies(Mockito.any(), Mockito.anyString())).willReturn(new HashSet<Long>());
 		given(rightsRepository.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).willReturn( new StudyUser());
 	}
 	
 	@Test
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException, RestServiceException {
-		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
+		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		Set<Long> ids = Mockito.anySet();
-		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
+		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
 		assertAccessDenied(api::findDatasetAcquisitionById, 1L);
 		assertAccessDenied(api::findByStudyCard, 1L);
@@ -103,75 +127,23 @@ public class DatasetAcquisitionApiSecurityTest {
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_USER" })
 	public void testAsUser() throws ShanoirException, RestServiceException {
-		given(commService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
-		assertAccessDenied(api::findDatasetAcquisitionById, 3L);
-		
-		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<Long>());
-		assertAccessAuthorized(api::findDatasetAcquisitions, PageRequest.of(0, 10));
-		assertAccessAuthorized(api::findByStudyCard, 1L);
-		assertNull(api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody());
-		assertNull(api.findByStudyCard(new Long(1L)).getBody());
-		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
-		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(ids);
-		
-		//assertEquals(2, api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody().getTotalElements());
-		//assertEquals(2, api.findByStudyCard(new Long(1L)).getBody().size());
-
-		ImportJob importJob = new ImportJob(); importJob.setExaminationId(1L);
-		assertAccessDenied(api::createNewDatasetAcquisition, new ImportJob());
-		assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
-		assertAccessDenied(api::deleteDatasetAcquisition, 1L);
-
+		setCenterRightsContext();		
+		testAll("ROLE_USER");
 	}
 	
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsExpert() throws ShanoirException, RestServiceException {
-		given(commService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
-		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
-		assertAccessDenied(api::findDatasetAcquisitionById, 3L);
-		
-		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<Long>());
-		assertAccessAuthorized(api::findDatasetAcquisitions, PageRequest.of(0, 10));
-		assertAccessAuthorized(api::findByStudyCard, 1L);
-		assertNull(api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody());
-		assertNull(api.findByStudyCard(new Long(1L)).getBody());
-		Set<Long> ids = new HashSet<>(); ids.add(1L); ids.add(2L);
-		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(ids);
-		//assertEquals(2, api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody().getTotalElements());
-		//assertEquals(2, api.findByStudyCard(new Long(1L)).getBody().size());
-		
-		given(commService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
-		Examination exam = ModelsUtil.createExamination(); exam.setId(1L);
-		ImportJob importJob = new ImportJob();
-		importJob.setStudyId(2L);
-		importJob.setExaminationId(3L);
-		assertAccessDenied(api::createNewDatasetAcquisition, importJob);
-		importJob.setStudyId(1L);
-		importJob.setExaminationId(1L);
-		assertAccessAuthorized(api::createNewDatasetAcquisition, importJob);
-		
-//		DatasetAcquisitionDTO dsAcqDB = api.findDatasetAcquisitionById(1L).getBody();
-//		given(commService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
-//		given(commService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);
-//		dsAcqDB.setRank(1000);
-//		dsAcqDB.getExamination().setStudyId(3L);
-//		assertAccessDenied(api::updateDatasetAcquisition, 1L, dsAcqDB, mockBindingResult);
-//		assertAccessDenied(api::updateDatasetAcquisition, 3L, dsAcqDB, mockBindingResult);
-//		dsAcqDB.getExamination().setStudyId(1L);
-//		assertAccessAuthorized(api::updateDatasetAcquisition catch (RestServiceException e1) { } }, 1L, dsAcqDB, mockBindingResult);
-		
-		assertAccessDenied(api::deleteDatasetAcquisition, 3L);
-		assertAccessAuthorized(api::deleteDatasetAcquisition, 4L);
+		setCenterRightsContext();
+		testAll("ROLE_EXPERT");
 	}
 
 	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
-		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
+		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
 		Set<Long> ids = Mockito.anySet();
-		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
+		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
 		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
 		assertAccessAuthorized(api::findByStudyCard, 1L);
@@ -182,12 +154,140 @@ public class DatasetAcquisitionApiSecurityTest {
 		assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);
 		assertAccessAuthorized(api::deleteDatasetAcquisition, 4L);
 	}
+	
+	private void testAll(String role) throws ShanoirException, RestServiceException {
+		// createNewDatasetAcquisition(ImportJob)
+		ImportJob importJob = new ImportJob(); 
+		importJob.setExaminationId(1L);
+		importJob.setStudyId(1L);
+		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+		assertAccessDenied(api::createNewDatasetAcquisition, importJob);
+		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
+		assertAccessAuthorized(api::createNewDatasetAcquisition, importJob);
+		
+		importJob.setExaminationId(3L);
+		importJob.setStudyId(1L);
+		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+		assertAccessDenied(api::createNewDatasetAcquisition, importJob);
+		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
+		assertAccessDenied(api::createNewDatasetAcquisition, importJob);
+		
+		importJob.setExaminationId(2L);
+		importJob.setStudyId(2L);
+		given(rightsService.hasRightOnStudy(3L, "CAN_IMPORT")).willReturn(false);
+		assertAccessDenied(api::createNewDatasetAcquisition, importJob);
+		
+		importJob.setExaminationId(4L);
+		importJob.setStudyId(4L);
+		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+		assertAccessDenied(api::createNewDatasetAcquisition, importJob);
+		
+		// createNewEegDatasetAcquisition(EegImportJob)
+		EegImportJob eegImportJob = new EegImportJob(); 
+		eegImportJob.setExaminationId(1L);
+		eegImportJob.setStudyId(1L);
+		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+		assertAccessDenied(api::createNewDatasetAcquisition, eegImportJob);
+		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
+		assertAccessAuthorized(api::createNewDatasetAcquisition, eegImportJob);
+		
+		eegImportJob.setExaminationId(3L);
+		eegImportJob.setStudyId(1L);
+		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+		assertAccessDenied(api::createNewDatasetAcquisition, eegImportJob);
+		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(true);
+		assertAccessDenied(api::createNewDatasetAcquisition, eegImportJob);
+		
+		eegImportJob.setExaminationId(2L);
+		eegImportJob.setStudyId(2L);
+		given(rightsService.hasRightOnStudy(3L, "CAN_IMPORT")).willReturn(false);
+		assertAccessDenied(api::createNewDatasetAcquisition, eegImportJob);
+		
+		eegImportJob.setExaminationId(4L);
+		eegImportJob.setStudyId(4L);
+		given(rightsService.hasRightOnStudy(1L, "CAN_IMPORT")).willReturn(false);
+		assertAccessDenied(api::createNewDatasetAcquisition, eegImportJob);	
+		
+		// findByStudyCard(Long)
+		assertAccessAuthorized(api::findByStudyCard, 1L);
+		assertAccessAuthorized(api::findByStudyCard, 2L);
+		assertThat(api.findByStudyCard(2L).getBody()).isNullOrEmpty();
+		assertAccessAuthorized(api::findByStudyCard, 3L);
+		assertThat(api.findByStudyCard(3L).getBody()).isNullOrEmpty();
+		assertAccessAuthorized(api::findByStudyCard, 4L);
+		assertThat(api.findByStudyCard(4L).getBody()).isNullOrEmpty();
+		
+		// deleteDatasetAcquisition(Long)
+		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
+		if ("ROLE_USER".equals(role)) {
+			assertAccessDenied(api::deleteDatasetAcquisition, 1L);
+		} else if ("ROLE_EXPERT".equals(role)) {
+			assertAccessAuthorized(api::deleteDatasetAcquisition, 1L);		
+		}
+		given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(true);
+		assertAccessDenied(api::deleteDatasetAcquisition, 2L);
+		given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(true);
+		assertAccessDenied(api::deleteDatasetAcquisition, 3L);
+		given(rightsService.hasRightOnStudy(4L, "CAN_ADMINISTRATE")).willReturn(true);
+		assertAccessDenied(api::deleteDatasetAcquisition, 4L);
+		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(false);
+		given(rightsService.hasRightOnStudy(2L, "CAN_ADMINISTRATE")).willReturn(false);
+		given(rightsService.hasRightOnStudy(3L, "CAN_ADMINISTRATE")).willReturn(false);
+		given(rightsService.hasRightOnStudy(4L, "CAN_ADMINISTRATE")).willReturn(false);
+		
+		// findDatasetAcquisitionById(Long)
+		assertAccessAuthorized(api::findDatasetAcquisitionById, 1L);
+		assertAccessDenied(api::findDatasetAcquisitionById, 2L);
+		assertAccessDenied(api::findDatasetAcquisitionById, 3L);
+		assertAccessDenied(api::findDatasetAcquisitionById, 4L);
+		
+		// findDatasetAcquisitionByExaminationId(Long)
+		assertAccessAuthorized(api::findDatasetAcquisitionByExaminationId, 1L);
+		assertAccessDenied(api::findDatasetAcquisitionByExaminationId, 2L);
+		assertAccessDenied(api::findDatasetAcquisitionByExaminationId, 3L);
+		assertAccessDenied(api::findDatasetAcquisitionByExaminationId, 4L);
+		
+		// findDatasetAcquisitions(Pageable)
+		Page<DatasetAcquisitionDTO> page1 = api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody();
+		assertThat(page1 != null && page1.getSize() == 1);
+		
+		// updateDatasetAcquisition(Long, DatasetAcquisitionDTO, BindingResult)
+		if ("ROLE_USER".equals(role)) {
+			assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);			
+		} else if ("ROLE_EXPERT".equals(role)) {
+			assertAccessAuthorized(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);		
+		}
+		assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(2L), mockBindingResult);
+		assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(3L), mockBindingResult);
+		assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(4L), mockBindingResult);
+	}
 
 
 	private DatasetAcquisition mockDsAcq(Long id) {
 		DatasetAcquisition dsA = ModelsUtil.createDatasetAcq();
 		dsA.setId(id);
 		return dsA;
+	}
+	
+	private DatasetAcquisition mockDsAcq(Long id, Long examId, Long centerId, Long studyId) {
+		DatasetAcquisition dsA = ModelsUtil.createDatasetAcq();
+		dsA.setId(id);
+		dsA.setExamination(mockExam(examId, centerId, studyId));
+		return dsA;
+	}
+	
+	private Examination mockExam(Long id, Long centerId, Long studyId) {
+		Examination exam = mockExam(id);
+		exam.setCenterId(centerId);
+		exam.setStudyId(studyId);
+		return exam;
+	}
+	
+	private Examination mockExam(Long id) {
+		Examination exam = ModelsUtil.createExamination();
+		exam.setId(id);
+		exam.setInstrumentBasedAssessmentList(new ArrayList<>());
+		return exam;
 	}
 	
 	private DatasetAcquisitionDTO mockDsAcqDTO(Long id) {
@@ -206,6 +306,119 @@ public class DatasetAcquisitionApiSecurityTest {
 	
 	private DatasetAcquisition mockDsAcq() {
 		return mockDsAcq(null);
+	}
+	
+	private Study mockStudy(Long id) {
+		Study study = new Study();
+		study.setId(id);
+		study.setName("");
+		study.setRelatedDatasets(new ArrayList<>());
+		study.setSubjectStudyList(new ArrayList<>());
+		study.setTags(new ArrayList<>());
+		return study;
+	}
+	
+	private void setCenterRightsContext() {
+		/**
+		 * -> study 1 [CAN_SEE_ALL]
+		 *     -> subject 1 
+		 *         -> center 1 [HAS_RIGHTS]
+		 *             -> exam 1
+		 *                 -> ds acq 1 (equipment 1 - studycard 1)
+		 *         -> center 3 [no_rights]
+		 *             -> exam 3
+		 *                 -> ds acq 3 (equipment 3 - studycard 3)
+		 * -> study 2 [CAN_SEE_ALL]
+		 *     -> subject 2
+		 *         -> center 2 [no_rights]
+		 *             -> exam 2
+		 *                 -> ds acq 2 (equipment 2 - studycard 2)
+		 * -> study 4 [no_rights]
+		 *     -> subject 4
+		 *         -> center 4
+		 *             -> exam 4
+		 *                 -> ds acq 4 (equipment 4 - studycard 4)
+		 */
+		
+		// has right on study 1
+		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
+		// has right on [study 1, center 1] 
+		given(rightsService.hasRightOnCenter(1L, 1L)).willReturn(true);
+		Set<Long> studyIds1 = new HashSet<Long>(); studyIds1.add(1L);
+		given(rightsService.hasRightOnCenter(studyIds1, 1L)).willReturn(true);
+		// does not have right on [study 1, center 3] 
+		given(rightsService.hasRightOnCenter(1L, 3L)).willReturn(false);
+		given(rightsService.hasRightOnCenter(studyIds1, 3L)).willReturn(false);
+		
+		// has right on study 2
+		given(rightsService.hasRightOnStudy(2L, "CAN_SEE_ALL")).willReturn(true);
+		// does not have right on [study 2, center 2] 
+		given(rightsService.hasRightOnCenter(2L, 2L)).willReturn(false);
+		Set<Long> studyIds2 = new HashSet<Long>(); studyIds2.add(2L);
+		given(rightsService.hasRightOnCenter(studyIds2, 2L)).willReturn(false);
+		
+		// does not have right on study 4
+		given(rightsService.hasRightOnStudy(4L, "CAN_SEE_ALL")).willReturn(false);
+		
+		// has rights on studies 1 & 2
+		given(rightsService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(new HashSet<>(Arrays.asList(new Long[]{1L, 2L})));
+		
+		// exam 1 is in center 1
+		Examination exam1 = mockExam(1L, 1L, 1L);
+		given(examinationRepository.findById(1L)).willReturn(Optional.of(exam1));
+		// exam 2 is in center 2
+		Examination exam2 = mockExam(2L, 2L, 2L);
+		given(examinationRepository.findById(2L)).willReturn(Optional.of(exam2));
+		// exam 3 is in center 3
+		Examination exam3 = mockExam(3L, 3L, 1L);
+		given(examinationRepository.findById(3L)).willReturn(Optional.of(exam3));
+		// exam 4 is in center 4
+		Examination exam4 = mockExam(4L, 4L, 4L);
+		given(examinationRepository.findById(4L)).willReturn(Optional.of(exam4));
+		// exam 1 & 3 are in study 1 > subject 1 (but in different centers)
+		given(examinationRepository.findBySubjectIdAndStudyId(1L, 1L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam1, exam3})));
+		given(examinationRepository.findBySubjectId(1L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam1, exam3})));
+		// exam 2 is in study 2 > subject 2
+		given(examinationRepository.findBySubjectIdAndStudyId(2L, 2L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam2})));
+		given(examinationRepository.findBySubjectId(2L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam2})));
+		//exam 4 is in study 4 > subject 4
+		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam4})));
+		given(examinationRepository.findBySubjectId(4L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam4})));
+		given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
+		
+		// study 1
+		Study study1 = mockStudy(1L);
+		given(studyRepository.findById(1L)).willReturn(Optional.of(study1));
+		// study 2
+		Study study2 = mockStudy(2L);
+		given(studyRepository.findById(2L)).willReturn(Optional.of(study2));
+		// study 4
+		Study study4 = mockStudy(4L);
+		given(studyRepository.findById(2L)).willReturn(Optional.of(study4));
+		
+		DatasetAcquisition dsAcq1 = mockDsAcq(1L, 1L, 1L, 1L);
+		given(datasetAcquisitionRepository.findById(1L)).willReturn(Optional.of(dsAcq1));
+		given(datasetAcquisitionRepository.findByStudyCardId(1L)).willReturn(new ArrayList<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1})));
+		DatasetAcquisition dsAcq3 = mockDsAcq(3L, 3L, 3L, 1L);
+		given(datasetAcquisitionRepository.findById(3L)).willReturn(Optional.of(dsAcq3));
+		given(datasetAcquisitionRepository.findByStudyCardId(3L)).willReturn(new ArrayList<>(Arrays.asList(new DatasetAcquisition[]{dsAcq3})));
+		DatasetAcquisition dsAcq2 = mockDsAcq(2L, 2L, 2L, 2L);
+		given(datasetAcquisitionRepository.findById(2L)).willReturn(Optional.of(dsAcq2));
+		given(datasetAcquisitionRepository.findByStudyCardId(2L)).willReturn(new ArrayList<>(Arrays.asList(new DatasetAcquisition[]{dsAcq2})));
+		DatasetAcquisition dsAcq4 = mockDsAcq(4L, 4L, 4L, 4L);
+		given(datasetAcquisitionRepository.findById(4L)).willReturn(Optional.of(dsAcq4));
+		given(datasetAcquisitionRepository.findByStudyCardId(4L)).willReturn(new ArrayList<>(Arrays.asList(new DatasetAcquisition[]{dsAcq4})));
+		
+		given(datasetAcquisitionRepository.findByExaminationByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{}), PageRequest.of(0, 10), 0));
+		List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
+		studyCenterIds.add(new Pair<Long, Long>(1L, 1L));
+		given(datasetAcquisitionRepository.findByExaminationByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newHashSet(new Long[]{}), PageRequest.of(0, 10))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
+		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Long[]{1L}));
+		StudyUser su1 = new StudyUser();
+		su1.setStudyId(1L);
+		su1.setCentersIds(Arrays.asList(new Long[]{1L}));
+		given(rightsRepository.findByUserIdAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new StudyUser[]{su1}));
+		
 	}
 
 }

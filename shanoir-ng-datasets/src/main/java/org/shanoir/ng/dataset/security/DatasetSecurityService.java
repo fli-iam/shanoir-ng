@@ -584,26 +584,29 @@ public class DatasetSecurityService {
     	list.removeAll(acqsToRemove);
     	return true;
     }
+    
 
-    /**
-     * Filter dataset acquisitions checking the connected user has the right on those.
-     * 
-     * @param page the page
-     * @param rightStr the right
-     * @return true
-     */
-    public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) {
-    	if (list == null) {
-			return true;
-		}
-    	Set<Long> studyIds = new HashSet<Long>();
-    	list.forEach((ExaminationDatasetAcquisitionDTO edsa) -> {
-    		studyIds.add(edsa.getStudyId());
-    	});
-    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
-    	list.removeIf((ExaminationDatasetAcquisitionDTO edsa) -> !checkedIds.contains(edsa.getStudyId()));
-    	return true;
-    }
+	/**
+	* Filter dataset acquisitions checking the connected user has the right on those.
+	* 
+	* @param page the page
+	* @param rightStr the right
+	* @return true
+	*/
+	public boolean filterExaminationDatasetAcquisitionDTOList(List<ExaminationDatasetAcquisitionDTO> list, String rightStr) throws EntityNotFoundException {
+	   if (list == null) {
+	                   return true;
+	           }
+	   Set<Long> checkedIds = new HashSet<Long>();
+	   for (ExaminationDatasetAcquisitionDTO edsa : list) {
+		   if (hasRightOnExamination(edsa.getExaminationId(), rightStr)) {
+			   checkedIds.add(edsa.getExaminationId());
+		   }
+	   }
+	   list.removeIf((ExaminationDatasetAcquisitionDTO edsa) -> !checkedIds.contains(edsa.getExaminationId()));
+	   return true;
+	}
+
     
     /**
      * Filter dataset acquisitions checking the connected user has the right on those.
@@ -764,6 +767,29 @@ public class DatasetSecurityService {
 		}
         return this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr);
     }
+    
+    
+    /**
+     * Check that the connected user has the given right for the given examination.
+     * 
+     * @param examinationId the examination id
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasRightOnTrustedExaminationDTO(ExaminationDTO examination, String rightStr) throws EntityNotFoundException {
+    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+        if (examination == null) {
+			return true;
+		}
+        if (examination.getStudyId() == null) {
+			return false;
+		}
+        return this.hasRightOnStudyCenter(examination.getCenterId(), examination.getStudyId(), rightStr);
+    }
+    
     
     public boolean hasRightOnExamination(String examinationUID, String rightStr) throws EntityNotFoundException {
 		Long id = studyInstanceUIDHandler.extractExaminationId(examinationUID);
