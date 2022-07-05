@@ -224,8 +224,8 @@ public class SolrServiceImpl implements SolrService {
 	}
 	
 	private String findCenterName(List<Center> centers, Long id) {
-		Center center =  centers.stream().filter(centerToFilter -> centerToFilter.getId().equals(id)).collect(Collectors.toList()).get(0);
-		return center != null ? center.getName() : null;
+		List<Center> filteredCenters = centers.stream().filter(centerToFilter -> centerToFilter.getId().equals(id)).collect(Collectors.toList());
+		return filteredCenters.size() > 0 ? filteredCenters.get(0).getName() : null;
 	}
 
 	private Pageable prepareTextFields(Pageable pageable) {

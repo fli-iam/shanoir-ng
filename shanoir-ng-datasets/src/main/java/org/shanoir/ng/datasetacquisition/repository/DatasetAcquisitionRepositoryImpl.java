@@ -44,7 +44,7 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 				if (isort >= 1) {
 					queryStr += ",";
 				}
-				queryStr += order.getProperty();
+				queryStr += "da." + order.getProperty();
 				queryStr += " " + order.getDirection() + " ";
 				isort ++;
 			}
@@ -66,7 +66,7 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 	
 		Long total = (Long) queryCount.getSingleResult();
 
-		query.setFirstResult(Math.toIntExact(pageable.getOffset() + (pageable.getPageNumber() * pageable.getPageSize())));
+		query.setFirstResult(Math.toIntExact(pageable.getPageNumber() * pageable.getPageSize()));
 		query.setMaxResults(pageable.getPageSize());
 
 		return new PageImpl<DatasetAcquisition>(query.getResultList(), pageable, total);
