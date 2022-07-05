@@ -75,7 +75,7 @@ export class DatasetDTOService {
     public toEntityList(dtos: DatasetDTO[], result?: Dataset[]): Promise<Dataset[]>{
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos) {
+            for (let dto of dtos ? dtos : []) {
                 let entity = DatasetUtils.getDatasetInstance(dto.type);
                 DatasetDTOService.mapSyncFields(dto, entity);
                 result.push(entity);

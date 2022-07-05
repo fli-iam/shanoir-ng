@@ -59,7 +59,7 @@ export class DatasetAcquisitionDTOService {
      */
     public toDatasetAcquisitions(dtos: DatasetAcquisitionDTO[], result?: DatasetAcquisition[]): Promise<DatasetAcquisition[]>{
         if (!result) result = [];
-        for (let dto of dtos) {
+        for (let dto of dtos ? dtos : []) {
             let entity = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
             DatasetAcquisitionDTOService.mapSyncFields(dto, entity);
             if (dto.acquisitionEquipmentId) {
