@@ -19,6 +19,9 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.accessrequest.controller.AccessRequestService;
+import org.shanoir.ng.accessrequest.model.AccessRequest;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -33,6 +36,7 @@ import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +51,12 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	@Autowired
 	ShanoirEventService eventService;
 
+	@Autowired
+	AccessRequestService accessRequestService;
+
+	@Autowired
+	RabbitTemplate rabbitTemplate;
+
 	@Override
 	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
 			@RequestBody final User user, final BindingResult result) throws RestServiceException {
@@ -55,18 +65,27 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			validate(user, result);
 
 			User userSaved = getUserService().confirmAccountRequest(user);
-			
-			if (userSaved.getAccountRequestInfo() != null && userSaved.getAccountRequestInfo().getChallenge() != null) {
-				// I see that we have a challenger here
-				// Directly create a StudyUser linked to the given study
-				ShanoirEvent subscription = new ShanoirEvent(
-						ShanoirEventType.CHALLENGE_SUBSCRIPTION_EVENT,
-						userSaved.getAccountRequestInfo().getChallenge().toString(),
-						userSaved.getId(),
-						userSaved.getUsername(),
-						ShanoirEvent.IN_PROGRESS);
-				eventService.publishEvent(subscription);
-				// So that when the user account request is accepted, it directly has access to the data
+
+			if (userSaved.getAccountRequestInfo() != null && 
+					(userSaved.getAccountRequestInfo().getStudyId() != null || userSaved.getAccountRequestInfo().getInvitationKey() != null)) {
+				
+				if (userSaved.getAccountRequestInfo().getInvitationKey() != null) {
+					Long studyId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_KEY_QUEUE, userSaved.getAccountRequestInfo().getInvitationKey());
+					if (studyId != null) {
+						userSaved.getAccountRequestInfo().setStudyId(studyId);
+					}
+ 				}
+				if (userSaved.getAccountRequestInfo().getStudyId() != null) {
+					// Directly create an access request for the given study
+					AccessRequest request = new AccessRequest();
+					request.setUser(userSaved);
+					request.setStudyId(userSaved.getAccountRequestInfo().getStudyId());
+					request.setInvitationKey(userSaved.getAccountRequestInfo().getInvitationKey());
+					request.setMotivation(userSaved.getAccountRequestInfo().getMessage());
+					// So that when the user account request is accepted, it directly has access to the data
+					
+					accessRequestService.create(request);						
+				}
 			}
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			
@@ -77,7 +96,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 	}
 
-	
 	@Override
 	public ResponseEntity<Void> deleteUser(@PathVariable("userId") final Long userId) throws ForbiddenException {
 		try {
@@ -89,7 +107,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 	}
 
-	
 	@Override
 	public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
 		try {

@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.email;
 
+import org.shanoir.ng.accessrequest.controller.AccessRequestService;
+import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
@@ -128,10 +130,21 @@ public interface EmailService {
 	void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email);
 
 	/**
-	 *  This method notifies a study manager that san import fail for a given study
+	 *  This method notifies a study manager that an import failed for a given study
 	 * @param generatedMail: The object containing all the mail informations
 	 */
 	void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail);
 
+	/**
+	 * This method notifies a study manager that a user asked an access to a study.
+	 * @param createdRequest the access request object
+	 */
+	void notifyStudyManagerAccessRequest(AccessRequest createdRequest);
+
+	/**
+	 * Notify a user its study request was accepted / refused
+	 * @param accessRequestService the access request
+	 */
+	void notifyUserAddedToStudy(AccessRequestService accessRequestService);
 
 }

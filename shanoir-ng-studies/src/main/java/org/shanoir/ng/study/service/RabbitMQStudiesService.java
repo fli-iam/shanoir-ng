@@ -128,13 +128,21 @@ public class RabbitMQStudiesService {
 		}
 	}
 
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_KEY_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public Long getStudyFromInvitationKey(String invitation) {
+		Study study = this.studyRepo.findByInvitationKey(invitation);
+		return study == null ? null : study.getId();
+	}
+
 	/**
 	 * Receives a shanoirEvent as a json object, concerning a challenge subscription
 	 * @param commandArrStr the task as a json string.
 	 */
 	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.CHALLENGE_SUBSCRIPTION_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.CHALLENGE_SUBSCRIPTION_QUEUE, durable = "true"),
+			key = ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
+			value = @Queue(value = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 			)

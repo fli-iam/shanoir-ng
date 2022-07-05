@@ -121,7 +121,7 @@ public class UserApiControllerTest {
 	public void confirmAccountRequestChallengeTest() throws Exception {
 		User user = ModelsUtil.createUser(1L);
 		AccountRequestInfo info = new AccountRequestInfo();
-		info.setChallenge(1L);
+		info.setStudyId(1L);
 		user.setAccountRequestInfo(info);
 		given(userService.confirmAccountRequest(Mockito.any(User.class))).willReturn(user);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID + "/confirmaccountrequest")

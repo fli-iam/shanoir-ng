@@ -577,4 +577,9 @@ public class StudyServiceImpl implements StudyService {
 		return Utils.copyList(studyRepository.findByChallengeTrue());
 	}
 
+	@Override
+	public List<Study> findPublicStudies() {
+		return this.studyRepository.findByVisibleByDefaultTrue();
+	}
+
 }

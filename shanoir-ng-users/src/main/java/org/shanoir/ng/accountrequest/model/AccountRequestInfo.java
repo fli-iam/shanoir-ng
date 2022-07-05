@@ -51,21 +51,11 @@ public class AccountRequestInfo extends AbstractEntity {
 	@NotNull
 	private String work;
 
-	private Long challenge;
+	private Long studyId;
 
-	/**
-	 * @return the challenge
-	 */
-	public Long getChallenge() {
-		return challenge;
-	}
+	private String invitationKey;
 
-	/**
-	 * @param challenge the challenge to set
-	 */
-	public void setChallenge(Long challenge) {
-		this.challenge = challenge;
-	}
+	private String message;
 
 	/**
 	 * @return the contact
@@ -149,6 +139,30 @@ public class AccountRequestInfo extends AbstractEntity {
 	 */
 	public void setWork(String work) {
 		this.work = work;
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+
+	public String getInvitationKey() {
+		return invitationKey;
+	}
+
+	public void setInvitationKey(String invitationKey) {
+		this.invitationKey = invitationKey;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 
 }

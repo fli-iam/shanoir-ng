@@ -25,6 +25,13 @@ import org.springframework.stereotype.Repository;
 public interface StudyRepository extends CrudRepository<Study, Long> {
 
 	/**
+	 * Gets the study with the given invitation key which is normaly unique.
+	 * @param invitationKey the invitation key
+	 * @return the associated study, null otherwise.
+	 */
+	Study findByInvitationKey(String invitationKey);
+	
+	/**
 	 * Get all studies
 	 * 
 	 * @return list of studies.
@@ -55,5 +62,11 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 * @return list of studies.
 	 */
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUseRightId, boolean confirmed);
+
+	/**
+	 * Lists all the publicly available studies.
+	 * @return all the publicly available studies.
+	 */
+	List<Study> findByVisibleByDefaultTrue();
 
 }

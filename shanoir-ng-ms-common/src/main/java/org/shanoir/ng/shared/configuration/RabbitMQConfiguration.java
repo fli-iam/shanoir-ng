@@ -94,9 +94,6 @@ public class RabbitMQConfiguration {
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
 
-	/** Queue to create a study_user when subscribing to a challenge */
-	public static final String CHALLENGE_SUBSCRIPTION_QUEUE = "challenge-subscription-queue";
-	
 	/** Queue used to get information for study_examination relationship.*/
 	public static final String EXAMINATION_STUDY_QUEUE = "examination-study-queue";
 
@@ -126,6 +123,12 @@ public class RabbitMQConfiguration {
 
 	/** Queue to create get equipment ID from code. */
 	public static final String ACQUISITION_EQUIPEMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
+
+	/** Queue to create a study_user when subscribing to a study */
+	public static final String STUDY_SUBSCRIPTION_QUEUE = "study-subscription-queue";
+
+	/** Queue to get study id from invitation key */
+	public static final String STUDY_KEY_QUEUE = "study-key-queue";
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
@@ -337,11 +340,6 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
-	public static Queue challengeSubscriptionQueue() {
-		return new Queue(CHALLENGE_SUBSCRIPTION_QUEUE, true);
-	}
-
-	@Bean
 	public static Queue examinationStudyQueue() {
 		return new Queue(EXAMINATION_STUDY_QUEUE, true);
 	}
@@ -394,5 +392,15 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue deleteUserQueue() {
 		return new Queue(DELETE_USER_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue studySubscriptionQueue() {
+		return new Queue(STUDY_SUBSCRIPTION_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue studyKeyQueue() {
+		return new Queue(STUDY_KEY_QUEUE, true);
 	}
 }

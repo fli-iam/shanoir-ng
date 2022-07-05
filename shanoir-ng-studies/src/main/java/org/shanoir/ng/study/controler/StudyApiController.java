@@ -384,4 +384,10 @@ public class StudyApiController implements StudyApi {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@Override
+	public ResponseEntity<List<StudyDTO>> findPublicStudies() {
+		List<Study> studies = this.studyService.findPublicStudies();
+		return null;
+	}
+
 }

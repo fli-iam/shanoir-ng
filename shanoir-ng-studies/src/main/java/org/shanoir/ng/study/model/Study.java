@@ -153,6 +153,11 @@ public class Study extends HalEntity {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Tag> tags;
 
+	@Unique
+	private String invitationKey;
+
+	private String publicDescription;
+	
 	/**
 	 * Init HATEOAS links
 	 */
@@ -483,5 +488,21 @@ public class Study extends HalEntity {
 	 */
 	public void setTags(List<Tag> tags) {
 		this.tags = tags;
+	}
+
+	public String getInvitationKey() {
+		return invitationKey;
+	}
+
+	public void setInvitationKey(String invitationKey) {
+		this.invitationKey = invitationKey;
+	}
+
+	public String getPublicDescription() {
+		return publicDescription;
+	}
+
+	public void setPublicDescription(String publicDescription) {
+		this.publicDescription = publicDescription;
 	}
 }

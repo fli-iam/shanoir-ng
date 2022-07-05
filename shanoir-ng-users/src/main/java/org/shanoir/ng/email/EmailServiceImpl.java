@@ -21,10 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.NotImplementedException;
+import org.shanoir.ng.accessrequest.controller.AccessRequestService;
+import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.model.DatasetDetail;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.slf4j.Logger;
@@ -521,6 +525,49 @@ public class EmailServiceImpl implements EmailService {
 			LOG.info("Sending user-added mail to {} for study {}", studyUser.getUsername(), email.getStudyId());
 			mailSender.send(messagePreparator);
 		}
+	}
+
+	@Override
+	public void notifyStudyManagerAccessRequest(AccessRequest createdRequest) {
+        // Find requester users
+		throw new NotImplementedException("To be done");
+		/*
+        User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
+		Study study = studyRepository.findByid(createdRequest.getStudyId());
+
+        // get study admin
+        List<User> studyAdmins = this.userRepository.findByIdIn(null);
+
+        if (!Collections.isEmpty(studyAdmins)) {
+			for (User studyAdmin : studyAdmins) {
+				MimeMessagePreparator messagePreparator = mimeMessage -> {
+					final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+					messageHelper.setFrom(administratorEmail);
+					messageHelper.setTo(studyAdmin.getEmail());
+					messageHelper.setSubject("[Shanoir] Member(s) access request to " + email.getStudyName());
+					final Map<String, Object> variables = new HashMap<>();
+					variables.put(FIRSTNAME, studyAdmin.getFirstName());
+					variables.put(LASTNAME, studyAdmin.getLastName());
+					variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
+					variables.put(STUDY_NAME, email.getStudyName());
+					variables.put(STUDY_USERS, newStudyUsers);
+					variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
+					final String content = build("notifyStudyAdminStudyUsersAdded", variables);
+					LOG.info(content);
+					messageHelper.setText(content, true);
+				};
+				// Send the message
+				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
+				mailSender.send(messagePreparator);
+			}
+        }
+        */
+	}
+
+	@Override
+	public void notifyUserAddedToStudy(AccessRequestService accessRequestService) {
+		throw new NotImplementedException("To be done");
+		
 	}
 
 

@@ -1,5 +1,7 @@
 package org.shanoir.ng.accessrequest.model;
 
+import javax.persistence.Entity;
+
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.user.model.User;
 
@@ -9,6 +11,7 @@ import org.shanoir.ng.user.model.User;
  * @author jcome
  *
  */
+@Entity
 public class AccessRequest extends HalEntity {
 
 	private static final long serialVersionUID = 4662874539537675259L;
@@ -20,6 +23,8 @@ public class AccessRequest extends HalEntity {
 	private String motivation;
 	
 	private String invitationKey;
+
+	private Boolean status;
 
 	/**
 	 * @return the studyId
@@ -69,5 +74,13 @@ public class AccessRequest extends HalEntity {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public Boolean getStatus() {
+		return status;
+	}
+
+	public void setStatus(Boolean status) {
+		this.status = status;
 	}
 }
