@@ -99,7 +99,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 			return repository.findAll(pageable);
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
-
 			// Check if user has restrictions.
 			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_SEE_ALL.getId()));
 			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
@@ -113,7 +112,6 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 					}
 				}
 			}
-
 			return repository.findByExaminationByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
 		}
 	}
