@@ -17,7 +17,8 @@ import org.springframework.stereotype.Service;
  * @author KhalilKes
  */
 @Service
-public class CarminDatasetPorcessingServiceImpl extends BasicEntityServiceImpl<CarminDatasetProcessing>  implements CarminDatasetProcessingService {
+public class CarminDatasetPorcessingServiceImpl extends BasicEntityServiceImpl<CarminDatasetProcessing>
+                implements CarminDatasetProcessingService {
 
         @Autowired
         private CarminDatasetProcessingRepository carminDatasetProcessingRepository;
@@ -47,7 +48,8 @@ public class CarminDatasetPorcessingServiceImpl extends BasicEntityServiceImpl<C
         }
 
         @Override
-        public CarminDatasetProcessing createCarminDatasetProcessing(final CarminDatasetProcessing carminDatasetProcessing) {
+        public CarminDatasetProcessing createCarminDatasetProcessing(
+                        final CarminDatasetProcessing carminDatasetProcessing) {
                 ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT,
                                 carminDatasetProcessing.getResultsLocation(), KeycloakUtil.getTokenUserId(),
                                 "Starting import...",
@@ -72,11 +74,10 @@ public class CarminDatasetPorcessingServiceImpl extends BasicEntityServiceImpl<C
         }
 
         @Override
-        public CarminDatasetProcessing updateCarminDatasetProcessing(final Long datasetProcessingId,
-                        final CarminDatasetProcessing carminDatasetProcessing)
+        public CarminDatasetProcessing updateCarminDatasetProcessing(final CarminDatasetProcessing carminDatasetProcessing)
                         throws EntityNotFoundException {
                 final Optional<CarminDatasetProcessing> entityDbOpt = carminDatasetProcessingRepository
-                                .findById(datasetProcessingId);
+                                .findById(carminDatasetProcessing.getId());
                 final CarminDatasetProcessing entityDb = entityDbOpt.orElseThrow(
                                 () -> new EntityNotFoundException(carminDatasetProcessing.getClass(),
                                                 carminDatasetProcessing.getId()));

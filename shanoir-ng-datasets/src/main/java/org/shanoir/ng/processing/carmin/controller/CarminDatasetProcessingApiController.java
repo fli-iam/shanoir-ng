@@ -5,8 +5,6 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
-import org.shanoir.ng.processing.carmin.dto.CarminDatasetProcessingDTO;
-import org.shanoir.ng.processing.carmin.dto.mapper.CarminDatasetProcessingMapper;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -31,14 +29,12 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class CarminDatasetProcessingApiController implements CarminDatasetProcessingApi {
 
-    @Autowired
-    private CarminDatasetProcessingMapper carminDatasetProcessingMapper;
 
     @Autowired
     private CarminDatasetProcessingService carminDatasetProcessingService;
 
     @Override
-    public ResponseEntity<CarminDatasetProcessingDTO> saveNewCarminDatasetProcessing(
+    public ResponseEntity<CarminDatasetProcessing> saveNewCarminDatasetProcessing(
             @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing, BindingResult result)
             throws RestServiceException {
 
@@ -49,22 +45,20 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
         final CarminDatasetProcessing createdDatasetProcessing = carminDatasetProcessingService
                 .createCarminDatasetProcessing(carminDatasetProcessing);
 
-        return new ResponseEntity<>(
-                carminDatasetProcessingMapper.carminDatasetProcessingToCarminDatasetProcessingDTO(createdDatasetProcessing),
-                HttpStatus.OK);
+        return new ResponseEntity<>(createdDatasetProcessing, HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingById(Long datasetProcessingId) {
+    public ResponseEntity<CarminDatasetProcessing> findCarminDatasetProcessingById(Long datasetProcessingId) {
         final Optional<CarminDatasetProcessing> carminDatasetProcessing = carminDatasetProcessingService.findById(datasetProcessingId);
 		if (!carminDatasetProcessing.isPresent()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(carminDatasetProcessingMapper.carminDatasetProcessingToCarminDatasetProcessingDTO(carminDatasetProcessing.get()), HttpStatus.OK);
+		return new ResponseEntity<>(carminDatasetProcessing.get(), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingByIdentifier(
+    public ResponseEntity<CarminDatasetProcessing> findCarminDatasetProcessingByIdentifier(
             @ApiParam(value = "id of the dataset processing", required = true) @RequestParam("identifier") String identifier) {
 
         final Optional<CarminDatasetProcessing> carminDatasetProcessing = carminDatasetProcessingService.findByIdentifier(identifier);
@@ -72,8 +66,7 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(carminDatasetProcessingMapper.carminDatasetProcessingToCarminDatasetProcessingDTO(
-                 carminDatasetProcessing.get()), HttpStatus.OK);
+        return new ResponseEntity<>(carminDatasetProcessing.get(), HttpStatus.OK);
     }
 
     @Override
@@ -84,7 +77,7 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
         validate(result);
         try {
-            carminDatasetProcessingService.updateCarminDatasetProcessing(datasetProcessingId, carminDatasetProcessing);
+            carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 
         } catch (EntityNotFoundException e) {
@@ -93,12 +86,12 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
     }
 
     @Override
-    public ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessings() {
+    public ResponseEntity<List<CarminDatasetProcessing>> findCarminDatasetProcessings() {
         final List<CarminDatasetProcessing> carminDatasetProcessings = carminDatasetProcessingService.findAll();
 		if (carminDatasetProcessings.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(carminDatasetProcessingMapper.carminDatasetProcessingsToCarminDatasetProcessingDTOs(carminDatasetProcessings), HttpStatus.OK);
+		return new ResponseEntity<>(carminDatasetProcessings, HttpStatus.OK);
     }
 
 
