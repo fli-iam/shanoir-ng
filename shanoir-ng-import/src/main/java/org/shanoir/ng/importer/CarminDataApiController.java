@@ -28,6 +28,7 @@ import org.shanoir.ng.importer.model.carmin.Path;
 import org.shanoir.ng.importer.model.carmin.UploadData;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.util.UriUtils;
 
@@ -114,14 +114,20 @@ public class CarminDataApiController implements CarminDataApi {
     }
 
     @Override
-    public ResponseEntity<Void> deletePath(
-            @ApiParam(value = "The complete path to delete. It can contain non-encoded slashes.", required = true) @PathVariable("completePath") String completePath) {
-        // TODO implementation
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+    public ResponseEntity<Void> deletePath() {
+        String completePath = extractPathFromRequest(httpServletRequest);
+        LOG.info(completePath);
+
+        final String userImportDirFilePath = importDir + File.separator + VIP_UPLOAD_FOLDER + completePath;
+
+        final File fileToDelete = new File(userImportDirFilePath);
+        Utils.deleteFolder(fileToDelete);
+
+        return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
     /**
-     * get the path from the URI aftrer path prefix /carmin-data/path 
+     * get the path from the URI aftrer path prefix /carmin-data/path
      * 
      * @param request
      * @return
