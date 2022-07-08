@@ -14,6 +14,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <h2 i18n="Manage studies|Title@@studyListTitle">Manage studies</h2>
 
+<button routerLink="/access-request" routerLinkActive="active"><i class="fas fa-moon"></i>Request an access</button>        
+
 <shanoir-table #table
     [class.narrow]="windowService.isWide()"
     [getPage]="getPage.bind(this)" 

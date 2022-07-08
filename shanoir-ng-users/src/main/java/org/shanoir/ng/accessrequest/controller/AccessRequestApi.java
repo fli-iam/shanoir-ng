@@ -22,8 +22,8 @@ import io.swagger.annotations.ApiResponses;
  * @author jcome
  *
  */
-@Api(value = "accountrequest")
-@RequestMapping("/accountrequest")
+@Api(value = "accessrequest")
+@RequestMapping("/accessrequest")
 public interface AccessRequestApi {
 
 	@ApiOperation(value = "", notes = "Saves a new access request", response = User.class, tags = {})

@@ -85,7 +85,7 @@ public interface StudyApi {
 			@ApiResponse(code = 404, message = "no study found", response = Study.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
 	@RequestMapping(value = "/public", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<StudyDTO>> findPublicStudies();
+	ResponseEntity<List<IdName>> findPublicStudies();
 
 	@ApiOperation(value = "", notes = "Returns id and name for all the studies", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {

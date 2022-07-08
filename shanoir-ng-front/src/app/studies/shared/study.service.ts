@@ -62,6 +62,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             });
     }
 
+    getPublicStudies(): Promise<IdName[]> {
+        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_URL)
+            .toPromise().then((typeResult: IdName[]) => {
+                return typeResult;
+            });
+    }
+
     getStudyNamesAndCenters(): Promise<Study[]> {
         return this.http.get<CenterStudyDTO[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL)
             .toPromise().then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));

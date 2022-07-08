@@ -82,6 +82,7 @@ import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { DUAComponent } from './dua/dua.component';
+import { AccessRequestComponent } from './users/access-request/access-request.component';
 
 let routes: Routes = [
     {
@@ -739,7 +740,10 @@ let routes: Routes = [
 		component: AnimalSubjectFormComponent,
 		data: { mode: 'create' }
 	},
-
+    {
+        path: 'access-request',
+        component: AccessRequestComponent
+    },
 
 ];
 

@@ -49,6 +49,7 @@ export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '
 export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
+export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_URL + '/public';
 
 // Challenge API
 export const BACKEND_API_STUDY_CHALLENGES_URL: string = BACKEND_API_STUDIES_MS_URL + '/challenges';
