@@ -27,6 +27,8 @@ import { DatasetModalityType } from '../../../enum/dataset-modality-type.enum';
 import { DatasetProcessingType } from '../../../enum/dataset-processing-type.enum';
 import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../shared/dataset-type.model';
+import { ServiceLocator } from '../../../utils/locator.service';
+import { KeycloakService } from '../../../shared/keycloak/keycloak.service';
 
 @Component({
     selector: 'common-dataset-details',
@@ -40,6 +42,7 @@ export class CommonDatasetComponent implements OnChanges {
     subjects: Subject[] = [];
     studies: Study[] = [];
     
+    public keycloakService: KeycloakService;
     exploredEntityOptions: Option<ExploredEntity>[];
     datasetTypes: Option<DatasetType>[];
     processedDatasetTypeOptions: Option<ProcessedDatasetType>[];
@@ -52,6 +55,7 @@ export class CommonDatasetComponent implements OnChanges {
         this.exploredEntityOptions = ExploredEntity.options;
         this.datasetTypes = DatasetType.options;
         this.processedDatasetTypeOptions = ProcessedDatasetType.options;
+        this.keycloakService = ServiceLocator.injector.get(KeycloakService);
     }
 
     completeForm() {
@@ -106,6 +110,10 @@ export class CommonDatasetComponent implements OnChanges {
         this.studyService.getAll().then(studies => {
             this.studies = studies;
         });
+    }
+
+    public isAdmin(): boolean {
+         return this.keycloakService.isUserAdmin();
     }
 
 }

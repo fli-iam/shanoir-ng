@@ -44,13 +44,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset subject@@datasetDetailSubject">Subject</label>
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
+			<span class="right-col">
+                <ng-template [ngIf]="mode=='view' || (mode=='edit' && !isAdmin())">
 				<a [routerLink]="['/subject/details/', dataset.subject?.id]">
 					{{dataset.subject?.name}}
 				</a>
 				</ng-template>
-				<ng-template ngSwitchDefault>
+                <ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
 					<select-box [(ngModel)]="dataset.subject" formControlName="subject" [optionArr]="subjects">
 					</select-box>
 				</ng-template>
@@ -58,13 +58,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</li>
 		<li>
 			<label i18n="Dataset detail|Dataset study@@datasetDetailStudy">Study</label>
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
+			<span class="right-col">
+				<ng-template [ngIf]="mode=='view' || (mode=='edit' && !isAdmin())">
 				<a [routerLink]="['/study/details/', dataset.study?.id]">
 					{{dataset.study?.name}}
 				</a>
 				</ng-template>
-				<ng-template ngSwitchDefault>
+                            <ng-template [ngIf]="mode == 'create' || (mode=='edit' && isAdmin())">
 					<select-box [(ngModel)]="dataset.study" formControlName="study" [optionArr]="studies">
 					</select-box>
 				</ng-template>
