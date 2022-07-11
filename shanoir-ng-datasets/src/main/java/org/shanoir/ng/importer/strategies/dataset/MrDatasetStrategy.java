@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.dataset.modality.ImageFlavor;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMetadata;
 import org.shanoir.ng.dataset.modality.MrDatasetNature;
@@ -80,12 +81,9 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			datasetIndex = -1;
 		}
 
-		// TODO ATO : implement MrDAtasetAcquisitionHome.createMrDataset (issue by
-		// createMrDatasetAcquisitionFromDicom()
 		for (Dataset dataset : serie.getDatasets()) {
 			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
 
-			// TODO ATO : implement line 350 - 372 MrDAtasetAcquisitionHome.createMrDataset
 			MrDataset mrDataset = new MrDataset();
 			mrDataset = generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);
 			if (mrDataset.getFirstImageAcquisitionTime() != null) {
@@ -194,6 +192,31 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			mrDataset.setOriginMrMetadata(mrDatasetMetadata);
 		}
 		
+		if (serie.getIsEnhanced()) { // there is no "enhanced mr spectroscopy"
+			MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
+			String[] imageTypeArray = dicomAttributes.getStrings(Tag.ImageType);
+			String imageFlavor = imageTypeArray[2];
+			if (imageFlavor.equals(ImageFlavor.ANGIO_TIME)) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.CONTRAST_AGENT_USED_ANGIO_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.DIFFUSION)) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.DIFFUSION_WEIGHTED_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.PERFUSION)) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.SPIN_TAGGING_PERFUSION_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.PROTON_DENSITY)) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.PROTON_DENSITY_WEIGHTED_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.T1)) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T1_WEIGHTED_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.T2)) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T2_WEIGHTED_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.T2_STAR)) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T2_STAR_WEIGHTED_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.TOF)) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.TIME_OF_FLIGHT_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.VELOCITY)) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.VELOCITY_ENCODED_ANGIO_MR_DATASET);
+			}
+			mrDataset.setOriginMrMetadata(mrDatasetMetadata);
+		}
 
 		/**
 		 *  The part below will generate automatically the datasetExpression according to :
