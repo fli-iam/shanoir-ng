@@ -104,7 +104,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PutMapping(value = "/{datasetId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("@controlerSecurityService.idMatches(#datasetId, #dataset) and hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
+	@PreAuthorize("@controlerSecurityService.idMatches(#datasetId, #dataset) and (hasRole('ADMIN') or ((hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))))")
 	ResponseEntity<Void> updateDataset(
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId,
 			@ApiParam(value = "dataset to update", required = true) @Valid @RequestBody Dataset dataset,

@@ -127,6 +127,7 @@ export class DatasetAcquisitionDTO {
         if (dsAcq.examination) {
             this.examination = new ExaminationDTO(); 
             this.examination.id = dsAcq.examination.id;
+            this.examination.studyId = dsAcq.examination.study.id;
         }
         this.rank = dsAcq.rank;
         this.softwareRelease = dsAcq.softwareRelease;
