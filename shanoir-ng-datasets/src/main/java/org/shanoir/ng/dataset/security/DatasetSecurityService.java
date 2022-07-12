@@ -451,6 +451,31 @@ public class DatasetSecurityService {
     }
     
     /**
+     * Check that page checking the connected user has the right on those datasets.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true or false
+     */
+    public boolean checkDatasetDTOPage(Iterable<DatasetDTO> page, String rightStr) {
+    	Set<Long> studyIds = new HashSet<>();
+    	page.forEach((DatasetDTO dataset) -> studyIds.add(dataset.getStudyId()));
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr); //
+    	
+    	// Also check for centers    	
+    	for (DatasetDTO dataset : page) {
+    		if (!checkedIds.contains(dataset.getStudyId())) {
+    			return false;
+    		} else {
+    			if (!this.hasRightOnStudyCenter(dataset.getCenterId(), dataset.getStudyId(), rightStr)) {
+    				return false;
+    			}
+    		}
+    	}
+    	return true;
+    }
+    
+    /**
      * Filter datasets in that page checking the connected user has the right on those datasets.
      * 
      * @param page the page
@@ -737,28 +762,7 @@ public class DatasetSecurityService {
     	list.removeAll(examsToRemove);
     	return true;
     }
-
-    /**
-     * Filter datasets in that page checking the connected user has the right on those datasets.
-     * 
-     * @param page the page
-     * @param rightStr the right
-     * @return true
-     */
-    public boolean filterDatasetDTOPage(Page<DatasetDTO> page, String rightStr) {
-    	if (page == null) {
-			return true;
-		}
-    	Set<Long> studyIds = new HashSet<>();
-    	page.forEach((DatasetDTO dataset) -> studyIds.add(dataset.getStudyId()));
-    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
-    	for (DatasetDTO dataset : page) {
-    		if (!checkedIds.contains(dataset.getStudyId())) {
-				return false;
-			}
-    	}
-    	return true;
-    }
+    
     
     /**
      * Check that the connected user has the given right for the given examination.
