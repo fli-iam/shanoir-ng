@@ -44,6 +44,7 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -195,14 +196,14 @@ public class ExaminationApiSecurityTest {
 		given(examinationRepository.findById(4L)).willReturn(Optional.of(exam4));
 		ExaminationDTO examDTO4 = mockExaminationDTO(4L, 4L, 4L, 4L);
 		// exam 1 & 3 are in study 1 > subject 1 (but in different centers)
-		given(examinationRepository.findBySubjectIdAndStudyId(1L, 1L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam1, exam3})));
-		given(examinationRepository.findBySubjectId(1L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam1, exam3})));
+		given(examinationRepository.findBySubjectIdAndStudyId(1L, 1L)).willReturn(Utils.toList(exam1, exam3));
+		given(examinationRepository.findBySubjectId(1L)).willReturn(Utils.toList(exam1, exam3));
 		// exam 2 is in study 2 > subject 2
-		given(examinationRepository.findBySubjectIdAndStudyId(2L, 2L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam2})));
-		given(examinationRepository.findBySubjectId(2L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam2})));
+		given(examinationRepository.findBySubjectIdAndStudyId(2L, 2L)).willReturn(Utils.toList(exam2));
+		given(examinationRepository.findBySubjectId(2L)).willReturn(Utils.toList(exam2));
 		//exam 4 is in study 4 > subject 4
-		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam4})));
-		given(examinationRepository.findBySubjectId(4L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam4})));
+		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(Utils.toList(exam4));
+		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
 		
 		// study 1
@@ -236,8 +237,7 @@ public class ExaminationApiSecurityTest {
 		
 		// findExaminations(Pageable)
 		assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10));
-		assertThat(api.findExaminations(PageRequest.of(0, 10)).getBody() != null);
-		assertThat(api.findExaminations(PageRequest.of(0, 10)).getBody().getSize() == 1);
+		assertThat(api.findExaminations(PageRequest.of(0, 10)).getBody()).hasSize(1);
 		
 		// findPreclinicalExaminations(Boolean, Pageable)
 		assertAccessAuthorized(api::findPreclinicalExaminations, true, PageRequest.of(0, 10));

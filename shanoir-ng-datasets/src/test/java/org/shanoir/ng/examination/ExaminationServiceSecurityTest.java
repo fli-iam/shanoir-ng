@@ -42,6 +42,7 @@ import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -156,8 +157,7 @@ public class ExaminationServiceSecurityTest {
 	
 	private void testFindPage() throws ShanoirException {
 		assertAccessAuthorized(service::findPage, PageRequest.of(0, 10), false);
-		assertThat(service.findPage(PageRequest.of(0, 10), false) != null);
-		assertThat(service.findPage(PageRequest.of(0, 10), false).getSize() == 1);
+		assertThat(service.findPage(PageRequest.of(0, 10), false)).hasSize(1);
 	}
 	
 	private void testFindBySubjectId() throws ShanoirException {
@@ -174,8 +174,7 @@ public class ExaminationServiceSecurityTest {
 		assertAccessAuthorized(service::findBySubjectIdStudyId, 1L, 1L);
 		try {
 			// either the access is denied or the body is empty, both are fine
-			List<Examination> examsOfSubject2LStudy2L = service.findBySubjectIdStudyId(2L,  2L);
-			assertThat(examsOfSubject2LStudy2L == null || examsOfSubject2LStudy2L.isEmpty());
+			assertThat(service.findBySubjectIdStudyId(2L,  2L)).isNullOrEmpty();
 		} catch (AccessDeniedException e) { /* good */ }
 		assertAccessDenied(service::findBySubjectIdStudyId, 4L, 4L);
 		// check access denied to exam 3
@@ -333,14 +332,14 @@ public class ExaminationServiceSecurityTest {
 		Examination exam4 = mockExam(4L, 4L, 4L);
 		given(examinationRepository.findById(4L)).willReturn(Optional.of(exam4));
 		// exam 1 & 3 are in study 1 > subject 1 (but in different centers)
-		given(examinationRepository.findBySubjectIdAndStudyId(1L, 1L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam1, exam3})));
-		given(examinationRepository.findBySubjectId(1L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam1, exam3})));
+		given(examinationRepository.findBySubjectIdAndStudyId(1L, 1L)).willReturn(Utils.toList(exam1, exam3));
+		given(examinationRepository.findBySubjectId(1L)).willReturn(Utils.toList(exam1, exam3));
 		// exam 2 is in study 2 > subject 2
-		given(examinationRepository.findBySubjectIdAndStudyId(2L, 2L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam2})));
-		given(examinationRepository.findBySubjectId(2L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam2})));
+		given(examinationRepository.findBySubjectIdAndStudyId(2L, 2L)).willReturn(Utils.toList(exam2));
+		given(examinationRepository.findBySubjectId(2L)).willReturn(Utils.toList(exam2));
 		//exam 4 is in study 4 > subject 4
-		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam4})));
-		given(examinationRepository.findBySubjectId(4L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam4})));
+		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(Utils.toList(exam4));
+		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
 		
 		// study 1

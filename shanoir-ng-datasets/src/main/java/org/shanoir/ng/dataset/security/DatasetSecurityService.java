@@ -70,7 +70,7 @@ public class DatasetSecurityService {
 	
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	
+
 	/**
 	 * Check that the connected user has the given right for the given study.
 	 * 
@@ -190,6 +190,37 @@ public class DatasetSecurityService {
 		}
         return hasRightOnTrustedDataset(dataset, rightStr);
     }
+    
+    /**
+     * Check that the connected user has the given right for the given dataset.
+     * 
+     * @param datasetId the dataset id
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasRightOnNewDataset(Dataset dataset, String rightStr) throws EntityNotFoundException {
+    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+    	if (dataset == null) {
+    		throw new IllegalArgumentException("Dataset can't be null here");
+    	}
+    	if (dataset.getId() != null) {
+    		throw new IllegalStateException("Id must be null for a new dataset. Use another security method for an existing dataset.");
+    	}
+    	if (dataset.getDatasetAcquisition() == null || dataset.getDatasetAcquisition().getExamination() == null) {
+    		return true;
+    	} else if (dataset.getDatasetAcquisition().getExamination().getCenterId() == null) {
+    		if (dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
+    			return true;
+    		} else {
+    			return hasRightOnStudy(dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);    			
+    		}
+    	} else {
+    		return hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);    		
+    	}
+    }
 
     /**
      * Check that the connected user has the given right for the given dataset acquisition.
@@ -228,44 +259,6 @@ public class DatasetSecurityService {
     	}
     	return hasRight;
     }
-
-    /**
-     * Filters the list of datasets in entry if the given user has the right to do so.
-     * DatasetIds list is also cleaned here
-     * 
-     * @param datasets the datasets
-     * @param rightStr the right
-     * @return a filtered list of datasets
-     * @throws EntityNotFoundException
-     */
-    public List<Dataset> hasRightOnAtLeastOneDataset(List<Dataset> datasets, String rightStr) throws EntityNotFoundException {
-    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			return datasets;
-		}
-    	// Create empty list
-    	List<Dataset> filteredDatasets = new ArrayList<>();
-
-    	// If the entry is empty, return an empty list
-    	if (datasets == null || datasets.isEmpty()) {
-			return filteredDatasets;
-		}
-    	// Get list of corresponding studies
-    	Set<Long> studyIds = new HashSet<>();
-    	datasets.forEach((Dataset dataset) -> {
-    		studyIds.add(dataset.getStudyId());
-    	});
-
-    	// Check study right
-    	Set<Long> validStudyIds = commService.hasRightOnStudies(studyIds, rightStr);
-
-    	// Build filtered list of datasets
-    	datasets.forEach((Dataset dataset) -> {
-    		if (validStudyIds.contains(dataset.getStudyId())) {
-    			filteredDatasets.add(dataset);
-    		}
-    	});
-    	return filteredDatasets;
-    }
     
     /**
      * Reject if one dataset doesn't have the right.
@@ -287,12 +280,11 @@ public class DatasetSecurityService {
     	
     	Iterable<Dataset> datasets = datasetRepository.findAllById(datasetIds);
     	Set<Long> studyIds = new HashSet<Long>();
-    	
+    	 
     	boolean hasRight = true;
-    	
     	for (Dataset dataset : datasets) {
     		studyIds.add(dataset.getStudyId());
-    		hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getStudyId(), rightStr);
+    		hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
     	}
     	return hasRight;
     }
@@ -545,6 +537,28 @@ public class DatasetSecurityService {
     	list.removeAll(toRemove);
     	return true;
     }
+    
+    /**
+     * Filter datasets checking the connected user has the right on those.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean filterDatasetDTOList(List<DatasetDTO> list, String rightStr) throws EntityNotFoundException {
+    	if (list == null) {
+			return true;
+		}
+    	Set<DatasetDTO> dsRemove = new HashSet<>();
+    	for(DatasetDTO dto : list) {
+    		if (!this.hasRightOnDataset(dto.getId(), rightStr)) {
+    			dsRemove.add(dto);
+        	}
+    	}
+    	list.removeAll(dsRemove);
+    	return true;
+    }
+    
     
     /**
      * Filter dataset acquisitions checking the connected user has the right on those.

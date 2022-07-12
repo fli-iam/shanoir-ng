@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-import com.mysql.cj.conf.ConnectionUrlParser.Pair;
+import org.apache.commons.math3.util.Pair;
 
 @Component
 public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepositoryCustom {
@@ -57,10 +57,10 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 		queryCount.setParameter(1, studyIds);
 		i = 2;
 		for (Pair<Long, Long> studyCenter : studyCenterIds) {
-			query.setParameter(i, studyCenter.left);
-			query.setParameter(i + 1, studyCenter.right);
-			queryCount.setParameter(i, studyCenter.left);
-			queryCount.setParameter(i + 1, studyCenter.right);
+			query.setParameter(i, studyCenter.getFirst());
+			query.setParameter(i + 1, studyCenter.getSecond());
+			queryCount.setParameter(i, studyCenter.getFirst());
+			queryCount.setParameter(i + 1, studyCenter.getSecond());
 			i += 2;
 		}
 	

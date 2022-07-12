@@ -485,8 +485,6 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response) throws EntityNotFoundException, RestServiceException, IOException {
-		// STEP 2: Check rights => Also filters datasets on rights
-		datasets = datasetSecurityService.hasRightOnAtLeastOneDataset(datasets, "CAN_DOWNLOAD");
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 		File userDir = getUserImportDir(System.getProperty(JAVA_IO_TMPDIR));

@@ -234,7 +234,7 @@ public class DatasetServiceImpl implements DatasetService {
 			// If yes, get all examinations and filter by centers
 			if (hasRestrictions) {
 				List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable.getSort()));
-
+				
 				if (CollectionUtils.isEmpty(datasets)) {
 					return new PageImpl<>(datasets);
 				}

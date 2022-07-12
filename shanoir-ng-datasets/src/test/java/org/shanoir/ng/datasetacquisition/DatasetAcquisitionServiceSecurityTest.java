@@ -48,6 +48,7 @@ import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -61,7 +62,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.google.common.collect.Sets;
-import com.mysql.cj.conf.ConnectionUrlParser.Pair;
+import org.apache.commons.math3.util.Pair;
 
 /**
  * User security service test.
@@ -187,8 +188,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		assertThat(service.findByExamination(4L).isEmpty());
 		
 		// findPage(Pageable)
-		Page<DatasetAcquisition> page1 = service.findPage(PageRequest.of(0, 10));
-		assertThat(page1 != null && page1.getSize() == 1);
+		assertThat(service.findPage(PageRequest.of(0, 10))).hasSize(1);
 		
 		// update(DatasetAcquisition)
 		if ("ROLE_USER".equals(role)) {
@@ -326,14 +326,14 @@ public class DatasetAcquisitionServiceSecurityTest {
 		Examination exam4 = mockExam(4L, 4L, 4L);
 		given(examinationRepository.findById(4L)).willReturn(Optional.of(exam4));
 		// exam 1 & 3 are in study 1 > subject 1 (but in different centers)
-		given(examinationRepository.findBySubjectIdAndStudyId(1L, 1L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam1, exam3})));
-		given(examinationRepository.findBySubjectId(1L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam1, exam3})));
+		given(examinationRepository.findBySubjectIdAndStudyId(1L, 1L)).willReturn(Utils.toList(exam1, exam3));
+		given(examinationRepository.findBySubjectId(1L)).willReturn(Utils.toList(exam1, exam3));
 		// exam 2 is in study 2 > subject 2
-		given(examinationRepository.findBySubjectIdAndStudyId(2L, 2L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam2})));
-		given(examinationRepository.findBySubjectId(2L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam2})));
+		given(examinationRepository.findBySubjectIdAndStudyId(2L, 2L)).willReturn(Utils.toList(exam2));
+		given(examinationRepository.findBySubjectId(2L)).willReturn(Utils.toList(exam2));
 		//exam 4 is in study 4 > subject 4
-		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam4})));
-		given(examinationRepository.findBySubjectId(4L)).willReturn(new ArrayList<>(Arrays.asList(new Examination[]{exam4})));
+		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(Utils.toList(exam4));
+		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
 		
 		// study 1
@@ -348,23 +348,23 @@ public class DatasetAcquisitionServiceSecurityTest {
 		
 		DatasetAcquisition dsAcq1 = mockDsAcq(1L, 1L, 1L, 1L);
 		given(datasetAcquisitionRepository.findById(1L)).willReturn(Optional.of(dsAcq1));
-		given(datasetAcquisitionRepository.findByStudyCardId(1L)).willReturn(new ArrayList<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1})));
+		given(datasetAcquisitionRepository.findByStudyCardId(1L)).willReturn(Utils.toList(dsAcq1));
 		DatasetAcquisition dsAcq3 = mockDsAcq(3L, 3L, 3L, 1L);
 		given(datasetAcquisitionRepository.findById(3L)).willReturn(Optional.of(dsAcq3));
-		given(datasetAcquisitionRepository.findByStudyCardId(3L)).willReturn(new ArrayList<>(Arrays.asList(new DatasetAcquisition[]{dsAcq3})));
+		given(datasetAcquisitionRepository.findByStudyCardId(3L)).willReturn(Utils.toList(dsAcq3));
 		DatasetAcquisition dsAcq2 = mockDsAcq(2L, 2L, 2L, 2L);
 		given(datasetAcquisitionRepository.findById(2L)).willReturn(Optional.of(dsAcq2));
-		given(datasetAcquisitionRepository.findByStudyCardId(2L)).willReturn(new ArrayList<>(Arrays.asList(new DatasetAcquisition[]{dsAcq2})));
+		given(datasetAcquisitionRepository.findByStudyCardId(2L)).willReturn(Utils.toList(dsAcq2));
 		DatasetAcquisition dsAcq4 = mockDsAcq(4L, 4L, 4L, 4L);
 		given(datasetAcquisitionRepository.findById(4L)).willReturn(Optional.of(dsAcq4));
-		given(datasetAcquisitionRepository.findByStudyCardId(4L)).willReturn(new ArrayList<>(Arrays.asList(new DatasetAcquisition[]{dsAcq4})));
+		given(datasetAcquisitionRepository.findByStudyCardId(4L)).willReturn(Utils.toList(dsAcq4));
 		
 		given(datasetAcquisitionRepository.findByExaminationByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{}), PageRequest.of(0, 10), 0));
 		List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
 		studyCenterIds.add(new Pair<Long, Long>(1L, 1L));
 		given(datasetAcquisitionRepository.findByExaminationByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newHashSet(new Long[]{}), PageRequest.of(0, 10))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
 		given(datasetAcquisitionRepository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1, dsAcq2, dsAcq3, dsAcq4}), PageRequest.of(0, 10), 0));
-		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Long[]{1L}));
+		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Long[]{1L, 2L}));
 		StudyUser su1 = new StudyUser();
 		su1.setStudyId(1L);
 		su1.setCentersIds(Arrays.asList(new Long[]{1L}));

@@ -40,7 +40,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.mysql.cj.conf.ConnectionUrlParser.Pair;
+import org.apache.commons.math3.util.Pair;
 
 import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper;
 import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
@@ -88,7 +88,7 @@ public class DatasetAcquisitionRepositoryTest {
 		studyIds.add(3L);
 		
 		List<Order> orders = new ArrayList<Order>();
-		orders.add(new Order(Direction.ASC, "acquisition_equipment_id"));
+		orders.add(new Order(Direction.ASC, "acquisitionEquipmentId"));
 		Pageable pageable = PageRequest.of(0, 10, Sort.by(orders));
 		
 		Page<DatasetAcquisition> pageDB = repository.findByExaminationByStudyCenterOrStudyIdIn(studyCentersList, studyIds, pageable);
