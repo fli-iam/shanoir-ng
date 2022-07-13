@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * This private class only holds 3 values as the keys for sorting the dicom
  * files into separate folders. 1 folder = 1 dataset. In one folder, we group
  * all the files with the same value for the EchoNumbers, AcquisitionNumber and
- * ImageOrientationPatien.
+ * ImageOrientationPatient.
  *
  * @author aferial
  * @author mkain
@@ -120,7 +120,7 @@ public class SerieToDatasetsSeparator {
 			double diff = imageOrientationPatient[i] - otherImageOrientationPatient[i];
 			if (diff != 0) {
 				if (Math.abs(diff) < 0.0001) {
-					LOG.warn(
+					LOG.info(
 							"imageOrientationEquals : Attention! The image orientation is not strictly parallel. Found {} != {}. However, we tolerate this difference.", otherImageOrientationPatient[i], imageOrientationPatient[i]);
 				} else {
 					return false;

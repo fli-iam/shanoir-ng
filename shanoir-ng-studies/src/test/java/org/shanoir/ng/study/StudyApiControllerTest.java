@@ -34,8 +34,6 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.bids.service.StudyBIDSService;
-import org.shanoir.ng.bids.utils.BidsDeserializer;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
@@ -60,6 +58,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -77,6 +76,7 @@ import com.google.gson.GsonBuilder;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = StudyApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class StudyApiControllerTest {
 
 	private static final String REQUEST_PATH = "/studies";
@@ -108,17 +108,9 @@ public class StudyApiControllerTest {
 	@MockBean
 	private StudyUniqueConstraintManager uniqueConstraintManager;
 
-	private Study stud;
-
-	@MockBean
-	private StudyBIDSService bidsService;
-	
 	@MockBean(name = "studySecurityService")
 	private StudySecurityService studySecurityService;
 	
-	@MockBean
-	private BidsDeserializer bidsDeserializer;
-
 	@MockBean
 	private ShanoirEventService eventService;
 
@@ -137,16 +129,12 @@ public class StudyApiControllerTest {
 	public void setup() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		stud = new Study();
-		stud.setId(1L);
-
-		given(studyMapperMock.studiesToStudyDTOs(Mockito.anyListOf(Study.class)))
+		given(studyMapperMock.studiesToStudyDTOs(Mockito.anyList()))
 		.willReturn(Arrays.asList(new StudyDTO()));
 		given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
 
 		doNothing().when(studyServiceMock).deleteById(1L);
 		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
-		given(studyServiceMock.findById(1L)).willReturn(stud);
 		given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());
 		given(fieldEditionSecurityManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(Study.class))).willReturn(new FieldErrorMap());
@@ -165,9 +153,9 @@ public class StudyApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void deleteStudyTest() throws Exception {
-		Mockito.when(studyServiceMock.getStudyFilePath(Mockito.any(Long.class), Mockito.any(String.class))).thenReturn("unexistingFile");
+		Mockito.when(studyServiceMock.findById(Mockito.any(Long.class))).thenReturn(null);
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-		.andExpect(status().isNoContent());
+		.andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -239,16 +227,6 @@ public class StudyApiControllerTest {
 			e.printStackTrace();
 			fail();
 		}
-	}
-
-	@Test
-	public void testDeleteStudyWithExaminations() {
-		return;
-	}
-
-	@Test
-	public void testDeleteStudy() {
-		return;
 	}
 
 }

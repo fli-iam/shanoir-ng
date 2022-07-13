@@ -15,8 +15,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node
         *ngIf="node"
         [class.selected]="showDetails && this.menuOpened"
-        [label]="node.label" 
-        awesome="fas fa-folder-open"
+        [label]="node.label"
+        [tags]="node.tags"
+        awesome="fa-regular fa-folder-open"
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
         (firstOpen)="loadExaminations()"
@@ -25,7 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [dataLoading]="loading">
 
         <dropdown-menu [(openInput)]="menuOpened" *ngIf="showDetails && menuOpened">
-            <menu-item label="Details..." awesome="fas fa-eye" (click)="showStudyDetails()"></menu-item>
+            <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showStudyDetails()"></menu-item>
         </dropdown-menu>
 
         <ng-container *ngIf="node.open && node.examinations && node.examinations != $any('UNLOADED')">        

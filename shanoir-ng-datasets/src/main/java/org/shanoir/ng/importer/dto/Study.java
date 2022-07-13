@@ -21,13 +21,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-
-/**
- * @author atouboul
- *
- */
-
- public class Study {
+public class Study {
 
      @JsonProperty("studyInstanceUID")
      private String studyInstanceUID;

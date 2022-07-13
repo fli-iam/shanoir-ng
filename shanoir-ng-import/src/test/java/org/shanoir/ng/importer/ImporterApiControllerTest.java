@@ -17,8 +17,6 @@ package org.shanoir.ng.importer;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
@@ -55,6 +54,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -72,6 +72,7 @@ import com.google.gson.GsonBuilder;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ImporterApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class ImporterApiControllerTest {
 
 	private static final String UPLOAD_EEG_PATH = "/importer/upload_eeg/";
@@ -149,47 +150,6 @@ public class ImporterApiControllerTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testUploadEEGZipFile() throws Exception {
-		String filePath = "./src/main/resources/tests/eeg/brainvision (copy).zip";
-		File f = new File(filePath);
-
-		if (f.exists() && !f.isDirectory()) {
-			MockMultipartFile multipartFile = new MockMultipartFile("file", "brainvision (copy).zip", "application/zip",	new FileInputStream(new File(filePath)));
-
-			// Check that we return an EEGImport Job with adapted informations.
-			mvc.perform(MockMvcRequestBuilders.fileUpload(UPLOAD_EEG_PATH).file(multipartFile))
-			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("\"name\":\"Fp1\"")))
-			.andExpect(content().string(containsString("\"z\":2.5810034")))
-			.andExpect(content().string(containsString("brainvision (copy)")))
-			.andExpect(content().string(containsString("ROBEEG_BACGU020_dlpfc_l_0002.vhdr")));
-		} else {
-			System.out.println("[TEST CASE ERROR] UNABLE TO RETRIEVE FILE FOR TESTCASE ImporterApiControllerTest.uploadFileTest() at location : " + filePath);
-			fail();
-		}
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testUploadEEGZipFileNotZip() throws Exception {
-		// Wrong file
-		String filePath = "./src/main/resources/tests/eeg/ROBEEG_BACGU020_dlpfc_l_0002.pos";
-		File f = new File(filePath);
-
-		if (f.exists() && !f.isDirectory()) {
-			MockMultipartFile multipartFile = new MockMultipartFile("file", "brainvision (copy).zip", "application/zip",	new FileInputStream(new File(filePath)));
-
-			// Check that we return an EEGImport Job with adapted informations.
-			mvc.perform(MockMvcRequestBuilders.fileUpload(UPLOAD_EEG_PATH).file(multipartFile))
-			.andExpect(status().isUnprocessableEntity());
-		} else {
-			System.out.println("[TEST CASE ERROR] UNABLE TO RETRIEVE FILE FOR TESTCASE ImporterApiControllerTest.uploadFileTest() at location : " + filePath);
-			fail();
-		}
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testStartImportEEGJob() throws Exception {
 		ArgumentCaptor<HttpEntity> captor = ArgumentCaptor.forClass(HttpEntity.class);
 
@@ -204,7 +164,7 @@ public class ImporterApiControllerTest {
 				.content(gson.toJson(importJob)));
 		
 		// Just check that the name is well transmitted and that the call is made
-		verify(restTemplate).exchange(any(String.class), eq(HttpMethod.POST), captor.capture(), eq(String.class));
+		verify(restTemplate).exchange(Mockito.any(String.class), Mockito.eq(HttpMethod.POST), captor.capture(), Mockito.eq(String.class));
 		assertEquals(dataset.getName(), ((EegImportJob)captor.getValue().getBody()).getDatasets().get(0).getName());
 	}
 

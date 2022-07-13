@@ -41,7 +41,6 @@ import { TaskService } from './async-tasks/task.service';
 import { BidsTreeComponent } from './bids/tree/bids-tree.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
-import { Router } from './breadcrumbs/router';
 import { CenterListComponent } from './centers/center-list/center-list.component';
 import { CenterComponent } from './centers/center/center.component';
 import { CenterService } from './centers/shared/center.service';
@@ -58,6 +57,11 @@ import { DatasetAcquisitionService } from './dataset-acquisitions/shared/dataset
 import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 import { CommonDatasetComponent } from './datasets/dataset/common/dataset.common.component';
 import { DatasetComponent } from './datasets/dataset/dataset.component';
+import { DatasetProcessingComponent } from './datasets/dataset-processing/dataset-processing.component';
+import { DatasetProcessingListComponent } from './datasets/dataset-processing-list/dataset-processing-list.component';
+import { DatasetProcessingService } from './datasets/shared/dataset-processing.service';
+import { DatasetProcessingDTOService } from './datasets/shared/dataset-processing.dto';
+import { DatasetProcessingPipe } from './datasets/dataset-processing/dataset-processing.pipe';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
 import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
@@ -79,12 +83,12 @@ import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
-import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
-import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
+import { ImportProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
+import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { ImportDataService } from './import/shared/import.data-service';
@@ -111,7 +115,6 @@ import { TableComponent } from './shared/components/table/table.component';
 import { TooltipComponent } from './shared/components/tooltip/tooltip.component';
 import { TreeNodeComponent } from './shared/components/tree/tree-node.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
-import { ConsoleComponent } from './shared/console/console.line.component';
 import { DatepickerComponent } from './shared/date-picker/date-picker.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { HelpMessageComponent } from './shared/help-message/help-message.component';
@@ -170,6 +173,7 @@ import { ReverseSubjectNodeComponent } from './subjects/tree/reverse-subject-nod
 import { ExaminationNodeComponent } from './examinations/tree/examination-node.component';
 import { DatasetAcquisitionNodeComponent } from './dataset-acquisitions/tree/dataset-acquisition-node.component';
 import { DatasetNodeComponent } from './datasets/tree/dataset-node.component';
+import { SimpleDatasetNodeComponent } from './datasets/tree/simple-dataset-node.component';
 import { ProcessingNodeComponent } from './datasets/tree/processing-node.component';
 import { StudyNodeComponent } from './studies/tree/study-node.component';
 import { ReverseStudyNodeComponent } from './studies/tree/reverse-study-node.component';
@@ -223,17 +227,26 @@ import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
 import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 // import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
-import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { DUAComponent } from './dua/dua.component';
 import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
-import { SolrCriterionComponent } from './solr/criteria/solr.criterion.component';
+import { SolrPagingCriterionComponent } from './solr/criteria/solr.paging-criterion.component';
 import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
+import { SolrTextSearchModeComponent } from './solr/text-search/solr.text-search-mode.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
+import { ConsoleComponent } from './shared/console/console.component';
+import { ConsoleService } from './shared/console/console.service';
+import { ExtraDataService } from './preclinical/extraData/extraData/shared/extradata.service'
+import { TagCreatorComponent } from './tags/tag.creator.component';
+import { TagInputComponent } from './tags/tag.input.component';
+import { StudyDTOService } from './studies/shared/study.dto';
+import { SubjectDTOService } from './subjects/shared/subject.dto';
+import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
+import { VarDirective } from './utils/ng-var.directive';
 
 @NgModule({
     imports: [
@@ -260,7 +273,6 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         CenterComponent,
         CenterListComponent,
         ConfirmDialogComponent,
-        ConsoleComponent,
         DropdownMenuComponent,
         UserComponent,
         ExaminationListComponent,
@@ -296,6 +308,9 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         DatasetComponent,
         EegDatasetComponent,
         DatasetListComponent,
+        DatasetProcessingComponent,
+        DatasetProcessingListComponent,
+        DatasetProcessingPipe,
         DatasetDownloadComponent,
         DownloadStatisticsComponent,
         MigrateStudyComponent,
@@ -310,8 +325,10 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         EegUploadComponent,
         BidsUploadComponent,
         QueryPacsComponent,
+        ImportProcessedDatasetComponent,
         ClinicalContextComponent,
         EegClinicalContextComponent,
+        ProcessedDatasetClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,
@@ -319,8 +336,6 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         ModalsComponent,
         BreadcrumbsComponent,
         SelectBoxComponent,
-        FinishImportComponent,
-        FinishEegImportComponent,
         UploaderComponent,
         HelpMessageComponent,
         AsyncTasksComponent,
@@ -373,13 +388,13 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
     	PhysiologicalDataFormComponent,
     	BloodGasDataFormComponent, 
     	BrukerUploadComponent,
-        BrukerSelectSeriesComponent, 
-        BrukerFinishImportComponent,
+        BrukerSelectSeriesComponent,
         LoaderComponent,
         SubjectNodeComponent,
         ExaminationNodeComponent,
         DatasetAcquisitionNodeComponent,
         DatasetNodeComponent,
+        SimpleDatasetNodeComponent,
         ProcessingNodeComponent,
         StudyNodeComponent,
         CenterNodeComponent,
@@ -391,10 +406,17 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         DUAComponent,
         DUASigningComponent,
         EventTypePipe,
-        SolrCriterionComponent,
+        SolrPagingCriterionComponent,
         SolrTextSearchComponent,
+        SolrTextSearchModeComponent,
+        ChallengeBlockComponent,
+        TagCreatorComponent,
         SolrRangeCriterionComponent,
-        ChallengeBlockComponent
+        ChallengeBlockComponent,
+        ConsoleComponent,
+        TagInputComponent,
+        StudyUserListComponent,
+        VarDirective
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -436,6 +458,8 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         UserService,
         DicomArchiveService,
         DatasetService,
+        DatasetProcessingService,
+        DatasetProcessingPipe,
         MsgBoxService,
     	PathologyService,
         AnimalSubjectService,
@@ -452,8 +476,7 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
     	ImportBrukerService,
     	EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
-        BreadcrumbsService,
-        Router,
+	    BreadcrumbsService,
         GlobalService,
         ImportDataService,
         NiftiConverterService,
@@ -477,12 +500,17 @@ import { ChallengeBlockComponent } from './home/challenge/challenge-block.compon
         SubjectExaminationPipe,
         ExaminationPipe,
         DatasetDTOService,
+        DatasetProcessingDTOService,
         SolrService,
         NotificationsService,
         CenterDTOService,
         LoaderService,
         SubjectStudyPipe,
         KeycloakSessionService,
+        ConsoleService,
+		ExtraDataService,
+        StudyDTOService,
+        SubjectDTOService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]
@@ -492,4 +520,4 @@ export class AppModule {
     constructor(private injector: Injector) {
         ServiceLocator.injector = injector;
     }
- }
+}

@@ -16,11 +16,11 @@ package org.shanoir.ng.importer.strategies.dataset;
 
 import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.dataset.modality.CtDataset;
+import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
-import org.shanoir.ng.dataset.model.ProcessedDatasetType;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;

@@ -76,6 +76,9 @@ public class RabbitMQConfiguration {
 	/** Delete subject => Delete associated examination / datasets. */
 	public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
 
+	/** Delete user queue. */
+	public static final String DELETE_USER_QUEUE = "delete-user-queue";
+	
 	/** Study deleted => Delete associated datasets. */
 	public static final String DELETE_STUDY_QUEUE = "delete-study-queue";
 	
@@ -100,7 +103,7 @@ public class RabbitMQConfiguration {
 	/** Queue used to get information for study_examination deletion relationship.*/
 	public static final String EXAMINATION_STUDY_DELETE_QUEUE = "examination-study-delete-queue";
 
-	/** Send a mail from dataset microservice to study users */
+	/** Send a mail from dataset microservice to ms users */
 	public static final String IMPORT_DATASET_MAIL_QUEUE = "import-dataset-mail-queue";
 
 	/** Migrate a study, communication between services. */
@@ -109,8 +112,26 @@ public class RabbitMQConfiguration {
 	/** Migrate a study, communication between dataset and preclinical services. */
 	public static final String STUDY_MIGRATION_PRECLINICAL_QUEUE = "study-migration-preclinical-queue";
 	
+	/** Send a mail from dataset microservice to ms users for import dataset failure*/
+	public static final String IMPORT_DATASET_FAILED_MAIL_QUEUE = "import-dataset-failed-mail-queue";
+	
+	/** Send a mail from studies microservice to ms users */
+	public static final String STUDY_USER_MAIL_QUEUE = "study-user-mail-queue";
+
 	/** Queue to re-convert using a different nifti converter */
 	public static final String NIFTI_CONVERSION_QUEUE = "nifti-conversion-queue";
+
+	/** Queue to consume BIDS related events */
+	public static final String BIDS_EVENT_QUEUE = "bids-event-queue";
+	
+	/** Queue to create examination extra data from import */
+	public static final String EXAMINATION_EXTRA_DATA_QUEUE = "examination-extra-data-queue";
+
+	/** Queue to create all bids dataset acquisitions */
+	public static final String IMPORTER_BIDS_DATASET_QUEUE = "importer-bids-dataset-queue";
+
+	/** Queue to create get equipment ID from code. */
+	public static final String ACQUISITION_EQUIPEMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
@@ -140,7 +161,7 @@ public class RabbitMQConfiguration {
 	private static final String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
 
 	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
-
+	
 	////////////////// EXCHANGES //////////////////
 
 	/** Exchange used to publish / treat all sort of shanoir events. */
@@ -148,6 +169,7 @@ public class RabbitMQConfiguration {
 
 	/** Exchange to notify when a user / study is update / deleted. */
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
+
 
     @Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
@@ -341,7 +363,7 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
-	public static Queue importDatasetMail() {
+	public static Queue importDatasetMailQueue() {
 		return new Queue(IMPORT_DATASET_MAIL_QUEUE, true);
 	}
 	
@@ -355,4 +377,38 @@ public class RabbitMQConfiguration {
 		return new Queue(STUDY_MIGRATION_PRECLINICAL_QUEUE, true);
 	}
 
+	@Bean
+	public static Queue bidsEventQueue() {
+		return new Queue(BIDS_EVENT_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue examinationExtraDataQueue() {
+		return new Queue(EXAMINATION_EXTRA_DATA_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue importDatasetFailedMailQueue() {
+		return new Queue(IMPORT_DATASET_FAILED_MAIL_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue studyUserMailQueue() {
+		return new Queue(STUDY_USER_MAIL_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue importBidsDatasetQueue() {
+		return new Queue(IMPORTER_BIDS_DATASET_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue acquisitionEquipmentCodeQueue() {
+		return new Queue(ACQUISITION_EQUIPEMENT_CODE_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue deleteUserQueue() {
+		return new Queue(DELETE_USER_QUEUE, true);
+	}
 }

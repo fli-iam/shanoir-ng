@@ -37,6 +37,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -53,6 +54,7 @@ import com.google.gson.GsonBuilder;
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {ManufacturerApiController.class, ControlerSecurityService.class})
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class ManufacturerApiControllerTest {
 
 	private static final String REQUEST_PATH = "/manufacturers";
@@ -71,10 +73,12 @@ public class ManufacturerApiControllerTest {
 
 	@Before
 	public void setup() {
+		Manufacturer manuf = new Manufacturer();
+		manuf.setId(1L);
 		gson = new GsonBuilder().create();
-		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(new Manufacturer()));
-		given(manufacturerServiceMock.findById(1L)).willReturn(Optional.of(new Manufacturer()));
-		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(new Manufacturer());
+		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(manuf));
+		given(manufacturerServiceMock.findById(1L)).willReturn(Optional.of(manuf));
+		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(manuf);
 		given(uniqueConstraintManager.validate(Mockito.any(Manufacturer.class))).willReturn(new FieldErrorMap());
 	}
 

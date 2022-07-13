@@ -27,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticRepository;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticServiceImpl;
@@ -35,6 +34,7 @@ import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Anesthetics service test.

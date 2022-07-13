@@ -75,16 +75,17 @@ export class UserComponent extends EntityComponent<User> {
             if (user.extensionRequestDemand && user.extensionRequestInfo) {
                 this.user.expirationDate = user.extensionRequestInfo.extensionDate;
             }
-        });
-        this.studyService.findStudiesByUserId().then(studies => {
-            this.studies = studies.filter(study =>  {
-                for( var suser of study.studyUserList) {
-                    // Admin case, we check that the user is part of the study
-                    if (suser.userId === this.entity.id) {
-                        return true;
+        }).then(() => {
+            this.studyService.findStudiesByUserId().then(studies => {
+                this.studies = studies.filter(study =>  {
+                    for( var suser of study.studyUserList) {
+                        // Admin case, we check that the user is part of the study
+                        if (suser.userId === this.entity.id) {
+                            return true;
+                        }
                     }
-                }
-                return false;
+                    return false;
+                });
             });
         });
         Promise.all([userPromise, this.getRoles()]).then(() => {
@@ -102,8 +103,8 @@ export class UserComponent extends EntityComponent<User> {
     accept(): void {
         this.acceptLoading = true;
         this.userService.confirmAccountRequest(this.id, this.user)
-            .then((user) => {
-                this.msgBoxService.log('info', 'User saved and confirmed !');
+            .then(() => {
+                this.consoleService.log('info', 'User "' + this.user.username + '" saved and confirmed !');
                 this.goBack();
                 this.acceptLoading = false;
             }).catch(reason => {
@@ -116,7 +117,7 @@ export class UserComponent extends EntityComponent<User> {
         this.denyLoading = true;
         this.userService.denyAccountRequest(this.id)
             .then((user) => {
-                this.msgBoxService.log('info', 'The request has been denied !');
+                this.consoleService.log('info', 'The request for user "' + this.user.username + '" has been denied !');
                 this.goBack();
                 this.denyLoading = false;
             }).catch(reason => {

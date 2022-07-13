@@ -37,15 +37,16 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
  */
 @Entity
 @SqlResultSetMapping(name = "SolrResult", classes = {@ConstructorResult(targetClass = ShanoirMetadata.class,
-	columns = {@ColumnResult(name="datasetId", type = Long.class), @ColumnResult(name="datasetName", type = String.class), 
+	columns = {@ColumnResult(name="datasetId", type = Long.class), @ColumnResult(name="datasetName", type = String.class),
 			@ColumnResult(name="datasetType", type = Integer.class), @ColumnResult(name="datasetNature", type = Integer.class),
-			@ColumnResult(name="datasetCreationDate", type = LocalDate.class), @ColumnResult(name="examinationComment", type = String.class), 
+			@ColumnResult(name="datasetCreationDate", type = LocalDate.class), @ColumnResult(name="examinationComment", type = String.class),
 			@ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="subjectName", type = String.class),
+			@ColumnResult(name="subjectId", type = Long.class),
 			@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
-			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="sliceThickness", type = Float.class), 
-			@ColumnResult(name="pixelBandwidth", type = Float.class), @ColumnResult(name="magneticFieldStrength", type = Float.class), 
+			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="sliceThickness", type = Double.class),
+			@ColumnResult(name="pixelBandwidth", type = Double.class), @ColumnResult(name="magneticFieldStrength", type = Double.class)
 	})
-}) 
+})
 public class ShanoirMetadata {
 	
 	@Id
@@ -75,20 +76,22 @@ public class ShanoirMetadata {
 	
 	private String centerName;
 	
-	private Float sliceThickness;
+	private Double sliceThickness;
 	
-	private Float pixelBandwidth;
+	private Double pixelBandwidth;
 	
-	private Float magneticFieldStrength;
+	private Double magneticFieldStrength;
+	
+	private Long subjectId;
 	
 	public ShanoirMetadata () {
 		
 	}
 	
-	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature, 
+	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
 			LocalDate datasetCreationDate, String examinationComment, LocalDate examinationDate,
-			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness,
-			Float pixelBandwidth, Float magneticFieldStrength) {
+			String subjectName, Long subjectId, String studyName, Long studyId, String centerName, Double sliceThickness,
+			Double pixelBandwidth, Double magneticFieldStrength) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -97,13 +100,14 @@ public class ShanoirMetadata {
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
 		this.subjectName = subjectName;
+		this.subjectId = subjectId;
 		this.studyName = studyName;
 		this.studyId = studyId;
 		this.centerName = centerName;
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
-	}
+	}	
 	
 	/**
 	 * @return the datasetId
@@ -269,28 +273,42 @@ public class ShanoirMetadata {
 		this.centerName = centerName;
 	}
 
-	public Float getSliceThickness() {
+	public Double getSliceThickness() {
 		return sliceThickness;
 	}
 
-	public void setSliceThickness(Float sliceThickness) {
+	public void setSliceThickness(Double sliceThickness) {
 		this.sliceThickness = sliceThickness;
 	}
 
-	public Float getPixelBandwidth() {
+	public Double getPixelBandwidth() {
 		return pixelBandwidth;
 	}
 
-	public void setPixelBandwidth(Float pixelBandwidth) {
+	public void setPixelBandwidth(Double pixelBandwidth) {
 		this.pixelBandwidth = pixelBandwidth;
 	}
 
-	public Float getMagneticFieldStrength() {
+	public Double getMagneticFieldStrength() {
 		return magneticFieldStrength;
 	}
 
-	public void setMagneticFieldStrength(Float magneticFieldStrength) {
+	public void setMagneticFieldStrength(Double magneticFieldStrength) {
 		this.magneticFieldStrength = magneticFieldStrength;
+	}
+
+	/**
+	 * @return the subjectId
+	 */
+	public Long getSubjectId() {
+		return subjectId;
+	}
+
+	/**
+	 * @param subjectId the subjectId to set
+	 */
+	public void setSubjectId(Long subjectId) {
+		this.subjectId = subjectId;
 	}
 	
 }

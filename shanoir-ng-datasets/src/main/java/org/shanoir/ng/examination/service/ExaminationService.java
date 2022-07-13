@@ -14,10 +14,12 @@
 
 package org.shanoir.ng.examination.service;
 
+import java.io.File;
 import java.util.List;
 
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -37,9 +39,10 @@ public interface ExaminationService {
 	 * 
 	 * @param id examination id.
 	 * @throws EntityNotFoundException
+	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws EntityNotFoundException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
 
 	/**
 	 * Delete an examination from a rabbit MQ call, not identified
@@ -47,8 +50,17 @@ public interface ExaminationService {
 	 * @param exam the examination to delete
 	 * @throws EntityNotFoundException
 	 */
-	void deleteFromRabbit(Examination exam) throws EntityNotFoundException;
+	void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException;
 
+	/**
+	 * Get all examinations for a specific user to support DICOMweb.
+	 * 
+	 * @return
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
+	List<Examination> findAll();
+	
 	/**
 	 * Get a paginated list of examinations reachable by connected user.
 	 * 
@@ -58,6 +70,16 @@ public interface ExaminationService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
 	Page<Examination> findPage(final Pageable pageable, boolean preclinical);
+	
+	/**
+	 * Get a paginated list of examinations reachable by connected user.
+	 * 
+	 * @param pageable pagination data.
+	 * @return list of examinations.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
+	Page<Examination> findPage(final Pageable pageable, String patientName);
 
 	/**
 	 * Find examination by its id.
@@ -112,9 +134,10 @@ public interface ExaminationService {
 	 * @param examination  examination to update.
 	 * @return updated examination.
 	 * @throws EntityNotFoundException
+	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
-	Examination update(Examination examination) throws EntityNotFoundException;
+	Examination update(Examination examination) throws EntityNotFoundException, ShanoirException;
 
 	/**
 	 * Add an extra data file to examination
@@ -124,5 +147,9 @@ public interface ExaminationService {
 	 */
 	String addExtraData(Long examinationId, MultipartFile file);
 
+	String addExtraDataFromFile(Long examinationId, File file);
+
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD'))")
 	String getExtraDataFilePath(Long examinationId, String fileName);
+
 }

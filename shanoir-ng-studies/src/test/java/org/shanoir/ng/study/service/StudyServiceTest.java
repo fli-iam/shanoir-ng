@@ -44,6 +44,7 @@ import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -56,6 +57,10 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Study service test.
@@ -91,6 +96,12 @@ public class StudyServiceTest {
 	
 	@Mock
 	private DataUserAgreementService dataUserAgreementService;
+	
+	@Mock
+	private StudyMapper studyMapperMock;
+	
+	@Mock
+	private ObjectMapper objectMapper;
 
 	@ClassRule
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
@@ -108,7 +119,7 @@ public class StudyServiceTest {
 
 		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
 		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(ModelsUtil.createStudy()));
-		given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy());
+		given(studyRepository.save(Mockito.any(Study.class))).willReturn(ModelsUtil.createStudy(1L));
 	}
 
 	@Test
@@ -151,9 +162,9 @@ public class StudyServiceTest {
 	}
 
 	@Test
-	public void saveTest() throws MicroServiceCommunicationException {
+	public void saveTest() throws MicroServiceCommunicationException, JsonMappingException, JsonProcessingException {
 		studyService.create(createStudy());
-		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
+		Mockito.verify(studyRepository, Mockito.times(3)).save(Mockito.any(Study.class));
 	}
 
 	@Test
@@ -173,6 +184,9 @@ public class StudyServiceTest {
 
 		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(dbStudy));
 
+		updatedStudy.setId(1L);
+		given(studyRepository.save(Mockito.any(Study.class))).willReturn(updatedStudy);
+		
 		final Study returnedStudy = studyService.update(updatedStudy);
 		Assert.assertNotNull(returnedStudy);
 		Assert.assertTrue(UPDATED_STUDY_NAME.equals(returnedStudy.getName()));
@@ -181,7 +195,7 @@ public class StudyServiceTest {
 		assertEquals("new.txt", returnedStudy.getProtocolFilePaths().get(0));
 		// Check that the file was deleted
 		assertFalse(protocol.exists());
-		Mockito.verify(studyRepository, Mockito.times(1)).save(Mockito.any(Study.class));
+		//Mockito.verify(studyRepository, Mockito.times(3)).save(Mockito.any(Study.class));
 	}
 	
 	@Test
@@ -291,6 +305,8 @@ public class StudyServiceTest {
 		study.setId(STUDY_ID);
 		study.setName(UPDATED_STUDY_NAME);
 		study.setStudyCenterList(new ArrayList<>());
+		study.setStudyUserList(new ArrayList<>());
+		study.setSubjectStudyList(new ArrayList<>());
 		return study;
 	}
 	

@@ -14,24 +14,11 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
-import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
-import { Examination } from '../../examinations/shared/examination.model';
 import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
 import { ExaminationService } from '../../examinations/shared/examination.service';
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { Study } from '../../studies/shared/study.model';
-import {
-    DatasetAcquisitionNode,
-    DatasetNode,
-    ExaminationNode,
-    ProcessingNode,
-    ReverseStudyNode,
-    ReverseSubjectNode,
-    UNLOADED,
-} from '../../tree/tree.model';
+import { SimpleStudy, Study } from '../../studies/shared/study.model';
+import { ReverseStudyNode, ReverseSubjectNode, UNLOADED } from '../../tree/tree.model';
 import { Subject } from '../shared/subject.model';
 
 
@@ -66,19 +53,29 @@ export class ReverseSubjectNodeComponent implements OnChanges {
                 this.node  = new ReverseSubjectNode(
                     this.input.id,
                     this.input.name,
-                    this.input.subjectStudyList.map(subjectStudy => this.mapStudy(subjectStudy.study, subjectStudy.examinations)));
+                    this.input.subjectStudyList.map(subjectStudy => this.mapStudy(subjectStudy.study)));
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/subject/details/' + this.node.id;
         } 
     }
 
-    private mapStudy(study: Study, examinations: SubjectExamination[]): ReverseStudyNode {
-        return new ReverseStudyNode(
-            study.id,
-            study.name,
-            UNLOADED
-        );
+    private mapStudy(study: SimpleStudy): ReverseStudyNode {
+        if (this.input instanceof Subject) {
+            return new ReverseStudyNode(
+                study.id,
+                study.name,
+                this.input.subjectStudyList[this.input.subjectStudyList.findIndex(element => element.study.id == study.id)].tags,
+                UNLOADED
+            );
+        } else {
+            return new ReverseStudyNode(
+                study.id,
+                study.name,
+                [],
+                UNLOADED
+            );
+        }
     }
     
     

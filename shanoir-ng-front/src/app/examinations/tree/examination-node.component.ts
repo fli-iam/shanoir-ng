@@ -18,7 +18,7 @@ import { DatasetProcessing } from '../../datasets/shared/dataset-processing.mode
 import { Dataset } from '../../datasets/shared/dataset.model';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 
 import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
@@ -44,6 +44,10 @@ export class ExaminationNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     datasetIds: number[];
+	  hasEEG: boolean = false;
+	  hasDicom: boolean = false;
+    downloading = false;
+    hasBids: boolean = false;
 
     constructor(
         private router: Router,
@@ -51,7 +55,7 @@ export class ExaminationNodeComponent implements OnChanges {
         private datasetAcquisitionService: DatasetAcquisitionService,
         private examPipe: ExaminationPipe,
         private datasetService: DatasetService,
-        private msgService: MsgBoxService) {
+        private consoleService: ConsoleService) {
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -94,6 +98,7 @@ export class ExaminationNodeComponent implements OnChanges {
 
         return this.datasetAcquisitionService.getAllForExamination(this.node.id).then(dsAcqs => {
             if (!dsAcqs) dsAcqs = [];
+            dsAcqs = dsAcqs.filter(acq => acq.type !== 'Processed');
             this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq));
             this.fetchDatasetIds(this.node.datasetAcquisitions);
             this.nodeInit.emit(this.node);
@@ -110,7 +115,14 @@ export class ExaminationNodeComponent implements OnChanges {
                     return;
                 } else {
                     dsAcq.datasets.forEach(ds => {
-                        datasetIds.push(ds.id);                    
+                        datasetIds.push(ds.id);
+						if (ds.type === 'Eeg') {
+							this.hasEEG = true;
+						} else if (ds.type === 'BIDS') {
+                            this.hasBids = true;
+                        } else {
+							this.hasDicom = true;
+						}
                     });
                 }
             });
@@ -119,12 +131,17 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     download(format: string) {
+        if (this.downloading) {
+            return;
+        }
+        this.downloading = true;
         if (this.datasetIds && this.datasetIds.length == 0) return;
         let datasetIdsReady: Promise<void>;
         if (this.node.datasetAcquisitions == 'UNLOADED') {
             datasetIdsReady = this.loadDatasetAcquisitions();
             if (!this.datasetIds || this.datasetIds.length == 0) {
-                this.msgService.log('warn', 'Sorry, no dataset for this examination');
+                this.consoleService.log('warn', 'Sorry, no dataset for examination n°' + this.node?.id);
+                this.downloading = false;
                 return;
             }
         } else {
@@ -132,24 +149,25 @@ export class ExaminationNodeComponent implements OnChanges {
         }
         datasetIdsReady.then(() => {
             this.datasetService.downloadDatasets(this.datasetIds, format, this.progressBar);
+            this.downloading = false;
         });
     }
-
 
     mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
             dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds)) : []
+            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : []
         );
     }
     
-    mapDatasetNode(dataset: Dataset): DatasetNode {
+    mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
             dataset.id,
             dataset.name,
             dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : []
+            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
+            processed
         );
     }
     
@@ -157,7 +175,7 @@ export class ExaminationNodeComponent implements OnChanges {
         return new ProcessingNode(
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds)) : []
+            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : []
         );
     }
 }

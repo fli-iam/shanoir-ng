@@ -10,10 +10,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
+FROM ohif/viewer:v4.12.9.17613 AS viewer
+
 FROM nginx
 
 COPY nginx.conf http.conf https.conf shanoir.template.conf shanoir.template.dev.conf shanoir.template.prod.conf /etc/nginx/
+
+COPY viewer/app-config.js viewer/ohif-viewer.template.conf /etc/nginx/viewer/
+COPY --from=viewer /usr/share/nginx/html/. /etc/nginx/viewer/html/
+
 COPY entrypoint entrypoint_common /bin/
+
+
 
 COPY webapp/ /etc/nginx/html/
 

@@ -17,6 +17,7 @@ package org.shanoir.ng.shared.service;
 import java.io.File;
 import java.io.IOException;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.client.ClientProtocolException;
@@ -89,6 +90,12 @@ public class StowRsDicomService implements DicomServiceApi {
 			throw e;
 		}
 		LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
+	}
+
+	@Override
+	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
+		throw new NotImplementedException();
+		
 	}
 
 }

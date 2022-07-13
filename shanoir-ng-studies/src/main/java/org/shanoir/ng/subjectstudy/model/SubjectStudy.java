@@ -14,9 +14,16 @@
 
 package org.shanoir.ng.subjectstudy.model;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -26,6 +33,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.SubjectType;
+import org.shanoir.ng.tag.model.Tag;
 
 /**
  * Relation between the subjects and the studies.
@@ -64,6 +72,34 @@ public class SubjectStudy extends AbstractEntity {
 	/** Subject type. */
 	private Integer subjectType;
 
+	/** Tags associated to the subject. */
+	@OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<SubjectStudyTag> subjectStudyTags;
+
+	/**
+	 * @return the tags
+	 */
+	public List<Tag> getTags() {
+		if (getSubjectStudyTags() == null) return null;
+		return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
+	}
+	
+
+	public List<SubjectStudyTag> getSubjectStudyTags() {
+		return subjectStudyTags;
+	}
+
+	public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
+		if (this.subjectStudyTags != null) {
+			this.subjectStudyTags.clear();
+			if (subjectStudyTags != null) {
+				this.subjectStudyTags.addAll(subjectStudyTags);
+			}			
+		} else {
+			this.subjectStudyTags = subjectStudyTags;
+		}
+	}
+	
 	/**
 	 * @return the physicallyInvolved
 	 */

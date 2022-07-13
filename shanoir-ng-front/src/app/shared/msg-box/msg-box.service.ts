@@ -17,7 +17,10 @@ import { Injectable, ApplicationRef, Injector } from '@angular/core';
 import { Subject } from 'rxjs';
 
 type msgType = 'error' | 'warn' | 'info';
-class Message { constructor(public type: msgType, public txt: string, public duration: number) {} }
+class Message { 
+    public nb: number = 1;
+    constructor(public type: msgType, public txt: string, public duration: number) {} 
+}
 const ANIMATION_TRANSITION_DURATION = 500;
 const MSG_DURATION = 5000;
 
@@ -28,6 +31,7 @@ export class MsgBoxService {
     private messages: Message[] = [];
     //private appRef: ApplicationRef;
     private appRef: Promise<ApplicationRef> = new Promise((resolve, reject) => {});
+    private openingTimeout;
 
     constructor(private injector: Injector) {
         setTimeout(() => this.appRef = Promise.resolve(this.injector.get(ApplicationRef)));
@@ -35,29 +39,38 @@ export class MsgBoxService {
 
     public log(type: msgType, txt: string, duration: number = MSG_DURATION) {
         let message = new Message(type, txt, duration);
-        this.messages.push(message);
-        if (!this.opened) this.run();
+        if (this.messages.length > 1 && message.txt == this.messages[this.messages.length - 1].txt) {
+            this.messages[this.messages.length - 1].nb ++;
+        } else if (this.messages.length == 1 && this.messages[0].txt == message?.txt) {
+            if (this.openingTimeout) clearTimeout(this.openingTimeout);
+            this.messages[0].nb ++;
+            this.run();
+        } else {
+            this.messages.push(message);
+            if (!this.opened) {
+                this.run();
+            }
+        }
     }
 
     private run() {
         if (this.messages.length == 0) {
             this.close();
-            return;
+        } else {
+            this.open();
+            this.openingTimeout = setTimeout(() => {
+                this.close();
+                setTimeout(() => {
+                    this.messages.splice(0, 1);
+                    this.run();
+                }, ANIMATION_TRANSITION_DURATION);
+            }, this.messages[0].duration);
         }
-        this.open();
-        setTimeout(() => {
-            this.close();
-            setTimeout(() => {
-                this.messages.splice(0, 1);
-                this.run();
-            }, ANIMATION_TRANSITION_DURATION);
-        }, this.messages[0].duration);
     }
 
     private open() {
         if (!this.opened) {
             this.opened = true;
-            Promise
             this.appRef.then(appRef => appRef.tick());
         }
     }

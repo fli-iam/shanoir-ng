@@ -35,6 +35,10 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.shared.email.EmailBase;
+import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -42,12 +46,15 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -68,7 +75,7 @@ public class ImporterManagerService {
 	/**
 	 * For the moment Spring is not used here to autowire, as we try to keep the
 	 * anonymization project as simple as it is, without Spring annotations, to
-	 * be usable outside a Spring context.
+	 * be usable outside a Spring context, as e.g. in ShanoirUploader.
 	 * Maybe to change and think about deeper afterwards.
 	 */
 	private static final AnonymizationServiceImpl ANONYMIZER = new AnonymizationServiceImpl();
@@ -93,6 +100,9 @@ public class ImporterManagerService {
 
 	@Autowired
 	private ShanoirEventService eventService;
+	
+	@Autowired
+	StudyUserRightsRepository studyUserRightRepo;
 
 	@Value("${shanoir.import.directory}")
 	private String importDir;
@@ -131,7 +141,10 @@ public class ImporterManagerService {
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
-			event.setMessage("Analyzing series..");
+			
+			// do logging here
+			
+			event.setMessage("Anonymizing dicom..");
 			eventService.publishEvent(event);
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = patientsIt.next();
@@ -147,13 +160,8 @@ public class ImporterManagerService {
 					}
 				}
 				Long converterId = importJob.getConverterId();
-				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId);
+				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
 			}
-	        rabbitTemplate.setBeforePublishPostProcessors(message -> {
-	            message.getMessageProperties().setHeader("x-user-id",
-	            		KeycloakUtil.getTokenUserId());
-	            return message;
-	        });
 			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
 		} catch (Exception e) {
 			LOG.error("Error during import for study {} and examination {}", importJob.getStudyId(), importJob.getExaminationId(), e);
@@ -161,8 +169,50 @@ public class ImporterManagerService {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setProgress(1f);
 			eventService.publishEvent(event);
+			sendFailureMail(importJob, userId, e.getMessage());
 		}
 		LOG.info("Finished import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
+	}
+
+	private void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
+		EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
+		generatedMail.setExaminationId(importJob.getExaminationId().toString());
+		generatedMail.setStudyId(importJob.getStudyId().toString());
+		generatedMail.setSubjectName(importJob.getSubjectName());
+		generatedMail.setStudyName(importJob.getStudyName());
+		generatedMail.setUserId(userId);
+		
+		generatedMail.setErrorMessage(errorMessage != null ? errorMessage : "An unexpected error occured, please contact Shanoir support.");
+
+		sendMail(importJob, generatedMail, RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE);
+	}
+
+	/**
+	 * Sends the given mail in entry to all recipients in a given study
+	 * @param job the imprt job
+	 * @param email the recipients
+	 */
+	private void sendMail(ImportJob job, EmailBase email, String queue) {
+		List<Long> recipients = new ArrayList<>();
+
+		// Get all recpients
+		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(job.getStudyId());
+		for (StudyUser user : users) {
+			if (user.isReceiveNewImportReport()) {
+				recipients.add(user.getUserId());
+			}
+		}
+		if (recipients.isEmpty()) {
+			// Do not send any mail if no recipients
+			return;
+		}
+		email.setRecipients(recipients);
+
+		try {
+			rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(email));
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Could not send email for this import. ", e);
+		}
 	}
 	
 	/**

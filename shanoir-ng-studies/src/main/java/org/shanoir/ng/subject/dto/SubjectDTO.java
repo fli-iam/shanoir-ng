@@ -18,10 +18,16 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.Sex;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 
 public class SubjectDTO {
@@ -32,8 +38,10 @@ public class SubjectDTO {
     
     private String identifier;
 
-    @LocalDateAnnotations
-    private LocalDate birthDate;
+	@JsonSerialize(using = LocalDateSerializer.class)
+	@JsonDeserialize(using = LocalDateDeserializer.class)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	private LocalDate birthDate;
 
     private HemisphericDominance languageHemisphericDominance;
 

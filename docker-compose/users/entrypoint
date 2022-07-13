@@ -13,11 +13,13 @@ require	 SHANOIR_ADMIN_EMAIL
 require	 SHANOIR_SMTP_HOST
 
 optional SHANOIR_CERTIFICATE
+require  SHANOIR_CERTIFICATE_PEM_CRT
+require  SHANOIR_CERTIFICATE_PEM_KEY
 
 handle_microservice_migration
 
 case "$SHANOIR_MIGRATION" in
-auto|init)
+dev|init)
 	sync="--syncAllUsersToKeycloak=true" #FIXME: why can't we use an env var here?
 	;;
 *)
@@ -40,10 +42,12 @@ esac
 #  - in mode 'auto' the certificate is also automatically re-generated when the value of
 #    SHANOIR_URL_HOST changes
 keystore="/etc/ssl/certs/java/cacerts"
-crt="/etc/ssl/certs/java/shanoir-ng-nginx.crt"
-key="/etc/ssl/certs/java/shanoir-ng-nginx.key"
+crt="/etc/ssl/certs/java/$SHANOIR_CERTIFICATE_PEM_CRT"
+key="/etc/ssl/certs/java/$SHANOIR_CERTIFICATE_PEM_KEY"
 
-if [ "$SHANOIR_CERTIFICATE" = auto ]
+if [ "$SHANOIR_CERTIFICATE" = auto ] && \
+   [ "$SHANOIR_CERTIFICATE_PEM_CRT" != none ] && \
+   [ "$SHANOIR_CERTIFICATE_PEM_KEY" != none ]
 then
 	if [ ! -f "$crt" ] || [ "`openssl x509 -in "$crt"  -subject|grep ^subject=`" \
 				!= "subject=CN = $SHANOIR_URL_HOST" ]

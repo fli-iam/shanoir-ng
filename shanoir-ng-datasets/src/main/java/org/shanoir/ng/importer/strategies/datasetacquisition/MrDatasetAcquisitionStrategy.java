@@ -18,15 +18,20 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
+import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
@@ -72,6 +77,21 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	@Autowired
 	private StudyCardRepository studyCardRepository;
 
+    private static final Map<String, BidsDataType> dataTypeMapping;
+    static {
+        Map<String, BidsDataType> aMap = new HashMap<String, BidsDataType>();
+        aMap.put("ANGIO_TIME", BidsDataType.ANAT);
+        aMap.put("CINE", BidsDataType.ANAT);
+        aMap.put("DIFFUSION", BidsDataType.DWI);
+        aMap.put("FLUID_ATTENUATED", BidsDataType.ANAT);
+        aMap.put("FMRI", BidsDataType.FUNC);
+        aMap.put("MULTIECHO ", BidsDataType.ANAT);
+        aMap.put("T1", BidsDataType.ANAT);
+        aMap.put("T2", BidsDataType.ANAT);
+        aMap.put("T2_STAR", BidsDataType.ANAT);
+        //TODO: To be completed by an expert
+        dataTypeMapping = Collections.unmodifiableMap(aMap);
+    }
 	
 	@Override
 	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception {
@@ -118,11 +138,21 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 				mrDatasetAcquisition.getMrProtocol().setAcquisitionDuration(null);
 			}
 		}
-		
+
+		// Can be overridden by study cards
+		String imageType = dicomAttributes.getString(Tag.ImageType, 2);		
+		if (imageType != null && dataTypeMapping.get(imageType) != null) {
+			MrProtocolSCMetadata metadata = mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata();
+			if (mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata() == null) {
+				mrDatasetAcquisition.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
+			}
+			mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata().setBidsDataType(dataTypeMapping.get(imageType));
+		}
+
 		if (studyCard != null) {
 			studyCardProcessingService.applyStudyCard(mrDatasetAcquisition, studyCard, dicomAttributes);
 		}
-		
+
 		return mrDatasetAcquisition;
 	}
 

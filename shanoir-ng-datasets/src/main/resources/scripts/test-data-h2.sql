@@ -40,7 +40,7 @@ VALUES
 	(5,1573009,'150',5,6),
 	(6,1573013,'781.00',2,6);
 
-INSERT INTO Examination
+INSERT INTO examination
 	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id)
 VALUES 
 	(1, 1, parsedatetime('2017/01/01', 'yyyy/MM/dd'), false, 1, 'examination1', 1, 1),
@@ -124,7 +124,7 @@ VALUES
 	(3);
 	
 INSERT INTO study_user
-	(id, confirmed, receive_anonymization_report, receive_new_import_report, study_id, user_id, user_name)
+	(id, confirmed, receive_study_user_report, receive_new_import_report, study_id, user_id, user_name)
 VALUES
 	(1, 1, 0, 1, 1, 1, 'admin'),
 	(2, 1, 0, 1, 3, 1, 'admin'),

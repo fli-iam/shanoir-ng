@@ -32,11 +32,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.studyexamination.StudyExaminationRepository;
+import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
 import org.shanoir.ng.subject.model.PseudonymusHashValues;
@@ -47,6 +49,8 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.http.HttpStatus;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
@@ -66,9 +70,18 @@ public class SubjectServiceTest {
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
+	
+	@Mock
+	private SubjectMapper subjectMapperMock;
 
 	@InjectMocks
 	private SubjectServiceImpl subjectService;
+	
+	@Mock
+	private ObjectMapper objectMapper;
+	
+	@Mock
+	private StudyExaminationRepository studyExaminationRepository;
 
 	@Before
 	public void setup() {
@@ -76,7 +89,6 @@ public class SubjectServiceTest {
 		given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
 		//given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(ModelsUtil.createSubject());
 		given(subjectRepository.save(Mockito.any(Subject.class))).willReturn(createSubjectTosave());
-
 	}
 
 	@Test

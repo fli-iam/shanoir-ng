@@ -34,3 +34,6 @@ CREATE USER 'preclinical'@'localhost' IDENTIFIED BY 'password';
 CREATE USER 'preclinical'@'%' IDENTIFIED BY 'password';
 GRANT ALL ON *.* TO 'preclinical'@'localhost';
 GRANT ALL ON *.* TO 'preclinical'@'%';
+
+CREATE USER 'migrations'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL ON *.* TO 'migrations'@'localhost';

@@ -25,8 +25,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -40,7 +38,6 @@ import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.EegImportJob;
@@ -55,15 +52,15 @@ import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
-import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@PrepareForTest(KeycloakUtil.class)
 public class ImporterServiceTest {
 
 	@InjectMocks
@@ -86,22 +83,23 @@ public class ImporterServiceTest {
 	private DicomPersisterService dicomPersisterService;
 
 	@Mock
-	private BIDSService bidsService;
-
-	@Mock
 	private ShanoirEventService taskService;
 	
 	@Mock
 	StudyUserRightsRepository studyUserRightRepo;
 
+	private Examination exam;
+
 	@Before
 	public void setUp() throws IOException {
-        PowerMockito.mockStatic(KeycloakUtil.class);
-        given(KeycloakUtil.getKeycloakHeader()).willReturn(null);
-        given(examinationService.findById(Mockito.anyLong())).willReturn(new Examination());
+		exam = new Examination();
+		exam.setExaminationDate(LocalDate.now());
+		exam.setId(1l);
+        given(examinationService.findById(Mockito.anyLong())).willReturn(exam);
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testCreateEegDataset() throws IOException {
 		// Create a complete import job with some files and channels and events...
 		EegImportJob importJob = new EegImportJob();
@@ -162,15 +160,13 @@ public class ImporterServiceTest {
 		assertEquals(ds.getName(), dataset.getName());
 		assertEquals(DatasetExpressionFormat.EEG, ds.getDatasetExpressions().get(0).getDatasetExpressionFormat());
 		
-		// Check that we save bids folder too
-		verify(bidsService).addDataset(any(Examination.class), Mockito.eq(importJob.getSubjectName()), Mockito.eq(importJob.getStudyName()));
-
 		DatasetMetadata metadata = ds.getOriginMetadata();
 		assertNotNull(metadata);
 		assertEquals(DatasetModalityType.EEG_DATASET, metadata.getDatasetModalityType());
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void createAllDatasetAcquisition() throws Exception {
 		// GIVEN an importJob with series and patients
 		List<Patient> patients = new ArrayList<Patient>();
@@ -235,7 +231,6 @@ public class ImporterServiceTest {
 		// Check what we save at the end
 		verify(datasetAcquisitionService).create(datasetAcq);
 		verify(dicomPersisterService).persistAllForSerie(any());
-		verify(bidsService).addDataset(any(Examination.class), Mockito.eq(importJob.getSubjectName()), Mockito.eq(importJob.getStudyName()));
 
 		assertNotNull(datasetAcq);
 		

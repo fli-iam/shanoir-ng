@@ -108,8 +108,9 @@ public interface StudyService {
 	 * Links an examination to a study
 	 * @param examinationId an examination ID
 	 * @param studyId the lionked study ID
+	 * @param centerId 
 	 */
-	void addExaminationToStudy(Long examinationId, Long studyId);
+	void addExaminationToStudy(Long examinationId, Long studyId, Long centerId, Long subjectId);
 
 
 	/**

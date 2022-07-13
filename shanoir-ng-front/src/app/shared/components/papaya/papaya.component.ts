@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, OnInit, SimpleChange, Input } from "@angular/core";
+import { Component, OnInit, SimpleChange, Input, HostBinding, OnDestroy } from "@angular/core";
 
 declare var papaya: any;
 declare var papayaContainers: any[];
@@ -22,10 +22,10 @@ declare var papayaContainers: any[];
     templateUrl: "papaya.component.html",
     styleUrls: ["papaya.component.css"]
 })
-export class PapayaComponent implements OnInit {
+export class PapayaComponent implements OnInit, OnDestroy {
     @Input() params: any[];
     @Input() autoLoading: boolean = false;
-    loaded: boolean = false;
+    @HostBinding('class.expanded') loaded: boolean = false;
     private static loading: boolean = false;
 
     constructor() {}
@@ -50,6 +50,10 @@ export class PapayaComponent implements OnInit {
         }
     }
 
+    ngOnDestroy(): void {
+        papayaContainers[0].collapseViewer();
+    }
+
     load() {
         if (!PapayaComponent.loading) {
             this.loaded = true; 
@@ -66,7 +70,9 @@ export class PapayaComponent implements OnInit {
     }
 
     private setDefaultParams() {
-        if (!this.params["allowScroll"]) this.params["allowScroll"] = false;
+        this.params["allowScroll"] = false;
+        this.params["ignoreNiftiTransforms"] =  true;
+        this.params['expandable'] = true;
     }
 
 }

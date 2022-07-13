@@ -67,17 +67,18 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {
-                this.node.datasets = datasets.map(ds => this.mapDatasetNode(ds)).sort();
+                this.node.datasets = datasets.map(ds => this.mapDatasetNode(ds, false)).sort();
             });
         }
     }
 
-    private mapDatasetNode(dataset: Dataset): DatasetNode {
+    private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
             dataset.id,
             dataset.name,
             dataset.type,
-            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : []
+            dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
+            processed
         );
     }
     
@@ -85,7 +86,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
         return new ProcessingNode(
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds)) : []
+            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : []
         );
     }
 }

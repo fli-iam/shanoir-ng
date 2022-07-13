@@ -26,6 +26,7 @@ import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.command.CommandType;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +63,7 @@ public class StudyUserUpdateService {
         Iterable<StudyUser> toBeUpdatedDb = studyUserRepository.findAllById(toBeUpdated.keySet());
         for (StudyUser existingSu : toBeUpdatedDb) {
         	StudyUser replacingSu = toBeUpdated.get(existingSu.getId());
-			existingSu.setReceiveAnonymizationReport(replacingSu.isReceiveAnonymizationReport());
+			existingSu.setReceiveStudyUserReport(replacingSu.isReceiveStudyUserReport());
 			existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
 			existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
 			existingSu.setConfirmed(replacingSu.isConfirmed());

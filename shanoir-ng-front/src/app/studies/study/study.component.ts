@@ -19,8 +19,6 @@ import { Center } from '../../centers/shared/center.model';
 import { CenterService } from '../../centers/shared/center.service';
 import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
-import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
@@ -41,6 +39,7 @@ import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { StudyCardService } from '../../study-cards/shared/study-card.service';
 
 @Component({
     selector: 'study-detail',
@@ -59,22 +58,18 @@ export class StudyComponent extends EntityComponent<Study> {
 
     subjects: IdName[];
     selectedCenter: IdName;
-    
-    private browserPaging: BrowserPaging<StudyUser>;
-    columnDefs: any[];
     users: User[] = [];
+    studyNode: Study | StudyNode;
     
-    private studyUsersPromise: Promise<any>;
-    private freshlyAddedMe: boolean = false;
-    private studyUserBackup: StudyUser[] = [];
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
+    
+    public openPrefix: boolean = false;
 
     centerOptions: Option<IdName>[];
-    userOptions: Option<User>[];
     studyStatusOptions: Option<string>[] = [
         new Option<string>('IN_PROGRESS', 'In Progress'),
         new Option<string>('FINISHED', 'Finished')
@@ -86,13 +81,18 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyService: StudyService, 
             private subjectService: SubjectService,
             private userService: UserService,  
-            private studyRightsService: StudyRightsService) {
+            private studyRightsService: StudyRightsService,
+            private studyCardService: StudyCardService) {
 
         super(route, 'study');
+        this.activeTab = 'general';
     }
 
     public get study(): Study { return this.entity; }
-    public set study(study: Study) { this.entity = study; }
+    public set study(study: Study) {
+        this.studyNode = this.breadcrumbsService.currentStep.data.studyNode ? this.breadcrumbsService.currentStep.data.studyNode : study;
+        this.entity = study; 
+    }
 
     getService(): EntityService<Study> {
         return this.studyService;
@@ -102,7 +102,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
-        return this.studyService.get(this.id).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => {
             this.study = study;
             this.study.subjectStudyList = this.study.subjectStudyList.sort(
                 function(a: SubjectStudy, b:SubjectStudy) {
@@ -110,17 +110,23 @@ export class StudyComponent extends EntityComponent<Study> {
                     let bname = b.subjectStudyIdentifier ? b.subjectStudyIdentifier : b.subject.name;
                     return aname.localeCompare(bname);
                 });
-            }); 
+            return study;
+        });
+        if (this.keycloakService.isUserAdminOrExpert()) {
+            return Promise.all([
+                studyPromise,
+                this.fetchUsers()
+            ]).then(([study, users]) => {
+                Study.completeMembers(study, users);
+            });
+        } else {
+            return studyPromise.then();
+        }
     }
 
     initEdit(): Promise<void> {
         let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => this.study = study);
         this.getSubjects();
-
-        this.createColumnDefs();
-        this.studyUsersPromise = studyPromise.then(study => {
-            this.browserPaging = new BrowserPaging(study.studyUserList, this.columnDefs);
-        });
         
         this.protocolFiles = [];
 
@@ -129,13 +135,6 @@ export class StudyComponent extends EntityComponent<Study> {
             this.fetchUsers()
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
-            this.studyUserBackup = study.studyUserList ? study.studyUserList.map(a => Object.assign(new StudyUser, a)) : [];
-            if (study.studyUserList) {
-                study.studyUserList.forEach(studyUser => {
-                    let option = this.userOptions.find(userOpt => userOpt.value.id == studyUser.userId);
-                    if (option) option.disabled = true;
-                });
-            }
         });
         
         Promise.all([
@@ -155,28 +154,17 @@ export class StudyComponent extends EntityComponent<Study> {
         this.dataUserAgreement = null;
         this.getSubjects();
 
-        this.createColumnDefs();
-        this.studyUsersPromise = Promise.resolve().then(() => {
-            this.browserPaging = new BrowserPaging(this.study.studyUserList, this.columnDefs);
-        });
-
         this.fetchUsers().then(users => {
             // Add the connected user by default
             let connectedUser: User = users.find(user => this.isMe(user));
-            this.addUser(connectedUser, [StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE]);
+            this.addMe(connectedUser, [StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE]);
         });
         return Promise.resolve();
     }
 
     private fetchUsers(): Promise<User[]> {
         return this.userService.getAll().then(users => {
-            this.users = users.sort(function(a: User, b:User) {
-                return a.username.localeCompare(b.username);
-            })
-            this.userOptions = [];
-            if (users) {
-                users.forEach(user => this.userOptions.push(new Option<User>(user, user.username + ' (' +user.lastName + ' ' + user.firstName + ')')));
-            }
+            this.users = users;
             return users;
         });
     }
@@ -194,9 +182,11 @@ export class StudyComponent extends EntityComponent<Study> {
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
+            'tags': [this.study.tags],
             'challenge': [this.study.challenge],
             'protocolFile': [],
-            'dataUserAgreement': []
+            'dataUserAgreement': [],
+            'studyUserList': [this.study.studyUserList]
         });
         return formGroup;
     }
@@ -224,12 +214,12 @@ export class StudyComponent extends EntityComponent<Study> {
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
     }
 
-
     private newStudy(): Study {
         let study: Study = new Study();
         study.clinical = false;
         study.monoCenter = true;
         study.studyCenterList = [];
+        study.tags = [];
         study.timepoints = [];
         study.withExamination = true;
         study.protocolFilePaths = [];
@@ -253,15 +243,16 @@ export class StudyComponent extends EntityComponent<Study> {
         this.subjectService
             .getSubjectsNames()
             .then(subjects => {
-                this.subjects = subjects.sort(function(a:Subject, b:Subject){
+                this.subjects = subjects?.sort(function(a:Subject, b:Subject){
                     return a.name.localeCompare(b.name);
                 });
         });
     }
     
     /** Center section management  **/
-    private onMonoMultiChange() {
-        if (this.study.monoCenter && this.study.studyCenterList.length == 1) {
+    onMonoMultiChange() {
+        if (this.study.monoCenter && this.study.studyCenterList.length >= 1) {
+            this.study.studyCenterList = [this.study.studyCenterList[0]];
             let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
             if (option) this.selectedCenter = option.value; 
         }
@@ -278,9 +269,8 @@ export class StudyComponent extends EntityComponent<Study> {
             studyCenter.center.id = this.selectedCenter.id;
             studyCenter.center.name = this.selectedCenter.name;
             this.study.studyCenterList.push(studyCenter);
-    
-            let option = this.centerOptions.find(option => option.value.id == this.selectedCenter.id);
-            if (option) option.disabled = true;
+
+            this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         }
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
@@ -292,6 +282,11 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.studyCenterList = []
             this.onCenterAdd();
         }
+    }
+
+    onPrefixChange() {
+        this.form.get('studyCenterList').markAsDirty();
+        this.form.get('studyCenterList').updateValueAndValidity();
     }
 
     private validateCenter = (control: AbstractControl): ValidationErrors | null => {
@@ -308,8 +303,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.monoCenter = true;
             this.onMonoMultiChange();
         }
-        let option = this.centerOptions.find(option => option.value.id == centerId);
-        if (option) option.disabled = false;
+        this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }
@@ -329,119 +323,20 @@ export class StudyComponent extends EntityComponent<Study> {
         return false;
     }
 
-    /** StudyUser management **/
-    getPage(pageable: FilterablePageable): Promise<Page<StudyUser>> {
-        return new Promise((resolve) => {
-            this.studyUsersPromise.then(() => {
-                resolve(this.browserPaging.getPage(pageable));
-            });
-        });
-    }
-
     isMe(user: User): boolean {
         return user.id == KeycloakService.auth.userId;
     }
 
-    disableEdit(studyUser: StudyUser): boolean {
-        return !this.freshlyAddedMe && studyUser.userId == KeycloakService.auth.userId;
-    }
-
-    private createColumnDefs() {
-        this.columnDefs = [
-            { headerName: 'Username', field: 'userName' },
-            { headerName: 'First Name', field: 'user.firstName' },
-            { headerName: 'Last Name', field: 'user.lastName' },
-            { headerName: 'Email', field: 'user.email', width: '200%' },
-            { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
-            { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', suppressSorting: true},
-            { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
-                //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
-                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
-            { headerName: 'Can download', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', suppressSorting: true, 
-                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_DOWNLOAD, su, value),
-                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)},
-            { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', suppressSorting: true, 
-                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
-                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
-            { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px', 
-                onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
-                cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
-            { headerName: 'Received Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
-            { headerName: 'Received Anonymization Mail', type: 'boolean', field: 'receiveAnonymizationReport', editable: true, width: '54px' },
-            { headerName: '', type: 'button', awesome: 'fa-trash', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)}
-        ];
-    }
-
-    /**
-     * On select/unselect given right for the given study user 
-     */
-    private onEditRight(right: StudyUserRight, su: StudyUser, selected: boolean) {
-        if (!su.studyUserRights.includes(right) && selected) {
-            su.studyUserRights.push(right);
-        }
-        else if (su.studyUserRights.includes(right) && !selected) {
-            const index = su.studyUserRights.indexOf(right, 0);
-            if (index > -1) su.studyUserRights.splice(index, 1);
-        }
-    }
-
-    public onUserAdd(selectedUser: User) {
-        if (!selectedUser) {
-            return;
-        }
-        if (this.study.studyUserList.filter(user => user.userId == selectedUser.id).length > 0){
-            return;   
-        }
-        if (this.isMe(selectedUser)) {
-            this.freshlyAddedMe = true;
-        }
-        this.addUser(selectedUser);
-    }
-
-    private addUser(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
-        if (this.userOptions) {
-            let option = this.userOptions.find(opt => opt.value.id == selectedUser.id);
-            if (option) option.disabled = true;
-        }
-
-        let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
-        if (backedUpStudyUser) {
-            this.study.studyUserList.push(backedUpStudyUser);
-        } else {
-            let studyUser: StudyUser = new StudyUser();
-            studyUser.userId = selectedUser.id;
-            studyUser.userName = selectedUser.username;
-            studyUser.receiveAnonymizationReport = false;
-            studyUser.receiveNewImportReport = false;
-            studyUser.studyUserRights = rights;
-            studyUser.completeMember(this.users);
-            this.study.studyUserList.push(studyUser);
-        }
-        this.browserPaging.setItems(this.study.studyUserList);
-        this.table.refresh();
-        this.form.get('subjectStudyList').markAsDirty();
-        this.form.updateValueAndValidity();
-    }
-
-    private removeStudyUser = (item: StudyUser) => {
-        const index: number = this.study.studyUserList.indexOf(item);
-        if (index !== -1) {
-            this.study.studyUserList.splice(index, 1);
-        }
-        this.browserPaging.setItems(this.study.studyUserList);
-        this.table.refresh();
-        this.form.get('subjectStudyList').markAsDirty();
-        this.form.updateValueAndValidity();
-        StudyUser.completeMember(item, this.users);
-        if (this.userOptions) {
-            let option = this.userOptions.find(opt => opt.value.id == item.user.id);
-            if (option) option.disabled = false;
-        }
-    }
-
-    onStudyUserEdit() {
-        this.form.get('subjectStudyList').markAsDirty();
-        this.form.updateValueAndValidity();
+    private addMe(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
+        let studyUser: StudyUser = new StudyUser();
+        studyUser.userId = selectedUser.id;
+        studyUser.userName = selectedUser.username;
+        studyUser.receiveStudyUserReport = false;
+        studyUser.receiveNewImportReport = false;
+        studyUser.studyUserRights = rights;
+        studyUser.user = selectedUser;
+        this.study.studyUserList.unshift(studyUser);
+        this.study.studyUserList = this.study.studyUserList;
     }
 
     studyStatusStr(studyStatus: string) {
@@ -508,6 +403,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study.dataUserAgreementPaths = [];
             this.dataUserAgreement = null;           
         }
+
     }
 
     public downloadDataUserAgreement() {
@@ -517,19 +413,20 @@ export class StudyComponent extends EntityComponent<Study> {
     public attachDataUserAgreement(event: any) {
         this.dataUserAgreement = event.target.files[0];
         if (this.dataUserAgreement.name.indexOf(".pdf", this.dataUserAgreement.name.length - ".pdf".length) == -1) {
-            this.msgBoxService.log("error", "Only .pdf files are accepted");
+            this.consoleService.log("error", "Attaching DUA to study \"" + this.study.name + "\" : Only .pdf files are accepted");
             this.dataUserAgreement = null;
         } else if (this.dataUserAgreement.size > 50000000) {
-            this.msgBoxService.log("error", "File must be less than 50Mb.");
+            this.consoleService.log("error", "Attaching DUA to study \"" + this.study.name + "\" : File must be less than 50Mb.");
             this.dataUserAgreement = null;
         } else {
             this.study.dataUserAgreementPaths = ['DUA-' + this.dataUserAgreement.name];
         }
+        this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
 
-    save(): Promise<void> {
-        let prom = super.save().then(result => {
+    save(): Promise<Study> {
+        return super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
                 for (let file of this.protocolFiles) {
@@ -542,8 +439,21 @@ export class StudyComponent extends EntityComponent<Study> {
                     this.dataUserAgreement = null;
                 });
             }
+            return result;
+        }).then(study => {
+            this.studyCardService.getAllForStudy(study.id).then(studyCards => {
+                if (!studyCards || studyCards.length == 0) {
+                    this.confirmDialogService.confirm('Create a Study Card', 
+                        'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
+                        .then(userChoice => {
+                            if (userChoice) {
+                                this.router.navigate(['/study-card/create', {studyId: study.id}]);
+                            }
+                        });
+                }
+            })
+            return study;
         });
-        return prom;
     }
 
     getFileName(element): string {
@@ -594,5 +504,16 @@ export class StudyComponent extends EntityComponent<Study> {
    
     public hasDownloadRights(): boolean {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
+    }
+
+    onTagListChange() {
+        // hack : force change detection
+        this.study.tags = [].concat(this.study.tags); 
+        
+        // hack : force change detection for the subject-study tag list
+        this.study.subjectStudyList.forEach(subjStu => {
+            subjStu.study.tags = this.study.tags;
+        });
+        this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
     }
 }

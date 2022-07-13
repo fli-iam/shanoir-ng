@@ -20,7 +20,7 @@ VALUES
 	(3,'shanoirStudy3', NOW(), parsedatetime('2017/12/31', 'yyyy/MM/dd'), 1, 0, 0, 0, 1, 0, 1, 0);
 
 INSERT INTO study_user
-	(id, receive_anonymization_report, receive_new_import_report, confirmed, study_id, user_id, user_name)
+	(id, receive_study_user_report, receive_new_import_report, confirmed, study_id, user_id, user_name)
 VALUES
 	(1, 0, 1, 1, 1, 1, 'admin'),
 	(2, 0, 1, 1, 3, 1, 'admin'),
@@ -36,8 +36,8 @@ VALUES
     (3, 4),
     (4, 1);
 	
-insert into `center`(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`) values (1,'France','CHU Rennes','','','','Rennes','');
-insert into `center`(`id`,`COUNTRY`,`NAME`,`PHONE_NUMBER`,`POSTAL_CODE`,`STREET`,`CITY`,`WEBSITE`) values (2,'France','CHU Reims','','','','Reims','');
+insert into `center`(`id`,`country`,`name`,`phone_number`,`postal_code`,`street`,`city`,`website`) values (1,'France','CHU Rennes','','','','Rennes','');
+insert into `center`(`id`,`country`,`name`,`phone_number`,`postal_code`,`street`,`city`,`website`) values (2,'France','CHU Reims','','','','Reims','');
 
 insert into study_center 
 	(id, center_id, study_id) 
