@@ -418,7 +418,7 @@ public class DatasetMigrationService {
 			String result = null;
 			if (DatasetExpressionFormat.DICOM.equals(file.getDatasetExpression().getDatasetExpressionFormat())) {
 				// Dicom
-				result = downloader.downloadDicomFilesForURL(file.getPath(), workFolder, "");
+				result = downloader.downloadDicomFilesForURL(file.getPath(), workFolder, "", createdDataset);
 			} else {
 				// Nifti
 				URL url = new URL(file.getPath().replaceAll("%20", " "));

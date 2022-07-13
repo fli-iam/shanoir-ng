@@ -654,7 +654,7 @@ public class ImporterService {
 			dataset.setStudyId(importJob.getStudyId());
 			dataset.setSubjectId(importJob.getSubjectId());
 
-			dataset = datasetService.create(dataset);
+			dataset = datasetService.save(dataset);
 			
 			solrService.indexDataset(dataset.getId());
 

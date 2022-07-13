@@ -97,7 +97,7 @@ public class WADODownloaderService {
 
 	@Autowired
 	private RestTemplate restTemplate;
-	
+
 	@PostConstruct
 	public void initRestTemplate() {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
@@ -125,38 +125,37 @@ public class WADODownloaderService {
 		String instanceUID = null;
 		// handle and check at first for WADO-RS URLs by "/instances/"
 		int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
+		if (indexInstanceUID > 0) {
+			instanceUID = extractInstanceUID(url, instanceUID);
+			byte[] responseBody = downloadFileFromPACS(url);
+			extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
+		} else {
+			// handle and check secondly for WADO-URI URLs by "objectUID="
+			// instanceUID == objectUID
+			indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
 			if (indexInstanceUID > 0) {
 				instanceUID = extractInstanceUID(url, instanceUID);
 				byte[] responseBody = downloadFileFromPACS(url);
-				extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
-			} else {
-				// handle and check secondly for WADO-URI URLs by "objectUID="
-				// instanceUID == objectUID
-				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
-				if (indexInstanceUID > 0) {
-					instanceUID = extractInstanceUID(url, instanceUID);
-					byte[] responseBody = downloadFileFromPACS(url);
-					String serieDescription = dataset.getUpdatedMetadata().getName();
-					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-					String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
-					String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
-					if (name.contains(File.separator)) {
-						name = name.replaceAll(File.separator, "_");
-					}
-					File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
-					ByteArrayInputStream bIS = null;
-					try {
-						bIS = new ByteArrayInputStream(responseBody);
-						Files.copy(bIS, extractedDicomFile.toPath());
-						return extractedDicomFile.getAbsolutePath();
-					} finally {
-						if (bIS != null) {
-							bIS.close();
-						}
-					}
-				} else {
-					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
+				String serieDescription = dataset.getUpdatedMetadata().getName();
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
+				String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+				String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
+				if (name.contains(File.separator)) {
+					name = name.replaceAll(File.separator, "_");
 				}
+				File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
+				ByteArrayInputStream bIS = null;
+				try {
+					bIS = new ByteArrayInputStream(responseBody);
+					Files.copy(bIS, extractedDicomFile.toPath());
+					return extractedDicomFile.getAbsolutePath();
+				} finally {
+					if (bIS != null) {
+						bIS.close();
+					}
+				}
+			} else {
+				throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
 			}
 		}
 		return null;
