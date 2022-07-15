@@ -5,11 +5,7 @@ import java.util.Optional;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.repository.CarminDatasetProcessingRepository;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +18,6 @@ public class CarminDatasetPorcessingServiceImpl extends BasicEntityServiceImpl<C
 
         @Autowired
         private CarminDatasetProcessingRepository carminDatasetProcessingRepository;
-
-        @Autowired
-        private ShanoirEventService eventService;
 
         @Override
         protected CarminDatasetProcessing updateValues(CarminDatasetProcessing from, CarminDatasetProcessing to) {
@@ -50,21 +43,7 @@ public class CarminDatasetPorcessingServiceImpl extends BasicEntityServiceImpl<C
         @Override
         public CarminDatasetProcessing createCarminDatasetProcessing(
                         final CarminDatasetProcessing carminDatasetProcessing) {
-                ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT,
-                                carminDatasetProcessing.getResultsLocation(), KeycloakUtil.getTokenUserId(),
-                                "Starting import...",
-                                ShanoirEvent.IN_PROGRESS, 0f);
-                eventService.publishEvent(event);
-
                 CarminDatasetProcessing savedEntity = carminDatasetProcessingRepository.save(carminDatasetProcessing);
-
-                event.setStatus(ShanoirEvent.SUCCESS);
-                event.setMessage(carminDatasetProcessing.getPipelineIdentifier() + "("
-                                + carminDatasetProcessing.getStudyId() + ")"
-                                + ": Successfully created carmin dataset processing ");
-                event.setProgress(1f);
-                eventService.publishEvent(event);
-
                 return savedEntity;
         }
 
