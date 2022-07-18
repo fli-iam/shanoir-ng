@@ -34,6 +34,7 @@ import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
 import { FacetField, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { Range } from '../shared/models/range.model';
+import { ProcessingService } from '../processing/processing.service';
 
 
 @Component({
@@ -90,7 +91,7 @@ export class SolrSearchComponent implements AfterViewChecked{
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
-            private confirmDialogService: ConfirmDialogService, private msgBoxService: MsgBoxService) {
+            private confirmDialogService: ConfirmDialogService, private msgBoxService: MsgBoxService, private processingService: ProcessingService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
@@ -441,6 +442,7 @@ export class SolrSearchComponent implements AfterViewChecked{
             {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
             {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true }
         );
         return customActionDefs;
     }
@@ -456,6 +458,7 @@ export class SolrSearchComponent implements AfterViewChecked{
             {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
             {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
             {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true }
         );
         return customActionDefs;
     }
@@ -496,6 +499,10 @@ export class SolrSearchComponent implements AfterViewChecked{
 
     registerTextResetCallback(resetTextCallback: () => void) {
         this.clearTextSearch = resetTextCallback;
+    }
+    initExecutionMode(){
+        this.processingService.setDatasets(this.selectedDatasetIds);
+        this.router.navigate(['/processing']);
     }
 
 }

@@ -77,6 +77,18 @@ export class KeycloakService {
         return this.tokenPromise;
     }
 
+    getRefreshToken(): Promise<string> {
+        this.tokenPromise = new Promise<string>((resolve, reject) => {
+            if (KeycloakService.auth.authz.token) {
+                resolve(<string>KeycloakService.auth.authz.refreshToken);
+            } else {
+                reject();
+            }
+        });
+        return this.tokenPromise;
+    }
+
+
     isUserAdmin(): boolean {
         return KeycloakService.auth.authz && KeycloakService.auth.authz.hasRealmRole("ROLE_ADMIN");
     }
@@ -91,5 +103,9 @@ export class KeycloakService {
 
     canUserImportFromPACS(): boolean {
         return this.isUserAdmin() || KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed.canImportFromPACS;
+    }
+
+    getUserId(){
+        return KeycloakService.auth.userId;
     }
 }

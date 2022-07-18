@@ -1,0 +1,9 @@
+<section>
+    <h2>Processing</h2>
+    <div *ngIf="error">
+        <p><strong class="warning"><i class="fas fa-exclamation-triangle"></i> No dataset is selected to run executions</strong></p>
+        <p>You should select datasets first</p>
+        <button type="button" (click)="navigateToSolr()">Select Datasets</button>
+    </div>
+    <router-outlet *ngIf="!error"></router-outlet>
+</section>
