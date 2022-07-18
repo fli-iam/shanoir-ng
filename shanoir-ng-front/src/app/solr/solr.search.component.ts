@@ -34,11 +34,8 @@ import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { Range } from '../shared/models/range.model';
-<<<<<<< HEAD
 import { ProcessingService } from '../processing/processing.service';
-=======
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
->>>>>>> 4e238226b3085aa169f44dfe9e3c3ad41ecf7e3a
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -80,7 +77,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
-            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService) {
+            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
@@ -469,14 +466,11 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getFacetFieldPage(pageable: FacetPageable, facetName: string): Promise<FacetResultPage> {
         return this.solrService.getFacet(facetName, pageable, this.solrRequest);
     }
-<<<<<<< HEAD
     initExecutionMode(){
         this.processingService.setDatasets(this.selectedDatasetIds);
         this.router.navigate(['/processing']);
     }
 
-=======
->>>>>>> 4e238226b3085aa169f44dfe9e3c3ad41ecf7e3a
 }
 
 export interface SelectionBlock {
