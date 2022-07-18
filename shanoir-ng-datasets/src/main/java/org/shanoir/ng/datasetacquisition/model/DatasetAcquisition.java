@@ -29,6 +29,7 @@ import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.bids.BidsDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.eeg.EegDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -61,7 +62,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 	@Type(value = MrDatasetAcquisition.class, name = "Mr"),
 	@Type(value = PetDatasetAcquisition.class, name = "Pet"),
 	@Type(value = GenericDatasetAcquisition.class, name = "Generic"),
-	@Type(value = EegDatasetAcquisition.class, name = "Eeg")})
+	@Type(value = EegDatasetAcquisition.class, name = "Eeg"),
+	@Type(value = BidsDatasetAcquisition.class, name = "BIDS")})
 public abstract class DatasetAcquisition extends AbstractEntity {
 
 	/**

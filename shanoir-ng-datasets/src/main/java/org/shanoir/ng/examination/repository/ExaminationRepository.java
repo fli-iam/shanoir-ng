@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 /**
@@ -38,6 +39,27 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 * @return list of examinations.
 	 */
 	Page<Examination> findByStudyIdIn(List<Long> studyIds, Pageable pageable);
+	
+	/**
+	 * Get a paginated list of examinations for a list of studies filtered by subject name.
+	 * 
+	 * @param studyIds
+	 * @param patientName
+	 * @param pageable
+	 * @return
+	 */
+	@Query(value = "SELECT * FROM examination AS ex JOIN subject AS sub WHERE ex.subject_id = sub.id AND ex.study_id in (?1) AND sub.name like %?2%",
+			countQuery = "SELECT count(*) FROM examination AS ex JOIN subject AS sub WHERE ex.subject_id = sub.id AND ex.study_id in (?1) AND sub.name like %?2%",
+			nativeQuery = true)
+	Page<Examination> findByStudyIdInAndBySubjectName(List<Long> studyIds, String patientName, Pageable pageable);
+	
+	/**
+	 * Get all examinations for a list of studies.
+	 * 
+	 * @param studyIds
+	 * @return
+	 */
+	List<Examination> findByStudyIdIn(List<Long> studyIds);
 
 	/**
 	 * Get a paginated list of examinations for a list of studies.
@@ -106,5 +128,24 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 * @return list of examinations.
 	 */
 	List<Examination> findByStudyId(Long studyId);
+	
+	/**
+	 * Get all examinations, clinical or preclinical.
+	 * 
+	 * @return list of examinations.
+	 */
+	List<Examination> findAll();
+	
+	/**
+	 * Get all examinations, clinical or preclinical filtered by the patient/subject name.
+	 * 
+	 * @param patientName
+	 * @param pageable
+	 * @return
+	 */
+	@Query(value = "SELECT * FROM examination AS ex JOIN subject AS sub WHERE ex.subject_id = sub.id AND sub.name like %?1%",
+			countQuery = "SELECT count(*) FROM examination AS ex JOIN subject AS sub WHERE ex.subject_id = sub.id AND sub.name like %?1%",
+			nativeQuery = true)
+	Page<Examination> findAllBySubjectName(String patientName, Pageable pageable);
 
 }

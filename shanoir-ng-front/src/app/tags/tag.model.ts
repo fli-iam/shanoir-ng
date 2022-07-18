@@ -12,6 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Entity } from '../shared/components/entity/entity.abstract';
+import { Id } from '../shared/models/id.model';
 
 export class Tag extends Entity {
 
@@ -26,5 +27,23 @@ export class Tag extends Entity {
         tag.color = color;
         return tag;
     }
+
+    public equals(tag: Tag): boolean {
+        if (!tag) return false;
+        else if (this.id && tag.id) {
+            return this.id == tag.id;
+        } else {
+            return tag && tag.name?.trim() == this.name?.trim() && tag.color == this.color;
+        }
+    }
     
+}
+
+
+export class SubjectStudyTagDTO {
+    
+    constructor(
+        public subjectStudy: Id,
+        public tag: Tag
+    ) {}
 }

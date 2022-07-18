@@ -11,34 +11,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Injectable } from "@angular/core";
-import {
-    HttpInterceptor,
-    HttpRequest,
-    HttpHandler,
-    HttpEvent
-} from '@angular/common/http';
-
+import { formatDate } from '@angular/common';
+import { HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { StatusCodes } from 'http-status-codes';
 import { Observable } from 'rxjs/Observable';
-import { LoaderService } from "../shared/loader/loader.service";
-import { finalize } from 'rxjs/operators';
+import { catchError, finalize, tap } from 'rxjs/operators';
+
+import { ConsoleService } from '../shared/console/console.service';
+import { LoaderService } from '../shared/loader/loader.service';
+
 
 @Injectable()
 export class ShanoirHttpInterceptor implements HttpInterceptor {
 
-    constructor(private loaderService: LoaderService) {}
+    constructor(private loaderService: LoaderService, private consoleService: ConsoleService) {}
 
     intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         if (request.url.endsWith('shanoir-ng/users/tasks')) {
             return next.handle(request);
         } else {
             this.loaderService.startLoader();
-            return next.handle(request).pipe(finalize(() => {
-                this.loaderService.stopLoader();
-            }));
+            return next.handle(request).pipe(
+                finalize(() => {
+                    this.loaderService.stopLoader();
+                })
+            );
         }
     }
 
-    
 }

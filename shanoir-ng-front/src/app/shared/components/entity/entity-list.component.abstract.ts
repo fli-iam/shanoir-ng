@@ -20,7 +20,7 @@ import { capitalizeFirstLetter } from '../../../utils/app.utils';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ShanoirError } from '../../models/error.model';
-import { MsgBoxService } from '../../msg-box/msg-box.service';
+import { ConsoleService } from '../../console/console.service';
 import { WindowService } from '../../services/window.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
@@ -38,10 +38,10 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected confirmDialogService: ConfirmDialogService;
     protected keycloakService: KeycloakService;
     private entityRoutes: EntityRoutes;
-    protected msgBoxService: MsgBoxService;
+    protected consoleService: ConsoleService;
     protected breadcrumbsService: BreadcrumbsService;
     public windowService: WindowService;
-    public onDelete: Subject<any> =  new Subject<any>();
+    public onDelete: Subject<{entity: Entity, error?: ShanoirError}> =  new Subject();
     public onAdd: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
     private selectedId:  number;
@@ -60,7 +60,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
         this.router = ServiceLocator.injector.get(Router);
         this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
-        this.msgBoxService = ServiceLocator.injector.get(MsgBoxService);
+        this.consoleService = ServiceLocator.injector.get(ConsoleService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
         this.windowService = ServiceLocator.injector.get(WindowService);
@@ -85,13 +85,13 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
 
     private completeColDefs(): void {
         if (this.edit) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
         }
         if (this.view) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-eye", action: item => this.goToView(item.id) });
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item.id) });
         }
         if (this.delete) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
         }
         if (this.showId && this.keycloakService.isUserAdmin && !this.columnDefs.find(col => col.field == 'id')) {
             this.columnDefs.unshift({ headerName: 'Id', field: 'id', type: 'number', width: '30px'});
@@ -101,7 +101,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     private completeCustomActions(): void {
         if (this.new) {
             this.customActionDefs.push({
-                title: "New",awesome: "fa-plus", action: item => this.router.navigate([this.entityRoutes.getRouteToCreate()])
+                title: "New",awesome: "fa-solid fa-plus", action: item => this.router.navigate([this.entityRoutes.getRouteToCreate()])
             });
         }
     }
@@ -123,13 +123,13 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
             ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
-                        this.onDelete.next(entity);
+                        this.onDelete.next({entity: entity});
                         this.table.refresh().then(() => {
-                            this.msgBoxService.log('info', 'The ' + this.ROUTING_NAME + ' sucessfully deleted');
+                            this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
                         });
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({error: new ShanoirError(reason), entity: entity});
                             if (reason.error.code != 422) throw Error(reason);
                         } else {
                             console.error(reason);

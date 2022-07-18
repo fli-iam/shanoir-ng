@@ -27,12 +27,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.pathologies.PathologyRepository;
 import org.shanoir.ng.preclinical.pathologies.PathologyServiceImpl;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Pathology models service test.

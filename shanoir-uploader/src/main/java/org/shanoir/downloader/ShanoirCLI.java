@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLSession;
 import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.apache.commons.cli.CommandLine;
@@ -20,7 +18,6 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-
 import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
 

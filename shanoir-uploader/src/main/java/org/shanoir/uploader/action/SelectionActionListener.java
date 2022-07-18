@@ -17,8 +17,8 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.Serie;
-import org.shanoir.dicom.model.DicomTreeNode;
+import org.shanoir.uploader.dicom.DicomTreeNode;
+import org.shanoir.uploader.dicom.Serie;
 import org.shanoir.uploader.dicom.query.Patient;
 import org.shanoir.uploader.dicom.query.Study;
 import org.shanoir.uploader.gui.MainWindow;

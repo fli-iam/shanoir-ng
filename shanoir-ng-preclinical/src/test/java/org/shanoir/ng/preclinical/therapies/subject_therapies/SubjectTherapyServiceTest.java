@@ -27,13 +27,13 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.references.RefsRepository;
 import org.shanoir.ng.preclinical.subjects.AnimalSubjectRepository;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.TherapyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Subject Therapy service test.

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.studycard.model;
 
+import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMetadata;
 import org.shanoir.ng.dataset.modality.MrDatasetNature;
@@ -194,6 +195,19 @@ public enum AssignmentField implements DatasetFieldUpdater {
 				} else {
 					throw new IllegalArgumentException("dataset should be of type MrDataset");
 				}
+			}
+		}
+	},
+	BIDS_DATA_TYPE(15) {
+		@Override
+		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
+			BidsDataType dataType = BidsDataType.valueOf(updatedValue);
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
+				mrDsAcq.getMrProtocol().getUpdatedMetadata().setBidsDataType(dataType);
+			} else {
+				throw new IllegalArgumentException("datasetAcquisition should be of type MrDatasetAcquisition");
 			}
 		}
 	};

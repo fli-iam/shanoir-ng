@@ -21,7 +21,7 @@ import { BrowserPaginEntityListComponent } from '../../../../shared/components/e
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
@@ -66,7 +66,7 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
             
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
-            colDef.push({headerName: "", type: "button", awesome: "fa-download",action: item => this.downloadModelSpecifications(item) });
+            colDef.push({headerName: "", type: "button", awesome: "fa-solid fa-download",action: item => this.downloadModelSpecifications(item) });
         }
         return colDef;       
     }
@@ -131,12 +131,12 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
             ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
-                        this.onDelete.next(entity);
+                        this.onDelete.next({entity: entity});
                         this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-pathology-model sucessfully deleted');
+                        this.consoleService.log('info', 'The preclinical-pathology-model n° ' + entity.id + ' was sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({entity: entity, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
                     });                    

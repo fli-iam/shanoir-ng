@@ -33,6 +33,9 @@ import { ProcessedDatasetType } from '../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../datasets/shared/dataset-type.model';
 import { DatasetProcessingPipe } from '../../datasets/dataset-processing/dataset-processing.pipe';
 import { ImportMode } from '../../import/import.component';
+import { ProcessedDatasetImportJob } from '../shared/processed-dataset-data.model';
+import { ImportService } from '../shared/import.service';
+import { ConsoleService } from '../../shared/console/console.service';
 
 @Component({
     selector: 'processed-dataset-clinical-context',
@@ -74,7 +77,9 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService,
             public studyRightsService: StudyRightsService,
-            private keycloakService: KeycloakService
+            private keycloakService: KeycloakService,
+            private consoleService: ConsoleService,
+            private importService: ImportService
             ) {
 
         breadcrumbsService.nameStep('2. Context'); 
@@ -259,9 +264,43 @@ export class ProcessedDatasetClinicalContextComponent implements OnDestroy {
     }
 
     public next() {
-        this.router.navigate(['imports/processed-dataset-finish']);
+        this.startImportJob();
     }
-    
+
+    public startImportJob(): void {
+        let context = this.importDataService.contextData;
+            let that = this;
+            this.importData()
+                .then((importJob: ProcessedDatasetImportJob) => {
+                    this.importDataService.reset();
+                    setTimeout(function () {
+                        that.consoleService.log('info', 'Import successfully started for subject "' + that.subject.name + '" in study "' + that.study.name + '"');
+                    }, 0);
+                    // go back to the first step of import
+                    this.router.navigate(['/imports/processed-dataset']);
+                }).catch(error => {
+                    // Clean context
+                    this.importDataService.reset();
+                    throw error;
+        });
+    }
+
+    private importData(): Promise<any> {
+        let context = this.importDataService.contextData;
+        let importJob = new ProcessedDatasetImportJob();
+        importJob.subjectId = context.subject.id;
+        importJob.subjectName = context.subject.name;
+        importJob.studyName = context.study.name;
+        importJob.studyId = context.study.id;
+        importJob.datasetType = context.datasetType;
+        importJob.processedDatasetFilePath = context.processedDatasetFilePath;
+        importJob.processedDatasetType = context.processedDatasetType;
+        importJob.processedDatasetName = context.processedDatasetName;
+        importJob.processedDatasetComment = context.processedDatasetComment;
+        importJob.datasetProcessing = context.datasetProcessing;
+        return this.importService.startProcessedDatasetImportJob(importJob);
+    }
+
     protected hasAdminRightOn(study: Study): Promise<boolean> {
         if (!study) return Promise.resolve(false);
         else if (this.keycloakService.isUserAdmin()) return Promise.resolve(true);

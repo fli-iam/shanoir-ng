@@ -41,7 +41,6 @@ import { TaskService } from './async-tasks/task.service';
 import { BidsTreeComponent } from './bids/tree/bids-tree.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
-import { Router } from './breadcrumbs/router';
 import { CenterListComponent } from './centers/center-list/center-list.component';
 import { CenterComponent } from './centers/center/center.component';
 import { CenterService } from './centers/shared/center.service';
@@ -82,15 +81,12 @@ import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
-import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
-import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
-import { FinishProcessedDatasetImportComponent } from './import/processed-dataset-finish/processed-dataset-finish.component';
 import { SelectSeriesComponent } from './import/select-series/select-series.component';
 import { DicomArchiveService } from './import/shared/dicom-archive.service';
 import { ImportDataService } from './import/shared/import.data-service';
@@ -117,7 +113,6 @@ import { TableComponent } from './shared/components/table/table.component';
 import { TooltipComponent } from './shared/components/tooltip/tooltip.component';
 import { TreeNodeComponent } from './shared/components/tree/tree-node.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
-import { ConsoleComponent } from './shared/console/console.line.component';
 import { DatepickerComponent } from './shared/date-picker/date-picker.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { HelpMessageComponent } from './shared/help-message/help-message.component';
@@ -230,20 +225,24 @@ import { EnumUtils }      from './preclinical/shared/enum/enumUtils';
 import { BrukerUploadComponent }   from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 // import { AnimalClinicalContextComponent } from './preclinical/importBruker/clinical-context/animal-clinical-context.component';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
-import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ImportBrukerService } from './preclinical/importBruker/importBruker.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { DUAComponent } from './dua/dua.component';
 import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
-import { SolrCriterionComponent } from './solr/criteria/solr.criterion.component';
+import { SolrPagingCriterionComponent } from './solr/criteria/solr.paging-criterion.component';
 import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
+import { SolrTextSearchModeComponent } from './solr/text-search/solr.text-search-mode.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
+import { ConsoleComponent } from './shared/console/console.component';
+import { ConsoleService } from './shared/console/console.service';
 import { ExtraDataService } from './preclinical/extraData/extraData/shared/extradata.service'
 import { TagCreatorComponent } from './tags/tag.creator.component';
 import { TagInputComponent } from './tags/tag.input.component';
+import { StudyDTOService } from './studies/shared/study.dto';
+import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
 import { ProcessingComponent } from './processing/processing.component';
@@ -279,7 +278,6 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         CenterComponent,
         CenterListComponent,
         ConfirmDialogComponent,
-        ConsoleComponent,
         DropdownMenuComponent,
         UserComponent,
         ExaminationListComponent,
@@ -342,9 +340,6 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         ModalsComponent,
         BreadcrumbsComponent,
         SelectBoxComponent,
-        FinishImportComponent,
-        FinishEegImportComponent,
-        FinishProcessedDatasetImportComponent,
         UploaderComponent,
         HelpMessageComponent,
         AsyncTasksComponent,
@@ -397,8 +392,7 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
     	PhysiologicalDataFormComponent,
     	BloodGasDataFormComponent, 
     	BrukerUploadComponent,
-        BrukerSelectSeriesComponent, 
-        BrukerFinishImportComponent,
+        BrukerSelectSeriesComponent,
         LoaderComponent,
         SubjectNodeComponent,
         ExaminationNodeComponent,
@@ -416,12 +410,14 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         DUAComponent,
         DUASigningComponent,
         EventTypePipe,
-        SolrCriterionComponent,
+        SolrPagingCriterionComponent,
         SolrTextSearchComponent,
+        SolrTextSearchModeComponent,
         ChallengeBlockComponent,
         TagCreatorComponent,
         SolrRangeCriterionComponent,
         ChallengeBlockComponent,
+        ConsoleComponent,
         TagInputComponent,
         StudyUserListComponent,
         VarDirective,
@@ -491,7 +487,6 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
     	EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
 	    BreadcrumbsService,
-        Router,
         GlobalService,
         ImportDataService,
         NiftiConverterService,
@@ -521,7 +516,10 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         LoaderService,
         SubjectStudyPipe,
         KeycloakSessionService,
+        ConsoleService,
 		ExtraDataService,
+        StudyDTOService,
+        SubjectDTOService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

@@ -37,7 +37,7 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_PATHOLOGIES_URL}${pathology.id}/${PreclinicalUtils.PRECLINICAL_MODEL_DATA}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<PathologyModel[]>(url)
             .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));
+            .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
 
     getUploadUrl(model_id: number): string {

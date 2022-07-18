@@ -40,7 +40,7 @@ VALUES
 	(5,1573009,'150',5,6),
 	(6,1573013,'781.00',2,6);
 
-INSERT INTO Examination
+INSERT INTO examination
 	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id)
 VALUES 
 	(1, 1, parsedatetime('2017/01/01', 'yyyy/MM/dd'), false, 1, 'examination1', 1, 1),

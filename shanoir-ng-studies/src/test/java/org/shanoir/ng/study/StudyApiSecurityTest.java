@@ -29,8 +29,6 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.shanoir.ng.bids.service.StudyBIDSService;
-import org.shanoir.ng.bids.utils.BidsDeserializer;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -83,12 +81,6 @@ public class StudyApiSecurityTest {
 	@MockBean
 	private SubjectStudyRepository subjectStudyRepository;
 	
-	@MockBean
-	private StudyBIDSService bidsService;
-	
-	@MockBean
-	private BidsDeserializer bidsDeserializer;
-
 	@Before
 	public void setup() {
 		mockNew = ModelsUtil.createStudy();
@@ -150,6 +142,7 @@ public class StudyApiSecurityTest {
 		assertAccessAuthorized(api::deleteStudy, ENTITY_ID);
 		assertAccessAuthorized(api::findStudies);
 		assertAccessAuthorized(t -> { try { api.findStudiesNames(); } catch (RestServiceException e) {} }, null);
+		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
 		assertAccessAuthorized(api::findStudyById, ENTITY_ID);
 		assertAccessAuthorized((t, u) -> { try { api.saveNewStudy(t, u); } catch (RestServiceException e) {}}, mockNew, mockBindingResult);
 		assertAccessAuthorized((t, u, v) -> { try { api.updateStudy(t, u, v); } catch (RestServiceException e) {}}, ENTITY_ID, mockExisting, mockBindingResult);

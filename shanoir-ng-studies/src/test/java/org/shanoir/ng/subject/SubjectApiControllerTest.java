@@ -27,7 +27,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -91,16 +90,13 @@ public class SubjectApiControllerTest {
 	private SubjectUniqueConstraintManager uniqueConstraintManager;
 	
 	@MockBean
-	StudyBIDSService bidsService;
-
-	@MockBean
 	private ShanoirEventService eventService;
 
 	@Before
 	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		given(subjectMapperMock.subjectsToSubjectDTOs(Mockito.anyListOf(Subject.class)))
+		given(subjectMapperMock.subjectsToSubjectDTOs(Mockito.anyList()))
 		.willReturn(Arrays.asList(new SubjectDTO()));
 		
 		doNothing().when(subjectServiceMock).deleteById(1L);

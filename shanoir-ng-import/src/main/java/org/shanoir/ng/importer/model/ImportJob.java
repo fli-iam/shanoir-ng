@@ -59,6 +59,8 @@ public class ImportJob implements Serializable {
 	private String studyName;
 
 	private ShanoirEvent shanoirEvent;
+
+	private Long userId;
     
 	public String getArchive() {
 		return archive;
@@ -187,6 +189,14 @@ public class ImportJob implements Serializable {
 
 	public void setShanoirEvent(ShanoirEvent shanoirEvent) {
 		this.shanoirEvent = shanoirEvent;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 }
 

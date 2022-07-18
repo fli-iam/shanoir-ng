@@ -49,6 +49,10 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
     protected getEntity() {
         return new SubjectPathology();
     }
+
+    protected addEntity(subjectEntity: SubjectPathology) {
+        this.preclinicalSubject.pathologies = this.preclinicalSubject.pathologies.concat(subjectEntity);
+    }
     
     protected getOptions(): any {
         // Specify that we can't view a pathology'
@@ -117,10 +121,10 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
         ];
         setTimeout(() => {
             if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-                this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editSubjectEntity(item) });
+                this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.editSubjectEntity(item) });
             }
             if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-                this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeSubjectEntity(item) });
+                this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectEntity(item) });
             }
         }, 100)
         return columnDefs;

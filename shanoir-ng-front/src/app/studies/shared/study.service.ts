@@ -11,21 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpResponse, HttpEvent, HttpEventType } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
 import { BidsElement } from '../../bids/model/bidsElement.model';
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { StudyUserRight } from './study-user-right.enum';
-import { Study, StudyDTO } from './study.model';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { Subscription } from 'rxjs'
+import { CenterStudyDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO } from './study.dto';
+import { Study } from './study.model';
 
 
 @Injectable()
@@ -37,7 +38,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     
     subscribtions: Subscription[] = [];
 
-    constructor(protected http: HttpClient, private keycloakService: KeycloakService) {
+    constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService) {
         super(http)
     }
 
@@ -46,7 +47,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
         .toPromise()
-        .then(entities => entities.map((entity) => Object.assign(new Study(), entity)));
+        .then(entities => entities?.map((entity) => Object.assign(new Study(), entity)) || []);
     }
 
     getStudiesNames(): Promise<IdName[]> {
@@ -62,18 +63,18 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     getStudyNamesAndCenters(): Promise<Study[]> {
-        return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL)
-            .toPromise();
+        return this.http.get<CenterStudyDTO[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL)
+            .toPromise().then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));
     }
     
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
-        return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
-            .toPromise();
+        return this.http.get<SubjectWithSubjectStudyDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
+            .toPromise().then(this.mapSubjectWithSubjectStudyList);
     }
 
     findSubjectsByStudyIdPreclinical(studyId: number, preclinical: boolean): Promise<SubjectWithSubjectStudy[]> {
-        return this.http.get<SubjectWithSubjectStudy[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects?preclinical=' + preclinical)
-            .toPromise();
+        return this.http.get<SubjectWithSubjectStudyDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects?preclinical=' + preclinical)
+            .toPromise().then(this.mapSubjectWithSubjectStudyList);
     }
 
     private findStudiesIcanAdmin(): Promise<Study[]> {
@@ -197,9 +198,25 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     public stringify(entity: Study) {
         let dto = new StudyDTO(entity);
-        return JSON.stringify(dto, (key, value) => {
+        let test = JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });
+        return test;
+    }
+
+    protected mapEntity = (dto: StudyDTO, result?: Study): Promise<Study> => {
+        if (result == undefined) result = this.getEntityInstance();
+        return this.studyDTOService.toEntity(dto, result);
+    }
+
+    protected mapEntityList = (dtos: StudyDTO[], result?: Study[]): Promise<Study[]> => {
+        if (result == undefined) result = [];
+        if (dtos) return this.studyDTOService.toEntityList(dtos, result);
+    }
+
+    private mapSubjectWithSubjectStudyList = (dtos: SubjectWithSubjectStudyDTO[], result?: SubjectWithSubjectStudy[]): Promise<SubjectWithSubjectStudy[]> => {
+        if (result == undefined) result = [];
+        if (dtos) return this.studyDTOService.toSubjectWithSubjectStudyList(dtos, result);
     }
 
     ngOnDestroy() {

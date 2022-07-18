@@ -23,7 +23,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -83,10 +83,9 @@ public class BrukerApiControllerTest {
 	@WithMockUser
 	public void uploadBrukerFileTest() throws Exception {
 		String r = "test";
-		given(restTemplate.exchange(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class),
-				Matchers.<Class<String>>any())).willReturn(new ResponseEntity<>(r, HttpStatus.OK));
+		given(restTemplate.exchange(Mockito.anyString(), Mockito.any(), Mockito.any(HttpEntity.class), ArgumentMatchers.<Class<String>>any())).willReturn(new ResponseEntity<>(r, HttpStatus.OK));
 		MockMultipartFile firstFile = new MockMultipartFile("files", "2dseq", "text/plain", "some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
+		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
 				.andExpect(status().isOk());
 	}
 
@@ -95,7 +94,7 @@ public class BrukerApiControllerTest {
 	public void uploadBrukerFileNotValidTest() throws Exception {
 		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain",
 				"some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
+		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
 				.andExpect(status().isNotAcceptable());
 	}
 }

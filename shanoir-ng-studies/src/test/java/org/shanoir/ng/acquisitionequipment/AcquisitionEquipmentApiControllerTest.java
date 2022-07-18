@@ -42,6 +42,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -58,6 +59,7 @@ import com.google.gson.GsonBuilder;
 @RunWith(SpringRunner.class)
 @WebMvcTest(AcquisitionEquipmentApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class AcquisitionEquipmentApiControllerTest {
 
 	private static final String REQUEST_PATH = "/acquisitionequipments";
@@ -84,17 +86,19 @@ public class AcquisitionEquipmentApiControllerTest {
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 		given(acquisitionEquipmentMapper
-				.acquisitionEquipmentsToAcquisitionEquipmentDTOs(Mockito.anyListOf(AcquisitionEquipment.class)))
+				.acquisitionEquipmentsToAcquisitionEquipmentDTOs(Mockito.anyList()))
 						.willReturn(Arrays.asList(new AcquisitionEquipmentDTO()));
 		AcquisitionEquipmentDTO acqEq = new AcquisitionEquipmentDTO();
 		acqEq.setId(Long.valueOf(123));
+		AcquisitionEquipment equip = new AcquisitionEquipment();
+		equip.setId(1L);
 		given(acquisitionEquipmentMapper
 				.acquisitionEquipmentToAcquisitionEquipmentDTO(Mockito.any(AcquisitionEquipment.class)))
 						.willReturn(acqEq);
 		doNothing().when(acquisitionEquipmentService).deleteById(1L);
-		given(acquisitionEquipmentService.findAll()).willReturn(Arrays.asList(new AcquisitionEquipment()));
-		given(acquisitionEquipmentService.findById(1L)).willReturn(Optional.of(new AcquisitionEquipment()));
-		given(acquisitionEquipmentService.create(Mockito.any(AcquisitionEquipment.class))).willReturn(new AcquisitionEquipment());
+		given(acquisitionEquipmentService.findAll()).willReturn(Arrays.asList(equip));
+		given(acquisitionEquipmentService.findById(1L)).willReturn(Optional.of(equip));
+		given(acquisitionEquipmentService.create(Mockito.any(AcquisitionEquipment.class))).willReturn(equip);
 		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(AcquisitionEquipment.class))).willReturn(true);
 	}
 
@@ -103,6 +107,13 @@ public class AcquisitionEquipmentApiControllerTest {
 	public void deleteAcquisitionEquipmentTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
+	}
+	
+	@Test
+	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
+	public void deleteAcquisitionEquipmentUnknownTest() throws Exception {
+		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH + "/0").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
 	}
 
 	@Test

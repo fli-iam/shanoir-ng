@@ -37,7 +37,7 @@ export class AnestheticIngredientService extends EntityService<AnestheticIngredi
         const url = `${PreclinicalUtils.PRECLINICAL_API_ANESTHETICS_URL}/${anesthetic.id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC_INGREDIENT}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<AnestheticIngredient[]>(url)
             .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));
+            .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
     
         
