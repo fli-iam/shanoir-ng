@@ -198,5 +198,38 @@ public class ImportJob implements Serializable {
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
+
+	@Override
+	public String toString() {
+		String importType;
+		if (fromDicomZip) {
+			importType = "ZIP";
+		} else if (fromShanoirUploader) {
+			importType = "SHUP";
+		} else if (fromPacs) {
+			importType = "PACS";
+		} else {
+			importType = "UNSUPPORTED";
+		}
+		int numberOfSeries = 0;
+		String modality = "unknown";
+		boolean enhanced = false;
+		if (patients != null && !patients.isEmpty()) {
+			Patient patient = patients.get(0);
+			if (patient.getStudies() != null && !patient.getStudies().isEmpty()) {
+				Study study = patient.getStudies().get(0);
+				if (study.getSeries() != null && !study.getSeries().isEmpty()) {
+					numberOfSeries = study.getSeries().size(); // only selected series remain at the stage of the logging call
+					Serie serie = study.getSeries().get(0);
+					modality = serie.getModality();
+					enhanced = serie.getIsEnhanced();
+				}
+			}
+		}
+		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
+				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
+				",subjectName=" + subjectName + ",examId=" + examinationId  + ",converterId=" + converterId + ",numberOfSeries=" + numberOfSeries;
+	}
+	
 }
 
