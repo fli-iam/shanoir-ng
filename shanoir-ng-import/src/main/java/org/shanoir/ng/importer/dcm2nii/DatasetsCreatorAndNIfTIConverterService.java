@@ -530,22 +530,16 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 * @throws NoSuchFieldException
 	 */
 	private NIfTIConverter datasetToNiftiConversionLauncher(Dataset dataset, File directory, Serie serie, Long converterId, boolean isConvertAs4D, boolean isConvertWithClidcm) throws NoSuchFieldException, SecurityException {
-
 		// search for the existing files in the destination folder
-
-		LOG.info("convertToNifti : create nifti files for the dataset : {}", dataset.getName());
 		if (conversionLogs != null && !"".equals(conversionLogs)) {
 			conversionLogs += "\n";
 		} else {
 			conversionLogs = "";
 		}
-
-
 		NIfTIConverter converter = findById(converterId);
 		convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D);
-		LOG.info("conversionLogs : {}", conversionLogs);
+		LOG.debug("conversionLogs : {}", conversionLogs);
 		return converter;
-
 	}
 
 
@@ -554,7 +548,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 * 
 	 * @return List of nifti files
 	 */
-
 	private List<File> niftiFileSorting(List<File> existingFiles, File directory, File serieIDFolderFile) {
 		// If one of the output files is a prop file, there has been an error
 		List<File> niftiFileResult = null;
@@ -564,7 +557,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			if (!containsPropFile(niiFiles)) {
 				for (File niiFile : niiFiles) {
 					outputFiles.get(serieIDFolderFile.getName()).add(niiFile.getAbsolutePath());
-					LOG.info("Path niiFile : {}", niiFile.getAbsolutePath());
+					LOG.debug("Path niiFile : {}", niiFile.getAbsolutePath());
 				}
 			}
 		} else {
@@ -574,7 +567,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 				niftiFileResult = niiFileList;
 				for (File niiFile : niiFileList) {
 					niiPathList.add(niiFile.getAbsolutePath());
-					LOG.info("Path niiFile : {}", niiFile.getAbsolutePath());
+					LOG.debug("Path niiFile : {}", niiFile.getAbsolutePath());
 				}
 				outputFiles.put(serieIDFolderFile.getName(), niiPathList);
 			}
@@ -619,7 +612,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	}
 
 	/**
-	 * This method generates the nifti files of serie  in proper datasets for an entire serie.
+	 * This method generates the nifti files of a serie in proper datasets for an entire serie.
 	 * It also constructs the associated Nifti ExpressionFormat and DatasetFiles within the Dataset object.
 	 * Finally it also constructs the Bvec and BVal values needed for Diffusion and store them in a a list of Diffusion Gradient which is hold by the dataset itself.
 	 *
@@ -649,7 +642,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 				for (Dataset dataset : serie.getDatasets()) {
 					File directory = new File(serieIDFolderFile + File.separator + DATASET_STR + index);
 					if (directory.isDirectory()) {
-						LOG.info("convertToNifti : create nifti files for the dataset {} in directory : {}", dataset.getName(), directory.getName());
+						LOG.debug("convertToNifti : create nifti files for the dataset {} in directory : {}", dataset.getName(), directory.getName());
 						final List<File> existingFiles = Arrays.asList(directory.listFiles());
 						NIfTIConverter converter = null;
 						try {
@@ -666,7 +659,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 				// Need to construct nifti files for only one dataset in current serie
 				Dataset dataset = serie.getDatasets().get(0);
 				if (serieIDFolderFile.isDirectory()) {
-					LOG.info("convertToNifti : create nifti files for the dataset {} in directory : {}", dataset.getName(), serieIDFolderFile.getName());
+					LOG.debug("convertToNifti : create nifti files for the dataset {} in directory : {}", dataset.getName(), serieIDFolderFile.getName());
 					final List<File> existingFiles = Arrays.asList(serieIDFolderFile.listFiles());
 					NIfTIConverter converter = null;
 					try {
@@ -675,7 +668,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 						LOG.error(e.getMessage());
 					}
 					List<File> niftiGeneratedFiles = converter.isDicomifier() ? niftiFileSortingDicom2Nifti(existingFiles, serieIDFolderFile, dataset) : niftiFileSorting(existingFiles, serieIDFolderFile, serieIDFolderFile);
-
 					constructNiftiExpressionAndDatasetFiles(converter, dataset, serie, niftiGeneratedFiles);
 				}
 			}

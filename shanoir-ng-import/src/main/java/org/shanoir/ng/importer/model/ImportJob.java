@@ -17,6 +17,7 @@ package org.shanoir.ng.importer.model;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 
 /**
@@ -198,5 +199,38 @@ public class ImportJob implements Serializable {
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
+
+	@Override
+	public String toString() {
+		String importType;
+		if (fromDicomZip) {
+			importType = "ZIP";
+		} else if (fromShanoirUploader) {
+			importType = "SHUP";
+		} else if (fromPacs) {
+			importType = "PACS";
+		} else {
+			importType = "UNSUPPORTED";
+		}
+		int numberOfSeries = 0;
+		String modality = "unknown";
+		boolean enhanced = false;
+		if (CollectionUtils.isNotEmpty(patients)) {
+			Patient patient = patients.get(0);
+			if (CollectionUtils.isNotEmpty(patient.getStudies())) {
+				Study study = patient.getStudies().get(0);
+				if (CollectionUtils.isNotEmpty(study.getSeries())) {
+					numberOfSeries = study.getSeries().size(); // only selected series remain at the stage of the logging call
+					Serie serie = study.getSeries().get(0);
+					modality = serie.getModality();
+					enhanced = serie.getIsEnhanced();
+				}
+			}
+		}
+		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
+				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
+				",subjectName=" + subjectName + ",examId=" + examinationId  + ",converterId=" + converterId + ",numberOfSeries=" + numberOfSeries;
+	}
+	
 }
 
