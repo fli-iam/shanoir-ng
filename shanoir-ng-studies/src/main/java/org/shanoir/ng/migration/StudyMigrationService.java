@@ -27,6 +27,7 @@ import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +112,7 @@ public class StudyMigrationService {
 
 			event.setMessage("Migrating study...");
 			eventService.publishEvent(event);
-
+			
 			// Migrate study
 			Long oldStudyId = study.getId();
 
@@ -122,6 +123,11 @@ public class StudyMigrationService {
 			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 				subjectStudy.setId(null);
 				subjectStudy.setStudy(null);
+				
+				for (Tag tag : subjectStudy.getTags()) {
+					tag.setId(null);
+				}
+
 				Subject newSubject = new Subject();
 				newSubject.setId(subjectMap.get(subjectStudy.getSubject().getId()));
 				subjectStudy.setSubject(newSubject);
@@ -144,6 +150,12 @@ public class StudyMigrationService {
 			su.setUserName(username);
 			suList.add(su);
 			study.setStudyUserList(suList);
+
+
+			// Move all tags
+			for (Tag tag : study.getTags()) {
+				tag.setId(null);
+			}
 
 			StudyDTO newStudy = distantShanoir.createStudy(study);
 
@@ -214,6 +226,8 @@ public class StudyMigrationService {
 			Long oldId = center.getId();
 
 			for (IdName distantCenter : distantCenters) {
+				LOG.error(distantCenter.getName() + distantCenter.getName());
+				LOG.error(center.getName());
 				// If center already exists, use it.
 				if (distantCenter.getName().equals(center.getName())) {
 					studyCenter.getCenter().setId(distantCenter.getId());
