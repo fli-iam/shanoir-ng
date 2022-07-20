@@ -17,6 +17,7 @@ package org.shanoir.ng.importer.model;
 import java.io.Serializable;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 
 /**
@@ -214,11 +215,11 @@ public class ImportJob implements Serializable {
 		int numberOfSeries = 0;
 		String modality = "unknown";
 		boolean enhanced = false;
-		if (patients != null && !patients.isEmpty()) {
+		if (CollectionUtils.isNotEmpty(patients)) {
 			Patient patient = patients.get(0);
-			if (patient.getStudies() != null && !patient.getStudies().isEmpty()) {
+			if (CollectionUtils.isNotEmpty(patient.getStudies())) {
 				Study study = patient.getStudies().get(0);
-				if (study.getSeries() != null && !study.getSeries().isEmpty()) {
+				if (CollectionUtils.isNotEmpty(study.getSeries())) {
 					numberOfSeries = study.getSeries().size(); // only selected series remain at the stage of the logging call
 					Serie serie = study.getSeries().get(0);
 					modality = serie.getModality();
