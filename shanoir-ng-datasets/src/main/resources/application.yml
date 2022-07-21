@@ -132,6 +132,13 @@ dcm4chee-arc:
   dicom.wado.uri: /dcm4chee-arc/aets/DCM4CHEE/wado
   dicom.web.rs: /dcm4chee-arc/aets/DCM4CHEE/rs/studies
 
+# VIP
+vip:
+  uri: http://192.168.255.18:9090/rest/executions/
+  upload-folder: /tmp/vip_uploads
+  sleep-time: 20000
+  file-formats: .nii.gz, .nii
+
 ---
 
 ######################################
