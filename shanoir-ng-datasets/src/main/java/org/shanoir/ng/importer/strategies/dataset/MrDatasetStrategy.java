@@ -35,16 +35,21 @@ import org.shanoir.ng.importer.dto.EchoTime;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.shanoir.ng.shared.mapper.EchoTimeMapper;
 import org.shanoir.ng.shared.mapper.FlipAngleMapper;
 import org.shanoir.ng.shared.mapper.InversionTimeMapper;
 import org.shanoir.ng.shared.mapper.RepetitionTimeMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetStrategy.class);
 
 	@Autowired
 	DicomProcessing dicomProcessing;
@@ -196,23 +201,23 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
 			String[] imageTypeArray = dicomAttributes.getStrings(Tag.ImageType);
 			String imageFlavor = imageTypeArray[2];
-			if (imageFlavor.equals(ImageFlavor.ANGIO_TIME)) {
+			if (imageFlavor.equals(ImageFlavor.ANGIO_TIME.name())) {
 				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.CONTRAST_AGENT_USED_ANGIO_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.DIFFUSION)) {
+			} else if (imageFlavor.equals(ImageFlavor.DIFFUSION.name())) {
 				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.DIFFUSION_WEIGHTED_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.PERFUSION)) {
+			} else if (imageFlavor.equals(ImageFlavor.PERFUSION.name())) {
 				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.SPIN_TAGGING_PERFUSION_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.PROTON_DENSITY)) {
+			} else if (imageFlavor.equals(ImageFlavor.PROTON_DENSITY.name())) {
 				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.PROTON_DENSITY_WEIGHTED_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.T1)) {
+			} else if (imageFlavor.equals(ImageFlavor.T1.name())) {
 				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T1_WEIGHTED_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.T2)) {
+			} else if (imageFlavor.equals(ImageFlavor.T2.name())) {
 				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T2_WEIGHTED_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.T2_STAR)) {
+			} else if (imageFlavor.equals(ImageFlavor.T2_STAR.name())) {
 				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T2_STAR_WEIGHTED_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.TOF)) {
+			} else if (imageFlavor.equals(ImageFlavor.TOF.name())) {
 				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.TIME_OF_FLIGHT_MR_DATASET);
-			} else if (imageFlavor.equals(ImageFlavor.VELOCITY)) {
+			} else if (imageFlavor.equals(ImageFlavor.VELOCITY.name())) {
 				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.VELOCITY_ENCODED_ANGIO_MR_DATASET);
 			}
 			mrDataset.setOriginMrMetadata(mrDatasetMetadata);
