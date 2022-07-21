@@ -92,16 +92,17 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     initView(): Promise<void> {
         return this.datasetProcessingService.get(this.id).then((entity)=> {
-            if(this.isCarminDatasetProcessing(entity)){
-                this.carminDatasetProcessingService.getCarminDatasetProcessing(entity.comment).subscribe(
-                    (carminDatasetProcessing: CarminDatasetProcessing) => {
-                        this.setCarminDatasetProcessing(carminDatasetProcessing);
-                    },
-                    (error)=>{
-                        this.resetCarminDatasetProcessing();
-                    }
-                )
-            }
+            // checking if the datasetProcessing is carmin type.
+            this.carminDatasetProcessingService.getCarminDatasetProcessing(entity.id).subscribe(
+                (carminDatasetProcessing: CarminDatasetProcessing) => {
+                    this.setCarminDatasetProcessing(carminDatasetProcessing);
+                },
+                (error)=>{
+                    // 404 : if it's not found then it's not carmin type !
+                    this.resetCarminDatasetProcessing();
+                }
+            )
+            
             this.setDatasetProcessing(entity);
         })
     }
@@ -120,7 +121,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     setCarminDatasetProcessing(carminDatasetProcessing: CarminDatasetProcessing){
         this.isCarminDatasetProcessingEntity = true;
         this.carminDatasetProcessing = carminDatasetProcessing;
-        console.log(carminDatasetProcessing);
     }
     resetCarminDatasetProcessing(){
         this.isCarminDatasetProcessingEntity = false;

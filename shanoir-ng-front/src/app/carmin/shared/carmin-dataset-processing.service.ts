@@ -39,8 +39,8 @@ export class CarminDatasetProcessingService extends EntityService<CarminDatasetP
         return this.httpClient.get<CarminDatasetProcessing[]>(`${this.API_URL}/carminDatasetProcessings`);
     }
 
-    public getCarminDatasetProcessing(workflowId: string): Observable<CarminDatasetProcessing>{
-        return this.httpClient.get<CarminDatasetProcessing>(`${this.API_URL}?identifier=${workflowId}`)
+    public getCarminDatasetProcessing(id: number): Observable<CarminDatasetProcessing>{
+        return this.httpClient.get<CarminDatasetProcessing>(`${this.API_URL}/${id}`)
     }
 
 }

@@ -97,11 +97,18 @@ export class ExecutionComponent implements OnInit {
         if (parameter.type == ParameterType.File) {
           if (parameter.name == "executable") {
             // change the execution if you want to run another pipeline
+            // TODO : this shouldn't be sent ! VIP should find dautomatically the pipeline execution file location.
+            // this TODO is added in the backlog. 
             execution.inputValues[parameter.name] = "file:/var/www/html/workflows/SharedData/groups/Support/Applications/testGME2inputFilesUpdated/1.0/bin/testGME2inputFilesUpdated.sh.tar.gz";
 
           } else {
             let dataset = this.executionForm.get(parameter.name).value;
+            
+            // TODO the nifti extension format should be selected depending on the pipeline.
             let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g,"_")}.nii.zip`
+
+            // TODO the format should be selected depending on the pipeline.
+            // File ad md5 values should be selected automcatically depending on the pipeline.
             execution.inputValues[parameter.name] = `shanoir:/${dataset_name}?format=nii&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
           }
         } else {
@@ -122,8 +129,8 @@ export class ExecutionComponent implements OnInit {
         let carminDatasetProcessing: CarminDatasetProcessing = new CarminDatasetProcessing(execution.identifier, execution.name, execution.pipelineIdentifier, resultPath, execution.status, execution.timeout, execution.startDate, execution.endDate);
         
         carminDatasetProcessing.comment = execution.identifier;
-        carminDatasetProcessing.studyId = [...this.selectedDatasets][0].study.id;
-        carminDatasetProcessing.datasetProcessingType = DatasetProcessingType.SEGMENTATION;
+        carminDatasetProcessing.studyId = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
+        carminDatasetProcessing.datasetProcessingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
         carminDatasetProcessing.inputDatasets = Array.from(this.selectedDatasets);
 
         this.carminDatasetProcessing.saveNewCarminDatasetProcessing(carminDatasetProcessing).subscribe(
