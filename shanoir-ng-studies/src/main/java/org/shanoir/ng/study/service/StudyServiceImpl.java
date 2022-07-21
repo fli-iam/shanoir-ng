@@ -62,6 +62,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -191,8 +192,10 @@ public class StudyServiceImpl implements StudyService {
 			
 			for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
 				subjectStudy.setSubjectStudyTags(subjectStudyTagSave.get(subjectStudy.getSubject().getId()));
-				for (SubjectStudyTag ssTag : subjectStudy.getSubjectStudyTags()) {
-					ssTag.setSubjectStudy(subjectStudy);
+				if (!CollectionUtils.isEmpty(subjectStudy.getSubjectStudyTags())) {
+					for (SubjectStudyTag ssTag : subjectStudy.getSubjectStudyTags()) {
+						ssTag.setSubjectStudy(subjectStudy);
+					}
 				}
 			}
 			studyDb = studyRepository.save(studyDb);
