@@ -17,11 +17,15 @@ package org.shanoir.ng.dataset.controler;
 
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.joda.time.DateTime;
+import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.carmin.UploadData;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -43,7 +47,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriUtils;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -52,11 +58,20 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Controller
 public class CarminDataApiController implements CarminDataApi{
@@ -84,9 +99,6 @@ public class CarminDataApiController implements CarminDataApi{
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    private DatasetFileUtils datasetFileUtils;
-
-
     private final HttpServletRequest request;
 
     private static final Logger LOG = LoggerFactory.getLogger(CarminDataApiController.class);
@@ -94,12 +106,11 @@ public class CarminDataApiController implements CarminDataApi{
     @Autowired
     public CarminDataApiController(final HttpServletRequest request) {
         this.request = request;
-        this.datasetFileUtils = new DatasetFileUtils();
-    }   
+    }
 
     @Override
     public ResponseEntity<?> getPath(@ApiParam(value = "the complete path on which to request information. It can contain non-encoded slashes. Except for the \"exists\" action, any request on a non-existing path should return an error", required=true) @PathVariable("completePath") String completePath, @NotNull @ApiParam(value = "The \"content\" action downloads the raw file. If the path points to a directory, a tarball of this directory is returned. The \"exists\" action returns a BooleanResponse object (see definition) indicating if the path exists or not. The \"properties\" action returns a Path object (see definition) with the path properties. The \"list\" action returns a DirectoryList object (see definition) with the properties of all the files of the directory (if the path is not a directory an error must be returned). The \"md5\" action is optional and returns a PathMd5 object (see definition)." ,required=true
-            ,allowableValues = "properties, exists, list, md5, content", defaultValue = "content") @Valid @RequestParam(value = "action", required = true, defaultValue = "content") String action, HttpServletResponse response) throws IOException, RestServiceException {
+            ,allowableValues = "properties, exists, list, md5, content", defaultValue = "content") @Valid @RequestParam(value = "action", required = true, defaultValue = "content") String action, @Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response) throws IOException, RestServiceException {
         // TODO implement those actions
         switch (action){
             case "exists":
@@ -108,23 +119,11 @@ public class CarminDataApiController implements CarminDataApi{
             case "properties":
                 return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
             case "content":{
-                downloadDatasetById(Long.parseLong(completePath),null, DCM, response);
+                downloadDatasetById(Long.parseLong(completePath),null, format, response);
                 return new ResponseEntity<Void>(HttpStatus.OK);
             }
         }
         return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
-    }
-
-    @Override
-    public ResponseEntity<org.shanoir.ng.dataset.model.carmin.Path> uploadPath(@ApiParam(value = "The complete path on which to upload data. It can contain non-encoded slashes.", required=true) @PathVariable("completePath") String completePath, @ApiParam(value = "") @Valid @RequestBody UploadData body) {
-        // TODO To implement
-        return new ResponseEntity<org.shanoir.ng.dataset.model.carmin.Path>(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @Override
-    public ResponseEntity<Void> deletePath(@ApiParam(value = "The complete path to delete. It can contain non-encoded slashes.", required=true) @PathVariable("completePath") String completePath) {
-        // TODO to implement
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     private void downloadDatasetById(final Long datasetId, final Long converterId,final String format, HttpServletResponse response)
@@ -138,9 +137,13 @@ public class CarminDataApiController implements CarminDataApi{
 
         /* Create folder and file */
         String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-        File userDir = datasetFileUtils.getUserImportDir(tmpDir);
+        File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
 
-        String datasetName = datasetFileUtils.generateDatasetName(dataset);
+        String datasetName = "";
+        datasetName += dataset.getId() + "-" + dataset.getName();
+        if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
+            datasetName += "-" + dataset.getUpdatedMetadata().getComment();
+        }
 
         String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
 
@@ -157,7 +160,7 @@ public class CarminDataApiController implements CarminDataApi{
             }
 
             if (DCM.equals(format)) {
-                datasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+                DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
                 downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
             } else if (NII.equals(format)) {
                 // Check if we want a specific converter
@@ -168,8 +171,8 @@ public class CarminDataApiController implements CarminDataApi{
                     File tmpFile = new File(userDir.getAbsolutePath() + File.separator + "Datasets" + formatter.format(new DateTime().toDate()));
                     tmpFile.mkdirs();
                     // Download DICOMs in the temporary folder
-                    datasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-                    downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
+                    DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+                    downloader.downloadDicomFilesForURLs(pathURLs, tmpFile, subjectName, dataset);
 
                     // Convert them, sending to import microservice
                     boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + tmpFile.getAbsolutePath());
@@ -181,12 +184,12 @@ public class CarminDataApiController implements CarminDataApi{
                     tmpFilePath = tmpFile.getAbsolutePath();
                     workFolder = new File(tmpFile.getAbsolutePath() + File.separator + "result");
                 } else  {
-                    datasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-                    datasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+                    DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+                    DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
                 }
             } else if (EEG.equals(format)) {
-                datasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-                datasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+                DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
+                DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
             } else {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
@@ -207,28 +210,51 @@ public class CarminDataApiController implements CarminDataApi{
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for this dataset(s)."));
         }
 
-        File zipFile = new File(tmpFilePath + ZIP);
-        zipFile.createNewFile();
+        File resultFile = null;
 
-        datasetFileUtils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+        if(NII.equals(format)){
+            // return the file in the tmpFilePath
+            File directory = new File(workFolder.getAbsolutePath());
+            File[] files = directory.listFiles();
+
+
+            // return only one nifti file
+            for (int i = 0; i < files.length; i++) {
+                if(files[i].getName().endsWith("nii.gz")){
+                    resultFile = files[i];
+                    break;
+                }
+            }
+        }else{
+            File zipFile = new File(tmpFilePath + ZIP);
+            zipFile.createNewFile();
+
+            DatasetFileUtils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+
+            resultFile = zipFile;
+        }
+
+        if(resultFile == null) throw new RestServiceException(
+                new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for this dataset(s)."));
 
         // Try to determine file's content type
-        String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
+        String contentType = request.getServletContext().getMimeType(resultFile.getAbsolutePath());
 
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.IN_PROGRESS);
         eventService.publishEvent(event);
 
-        try (InputStream is = new FileInputStream(zipFile);) {
-            response.setHeader("Content-Disposition", "attachment;filename=" + zipFile.getName());
+        try (InputStream is = new FileInputStream(resultFile);) {
+            response.setHeader("Content-Disposition", "attachment;filename=" + resultFile.getName());
             response.setContentType(contentType);
-            response.setContentLengthLong(zipFile.length());
+            response.setContentLengthLong(resultFile.length());
             org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
             response.flushBuffer();
             event.setStatus(ShanoirEvent.SUCCESS);
             eventService.publishEvent(event);
         } finally {
             FileUtils.deleteQuietly(workFolder);
-            FileUtils.deleteQuietly(zipFile);
+            FileUtils.deleteQuietly(resultFile);
         }
     }
+
 }
