@@ -80,6 +80,8 @@ public class CarminDataApiController implements CarminDataApi{
     private static final String DOWNLOAD = ".download";
     private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     private static final String NII = "nii";
+    private static final String BIDS = "BIDS";
+
     private static final String EEG = "eeg";
     private static final String ZIP = ".zip";
 
@@ -185,11 +187,14 @@ public class CarminDataApiController implements CarminDataApi{
                     workFolder = new File(tmpFile.getAbsolutePath() + File.separator + "result");
                 } else  {
                     DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-                    DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+                    DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, false);
                 }
             } else if (EEG.equals(format)) {
                 DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-                DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName);
+                DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, false);
+            } else if (BIDS.equals(format)) {
+                DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
+                DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, workFolder, dataset, subjectName, true);
             } else {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));

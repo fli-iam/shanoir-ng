@@ -37,6 +37,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -53,6 +54,7 @@ import com.google.gson.GsonBuilder;
 @RunWith(SpringRunner.class)
 @WebMvcTest(ManufacturerModelApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class ManufacturerModelApiControllerTest {
 
 	private static final String REQUEST_PATH = "/manufacturermodels";
@@ -72,11 +74,14 @@ public class ManufacturerModelApiControllerTest {
 	@Before
 	public void setup() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		gson = new GsonBuilder().create();
+		
+		ManufacturerModel model = new ManufacturerModel();
+		model.setId(1L);
 
-		given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(new ManufacturerModel()));
-		given(manufacturerModelServiceMock.findById(1L)).willReturn(Optional.of(new ManufacturerModel()));
+		given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(model));
+		given(manufacturerModelServiceMock.findById(1L)).willReturn(Optional.of(model));
 		given(manufacturerModelServiceMock.create(Mockito.mock(ManufacturerModel.class)))
-				.willReturn(new ManufacturerModel());
+				.willReturn(model);
 		given(controlerSecurityService.idMatches(Mockito.anyLong(), Mockito.any(ManufacturerModel.class))).willReturn(true);
 	}
 

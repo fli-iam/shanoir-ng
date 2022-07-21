@@ -25,6 +25,7 @@ let url = window.location;
 const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
 export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
 export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
+export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/assets/silent-check-sso.html";
 
 
 // Users http api
@@ -114,6 +115,7 @@ export const BACKEND_API_GET_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/i
 export const BACKEND_API_QUERY_PACS: string = BACKEND_API_IMPORT_MS_URL + '/importer/query_pacs/';
 export const BACKEND_API_STUDY_CARD_URL: string = BACKEND_API_DATASET_MS_URL + '/studycards';
 export const BACKEND_API_UPLOAD_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_eeg/';
+export const BACKEND_API_ANALYSE_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/start_analysis_eeg_job/';
 export const BACKEND_API_UPLOAD_BIDS_URL: string = BACKEND_API_IMPORT_MS_URL + '/bidsImporter/';
 export const BACKEND_API_IMPORT_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/import_eeg/';
 

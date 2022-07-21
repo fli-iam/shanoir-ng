@@ -88,7 +88,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             exam.id,
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            []
+            exam.extraDataFilePathList
         );
     }
     

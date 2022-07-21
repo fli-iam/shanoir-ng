@@ -8,9 +8,9 @@ Search with "6.0.4" on the folder shanoir-uploader and replace all occurrences w
 This is important, that all scripts .sh or .bat find the correct version to start and create
 the correct folder.
 
-####### Delivery of new Executable Jar #############
-1) Remove the 3 system path libraries lines from the pom.xml dependencies
-as they do not be contained in the assembly.
+####### Delivery of new Executable Jar version #############
+1) Remove the 2 system path libraries lines from the pom.xml dependencies
+as they should not be contained in the assembly.
 2) Build latest version for delivery using the below mvn command:
 Use "mvn clean compile assembly:single", to create one big jar containing everything
 
@@ -27,27 +27,11 @@ First, you need to get the WSDL files from the Shanoir server. To do so, you can
 All in one : build the following ant tasks : clean, clean_jboss, build-server-java, 
 archive, explode
 
-## In the Shanoirws project:
-	* in the pom.xml file, you must define where are located the WSDL files. To do so, 
-	just modify the “wsdlSrcDir” property at the end of the pom.xml file.
-	* execute the command line 
-			>>> mvn clean compile license:format license:check package 
-			at the root of the Shanoirws project. This will create a jar file into 
-			the “target” directory.
-	* execute the command line 
-			>>> mvn install
-			This will install your ws librairy on your local maven repository, by 
-			copying ~/workspace/Shanoirws/target/shanoir-ws-0.3.jar into ~/.m2/repository/org/shanoir/shanoir-ws/0.3/
-
 Now retrieve Shanoir librairies and copy them in your maven repository
 	* copy (and rename) the Shanoir.jar archive 
 			>>> cp ~/workspace/Shanoir/dist-dev/Shanoir.jar ~/.m2/repository/org/shanoir/shanoir/1.0.0/shanoir-1.0.0.jar
 	* copy (and rename) 
 			>>> cp ~/workspace/Shanoir/lib/dcm4che2-tool-dcmqr-custom.jar ~/.m2/repository/dcm4che2/tool/dcm4che2-tool-dcmqr-custom/1.0.0/dcm4che2-tool-dcmqr-custom-1.0.0.jar
-
-And copy the web service from Shanoir that you need for ShanoirUploader
-	* copy 
-			>>> cp ~/workspace/Shanoir/resources/WEB-INF/wsdl/UploadFileService.wsdl ~/workspace/shanoir-uploader/src/main/resources/
 
 ## In the shanoir-uploader project:
 -----------------------------------------------

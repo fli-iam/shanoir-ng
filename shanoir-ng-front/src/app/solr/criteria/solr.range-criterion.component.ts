@@ -27,6 +27,7 @@ export class SolrRangeCriterionComponent {
     
     @Input() range: Range = new Range(null, null);
     @Input() label: string = "";
+    @Input() awesome: string;
     @Output() onChange: EventEmitter<Range> = new EventEmitter();
 
     private tiemout: number;

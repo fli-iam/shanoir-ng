@@ -70,36 +70,52 @@ public class DatasetFileUtils {
      * @throws IOException
      * @throws MessagingException
      */
-    public static void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName) throws IOException {
+    public static void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName, boolean keepName) throws IOException {
         int index = 0;
         for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
             URL url =  iterator.next();
             File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
 
+            // Consider processed datasets
+            if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
+                File destFile = new File(workFolder.getAbsolutePath() + File.separator + srcFile.getName());
+                Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                index++;
+                continue;
+            }
+
             // Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
             StringBuilder name = new StringBuilder("");
 
-            name.append(subjectName).append("_");
-            if (dataset instanceof EegDataset) {
-                name.append(dataset.getName()).append("_");
+            if (keepName) {
+                name.append(srcFile.getName());
             } else {
-                if (dataset.getUpdatedMetadata().getComment() != null) {
-                    name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+                name.append(subjectName).append("_");
+                if (dataset instanceof EegDataset) {
+                    name.append(dataset.getName()).append("_");
+                } else {
+                    if (dataset.getUpdatedMetadata().getComment() != null) {
+                        name.append(dataset.getUpdatedMetadata().getComment()).append("_");
+                    }
+                    name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
+                    if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
+                        name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+                    }
                 }
-                name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
-                if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
-                    name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
+                name.append(dataset.getDatasetAcquisition().getRank()).append("_")
+                        .append(index)
+                        .append(".");
+                if (srcFile.getName().endsWith(".nii.gz")) {
+                    name.append("nii.gz");
+                } else {
+                    name.append(FilenameUtils.getExtension(srcFile.getName()));
                 }
             }
-            name.append(dataset.getDatasetAcquisition().getRank()).append("_")
-                    .append(index)
-                    .append(".");
-            if (srcFile.getName().endsWith(".nii.gz")) {
-                name.append("nii.gz");
-            } else {
-                name.append(FilenameUtils.getExtension(srcFile.getName()));
+            String fileName = name.toString();
+            if (fileName.contains(File.separator)) {
+                fileName = fileName.replaceAll(File.separator, "_");
             }
-            File destFile = new File(workFolder.getAbsolutePath() + File.separator + name);
+            File destFile = new File(workFolder.getAbsolutePath() + File.separator + fileName);
             Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             index++;
         }

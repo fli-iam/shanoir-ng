@@ -22,7 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="isAdmin">
-        <menu-item label="Details..." awesome="fas fa-eye" (click)="showDetails()"></menu-item>
+        <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showDetails()"></menu-item>
     </dropdown-menu>
 
     <ng-container *ngIf="node.open && node.rights && node.rights != $any('UNLOADED')"> 

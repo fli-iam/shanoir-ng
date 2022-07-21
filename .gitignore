@@ -40,6 +40,7 @@ shanoir-ng-front/package-lock.json
 *.project
 **/webapp
 *.js
+.attach_pid*
 .env.bak
 /docker-compose/nginx/webapp/
 /docker-compose/*/shanoir-ng-*.jar

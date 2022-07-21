@@ -32,7 +32,7 @@ export class ExaminationAnestheticService extends EntityService<ExaminationAnest
         const url = `${PreclinicalUtils.PRECLINICAL_API_EXAMINATION_URL}/${examination_id}/${PreclinicalUtils.PRECLINICAL_ANESTHETIC}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<ExaminationAnesthetic[]>(url)
         .toPromise()
-        .then(entities => entities.map((entity) => this.toRealObject(entity)));
+        .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
 
     

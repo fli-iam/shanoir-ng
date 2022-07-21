@@ -91,7 +91,7 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
                             return '/dataset/details/' + task.message.slice(task.message.lastIndexOf('in dataset ') + ('in dataset '.length))
                         }
                     }
-                    return '/home';
+                    return;
                 }
             },
             { headerName: 'Progress', field: 'progress', width: '110px', type: 'progress' },

@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -44,8 +45,12 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +77,12 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Autowired
 	private ExaminationService examinationService;
+	
+	@Autowired
+	private SubjectRepository subjectRepository;
+	
+	@Autowired
+	private CenterRepository centerRepository;
 
 	@Autowired
 	ShanoirEventService eventService;
@@ -105,6 +116,8 @@ public class ExaminationApiController implements ExaminationApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (ShanoirException e) {
+			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while deleting examination."));
 		} catch (IOException e) {
 			LOG.error("Something went wrong while deleting extra-data file: {}" , e);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -115,7 +128,6 @@ public class ExaminationApiController implements ExaminationApi {
 	public ResponseEntity<ExaminationDTO> findExaminationById(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
 					throws RestServiceException {
-
 		Examination examination = examinationService.findById(examinationId);
 		orderDatasetAcquisitions(examination);
 		if (examination == null) {
@@ -219,8 +231,8 @@ public class ExaminationApiController implements ExaminationApi {
 			final BindingResult result) throws RestServiceException {
 		validate(result);
 		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
-		// NB: Message as studyID is important in RabbitMQStudiesService
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "" + createdExamination.getStudyId(), ShanoirEvent.SUCCESS, examinationDTO.getStudyId()));
+		// NB: Message as centerId / subjectId is important in RabbitMQStudiesService
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + createdExamination.getSubjectId(), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 	}
 
@@ -236,6 +248,8 @@ public class ExaminationApiController implements ExaminationApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (ShanoirException e) {
+			throw new RestServiceException(new ErrorModel(e.getErrorCode(), e.getMessage()));
 		}
 	}
 
@@ -256,8 +270,46 @@ public class ExaminationApiController implements ExaminationApi {
 		if (examinationService.addExtraData(examinationId, file) != null) {
 			return new ResponseEntity<>(HttpStatus.OK);
 		}
-		return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+		return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
 	}
+	
+	@Override
+	public ResponseEntity<Void> createExaminationAndAddExtraData(
+			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
+			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+		
+		Subject subject = subjectRepository.findByName(subjectName);
+		if (subject == null) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Couldn't find subject with name " + subjectName);
+			throw new RestServiceException(error);
+		}
+		
+		if (centerRepository.findById(centerId).isEmpty()) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Couldn't find center with id " + centerId);
+			throw new RestServiceException(error);
+		}
+
+		Examination examination = new Examination();
+		examination.setComment(file.getOriginalFilename());
+		examination.setCenterId(centerId);
+		examination.setSubjectId(subject.getId());
+		examination.setStudyId(subject.getSubjectStudyList().get(0).getStudy().getId());
+		examination.setExaminationDate(LocalDate.now());
+		List<String> pathList = new ArrayList<>();
+		pathList.add(file.getOriginalFilename());
+		examination.setExtraDataFilePathList(pathList);
+		Examination dbExamination = examinationService.save(examination);
+		
+		String path = examinationService.addExtraData(dbExamination.getId(), file);
+		
+		if (path != null) {
+			return new ResponseEntity<>(HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}		
+	}
+	
 
 	@Override
 	public void downloadExtraData(

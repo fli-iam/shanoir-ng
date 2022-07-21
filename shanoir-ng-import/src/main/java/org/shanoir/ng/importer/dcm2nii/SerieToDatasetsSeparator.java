@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * This private class only holds 3 values as the keys for sorting the dicom
  * files into separate folders. 1 folder = 1 dataset. In one folder, we group
  * all the files with the same value for the EchoNumbers, AcquisitionNumber and
- * ImageOrientationPatien.
+ * ImageOrientationPatient.
  *
  * @author aferial
  * @author mkain

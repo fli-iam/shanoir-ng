@@ -11,7 +11,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { slideDown } from '../../shared/animations/animations';
 
 
@@ -19,32 +20,30 @@ import { slideDown } from '../../shared/animations/animations';
     selector: 'solr-text-search',
     templateUrl: 'solr.text-search.component.html',
     styleUrls: ['solr.text-search.component.css'],
-    animations: [slideDown]
+    animations: [slideDown],
+    providers: [
+        {
+          provide: NG_VALUE_ACCESSOR,
+          useExisting: forwardRef(() => SolrTextSearchComponent),
+          multi: true,
+        }]  
 })
 
-export class SolrTextSearchComponent implements OnChanges {
+export class SolrTextSearchComponent implements ControlValueAccessor {
 
     showInfo: boolean = false;
     searchText: string = "";
-    @Input() registerResetCallback : (reset:() => void) => void;
-    @Output() onChange: EventEmitter<{searchTxt: string, expertMode: boolean}> = new EventEmitter();
+    @Output() onChange: EventEmitter<string> = new EventEmitter();
     @Output() onType: EventEmitter<void> = new EventEmitter();
     @Input() syntaxError: boolean = false;
-    expertMode: boolean = false;
+    @Input() expertMode: boolean = false;
+    protected propagateChange = (_: any) => {};
+    protected propagateTouched = () => {};
 
     onChangeSearch() {
-        if (this.expertMode) {
-            if (!this.syntaxError) {
-                this.onChange.emit({searchTxt: this.searchText, expertMode: true});        
-            }
-        } else { 
-            this.onChange.emit({searchTxt: this.searchText, expertMode: false}); 
-        }
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['registerResetCallback'] && this.registerResetCallback && changes['registerResetCallback'].firstChange) {
-            this.registerResetCallback(this.clear.bind(this));
+        if (!this.syntaxError) {
+            this.propagateChange(this.searchText);   
+            this.onChange.emit(this.searchText);
         }
     }
 
@@ -54,8 +53,19 @@ export class SolrTextSearchComponent implements OnChanges {
         }
     }
 
-    clear(text?: string, expertMode?: boolean) {
+    clear(text?: string) {
         this.searchText = text ? text : '';
-        this.expertMode = !!expertMode;
+    }
+
+    writeValue(value: string): void {
+        this.searchText = value;
+    }
+
+    registerOnChange(fn: any): void {
+        this.propagateChange = fn;
+    }
+
+    registerOnTouched(fn: any): void {
+        this.propagateTouched = fn;
     }
 }
