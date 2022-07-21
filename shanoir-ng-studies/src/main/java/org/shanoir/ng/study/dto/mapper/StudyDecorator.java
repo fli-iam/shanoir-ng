@@ -25,6 +25,7 @@ import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
 import org.shanoir.ng.tag.model.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Decorator for study.
@@ -55,7 +56,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		for (Study study : studies) {
 			final StudyDTO studyDTO = convertStudyToStudyDTO(study, false);
 			if (study.getSubjectStudyList() != null) {
-				studyDTO.setNbSujects(study.getSubjectStudyList().size());
+				studyDTO.setNbSujects(CollectionUtils.isEmpty(study.getSubjectStudyList()) ? 0 : study.getSubjectStudyList().size());
 			}
 			if (study.getExaminations() != null) {
 				studyDTO.setNbExaminations(study.getExaminations().size());
