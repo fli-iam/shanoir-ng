@@ -14,6 +14,7 @@
 
 import { Component, Input, Output, SimpleChanges, HostListener, HostBinding, EventEmitter, forwardRef } from '@angular/core';
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
+import { Mode } from '../components/entity/entity.component.abstract';
 
 @Component({
     selector: 'checkbox',
@@ -34,18 +35,19 @@ export class CheckboxComponent implements ControlValueAccessor {
     private onChangeCallback = (_: any) => {};
     @Input() @HostBinding('class.disabled') disabled: boolean = false;
     @Input() inverse: boolean = false;
+    @Input() mode: "edit" | "view";
 
     constructor() {}
 
     @HostListener('click', []) 
     onClick() {
-        if (this.disabled) return;
+        if (this.disabled || this.mode == "view") return;
         this.toogle();
     }
 
     @HostListener('keydown', ['$event']) 
     onKeyPress(event: any) {
-        if (this.disabled) return;
+        if (this.disabled || this.mode == "view") return;
         if (' ' == event.key) {
             this.toogle();
             event.preventDefault();
@@ -83,5 +85,11 @@ export class CheckboxComponent implements ControlValueAccessor {
     @HostBinding('attr.tabindex')
     get tabindex(): number {
         return this.disabled ? undefined : 0;
-    } 
+    }
+
+    @HostBinding('class.view') 
+    get viewMode() {
+        return this.mode == 'view';
+    }
+        
 }

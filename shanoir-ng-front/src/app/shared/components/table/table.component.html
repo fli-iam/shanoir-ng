@@ -69,7 +69,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [class.even]="i%2==0"
     [class.disabled]="rowDisabled(item)"
     [class.edit]="editMode"
-    [class.selected]="selectionAllowed && isSelected(item)">
+    [class.selected]="(selectionAllowed && isSelected(item)) || selectedId == item.id">
     <td *ngIf="selectionAllowed" class="checkbox-cell"><checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox></td>
     <!-- if it is a problem to modify an item, we could bind a number[] to the table component from the parent componnent -->
     <ng-container *ngFor="let col of columnDefs" >
@@ -164,8 +164,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
                 <span *ngIf="page">Total : {{page?.totalElements}}</span>
                 <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
-                <span (click)="settingsDialog.show()" class="clickable left-icon"><i class="fas fa-cog"></i>Columns settings</span>
-                <span (click)="resetColumns()" class="clickable left-icon"><i class="fas fa-undo-alt"></i>Reset columns</span>
+                <span (click)="settingsDialog.show()" class="clickable" [class.left-icon]="!compactMode" title="Columns settings">
+                    <i class="fas fa-cog"></i>
+                    <span *ngIf="!compactMode">Columns settings</span>
+                </span>
+                <span (click)="resetColumns()" class="clickable" [class.left-icon]="!compactMode" title="Reset columns">
+                    <i class="fas fa-undo-alt"></i>
+                    <span *ngIf="!compactMode">Reset columns</span>
+                </span>
             </ng-container>
         </span>
     </th>

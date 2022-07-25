@@ -13,21 +13,21 @@
  */
 import { Component, forwardRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { Mode } from '../../shared/components/entity/entity.component.abstract';
+import { Center } from '../../centers/shared/center.model';
+import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 
+import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { Option } from '../../shared/select/select.component';
 import { User } from '../../users/shared/user.model';
-import { UserService } from '../../users/shared/user.service';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
-import { StudyRightsService } from '../shared/study-rights.service';
+import { StudyCenter } from '../shared/study-center.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
-import { StudyService } from '../shared/study.service';
 
 @Component({
     selector: 'studyuser-list',
@@ -48,15 +48,24 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     @Input() users: User[] = [];
     userOptions: Option<User>[];
     @Input() studies: Study[] = [];
+    @Input() studyCenters: StudyCenter[] = [];
+    centers: Center[] = [];
     studyOptions: Option<Study>[];
     private browserPaging: BrowserPaging<StudyUser>;
     columnDefs: any[];
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
+    pannelStudyUser: StudyUser;
+    StudyUserRight = StudyUserRight;
+    isAdmin: boolean;
 
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
+
+    constructor(private keycloakService: KeycloakService) {
+        this.isAdmin = keycloakService.isUserAdmin();
+    }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.users && this.users) {
@@ -76,10 +85,19 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         if (changes.mode) {
             this.createColumnDefs(this.mode != 'view');
         }
+        if (changes.studyCenters) {
+            this.centers = this.studyCenters?.map(sc => sc.center);
+            this.studyUserList?.forEach(su => {
+                su.centers = su.centers.filter(suc => this.centers.findIndex(c => c.id == suc.id) > -1);
+            });
+        }
     }
 
     writeValue(obj: any): void {
         this.studyUserList = obj ? obj : [];
+        this.studyUserList?.forEach(su => {
+            su.centers = su.centers.filter(suc => this.centers.findIndex(c => c.id == suc.id) > -1);
+        });
         this.studyUserBackup = [...this.studyUserList];
         this.browserPaging = new BrowserPaging(this.studyUserList, this.columnDefs);
         this.getPage = (pageable) => Promise.resolve(this.browserPaging.getPage(pageable));
@@ -106,13 +124,13 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     private createColumnDefs(deleteButton: boolean) {
         this.columnDefs = [
             { headerName: 'Username', field: 'userName' },
-            { headerName: 'First Name', field: 'user.firstName' },
-            { headerName: 'Last Name', field: 'user.lastName' },
-            { headerName: 'Email', field: 'user.email', width: '200%' },
+            // { headerName: 'First Name', field: 'user.firstName' },
+            // { headerName: 'Last Name', field: 'user.lastName' },
+            // { headerName: 'Email', field: 'user.email', width: '200%' },
             { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
             { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', suppressSorting: true},
-            { headerName: 'Centers', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
-                cellRenderer: (params: any) => !params.data.centers || params.data.centers.length == 0},
+            // { headerName: 'Centers', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
+            //     cellRenderer: (params: any) => !params.data.centers || params.data.centers.length == 0},
             { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
                 //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
@@ -125,8 +143,8 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
-            { headerName: 'Receive Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
-            { headerName: 'Receive Member Mail', type: 'boolean', field: 'receiveStudyUserReport', editable: true, width: '54px' },
+            // { headerName: 'Receive Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
+            // { headerName: 'Receive Member Mail', type: 'boolean', field: 'receiveStudyUserReport', editable: true, width: '54px' },
         ];
         if (deleteButton) {
             this.columnDefs.push({ headerName: '', type: 'button', awesome: 'fa-regular fa-trash-can', action: this.removeStudyUser, editable: (su: StudyUser) => !this.disableEdit(su)});
@@ -136,7 +154,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     /**
      * On select/unselect given right for the given study user 
      */
-    private onEditRight(right: StudyUserRight, su: StudyUser, selected: boolean) {
+    onEditRight(right: StudyUserRight, su: StudyUser, selected: boolean) {
         if (!su.studyUserRights.includes(right) && selected) {
             su.studyUserRights.push(right);
         }
@@ -144,6 +162,39 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             const index = su.studyUserRights.indexOf(right, 0);
             if (index > -1) su.studyUserRights.splice(index, 1);
         }
+        this.onStudyUserEdit();
+    }
+
+    onEditCenter(center: Center, su: StudyUser, selected: boolean) {
+        if (!su.centers) su.centers = [];
+        let index: number = su.centers.findIndex(c => c.id == center.id)
+        if (!su.centers.find(c => c.id == center.id) && selected) {
+            su.centers.push(center);
+        }
+        else if (index > -1 && !selected) {
+            su.centers.splice(index, 1);
+        }
+        this.onStudyUserEdit();
+    }
+
+    hasCenter(center: Center, su: StudyUser): boolean {
+        return !!su.centers?.find(c => c.id == center.id);
+    }
+
+    onUserClick(studyUser: StudyUser) {
+        if (this.pannelStudyUser && (this.pannelStudyUser.id == studyUser.id)) {
+            this.closePannel();
+        } else {
+            this.openPannel(studyUser);
+        }
+    }
+
+    openPannel(studyUser: StudyUser) {
+        this.pannelStudyUser = studyUser;
+    }
+
+    closePannel() {
+        this.pannelStudyUser = null;
     }
 
     private removeStudyUser = (item: StudyUser) => {
@@ -160,6 +211,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             let option = this.userOptions.find(opt => opt.value?.id == item.user?.id);
             if (option) option.disabled = false;
         }
+        this.closePannel();
     }
 
     onStudyUserEdit() {
@@ -193,6 +245,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
             this.studyUserList.unshift(backedUpStudyUser);
+            this.pannelStudyUser = backedUpStudyUser;
         } else {
             let studyUser: StudyUser = new StudyUser();
             studyUser.userId = selectedUser.id;
@@ -202,6 +255,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             studyUser.studyUserRights = rights;
             studyUser.completeMember(this.users);
             this.studyUserList.unshift(studyUser);
+            this.pannelStudyUser = studyUser;
         }
         this.browserPaging.setItems(this.studyUserList);
         this.table.refresh();
@@ -241,5 +295,13 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.table.refresh();
         this.onChangeCallback(this.studyUserList);
         this.onTouchedCallback();
+    }
+
+    onToggleAllCenters(check: boolean) {
+        if(!check) {
+            this.pannelStudyUser.centers = [...this.centers];
+        } else {
+            this.pannelStudyUser.centers = [];
+        }
     }
 }

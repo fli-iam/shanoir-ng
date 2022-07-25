@@ -14,11 +14,13 @@
 import { Injectable } from '@angular/core';
 
 import { Center } from '../../centers/shared/center.model';
+import { IdName } from '../../shared/models/id-name.model';
 import { Id } from '../../shared/models/id.model';
 import { StudyCardDTOServiceAbstract } from '../../study-cards/shared/study-card.dto.abstract';
+import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { SubjectStudyDTO } from '../../subjects/shared/subject-study.dto';
+import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Tag } from '../../tags/tag.model';
@@ -26,7 +28,6 @@ import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser, StudyUserDTO } from './study-user.model';
 import { Study } from './study.model';
-import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 
 @Injectable()
 export class StudyDTOService {
@@ -120,6 +121,11 @@ export class StudyDTOService {
                 studyUser.user = studyUserDto.user;
                 studyUser.userId = studyUserDto.userId;
                 studyUser.userName = studyUserDto.userName;
+                studyUser.centers = studyUserDto.centersIds.map(centerId => {
+                    let center: Center = new Center();
+                    center.id = centerId;
+                    return center;
+                });
                 return studyUser;
             });
         } else {
