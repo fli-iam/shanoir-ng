@@ -144,11 +144,13 @@ handle_microservice_migration()
 			env_setdefault	spring.sql.init.mode	never
 			env_setdefault	spring.jpa.generate-ddl	true
 			env_setdefault	spring.jpa.hibernate.ddl-auto	update
+			env_setdefault  spring.batch.jdbc.initialize-schema	never
 			;;
 		init)
 			env_setdefault	spring.sql.init.mode	always
 			env_setdefault	spring.jpa.generate-ddl	true
 			env_setdefault	spring.jpa.hibernate.ddl-auto	create
+			env_setdefault  spring.batch.jdbc.initialize-schema	always
 
 			_ms_oneshot=1
 			env_setdefault	"SHANOIR_CONSOLE_LOG_LEVEL"			INFO
@@ -161,6 +163,7 @@ handle_microservice_migration()
 			env_setdefault	spring.sql.init.mode	never
 			env_setdefault	spring.jpa.generate-ddl	false
 			env_setdefault	spring.jpa.hibernate.ddl-auto	validate
+			env_setdefault  spring.batch.jdbc.initialize-schema	never
 			;;
 		manual)
 			error "SHANOIR_MIGRATION=manual not yet supported"
