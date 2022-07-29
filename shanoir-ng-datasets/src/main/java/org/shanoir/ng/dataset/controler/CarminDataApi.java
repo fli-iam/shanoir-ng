@@ -20,6 +20,7 @@ import org.shanoir.ng.dataset.model.carmin.GetPathResponse;
 import org.shanoir.ng.dataset.model.carmin.Path;
 import org.shanoir.ng.dataset.model.carmin.UploadData;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
