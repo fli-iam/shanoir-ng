@@ -38,8 +38,11 @@ public interface CarminDataApi {
     @ApiOperation(value = "Get content or information for a given path", notes = "Download a file (or a directory) or retun information about a specific path. The response format and content depends on the mandatory action query parameter (see the parameter description). Basically, the \"content\" action downloads the raw file, and the other actions return various information in a JSON record.", tags={  })
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "successful response. If the action is \"content\", the raw file (or a tarball) is returned, with the according mime type. Otherwise a json response a returned", response = GetPathResponse.class),
+            @ApiResponse(code = 200, message = "A functional or internal error occured processing the request"),
+            @ApiResponse(code = 403, message = "forbidden", response = Void.class),
+            @ApiResponse(code = 404, message = "o dataset found", response = Void.class),
+            @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 
-            @ApiResponse(code = 200, message = "A functional or internal error occured processing the request") })
     @RequestMapping(value = "/path/{completePath}",
             produces = { "application/json", "application/octet-stream" },
             method = RequestMethod.GET)
