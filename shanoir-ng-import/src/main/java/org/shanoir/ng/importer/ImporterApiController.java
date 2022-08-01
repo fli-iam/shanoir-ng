@@ -251,7 +251,7 @@ public class ImporterApiController implements ImporterApi {
 				importJob.setAnonymisationProfileToUse("Profile Neurinfo");
 			}
 			removeUnselectedSeries(importJob);
-			LOG.info("Starting import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
+			LOG.info("Starting import job for user {} (userId: {}) with import job folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
 			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} else {

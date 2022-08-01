@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -70,14 +71,17 @@ public abstract class DatasetAcquisitionDecorator implements DatasetAcquisitionM
 		}
 		final DatasetAcquisitionDTO datasetAcquisitionDTO = delegate
 				.datasetAcquisitionToDatasetAcquisitionDTO(datasetAcquisition);
-        if (datasetAcquisition.getType().equals("Mr")) {
+        setType(datasetAcquisitionDTO, datasetAcquisition);
+		return datasetAcquisitionDTO;
+	}
+	
+	private void setType(DatasetAcquisitionDTO datasetAcquisitionDTO, DatasetAcquisition datasetAcquisition) {
+		if (datasetAcquisition.getType().equals("Mr")) {
         	datasetAcquisitionDTO.setProtocol(((MrDatasetAcquisition)datasetAcquisition).getMrProtocol());
         } else if (datasetAcquisition.getType().equals("Pet")) {
         	datasetAcquisitionDTO.setProtocol(((PetDatasetAcquisition)datasetAcquisition).getPetProtocol());
         } else if (datasetAcquisition.getType().equals("Ct")) {
         	datasetAcquisitionDTO.setProtocol(((CtDatasetAcquisition)datasetAcquisition).getCtProtocol());
         }
-
-		return datasetAcquisitionDTO;
 	}
 }

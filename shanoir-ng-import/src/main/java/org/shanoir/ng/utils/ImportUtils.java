@@ -20,16 +20,18 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
@@ -52,8 +54,6 @@ import com.google.common.io.Files;
  */
 public class ImportUtils {
 
-	private static final String INTO = " into ";
-
 	private static final Logger LOG = LoggerFactory.getLogger(ImportUtils.class);
 
 	private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
@@ -67,6 +67,8 @@ public class ImportUtils {
 	private static final String DICOMDIR = "DICOMDIR";
 
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
+
+	private static final String INTO = " into ";
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -555,6 +557,32 @@ public class ImportUtils {
 			n = Math.abs(n);
 		}
 		return n;
+	}
+	
+	public static String readableFileSize(long size) {
+		if (size <= 0)
+			return "0";
+		final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
+		int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+		return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + units[digitGroups];
+	}
+
+	// size of directory in bytes
+	public static long getDirectorySize(Path path) {
+		long size = 0;
+		try (Stream<Path> walk = java.nio.file.Files.walk(path)) {
+			size = walk.filter(java.nio.file.Files::isRegularFile).mapToLong(p -> {
+				try {
+					return java.nio.file.Files.size(p);
+				} catch (IOException e) {
+					LOG.error("Failed to get size of %s%n%s", p, e);
+					return 0L;
+				}
+			}).sum();
+		} catch (IOException e) {
+			LOG.error("IO errors %s", e);
+		}
+		return size;
 	}
 
 }
