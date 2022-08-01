@@ -35,6 +35,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 							<ng-template ngSwitchDefault>
 								<input type="text" formControlName="name" [(ngModel)]="studyCard.name" />
+								<label *ngIf="hasError('name', ['required'])" [@slideDown]="hasError('name', ['required'])" class="form-validation-alert">Name is required!</label>
+								<label *ngIf="hasError('name', ['minlength', 'maxlength'])" [@slideDown]="hasError('name', ['minlength'])" class="form-validation-alert">Too short!</label>
+								<label *ngIf="hasError('name', ['unique'])" [@slideDown]="hasError('name', ['unique'])" class="form-validation-alert">Name should be unique!</label>
 							</ng-template>
 						</span>
 					</li>

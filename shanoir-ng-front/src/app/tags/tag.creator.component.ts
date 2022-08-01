@@ -11,15 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { Component, Input, forwardRef, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core'; // First, import Input
-
-import { Tag } from "./tag.model";
+import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { Study } from '../studies/shared/study.model';
-import { AbstractInput } from '../shared/form/input.abstract';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
+import { AbstractInput } from '../shared/form/input.abstract';
+import { Study } from '../studies/shared/study.model';
+import { Tag } from './tag.model';
+
 
 export type Mode =  "view" | "edit" | "create";
 @Component({
@@ -35,14 +34,14 @@ export type Mode =  "view" | "edit" | "create";
 ]
 })
 
-export class TagCreatorComponent extends AbstractInput implements OnChanges {
+export class TagCreatorComponent extends AbstractInput {
     @Input() study: Study;
     @Input() mode: Mode;
     @Output() onChange: EventEmitter<any> = new EventEmitter();
     selectedColor: string;
     text: string = null;
     addTagVisible: boolean = false;
-    displayedTags: Set<{tag: Tag, used: boolean, darkFont: boolean}>;
+    displayedTags: Set<{tag: Tag, darkFont: boolean}>;
     newTagDarkFont: boolean;
 
     constructor(private dialogService: ConfirmDialogService) {
@@ -56,18 +55,22 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
             let newTag = new Tag();
             newTag.color = this.selectedColor;
             newTag.name = this.text;
-            this.model.push(newTag);
-            this.text = null;
-            this.selectedColor = '#' + Math.floor(Math.random()*16777215).toString(16); // random color
-            this.addTagVisible = false;
-            this.displayedTags.add({tag: newTag, used: this.tagUsed(newTag), darkFont: this.getFontColor(newTag.color)});
-            this.propagateChange(this.model);
-            this.onChange.emit(this.model);
+            if (this.model.find(tag => (tag as Tag).equals(newTag))) {
+                this.dialogService.error('Error', 'A tag with this color and name already exist !');
+            } else {
+                this.model.push(newTag);
+                this.text = null;
+                this.selectedColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0'); // random color
+                this.addTagVisible = false;
+                this.displayedTags.add({tag: newTag, darkFont: this.getFontColor(newTag.color)});
+                this.propagateChange(this.model);
+                this.onChange.emit(this.model);
+            }
         }
     }
 
-    public deleteTag(tag: {tag: Tag, used: boolean, darkFont: boolean}) {
-        if (tag.used) {
+    public deleteTag(tag: {tag: Tag, darkFont: boolean}) {
+        if (this.tagUsed(tag.tag)) {
             this.dialogService.inform('Cannot delete!', 'Sorry, this tag is currently linked to one or more subject(s) in this study.');
             return;
         } else {
@@ -80,7 +83,7 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
 
     private tagUsed(tag: Tag) {
         for (let subjectStudy of this.study.subjectStudyList) {
-            if (subjectStudy.tags.findIndex(element => element.id === tag.id) != -1) {
+            if (subjectStudy.tags.findIndex(element => element.equals(tag)) != -1) {
                 return true;
             }
         }
@@ -92,13 +95,9 @@ export class TagCreatorComponent extends AbstractInput implements OnChanges {
         this.displayedTags = new Set();
         if (this.model) {
             (this.model as Tag[]).forEach(tag => 
-                this.displayedTags.add({tag: tag, used: this.tagUsed(tag), darkFont: this.getFontColor(tag.color)})
+                this.displayedTags.add({tag: tag, darkFont: this.getFontColor(tag.color)})
             );
         }
-    }
-
-    ngOnChanges(changes: SimpleChanges): void {
-        // ?
     }
 
     private getFontColor(colorInp: string): boolean {

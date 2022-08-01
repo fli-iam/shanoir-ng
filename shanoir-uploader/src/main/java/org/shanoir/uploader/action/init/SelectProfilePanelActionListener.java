@@ -11,7 +11,6 @@ import java.util.Properties;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.gui.SelectProfileConfigurationPanel;
 

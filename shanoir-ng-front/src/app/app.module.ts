@@ -41,7 +41,6 @@ import { TaskService } from './async-tasks/task.service';
 import { BidsTreeComponent } from './bids/tree/bids-tree.component';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
 import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
-import { Router } from './breadcrumbs/router';
 import { CenterListComponent } from './centers/center-list/center-list.component';
 import { CenterComponent } from './centers/center/center.component';
 import { CenterService } from './centers/shared/center.service';
@@ -114,7 +113,6 @@ import { TableComponent } from './shared/components/table/table.component';
 import { TooltipComponent } from './shared/components/tooltip/tooltip.component';
 import { TreeNodeComponent } from './shared/components/tree/tree-node.component';
 import { UploaderComponent } from './shared/components/uploader/uploader.component';
-import { ConsoleComponent } from './shared/console/console.line.component';
 import { DatepickerComponent } from './shared/date-picker/date-picker.component';
 import { HeaderComponent } from './shared/header/header.component';
 import { HelpMessageComponent } from './shared/help-message/help-message.component';
@@ -241,9 +239,13 @@ import { SolrTextSearchModeComponent } from './solr/text-search/solr.text-search
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
 import { ChallengeBlockComponent } from './home/challenge/challenge-block.component';
+import { ConsoleComponent } from './shared/console/console.component';
+import { ConsoleService } from './shared/console/console.service';
 import { ExtraDataService } from './preclinical/extraData/extraData/shared/extradata.service'
 import { TagCreatorComponent } from './tags/tag.creator.component';
 import { TagInputComponent } from './tags/tag.input.component';
+import { StudyDTOService } from './studies/shared/study.dto';
+import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
 
@@ -272,7 +274,6 @@ import { VarDirective } from './utils/ng-var.directive';
         CenterComponent,
         CenterListComponent,
         ConfirmDialogComponent,
-        ConsoleComponent,
         DropdownMenuComponent,
         UserComponent,
         ExaminationListComponent,
@@ -415,6 +416,7 @@ import { VarDirective } from './utils/ng-var.directive';
         TagCreatorComponent,
         SolrRangeCriterionComponent,
         ChallengeBlockComponent,
+        ConsoleComponent,
         TagInputComponent,
         StudyUserListComponent,
         VarDirective
@@ -477,7 +479,6 @@ import { VarDirective } from './utils/ng-var.directive';
     	EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
 	    BreadcrumbsService,
-        Router,
         GlobalService,
         ImportDataService,
         NiftiConverterService,
@@ -507,7 +508,10 @@ import { VarDirective } from './utils/ng-var.directive';
         LoaderService,
         SubjectStudyPipe,
         KeycloakSessionService,
+        ConsoleService,
 		ExtraDataService,
+        StudyDTOService,
+        SubjectDTOService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

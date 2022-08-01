@@ -21,7 +21,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
@@ -69,9 +71,15 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private DatasetService datasetService;
+	
+	@Value("${datasets-data}")
+	private String dataDir;
 	
 	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException {
+	public void deleteById(final Long id) throws EntityNotFoundException, ShanoirException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
@@ -86,6 +94,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			for (Dataset ds : dsAcq.getDatasets())  {
 				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, ds.getStudyId()));
 				solrService.deleteFromIndex(ds.getId());
+				this.datasetService.deleteDatasetFromPacs(ds);
 			}
 		}
 
@@ -95,7 +104,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public void deleteFromRabbit(Examination exam) throws EntityNotFoundException {
+	public void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException {
 		Long tokenUserId = KeycloakUtil.getTokenUserId();
 		String studyIdAsString = exam.getStudyId().toString();
 		// Iterate over datasets acquisitions and datasets to send events and remove them from solr
@@ -104,15 +113,24 @@ public class ExaminationServiceImpl implements ExaminationService {
 			for (Dataset ds : dsAcq.getDatasets())  {
 				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, ds.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, ds.getStudyId()));
 				solrService.deleteFromIndex(ds.getId());
+				this.datasetService.deleteDatasetFromPacs(ds);
 			}
 		}
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EXAMINATION_EVENT, exam.getId().toString(), tokenUserId, studyIdAsString, ShanoirEvent.SUCCESS, exam.getStudyId()));
 		examinationRepository.deleteById(exam.getId());
 	}
 
-	@Value("${datasets-data}")
-	private String dataDir;
-
+	@Override
+	public List<Examination> findAll() {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return examinationRepository.findAll();
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			return examinationRepository.findByStudyIdIn(studyIds);
+		}
+	}
+	
 	@Override
 	public Page<Examination> findPage(final Pageable pageable, boolean preclinical) {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
@@ -121,6 +139,25 @@ public class ExaminationServiceImpl implements ExaminationService {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			return examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable);
+		}
+	}
+	
+	@Override
+	public Page<Examination> findPage(final Pageable pageable, String patientName) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			if (StringUtils.isNotEmpty(patientName) && patientName.length() <= 64) {
+				return examinationRepository.findAllBySubjectName(patientName, pageable);
+			} else {
+				return examinationRepository.findAll(pageable);
+			}
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			if (StringUtils.isNotEmpty(patientName) && patientName.length() <= 64) {
+				return examinationRepository.findByStudyIdInAndBySubjectName(studyIds, patientName, pageable);
+			} else {
+				return examinationRepository.findByStudyIdIn(studyIds, pageable);
+			}
 		}
 	}
 

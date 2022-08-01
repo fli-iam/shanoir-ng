@@ -13,9 +13,8 @@
  */
 import { Examination } from '../../examinations/shared/examination.model';
 import { Entity } from '../../shared/components/entity/entity.abstract';
-import { Id } from '../../shared/models/id.model';
 import { ImagedObjectCategory } from './imaged-object-category.enum';
-import { SubjectStudy, SubjectStudyDTO } from './subject-study.model';
+import { SubjectStudy } from './subject-study.model';
 import { Sex } from './subject.types';
 
 
@@ -49,39 +48,4 @@ export interface SimpleSubject {
     name: string;
     identifier: string; 
     subjectStudyList: SubjectStudy[];
-}
-
-export class SubjectDTO {
-
-    id: number;
-    examinations: Id[];
-    name: string;
-    identifier: string;
-    birthDate: Date;
-    languageHemisphericDominance: "Left" | "Right";
-    manualHemisphericDominance: "Left" | "Right";
-    imagedObjectCategory: ImagedObjectCategory;
-    sex: Sex;
-    selected: boolean = false;
-    subjectStudyList: Id[] = [];
-    preclinical: boolean;
-	
-    constructor(subject: Subject) {
-        this.id = subject.id;
-        if (subject.examinations) this.examinations = Id.toIdList(subject.examinations);
-        this.name = subject.name;
-        this.identifier = subject.identifier;
-        this.birthDate = subject.birthDate;
-        this.languageHemisphericDominance = subject.languageHemisphericDominance;
-        this.manualHemisphericDominance = subject.manualHemisphericDominance;
-        this.imagedObjectCategory = subject.imagedObjectCategory;
-        this.sex = subject.sex;
-        this.selected = subject.selected;
-        this.preclinical = subject.preclinical;
-        this.subjectStudyList = subject.subjectStudyList ? subject.subjectStudyList.map(ss => {
-            let dto = new SubjectStudyDTO(ss);
-            dto.subject = null;
-            return dto;
-        }) : null;
-    }
 }

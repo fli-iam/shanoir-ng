@@ -102,13 +102,22 @@ public final class KeycloakUtil {
 		final KeycloakSecurityContext context = getKeycloakSecurityContext();
 		final AccessToken accessToken = context.getToken();
 		if (accessToken == null) {
-			throw new TokenNotFoundException("Access token not found");
+			throw new TokenNotFoundException("Access token not found.");
 		}
 		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
 		if (otherClaims.containsKey(USER_ID_TOKEN_ATT)) {
 			return Long.valueOf(otherClaims.get(USER_ID_TOKEN_ATT).toString());
 		}
 		return null;
+	}
+	
+	public static String getTokenUserName() {
+		final KeycloakSecurityContext context = getKeycloakSecurityContext();
+		final AccessToken accessToken = context.getToken();
+		if (accessToken == null) {
+			throw new TokenNotFoundException("Access token not found.");
+		}
+		return accessToken.getPreferredUsername();
 	}
 
 	/**

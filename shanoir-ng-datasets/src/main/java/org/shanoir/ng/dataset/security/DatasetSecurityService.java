@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,11 +31,15 @@ import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
@@ -61,10 +66,16 @@ public class DatasetSecurityService {
 	ExaminationRepository examinationRepository;
 	
 	@Autowired
+	SubjectRepository subjectRepository;
+	
+	@Autowired
 	StudyRightsService commService;
 
 	@Autowired
 	StudyRepository studyRepository;
+	
+	@Autowired
+	private StudyInstanceUIDHandler studyInstanceUIDHandler;
 	
 	/**
 	 * Check that the connected user has the given right for the given study.
@@ -81,6 +92,54 @@ public class DatasetSecurityService {
 			return false;
 		}
         return commService.hasRightOnStudy(studyId, rightStr);
+    }
+    
+    /**
+	 * Check that the connected user has the given right for the given subject.
+	 * 
+	 * @param studyId the study id
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+    public boolean hasRightOnSubjectId(Long subjectId, String rightStr) {
+    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+    	Optional<Subject> subject = subjectRepository.findById(subjectId);
+    	if (subject.isEmpty()) {
+    		return false;
+    	}
+    	for (SubjectStudy subjectStudy : subject.get().getSubjectStudyList()) {
+    		boolean hasRight = commService.hasRightOnStudy(subjectStudy.getStudy().getId(), rightStr);
+    		if (hasRight) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    /**
+	 * Check that the connected user has the given right for the given subject.
+	 * 
+	 * @param subjectName the study name
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+    public boolean hasRightOnSubjectName(String subjectName, String rightStr) {
+    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+    	Subject subject = subjectRepository.findByName(subjectName);
+    	if (subject == null) {
+    		return false;
+    	}
+    	for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+    		boolean hasRight = commService.hasRightOnStudy(subjectStudy.getStudy().getId(), rightStr);
+    		if (hasRight) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
     
     /**
@@ -768,6 +827,11 @@ public class DatasetSecurityService {
 			return false;
 		}
         return commService.hasRightOnStudy(exam.getStudyId(), rightStr);
+    }
+    
+    public boolean hasRightOnExamination(String examinationUID, String rightStr) throws EntityNotFoundException {
+		Long id = studyInstanceUIDHandler.extractExaminationId(examinationUID);
+		return hasRightOnExamination(id, rightStr);
     }
    
 }

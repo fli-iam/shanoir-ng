@@ -88,6 +88,9 @@ public class RabbitMQSubjectService {
 		IdName idNameMessage;
 		try {
 			idNameMessage = mapper.readValue(message, IdName.class);
+			if (idNameMessage == null) {
+				throw new IllegalStateException("no rabbitmq message parsed from " + message);
+			}
 			Long subjectId = idNameMessage.getId();
 			Long studyId = Long.valueOf(idNameMessage.getName());
 			Subject subject = subjectRepository.findById(subjectId).orElseThrow();
@@ -107,6 +110,9 @@ public class RabbitMQSubjectService {
 			subStud.setStudy(study);
 			subjectStudyRepository.save(subStud);
 			return study.getName();
+		} catch (NullPointerException e) {
+			LOG.error("Error while creating subjectStudy", e);
+			return null;
 		} catch (Exception e) {
 			LOG.error("Error while creating subjectStudy", e);
 			return null;

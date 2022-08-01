@@ -28,6 +28,9 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.shanoir.ng.studyexamination.StudyExamination;
+import org.shanoir.ng.studyexamination.StudyExaminationRepository;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
@@ -52,6 +55,12 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private StudyExaminationRepository studyExaminationRepository;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CenterServiceImpl.class);
 	
@@ -71,6 +80,12 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 		if (!centerOpt.get().getStudyCenterList().isEmpty()) {
 			errors.add(new FieldError("unauthorized", "Center linked to entities", "studies"));
 		}
+
+		List<StudyExamination> exams = Utils.toList(studyExaminationRepository.findByCenterId(id));
+		if (!exams.isEmpty()) {
+			errors.add(new FieldError("unauthorized", "Center linked to entities", "examinations"));
+		}
+
 		if (!errors.isEmpty()) {
 			final FieldErrorMap errorMap = new FieldErrorMap();
 			errorMap.put("delete", errors);
@@ -140,7 +155,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	private boolean updateName(IdName idName) throws MicroServiceCommunicationException{
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE,
-					new ObjectMapper().writeValueAsString(idName));
+					objectMapper.writeValueAsString(idName));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center name.");

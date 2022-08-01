@@ -23,6 +23,7 @@ import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
+import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
@@ -38,7 +39,8 @@ import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.co
 @Component({
     selector: 'study-card',
     templateUrl: 'study-card.component.html',
-    styleUrls: ['study-card.component.css']
+    styleUrls: ['study-card.component.css'],
+    animations: [slideDown]
 })
 export class StudyCardComponent extends EntityComponent<StudyCard> {
 
@@ -114,7 +116,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     buildForm(): FormGroup {
         let form: FormGroup = this.formBuilder.group({
-            'name': [this.studyCard.name, [Validators.required, Validators.minLength(2)]],
+            'name': [this.studyCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.studyCard.study, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
             'niftiConverter': [this.studyCard.niftiConverter, [Validators.required]],

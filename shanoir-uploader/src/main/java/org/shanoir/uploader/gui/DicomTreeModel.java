@@ -7,7 +7,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.model.DicomTreeNode;
+import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.query.Media;
 
 /**

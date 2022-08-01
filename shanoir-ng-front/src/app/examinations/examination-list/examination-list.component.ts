@@ -85,7 +85,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     getOptions() {
         return {
-            new: false,
+            new: this.keycloakService.isUserAdminOrExpert(),
             view: true, 
             edit: this.keycloakService.isUserAdminOrExpert(), 
             delete: this.keycloakService.isUserAdminOrExpert()
@@ -104,8 +104,9 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     canDelete(exam: Examination): boolean {
         return this.keycloakService.isUserAdmin() || (
-            exam.study &&
-            this.studiesICanAdmin.includes(exam.study.id)
+            exam.study
+            && this.studiesICanAdmin
+            && this.studiesICanAdmin.includes(exam.study.id)
         );
     }
 }

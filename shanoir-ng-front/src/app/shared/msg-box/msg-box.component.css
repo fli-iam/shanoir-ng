@@ -4,7 +4,7 @@
     color: var(--very-light-grey); 
     display: inline-block;
     position: fixed; 
-    top: 0; right: 0; left: 300px; 
+    bottom: 0; right: 0;
     width: 500px;
     border-radius: 0 0 3px 3px;
     z-index: 1000;
@@ -22,3 +22,14 @@
     .icon p { padding: 5px 13px 5px 5px; margin: 0; }
 
 .msg { float: left; width: 450px; }
+.number {     
+    position: absolute;
+    left: 38px;
+    top: 2px;
+    background-color: var(--color-a-light);
+    color: white;
+    border-radius: 10px;
+    height: 16px;
+    width: 16px;
+    text-align: center; 
+}

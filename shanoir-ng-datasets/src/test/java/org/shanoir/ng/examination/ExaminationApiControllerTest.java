@@ -47,7 +47,9 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +61,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -80,6 +83,7 @@ import com.google.gson.GsonBuilder;
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration()
 @EnableSpringDataWebSupport
+@ActiveProfiles("test")
 public class ExaminationApiControllerTest {
 
 	@ClassRule
@@ -108,6 +112,12 @@ public class ExaminationApiControllerTest {
 
 	@MockBean
 	private ExaminationService examinationServiceMock;
+	
+	@MockBean
+	private SubjectRepository subjectRepository;
+	
+	@MockBean
+	private CenterRepository centerRepository;
 
 	@MockBean
 	private Pageable pageable;
@@ -207,7 +217,7 @@ public class ExaminationApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewExaminationTest() throws Exception {
 		Examination exam = new Examination();
-		exam.setId(Long.valueOf(123));
+		exam.setId(123L);
 		exam.setStudyId(3L);
 		given(examinationServiceMock.findById(1L)).willReturn(exam);
 		given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
@@ -222,8 +232,11 @@ public class ExaminationApiControllerTest {
 		
 		ShanoirEvent event = eventCatcher.getValue();
 		assertNotNull(event);
-		assertEquals(exam.getStudyId().toString(), event.getMessage());
+		assertEquals(exam.getStudyId(), event.getStudyId());
 		assertEquals(exam.getId().toString(), event.getObjectId());
+		// This is import, plese keep it, or change RabbitMQStudiesService#linkExamination method
+		assertEquals("centerId:" + exam.getCenterId() + ";subjectId:" + exam.getSubjectId(), event.getMessage());
+
 		assertEquals(ShanoirEventType.CREATE_EXAMINATION_EVENT, event.getEventType());
 	}
 
@@ -249,7 +262,7 @@ public class ExaminationApiControllerTest {
 
 			// WHEN The file is added to the examination
 			mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH + "/extra-data-upload/1").file(file))
-			.andExpect(status().isNotAcceptable());
+			.andExpect(status().isUnprocessableEntity());
 
 			Mockito.verify(examinationServiceMock).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
 

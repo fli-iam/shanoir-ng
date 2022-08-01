@@ -26,11 +26,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.role.service.RoleServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * User detail service test.

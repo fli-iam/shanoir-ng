@@ -74,7 +74,7 @@ public class StudyCardSecurityTest {
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException, RestServiceException {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		Set<Long> ids = Mockito.anySetOf(Long.class);
+		Set<Long> ids = Mockito.anySet();
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
 		assertAccessDenied(t -> { try { api.deleteStudyCard(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
@@ -93,7 +93,7 @@ public class StudyCardSecurityTest {
 	public void testAsUser() throws ShanoirException, RestServiceException {
 		given(commService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
 		Set<Long> ids = new HashSet<>(); ids.add(1L);
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
+		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(ids);
 		
 		assertAccessAuthorized(api::findStudyCardByAcqEqId, 1L);
 		assertEquals(2, api.findStudyCardByAcqEqId(1L).getBody().size());
@@ -114,7 +114,7 @@ public class StudyCardSecurityTest {
 	public void testAsExpert() throws ShanoirException, RestServiceException {
 		given(commService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
 		Set<Long> ids = new HashSet<>(); ids.add(1L);
-		given(commService.hasRightOnStudies(Mockito.anySetOf(Long.class), Mockito.anyString())).willReturn(ids);
+		given(commService.hasRightOnStudies(Mockito.anySet(), Mockito.anyString())).willReturn(ids);
 		
 		assertAccessAuthorized(api::findStudyCardByAcqEqId, 1L);
 		assertEquals(2, api.findStudyCardByAcqEqId(1L).getBody().size());
@@ -151,7 +151,7 @@ public class StudyCardSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
 		given(commService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		Set<Long> ids = Mockito.anySetOf(Long.class);
+		Set<Long> ids = Mockito.anySet();
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
 		assertAccessAuthorized(t -> { try { api.deleteStudyCard(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);

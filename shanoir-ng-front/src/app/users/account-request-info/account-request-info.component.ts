@@ -17,7 +17,7 @@ import { ActivatedRoute } from '@angular/router';
 import { StudyService } from '../../studies/shared/study.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 
 import { AccountRequestInfo } from './account-request-info.model';
 import { Study } from '../../studies/shared/study.model';
@@ -48,7 +48,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor {
     constructor(private formBuilder: FormBuilder,
                 private route: ActivatedRoute,
                 private studyService: StudyService,
-                private msgService: MsgBoxService) {
+                private consoleService: ConsoleService) {
         this.isChallenge = this.route.snapshot.data['isChallenge'];
     }
 
@@ -75,7 +75,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor {
                     this.challengeOptions = result.map(element => new Option(element.id, element.name));
                 } else {
                     this.challengeOptions = [];
-                    this.msgService.log('warn', 'No challenges available for the moment. Please retry later.');
+                    this.consoleService.log('warn', 'No challenges available for the moment. Please retry later.');
                 }
             });
         }

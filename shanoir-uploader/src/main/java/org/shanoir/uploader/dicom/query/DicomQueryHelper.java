@@ -11,9 +11,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
-import org.shanoir.dicom.model.DicomTreeNode;
-//import org.shanoir.services.dicom.server.ConfigBean;
-import org.shanoir.util.ShanoirUtil;
+import org.shanoir.uploader.dicom.DicomTreeNode;
+import org.shanoir.uploader.utils.Util;
 
 /**
  * This class queries a DICOM server.
@@ -174,10 +173,10 @@ public class DicomQueryHelper {
 		}
 		if (afterStudyDate != null) {
 			if (beforeStudyDate != null) {
-				resultList.add("-qStudyDate=" + ShanoirUtil.convertDicomDateToString(afterStudyDate) + "-"
-						+ ShanoirUtil.convertDicomDateToString(beforeStudyDate));
+				resultList.add("-qStudyDate=" + Util.convertDicomDateToString(afterStudyDate) + "-"
+						+ Util.convertDicomDateToString(beforeStudyDate));
 			} else {
-				resultList.add("-qStudyDate=" + ShanoirUtil.convertDicomDateToString(afterStudyDate));
+				resultList.add("-qStudyDate=" + Util.convertDicomDateToString(afterStudyDate));
 			}
 		}
 		// add MRI information to the query result
@@ -299,7 +298,7 @@ public class DicomQueryHelper {
 			final String[] restrictions, String[] args, final String patientNameCriterion,
 			final boolean isFuzzypatientNameCriterion, final String studyDescriptionCriterion) throws Exception {
 		// first query: patient level
-		logger.debug("C_FIND: launching dcmqr with args: " + ShanoirUtil.arrayToString(args));
+		logger.debug("C_FIND: launching dcmqr with args: " + Util.arrayToString(args));
 		final Collection<DicomObject> patientList = dcmqr.query(args);
 		for (final Iterator<DicomObject> itePatient = patientList.iterator(); itePatient.hasNext();) {
 			final DicomObject patientDicomObject = itePatient.next();
@@ -318,7 +317,7 @@ public class DicomQueryHelper {
 				boolean studyFound = false;
 				args = buildCommand(null, false, restrictions, null, null);
 				// second query: study level
-				logger.debug("C_FIND: launching dcmqr with args: " + ShanoirUtil.arrayToString(args));
+				logger.debug("C_FIND: launching dcmqr with args: " + Util.arrayToString(args));
 				final Collection<DicomObject> studyList = dcmqr.query(args);
 				studyFound = populateWithPatientLevelStudy(dcmqr, restrictions, /* patientNameCriterion */
 						patientDicomObject.dataset().getString(Tag.PatientName), studyDescriptionCriterion, patient,
@@ -350,7 +349,7 @@ public class DicomQueryHelper {
 	private DicomTreeNode populateWithStudyLevel(DicomTreeNode media, final IDcmQR dcmqr, final String[] restrictions,
 			String[] args) throws Exception {
 		// First query: study level
-		logger.debug("C_FIND: Populate with study level, study command: launching dcmqr with args: " + ShanoirUtil.arrayToString(args));
+		logger.debug("C_FIND: Populate with study level, study command: launching dcmqr with args: " + Util.arrayToString(args));
 		final Collection<DicomObject> dicomObjectList = dcmqr.query(args);
 		logger.debug("Populate with study level, study command: " + dicomObjectList.size() + " result objects.");
 		for (final Iterator<DicomObject> iteStudy = dicomObjectList.iterator(); iteStudy.hasNext();) {
@@ -362,7 +361,7 @@ public class DicomQueryHelper {
 
 			// Second query: series level
 			args = buildCommand("-S", false, restrictions, dicomObject.dataset().getString(Tag.StudyInstanceUID), null);
-			logger.debug("C_FIND: Populate with study level, series command: launching dcmqr with args: " + ShanoirUtil.arrayToString(args));
+			logger.debug("C_FIND: Populate with study level, series command: launching dcmqr with args: " + Util.arrayToString(args));
 			final Collection<DicomObject> serieList = dcmqr.query(args);
 			logger.debug("Populate with study level, series command: " + serieList.size() + " result objects.");
 			for (final Iterator<DicomObject> iteSerie = serieList.iterator(); iteSerie.hasNext();) {
@@ -386,7 +385,7 @@ public class DicomQueryHelper {
 	 */
 	private DicomTreeNode populateWithSerieLevel(DicomTreeNode media, final IDcmQR dcmqr, final String[] args)
 			throws Exception {
-		logger.debug("C_FIND: launching dcmqr with args: " + ShanoirUtil.arrayToString(args));
+		logger.debug("C_FIND: launching dcmqr with args: " + Util.arrayToString(args));
 		final Collection<DicomObject> serieList = dcmqr.query(args);
 		for (final Iterator<DicomObject> iteSerie = serieList.iterator(); iteSerie.hasNext();) {
 			final DicomObject dicomObject = iteSerie.next();
@@ -633,7 +632,7 @@ public class DicomQueryHelper {
 	private boolean populateWithPatientLevelSerie(final IDcmQR dcmqr, final String[] restrictions,
 			final DicomObject studyDicomObject, final DicomTreeNode study, boolean atLeastOneWantedModality) throws Exception {
 		final String[] args = buildCommand("-S", false, restrictions, studyDicomObject.dataset().getString(Tag.StudyInstanceUID), null);
-		logger.debug("C_FIND: launching dcmqr with args: " + ShanoirUtil.arrayToString(args));
+		logger.debug("C_FIND: launching dcmqr with args: " + Util.arrayToString(args));
 		final Collection<DicomObject> serieList = dcmqr.query(args);
 		for (final Iterator<DicomObject> iteSerie = serieList.iterator(); iteSerie.hasNext();) {
 			final DicomObject dicomObject = iteSerie.next();

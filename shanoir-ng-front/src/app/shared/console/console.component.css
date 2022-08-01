@@ -1,0 +1,25 @@
+:host() { width: 300px; display: block; position: relative; height: 20px; transition: 1s ease; overflow: hidden; margin-top: -20px; }
+:host().open { height: 128px; }
+:host().deployed { width: 100%; }
+.content { transition: 1s ease; position: absolute; left: 0; right: 0; top: 20px; padding: 4px 10px; overflow-x: hidden; overflow-y: auto; background-color: var(--dark-grey); height: 100px; }
+:host():not(.deployed) .content::-webkit-scrollbar { display: none; }
+
+.error { color: orangered; }
+.warn { color: orange }
+.info { color: limegreen; }
+.fresh { font-weight: bold; }
+
+.details-button { cursor: pointer; margin-left: 7px; }
+
+.details li { opacity: 0.8; font-size: 10px; white-space: nowrap; overflow-x: scroll; scrollbar-width: none; -ms-overflow-style: none; }
+.details li::-webkit-scrollbar { width: 0; height: 0; }
+.details ul { margin: 0 0 0 16px; }
+
+.button { background-color: transparent; }
+.button .tab { position: absolute;  color: var(--light-grey); text-align: center; cursor: pointer; }
+.button i { padding: 4px; }
+.button-top .tab { top: 0; border-bottom: 20px solid var(--dark-grey); border-right: 10px solid transparent; height: 0; }
+.right-tab { float: right; color: var(--light-grey); margin-right: -6px; cursor: pointer; }
+
+i { vertical-align: 1px; }
+.number { color: violet; }

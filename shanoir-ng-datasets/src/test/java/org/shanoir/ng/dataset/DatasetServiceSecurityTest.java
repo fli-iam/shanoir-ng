@@ -97,7 +97,7 @@ public class DatasetServiceSecurityTest {
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException {
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(true);
-		Set<Long> ids = Mockito.anySetOf(Long.class);
+		Set<Long> ids = Mockito.anySet();
 		given(rightsService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
 		assertAccessDenied(service::findById, ENTITY_ID);

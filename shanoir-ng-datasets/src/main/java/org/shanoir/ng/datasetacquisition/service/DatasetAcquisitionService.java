@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -59,6 +60,6 @@ public interface DatasetAcquisitionService {
 	Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
-	void deleteById(Long id) throws EntityNotFoundException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
 
 }

@@ -204,7 +204,7 @@ public class SolrServiceImpl implements SolrService {
 		SolrResultPage<ShanoirSolrDocument> result = null;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByFacetCriteria(query, pageable);
+			result = solrRepository.findByFacetCriteriaForAdmin(query, pageable);
 		} else {
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
 			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, query, pageable);

@@ -11,6 +11,7 @@ import org.shanoir.ng.bids.model.BidsFile;
 import org.shanoir.ng.bids.model.BidsFolder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 /**
  * This class allows to generate a BidsElement Tree from a BIDS folder
@@ -63,7 +64,9 @@ public class BidsDeserializer {
 			}
 			folderElement.getElements().add(fileElement);
 		}
-		folderElement.getElements().sort(Comparator.comparing(BidsElement::getPath));
+		if (!CollectionUtils.isEmpty(folderElement.getElements())) {
+			folderElement.getElements().sort(Comparator.comparing(BidsElement::getPath));
+		}
 		return folderElement;
 	}
 }
