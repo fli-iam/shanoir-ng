@@ -9,39 +9,41 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import javax.ws.rs.NotFoundException;
-
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
-import org.shanoir.ng.processing.carmin.model.Execution;
 import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.processing.carmin.model.Execution;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-
 /**
- * CRON job to request VIP api and create porcessedDataset
+ * CRON job to request VIP api and create processedDataset
  * 
  * @author KhalilKes
  */
@@ -78,6 +80,9 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     @Autowired
     private StudyRepository studyRepository;
 
+    @Autowired
+    private SubjectRepository subjectRepository;
+
     @Async
     @Override
     @Transactional
@@ -90,17 +95,14 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
         RestTemplate restTemplate = new RestTemplate();
 
         while (!stop) {
-
             Execution execution = restTemplate.getForObject(uri, Execution.class);
-
             try {
-
                 CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
                         .findByIdentifier(this.identifier)
-                        .orElseThrow(() -> new EntityNotFoundException("entity not found with identifier :" + this.identifier));
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                "entity not found with identifier :" + this.identifier));
 
                 switch (execution.getStatus()) {
-
                     case FINISHED:
                         /**
                          * updates the status and finish the job
@@ -135,7 +137,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                     case KILLED:
 
                         carminDatasetProcessing.setStatus(execution.getStatus());
-
                         this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
                         LOG.info("execution status updated stopping job...");
 
@@ -205,8 +206,8 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     }
 
     /**
-     * 
-     * @param zipFilePath
+     *
+     * @param niiftiFile
      * @param destDir
      * @param carminDatasetProcessing
      */
@@ -218,7 +219,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
             dir.mkdirs();
 
         try {
-
             ProcessedDatasetImportJob processedDataset = new ProcessedDatasetImportJob();
             DatasetProcessing datasetProcessing = datasetProcessingService
                     .findById(carminDatasetProcessing.getId())
@@ -234,12 +234,31 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
             processedDataset.setStudyId(datasetProcessing.getStudyId());
             processedDataset.setStudyName(study.getName());
 
-            // TODO get a subject for the processedDataset, hard coded for the time being
-            processedDataset.setSubjectId(1L);
-            processedDataset.setSubjectName("DemoSubject");
-            processedDataset.setProcessedDatasetName(getNameWithoutExtension(niiftiFile.getName()));
-            processedDataset.setDatasetType("Mesh");
+            List<Dataset> inputDatasets = datasetProcessing.getInputDatasets();
 
+            if(inputDatasets.size() != 0) {
+                
+                List<Long> subjectIds = inputDatasets.stream().map(dataset -> dataset.getSubjectId())
+                    .collect(Collectors.toList());
+             
+                Predicate<Long> predicate = obj -> Objects.equals(inputDatasets.get(0).getSubjectId(), obj);
+
+                if (subjectIds.stream().allMatch(predicate)) {
+                    Subject subject = subjectRepository.findById(inputDatasets.get(0).getSubjectId())
+                        .orElseThrow(() -> new NotFoundException("subject not found"));
+
+                    processedDataset.setSubjectId(subject.getId());
+                    processedDataset.setSubjectName(subject.getName());
+                    processedDataset.setDatasetType(inputDatasets.get(0).getType());
+                } else {
+                    processedDataset.setDatasetType("Mesh");
+                }
+
+            } else {
+                processedDataset.setDatasetType("Mesh");
+            }
+            
+            processedDataset.setProcessedDatasetName(getNameWithoutExtension(niiftiFile.getName())); 
             importerService.createProcessedDataset(processedDataset);
 
             deleteCacheDir(Paths.get(destDir));
