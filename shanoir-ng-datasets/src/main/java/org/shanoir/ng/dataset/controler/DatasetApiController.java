@@ -471,7 +471,7 @@ public class DatasetApiController implements DatasetApi {
 		
 		final Dataset dataset = datasetService.findById(datasetId);
 		List<URL> pathURLs = new ArrayList<>();
-		getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 		if (pathURLs.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
