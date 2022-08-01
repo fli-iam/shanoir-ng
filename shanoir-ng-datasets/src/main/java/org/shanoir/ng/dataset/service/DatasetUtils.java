@@ -5,9 +5,11 @@ import java.net.URL;
 import java.util.Iterator;
 import java.util.List;
 
+import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
+import org.shanoir.ng.dataset.modality.GenericDataset;
 import org.shanoir.ng.dataset.modality.MegDataset;
 import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -24,7 +26,6 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.processing.model.DatasetProcessing;
 
 public class DatasetUtils {
 
@@ -108,9 +109,16 @@ public class DatasetUtils {
 				dataset = new TemplateDataset();
 				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 				break;
+			case BidsDataset.datasetType:
+				dataset = new BidsDataset();
+				originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
+				break;
 			default:
-			break;
+				dataset = new GenericDataset();
+				originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
+				break;
 		}
+		dataset.setOriginMetadata(originMetadata);
 		return dataset;
 	}
 	
