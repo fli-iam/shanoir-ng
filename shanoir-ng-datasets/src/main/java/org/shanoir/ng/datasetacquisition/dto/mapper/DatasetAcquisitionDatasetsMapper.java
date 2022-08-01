@@ -21,38 +21,43 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MapperConfig;
 import org.mapstruct.MappingInheritanceStrategy;
 import org.mapstruct.ObjectFactory;
-import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetUtils;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
-import org.shanoir.ng.shared.paging.PageImpl;
-import org.springframework.data.domain.Page;
 
-@Mapper(componentModel = "spring", uses = { ExaminationMapper.class })
-@DecoratedWith(DatasetAcquisitionDecorator.class)
+@Mapper(componentModel = "spring", uses = { ExaminationMapper.class, DatasetMapper.class })
+@DecoratedWith(DatasetAcquisitionDatasetsDecorator.class)
 @MapperConfig(mappingInheritanceStrategy=MappingInheritanceStrategy.AUTO_INHERIT_FROM_CONFIG)
-public interface DatasetAcquisitionMapper {
-
+public interface DatasetAcquisitionDatasetsMapper {
 	
-	List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
+	List<DatasetAcquisitionDatasetsDTO> datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(
 			List<DatasetAcquisition> datasetAcquisitions); 
 	
-	public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page);
-
-	
-	DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
+	DatasetAcquisitionDatasetsDTO datasetAcquisitionToDatasetAcquisitionDatasetsDTO(
 			DatasetAcquisition datasetAcquisition);
-	
-	DatasetAcquisition datasetAcquisitionDTOToDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
+
+	DatasetAcquisition datasetAcquisitionDatasetsDTOToDatasetAcquisition(DatasetAcquisitionDatasetsDTO dto);
 	
 	@ObjectFactory
-	default DatasetAcquisition createDatasetAcquisition(DatasetAcquisitionDTO dto) {
-        if (dto.getType().equals("Mr")) return new MrDatasetAcquisition(); 
+	default DatasetAcquisition createDatasetAcquisition(DatasetAcquisitionDatasetsDTO dto) {
+		if (dto.getType().equals("Mr")) return new MrDatasetAcquisition(); 
         else if (dto.getType().equals("Pet")) return new PetDatasetAcquisition(); 
         else if (dto.getType().equals("Ct")) return new CtDatasetAcquisition(); 
         else throw new IllegalStateException("Cannot map from a dataset acquisition dto that don't provide a valid type. Given type = " + dto.getType());
+    }
+	
+	@ObjectFactory
+	default Dataset createDataset(DatasetDTO dto) {
+		Dataset ds = DatasetUtils.buildDatasetFromType(dto.getType());
+		if (ds != null) return ds;
+        else throw new IllegalStateException("Cannot map from a dataset dto that don't provide a valid type. Given type = " + dto.getType());
     }
 
 }
