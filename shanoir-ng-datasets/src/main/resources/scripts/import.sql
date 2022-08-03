@@ -44,16 +44,21 @@ VALUES
 INSERT INTO study_cards
 	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)
 VALUES 
-	(1,1,false,0,'StudyCard1',1,1);
+	(1,1,false,0,'StudyCard1',1,1),
+	(2,null,false,0,'QualityCard1',null,1);
+
+INSERT INTO study_card_rule
+	(id, type, study_card_id)
+VALUES (1,1,2),(2,1,2);
 
 INSERT INTO study_card_condition
-	(id, type, dicom_tag_or_field, operation)
+	(id, dicom_tag_or_field, operation, rule_id)
 VALUES 
-	(1,'EXAMINATION',2,4),
-	(2,'EXAMINATION',2,4),
-	(3,'SERIE',1573009,5),
-	(4,'SERIE',1573009,6),
-	(5,'SERIE',1573013,6);
+	(1,2,4,1),
+	(2,2,4,1),
+	(3,1573009,5,2),
+	(4,1573009,6,2),
+	(5,1573013,6,2);
 
 INSERT INTO study_card_condition_value
 	(id, value, study_card_condition_id)

@@ -18,10 +18,12 @@ VALUES
 	(1,1,false,0,'StudyCard1',1,1),
 	(2,1,false,0,'StudyCard2',1,1),
 	(3,3,false,0,'StudyCard3',1,2),
-	(4,4,false,0,'StudyCard4',1,3);
+	(4,4,false,0,'StudyCard4',1,3),
+	(5,null,false,0,'QualityCard1',null,1);
 	
-INSERT INTO study_card_rule 
-VALUES (3,1),(4,1),(5,1),(6,1);
+INSERT INTO study_card_rule
+	(id, type, study_card_id)
+VALUES (3,2,1),(4,2,1),(5,2,1),(6,2,1),(7,1,5),(8,1,5);
 
 INSERT INTO study_card_assignment 
 VALUES 
@@ -33,13 +35,13 @@ VALUES
 	(8,4,'4',6);
 
 INSERT INTO study_card_condition
-	(id, type, dicom_tag_or_field, operation)
+	(id, dicom_tag_or_field, operation, rule_id)
 VALUES 
-	(1,'EXAMINATION',2,4),
-	(2,'EXAMINATION',2,4),
-	(3,'SERIE',1573009,5),
-	(4,'SERIE',1573009,6),
-	(5,'SERIE',1573013,6);
+	(1,2,4,7),
+	(2,2,4,7),
+	(3,1573009,5,8),
+	(4,1573009,6,8),
+	(5,1573013,6,8);
 
 INSERT INTO study_card_condition_value
 	(id, value, study_card_condition_id)

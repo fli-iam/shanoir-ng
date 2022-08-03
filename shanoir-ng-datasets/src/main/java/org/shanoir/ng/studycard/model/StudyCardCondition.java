@@ -36,9 +36,6 @@ public class StudyCardCondition extends AbstractEntity {
 	/** UID */
 	private static final long serialVersionUID = 6708177853555591193L;
 	
-	@NotNull
-	private String type; // examination, acquisition, dataset
-	
 	private int dicomTagOrField;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -62,14 +59,6 @@ public class StudyCardCondition extends AbstractEntity {
 
 	public void setOperation(Operation operation) {
 		this.operation = operation.getId();
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	public List<StudyCardConditionValue> getValues() {

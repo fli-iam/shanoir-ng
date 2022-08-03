@@ -32,6 +32,8 @@ import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -266,7 +268,8 @@ public class StudyCardApiController implements StudyCardApi {
 		if (studyCard == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		LOG.info("applyStudyCardOnStudy:" + studyCard.getName() + "studyId:" + studyCard.getStudyId());
+		LOG.info("applyStudyCardOnStudy:" + studyCard.getName() + ", studyId:" + studyCard.getStudyId());
+		studyCardProcessingService.applyStudyCardOnStudy(studyCard);
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
