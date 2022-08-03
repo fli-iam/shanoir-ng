@@ -55,6 +55,8 @@ public class ShanoirUploaderServiceClient {
 
 	private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
 
+	private static final String SERVICE_STUDYCARDS_APPLY_ON_STUDY = "service.studycards.apply.on.study";
+
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS = "service.acquisition.equipments";
 	
 	private static final String SERVICE_SUBJECTS_FIND_BY_IDENTIFIER = "service.subjects.find.by.identifier";
@@ -82,6 +84,8 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLStudiesNamesAndCenters;
 	
 	private String serviceURLStudyCardsByStudyIds;
+
+	private String serviceURLStudyCardsApplyOnStudy;
 	
 	private String serviceURLAcquisitionEquipments;
 	
@@ -123,6 +127,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
 		this.serviceURLStudyCardsByStudyIds = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
+		this.serviceURLStudyCardsApplyOnStudy = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDYCARDS_APPLY_ON_STUDY);
 		this.serviceURLAcquisitionEquipments = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
@@ -598,4 +604,16 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
+	public void applyStudyCardOnStudy(Long studyCardId) throws Exception {
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLStudyCardsApplyOnStudy + studyCardId)) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				logger.info("Apply studycard on study, started on server.");
+			} else {
+				logger.error("Error in applyStudyCardOnStudy: (status code: " + code
+						+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				throw new Exception("Error in applyStudyCardOnStudy");
+			}
+		}
+	}
 }

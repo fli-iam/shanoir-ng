@@ -160,4 +160,17 @@ public interface StudyCardApi {
 	ResponseEntity<Void> applyStudyCard(
 			@ApiParam(value = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException;
 
+	@ApiOperation(value = "", notes = "Apply a study card on a study for quality control", response = Void.class, tags = {})
+	@ApiResponses(value = {
+		@ApiResponse(code = 200, message = "applied a study card on its study for quality control", response = Void.class),
+		@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+		@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+		@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
+		@ApiResponse(code = 500, message = "unexpected error", response = Void.class)
+	})
+	@RequestMapping(value = "/apply_on_study/{studyCardId}", method = RequestMethod.GET)
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudyCard(#studyCardId, 'CAN_ADMINISTRATE'))")
+	ResponseEntity<Void> applyStudyCardOnStudy(
+		@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException;
+	
 }

@@ -83,10 +83,8 @@ public class StudyCardApiController implements StudyCardApi {
 	@Override
 	public ResponseEntity<Void> deleteStudyCard(
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
-		
 		try {
 			studyCardService.deleteById(studyCardId);
-			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (MicroServiceCommunicationException e) {
@@ -140,9 +138,7 @@ public class StudyCardApiController implements StudyCardApi {
 	public ResponseEntity<StudyCard> saveNewStudyCard(
 			@ApiParam(value = "study Card to create", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException {
-
 		validate(studyCard, result);
-
 		StudyCard createdStudyCard;
 		try {
 			createdStudyCard = studyCardService.save(studyCard);
@@ -169,9 +165,7 @@ public class StudyCardApiController implements StudyCardApi {
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@ApiParam(value = "study card to update", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException {
-
 		validate(studyCard, result);
-
 		try {
 			studyCardService.update(studyCard);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -182,8 +176,6 @@ public class StudyCardApiController implements StudyCardApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
 		}
 	}
-	
-
 	
 	@Override
 	public ResponseEntity<List<DicomTag>> findDicomTags() throws RestServiceException {
@@ -231,17 +223,14 @@ public class StudyCardApiController implements StudyCardApi {
 	@Override
 	public ResponseEntity<Void> applyStudyCard(
 			@ApiParam(value = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException {
-		
 		if (studyCardApplyObject == null 
 				|| studyCardApplyObject.getDatasetAcquisitionIds() == null 
 				|| studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()
 				|| studyCardApplyObject.getStudyCardId() == null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		
 		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
 		List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
-		
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (!acquisition.getDatasets().isEmpty()) {
 				List<URL> urls = new ArrayList<>();
@@ -268,6 +257,17 @@ public class StudyCardApiController implements StudyCardApi {
 		}
 		datasetAcquisitionService.update(acquisitions);
 		return new ResponseEntity<Void>(HttpStatus.OK);
-		
 	}
+
+	@Override
+	public ResponseEntity<Void> applyStudyCardOnStudy(
+		@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
+		final StudyCard studyCard = studyCardService.findById(studyCardId);
+		if (studyCard == null) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		LOG.info("applyStudyCardOnStudy:" + studyCard.getName() + "studyId:" + studyCard.getStudyId());
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
 }
