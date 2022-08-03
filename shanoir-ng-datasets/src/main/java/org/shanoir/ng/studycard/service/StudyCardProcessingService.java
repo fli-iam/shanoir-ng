@@ -26,6 +26,7 @@ import org.shanoir.ng.studycard.model.Operation;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.StudyCardCondition;
+import org.shanoir.ng.studycard.model.StudyCardConditionValue;
 import org.shanoir.ng.studycard.model.StudyCardRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,6 @@ public class StudyCardProcessingService {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(StudyCardProcessingService.class);
 
-	
 	public void applyStudyCard(DatasetAcquisition acquisition, StudyCard studyCard, Attributes dicomAttributes) {
 		LOG.debug("apply studycard n° " + studyCard.getId());
 		if (studyCard.getRules() != null) {
@@ -47,74 +47,72 @@ public class StudyCardProcessingService {
 		acquisition.setStudyCard(studyCard);
 		acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
 	}
-
 	
 	private void applyStudyCardRule(DatasetAcquisition acquisition, StudyCardRule rule, Attributes dicomAttributes) {
-		if (rule.getConditions() == null || rule.getConditions().isEmpty() || conditionsFullfiled(rule.getConditions(), dicomAttributes)) {
+		if (rule.getConditions() == null || rule.getConditions().isEmpty() || conditionsFulfilled(rule.getConditions(), dicomAttributes)) {
 			if (rule.getAssignments() != null) applyAssignments(acquisition, rule.getAssignments());
 		}
 	}
 
-
-	private boolean conditionsFullfiled(List<StudyCardCondition> conditions, Attributes dicomAttributes) {
+	private boolean conditionsFulfilled(List<StudyCardCondition> conditions, Attributes dicomAttributes) {
 		for (StudyCardCondition condition : conditions) {
-			if (!conditionFullfiled(condition, dicomAttributes)) return false;
+			if (!conditionFulfilled(condition, dicomAttributes)) return false;
 		}
 		return true;
 	}
 
-
-	private boolean conditionFullfiled(StudyCardCondition condition, Attributes dicomAttributes) {
-		VR tagVr = StandardElementDictionary.INSTANCE.vrOf(condition.getDicomTag());
+	/**
+	 * This method checks for one condition of a study card. If one value matches, of the list of values,
+	 * true is returned and the condition is fulfilled.
+	 * @param condition
+	 * @param dicomAttributes
+	 * @return
+	 */
+	private boolean conditionFulfilled(StudyCardCondition condition, Attributes dicomAttributes) {
+		VR tagVr = StandardElementDictionary.INSTANCE.vrOf(condition.getDicomTagOrField());
 		DicomTagType tagType = DicomTagType.valueOf(tagVr);
-		if (condition.getDicomValue() == null) throw new IllegalArgumentException("A condition value cannot be null");
-		
-		if (tagType.isNumerical()) {
-			if (!condition.getOperation().isNumerical()) {
-				throw new IllegalArgumentException("Study card processing : operation " + condition.getOperation() + " is not compatible with dicom tag " 
-						+ condition.getDicomTag() + " of type " + tagType + "(condition id : " + condition.getId() + ")");
+		for (StudyCardConditionValue value : condition.getValues()) {
+			if (value.getValue() == null) throw new IllegalArgumentException("A condition value cannot be null.");
+			if (tagType.isNumerical()) {
+				if (!condition.getOperation().isNumerical()) {
+					throw new IllegalArgumentException("Study card processing : operation " + condition.getOperation() + " is not compatible with dicom tag " 
+							+ condition.getDicomTagOrField() + " of type " + tagType + "(condition id : " + condition.getId() + ")");
+				}
+				BigDecimal scValue = new BigDecimal(value.getValue());
+				Integer comparison = null;
+				if (DicomTagType.Float.equals(tagType)) {
+					Float floatValue = dicomAttributes.getFloat(condition.getDicomTagOrField(), Float.MIN_VALUE);			
+					comparison = BigDecimal.valueOf(floatValue).compareTo(scValue);
+				}
+				// There is no dicomAttributes.getLong() !
+				else if (DicomTagType.Double.equals(tagType) || DicomTagType.Long.equals(tagType)) {
+					Double doubleValue = dicomAttributes.getDouble(condition.getDicomTagOrField(), Double.MIN_VALUE);			
+					comparison = BigDecimal.valueOf(doubleValue).compareTo(scValue);
+				}
+				else if (DicomTagType.Integer.equals(tagType)) {
+					Integer integerValue = dicomAttributes.getInt(condition.getDicomTagOrField(), Integer.MIN_VALUE);
+					comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
+				}
+				if (comparison != null && numericalCompare(condition.getOperation(), comparison)) {
+					return true; // as condition values are combined by OR: return if one is true
+				}
+			} else if (tagType.isTextual()) {
+				if (!condition.getOperation().isTextual()) {
+					throw new IllegalArgumentException("Study card processing : operation " + condition.getOperation() + " is not compatible with dicom tag " 
+							+ condition.getDicomTagOrField() + " of type " + tagType + "(condition id : " + condition.getId() + ")");
+				}	
+				String stringValue = dicomAttributes.getString(condition.getDicomTagOrField());
+				if (stringValue == null) {
+					LOG.warn("Could not find a value in the dicom for the tag " + condition.getDicomTagOrField());
+					return false;
+				}				
+				if (textualCompare(condition.getOperation(), stringValue, value.getValue())) {
+					return true; // as condition values are combined by OR: return if one is true
+				}
 			}
-			
-			BigDecimal scValue = new BigDecimal(condition.getDicomValue());
-			Integer comparison = null;
-			
-			if (DicomTagType.Float.equals(tagType)) {
-				Float dicomValue = dicomAttributes.getFloat(condition.getDicomTag(), Float.MIN_VALUE);			
-				comparison = BigDecimal.valueOf(dicomValue).compareTo(scValue);
-			}
-			
-			// There is no dicomAttributes.getLong() !
-			else if (DicomTagType.Double.equals(tagType) || DicomTagType.Long.equals(tagType)) {
-				Double dicomValue = dicomAttributes.getDouble(condition.getDicomTag(), Double.MIN_VALUE);			
-				comparison = BigDecimal.valueOf(dicomValue).compareTo(scValue);
-			}
-			
-			else if (DicomTagType.Integer.equals(tagType)) {
-				Integer dicomValue = dicomAttributes.getInt(condition.getDicomTag(), Integer.MIN_VALUE);
-				comparison = BigDecimal.valueOf(dicomValue).compareTo(scValue);
-			}
-			
-			return comparison != null && numericalCompare(condition.getOperation(), comparison);
-		}
-		
-		else if (tagType.isTextual()) {
-			if (!condition.getOperation().isTextual()) {
-				throw new IllegalArgumentException("Study card processing : operation " + condition.getOperation() + " is not compatible with dicom tag " 
-						+ condition.getDicomTag() + " of type " + tagType + "(condition id : " + condition.getId() + ")");
-			}
-			
-			String dicomValue = dicomAttributes.getString(condition.getDicomTag());
-			if (dicomValue == null) {
-				LOG.warn("Could not find a value in the dicom for the tag " + condition.getDicomTag());
-				return false;
-			}
-			
-			return textualCompare(condition.getOperation(), dicomValue, condition.getDicomValue());
-			
 		}
 		return false;
 	}
-	
 	
 	private boolean numericalCompare(Operation operation, int comparison) {
 		if (Operation.BIGGER_THAN.equals(operation)) {
@@ -127,30 +125,24 @@ public class StudyCardProcessingService {
 		throw new IllegalArgumentException("Cannot use this method for non-numerical operations (" + operation + ")");
 	}
 	
-	
 	private boolean textualCompare(Operation operation, String dicomStr, String studycardStr) {
 		if (Operation.EQUALS.equals(operation)) {
 			return dicomStr.equals(studycardStr);
-		}
-		else if (Operation.CONTAINS.equals(operation)) {
+		} else if (Operation.CONTAINS.equals(operation)) {
 			return dicomStr.contains(studycardStr);
-		}
-		else if (Operation.STARTS_WITH.equals(operation)) {
+		} else if (Operation.STARTS_WITH.equals(operation)) {
 			return dicomStr.startsWith(studycardStr);
-		}
-		else if (Operation.ENDS_WITH.equals(operation)) {
+		} else if (Operation.ENDS_WITH.equals(operation)) {
 			return dicomStr.endsWith(studycardStr);
 		}
 		throw new IllegalArgumentException("Cannot use this method for non-textual operations (" + operation + ")");
 	}
-	
 	
 	private void applyAssignments(DatasetAcquisition acquisition, List<StudyCardAssignment> assignments) {
 		for (StudyCardAssignment assignment : assignments) {
 			applyAssignment(acquisition, assignment);
 		}
 	}
-
 
 	private void applyAssignment(DatasetAcquisition acquisition, StudyCardAssignment assignment) {
 		try {
@@ -161,5 +153,5 @@ public class StudyCardProcessingService {
 			LOG.error("Error in studycard processing : ", e);
 		}
 	}
-	
+
 }

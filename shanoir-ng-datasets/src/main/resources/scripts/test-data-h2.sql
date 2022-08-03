@@ -32,13 +32,27 @@ VALUES
 	(7,11,'OVERRIDEN',6),
 	(8,4,'4',6);
 
-INSERT INTO study_card_condition 
+INSERT INTO study_card_condition
+	(id, type, dicom_tag_or_field, operation)
 VALUES 
-	(2,528446,'tse_vfl_WIP607',2,3),
-	(3,1573009,'200',6,5),
-	(4,1573009,'150',5,5),
-	(5,1573009,'150',5,6),
-	(6,1573013,'781.00',2,6);
+	(1,'EXAMINATION',2,4),
+	(2,'EXAMINATION',2,4),
+	(3,'SERIE',1573009,5),
+	(4,'SERIE',1573009,6),
+	(5,'SERIE',1573013,6);
+
+INSERT INTO study_card_condition_value
+	(id, value, study_card_condition_id)
+VALUES 
+	(1,'TOF',1),
+	(2,'flight',1),
+	(3,'gadolinium',2),
+	(4,'contrast',2),
+	(5,'enhanced',2),
+	(6,'Gd',2),
+	(7,'150',3),
+	(8,'150',4),
+	(9,'781.00',5);
 
 INSERT INTO examination
 	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id)

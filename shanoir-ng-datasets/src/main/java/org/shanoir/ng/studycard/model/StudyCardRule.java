@@ -25,7 +25,6 @@ import javax.persistence.OneToMany;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
-
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class StudyCardRule extends AbstractEntity {
@@ -36,7 +35,7 @@ public class StudyCardRule extends AbstractEntity {
 	@JoinColumn(name="rule_id")
 	private List<StudyCardAssignment> assignments;
 	
-@	OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name="rule_id")
 	private List<StudyCardCondition> conditions;
 	
@@ -55,4 +54,5 @@ public class StudyCardRule extends AbstractEntity {
 	public void setConditions(List<StudyCardCondition> conditions) {
 		this.conditions = conditions;
 	}
+
 }

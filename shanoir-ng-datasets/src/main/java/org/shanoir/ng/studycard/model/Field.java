@@ -30,7 +30,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequencePhysics;
 
-public enum AssignmentField implements DatasetFieldUpdater {
+public enum Field implements DatasetFieldUpdater {
 
 	MODALITY_TYPE(1) {
 		@Override
@@ -212,20 +212,20 @@ public enum AssignmentField implements DatasetFieldUpdater {
 		}
 	};
 	
-	private long id;
+	private int id;
 	
-	private AssignmentField(long id) {
+	private Field(int id) {
 		this.id = id;
 	}
 	
-	public static AssignmentField getEnum(long id) {
-		for (AssignmentField field : AssignmentField.values()) {
+	public static Field getEnum(int id) {
+		for (Field field : Field.values()) {
 			if (field.getId() == id) return field;
 		}
-		throw new IllegalArgumentException(id + " is not a valid AssignmentField id");
+		throw new IllegalArgumentException(id + " is not a valid Field id");
 	}
 	
-	public long getId() {
+	public int getId() {
 		return id;
 	}
 
