@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.schedule.ExecutionStatusMonitorService;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -33,6 +34,9 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
     @Autowired
     private CarminDatasetProcessingService carminDatasetProcessingService;
 
+    @Autowired
+    private ExecutionStatusMonitorService executionStatusMonitorService;
+
     @Override
     public ResponseEntity<CarminDatasetProcessing> saveNewCarminDatasetProcessing(
             @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing, BindingResult result)
@@ -40,6 +44,12 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
         /* Validation */
         validate(result);
+        
+        /**
+         * run monitoring job
+         */
+
+        executionStatusMonitorService.startJob(carminDatasetProcessing.getIdentifier());
 
         /* Save dataset processing in db. */
         final CarminDatasetProcessing createdDatasetProcessing = carminDatasetProcessingService
