@@ -19,10 +19,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * This component contains the methods of a DICOMWeb client,
+ * that calls a DICOMWeb server:
+ * - wado-rs
+ * - qido-rs
+ * - stow-rs
+ * 
+ * @author mkain
+ *
+ */
 @Component
-public class DICOMWebService {
+public class DICOMWebClientService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebClientService.class);
 
 	private CloseableHttpClient httpClient;
 
@@ -82,6 +92,30 @@ public class DICOMWebService {
 	public String findSerieMetadataOfStudy(String studyInstanceUID, String serieInstanceUID) {
 		try {
 			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/metadata";
+			HttpGet httpGet = new HttpGet(url);
+			CloseableHttpResponse response = httpClient.execute(httpGet);
+			HttpEntity entity = response.getEntity();
+			if (entity != null) {
+				return EntityUtils.toString(entity);
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
+	
+	/**
+	 * QIDO call to DICOM server: QIDO-RS Search For Series.
+	 * Use with &includefield={attributeID} to query for desired attribute.
+	 * 
+	 * @param studyInstanceUID
+	 * @param serieInstanceUID
+	 * @param query
+	 * @return
+	 */
+	public String searchForSerieOfStudy(String studyInstanceUID, String serieInstanceUID, String query) {
+		try {
+			String url = this.serverURL + "/" + studyInstanceUID + "/series?SeriesInstanceUID=" + serieInstanceUID + query;
 			HttpGet httpGet = new HttpGet(url);
 			CloseableHttpResponse response = httpClient.execute(httpGet);
 			HttpEntity entity = response.getEntity();
