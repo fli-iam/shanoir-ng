@@ -10,6 +10,6 @@ public class StudyCardTest extends AbstractTest {
 	
 	@Test
 	public void applyStudyCardOnStudy() throws Exception {
-        shUpClient.applyStudyCardOnStudy(Long.valueOf(1));
+        shUpClient.applyStudyCardOnStudy(Long.valueOf(2));
     }
 }

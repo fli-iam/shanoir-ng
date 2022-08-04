@@ -268,7 +268,7 @@ public class StudyCardApiController implements StudyCardApi {
 		if (studyCard == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		LOG.info("applyStudyCardOnStudy:" + studyCard.getName() + ", studyId:" + studyCard.getStudyId());
+		LOG.info("applyStudyCardOnStudy: name:" + studyCard.getName() + ", studyId: " + studyCard.getStudyId());
 		studyCardProcessingService.applyStudyCardOnStudy(studyCard);
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
