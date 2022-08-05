@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.json.Json;
+import javax.json.stream.JsonParser;
 import javax.mail.MessagingException;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -49,7 +50,6 @@ import org.shanoir.ng.studycard.model.StudyCardRuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 
@@ -79,8 +79,7 @@ public class StudyCardProcessingService {
 		acquisition.setStudyCard(studyCard);
 		acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
 	}	
-	
-	@Async("asyncExecutor")
+
 	public void applyStudyCard(StudyCardApply studyCardApplyObject) {
 		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
 		LOG.debug("apply studycard n° " + studyCard.getId());
@@ -105,8 +104,8 @@ public class StudyCardProcessingService {
 				DatasetUtils.getDatasetFilePathURLs(acquisition.getDatasets().get(0), urls, DatasetExpressionFormat.DICOM);
 				if (!urls.isEmpty()) {
 					String jsonMetadataStr = downloader.downloadDicomMetadataForURL(urls.get(0));
-					JSONReader jsonReader = new JSONReader(Json.createParser(new StringReader(jsonMetadataStr)));
-					Attributes dicomAttributes = jsonReader.getFileMetaInformation();
+					JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
+					Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
 					if (dicomAttributes != null) {
 						return dicomAttributes;
 					} else {
@@ -124,7 +123,6 @@ public class StudyCardProcessingService {
 		return null;
 	}
 
-	@Async("asyncExecutor")
 	public void applyStudyCardOnStudy(StudyCard studyCard) {
 		if (studyCard.getRules() != null) {
 			final List<Examination> examinations = examinationService.findByStudyId(studyCard.getStudyId());
