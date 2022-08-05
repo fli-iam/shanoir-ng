@@ -70,6 +70,16 @@ public class StudyCardProcessingService {
 	@Autowired
 	private WADODownloaderService downloader;
 
+	public void applyStudyCard(DatasetAcquisition acquisition, StudyCard studyCard, Attributes dicomAttributes) {
+		if (studyCard.getRules() != null) {
+			for (StudyCardRule rule : studyCard.getRules()) {
+				applyStudyCardRule(acquisition, rule, dicomAttributes);
+			}
+		}
+		acquisition.setStudyCard(studyCard);
+		acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
+	}	
+	
 	@Async("asyncExecutor")
 	public void applyStudyCard(StudyCardApply studyCardApplyObject) {
 		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
