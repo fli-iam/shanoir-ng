@@ -14,23 +14,33 @@
 
 package org.shanoir.ng.studycard.service;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.json.Json;
+import javax.mail.MessagingException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.StandardElementDictionary;
-import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
+import org.dcm4che3.json.JSONReader;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.Field;
 import org.shanoir.ng.studycard.model.Operation;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.model.StudyCardApply;
 import org.shanoir.ng.studycard.model.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.StudyCardCondition;
 import org.shanoir.ng.studycard.model.StudyCardConditionValue;
@@ -39,7 +49,9 @@ import org.shanoir.ng.studycard.model.StudyCardRuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 
 @Service
 public class StudyCardProcessingService {
@@ -47,19 +59,62 @@ public class StudyCardProcessingService {
 	private static final Logger LOG = LoggerFactory.getLogger(StudyCardProcessingService.class);
 	
 	@Autowired
+	private StudyCardService studyCardService;
+	
+	@Autowired
 	private ExaminationService examinationService;
+	
+	@Autowired
+	private DatasetAcquisitionService datasetAcquisitionService;
+	
+	@Autowired
+	private WADODownloaderService downloader;
 
-	public void applyStudyCard(DatasetAcquisition acquisition, StudyCard studyCard, Attributes dicomAttributes) {
+	@Async("asyncExecutor")
+	public void applyStudyCard(StudyCardApply studyCardApplyObject) {
+		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
 		LOG.debug("apply studycard n° " + studyCard.getId());
-		if (studyCard.getRules() != null) {
-			for (StudyCardRule rule : studyCard.getRules()) {
-				applyStudyCardRule(acquisition, rule, dicomAttributes);
+		List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
+		for (DatasetAcquisition acquisition : acquisitions) {
+			Attributes dicomAttributes = getDicomAttributesForAcquisition(acquisition);
+			if (studyCard.getRules() != null) {
+				for (StudyCardRule rule : studyCard.getRules()) {
+					applyStudyCardRule(acquisition, rule, dicomAttributes);
+				}
+			}
+			acquisition.setStudyCard(studyCard);
+			acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
+		}
+		datasetAcquisitionService.update(acquisitions);
+	}
+	
+	private Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) {
+		if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
+			List<URL> urls = new ArrayList<>();
+			try {
+				DatasetUtils.getDatasetFilePathURLs(acquisition.getDatasets().get(0), urls, DatasetExpressionFormat.DICOM);
+				if (!urls.isEmpty()) {
+					String jsonMetadataStr = downloader.downloadDicomMetadataForURL(urls.get(0));
+					JSONReader jsonReader = new JSONReader(Json.createParser(new StringReader(jsonMetadataStr)));
+					Attributes dicomAttributes = jsonReader.getFileMetaInformation();
+					if (dicomAttributes != null) {
+						return dicomAttributes;
+					} else {
+						LOG.error("Could not apply studycard on dataset acquisition " + acquisition.getId() 
+								+ " : dicom attributes are empty");
+					}
+				} else {
+					LOG.error("Could not apply studycard on dataset acquisition " + acquisition.getId() 
+					+ " : no pacs url for this acquisition");
+				}
+			} catch (IOException | MessagingException | RestClientException e) {
+				throw new RestClientException("Can not get dicom attributes for acquisition " + acquisition.getId(), e);
 			}
 		}
-		acquisition.setStudyCard(studyCard);
-		acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
+		return null;
 	}
 
+	@Async("asyncExecutor")
 	public void applyStudyCardOnStudy(StudyCard studyCard) {
 		if (studyCard.getRules() != null) {
 			final List<Examination> examinations = examinationService.findByStudyId(studyCard.getStudyId());
@@ -105,12 +160,13 @@ public class StudyCardProcessingService {
 			boolean conditionVerifiedOnAtLeastOneAcquisition = false;
 			for (DatasetAcquisition acquisition: acquisitions) {
 				int getDicomTagOrField = condition.getDicomTagOrField();
+				// A) check for a dicom tag using a QIDO call to the pacs
 				if (Field.getEnum(getDicomTagOrField) == null) {
-					// depending on the condition: introduce code here, that calls QIDO in case of dicom tag
-					// and gets attributes from pacs, based on current acquisition
-					if (dicomConditionFulfilled(condition, null)) {
+					Attributes dicomAttributes = getDicomAttributesForAcquisition(acquisition);
+					if (dicomConditionFulfilled(condition, dicomAttributes)) {
 						conditionVerifiedOnAtLeastOneAcquisition = true;
-					}	
+					}
+				// B) check for a field in the database, using entity model
 				} else {
 					if (entityConditionFulfilled(condition, acquisition)) {
 						conditionVerifiedOnAtLeastOneAcquisition = true;
