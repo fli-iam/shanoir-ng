@@ -15,6 +15,13 @@ public class StudyCardConditionValue  extends AbstractEntity {
 
 	@NotNull
 	private String value;
+	
+	public StudyCardConditionValue() {
+	}
+	
+	public StudyCardConditionValue(String value) {
+		this.value = value;
+	}
 
 	public String getValue() {
 		return value;
