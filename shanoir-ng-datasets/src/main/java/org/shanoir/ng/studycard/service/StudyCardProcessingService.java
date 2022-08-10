@@ -226,16 +226,18 @@ public class StudyCardProcessingService {
 	private boolean conditionsFulfilledOnAllDatasets(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions) {
 		for (StudyCardCondition condition : conditions) {
 			for (DatasetAcquisition acquisition: acquisitions) {
-				for (Dataset dataset : acquisition.getDatasets()) {
-					int getDicomTagOrField = condition.getDicomTagOrField();
-					// A) check for a dicom tag using a metadata call to the pacs
-					if (Field.getEnum(getDicomTagOrField) == null) {
-						Attributes dicomAttributes = getDicomAttributesForDataset(dataset);
-						if (!dicomConditionFulfilled(condition, dicomAttributes)) return false;
-					// B) check for a field in the database, using entity model
-					} else {
-						if (!entityConditionFulfilled(condition, acquisition)) return false;
-					}					
+				if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
+					for (Dataset dataset : acquisition.getDatasets()) {
+						int getDicomTagOrField = condition.getDicomTagOrField();
+						// A) check for a dicom tag using a metadata call to the pacs
+						if (Field.getEnum(getDicomTagOrField) == null) {
+							Attributes dicomAttributes = getDicomAttributesForDataset(dataset);
+							if (!dicomConditionFulfilled(condition, dicomAttributes)) return false;
+						// B) check for a field in the database, using entity model
+						} else {
+							if (!entityConditionFulfilled(condition, acquisition)) return false;
+						}					
+					}
 				}
 			}	
 		}
