@@ -49,7 +49,10 @@ VALUES
 
 INSERT INTO study_card_rule
 	(id, type, study_card_id)
-VALUES (1,1,2),(2,1,2);
+VALUES
+	(1,1,2),
+	(2,2,2),
+	(3,3,2);
 
 INSERT INTO study_card_condition
 	(id, dicom_tag_or_field, operation, rule_id)
@@ -57,8 +60,7 @@ VALUES
 	(1,2,4,1),
 	(2,2,4,1),
 	(3,1573009,5,2),
-	(4,1573009,6,2),
-	(5,1573013,6,2);
+	(4,1573013,6,3);
 
 INSERT INTO study_card_condition_value
 	(id, value, study_card_condition_id)
@@ -70,5 +72,4 @@ VALUES
 	(5,'enhanced',2),
 	(6,'Gd',2),
 	(7,'150',3),
-	(8,'150',4),
-	(9,'781.00',5);
+	(8,'781.00',4);
