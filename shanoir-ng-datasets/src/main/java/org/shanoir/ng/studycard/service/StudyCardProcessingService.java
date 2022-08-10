@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.stream.JsonParser;
@@ -30,13 +31,17 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.json.JSONReader;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.Field;
 import org.shanoir.ng.studycard.model.Operation;
@@ -62,6 +67,9 @@ public class StudyCardProcessingService {
 	private StudyCardService studyCardService;
 	
 	@Autowired
+	private SubjectStudyRepository subjectStudyRepository;
+	
+	@Autowired
 	private ExaminationService examinationService;
 	
 	@Autowired
@@ -70,6 +78,12 @@ public class StudyCardProcessingService {
 	@Autowired
 	private WADODownloaderService downloader;
 
+	/**
+	 * Application during import, when dicoms are present in tmp directory.
+	 * @param acquisition
+	 * @param studyCard
+	 * @param dicomAttributes
+	 */
 	public void applyStudyCard(DatasetAcquisition acquisition, StudyCard studyCard, Attributes dicomAttributes) {
 		if (studyCard.getRules() != null) {
 			for (StudyCardRule rule : studyCard.getRules()) {
@@ -80,68 +94,72 @@ public class StudyCardProcessingService {
 		acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
 	}	
 
+	/**
+	 * Re-application on using web GUI and list of dataset acquisitions.
+	 * @param studyCardApplyObject
+	 */
 	public void applyStudyCard(StudyCardApply studyCardApplyObject) {
 		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
-		LOG.debug("apply studycard n° " + studyCard.getId());
+		LOG.debug("re-apply studycard n° " + studyCard.getId());
 		List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
+		boolean changeInAtLeastOneAcquisition = false;
 		for (DatasetAcquisition acquisition : acquisitions) {
-			Attributes dicomAttributes = getDicomAttributesForAcquisition(acquisition);
-			if (studyCard.getRules() != null) {
-				for (StudyCardRule rule : studyCard.getRules()) {
-					applyStudyCardRule(acquisition, rule, dicomAttributes);
-				}
-			}
-			acquisition.setStudyCard(studyCard);
-			acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
-		}
-		datasetAcquisitionService.update(acquisitions);
-	}
-	
-	private Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) {
-		if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
-			List<URL> urls = new ArrayList<>();
-			try {
-				DatasetUtils.getDatasetFilePathURLs(acquisition.getDatasets().get(0), urls, DatasetExpressionFormat.DICOM);
-				if (!urls.isEmpty()) {
-					String jsonMetadataStr = downloader.downloadDicomMetadataForURL(urls.get(0));
-					JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
-					Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
-					if (dicomAttributes != null) {
-						return dicomAttributes;
-					} else {
-						LOG.error("Could not apply studycard on dataset acquisition " + acquisition.getId() 
-								+ " : dicom attributes are empty");
+			if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
+				Dataset refDataset = acquisition.getDatasets().get(0);
+				Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
+				if (studyCard.getRules() != null) {
+					for (StudyCardRule rule : studyCard.getRules()) {
+						applyStudyCardRule(acquisition, rule, dicomAttributes);
 					}
-				} else {
-					LOG.error("Could not apply studycard on dataset acquisition " + acquisition.getId() 
-					+ " : no pacs url for this acquisition");
+					acquisition.setStudyCard(studyCard);
+					acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
+					changeInAtLeastOneAcquisition = true;
 				}
-			} catch (IOException | MessagingException | RestClientException e) {
-				throw new RestClientException("Can not get dicom attributes for acquisition " + acquisition.getId(), e);
 			}
 		}
-		return null;
+		if (changeInAtLeastOneAcquisition) { // no need to update, if nothing happened
+			datasetAcquisitionService.update(acquisitions);
+		}
 	}
 
+	/**
+	 * Study cards for quality control: apply on entire study.
+	 * @param studyCard
+	 */
 	public void applyStudyCardOnStudy(StudyCard studyCard) {
 		if (studyCard.getRules() != null) {
-			final List<Examination> examinations = examinationService.findByStudyId(studyCard.getStudyId());
-			LOG.info(examinations.size() + " examinations found for studyId: " + studyCard.getStudyId());
-			for (Examination examination : examinations) {
-				final List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
-				if (CollectionUtils.isNotEmpty(acquisitions)) {
-					LOG.info(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
-					final List<StudyCardRule> rules = studyCard.getRules();
-					LOG.info(rules.size() + " rules found for study card with id: " + studyCard.getId());
-					for (StudyCardRule rule : rules) {
-						if (rule.getType() == StudyCardRuleType.EXAMINATION.getId()) {
-							boolean check = checkStudyCardRule(rule, acquisitions);
-							if (!check) {
-								LOG.error("Examination found, not valid: id: " + examination.getId() + ", comment: " + examination.getComment());							
+			final List<SubjectStudy> subjectStudyList = subjectStudyRepository.findByStudyId(studyCard.getStudyId());
+			for (SubjectStudy subjectStudy : subjectStudyList) {
+				final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectStudy.getSubject().getId(), studyCard.getStudyId());
+				LOG.info(examinations.size() + " examinations found for subject: " + subjectStudy.getSubject().getName());
+				for (Examination examination : examinations) {
+					List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
+					// today study cards are only used for MR modality
+					acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
+					if (CollectionUtils.isNotEmpty(acquisitions)) {
+						LOG.info(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
+						final List<StudyCardRule> rules = studyCard.getRules();
+						LOG.info(rules.size() + " rules found for study card with id: " + studyCard.getId() + " and name: " + studyCard.getName());
+						for (StudyCardRule rule : rules) {
+							if (rule.getType() == StudyCardRuleType.EXAMINATION.getId()) {
+								boolean check = conditionsFulfilledOnAtLeastOneAcquisition(rule.getConditions(), acquisitions);
+								if (!check) {
+									LOG.error("Examination found, not valid: id: " + examination.getId() + ", comment: " + examination.getComment());							
+								}
+							} else if (rule.getType() == StudyCardRuleType.ACQUISITION.getId()) {
+								boolean check = conditionsFulfilledOnAllAcquisitions(rule.getConditions(), acquisitions);
+								if (!check) {
+									LOG.error("Examination found, not valid: id: " + examination.getId() + ", comment: " + examination.getComment());							
+								}								
+							} else if (rule.getType() == StudyCardRuleType.DATASET.getId()) {
+								boolean check = conditionsFulfilledOnAllDatasets(rule.getConditions(), acquisitions);
+								if (!check) {
+									LOG.error("Examination found, not valid: id: " + examination.getId() + ", comment: " + examination.getComment());							
+								}								
 							}
 						}
-					}
-				}				
+					}				
+				}
 			}
 		}
 	}
@@ -152,10 +170,6 @@ public class StudyCardProcessingService {
 		}
 	}
 
-	private boolean checkStudyCardRule(StudyCardRule rule, List<DatasetAcquisition> acquisitions) {
-		return conditionsFulfilled(rule.getConditions(), acquisitions);
-	}
-
 	private boolean conditionsFulfilled(List<StudyCardCondition> conditions, Attributes dicomAttributes, DatasetAcquisition acquisition) {
 		for (StudyCardCondition condition : conditions) {
 			if (!dicomConditionFulfilled(condition, dicomAttributes)) return false;
@@ -163,16 +177,19 @@ public class StudyCardProcessingService {
 		return true;
 	}
 
-	private boolean conditionsFulfilled(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions) {
+	private boolean conditionsFulfilledOnAtLeastOneAcquisition(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions) {
 		for (StudyCardCondition condition : conditions) {
 			boolean conditionVerifiedOnAtLeastOneAcquisition = false;
 			for (DatasetAcquisition acquisition: acquisitions) {
 				int getDicomTagOrField = condition.getDicomTagOrField();
-				// A) check for a dicom tag using a QIDO call to the pacs
+				// A) check for a dicom tag using a metadata call to the pacs
 				if (Field.getEnum(getDicomTagOrField) == null) {
-					Attributes dicomAttributes = getDicomAttributesForAcquisition(acquisition);
-					if (dicomConditionFulfilled(condition, dicomAttributes)) {
-						conditionVerifiedOnAtLeastOneAcquisition = true;
+					if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
+						Dataset refDataset = acquisition.getDatasets().get(0);
+						Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
+						if (dicomConditionFulfilled(condition, dicomAttributes)) {
+							conditionVerifiedOnAtLeastOneAcquisition = true;
+						}
 					}
 				// B) check for a field in the database, using entity model
 				} else {
@@ -185,7 +202,72 @@ public class StudyCardProcessingService {
 		}
 		return true;
 	}
+	
+	private boolean conditionsFulfilledOnAllAcquisitions(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions) {
+		for (StudyCardCondition condition : conditions) {
+			for (DatasetAcquisition acquisition: acquisitions) {
+				int getDicomTagOrField = condition.getDicomTagOrField();
+				// A) check for a dicom tag using a metadata call to the pacs
+				if (Field.getEnum(getDicomTagOrField) == null) {
+					if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
+						Dataset refDataset = acquisition.getDatasets().get(0);
+						Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
+						if (!dicomConditionFulfilled(condition, dicomAttributes)) return false;
+					}
+				// B) check for a field in the database, using entity model
+				} else {
+					if (!entityConditionFulfilled(condition, acquisition)) return false;
+				}
+			}	
+		}
+		return true;
+	}
+	
+	private boolean conditionsFulfilledOnAllDatasets(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions) {
+		for (StudyCardCondition condition : conditions) {
+			for (DatasetAcquisition acquisition: acquisitions) {
+				for (Dataset datasets : acquisition.getDatasets()) {
+					int getDicomTagOrField = condition.getDicomTagOrField();
+					// A) check for a dicom tag using a metadata call to the pacs
+					if (Field.getEnum(getDicomTagOrField) == null) {
+						if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
+							Dataset refDataset = acquisition.getDatasets().get(0);
+							Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
+							if (!dicomConditionFulfilled(condition, dicomAttributes)) return false;
+						}
+					// B) check for a field in the database, using entity model
+					} else {
+						if (!entityConditionFulfilled(condition, acquisition)) return false;
+					}					
+				}
+			}	
+		}
+		return true;
+	}
 
+	private Attributes getDicomAttributesForDataset(Dataset dataset) {
+		List<URL> urls = new ArrayList<>();
+		try {
+			DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
+			if (!urls.isEmpty()) {
+				String jsonMetadataStr = downloader.downloadDicomMetadataForURL(urls.get(0));
+				JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
+				Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
+				if (dicomAttributes != null) {
+					return dicomAttributes;
+				} else {
+					LOG.error("Could not find dicom attributes for dataset with id: " + dataset.getId());
+				}
+			} else {
+				LOG.error("Could not find dicom attributes for dataset with id: " + dataset.getId()
+				+ " : no pacs url for this dataset");
+			}
+		} catch (IOException | MessagingException | RestClientException e) {
+			throw new RestClientException("Can not get dicom attributes for dataset " + dataset.getId(), e);
+		}
+		return null;
+	}
+	
 	private boolean entityConditionFulfilled(StudyCardCondition condition, DatasetAcquisition acquisition) {
 		int fieldId = condition.getDicomTagOrField();
 		Field field = Field.getEnum(fieldId);
