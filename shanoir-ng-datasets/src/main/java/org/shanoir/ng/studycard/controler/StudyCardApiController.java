@@ -215,7 +215,7 @@ public class StudyCardApiController implements StudyCardApi {
 
 	@Override
 	public ResponseEntity<Void> applyStudyCardOnStudy(
-		@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
+		@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException, MicroServiceCommunicationException {
 		final StudyCard studyCard = studyCardService.findById(studyCardId);
 		if (studyCard == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

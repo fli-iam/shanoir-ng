@@ -24,6 +24,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -75,18 +76,34 @@ public class SubjectStudy extends AbstractEntity {
 	/** Tags associated to the subject. */
 	@OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudyTag> subjectStudyTags;
+	
+	/** StudyCard tags associated to the subject. */
+	@OneToOne(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	private SubjectStudyStudyCardTag subjectStudyStudyCardTag;
 
 	/**
 	 * @return the tags
 	 */
 	public List<Tag> getTags() {
-		if (getSubjectStudyTags() == null) return null;
-		return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
+		if (getSubjectStudyTags() == null && getSubjectStudyCardTags() == null) {
+			return null;
+		} else if (getSubjectStudyTags() == null) {
+			ArrayList<Tag> tags = new ArrayList<Tag>();
+			tags.add(subjectStudyStudyCardTag.getTag());
+			return tags;
+		} else {
+			List<Tag> tags = getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
+			tags.add(0, subjectStudyStudyCardTag.getTag());
+			return tags;
+		}
 	}
 	
-
 	public List<SubjectStudyTag> getSubjectStudyTags() {
 		return subjectStudyTags;
+	}
+	
+	public SubjectStudyStudyCardTag getSubjectStudyCardTags() {
+		return subjectStudyStudyCardTag;
 	}
 
 	public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {

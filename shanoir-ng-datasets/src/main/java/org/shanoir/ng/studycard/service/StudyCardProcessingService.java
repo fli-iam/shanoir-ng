@@ -40,8 +40,11 @@ import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
+import org.shanoir.ng.studycard.dto.SubjectStudyStudyCardTag;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.Field;
 import org.shanoir.ng.studycard.model.Operation;
@@ -54,9 +57,14 @@ import org.shanoir.ng.studycard.model.StudyCardRule;
 import org.shanoir.ng.studycard.model.StudyCardRuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class StudyCardProcessingService {
@@ -77,6 +85,12 @@ public class StudyCardProcessingService {
 	
 	@Autowired
 	private WADODownloaderService downloader;
+	
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	/**
 	 * Application during import, when dicoms are present in tmp directory.
@@ -125,9 +139,11 @@ public class StudyCardProcessingService {
 	/**
 	 * Study cards for quality control: apply on entire study.
 	 * @param studyCard
+	 * @throws MicroServiceCommunicationException 
 	 */
-	public void applyStudyCardOnStudy(StudyCard studyCard) {
+	public void applyStudyCardOnStudy(StudyCard studyCard) throws MicroServiceCommunicationException {
 		if (studyCard.getRules() != null) {
+			final List<SubjectStudyStudyCardTag> subjectStudyStudyCardTagList = new ArrayList<SubjectStudyStudyCardTag>();
 			final List<SubjectStudy> subjectStudyList = subjectStudyRepository.findByStudyId(studyCard.getStudyId());
 			for (SubjectStudy subjectStudy : subjectStudyList) {
 				final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectStudy.getSubject().getId(), studyCard.getStudyId());
@@ -140,26 +156,38 @@ public class StudyCardProcessingService {
 						LOG.info(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
 						final List<StudyCardRule> rules = studyCard.getRules();
 						LOG.info(rules.size() + " rules found for study card with id: " + studyCard.getId() + " and name: " + studyCard.getName());
+						boolean allRulesFulFilled = true;
+						SubjectStudyStudyCardTag subjectStudyStudyCardTag = new SubjectStudyStudyCardTag();
 						for (StudyCardRule rule : rules) {
 							if (rule.getType() == StudyCardRuleType.EXAMINATION.getId()) {
-								boolean check = conditionsFulfilledOnAtLeastOneAcquisition(rule.getConditions(), acquisitions);
-								if (!check) {
-									LOG.error("Examination found, not valid: id: " + examination.getId() + ", comment: " + examination.getComment());							
+								if (!conditionsFulfilledOnAtLeastOneAcquisition(rule.getConditions(), acquisitions)) {
+									allRulesFulFilled = false;
 								}
 							} else if (rule.getType() == StudyCardRuleType.ACQUISITION.getId()) {
-								boolean check = conditionsFulfilledOnAllAcquisitions(rule.getConditions(), acquisitions);
-								if (!check) {
-									LOG.error("Examination found, not valid: id: " + examination.getId() + ", comment: " + examination.getComment());							
+								if (!conditionsFulfilledOnAllAcquisitions(rule.getConditions(), acquisitions)) {
+									allRulesFulFilled = false;
 								}								
 							} else if (rule.getType() == StudyCardRuleType.DATASET.getId()) {
-								boolean check = conditionsFulfilledOnAllDatasets(rule.getConditions(), acquisitions);
-								if (!check) {
-									LOG.error("Examination found, not valid: id: " + examination.getId() + ", comment: " + examination.getComment());							
-								}								
+								if (!conditionsFulfilledOnAllDatasets(rule.getConditions(), acquisitions)) {
+									allRulesFulFilled = false;
+								}							
 							}
 						}
+						subjectStudyStudyCardTag.setSubjectStudy(subjectStudy);
+						if (allRulesFulFilled) {
+							subjectStudyStudyCardTag.setType(1);
+						} else {
+							subjectStudyStudyCardTag.setType(3);
+						}
+						subjectStudyStudyCardTagList.add(subjectStudyStudyCardTag);
 					}				
 				}
+			}
+			try {
+				rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG,
+						objectMapper.writeValueAsString(subjectStudyStudyCardTagList));
+			} catch (AmqpException | JsonProcessingException e) {
+				throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");
 			}
 		}
 	}
