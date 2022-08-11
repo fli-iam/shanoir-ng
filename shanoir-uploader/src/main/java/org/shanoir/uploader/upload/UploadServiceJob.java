@@ -157,9 +157,9 @@ public class UploadServiceJob implements Job {
 			 * Explicitly upload the upload-job.xml as the last file to avoid sync problems on server in case of
 			 * many files have to be uploaded.
 			 */
-			File exchangeJsonFile = new File(folder.getAbsolutePath() + File.separator + ImportJob.IMPORT_JOB_JSON);
-			if (exchangeJsonFile.exists()) {
-				setTempDirIdAndStartImport(tempDirId, exchangeJsonFile);	
+			File importJobJsonFile = new File(folder.getAbsolutePath() + File.separator + ImportJob.IMPORT_JOB_JSON);
+			if (importJobJsonFile.exists()) {
+				setTempDirIdAndStartImport(tempDirId, importJobJsonFile);	
 			} else {
 				throw new Exception(ImportJob.IMPORT_JOB_JSON + " missing in folder.");
 			}

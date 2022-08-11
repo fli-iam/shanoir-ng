@@ -6,6 +6,7 @@ import java.net.URL;
 
 import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.test.AbstractTest;
 
 public class ZipFileImportTest extends AbstractTest {
@@ -14,15 +15,20 @@ public class ZipFileImportTest extends AbstractTest {
 	
 	@Test
 	public void importDicomZipTest() throws Exception {
+		ImportJob importJob = step1UploadDicom("acr_phantom_t1.zip");
+	}
+	
+	private ImportJob step1UploadDicom(final String fileName) {
 		try {
-		    URL resource = getClass().getClassLoader().getResource("acr_phantom_t1.zip");
+		    URL resource = getClass().getClassLoader().getResource(fileName);
 		    if (resource != null) {
 		        File file = new File(resource.toURI());
-		        shUpClient.uploadDicom(file);
+		        return shUpClient.uploadDicom(file);
 		    }
-		} catch (URISyntaxException e) {
+		} catch (Exception e) {
 		    logger.error("Error while reading file", e);
 		}
+		return null;
 	}
 
 }

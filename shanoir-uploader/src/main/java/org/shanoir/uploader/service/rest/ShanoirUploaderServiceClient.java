@@ -32,6 +32,7 @@ import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -108,6 +109,8 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLSubjectsByStudyId;
 
 	private Map<Integer, String> apiResponseMessages;
+	
+	private ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
 	/**
 	 * Constructor: used after profile has been selected to init one
@@ -272,7 +275,6 @@ public class ShanoirUploaderServiceClient {
 
 	public List<StudyCard> findStudyCardsByStudyIds(IdList studyIds) throws IOException {
 		try {
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(studyIds);
 			long startTime = System.currentTimeMillis();
 			try (CloseableHttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json, false)) {
@@ -428,15 +430,18 @@ public class ShanoirUploaderServiceClient {
 		}
 	}
 	
-	public void uploadDicom(File file) throws Exception {
+	public ImportJob uploadDicom(File file) throws Exception {
 		try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterUploadDicom, file)) {
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-			} else {
-				logger.error("Error in uploadDicom: with file (path: "
-						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
-						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
-				throw new Exception("Error in uploadDicom");
+			try (response) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					ImportJob importJob = Util.getMappedObject(response, ImportJob.class);
+					return importJob;
+				} else {
+					logger.error("Error in uploadDicom: "
+						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+					throw new Exception("Error in uploadDicom");
+				}
 			}
 		}		
 	}
@@ -520,7 +525,6 @@ public class ShanoirUploaderServiceClient {
 			final boolean modeSubjectCommonNameManual,
 			final Long centerId) {
 		try {
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(subject);
 			CloseableHttpResponse response;
 			if (modeSubjectCommonNameManual) {
@@ -556,7 +560,6 @@ public class ShanoirUploaderServiceClient {
 	public Subject createSubjectStudy(
 			final Subject subject) {
 		try {
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(subject);
 			try (CloseableHttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json)) {
 				int code = response.getCode();
@@ -583,7 +586,6 @@ public class ShanoirUploaderServiceClient {
 	 */
 	public Examination createExamination(final Examination examinationDTO) {
 		try {
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 			String json = ow.writeValueAsString(examinationDTO);
 			try (CloseableHttpResponse response = httpService.post(this.serviceURLExaminationsCreate, json, false)) {
 				int code = response.getCode();
@@ -616,4 +618,5 @@ public class ShanoirUploaderServiceClient {
 			}
 		}
 	}
+
 }

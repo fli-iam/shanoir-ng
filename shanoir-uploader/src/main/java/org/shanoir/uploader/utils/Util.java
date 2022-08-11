@@ -56,6 +56,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  *
@@ -339,6 +340,7 @@ public final class Util {
 	public static <T> T getMappedObject(CloseableHttpResponse response, Class<T> classname) {
 		StringBuffer result = new StringBuffer();
 		ObjectMapper mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
 		result = readStringBuffer(response);
 		if (result != null) {
 			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
