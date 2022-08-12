@@ -187,7 +187,7 @@ public class StudyCardProcessingService {
 				rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG,
 						objectMapper.writeValueAsString(subjectStudyStudyCardTagList));
 			} catch (AmqpException | JsonProcessingException e) {
-				throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");
+				throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.");
 			}
 		}
 	}

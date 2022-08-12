@@ -188,11 +188,9 @@ public class UploadServiceJob implements Job {
 	 */
 	private void setTempDirIdAndStartImport(String tempDirId, File importJobJsonFile)
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
-		ObjectMapper objectMapper = new ObjectMapper();
-		ImportJob importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
+		ImportJob importJob = Util.objectMapper.readValue(importJobJsonFile, ImportJob.class);
 		importJob.setWorkFolder(tempDirId);
-		ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
-		String importJobJson = ow.writeValueAsString(importJob);
+		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		uploadServiceClient.startImportJob(importJobJson);
 	}
 	

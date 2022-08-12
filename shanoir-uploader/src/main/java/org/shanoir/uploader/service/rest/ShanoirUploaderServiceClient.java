@@ -109,8 +109,6 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLSubjectsByStudyId;
 
 	private Map<Integer, String> apiResponseMessages;
-	
-	private ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 
 	/**
 	 * Constructor: used after profile has been selected to init one
@@ -275,7 +273,7 @@ public class ShanoirUploaderServiceClient {
 
 	public List<StudyCard> findStudyCardsByStudyIds(IdList studyIds) throws IOException {
 		try {
-			String json = ow.writeValueAsString(studyIds);
+			String json = Util.objectWriter.writeValueAsString(studyIds);
 			long startTime = System.currentTimeMillis();
 			try (CloseableHttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json, false)) {
 				long stopTime = System.currentTimeMillis();
@@ -525,7 +523,7 @@ public class ShanoirUploaderServiceClient {
 			final boolean modeSubjectCommonNameManual,
 			final Long centerId) {
 		try {
-			String json = ow.writeValueAsString(subject);
+			String json = Util.objectWriter.writeValueAsString(subject);
 			CloseableHttpResponse response;
 			if (modeSubjectCommonNameManual) {
 				response = httpService.post(this.serviceURLSubjectsCreate, json, false);
@@ -560,7 +558,7 @@ public class ShanoirUploaderServiceClient {
 	public Subject createSubjectStudy(
 			final Subject subject) {
 		try {
-			String json = ow.writeValueAsString(subject);
+			String json = Util.objectWriter.writeValueAsString(subject);
 			try (CloseableHttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json)) {
 				int code = response.getCode();
 				if (code == HttpStatus.SC_NO_CONTENT) {
@@ -586,7 +584,7 @@ public class ShanoirUploaderServiceClient {
 	 */
 	public Examination createExamination(final Examination examinationDTO) {
 		try {
-			String json = ow.writeValueAsString(examinationDTO);
+			String json = Util.objectWriter.writeValueAsString(examinationDTO);
 			try (CloseableHttpResponse response = httpService.post(this.serviceURLExaminationsCreate, json, false)) {
 				int code = response.getCode();
 				if (code == HttpStatus.SC_OK) {

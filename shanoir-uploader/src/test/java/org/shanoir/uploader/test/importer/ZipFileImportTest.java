@@ -25,6 +25,7 @@ import org.shanoir.uploader.model.rest.importer.Serie;
 import org.shanoir.uploader.model.rest.importer.Study;
 import org.shanoir.uploader.test.AbstractTest;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,11 +40,12 @@ public class ZipFileImportTest extends AbstractTest {
 		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
 		study.setId(Long.valueOf(1));
 		study.setName("DemoStudy");
-		ImportJob importJob = step1UploadDicom("acr_phantom_t1.zip");
-		if (CollectionUtils.isNotEmpty(importJob.getPatients())) {
-			selectAllSeriesForImport(importJob);
-			for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 100; i++) {
+			ImportJob importJob = step1UploadDicom("acr_phantom_t1.zip");
+			if (CollectionUtils.isNotEmpty(importJob.getPatients())) {
+				selectAllSeriesForImport(importJob);
 				Subject subject = step2CreateSubject(importJob);
+				importJob.getPatients().get(0).setPatientBirthDate(null);
 				step3CreateSubjectStudy(study, subject);
 				Examination examination = step4CreateExamination(subject);
 				step5StartImport(importJob, subject, examination);
@@ -71,9 +73,7 @@ public class ZipFileImportTest extends AbstractTest {
 		importJob.setSubjectName(subject.getName());
 		importJob.setExaminationId(examination.getId());
 		importJob.setConverterId(Long.valueOf(6));
-		ObjectMapper objectMapper = new ObjectMapper();
-		ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
-		String importJobJson = ow.writeValueAsString(importJob);
+		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		shUpClient.startImportJob(importJobJson);
 	}
 
@@ -113,9 +113,11 @@ public class ZipFileImportTest extends AbstractTest {
 		for (Patient patient : patients) {
 			List<Study> studies = patient.getStudies();
 			for (Study study : studies) {
+				study.setStudyDate(null);
 				List<Serie> series = study.getSeries();
 				for (Serie serie : series) {
 					serie.setSelected(true);
+					serie.setSeriesDate(null);
 				}
 			}
 		}
