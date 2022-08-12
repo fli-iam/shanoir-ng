@@ -16,6 +16,7 @@ import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyStudyCardTag;
+import org.shanoir.ng.subjectstudy.repository.SubjectStudyStudyCardTagRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,9 @@ public class RabbitMQStudiesService {
 
 	@Autowired
 	private StudyService studyService;
+	
+	@Autowired
+	private SubjectStudyStudyCardTagRepository subjectStudyStudyCardTagRepository;
 	
 	@Autowired
 	private DataUserAgreementService dataUserAgreementService;
@@ -166,6 +170,7 @@ public class RabbitMQStudiesService {
 		try {
 			List<SubjectStudyStudyCardTag> subjectStudyStudyCardTagList =
 					objectMapper.readValue(messageStr, new TypeReference<List<SubjectStudyStudyCardTag>>(){});
+			subjectStudyStudyCardTagRepository.saveAll(subjectStudyStudyCardTagList);
 			LOG.info(messageStr);
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);

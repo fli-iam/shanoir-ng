@@ -8,18 +8,27 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
+import org.shanoir.uploader.model.rest.IdName;
+import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
+import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.model.rest.importer.Patient;
 import org.shanoir.uploader.model.rest.importer.Serie;
 import org.shanoir.uploader.model.rest.importer.Study;
 import org.shanoir.uploader.test.AbstractTest;
+import org.shanoir.uploader.utils.ImportUtils;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class ZipFileImportTest extends AbstractTest {
 
@@ -27,17 +36,48 @@ public class ZipFileImportTest extends AbstractTest {
 	
 	@Test
 	public void importDicomZipTest() throws Exception {
+		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
+		study.setId(Long.valueOf(1));
+		study.setName("DemoStudy");
 		ImportJob importJob = step1UploadDicom("acr_phantom_t1.zip");
 		if (CollectionUtils.isNotEmpty(importJob.getPatients())) {
 			selectAllSeriesForImport(importJob);
-			for (int i = 0; i < 1000; i++) {
-				Subject subject = step2CreateSubject(importJob);				
-				Examination examination = step3CreateExamination(subject);
+			for (int i = 0; i < 100; i++) {
+				Subject subject = step2CreateSubject(importJob);
+				step3CreateSubjectStudy(study, subject);
+				Examination examination = step4CreateExamination(subject);
+				step5StartImport(importJob, subject, examination);
 			}
 		}
 	}
 
-	private Examination step3CreateExamination(Subject subject) {
+	private void step3CreateSubjectStudy(org.shanoir.uploader.model.rest.Study study, Subject subject) {
+		SubjectStudy subjectStudy = new SubjectStudy();
+		subjectStudy.setStudy(new IdName(study.getId(), study.getName()));
+		subjectStudy.setSubject(new IdName(subject.getId(), subject.getName()));
+		subjectStudy.setSubjectStudyIdentifier(subject.getName());
+		subjectStudy.setSubjectType(SubjectType.PHANTOM);
+		subjectStudy.setPhysicallyInvolved(true);
+		subject.getSubjectStudyList().add(subjectStudy);
+		shUpClient.createSubjectStudy(subject);
+	}
+
+	private void step5StartImport(ImportJob importJob, Subject subject, Examination examination)
+			throws JsonProcessingException, Exception {
+		importJob.setStudyId(Long.valueOf(1));
+		importJob.setStudyCardId(Long.valueOf(1));
+		importJob.setStudyCardName("StudyCard1");
+		importJob.setAcquisitionEquipmentId(Long.valueOf(1));
+		importJob.setSubjectName(subject.getName());
+		importJob.setExaminationId(examination.getId());
+		importJob.setConverterId(Long.valueOf(6));
+		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
+		String importJobJson = ow.writeValueAsString(importJob);
+		shUpClient.startImportJob(importJobJson);
+	}
+
+	private Examination step4CreateExamination(Subject subject) {
 		Examination examination = new Examination();
 		examination.setStudyId(Long.valueOf(1));
 		examination.setSubjectId(subject.getId());
@@ -58,9 +98,12 @@ public class ZipFileImportTest extends AbstractTest {
 			subject.setSex(Sex.F);
 		} else if (patient.getPatientSex().compareTo(Sex.M.name()) == 0) {
 			subject.setSex(Sex.M);
-		}			
+		} else {
+			subject.setSex(Sex.O);
+		}
 		subject.setLanguageHemisphericDominance(HemisphericDominance.Left);
 		subject.setManualHemisphericDominance(HemisphericDominance.Left);
+		subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
 		subject.setSubjectStudyList(new ArrayList<SubjectStudy>());
 		return shUpClient.createSubject(subject, true, Long.valueOf(1));
 	}
