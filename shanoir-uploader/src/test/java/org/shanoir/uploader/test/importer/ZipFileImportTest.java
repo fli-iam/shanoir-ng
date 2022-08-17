@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.shanoir.uploader.model.rest.Examination;
@@ -24,12 +23,9 @@ import org.shanoir.uploader.model.rest.importer.Patient;
 import org.shanoir.uploader.model.rest.importer.Serie;
 import org.shanoir.uploader.model.rest.importer.Study;
 import org.shanoir.uploader.test.AbstractTest;
-import org.shanoir.uploader.utils.ImportUtils;
 import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class ZipFileImportTest extends AbstractTest {
 
@@ -45,7 +41,6 @@ public class ZipFileImportTest extends AbstractTest {
 			if (CollectionUtils.isNotEmpty(importJob.getPatients())) {
 				selectAllSeriesForImport(importJob);
 				Subject subject = step2CreateSubject(importJob);
-				importJob.getPatients().get(0).setPatientBirthDate(null);
 				step3CreateSubjectStudy(study, subject);
 				Examination examination = step4CreateExamination(subject);
 				step5StartImport(importJob, subject, examination);
@@ -113,11 +108,9 @@ public class ZipFileImportTest extends AbstractTest {
 		for (Patient patient : patients) {
 			List<Study> studies = patient.getStudies();
 			for (Study study : studies) {
-				study.setStudyDate(null);
 				List<Serie> series = study.getSeries();
 				for (Serie serie : series) {
 					serie.setSelected(true);
-					serie.setSeriesDate(null);
 				}
 			}
 		}

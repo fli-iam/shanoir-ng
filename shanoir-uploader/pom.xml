@@ -14,7 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
 		<keycloak.version>13.0.1</keycloak.version>
-		<jackson.version>2.8.3</jackson.version>
+		<jackson.version>2.13.2</jackson.version>
 		<javax.activation.version>1.2.0</javax.activation.version>
 		<jaxb.api.version>2.3.0</jaxb.api.version>
 		<lombok.version>1.18.6</lombok.version>
@@ -51,6 +51,11 @@
 		    <groupId>com.fasterxml.jackson.datatype</groupId>
     		<artifactId>jackson-datatype-jsr310</artifactId>
     		<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.datatype</groupId>
+		    <artifactId>jackson-datatype-jdk8</artifactId>
+		    <version>${jackson.version}</version>
 		</dependency>
 		<!-- dependency log4j -->
 		<dependency>

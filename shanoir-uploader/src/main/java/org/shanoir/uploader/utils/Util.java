@@ -57,7 +57,8 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
@@ -80,10 +81,14 @@ public final class Util {
 	
 	public static ObjectMapper objectMapper = new ObjectMapper();
 	
-	public static ObjectWriter objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
+	public static ObjectWriter objectWriter;
 	
 	static {
-		objectMapper.registerModule(new JavaTimeModule());
+		objectMapper
+			.registerModule(new JavaTimeModule())
+			.registerModule(new Jdk8Module())
+			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
 	}
 
 	/**
