@@ -44,6 +44,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
+import org.shanoir.ng.studycard.dto.SubjectStudyDTO;
 import org.shanoir.ng.studycard.dto.SubjectStudyStudyCardTag;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.Field;
@@ -173,7 +174,11 @@ public class StudyCardProcessingService {
 								}							
 							}
 						}
-						subjectStudyStudyCardTag.setSubjectStudy(subjectStudy);
+						SubjectStudyDTO subjectStudyDTO = new SubjectStudyDTO();
+						subjectStudyDTO.setId(subjectStudy.getId());
+						subjectStudyDTO.setStudyId(subjectStudy.getStudy().getId());
+						subjectStudyDTO.setSubjectId(subjectStudy.getSubject().getId());
+						subjectStudyStudyCardTag.setSubjectStudy(subjectStudyDTO);
 						if (allRulesFulFilled) {
 							subjectStudyStudyCardTag.setType(1);
 						} else {

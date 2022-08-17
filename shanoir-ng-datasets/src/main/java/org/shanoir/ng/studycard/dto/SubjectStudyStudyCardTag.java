@@ -1,18 +1,16 @@
 package org.shanoir.ng.studycard.dto;
 
-import org.shanoir.ng.shared.model.SubjectStudy;
-
 public class SubjectStudyStudyCardTag {
 
-	private SubjectStudy subjectStudy;
+	private SubjectStudyDTO subjectStudy;
 
 	private int type;
 
-	public SubjectStudy getSubjectStudy() {
+	public SubjectStudyDTO getSubjectStudy() {
 		return subjectStudy;
 	}
 
-	public void setSubjectStudy(SubjectStudy subjectStudy) {
+	public void setSubjectStudy(SubjectStudyDTO subjectStudy) {
 		this.subjectStudy = subjectStudy;
 	}
 
