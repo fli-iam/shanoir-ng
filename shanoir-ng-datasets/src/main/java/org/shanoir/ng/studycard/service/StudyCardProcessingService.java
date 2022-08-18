@@ -44,7 +44,6 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
-import org.shanoir.ng.studycard.dto.SubjectStudyDTO;
 import org.shanoir.ng.studycard.dto.SubjectStudyStudyCardTag;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.Field;
@@ -143,7 +142,8 @@ public class StudyCardProcessingService {
 	 * @throws MicroServiceCommunicationException 
 	 */
 	public void applyStudyCardOnStudy(StudyCard studyCard) throws MicroServiceCommunicationException {
-		if (studyCard.getRules() != null) {
+		final List<StudyCardRule> rules = studyCard.getRules();
+		if (CollectionUtils.isNotEmpty(rules)) {
 			final List<SubjectStudyStudyCardTag> subjectStudyStudyCardTagList = new ArrayList<SubjectStudyStudyCardTag>();
 			final List<SubjectStudy> subjectStudyList = subjectStudyRepository.findByStudyId(studyCard.getStudyId());
 			for (SubjectStudy subjectStudy : subjectStudyList) {
@@ -155,7 +155,6 @@ public class StudyCardProcessingService {
 					acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
 					if (CollectionUtils.isNotEmpty(acquisitions)) {
 						LOG.info(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
-						final List<StudyCardRule> rules = studyCard.getRules();
 						LOG.info(rules.size() + " rules found for study card with id: " + studyCard.getId() + " and name: " + studyCard.getName());
 						boolean allRulesFulFilled = true;
 						SubjectStudyStudyCardTag subjectStudyStudyCardTag = new SubjectStudyStudyCardTag();
