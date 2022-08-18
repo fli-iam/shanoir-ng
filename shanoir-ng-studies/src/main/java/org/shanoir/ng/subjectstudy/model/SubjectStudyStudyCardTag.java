@@ -6,7 +6,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
@@ -23,7 +22,6 @@ public class SubjectStudyStudyCardTag implements Serializable {
     private Long id;
 	
 	@OneToOne
-    @MapsId
     @JoinColumn(name = "subject_study_id")
     private SubjectStudy subjectStudy;
 	
@@ -50,6 +48,14 @@ public class SubjectStudyStudyCardTag implements Serializable {
 			tag.setColor("#f11722");		
 		}
 		return tag;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }

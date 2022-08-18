@@ -159,6 +159,7 @@ public class StudyCardProcessingService {
 						LOG.info(rules.size() + " rules found for study card with id: " + studyCard.getId() + " and name: " + studyCard.getName());
 						boolean allRulesFulFilled = true;
 						SubjectStudyStudyCardTag subjectStudyStudyCardTag = new SubjectStudyStudyCardTag();
+						subjectStudyStudyCardTag.setId(subjectStudy.getId());
 						for (StudyCardRule rule : rules) {
 							if (rule.getType() == StudyCardRuleType.EXAMINATION.getId()) {
 								if (!conditionsFulfilledOnAtLeastOneAcquisition(rule.getConditions(), acquisitions)) {
@@ -174,11 +175,6 @@ public class StudyCardProcessingService {
 								}							
 							}
 						}
-						SubjectStudyDTO subjectStudyDTO = new SubjectStudyDTO();
-						subjectStudyDTO.setId(subjectStudy.getId());
-						subjectStudyDTO.setStudyId(subjectStudy.getStudy().getId());
-						subjectStudyDTO.setSubjectId(subjectStudy.getSubject().getId());
-						subjectStudyStudyCardTag.setSubjectStudy(subjectStudyDTO);
 						if (allRulesFulFilled) {
 							subjectStudyStudyCardTag.setType(1);
 						} else {
