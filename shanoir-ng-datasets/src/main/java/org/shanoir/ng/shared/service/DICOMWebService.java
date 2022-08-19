@@ -71,6 +71,8 @@ public class DICOMWebService implements DicomServiceApi {
 
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
+	
+	private final CloseableHttpClient httpClient = HttpClients.createDefault();
 
 	@Override
 	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
@@ -80,7 +82,7 @@ public class DICOMWebService implements DicomServiceApi {
 		File[] dicomFiles = directoryWithDicomFiles.listFiles();
 		LOG.info("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
 
-		try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
+		try(httpClient) {
 			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
 			for (File dicomFile : dicomFiles) {
 				multipartEntityBuilder.addBinaryBody("dcm_upload", dicomFile, ContentType.create(CONTENT_TYPE_DICOM), "filename");
@@ -133,7 +135,7 @@ public class DICOMWebService implements DicomServiceApi {
 			deleteUrl = url.substring(0, url.indexOf("/aets/")) + REJECT_SUFFIX;
 		}
 
-		try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
+		try(httpClient) {
 			HttpPost post = new HttpPost(rejectURL);
 			post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 			CloseableHttpResponse response = httpClient.execute(post);
@@ -206,4 +208,5 @@ public class DICOMWebService implements DicomServiceApi {
 		}
 		return defaultValue;
 	}
+
 }
