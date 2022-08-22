@@ -229,12 +229,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [readOnly]="useStudyCard">
                 </select-box>
             </span>
-            <span *ngIf="modality == 'CT'">
-            <br/>
-            <br/>
-                Please be careful, some nifti converters are not adapted for CT (dicomifier for example).
-            <br/>
-            </span>
+            <div *ngIf="modality == 'CT'" class="ct-warn left-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+                You are importing CT data. Please be aware that some nifti converters are not adapted for CT (dicomifier for example)
+            </div>
         </li>
     </ol>
 
