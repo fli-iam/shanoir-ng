@@ -15,8 +15,10 @@
 package org.shanoir.ng.importer.model;
 
 import java.io.Serializable;
+import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 
 /**
@@ -198,5 +200,50 @@ public class ImportJob implements Serializable {
 	public void setUserId(Long userId) {
 		this.userId = userId;
 	}
+
+	@Override
+	public String toString() {
+		String importType;
+		if (fromDicomZip) {
+			importType = "ZIP";
+		} else if (fromShanoirUploader) {
+			importType = "SHUP";
+		} else if (fromPacs) {
+			importType = "PACS";
+		} else {
+			importType = "UNSUPPORTED";
+		}
+		int numberOfSeries = 0;
+		StringBuffer seriesNames = new StringBuffer();
+		seriesNames.append("[");
+		String modality = "unknown";
+		boolean enhanced = false;
+		if (CollectionUtils.isNotEmpty(patients)) {
+			Patient patient = patients.get(0);
+			if (CollectionUtils.isNotEmpty(patient.getStudies())) {
+				Study study = patient.getStudies().get(0);
+				List<Serie> series = study.getSeries();
+				if (CollectionUtils.isNotEmpty(series)) {
+					numberOfSeries = series.size(); // only selected series remain at the stage of the logging call
+					Serie serie = study.getSeries().get(0);
+					modality = serie.getModality();
+					enhanced = serie.getIsEnhanced();
+					for (Iterator iterator = series.iterator(); iterator.hasNext();) {
+						serie = (Serie) iterator.next();
+						if (iterator.hasNext()) {
+							seriesNames.append(serie.getSequenceName() + ",");
+						} else {
+							seriesNames.append(serie.getSequenceName() + "]");
+						}
+					}
+				}
+			}
+		}
+		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
+				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
+				",subjectName=" + subjectName + ",examId=" + examinationId  + ",converterId=" + converterId + ",numberOfSeries=" + numberOfSeries +
+				",seriesNames=" + seriesNames.toString();
+	}
+	
 }
 

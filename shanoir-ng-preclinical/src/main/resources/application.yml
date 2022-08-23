@@ -14,7 +14,7 @@
 # Default profile is production      #
 ######################################
 server:
-  port: 9909
+  port: 9905
   error:
     whitelabel:
       enabled: false
@@ -25,11 +25,9 @@ spring:
     username: preclinical
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
-    initialization-mode: never
-    data: classpath:/scripts/import.sql
   jpa:
-    defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
@@ -48,8 +46,8 @@ spring:
       matching-strategy: ANT_PATH_MATCHER
   sql:
     init:
-      mode: never
       data-locations: classpath:/scripts/import.sql
+      mode: never
 ##### Others #####
   jackson:
     mapper:
@@ -119,18 +117,12 @@ spring:
   main:
     allow-bean-definition-overriding: true
     allow-circular-references: true
-  sql:
-    init.mode: always
-    init.data-locations: classpath:/scripts/test-data-preclinical-h2.sql
   datasource:
     url: jdbc:h2:mem:SHANOIR_NG_PRECLINICAL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
     username: sa
     password: 
     driver-class-name: org.h2.Driver
-    initialization-mode: always
-    data: classpath:/scripts/test-data-preclinical-h2.sql
   jpa:
-    defer-datasource-initialization: true
     database-platform: org.hibernate.dialect.H2Dialect
     generate-ddl: true
     hibernate:
@@ -139,7 +131,10 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
-
+  sql:
+    init:
+      data-locations: classpath:/scripts/test-data-preclinical-h2.sql
+      mode: always
 logging:
   file:
     name: /tmp/shanoir-ng-import.log
@@ -148,10 +143,10 @@ logging:
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
+server:
+  port: 9915
 spring:
   config.activate.on-profile: dev
-  datasource:
-    initialization-mode: always
   jpa:
     defer-datasource-initialization: true
     generate-ddl: true
@@ -160,13 +155,15 @@ spring:
       ddl-auto: create
     # Show or not log for each sql query
     show-sql: true
-  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration  sql:    init:      mode: always
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   main:
     allow-circular-references: true
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
-
+  sql:
+    init:
+      mode: always
 # logging configuration
 logging:
   file:

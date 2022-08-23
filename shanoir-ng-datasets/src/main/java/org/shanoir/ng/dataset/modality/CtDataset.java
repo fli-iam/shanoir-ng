@@ -29,6 +29,14 @@ public class CtDataset extends Dataset {
 
 	public static final String datasetType = "Ct";
 
+//	private String pixelData;
+//	
+//	private String patientExamination;
+//	
+//	private String imageFlavor;
+//	
+//	private String derivedPixelContrast;
+	
 	/**
 	 * UID
 	 */
