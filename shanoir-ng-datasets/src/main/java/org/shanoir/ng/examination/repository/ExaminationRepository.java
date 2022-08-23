@@ -68,14 +68,14 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 			+ "ON su.study_id = e.study_id "
 			+ "LEFT JOIN study_user_center suc "
 			+ "ON suc.study_user_id = su.id "
-			+ "AND suc.centers_ids = e.center_id "
+			+ "AND suc.center_id = e.center_id "
 			+ "AND e.study_id in :studyIds",
 			    countQuery = "SELECT count(*) FROM examination e "
 						+ "LEFT JOIN study_user su "
 						+ "ON su.study_id = e.study_id "
 						+ "LEFT JOIN study_user_center suc "
 						+ "ON suc.study_user_id = su.id "
-						+ "AND suc.centers_ids = e.center_id "
+						+ "AND suc.center_id = e.center_id "
 						+ "AND e.study_id in :studyIds",
 			    nativeQuery = true)
 	Page<Examination>findByStudyIdInFilterByCenter(@Param("studyIds") List<Long> studyIds, Pageable pageable);
@@ -94,7 +94,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 			+ "ON su.study_id = e.study_id "
 			+ "LEFT JOIN study_user_center suc "
 			+ "ON suc.study_user_id = su.id "
-			+ "AND suc.centers_ids = e.center_id "
+			+ "AND suc.center_id = e.center_id "
 			+ "AND e.study_id in :studyIds "
 			+ "AND e.preclinical = :preclinical",
 			    countQuery ="SELECT count(*) FROM examination e "
@@ -102,7 +102,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 						+ "ON su.study_id = e.study_id "
 						+ "LEFT JOIN study_user_center suc "
 						+ "ON suc.study_user_id = su.id "
-						+ "AND suc.centers_ids = e.center_id "
+						+ "AND suc.center_id = e.center_id "
 						+ "AND e.study_id in :studyIds "
 						+ "AND e.preclinical = :preclinical",
 			    nativeQuery = true)

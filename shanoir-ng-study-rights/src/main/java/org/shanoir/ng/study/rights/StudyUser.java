@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -65,6 +66,7 @@ public class StudyUser implements StudyUserInterface {
 
 	@ElementCollection
 	@CollectionTable(name="study_user_center", joinColumns=@JoinColumn(name="study_user_id"))
+	@Column(name = "center_id")
 	private List<Long> centersIds;
 
 	/**
