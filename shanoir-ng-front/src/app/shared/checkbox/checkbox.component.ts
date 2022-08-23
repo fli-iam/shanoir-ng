@@ -60,8 +60,8 @@ export class CheckboxComponent implements ControlValueAccessor {
         } else {
             this.model = true;
         }
-        this.onChange.emit(this.model);
         this.onChangeCallback(this.model);
+        this.onChange.emit(this.model);
         this.onTouchedCallback();
     }
     

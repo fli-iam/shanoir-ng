@@ -20,6 +20,7 @@ import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
 import {
+    DatasetAcquisitionDatasetsDTO,
     DatasetAcquisitionDTO,
     DatasetAcquisitionDTOService,
     ExaminationDatasetAcquisitionDTO,
@@ -72,6 +73,11 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
     getAllForExamination(examinationId: number): Promise<ExaminationDatasetAcquisitionDTO[]> {
         return this.http.get<ExaminationDatasetAcquisitionDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/examination/' + examinationId)
             .toPromise();
+    }
+
+    getAllForDatasets(datasetIds: number[]): Promise<DatasetAcquisition[]> {
+        return this.http.post<DatasetAcquisitionDatasetsDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/byDatasetIds', Array.from(datasetIds))
+            .toPromise().then(dtos => this.mapEntityList(dtos));
     }
 
     public stringify(entity: DatasetAcquisition) {

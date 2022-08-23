@@ -12,10 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-/**
- * https://github.com/swagger-api/swagger-codegen
- * Do not edit the class manually.
- */
 package org.shanoir.ng.dataset.controler;
 
 import java.io.IOException;
@@ -23,6 +19,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -131,6 +128,27 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the acquisition", required = true) @PathVariable("acquisitionId") Long acquisitionId);
 
+	@ApiOperation(value = "", notes = "Returns a dataset list", response = List.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found datasets", response = Page.class),
+			@ApiResponse(code = 204, message = "no user found", response = ErrorModel.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
+			@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/studycard/{studycardId}", produces = { "application/json" })
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
+	ResponseEntity<List<DatasetDTO>> findDatasetsByStudycardId(@ApiParam(value = "id of the studycard", required = true) @PathVariable("studycardId") Long studycardId);
+	
+	@ApiOperation(value = "", notes = "Returns the list of dataset id by subject id and study id", response = Long.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found datasets", response = Long.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no dataset found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@RequestMapping(value = "/subject/{subjectId}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnSubjectForEveryStudy(#subjectId, 'CAN_SEE_ALL'))")
+	ResponseEntity<List<Long>> findDatasetIdsBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+
 	@ApiOperation(value = "", notes = "Returns the list of dataset id by study id", response = Long.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found datasets", response = Long.class, responseContainer = "List"),
@@ -188,6 +206,19 @@ public interface DatasetApi {
     		@Valid @RequestParam(value = "format", required = false, defaultValue="dcm") String format, 
     		HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
 
+    @ApiOperation(value = "", nickname = "getDicomMetadataByDatasetId", notes = "If exists, returns the dataset dicom metadata corresponding to the given id", response = Resource.class, tags={  })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "dicom metadata", response = Resource.class),
+        @ApiResponse(code = 401, message = "unauthorized"),
+        @ApiResponse(code = 403, message = "forbidden"),
+        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+    @GetMapping(value = "/dicom-metadata/{datasetId}")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_DOWNLOAD'))")
+    ResponseEntity<String> getDicomMetadataByDatasetId(
+    		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws MalformedURLException, IOException, MessagingException;
+
+    
 	@ApiOperation(value = "", notes = "Creates a processed dataset", response = Void.class, tags={  })
 	@ApiResponses(value = {
 		@ApiResponse(code = 204, message = "created Processed Dataset", response = Void.class),

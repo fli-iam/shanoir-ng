@@ -101,7 +101,7 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
             this.studyService.getStudiesNames().then(studies => {
                 for (let entity of result) {
                     if (entity.study) 
-                        entity.study.name = studies.find(study => study.id == entity.study.id).name;
+                        entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
                 }
             }),
             this.acqEqService.getAll().then(acqs => {

@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.dataset.modality.ImageFlavor;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMetadata;
 import org.shanoir.ng.dataset.modality.MrDatasetNature;
@@ -34,16 +35,21 @@ import org.shanoir.ng.importer.dto.EchoTime;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
 import org.shanoir.ng.shared.mapper.EchoTimeMapper;
 import org.shanoir.ng.shared.mapper.FlipAngleMapper;
 import org.shanoir.ng.shared.mapper.InversionTimeMapper;
 import org.shanoir.ng.shared.mapper.RepetitionTimeMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetStrategy.class);
 
 	@Autowired
 	DicomProcessing dicomProcessing;
@@ -80,12 +86,9 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			datasetIndex = -1;
 		}
 
-		// TODO ATO : implement MrDAtasetAcquisitionHome.createMrDataset (issue by
-		// createMrDatasetAcquisitionFromDicom()
 		for (Dataset dataset : serie.getDatasets()) {
 			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
 
-			// TODO ATO : implement line 350 - 372 MrDAtasetAcquisitionHome.createMrDataset
 			MrDataset mrDataset = new MrDataset();
 			mrDataset = generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);
 			if (mrDataset.getFirstImageAcquisitionTime() != null) {
@@ -194,6 +197,31 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			mrDataset.setOriginMrMetadata(mrDatasetMetadata);
 		}
 		
+		if (serie.getIsEnhanced()) { // there is no "enhanced mr spectroscopy"
+			MrDatasetMetadata mrDatasetMetadata = new MrDatasetMetadata();
+			String[] imageTypeArray = dicomAttributes.getStrings(Tag.ImageType);
+			String imageFlavor = imageTypeArray[2];
+			if (imageFlavor.equals(ImageFlavor.ANGIO_TIME.name())) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.CONTRAST_AGENT_USED_ANGIO_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.DIFFUSION.name())) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.DIFFUSION_WEIGHTED_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.PERFUSION.name())) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.SPIN_TAGGING_PERFUSION_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.PROTON_DENSITY.name())) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.PROTON_DENSITY_WEIGHTED_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.T1.name())) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T1_WEIGHTED_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.T2.name())) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T2_WEIGHTED_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.T2_STAR.name())) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.T2_STAR_WEIGHTED_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.TOF.name())) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.TIME_OF_FLIGHT_MR_DATASET);
+			} else if (imageFlavor.equals(ImageFlavor.VELOCITY.name())) {
+				mrDatasetMetadata.setMrDatasetNature(MrDatasetNature.VELOCITY_ENCODED_ANGIO_MR_DATASET);
+			}
+			mrDataset.setOriginMrMetadata(mrDatasetMetadata);
+		}
 
 		/**
 		 *  The part below will generate automatically the datasetExpression according to :

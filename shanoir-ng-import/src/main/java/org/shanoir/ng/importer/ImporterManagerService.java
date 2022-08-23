@@ -35,14 +35,15 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.study.rights.StudyUser;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.shared.email.EmailBase;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +110,6 @@ public class ImporterManagerService {
 	
 	@Async("asyncExecutor")
 	public void manageImportJob(final Long userId, final HttpHeaders keycloakHeaders, final ImportJob importJob) {
-		LOG.info("Starting import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 		importJob.setShanoirEvent(event);
@@ -141,9 +141,7 @@ public class ImporterManagerService {
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
-			
-			// do logging here
-			
+						
 			event.setMessage("Anonymizing dicom..");
 			eventService.publishEvent(event);
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
@@ -163,6 +161,8 @@ public class ImporterManagerService {
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
 			}
 			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
+			long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());
+			LOG.info("user=" + KeycloakUtil.getTokenUserName() + ",size=" + ImportUtils.readableFileSize(importJobDirSize) + "," + importJob.toString());
 		} catch (Exception e) {
 			LOG.error("Error during import for study {} and examination {}", importJob.getStudyId(), importJob.getExaminationId(), e);
 			event.setMessage("ERROR while importing data for study " + importJob.getStudyId() + " for examination " + importJob.getExaminationId() + ", please contact an administrator");
@@ -171,7 +171,6 @@ public class ImporterManagerService {
 			eventService.publishEvent(event);
 			sendFailureMail(importJob, userId, e.getMessage());
 		}
-		LOG.info("Finished import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
 	}
 
 	private void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {

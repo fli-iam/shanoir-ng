@@ -1,0 +1,20 @@
+.info { margin-top: 40px; }
+.form { margin: 0 0 5px; display: inline-block; vertical-align: middle; }
+.form li { margin: 5px 0; height: 19px; }
+select-box { width: 200px; }
+.form .value { color: var(--color-a); font-weight: bold; }
+.form ul { width: auto; }
+.sc-box { white-space: nowrap; overflow: hidden; border: 1px solid var(--grey); border-radius: 2px; padding: 4px 15px; margin: -4px 0; background-color: beige; }
+.main { margin-right: 70px; }
+div.warning { color: orangered; }
+
+.apply { margin: 10px 0 8px; font-size: 18px; background-color: var(--color-c); }
+.apply:not(:disabled):hover { background-color: var(--color-c-light); cursor: pointer; }
+.apply:disabled { opacity: 0.4; }
+
+.apply.warning { background-color: orangered; }
+.apply.warning:not(:disabled):hover { background-color: #fe8545; }
+
+.button-div { margin: 20px 0 40px; }
+.done { color: darkgreen; font-size: 35px; font-weight: bold; }
+checkbox { vertical-align: bottom; }

@@ -94,4 +94,17 @@ public class DatasetAcquisitionRepositoryTest {
 		Page<DatasetAcquisition> pageDB = repository.findByExaminationByStudyCenterOrStudyIdIn(studyCentersList, studyIds, pageable);
 		assertEquals(2, pageDB.getNumberOfElements());
 	}
+
+	@Test
+	public void findByDatasetsIdTest() throws Exception {
+		Long[] datasetIds = {1L, 2L, 3L};
+		Iterable<DatasetAcquisition> acquisitionsDb = repository.findDistinctByDatasetsIdIn(datasetIds);
+		assertThat(acquisitionsDb).isNotNull();
+		List<DatasetAcquisition> list = Utils.toList(acquisitionsDb);
+		assertThat(list.size()).isEqualTo(3);
+		assertEquals("Mr", list.get(0).getType());
+		assertEquals("Pet", list.get(1).getType());
+		assertEquals("Ct", list.get(2).getType());
+
+	}
 }

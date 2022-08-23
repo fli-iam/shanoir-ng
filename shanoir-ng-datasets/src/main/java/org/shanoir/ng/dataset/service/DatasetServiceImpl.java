@@ -261,8 +261,20 @@ public class DatasetServiceImpl implements DatasetService {
 	public List<Dataset> findByAcquisition(Long acquisitionId) {
 		return Utils.toList(repository.findByDatasetAcquisitionId(acquisitionId));
 	}
-
+	
 	@Override
+	public List<Dataset> findByStudycard(Long studycardId) {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return Utils.toList(repository.findBydatasetAcquisitionStudyCardId(studycardId));
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			
+			return Utils.toList(repository.findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudyIdIn(studycardId, studyIds));
+		}
+	}
+	
+  @Override
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}

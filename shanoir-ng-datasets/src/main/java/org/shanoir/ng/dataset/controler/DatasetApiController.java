@@ -254,9 +254,22 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
-
 		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
-		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+		if (datasets.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+		}
+	}
+	
+	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByStudycardId(@ApiParam(value = "id of the studycard", required = true) @PathVariable("studycardId") Long studycardId) {
+		List<Dataset> datasets = datasetService.findByStudycard(studycardId);
+		if (datasets.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);			
+		}
 	}
 
 	@Override
@@ -432,6 +445,19 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
+	public ResponseEntity<String> getDicomMetadataByDatasetId(
+    		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
+		
+		final Dataset dataset = datasetService.findById(datasetId);
+		List<URL> pathURLs = new ArrayList<>();
+		getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+		if (pathURLs.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);			
+		}
+	}
+	
 	public ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) {
 		importerService.createProcessedDataset(importJob);
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());

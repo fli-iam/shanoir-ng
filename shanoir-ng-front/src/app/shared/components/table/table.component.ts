@@ -20,6 +20,7 @@ import { GlobalService } from '../../services/global.service';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
 import * as shajs from 'sha.js';
 import { SolrResultPage } from '../../../solr/solr.document.model';
+import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 
 
@@ -27,11 +28,13 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
     selector: 'shanoir-table',
     templateUrl: 'table.component.html',
     styleUrls: ['table.component.css'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    animations: [slideDown]
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<SolrResultPage>;
     @Input() columnDefs: any[];
+    @Input() subRowsDefs: any[];
     @Input() customActionDefs: any[];
     @Input() selectionAllowed: boolean = false;
     @Input() selection: Set<number> = new Set();
@@ -44,6 +47,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
+    @Input() subRowsKey: string;
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
@@ -55,11 +59,14 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     filter: Filter = new Filter(null, null);
     firstLoading: boolean = true;
     @ViewChild('settingsDialog') settingsDialog: ModalComponent;
-    currentDrag: {leftOrigin: number, totalWidth: number, leftColIndex: number};
+    currentDrag: {columns: any; leftOrigin: number, totalWidth: number, leftColIndex: number};
     private subscriptions: Subscription[] = [];
     private hash: string;
     private colSave: { width: string, hidden: boolean }[];
     compactMode: boolean = false;
+    nbColumns: number;
+    expended: boolean[] = [];
+    subRowOpen: any = {};
 
     constructor(
             private elementRef: ElementRef,
@@ -73,11 +80,17 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             this.saveSelection();
         }
         if (changes.columnDefs && this.columnDefs) {
-            this.colSave = this.columnDefs.map(col => { return { width: col.width, hidden: col.hidden } });
-            this.hash = this.getHash();
-            this.reloadSettings();
             setTimeout(() => {
+                this.colSave = this.columnDefs.map(col => { return { width: col.width, hidden: col.hidden } });
+                if (this.subRowsDefs) {
+                    this.colSave = this.colSave.concat(this.subRowsDefs.map(col => { return { width: col.width, hidden: col.hidden } }));
+                }
+                this.hash = this.getHash();
+                this.reloadSettings();
                 this.reloadPreviousState();
+                this.nbColumns = this.columnDefs.length;
+                if (this.selectionAllowed) this.nbColumns++;
+                if (this.subRowsDefs) this.nbColumns++;
             })
         }
     }
@@ -359,6 +372,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     saveSettings() {
         let pref: TablePreferences = new TablePreferences();
         pref.colWidths = this.columnDefs.map(col => { return {width: col.width, hidden: col.hidden}; });
+        if (this.subRowsDefs) {
+            pref.colWidths = pref.colWidths.concat(this.subRowsDefs.map(col => { return {width: col.width, hidden: col.hidden}; }));
+        }
         pref.pageSize = this.maxResultsField;
         localStorage.setItem(this.hash, JSON.stringify(pref));
     }
@@ -369,8 +385,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             let pref: TablePreferences = JSON.parse(prefStr);
             this.maxResults = pref.pageSize;
             this.columnDefs.forEach((col, i) => {
-                col.width = pref.colWidths[i].width;
-                col.hidden = pref.colWidths[i].hidden;
+                col.width = pref.colWidths[i]?.width;
+                col.hidden = pref.colWidths[i]?.hidden;
+            });
+            this.subRowsDefs?.forEach((col, i) => {
+                col.width = pref.colWidths[this.columnDefs.length + i]?.width;
+                col.hidden = pref.colWidths[this.columnDefs.length + i]?.hidden;
             });
         }
     }
@@ -492,8 +512,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    startDrag(leftColIndex: number, thRef: HTMLElement, event: MouseEvent) {
+    startDrag(leftColIndex: number, thRef: HTMLElement, event: MouseEvent, columnDefs: any) {
         this.currentDrag = {
+            columns: columnDefs,
             leftOrigin: event.pageX - thRef.offsetWidth + 10, 
             totalWidth: (thRef.nextElementSibling as HTMLElement).offsetWidth + thRef.offsetWidth - 22, 
             leftColIndex: leftColIndex
@@ -503,17 +524,17 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     moveDrag(event: MouseEvent) {
         if (this.currentDrag) {
             let leftDragWidth: number = event.pageX - this.currentDrag.leftOrigin;
-            let nextIndex: number = this.columnDefs.slice(this.currentDrag.leftColIndex + 1).findIndex(col => !col.hidden);
+            let nextIndex: number = this.currentDrag.columns.slice(this.currentDrag.leftColIndex + 1).findIndex(col => !col.hidden);
             if (leftDragWidth >= 10) {
-                this.columnDefs[this.currentDrag.leftColIndex].width = (leftDragWidth + 0) + 'px';
+                this.currentDrag.columns[this.currentDrag.leftColIndex].width = (leftDragWidth + 0) + 'px';
                 if (this.currentDrag.totalWidth - leftDragWidth < 10 && nextIndex != -1) {
-                    this.columnDefs[nextIndex + this.currentDrag.leftColIndex + 1].width = 10 + 'px';
+                    this.currentDrag.columns[nextIndex + this.currentDrag.leftColIndex + 1].width = 10 + 'px';
                 } else {
-                    this.columnDefs[nextIndex + this.currentDrag.leftColIndex + 1].width = (this.currentDrag.totalWidth - leftDragWidth) + 'px';
+                    this.currentDrag.columns[nextIndex + this.currentDrag.leftColIndex + 1].width = (this.currentDrag.totalWidth - leftDragWidth) + 'px';
                 }
             } else {
-                this.columnDefs[this.currentDrag.leftColIndex].width = 10 + 'px';
-                this.columnDefs[nextIndex + this.currentDrag.leftColIndex + 1].width = (this.currentDrag.totalWidth - 10) + 'px';
+                this.currentDrag.columns[this.currentDrag.leftColIndex].width = 10 + 'px';
+                this.currentDrag.columns[nextIndex + this.currentDrag.leftColIndex + 1].width = (this.currentDrag.totalWidth - 10) + 'px';
             }
         }
     }
@@ -538,7 +559,19 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             col.width = this.colSave[i].width;
             col.hidden = this.colSave[i].hidden;
         });
+        this.subRowsDefs.forEach((col, i) => {
+            col.width = this.colSave[this.columnDefs.length + i].width;
+            col.hidden = this.colSave[this.columnDefs.length + i].hidden;
+        });
         this.saveSettings();
+    }
+
+    deploy(i: number) {
+        this.subRowOpen[i] = true;
+    }
+
+    fold(i: number) {
+        this.subRowOpen[i] = false;
     }
 }
 

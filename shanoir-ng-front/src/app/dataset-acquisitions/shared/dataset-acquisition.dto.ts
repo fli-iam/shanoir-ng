@@ -15,6 +15,9 @@ import { Injectable } from '@angular/core';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
+import { DatasetDTO, DatasetDTOService } from '../../datasets/shared/dataset.dto';
+import { Dataset } from '../../datasets/shared/dataset.model';
+import { DatasetUtils } from '../../datasets/shared/dataset.utils';
 import { ExaminationDTO, ExaminationDTOService } from '../../examinations/shared/examination.dto';
 import { Examination } from '../../examinations/shared/examination.model';
 import { StudyService } from '../../studies/shared/study.service';
@@ -35,7 +38,8 @@ export class DatasetAcquisitionDTOService {
 
     constructor(
         private acqEqService: AcquisitionEquipmentService,
-        private studyService: StudyService) {}
+        private studyService: StudyService,
+        private datasetDtoService: DatasetDTOService) {}
 
     /**
      * Convert from DatasetAcquisitionDTO to DatasetAcquisition
@@ -65,6 +69,13 @@ export class DatasetAcquisitionDTOService {
             if (dto.acquisitionEquipmentId) {
                 entity.acquisitionEquipment = new AcquisitionEquipment();
                 entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
+            }
+            if ((dto as DatasetAcquisitionDatasetsDTO).datasets) {
+                entity.datasets = (dto as DatasetAcquisitionDatasetsDTO).datasets.map(dsdto => {
+                    let simpleDataset: Dataset = DatasetUtils.getDatasetInstance(dsdto.type);
+                    DatasetDTOService.mapSyncFields(dsdto, simpleDataset);
+                    return simpleDataset;
+                });
             }
             result.push(entity);
         }
@@ -167,4 +178,8 @@ export class ExaminationDatasetAcquisitionDTO {
     name: string;
     type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed' | 'BIDS';
     datasets: any;
+}
+
+export class DatasetAcquisitionDatasetsDTO extends DatasetAcquisitionDTO {
+    datasets: DatasetDTO[];
 }

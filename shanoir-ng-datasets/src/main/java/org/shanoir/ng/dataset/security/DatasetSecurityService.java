@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,10 @@ import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
@@ -63,6 +67,9 @@ public class DatasetSecurityService {
 	ExaminationRepository examinationRepository;
 	
 	@Autowired
+	SubjectRepository subjectRepository;
+	
+	@Autowired
 	StudyRightsService commService;
 
 	@Autowired
@@ -86,6 +93,54 @@ public class DatasetSecurityService {
 			return false;
 		}
         return commService.hasRightOnStudy(studyId, rightStr);
+    }
+    
+    /**
+	 * Check that the connected user has the given right for the given subject.
+	 * 
+	 * @param studyId the study id
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+    public boolean hasRightOnSubjectId(Long subjectId, String rightStr) {
+    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+    	Optional<Subject> subject = subjectRepository.findById(subjectId);
+    	if (subject.isEmpty()) {
+    		return false;
+    	}
+    	for (SubjectStudy subjectStudy : subject.get().getSubjectStudyList()) {
+    		boolean hasRight = commService.hasRightOnStudy(subjectStudy.getStudy().getId(), rightStr);
+    		if (hasRight) {
+    			return true;
+    		}
+    	}
+    	return false;
+    }
+    
+    /**
+	 * Check that the connected user has the given right for the given subject.
+	 * 
+	 * @param subjectName the study name
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+    public boolean hasRightOnSubjectName(String subjectName, String rightStr) {
+    	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+    	Subject subject = subjectRepository.findByName(subjectName);
+    	if (subject == null) {
+    		return false;
+    	}
+    	for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+    		boolean hasRight = commService.hasRightOnStudy(subjectStudy.getStudy().getId(), rightStr);
+    		if (hasRight) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
     
     /**
@@ -242,6 +297,31 @@ public class DatasetSecurityService {
 			return false;
 		}
         return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr);
+    }
+    
+    /**
+     * Check that the connected user has the given right for the given dataset acquisitions.
+     * !!! The acquisitions must be trusted, meaning they must come from the database, not from the user !!!
+     * 
+     * @param datasetId the dataset acquisition id
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasRightOnEveryTrustedDatasetAcquisition(List<DatasetAcquisition> datasetAcquisitions, String rightStr) throws EntityNotFoundException {
+    	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
+    	// If the entry is empty, return an empty list
+    	if (datasetAcquisitions == null || datasetAcquisitions.isEmpty()) {
+			return true;
+		}
+    	
+    	Set<Long> studyIds = new HashSet<Long>();
+    	for (DatasetAcquisition acq : datasetAcquisitions) {
+    		studyIds.add(acq.getExamination().getStudyId());
+    	}
+    	return studyIds.equals(commService.hasRightOnStudies(studyIds, rightStr));
     }
 
     /**
@@ -763,6 +843,26 @@ public class DatasetSecurityService {
     	return true;
     }
     
+    
+    /**
+     * Filter datasets in that page checking the connected user has the right on those datasets.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean filterDatasetDTOList(List<DatasetDTO> list, String rightStr) {
+    	if (list == null) {
+			return true;
+		}
+    	Set<Long> studyIds = new HashSet<Long>();
+    	list.forEach((DatasetDTO dataset) -> {
+    		studyIds.add(dataset.getStudyId());
+    	});
+    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+    	list.removeIf((DatasetDTO dataset) -> !checkedIds.contains(dataset.getStudyId()));
+    	return true;
+    }
     
     /**
      * Check that the connected user has the given right for the given examination.

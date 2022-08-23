@@ -51,6 +51,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
@@ -98,10 +99,12 @@ public abstract class Dataset extends AbstractEntity {
 	private DatasetAcquisition datasetAcquisition;
 
 	/** Dataset expression list. */
+	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "dataset", cascade = CascadeType.ALL)
 	private List<DatasetExpression> datasetExpressions;
 
 	/** Dataset Processing. */
+	@JsonIgnore
 	@ManyToOne(cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "dataset_processing_id")
 	private DatasetProcessing datasetProcessing;
@@ -113,6 +116,7 @@ public abstract class Dataset extends AbstractEntity {
 	private Long groupOfSubjectsId;
 
 	/** Processings for which this dataset is an input. */
+	@JsonIgnore
 	@ManyToMany(mappedBy="inputDatasets")
 	private List<DatasetProcessing> processings;
 

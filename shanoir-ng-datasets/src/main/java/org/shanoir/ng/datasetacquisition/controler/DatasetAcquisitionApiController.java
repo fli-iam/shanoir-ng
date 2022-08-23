@@ -21,7 +21,9 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionDatasetsMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -76,6 +78,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Autowired
 	private DatasetAcquisitionMapper dsAcqMapper;
+	
+	@Autowired
+	private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
 	
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
@@ -155,6 +160,27 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
 			return new ResponseEntity<>(examDsAcqMapper.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(daList), HttpStatus.OK);
+		}
+	}
+	
+	@Override
+	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
+			@ApiParam(value = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
+		
+		List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
+		
+		daList.sort(new Comparator<DatasetAcquisition>() {
+			@Override
+			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
+				return o1.getExamination() != null && o2.getExamination() != null 
+						? Long.compare(o1.getExamination().getStudyId(), o2.getExamination().getStudyId())
+						: 0;
+			}
+		});
+		if (daList.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
 		}
 	}
 	
