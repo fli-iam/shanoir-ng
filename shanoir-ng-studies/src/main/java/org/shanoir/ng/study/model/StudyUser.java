@@ -206,7 +206,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 		return centers;
 	}
 
-	public List<Long> getCentersIds() {
+	public List<Long> getCenterIds() {
 		if (CollectionUtils.isEmpty(this.centers)) {
 			return Collections.emptyList();
 		}
@@ -218,7 +218,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 		this.centers = centers;
 	}
 	
-	public void setCentersIds(List<Long> ids) {
+	public void setCenterIds(List<Long> ids) {
 		centers = ids.stream().map(id -> {
 			Center center = new Center();
 			center.setId(id);
