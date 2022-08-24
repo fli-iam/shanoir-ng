@@ -497,7 +497,7 @@ public class StudySecurityService {
 			return true;
 		}
 		// Filter only allowed centers.
-		centers.removeIf(center -> !su.getCentersIds().contains(center.getId()));
+		centers.removeIf(center -> !su.getCenterIds().contains(center.getId()));
 		return true;
 	}
 

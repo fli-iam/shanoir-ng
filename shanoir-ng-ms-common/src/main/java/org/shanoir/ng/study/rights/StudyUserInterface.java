@@ -77,6 +77,6 @@ public interface StudyUserInterface {
 	
 	public void setId(Long id);
 
-	public List<Long> getCentersIds();
+	public List<Long> getCenterIds();
 
 }

@@ -67,7 +67,7 @@ public class StudyUser implements StudyUserInterface {
 	@ElementCollection
 	@CollectionTable(name="study_user_center", joinColumns=@JoinColumn(name="study_user_id"))
 	@Column(name = "center_id")
-	private List<Long> centersIds;
+	private List<Long> centerIds;
 
 	/**
 	 * @return the receiveStudyUserReport
@@ -192,15 +192,15 @@ public class StudyUser implements StudyUserInterface {
 	/**
 	 * @return the centersIds
 	 */
-	public List<Long> getCentersIds() {
-		return centersIds;
+	public List<Long> getCenterIds() {
+		return centerIds;
 	}
 
 	/**
 	 * @param centersIds the centersIds to set
 	 */
-	public void setCentersIds(List<Long> centersIds) {
-		this.centersIds = centersIds;
+	public void setCenterIds(List<Long> centersIds) {
+		this.centerIds = centersIds;
 	}
 
 }

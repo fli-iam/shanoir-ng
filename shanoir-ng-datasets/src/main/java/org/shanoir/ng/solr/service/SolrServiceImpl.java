@@ -216,7 +216,7 @@ public class SolrServiceImpl implements SolrService {
 			Map<Long, List<String>> studiesCenter = new HashMap<>();
 			List<Center> centers = Utils.toList(centerRepository.findAll());
 			for(StudyUser su : studyUsers) {
-				studiesCenter.put(su.getStudyId(), su.getCentersIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
+				studiesCenter.put(su.getStudyId(), su.getCenterIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
 			}
 			result = solrRepository.findByStudyIdInAndFacetCriteria(studiesCenter, query, pageable);
 		}
