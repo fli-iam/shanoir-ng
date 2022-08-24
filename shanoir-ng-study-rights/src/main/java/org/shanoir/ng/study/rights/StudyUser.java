@@ -189,18 +189,13 @@ public class StudyUser implements StudyUserInterface {
 		this.id = id;
 	}
 
-	/**
-	 * @return the centersIds
-	 */
+
 	public List<Long> getCenterIds() {
 		return centerIds;
 	}
 
-	/**
-	 * @param centersIds the centersIds to set
-	 */
-	public void setCenterIds(List<Long> centersIds) {
-		this.centerIds = centersIds;
+	public void setCenterIds(List<Long> centerIds) {
+		this.centerIds = centerIds;
 	}
 
 }

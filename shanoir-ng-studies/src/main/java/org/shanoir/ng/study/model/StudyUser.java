@@ -26,14 +26,15 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.ForeignKey;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotBlank;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -87,6 +88,9 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	@ElementCollection
 	@CollectionTable(name="study_user_center", joinColumns=@JoinColumn(name="study_user_id"))
 	@Column(name = "center_id")
+	
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "study_user_id", foreignKey = @ForeignKey(name = "center_id"))
 	private List<Center> centers;
 
 	/**
@@ -206,7 +210,6 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 		return centers;
 	}
 
-	@Transient
 	public List<Long> getCenterIds() {
 		if (CollectionUtils.isEmpty(this.centers)) {
 			return Collections.emptyList();
