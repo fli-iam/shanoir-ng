@@ -22,6 +22,8 @@ import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.SqlResultSetMapping;
@@ -35,8 +37,10 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.security.EditableOnlyBy;
 import org.shanoir.ng.shared.validation.Unique;
+import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
@@ -85,6 +89,11 @@ public class Center extends HalEntity {
 	private List<StudyCenter> studyCenterList;
 
 	private String website;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "study_user_id")
+	@JsonIgnore
+	private StudyUser studyUser;
 
 	/**
 	 * Init HATEOAS links
@@ -227,6 +236,14 @@ public class Center extends HalEntity {
 	 */
 	public void setWebsite(String website) {
 		this.website = website;
+	}
+
+	public StudyUser getStudyUser() {
+		return studyUser;
+	}
+
+	public void setStudyUser(StudyUser studyUser) {
+		this.studyUser = studyUser;
 	}
 
 }

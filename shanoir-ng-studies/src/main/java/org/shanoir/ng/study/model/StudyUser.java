@@ -84,9 +84,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	@NotBlank
 	private String userName;
 
-	@ElementCollection
-	@CollectionTable(name="study_user_center", joinColumns=@JoinColumn(name="study_user_id"))
-	@Column(name = "center_id")
+	@OneToMany(mappedBy = "studyUser", fetch = FetchType.EAGER)
 	private List<Center> centers;
 
 	/**
