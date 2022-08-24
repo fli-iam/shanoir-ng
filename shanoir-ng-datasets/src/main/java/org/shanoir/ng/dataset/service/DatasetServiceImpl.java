@@ -241,10 +241,13 @@ public class DatasetServiceImpl implements DatasetService {
 				
 				datasets = datasets.stream().filter(ds -> 
 						studyUserCenters.get(ds.getStudyId()) == null ||
-						studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId())).collect(Collectors.toList());
+						studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
+						.collect(Collectors.toList());
+				int size = datasets.size();
 
-				datasets = datasets.subList(pageable.getPageSize() * pageable.getPageNumber(), pageable.getPageSize() * pageable.getPageNumber() + 1);
-				Page<Dataset> page = new PageImpl<>(datasets);
+				datasets = datasets.subList(pageable.getPageSize() * pageable.getPageNumber(), Math.min(datasets.size(), pageable.getPageSize() * (pageable.getPageNumber() + 1)));
+				
+				Page<Dataset> page = new PageImpl<>(datasets, pageable, size);
 				return page;
 			} else {
 				return repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable);
