@@ -206,6 +206,7 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 		return centers;
 	}
 
+	@Transient
 	public List<Long> getCenterIds() {
 		if (CollectionUtils.isEmpty(this.centers)) {
 			return Collections.emptyList();
