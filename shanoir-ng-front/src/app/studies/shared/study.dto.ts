@@ -121,7 +121,7 @@ export class StudyDTOService {
                 studyUser.user = studyUserDto.user;
                 studyUser.userId = studyUserDto.userId;
                 studyUser.userName = studyUserDto.userName;
-                studyUser.centers = studyUserDto.centersIds.map(centerId => {
+                studyUser.centers = studyUserDto.centersIds?.map(centerId => {
                     let center: Center = new Center();
                     center.id = centerId;
                     return center;
