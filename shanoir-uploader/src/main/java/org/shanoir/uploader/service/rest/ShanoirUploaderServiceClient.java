@@ -35,8 +35,6 @@ import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
  * 

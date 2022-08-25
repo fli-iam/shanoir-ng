@@ -2,19 +2,18 @@ package org.shanoir.ng.dicom.web;
 
 import java.util.Map;
 
-import javax.validation.Valid;
+import javax.servlet.http.HttpServletRequest;
 
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -154,16 +153,15 @@ public interface DICOMWebApi {
 	
 	@ApiOperation(value = "", notes = "STOW-RS", response = Void.class, tags = {})
 	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "stored", response = Void.class),
 			@ApiResponse(code = 204, message = "updated", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@PostMapping(value = "/studies", consumes = { "multipart/related" })
+	@PostMapping(value = "/studies", consumes = { MediaType.MULTIPART_RELATED_VALUE })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<Void> stow(
-			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file
-		) throws RestServiceException;
+	ResponseEntity<Void> stow(HttpServletRequest request) throws RestServiceException;
 
 
 //    @GET

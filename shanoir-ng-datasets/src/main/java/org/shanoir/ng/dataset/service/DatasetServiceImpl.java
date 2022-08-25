@@ -32,19 +32,18 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -76,12 +75,7 @@ public class DatasetServiceImpl implements DatasetService {
 	private SolrService solrService;
 
 	@Autowired
-	@Qualifier("stowrs")
-	DicomServiceApi stowRsService;
-
-	@Autowired
-	@Qualifier("cstore")
-	DicomServiceApi cStoreService;
+	private DICOMWebService dicomWebService;
 
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
@@ -105,7 +99,7 @@ public class DatasetServiceImpl implements DatasetService {
 				if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
 					for (DatasetFile file : expression.getDatasetFiles()) {
 						if (file.isPacs()) {
-							stowRsService.deleteDicomFilesFromPacs(file.getPath());
+							dicomWebService.deleteDicomFilesFromPacs(file.getPath());
 						}
 					}
 				} else {
