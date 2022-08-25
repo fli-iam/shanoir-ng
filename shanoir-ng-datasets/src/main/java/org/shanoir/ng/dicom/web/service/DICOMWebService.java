@@ -22,6 +22,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -134,10 +135,10 @@ public class DICOMWebService {
 			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
-					InputStreamResource inputStreamResource = new InputStreamResource(entity.getContent());
+					ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
 					HttpHeaders responseHeaders = new HttpHeaders();
 					responseHeaders.setContentLength(entity.getContentLength());
-					return new ResponseEntity(inputStreamResource, responseHeaders, HttpStatus.OK);
+					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
 				} else {
 					LOG.error("DICOMWeb: findFrameOfStudyOfSerieOfInstance: empty response entity.");				
 				}
