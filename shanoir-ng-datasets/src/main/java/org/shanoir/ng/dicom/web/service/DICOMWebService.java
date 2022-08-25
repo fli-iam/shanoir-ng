@@ -26,6 +26,7 @@ import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -162,6 +163,7 @@ public class DICOMWebService {
 		LOG.info("Finished: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
 	}
 
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public void sendDicomInputStreamToPacs(InputStream inputStream) throws Exception {
 		LOG.info("Start: STOW-RS sending dicom file input stream to PACS.");
 		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);

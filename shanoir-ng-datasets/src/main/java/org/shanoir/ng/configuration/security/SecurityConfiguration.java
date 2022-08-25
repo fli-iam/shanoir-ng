@@ -19,7 +19,7 @@ import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
 import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter;
-import org.shanoir.ng.dicom.web.MultipartRelatedRequestFilter;
+import org.shanoir.ng.dicom.web.StowRSMultipartRelatedRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -56,7 +56,7 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 	private String frontServerUrl;
 	
 	@Autowired
-	private MultipartRelatedRequestFilter multipartRelatedRequestFilter;
+	private StowRSMultipartRelatedRequestFilter multipartRelatedRequestFilter;
 
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication
