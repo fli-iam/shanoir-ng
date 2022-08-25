@@ -24,8 +24,8 @@ import org.springframework.web.filter.GenericFilterBean;
 /**
  * The StowRSMultipartRelatedRequestFilter handles a POST request of
  * content type "multipart/related", as send by the OHIF-viewer according
- * to the DICOM standard, containing a DICOM SR modality, for Structured
- * Report. Within the OHIF viewer, the button save measurements is used
+ * to the DICOM standard, containing a DICOM SR modality, == Structured
+ * Report. Within the OHIF viewer, the button "save measurements" is used
  * to send the measurements to shanoir backend for storage.
  * 
  * It might look weird to use a request filter for this purpose and not
@@ -45,8 +45,8 @@ import org.springframework.web.filter.GenericFilterBean;
  * comes after the Keycloak filter (addFilterAfter), and does therefore not
  * expose any access from outside.
  * 
- * Instead of writing a multipart/related parser on my own using the below MimeMultipart
- * seems pretty elegant.
+ * Instead of writing a multipart/related parser on my own using the below
+ * MimeMultipart seems pretty elegant.
  * 
  * @author mkain
  *
