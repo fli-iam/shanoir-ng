@@ -96,7 +96,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     writeValue(obj: any): void {
         this.studyUserList = obj ? obj : [];
         this.studyUserList?.forEach(su => {
-            su.centers = su.centers.filter(suc => this.centers.findIndex(c => c.id == suc.id) > -1);
+            su.centers = su.centers?.filter(suc => this.centers.findIndex(c => c.id == suc.id) > -1);
         });
         this.studyUserBackup = [...this.studyUserList];
         this.browserPaging = new BrowserPaging(this.studyUserList, this.columnDefs);
@@ -111,7 +111,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         this.onTouchedCallback = fn;
     }
 
-    getPage: (FilterablePageable) => Promise<Page<StudyUser>>;
+    getPage: (FilterablePageable) => Promise<Page<StudyUser>> = () => Promise.resolve(new Page());
 
     isMe(user: User): boolean {
         return user.id == KeycloakService.auth.userId;
