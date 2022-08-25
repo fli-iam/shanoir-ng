@@ -7,17 +7,17 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.ClientProtocolException;
+import org.apache.hc.client5.http.classic.methods.HttpDelete;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ContentType;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,22 +197,20 @@ public class DICOMWebService {
 			HttpPost post = new HttpPost(rejectURL);
 			post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 			CloseableHttpResponse response = httpClient.execute(post);
-			if (response.getStatusLine().getStatusCode() == HttpStatus.NO_CONTENT.value()) {
+			if (response.getCode() == HttpStatus.NO_CONTENT.value()) {
 				LOG.info("Rejected from PACS: " + url);
 			} else {
-				LOG.error(response.getStatusLine().getStatusCode() + ": Could not reject instance from PACS: "
-						+ response.getStatusLine().getReasonPhrase());
+				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase());
 				throw new ShanoirException("Could not reject instance from PACS: " + rejectURL);
 			}
 			// STEP 2: Delete from the PACS
 			HttpDelete delete = new HttpDelete(deleteUrl);
 			delete.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 			response = httpClient.execute(delete);
-			if (response.getStatusLine().getStatusCode() == HttpStatus.OK.value()) {
+			if (response.getCode() == HttpStatus.OK.value()) {
 				LOG.info("Deleted from PACS: " + url);
 			} else {
-				LOG.error(response.getStatusLine().getStatusCode() + ": Could not delete instance from PACS: "
-						+ response.getStatusLine().getReasonPhrase());
+				LOG.error(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase());
 				throw new ShanoirException("Could not delete instance from PACS: " + deleteUrl);
 			}
 		} catch (ClientProtocolException e) {
