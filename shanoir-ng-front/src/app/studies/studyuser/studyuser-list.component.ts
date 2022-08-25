@@ -88,7 +88,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
         if (changes.studyCenters) {
             this.centers = this.studyCenters?.map(sc => sc.center);
             this.studyUserList?.forEach(su => {
-                su.centers = su.centers.filter(suc => this.centers.findIndex(c => c.id == suc.id) > -1);
+                su.centers = su.centers?.filter(suc => this.centers.findIndex(c => c.id == suc.id) > -1);
             });
         }
     }
