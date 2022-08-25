@@ -62,7 +62,7 @@ public class StudyRightsService {
 		return
 				founded != null
 				&& 
-				( founded.getCentersIds().isEmpty() || founded.getCentersIds().contains(centerId) );
+				( founded.getCenterIds().isEmpty() || founded.getCenterIds().contains(centerId) );
     }
 
     /*
@@ -80,7 +80,7 @@ public class StudyRightsService {
 		}
 		boolean hasRight = false;
 		for (StudyUser su  : founded) {
-			hasRight = hasRight || CollectionUtils.isEmpty(su.getCentersIds()) || su.getCentersIds().contains(centerId);
+			hasRight = hasRight || CollectionUtils.isEmpty(su.getCenterIds()) || su.getCenterIds().contains(centerId);
 		}
 		return hasRight;
     }

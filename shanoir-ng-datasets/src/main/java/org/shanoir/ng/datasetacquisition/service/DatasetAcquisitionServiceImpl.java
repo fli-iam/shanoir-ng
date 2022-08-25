@@ -112,10 +112,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
 			Set<Long> unrestrictedStudies = new HashSet<Long>();
 			for (StudyUser studyUser : studyUsers) {
-				if (CollectionUtils.isEmpty(studyUser.getCentersIds())) {
+				if (CollectionUtils.isEmpty(studyUser.getCenterIds())) {
 					unrestrictedStudies.add(studyUser.getStudyId());
 				} else {
-					for (Long centerId : studyUser.getCentersIds()) {
+					for (Long centerId : studyUser.getCenterIds()) {
 						studyCenters.add(new Pair<Long, Long>(studyUser.getStudyId(), centerId));						
 					}
 				}

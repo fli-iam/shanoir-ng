@@ -367,7 +367,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Long[]{1L, 2L}));
 		StudyUser su1 = new StudyUser();
 		su1.setStudyId(1L);
-		su1.setCentersIds(Arrays.asList(new Long[]{1L}));
+		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
 		given(rightsRepository.findByUserIdAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new StudyUser[]{su1}));
 		
 	}

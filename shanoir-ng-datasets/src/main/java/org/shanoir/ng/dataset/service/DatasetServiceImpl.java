@@ -226,9 +226,9 @@ public class DatasetServiceImpl implements DatasetService {
 			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(userId));
 			Map<Long, List<Long>> studyUserCenters = new HashMap<>();
 			for (StudyUser studyUser : studyUsers) {
-				if (! CollectionUtils.isEmpty(studyUser.getCentersIds())) {
+				if (! CollectionUtils.isEmpty(studyUser.getCenterIds())) {
 					hasRestrictions = true;
-					studyUserCenters.put(studyUser.getStudyId(), studyUser.getCentersIds());
+					studyUserCenters.put(studyUser.getStudyId(), studyUser.getCenterIds());
 				}
 			}
 			// If yes, get all examinations and filter by centers

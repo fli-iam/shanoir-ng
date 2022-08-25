@@ -431,7 +431,7 @@ public class DatasetApiSecurityTest {
 		
 		StudyUser su1 = new StudyUser();
 		su1.setStudyId(1L);
-		su1.setCentersIds(Arrays.asList(new Long[]{1L}));
+		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
 		given(rightsRepository.findByUserId(LOGGED_USER_ID)).willReturn(Arrays.asList(new StudyUser[]{su1}));
 		given(datasetRepository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Dataset[]{dataset1, dataset3})));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L, 2L));

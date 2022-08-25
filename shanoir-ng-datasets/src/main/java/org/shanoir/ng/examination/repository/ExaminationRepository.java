@@ -78,7 +78,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 			+ "AND su.user_id = :userId "
 			+ "JOIN study_user_center suc "
 			+ "ON suc.study_user_id = su.id "
-			+ "AND suc.centers_ids = e.center_id "
+			+ "AND suc.center_id = e.center_id "
 			+ "AND e.study_id in :studyIds "
 			+ "AND e.preclinical = :preclinical",
 			    countQuery ="SELECT count(*) FROM examination e "
@@ -87,7 +87,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 						+ "AND su.user_id = :userId "
 						+ "JOIN study_user_center suc "
 						+ "ON suc.study_user_id = su.id "
-						+ "AND suc.centers_ids = e.center_id "
+						+ "AND suc.center_id = e.center_id "
 						+ "AND e.study_id in :studyIds "
 						+ "AND e.preclinical = :preclinical",
 			    nativeQuery = true)
