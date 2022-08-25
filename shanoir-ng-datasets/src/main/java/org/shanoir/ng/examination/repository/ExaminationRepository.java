@@ -62,23 +62,6 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 * @return
 	 */
 	List<Examination> findByStudyIdIn(List<Long> studyIds);
-
-	@Query(value = "SELECT * FROM examination e "
-			+ "LEFT JOIN study_user su "
-			+ "ON su.study_id = e.study_id "
-			+ "LEFT JOIN study_user_center suc "
-			+ "ON suc.study_user_id = su.id "
-			+ "AND suc.center_id = e.center_id "
-			+ "AND e.study_id in :studyIds",
-			    countQuery = "SELECT count(*) FROM examination e "
-						+ "LEFT JOIN study_user su "
-						+ "ON su.study_id = e.study_id "
-						+ "LEFT JOIN study_user_center suc "
-						+ "ON suc.study_user_id = su.id "
-						+ "AND suc.center_id = e.center_id "
-						+ "AND e.study_id in :studyIds",
-			    nativeQuery = true)
-	Page<Examination>findByStudyIdInFilterByCenter(@Param("studyIds") List<Long> studyIds, Pageable pageable);
 	
 	/**
 	 * Get a paginated list of examinations for a list of studies.
@@ -92,7 +75,8 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	@Query(value = "SELECT * FROM examination e "
 			+ "LEFT JOIN study_user su "
 			+ "ON su.study_id = e.study_id "
-			+ "LEFT JOIN study_user_center suc "
+			+ "AND su.user_id = :userId "
+			+ "JOIN study_user_center suc "
 			+ "ON suc.study_user_id = su.id "
 			+ "AND suc.center_id = e.center_id "
 			+ "AND e.study_id in :studyIds "
@@ -100,13 +84,14 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 			    countQuery ="SELECT count(*) FROM examination e "
 						+ "LEFT JOIN study_user su "
 						+ "ON su.study_id = e.study_id "
-						+ "LEFT JOIN study_user_center suc "
+						+ "AND su.user_id = :userId "
+						+ "JOIN study_user_center suc "
 						+ "ON suc.study_user_id = su.id "
 						+ "AND suc.center_id = e.center_id "
 						+ "AND e.study_id in :studyIds "
 						+ "AND e.preclinical = :preclinical",
 			    nativeQuery = true)
-	Page<Examination>findByPreclinicalAndStudyIdInFilterByCenter(@Param("preclinical")Boolean preclinical, @Param("studyIds") List<Long> studyIds, Pageable pageable);
+	Page<Examination>findByPreclinicalAndStudyIdInFilterByCenter(@Param("preclinical")Boolean preclinical, @Param("studyIds") List<Long> studyIds, @Param("userId") Long userId, Pageable pageable);
 
 	Page<Examination> findByPreclinicalAndStudyIdIn(Boolean preclinical, List<Long> studyIds, Pageable page);
 

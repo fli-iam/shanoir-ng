@@ -161,7 +161,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 			}
 			// If yes, get all examinations and filter by centers
 			if (hasRestrictions) {
-				return examinationRepository.findByPreclinicalAndStudyIdInFilterByCenter(preclinical, studyIds, pageable);
+				return examinationRepository.findByPreclinicalAndStudyIdInFilterByCenter(preclinical, studyIds, KeycloakUtil.getTokenUserId(), pageable);
 			} else {
 				return examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable);
 			}
