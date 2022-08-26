@@ -1,5 +1,7 @@
 package org.shanoir.ng.importer.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Optional;
 
@@ -7,6 +9,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
+import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
@@ -46,14 +49,16 @@ public class DicomSRImporterService {
 	
 	@Transactional
 	public boolean importDicomSR(InputStream inputStream) {
+		// DicomInputStream consumes the input stream to read the data
 		try (DicomInputStream dIS = new DicomInputStream(inputStream)) {
-			Attributes attributes = dIS.readDatasetUntilPixelData();
+			Attributes metaInformationAttributes = dIS.readFileMetaInformation();
+			Attributes datasetAttributes = dIS.readDataset();
 			// check for modality: DICOM SR
-			if (SR.equals(attributes.getString(Tag.Modality))) {
+			if (SR.equals(datasetAttributes.getString(Tag.Modality))) {
 				// replace artificial examinationUID with real StudyInstanceUID in DICOM server
-				String examinationUID = attributes.getString(Tag.StudyInstanceUID);
+				String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
 				String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
-				attributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
+				datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
 				// complete subject name, that is sent by the viewer wrongly with P-0000001 etc.
 				Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
 				Examination examination = examinationRepository.findById(examinationID).get();
@@ -62,18 +67,28 @@ public class DicomSRImporterService {
 				if (subjectOpt.isPresent()) {
 					subjectName = subjectOpt.get().getName();
 				}
-				attributes.setString(Tag.PatientName, VR.PN, subjectName);
-				attributes.setString(Tag.PatientID, VR.LO, subjectName);
+				datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
+				datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
 				// set user name, as person, who created the measurement
 				final String userName = KeycloakUtil.getTokenUserName();
-				attributes.setString(Tag.PersonName, VR.PN, userName);
-				dicomWebService.sendDicomInputStreamToPacs(inputStream);
+				datasetAttributes.setString(Tag.PersonName, VR.PN, userName);
+				/**
+				 * Create a new output stream to write the changes into and use its bytes
+				 * to produce a new input stream to send later by http client to the DICOM server.
+				 */
+				ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
+				DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID));
+				dOS.writeDataset(metaInformationAttributes, datasetAttributes);
+				byte[] bytes = bAOS.toByteArray();
+				InputStream finalInputStream = new ByteArrayInputStream(bytes);
+				dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
 			} else {
 				LOG.error("Error: importDicomSR: other modality sent then SR.");
 				return false;
 			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
+			return false;
 		}
 		return true;
 	}
