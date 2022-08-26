@@ -1,0 +1,83 @@
+DICMULÊOBUI1.2.840.10008.5.1.4.1.1.88.22UI,2.25.365381979203687792071102125701847378379UI1.2.840.10008.1.2.1UI,2.25.446924883457022254915666177994988242431SH
+dcmjs-0.0 UI1.2.840.10008.5.1.4.1.1.88.22UI,2.25.365381979203687792071102125701847378379 DA!DA20220826#DA202208260TM1TM0729043TM072904PSH`CSSRpLOUnspecified PNSQÿÿÿÿþÿàÿÿÿÿSH99dcmjs SH0 STCodes used for dcmjsST"https://github.com/dcmjs-org/dcmjsþÿ
+àþÿÝà>LOResearch Derived series LOUnspecified SQÿÿÿÿþÿÝàPN LO0DA@CSASLO1  LO0 CSRESEARCH 
+UI1.4.9.12.34.1.8527.503 UI,2.25.178868938013495036579719652913233683568 SH IS99 IS1  @LTNOT FOR CLINICAL USE@@ CS
+CONTAINER @C SQÿÿÿÿþÿàÿÿÿÿSH126000SHDCM LOImaging Measurement Reportþÿ
+àþÿÝà@P CSSEPARATE@r£SQÿÿÿÿþÿÝà@u£SQÿÿÿÿþÿàÿÿÿÿSQÿÿÿÿþÿàÿÿÿÿSQÿÿÿÿþÿàÿÿÿÿPUI1.2.840.10008.5.1.4.1.1.4UUI<1.4.9.12.34.1.8527.7219826876507749844956495933893743098272þÿ
+àþÿÝà UI<1.4.9.12.34.1.8527.9039138681602072506059856080256047406636þÿ
+àþÿÝà 
+UI1.4.9.12.34.1.8527.503þÿ
+àþÿÝà@¤CSCOMPLETE@¤CS
+UNVERIFIED@¥SQÿÿÿÿþÿàÿÿÿÿCSDCMR@ÛCS1500þÿ
+àþÿÝà@0§SQÿÿÿÿþÿàÿÿÿÿ@ CSHAS CONCEPT MOD @@ CSCODE@C SQÿÿÿÿþÿàÿÿÿÿSH121049SHDCM LO(Language of Content Item and Descendantsþÿ
+àþÿÝà@h¡SQÿÿÿÿþÿàÿÿÿÿSHeng SHRFC5646 LOEnglish þÿ
+àþÿÝà@0§SQÿÿÿÿþÿàÿÿÿÿ@ CSHAS CONCEPT MOD @@ CSCODE@C SQÿÿÿÿþÿàÿÿÿÿSH121046SHDCM LOCountry of Language þÿ
+àþÿÝà@h¡SQÿÿÿÿþÿàÿÿÿÿSHUSSH
+ISO3166_1 LOUnited States þÿ
+àþÿÝàþÿ
+àþÿÝàþÿ
+àþÿàÿÿÿÿ@ CSHAS OBS CONTEXT @@ CSPNAME @C SQÿÿÿÿþÿàÿÿÿÿSH121008SHDCM LOPerson Observer Nameþÿ
+àþÿÝà@#¡PNunknown^unknown þÿ
+àþÿàÿÿÿÿ@ CSHAS CONCEPT MOD @@ CSCODE@C SQÿÿÿÿþÿàÿÿÿÿSH121058SHDCM LOProcedure reportedþÿ
+àþÿÝà@h¡SQÿÿÿÿþÿàÿÿÿÿSH1 SH99dcmjs LOUnknown procedure þÿ
+àþÿÝàþÿ
+àþÿàÿÿÿÿ@ CSCONTAINS@@ CS
+CONTAINER @C SQÿÿÿÿþÿàÿÿÿÿSH111028SHDCM LOImage Library þÿ
+àþÿÝà@P CSSEPARATE@0§SQÿÿÿÿþÿàÿÿÿÿ@ CSCONTAINS@@ CS
+CONTAINER @C SQÿÿÿÿþÿàÿÿÿÿSH126200SHDCM LOImage Library Group þÿ
+àþÿÝà@P CSSEPARATE@0§SQÿÿÿÿþÿàÿÿÿÿSQÿÿÿÿþÿàÿÿÿÿPUI1.2.840.10008.5.1.4.1.1.4UUI<1.4.9.12.34.1.8527.7219826876507749844956495933893743098272þÿ
+àþÿÝà@ CSCONTAINS@@ CSIMAGE þÿ
+àþÿÝàþÿ
+àþÿÝàþÿ
+àþÿàÿÿÿÿ@ CSCONTAINS@@ CS
+CONTAINER @C SQÿÿÿÿþÿàÿÿÿÿSH126010SHDCM LOImaging Measurementsþÿ
+àþÿÝà@P CSSEPARATE@0§SQÿÿÿÿþÿàÿÿÿÿ@ CSCONTAINS@@ CS
+CONTAINER @C SQÿÿÿÿþÿàÿÿÿÿSH125007SHDCM LOMeasurement Group þÿ
+àþÿÝà@P CSSEPARATE@0§SQÿÿÿÿþÿàÿÿÿÿ@ CSHAS OBS CONTEXT @@ CSTEXT@C SQÿÿÿÿþÿàÿÿÿÿSH112039SHDCM LOTracking Identifier þÿ
+àþÿÝà@`¡UT&cornerstoneTools@^4.0.0:ArrowAnnotate þÿ
+àþÿàÿÿÿÿ@ CSHAS OBS CONTEXT @@ CSUIDREF@C SQÿÿÿÿþÿàÿÿÿÿSH112040SHDCM LOTracking Unique Identifierþÿ
+àþÿÝà@$¡UI,2.25.557687013162157663518477651591348701917þÿ
+àþÿàÿÿÿÿ@ CSCONTAINS@@ CSCODE@C SQÿÿÿÿþÿàÿÿÿÿSH121071SHDCM LOFinding þÿ
+àþÿÝà@h¡SQÿÿÿÿþÿàÿÿÿÿSHCORNERSTONEFREETEXT SHCST4þÿ
+àþÿÝàþÿ
+àþÿàÿÿÿÿ@ CSCONTAINS@@ CSNUM @C SQÿÿÿÿþÿàÿÿÿÿSH111010SHDCM LOCenterþÿ
+àþÿÝà@0§SQÿÿÿÿþÿàÿÿÿÿ@ CSINFERRED FROM @@ CSSCOORD@0§SQÿÿÿÿþÿàÿÿÿÿSQÿÿÿÿþÿàÿÿÿÿPUI1.2.840.10008.5.1.4.1.1.4UUI<1.4.9.12.34.1.8527.7219826876507749844956495933893743098272þÿ
+àþÿÝà@ CSSELECTED FROM @@ CSIMAGE þÿ
+àþÿÝàp"FLÃC¼YCk/JC*ªCp#CSPOINT þÿ
+àþÿÝàþÿ
+àþÿÝàþÿ
+àþÿàÿÿÿÿ@ CSCONTAINS@@ CS
+CONTAINER @C SQÿÿÿÿþÿàÿÿÿÿSH125007SHDCM LOMeasurement Group þÿ
+àþÿÝà@P CSSEPARATE@0§SQÿÿÿÿþÿàÿÿÿÿ@ CSHAS OBS CONTEXT @@ CSTEXT@C SQÿÿÿÿþÿàÿÿÿÿSH112039SHDCM LOTracking Identifier þÿ
+àþÿÝà@`¡UTcornerstoneTools@^4.0.0:Lengthþÿ
+àþÿàÿÿÿÿ@ CSHAS OBS CONTEXT @@ CSUIDREF@C SQÿÿÿÿþÿàÿÿÿÿSH112040SHDCM LOTracking Unique Identifierþÿ
+àþÿÝà@$¡UI,2.25.882368074651254913085722568349051392645þÿ
+àþÿàÿÿÿÿ@ CSCONTAINS@@ CSNUM @C SQÿÿÿÿþÿàÿÿÿÿSHG-D7FESHSRT LOLengthþÿ
+àþÿÝà@£SQÿÿÿÿþÿàÿÿÿÿ@êSQÿÿÿÿþÿàÿÿÿÿSHmmSHUCUMSH1.4 LO
+millimeterþÿ
+àþÿÝà@
+£DS21.6662479219405þÿ
+àþÿÝà@0§SQÿÿÿÿþÿàÿÿÿÿ@ CSINFERRED FROM @@ CSSCOORD@0§SQÿÿÿÿþÿàÿÿÿÿSQÿÿÿÿþÿàÿÿÿÿPUI1.2.840.10008.5.1.4.1.1.4UUI<1.4.9.12.34.1.8527.7219826876507749844956495933893743098272þÿ
+àþÿÝà@ CSSELECTED FROM @@ CSIMAGE þÿ
+àþÿÝàp"FLó~ÕBCë*CD©Cp#CSPOLYLINEþÿ
+àþÿÝàþÿ
+àþÿÝàþÿ
+àþÿàÿÿÿÿ@ CSCONTAINS@@ CS
+CONTAINER @C SQÿÿÿÿþÿàÿÿÿÿSH125007SHDCM LOMeasurement Group þÿ
+àþÿÝà@P CSSEPARATE@0§SQÿÿÿÿþÿàÿÿÿÿ@ CSHAS OBS CONTEXT @@ CSTEXT@C SQÿÿÿÿþÿàÿÿÿÿSH112039SHDCM LOTracking Identifier þÿ
+àþÿÝà@`¡UTcornerstoneTools@^4.0.0:Angle þÿ
+àþÿàÿÿÿÿ@ CSHAS OBS CONTEXT @@ CSUIDREF@C SQÿÿÿÿþÿàÿÿÿÿSH112040SHDCM LOTracking Unique Identifierþÿ
+àþÿÝà@$¡UI,2.25.997841341525613765611695906345145963552þÿ
+àþÿàÿÿÿÿ@ CSCONTAINS@@ CSNUM @C SQÿÿÿÿþÿàÿÿÿÿSH
+285285000 SHSCT LO
+Cobb angleþÿ
+àþÿÝà@£SQÿÿÿÿþÿàÿÿÿÿ@êSQÿÿÿÿþÿàÿÿÿÿSHdeg SHUCUMSH1.4 LOÂ°þÿ
+àþÿÝà@
+£DS90.58 þÿ
+àþÿÝà@0§SQÿÿÿÿþÿàÿÿÿÿ@ CSINFERRED FROM @@ CSSCOORD@0§SQÿÿÿÿþÿàÿÿÿÿSQÿÿÿÿþÿàÿÿÿÿPUI1.2.840.10008.5.1.4.1.1.4UUI<1.4.9.12.34.1.8527.7219826876507749844956495933893743098272þÿ
+àþÿÝà@ CSSELECTED FROM @@ CSIMAGE þÿ
+àþÿÝàp"FL ¥CÎ(CdçCähCdçCähC§¦CíBCp#CSPOLYLINEþÿ
+àþÿÝàþÿ
+àþÿÝàþÿ
+àþÿÝàþÿ
+àþÿÝà
