@@ -1,6 +1,8 @@
 package org.shanoir.ng.dicom.web.service;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.regex.Matcher;
@@ -11,7 +13,11 @@ import javax.annotation.PostConstruct;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.mime.ContentBody;
+import org.apache.hc.client5.http.entity.mime.InputStreamBody;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
+import org.apache.hc.client5.http.entity.mime.MultipartPart;
+import org.apache.hc.client5.http.entity.mime.MultipartPartBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -23,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +42,8 @@ public class DICOMWebService {
 
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 	
+	private static final String RELATED = "related";
+
 	private static final String CONTENT_TYPE_DICOM = "application/dicom";
 
 	private static final String CONTENT_TYPE_JSON = "application/json";
@@ -155,9 +162,21 @@ public class DICOMWebService {
 		}
 		File[] dicomFiles = directoryWithDicomFiles.listFiles();
 		LOG.info("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
-		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
+		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+		multipartEntityBuilder.setBoundary(BOUNDARY);
+		multipartEntityBuilder.setMimeSubtype(RELATED);
+		// create one multipart part for each file
 		for (File dicomFile : dicomFiles) {
-			multipartEntityBuilder.addBinaryBody("dcm_upload", dicomFile, ContentType.create(CONTENT_TYPE_DICOM), "filename");
+			FileInputStream fileIS = new FileInputStream(dicomFile);
+			// create content body
+			ContentBody contentBody = new InputStreamBody(
+					new ByteArrayInputStream(fileIS.readAllBytes()), CONTENT_TYPE_DICOM);
+			// build MultipartPart
+			MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
+			partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
+			partBuilder.setBody(contentBody);
+			MultipartPart multipartPart = partBuilder.build();
+			multipartEntityBuilder.addPart(multipartPart);
 		}
 		HttpEntity entity = multipartEntityBuilder.build();
 		sendMultipartRequest(entity);
@@ -167,8 +186,19 @@ public class DICOMWebService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public void sendDicomInputStreamToPacs(InputStream inputStream) throws Exception {
 		LOG.info("Start: STOW-RS sending dicom file input stream to PACS.");
-		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
-		multipartEntityBuilder.addBinaryBody("dcm_upload", inputStream, ContentType.create(CONTENT_TYPE_DICOM), "filename");
+		// create content body
+		ContentBody contentBody = new InputStreamBody(
+				new ByteArrayInputStream(inputStream.readAllBytes()), CONTENT_TYPE_DICOM);
+		// build MultipartPart
+		MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
+		partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
+		partBuilder.setBody(contentBody);
+		MultipartPart multipartPart = partBuilder.build();
+		// build MultipartEntity
+		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+		multipartEntityBuilder.setBoundary(BOUNDARY);
+		multipartEntityBuilder.setMimeSubtype(RELATED);
+		multipartEntityBuilder.addPart(multipartPart);
 		HttpEntity entity = multipartEntityBuilder.build();
 		sendMultipartRequest(entity);
 		LOG.info("Finished: STOW-RS sending dicom file input stream to PACS.");
