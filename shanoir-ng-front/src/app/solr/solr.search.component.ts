@@ -360,6 +360,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             });
     }
 
+    protected openApplyStudyCard = () => {
+        this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+            this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
+        });
+    }
+
     private getCommonColumnDefs() {
         function dateRenderer(date: number) {
             if (date) {
@@ -412,12 +418,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getCustomActionsDefs(): any[] {
         let customActionDefs:any = [];
         customActionDefs.push(
-            {title: "Clear selection", awesome: "fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
-            {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
-            {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
-            {title: "Download as EEG", awesome: "fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
-            {title: "Download as BIDS", awesome: "fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
-            {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
+            {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
+            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
+            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
+            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
+            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
+            {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
+            {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true }
         );
         return customActionDefs; 
@@ -431,11 +438,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 this.table.clearSelection();
                 this.selectionTable.refresh();
             }, disabledIfNoResult: true},
-            {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
-            {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
-            {title: "Download as EEG", awesome: "fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
-            {title: "Download as BIDS", awesome: "fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
-            {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
+            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
+            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
+            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
+            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
+            {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
+            {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true }
         );
         return customActionDefs;

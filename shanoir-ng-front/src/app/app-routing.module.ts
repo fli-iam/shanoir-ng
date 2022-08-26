@@ -86,6 +86,9 @@ import { ProcessingComponent } from './processing/processing.component';
 import { PipelinesComponent } from './processing/pipelines/pipelines.component';
 import { ExecutionComponent } from './processing/execution/execution.component';
 import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
+import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
+import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 
 let routes: Routes = [
     {
@@ -297,6 +300,10 @@ let routes: Routes = [
         path: 'dataset/details/:id',
         component: DatasetComponent,
         data: { mode: 'view' },
+    },
+    {
+        path: 'dataset/details/dicom/:id',
+        component: MetadataComponent
     },
     {
         path: 'dataset/edit/:id',
@@ -536,6 +543,15 @@ let routes: Routes = [
 		component: StudyCardComponent,
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
+	},
+    {
+		path: 'study-card/apply/:id',
+		component: StudyCardApplyComponent,
+        canActivate: [AuthAdminOrExpertGuard],
+	},{
+		path: 'study-card/apply-on-datasets',
+		component: ApplyStudyCardOnComponent,
+        canActivate: [AuthAdminOrExpertGuard],
 	},
 	{
 		path: 'dataset-acquisition',

@@ -68,6 +68,8 @@ public class ShanoirUploaderServiceClient {
 	private static final String SERVICE_IMPORTER_CREATE_TEMP_DIR = "service.importer.create.temp.dir";
 	
 	private static final String SERVICE_IMPORTER_START_IMPORT_JOB = "service.importer.start.import.job";
+	
+	private static final String SERVICE_IMPORTER_UPLOAD_DICOM = "service.importer.upload.dicom";
 
 	private static final String SERVICE_EXAMINATIONS_BY_SUBJECT_ID = "service.examinations.find.by.subject.id";
 
@@ -94,6 +96,8 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLImporterCreateTempDir;
 	
 	private String serviceURLImporterStartImportJob;
+	
+	private String serviceURLImporterUploadDicom;
 
 	private String serviceURLExaminationsBySubjectId;
 
@@ -133,6 +137,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_CREATE_TEMP_DIR);
 		this.serviceURLImporterStartImportJob = this.serverURL
 				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_JOB);
+		this.serviceURLImporterUploadDicom = this.serverURL
+				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_UPLOAD_DICOM);
 		this.serviceURLExaminationsBySubjectId = this.serverURL
 		+ ShUpConfig.profileProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
 		this.serviceURLSubjectsByStudyId = this.serverURL
@@ -414,6 +420,19 @@ public class ShanoirUploaderServiceClient {
 				throw new Exception("Error in uploadFile");
 			}
 		}
+	}
+	
+	public void uploadDicom(File file) throws Exception {
+		try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterUploadDicom, file)) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+			} else {
+				logger.error("Error in uploadDicom: with file (path: "
+						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
+						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
+				throw new Exception("Error in uploadDicom");
+			}
+		}		
 	}
 	
 	public void startImportJob(String importJobJsonStr) throws Exception {

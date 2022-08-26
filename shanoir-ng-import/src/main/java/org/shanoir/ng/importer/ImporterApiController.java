@@ -242,6 +242,7 @@ public class ImporterApiController implements ImporterApi {
 					throws RestServiceException {
 		File userImportDir = ImportUtils.getUserImportDir(importDir);
 		final Long userId = KeycloakUtil.getTokenUserId();
+		importJob.setUserId(userId);
 		String tempDirId = importJob.getWorkFolder();
 		final File importJobDir = new File(userImportDir, tempDirId);
 		if (importJobDir.exists()) {
@@ -250,6 +251,7 @@ public class ImporterApiController implements ImporterApi {
 				importJob.setAnonymisationProfileToUse("Profile Neurinfo");
 			}
 			removeUnselectedSeries(importJob);
+			LOG.info("Starting import job for user {} (userId: {}) with import job folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
 			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} else {
