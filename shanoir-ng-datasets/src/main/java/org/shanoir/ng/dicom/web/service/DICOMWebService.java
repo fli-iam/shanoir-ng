@@ -181,7 +181,7 @@ public class DICOMWebService {
 		try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
 			int code = response.getCode();
 			if (code != HttpStatus.OK.value()) {
-				LOG.error("DICOMWeb: sendMultipartRequest: response code not 200.");				
+				LOG.error("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);				
 			}
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
