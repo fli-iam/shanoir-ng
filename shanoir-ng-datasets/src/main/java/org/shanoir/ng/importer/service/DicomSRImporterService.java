@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 
@@ -43,6 +44,7 @@ public class DicomSRImporterService {
 	@Autowired
 	private DICOMWebService dicomWebService;
 	
+	@Transactional
 	public boolean importDicomSR(InputStream inputStream) {
 		try (DicomInputStream dIS = new DicomInputStream(inputStream)) {
 			Attributes attributes = dIS.readDatasetUntilPixelData();
@@ -51,20 +53,20 @@ public class DicomSRImporterService {
 				// replace artificial examinationUID with real StudyInstanceUID in DICOM server
 				String examinationUID = attributes.getString(Tag.StudyInstanceUID);
 				String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
-				attributes.setString(Tag.StudyInstanceUID, VR.valueOf(Tag.StudyInstanceUID), studyInstanceUID);
+				attributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
 				// complete subject name, that is sent by the viewer wrongly with P-0000001 etc.
-				Long examinationID = Long.valueOf(studyInstanceUID.substring(StudyInstanceUIDHandler.PREFIX.length() + 1));
+				Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
 				Examination examination = examinationRepository.findById(examinationID).get();
 				Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubjectId());
 				String subjectName = "error_subject_name_not_found_in_db";
 				if (subjectOpt.isPresent()) {
 					subjectName = subjectOpt.get().getName();
 				}
-				attributes.setString(Tag.PatientName, VR.valueOf(Tag.PatientName), subjectName);
-				attributes.setString(Tag.PatientID, VR.valueOf(Tag.PatientID), subjectName);
+				attributes.setString(Tag.PatientName, VR.PN, subjectName);
+				attributes.setString(Tag.PatientID, VR.LO, subjectName);
 				// set user name, as person, who created the measurement
 				final String userName = KeycloakUtil.getTokenUserName();
-				attributes.setString(Tag.PersonName, VR.valueOf(Tag.PersonName), userName);
+				attributes.setString(Tag.PersonName, VR.PN, userName);
 				dicomWebService.sendDicomInputStreamToPacs(inputStream);
 			} else {
 				LOG.error("Error: importDicomSR: other modality sent then SR.");
