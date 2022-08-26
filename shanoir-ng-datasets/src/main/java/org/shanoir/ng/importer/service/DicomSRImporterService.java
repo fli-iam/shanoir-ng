@@ -81,6 +81,8 @@ public class DicomSRImporterService {
 				dOS.writeDataset(metaInformationAttributes, datasetAttributes);
 				InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray());
 				dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
+				finalInputStream.close();
+				dOS.close();
 			} else {
 				LOG.error("Error: importDicomSR: other modality sent then SR.");
 				return false;
