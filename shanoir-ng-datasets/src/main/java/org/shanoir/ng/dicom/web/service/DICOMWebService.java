@@ -21,6 +21,7 @@ import org.apache.hc.client5.http.entity.mime.MultipartPartBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -169,7 +170,7 @@ public class DICOMWebService {
 			FileInputStream fileIS = new FileInputStream(dicomFile);
 			// create content body
 			ContentBody contentBody = new InputStreamBody(
-					new ByteArrayInputStream(fileIS.readAllBytes()), CONTENT_TYPE_DICOM);
+					new ByteArrayInputStream(fileIS.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
 			// build MultipartPart
 			MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
 			partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
@@ -187,7 +188,7 @@ public class DICOMWebService {
 		LOG.info("Start: STOW-RS sending dicom file input stream to PACS.");
 		// create content body
 		ContentBody contentBody = new InputStreamBody(
-				new ByteArrayInputStream(inputStream.readAllBytes()), CONTENT_TYPE_DICOM);
+				new ByteArrayInputStream(inputStream.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
 		// build MultipartPart
 		MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
 		partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
