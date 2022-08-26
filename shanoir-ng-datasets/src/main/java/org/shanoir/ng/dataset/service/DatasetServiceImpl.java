@@ -240,7 +240,7 @@ public class DatasetServiceImpl implements DatasetService {
 				}
 				
 				datasets = datasets.stream().filter(ds -> 
-						studyUserCenters.get(ds.getStudyId()) == null ||
+						studyUserCenters.get(ds.getStudyId()) != null &&
 						studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
 						.collect(Collectors.toList());
 				int size = datasets.size();
