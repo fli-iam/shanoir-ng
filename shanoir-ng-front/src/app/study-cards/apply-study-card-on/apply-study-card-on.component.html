@@ -1,0 +1,83 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<h2>Apply Study Card</h2>
+
+<div class="info">
+    <ul class="form main">
+        <li>
+            <span class="label">Nb selected dataset acquisitions : </span>
+            <span class="value">{{selectedAcquisitionIds?.size}}</span>
+        </li>
+        <li>
+            <span class="label">Nb selected datasets : </span>
+            <span class="value">{{nbSelectedDatasets}}</span>
+        </li>
+        <li>
+            <span class="label">Study card : </span>
+            <span *ngIf="!finished"><select-box [(ngModel)]="studycard" [options]="studycardOptions" (userChange)="updateStudyCard()" (onViewClick)="showStudyCard()" [viewDisabled]="!studycard"></select-box></span>
+            <span *ngIf="finished"class="value">{{studycard?.name}}</span>
+        </li>
+        <li *ngIf="!finished">
+            <span class="label">Show incompatible studycards : </span>
+            <span><checkbox [(ngModel)]="showIncompatibles" (onChange)="updateShowIncompatible()"></checkbox></span>
+        </li>
+    </ul>
+    <ul class="form sc-box" *ngIf="studycard" @slideRight>
+        <li>
+            <span class="label">Study card name : </span>
+            <span class="value">{{studycard.name}}</span>
+        </li>
+        <li>
+            <span class="label">Study card equipment : </span>
+            <span class="value">{{studycard.acquisitionEquipment | acqEqptLabel}}</span>
+        </li>
+        <li>
+            <span class="label">Study card study : </span>
+            <span class="value">{{studycard.study?.name}}</span>
+        </li>
+    </ul>
+</div>
+
+<div *ngIf="!finished" class="button-div">
+    <button class="apply right-icon" 
+            [class.warning]="nbIncompatible > 0" 
+            [disabled]="loading || !studycard || !selectedAcquisitionIds || selectedAcquisitionIds.size == 0" 
+            (click)="reapplyOnSelected()">
+        Apply Studycard
+        <i class="fa-solid fa-history"></i>
+    </button>  
+    <div *ngIf="nbIncompatible > 0" class="warning left-icon">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        {{nbIncompatible}} selected dataset acquisitions are incompatible with the selected studycard, equipments differ.
+    </div>
+</div>
+
+<div *ngIf="finished" class="button-div done right-icon">
+    Done<i class="fa-solid fa-check"></i>
+</div>
+
+<shanoir-table #table
+        *ngIf="browserPaging"
+        [getPage]="getPage.bind(this)" 
+        [columnDefs]="columnsDefs" 
+        [subRowsDefs]="subRowsDefs"
+        [customActionDefs]="customActionDefs"
+        subRowsKey="datasets"
+		[selectionAllowed]="!finished"
+        [browserSearch]="false"
+        [(selection)]="selectedAcquisitionIds"
+        (selectionChange)="onSelectionChange()">
+</shanoir-table>
+

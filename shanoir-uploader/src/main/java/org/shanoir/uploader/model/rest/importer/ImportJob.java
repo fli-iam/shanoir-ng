@@ -66,8 +66,19 @@ public class ImportJob {
 	
 	@JsonProperty("anonymisationProfileToUse")
 	private String anonymisationProfileToUse;
+
+	@JsonProperty("userId")
+	private Long userId;
 	
-    public boolean isFromDicomZip() {
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
 

@@ -211,7 +211,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				images.add(image);
 			}
 		} catch (IOException e) {
-			LOG.error("Error during DICOM file process", e);
+			LOG.error("Error during DICOM file process.", e);
 		}
 	}
 	
@@ -224,7 +224,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private void processDicomFileForFirstInstance(File dicomFile, Serie serie, Patient patient) {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
-			LOG.warn("Process first DICOM file of serie {} path {}", serie.getSeriesInstanceUID() + " " + serie.getSeriesDescription(), dicomFile.getAbsolutePath());
+			LOG.debug("Process first DICOM file of serie {} path {}", serie.getSeriesInstanceUID() + " " + serie.getSeriesDescription(), dicomFile.getAbsolutePath());
 			Attributes attributes = dIS.readDataset(-1, -1);
 			checkPatientData(patient, attributes);
 			checkSerieData(serie, attributes);
@@ -258,7 +258,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			}
 			image.setImageOrientationPatient(imageOrientationPatient);
 		} else {
-			LOG.warn("imageOrientationPatientArray in dcm file null: {}", image.getPath());
+			LOG.debug("imageOrientationPatientArray in dcm file null: {}", image.getPath());
 		}
 		// repetition time
 		image.setRepetitionTime(attributes.getDouble(Tag.RepetitionTime, 0));

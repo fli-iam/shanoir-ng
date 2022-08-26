@@ -116,10 +116,23 @@ public class HttpService {
 			HttpPost httpPost = new HttpPost(url + tempDirId);
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-			// for (Iterator iterator = files.iterator(); iterator.hasNext();) {
-			// File file = (File) iterator.next();
 			builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
-			// }
+			HttpEntity entity = builder.build();
+			httpPost.setEntity(entity);
+			CloseableHttpResponse response = httpClient.execute(httpPost, context);
+			return response;
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+
+	public CloseableHttpResponse postFile(String url, File file) {
+		try {
+			HttpPost httpPost = new HttpPost(url);
+			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
 			HttpEntity entity = builder.build();
 			httpPost.setEntity(entity);
 			CloseableHttpResponse response = httpClient.execute(httpPost, context);

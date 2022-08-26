@@ -14,11 +14,24 @@
 
 package org.shanoir.ng.studycard.controler;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.json.Json;
+import javax.mail.MessagingException;
+
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.dcm4che3.json.JSONReader;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetUtils;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -28,8 +41,12 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.model.StudyCardApply;
+import org.shanoir.ng.studycard.service.StudyCardProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +54,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.RestClientException;
 
 import io.swagger.annotations.ApiParam;
 
@@ -44,12 +62,23 @@ import io.swagger.annotations.ApiParam;
 public class StudyCardApiController implements StudyCardApi {
 
 	private static final String MICROSERVICE_COMMUNICATION_ERROR = "Microservice communication error";
+	
+	private static final Logger LOG = LoggerFactory.getLogger(StudyCardApiController.class);
 
 	@Autowired
 	private StudyCardService studyCardService;
 	
 	@Autowired
 	private StudyCardUniqueConstraintManager uniqueConstraintManager;
+	
+	@Autowired
+	private StudyCardProcessingService studyCardProcessingService;
+	
+	@Autowired
+	private DatasetAcquisitionService datasetAcquisitionService;
+	
+	@Autowired
+	private WADODownloaderService downloader;
 
 	@Override
 	public ResponseEntity<Void> deleteStudyCard(
@@ -197,5 +226,48 @@ public class StudyCardApiController implements StudyCardApi {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", new ErrorDetails(errors));
 			throw new RestServiceException(error);
 		} 
+	}
+	
+	@Override
+	public ResponseEntity<Void> applyStudyCard(
+			@ApiParam(value = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException {
+		
+		if (studyCardApplyObject == null 
+				|| studyCardApplyObject.getDatasetAcquisitionIds() == null 
+				|| studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()
+				|| studyCardApplyObject.getStudyCardId() == null) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		
+		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
+		List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
+		
+		for (DatasetAcquisition acquisition : acquisitions) {
+			if (!acquisition.getDatasets().isEmpty()) {
+				List<URL> urls = new ArrayList<>();
+				try {
+					DatasetUtils.getDatasetFilePathURLs(acquisition.getDatasets().get(0), urls, DatasetExpressionFormat.DICOM);
+					if (!urls.isEmpty()) {
+						String jsonMetadataStr = downloader.downloadDicomMetadataForURL(urls.get(0));
+						JSONReader jsonReader = new JSONReader(Json.createParser(new StringReader(jsonMetadataStr)));
+						Attributes dicomAttributes = jsonReader.getFileMetaInformation();
+						if (dicomAttributes != null) {
+							studyCardProcessingService.applyStudyCard(acquisition, studyCard, dicomAttributes);																
+						} else {
+							LOG.error("Could not apply studycard " + studyCard.getId() + " on dataset acquisition " + acquisition.getId() 
+									+ " : dicom attributes are empty");
+						}
+					} else {
+						LOG.error("Could not apply studycard " + studyCard.getId() + " on dataset acquisition " + acquisition.getId() 
+						+ " : no pacs url for this acquisition");
+					}
+				} catch (IOException | MessagingException | RestClientException e) {
+					throw new RestClientException("Cannot apply study card " + studyCardApplyObject.getStudyCardId() + " on acquisitions " + studyCardApplyObject.getDatasetAcquisitionIds(), e);
+				}
+			}
+		}
+		datasetAcquisitionService.update(acquisitions);
+		return new ResponseEntity<Void>(HttpStatus.OK);
+		
 	}
 }

@@ -156,8 +156,6 @@ public class MrDataset extends Dataset {
 		this.inversionTime = inversionTimes;
 	}
 
-	
-	
 	/**
 	 * @return the mrQualityProcedureType
 	 */
@@ -245,7 +243,5 @@ public class MrDataset extends Dataset {
 	public void setLastImageAcquisitionTime(LocalDateTime lastImageAcquisitionTime) {
 		this.lastImageAcquisitionTime = lastImageAcquisitionTime;
 	}
-	
-
 
 }

@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.assertj.core.util.Arrays;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -29,6 +33,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,6 +67,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	}
 	
 	@Override
+	public List<DatasetAcquisition> findByDatasetId(Long[] datasetIds) {
+		return repository.findDistinctByDatasetsIdIn(datasetIds);
+	}
+	
+	@Override
 	public List<DatasetAcquisition> findByExamination(Long examinationId) {
 		return repository.findByExaminationId(examinationId);
 	}
@@ -80,6 +90,11 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	@Override
 	public DatasetAcquisition findById(Long id) {
 		return repository.findById(id).orElse(null);
+	}
+	
+	@Override
+	public List<DatasetAcquisition> findById(List<Long> ids) {
+		return Utils.toList(repository.findAllById(ids));
 	}
 
 	@Override
@@ -113,6 +128,34 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
 
 		return acq;
+	}
+	
+	@Override
+	public Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities) {
+		List<Long> ids = new ArrayList<>();
+		for (DatasetAcquisition acq : entities) {
+			ids.add(acq.getId());
+		}
+		final Iterable<DatasetAcquisition> entitiesDb = repository.findAllById(ids);
+		// the doc says the order is not guaranteed for findAllById
+		Map<Long, DatasetAcquisition> entityMap = new HashMap<Long, DatasetAcquisition>();
+		for (DatasetAcquisition entity : entities) {
+			entityMap.put(entity.getId(), entity);
+		}
+		for (DatasetAcquisition db : entitiesDb) {
+			DatasetAcquisition entity = entityMap.get(db.getId());
+			if (entity != null) {
+				updateValues(entity, db);				
+			} else {
+				throw new IllegalStateException("method input entities should match entitieDb from the database");
+			}
+		}
+		Iterable<DatasetAcquisition> updatedAcqs =  repository.saveAll(entitiesDb);
+		
+		for (DatasetAcquisition db : updatedAcqs) {
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, db.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, db.getExamination().getStudyId()));			
+		}
+		return updatedAcqs;
 	}
 
 	@Override
