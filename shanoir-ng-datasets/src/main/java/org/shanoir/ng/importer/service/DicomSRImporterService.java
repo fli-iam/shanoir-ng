@@ -92,7 +92,8 @@ public class DicomSRImporterService {
 			Attributes datasetAttributes = dIS.readDataset();
 			// check for modality: DICOM SR
 			if (SR.equals(datasetAttributes.getString(Tag.Modality))) {
-				Examination examination = modifyDicomSR(datasetAttributes);
+				Examination examination = findExamination(datasetAttributes);
+				datasetAttributes = modifyDicomSR(datasetAttributes, examination);
 				createDataset(examination, datasetAttributes);
 				sendToPacs(metaInformationAttributes, datasetAttributes);
 			} else {
@@ -106,6 +107,46 @@ public class DicomSRImporterService {
 		return true;
 	}
 
+	private Examination findExamination(Attributes datasetAttributes) {
+		String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+		Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
+		Examination examination = examinationRepository.findById(examinationID).get();
+		return examination;
+	}
+
+	/**
+	 * This method replaces values of dicom tags within the DICOM SR file:
+	 * - use user name as person name, who created the measurement
+	 * - replace with correct study instance UID from pacs for correct storage
+	 * - add subject name according to shanoir, as viewer sends a strange P-000001.
+	 * 
+	 * Note: the approach to replace the newly created SeriesInstanceUID
+	 * with the referenced SeriesInstanceUID, available via CurrentRequested-
+	 * ProcedureEvidenceSequence -> ReferencedSeriesSequence -> SeriesInstanceUID
+	 * did not work to get it displayed correctly in the viewer, but lead even to
+	 * an error in the viewer.
+	 * 
+	 * @param datasetAttributes
+	 */
+	private Attributes modifyDicomSR(Attributes datasetAttributes, Examination examination) {
+		// replace artificial examinationUID with real StudyInstanceUID in DICOM server
+		String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+		datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
+		// replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
+		Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubjectId());
+		String subjectName = "error_subject_name_not_found_in_db";
+		if (subjectOpt.isPresent()) {
+			subjectName = subjectOpt.get().getName();
+		}
+		datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
+		datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
+		// set user name, as person, who created the measurement
+		final String userName = KeycloakUtil.getTokenUserName();
+		datasetAttributes.setString(Tag.PersonName, VR.PN, userName);
+		return datasetAttributes;
+	}
+	
 	private void createDataset(Examination examination, Attributes datasetAttributes) throws MalformedURLException {
 		// seriesNumber is used as sortingIndex, used to find correct serie == acquisition
 		int seriesNumber = datasetAttributes.getInt(Tag.SeriesNumber, -1);
@@ -180,41 +221,6 @@ public class DicomSRImporterService {
 		dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
 		finalInputStream.close();
 		dOS.close();
-	}
-
-	/**
-	 * This method replaces values of dicom tags within the DICOM SR file:
-	 * - use user name as person name, who created the measurement
-	 * - replace with correct study instance UID from pacs for correct storage
-	 * - add subject name according to shanoir, as viewer sends a strange P-000001.
-	 * 
-	 * Note: the approach to replace the newly created SeriesInstanceUID
-	 * with the referenced SeriesInstanceUID, available via CurrentRequested-
-	 * ProcedureEvidenceSequence -> ReferencedSeriesSequence -> SeriesInstanceUID
-	 * did not work to get it displayed correctly in the viewer, but lead even to
-	 * an error in the viewer.
-	 * 
-	 * @param datasetAttributes
-	 */
-	private Examination modifyDicomSR(Attributes datasetAttributes) {
-		// replace artificial examinationUID with real StudyInstanceUID in DICOM server
-		String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
-		datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
-		// replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
-		Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
-		Examination examination = examinationRepository.findById(examinationID).get();
-		Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubjectId());
-		String subjectName = "error_subject_name_not_found_in_db";
-		if (subjectOpt.isPresent()) {
-			subjectName = subjectOpt.get().getName();
-		}
-		datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
-		datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
-		// set user name, as person, who created the measurement
-		final String userName = KeycloakUtil.getTokenUserName();
-		datasetAttributes.setString(Tag.PersonName, VR.PN, userName);
-		return examination;
 	}
 
 }
