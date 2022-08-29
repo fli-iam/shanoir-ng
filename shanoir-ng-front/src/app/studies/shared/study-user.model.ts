@@ -51,7 +51,7 @@ export class StudyUserDTO {
     userName: string;
     user: User;
     confirmed: boolean = false;
-    centersIds: number[];
+    centerIds: number[];
 
     constructor(studyUser: StudyUser) {
         this.id = studyUser.id;
@@ -63,6 +63,6 @@ export class StudyUserDTO {
         this.userName = studyUser.userName;
         this.user = studyUser.user;
         this.confirmed = studyUser.confirmed;
-        this.centersIds = studyUser.centers?.map(center => center.id);
+        this.centerIds = studyUser.centers?.map(center => center.id);
     }
 }
