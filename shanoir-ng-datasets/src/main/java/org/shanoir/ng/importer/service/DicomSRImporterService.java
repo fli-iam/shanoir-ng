@@ -3,9 +3,11 @@ package org.shanoir.ng.importer.service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
@@ -55,23 +57,7 @@ public class DicomSRImporterService {
 			Attributes datasetAttributes = dIS.readDataset();
 			// check for modality: DICOM SR
 			if (SR.equals(datasetAttributes.getString(Tag.Modality))) {
-				// replace artificial examinationUID with real StudyInstanceUID in DICOM server
-				String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-				String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
-				datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
-				// complete subject name, that is sent by the viewer wrongly with P-0000001 etc.
-				Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
-				Examination examination = examinationRepository.findById(examinationID).get();
-				Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubjectId());
-				String subjectName = "error_subject_name_not_found_in_db";
-				if (subjectOpt.isPresent()) {
-					subjectName = subjectOpt.get().getName();
-				}
-				datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
-				datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
-				// set user name, as person, who created the measurement
-				final String userName = KeycloakUtil.getTokenUserName();
-				datasetAttributes.setString(Tag.PersonName, VR.PN, userName);
+				modifyDatasetAttributes(datasetAttributes);
 				/**
 				 * Create a new output stream to write the changes into and use its bytes
 				 * to produce a new input stream to send later by http client to the DICOM server.
@@ -93,4 +79,30 @@ public class DicomSRImporterService {
 		}
 		return true;
 	}
+
+	private void modifyDatasetAttributes(Attributes datasetAttributes) {
+		// set user name, as person, who created the measurement
+		final String userName = KeycloakUtil.getTokenUserName();
+		datasetAttributes.setString(Tag.PersonName, VR.PN, userName);
+		// replace artificial examinationUID with real StudyInstanceUID in DICOM server
+		String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+		datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
+		// replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
+		Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
+		Examination examination = examinationRepository.findById(examinationID).get();
+		Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubjectId());
+		String subjectName = "error_subject_name_not_found_in_db";
+		if (subjectOpt.isPresent()) {
+			subjectName = subjectOpt.get().getName();
+		}
+		datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
+		datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
+		// replace SeriesInstanceUID with the one of referenced series sequence
+		Sequence procedureEvidenceSequence = datasetAttributes.getSequence(Tag.CurrentRequestedProcedureEvidenceSequence);
+		Attributes refSeriesSequence = procedureEvidenceSequence.get(0);
+		String originalSeriesInstanceUID = refSeriesSequence.getString(Tag.SeriesInstanceUID);
+		datasetAttributes.setString(Tag.SeriesInstanceUID, VR.UI, originalSeriesInstanceUID);
+	}
+
 }
