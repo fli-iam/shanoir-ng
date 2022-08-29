@@ -3,11 +3,9 @@ package org.shanoir.ng.importer.service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Optional;
 
 import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
@@ -80,6 +78,20 @@ public class DicomSRImporterService {
 		return true;
 	}
 
+	/**
+	 * This method replaces values of dicom tags within the DICOM SR file:
+	 * - use user name as person name, who created the measurement
+	 * - replace with correct study instance UID from pacs for correct storage
+	 * - add subject name according to shanoir, as viewer sends a strange P-000001.
+	 * 
+	 * Note: the approach to replace the newly created SeriesInstanceUID
+	 * with the referenced SeriesInstanceUID, available via CurrentRequested-
+	 * ProcedureEvidenceSequence -> ReferencedSeriesSequence -> SeriesInstanceUID
+	 * did not work to get it displayed correctly in the viewer, but lead even to
+	 * an error in the viewer.
+	 * 
+	 * @param datasetAttributes
+	 */
 	private void modifyDatasetAttributes(Attributes datasetAttributes) {
 		// set user name, as person, who created the measurement
 		final String userName = KeycloakUtil.getTokenUserName();
@@ -98,11 +110,6 @@ public class DicomSRImporterService {
 		}
 		datasetAttributes.setString(Tag.PatientName, VR.PN, subjectName);
 		datasetAttributes.setString(Tag.PatientID, VR.LO, subjectName);
-		// replace SeriesInstanceUID with the one of referenced series sequence
-		Sequence procedureEvidenceSequence = datasetAttributes.getSequence(Tag.CurrentRequestedProcedureEvidenceSequence);
-		Attributes refSeriesSequence = procedureEvidenceSequence.get(0);
-		String originalSeriesInstanceUID = refSeriesSequence.getString(Tag.SeriesInstanceUID);
-		datasetAttributes.setString(Tag.SeriesInstanceUID, VR.UI, originalSeriesInstanceUID);
 	}
 
 }
