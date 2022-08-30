@@ -283,14 +283,20 @@ public class DicomSRImporterService {
 										// get numeric value and graphic data
 										String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
 										measurementDataset.setNumericValue(numericValue);
-										String graphicData = measuredValueAttributes.getString(Tag.GraphicData);
+									}
+								}
+								Sequence graphicDataSequence = measurementGroupAttributes2.getSequence(Tag.ContentSequence);
+								if (graphicDataSequence != null) {
+									Attributes graphicDataAttributes = graphicDataSequence.get(0);
+									if (graphicDataAttributes != null) {
+										String graphicData = graphicDataAttributes.getString(Tag.GraphicData);
 										measurementDataset.setGraphicData(graphicData);										
 									}
 								}
 							}
 						}
 					}
-				}				
+				}
 			}
 		}
 	}
