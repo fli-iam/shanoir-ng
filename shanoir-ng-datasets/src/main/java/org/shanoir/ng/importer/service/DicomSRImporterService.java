@@ -241,7 +241,7 @@ public class DicomSRImporterService {
 		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
 		// Metadata
 		DatasetMetadata originMetadata = new DatasetMetadata();
-		String datasetName = IMAGING_MEASUREMENT + measurementDataset.getTrackingIdentifier() + ": " + measurementDataset.getNumericValue();
+		String datasetName = IMAGING_MEASUREMENT + ": " + measurementDataset.getTrackingIdentifier() + ": " + measurementDataset.getNumericValue();
 		originMetadata.setName(datasetName);
 		originMetadata.setComment(datasetName);
 		originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
@@ -266,20 +266,26 @@ public class DicomSRImporterService {
 						// level of measurement group
 						Sequence measurementGroupSequence = imagingMeasurementsAttributes.getSequence(Tag.ContentSequence);
 						if (measurementGroupSequence != null) {
-							Attributes measurementGroupAttributes = measurementGroupSequence.get(0);
-							if (measurementGroupAttributes != null) {
-								// get tracking identifier
-								String trackingIdentifier = measurementGroupAttributes.getString(Tag.TextValue);
+							// get tracking identifier
+							Attributes measurementGroupAttributes1 = measurementGroupSequence.get(0);
+							if (measurementGroupAttributes1 != null) {
+								String trackingIdentifier = measurementGroupAttributes1.getString(Tag.TextValue);
 								String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":") + 1);
 								measurementDataset.setTrackingIdentifier(trackingIdentifierType);
-								// level measured value
-								Attributes measuredValueAttributes = measurementGroupSequence.get(2);
-								if (measuredValueAttributes != null) {
-									// get numeric value and graphic data
-									String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
-									measurementDataset.setNumericValue(numericValue);
-									String graphicData = measuredValueAttributes.getString(Tag.GraphicData);
-									measurementDataset.setGraphicData(graphicData);
+							}
+							// level measured values
+							Attributes measurementGroupAttributes2 = measurementGroupSequence.get(2);
+							if (measurementGroupAttributes2 != null) {
+								Sequence measuredValueSequence = measurementGroupAttributes2.getSequence(Tag.MeasuredValueSequence);
+								if (measuredValueSequence != null) {
+									Attributes measuredValueAttributes = measuredValueSequence.get(0);
+									if (measuredValueAttributes != null) {
+										// get numeric value and graphic data
+										String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
+										measurementDataset.setNumericValue(numericValue);
+										String graphicData = measuredValueAttributes.getString(Tag.GraphicData);
+										measurementDataset.setGraphicData(graphicData);										
+									}
 								}
 							}
 						}
