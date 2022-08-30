@@ -152,15 +152,7 @@ public class DicomSRImporterService {
 		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
 		if (contentSequence != null) {
 			Attributes itemContentSequence = contentSequence.get(1);
-			if (itemContentSequence != null) {
-				Sequence codeSequence = itemContentSequence.getSequence(Tag.ConceptNameCodeSequence);
-				if (codeSequence != null) {
-					Attributes itemCodeSequence = codeSequence.get(0);
-					if (itemCodeSequence != null) {
-						itemCodeSequence.setString(Tag.PersonName, VR.PN, userName);
-					}
-				}
-			}
+			itemContentSequence.setString(Tag.PersonName, VR.PN, userName);
 		}
 		return examination;
 	}
