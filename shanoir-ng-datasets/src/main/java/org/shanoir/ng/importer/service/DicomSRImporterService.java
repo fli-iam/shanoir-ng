@@ -231,6 +231,7 @@ public class DicomSRImporterService {
 		measurementDataset.setSubjectId(examination.getSubjectId());
 		measurementDataset.setCreationDate(LocalDate.now());
 		measurementDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
+		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
 		// Metadata
 		DatasetMetadata originMetadata = new DatasetMetadata();
 		originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
