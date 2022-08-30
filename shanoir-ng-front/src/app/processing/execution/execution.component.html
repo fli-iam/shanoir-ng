@@ -1,0 +1,35 @@
+<form *ngIf="pipeline" [formGroup]="executionForm" (ngSubmit)="onSubmitExecutionForm()">
+    <legend>{{pipeline.name}}</legend>
+
+    <div>
+        <label for="execution_name">Execution Name *</label>
+        <input type="text" id="execution_name" formControlName="execution_name" required>
+    </div>
+
+    <div *ngFor="let parameter of pipeline.parameters">
+        
+        <div *ngIf="parameter.name != 'executable'">
+             <label for="{{parameter.name}}">{{parameter.name}} {{parameter.isOptional ? '' : '*'}}</label>
+             <input *ngIf="!isAFile(parameter.type)" [type]="getParameterType(parameter.type)"
+                    formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+             <span *ngIf="isAFile(parameter.type)">
+                 <select *ngIf="selectedDatasets else loading" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+                    <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">
+                      {{dataset.id}}_{{dataset.name}}
+                    </option>
+                 </select>
+                 <ng-template #loading>Loading datasets...</ng-template>
+             </span>
+	</div>    
+
+    </div>
+    <!-- <div *ngIf="selectedDatasets">
+        <p>
+            Selected Dataset :
+            <span class="dataset-id" *ngFor="let dataset of selectedDatasets">
+                {{dataset.name}}.
+            </span>
+        </p>
+    </div> -->
+    <button type="submit" [disabled]="!executionForm.valid">Run</button>
+</form>
