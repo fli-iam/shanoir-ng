@@ -150,7 +150,8 @@ public class WADODownloaderService {
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
 				
 				String examDate;
-				if (dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null) {
+				if (dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null
+						&& dataset.getDatasetAcquisition().getExamination().getExaminationDate() != null) {
 					examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
 				} else {
 					// If we migrate a study, examination is not correctly set, please keep it as is.
