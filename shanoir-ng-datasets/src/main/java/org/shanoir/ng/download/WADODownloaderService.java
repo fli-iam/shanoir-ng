@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
@@ -147,7 +148,14 @@ public class WADODownloaderService {
 				byte[] responseBody = downloadFileFromPACS(url);
 				String serieDescription = dataset.getUpdatedMetadata().getName();
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-				String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+				
+				String examDate;
+				if (dataset.getDatasetAcquisition() != null && dataset.getDatasetAcquisition().getExamination() != null) {
+					examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+				} else {
+					// If we migrate a study, examination is not correctly set, please keep it as is.
+					examDate = LocalDate.now().format(formatter);
+				}
 				String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
 				if (name.contains(File.separator)) {
 					name = name.replaceAll(File.separator, "_");
