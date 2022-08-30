@@ -49,6 +49,10 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
     protected getEntity() {
         return new SubjectPathology();
     }
+
+    protected addEntity(subjectEntity: SubjectPathology) {
+        this.preclinicalSubject.pathologies = this.preclinicalSubject.pathologies.concat(subjectEntity);
+    }
     
     protected getOptions(): any {
         // Specify that we can't view a pathology'

@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.datasetacquisition.controler.DatasetAcquisitionApiController;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionDatasetsMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -50,6 +51,9 @@ public class DatasetAcquisitionApiControllerTest {
 	
 	@MockBean
 	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
+	
+	@MockBean
+	private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
 	
 	@Autowired
 	private MockMvc mvc;

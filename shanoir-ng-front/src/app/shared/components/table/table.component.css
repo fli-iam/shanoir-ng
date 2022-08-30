@@ -1,16 +1,17 @@
- :host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; }
+ :host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; border-collapse: collapse; }
 .full-row { background-color: var(--color-b); overflow: initial; }
 th,
 caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; }
 caption { overflow: hidden; }
 th { width: 100%; white-space: normal; position: relative; height: 1px; min-width: 10px; }
 	.controls { padding: 0; text-align: left; background-color: transparent; color: var(--very-dark-grey); }
-		.controls button { height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 2px; border: 1px solid transparent; color: var(--dark-grey); }
+		.controls button { margin: 0; height: 28px; padding: 0 5px; vertical-align: middle; background-color: transparent; border-radius: 2px; border: 1px solid transparent; color: var(--dark-grey); }
 			.controls button:not(:disabled):hover { box-shadow: none; transform: none; background-color: var(--color-b-light); }
 			.controls button:disabled { opacity: 0.5; }
 			.controls button span { vertical-align: middle; }
 			.controls button img { height: 16px; vertical-align: middle; }
-			.command-block + .command-block { margin-left: 10px; }
+			.command-block { white-space: normal; }
+			.command-block:not(:last-child) { margin-right: 10px; }
 			.controls .awesome { vertical-align: middle; margin-right: 4px; }
 				.controls .awesome i { color: var(--color-c); }
 		.controls input,
@@ -20,6 +21,10 @@ th { width: 100%; white-space: normal; position: relative; height: 1px; min-widt
 		.controls .text-search,
 		.controls .options,
 		.select-ctrl { margin: 0 3px 0 0; padding: 0 20px 0 5px; vertical-align: baseline; }
+		.select-ctrl checkbox { margin-bottom: 4px; }
+		.select-ctrl.with-sub checkbox { margin-left: 30px; }
+		.ctrl-right { width: calc(100% - 47px); display: inline-block; margin-bottom: 5px; }
+		.ctrl-right.with-sub { width: calc(100% - 77px); }
 			.controls .options .max-results { width: 40px; text-align: right; }
 	th.sortable { cursor: pointer; position: relative; overflow: initial; }
 		th.sortable .sort-arrow { position: absolute; top: 11px; right: 0; left: 0; color: var(--color-c); opacity: 0.6; top: 6px; font-size: 23px; }
@@ -31,16 +36,16 @@ th { width: 100%; white-space: normal; position: relative; height: 1px; min-widt
 	th.status-bar { text-align: left; padding: 3px 0; color: var(--greyer)}
 		th.status-bar input { width: 150px; }
 		th.status-bar .options { border-right: 0; }
-			th.status-bar .options span { padding: 0 10px; }
+			th.status-bar .options span { padding: 0 10px; white-space: nowrap; }
 				th.status-bar .options span + span { border: 0; border-left: 1px solid var(--grey); }
-tr { height: 20px; }
+tr { height: 21px; }
 	/* tr.even { background-color: var(--light-grey); }
 	tr.odd { background-color: var(--lighter-grey); } */
-	tr:not(.disabled):not(.edit):hover td:not(.loading):not(.empty) { background-color: var(--color-b-light); cursor: pointer; }
+	tr:not(.disabled):not(.edit):not(.sub-container-tr):hover td:not(.loading):not(.empty):not(.sub-container-tr) { background-color: var(--color-b-light); cursor: pointer; }
 	tr.selected:not(.disabled):not(.edit):hover td:not(.loading):not(.empty) { background-color: var(--grey); cursor: pointer; }
  	tr.selected { background-color: lightsteelblue; }
 tr.disabled { opacity: 0.7; }
-td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
+td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis; position: relative; }
 	td + td { border-left: 1px solid var(--light-grey); }
 	td.bool, td.progress { text-align: center; }
 	td.cell input:not([type='checkbox']), td.cell select { width: 100%; border: none; }
@@ -49,9 +54,11 @@ td { padding: 0 5px; border: none; white-space: nowrap; overflow: hidden; text-o
 	td.cell-nofield { text-align: center; }
 	td span.button { max-height: 20px; max-width: 20px; cursor: pointer; }
 		td span.button img { height: 16px; vertical-align: bottom; }
-		td span.button .awesome { color: var(--color-b); }
+		td span.button i { color: var(--color-b); }
 	td.loading,
 	td.empty { padding: 20px 20px; text-align: center; }
+	.cell-container { overflow: hidden; text-overflow: ellipsis; }
+	.cell-container:empty:after { content: '.'; visibility: hidden; }
 
 .loader { float: right; border-left: none !important; }
 	.loader img { margin-left: 5px; vertical-align: -1; height: 10px; }
@@ -95,3 +102,14 @@ thead th:not(:first-child) { border-left: 1px solid grey; }
 
 .resizing, .resizer { cursor: col-resize !important; user-select: none; }
 progress-bar { vertical-align: middle; }
+
+.sub-container-tr { border-left: 1px solid var(--grey); border-bottom: 1px solid var(--grey); border-right: 1px solid var(--grey); background-color: antiquewhite; }
+tr.opened { border-left: 1px solid var(--grey); border-top: 1px solid var(--grey); border-right: 1px solid var(--grey); background-color: antiquewhite; }
+.sub-container-tr:hover .sub-container-td { background-color: inherit !important; }
+.sub-container-td { background-color: inherit; padding: 0; }
+.sub-container-margin-td { width: 30px; background-color: inherit !important; padding: 0; }
+.sub-container-table { border-spacing: 0; table-layout: fixed; width: 100%; color: darkslateblue; }
+.sub-container-table th { background-color: var(--color-b-light2); }
+.sub-container-table .col-title { white-space: nowrap; }
+.sub-container-table th:not(:first-child) { border-left: 1px solid var(--very-light-grey); }
+.deploy-cell i { color: var(--color-b); padding: 0 5px; }

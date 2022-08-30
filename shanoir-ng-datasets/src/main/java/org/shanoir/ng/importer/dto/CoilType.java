@@ -43,9 +43,14 @@ public enum CoilType {
 	MULTICOIL(4),
 
 	/**
-	 * EXTREMITY
+	 * EXTREMITY.
 	 */
-	EXTREMITY(5);
+	EXTREMITY(5),
+	
+	/**
+	 * VOLUME.
+	 */
+	VOLUME(6);
 
 	private int id;
 

@@ -57,4 +57,10 @@ export class StudyCardService extends EntityService<StudyCard> {
             return this.customReplacer(key, value, dto);
         });
     }
+
+    applyStudyCardOn(studyCardId: number, datasetAcquisitionIds: number[]) {
+        return this.http.post<any[]>(this.API_URL + '/apply', JSON.stringify({studyCardId: studyCardId, datasetAcquisitionIds: datasetAcquisitionIds}))
+            .toPromise()
+            .then();
+    }
 }
