@@ -14,17 +14,22 @@ import java.util.List;
 import java.util.Optional;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.io.DicomOutputStream;
 import org.shanoir.ng.dataset.modality.MeasurementDataset;
 import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
@@ -53,6 +58,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DicomSRImporterService {
 	
+	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
+
 	private static final Logger LOG = LoggerFactory.getLogger(DicomSRImporterService.class);
 
 	private static final String SR = "SR";
@@ -92,9 +99,10 @@ public class DicomSRImporterService {
 			Attributes datasetAttributes = dIS.readDataset();
 			// check for modality: DICOM SR
 			if (SR.equals(datasetAttributes.getString(Tag.Modality))) {
-				Examination examination = findExamination(datasetAttributes);
-				datasetAttributes = modifyDicomSR(datasetAttributes, examination);
-				createDataset(examination, datasetAttributes);
+				// IMPORTANT: do this before to use correct StudyInstanceUID afterwards
+				Examination examination = modifyDicomSR(datasetAttributes);
+				Dataset dataset = findDataset(examination, datasetAttributes);
+				createDataset(examination, dataset, datasetAttributes);
 				sendToPacs(metaInformationAttributes, datasetAttributes);
 			} else {
 				LOG.error("Error: importDicomSR: other modality sent then SR.");
@@ -107,15 +115,9 @@ public class DicomSRImporterService {
 		return true;
 	}
 
-	private Examination findExamination(Attributes datasetAttributes) {
-		String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
-		Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
-		Examination examination = examinationRepository.findById(examinationID).get();
-		return examination;
-	}
-
 	/**
-	 * This method replaces values of dicom tags within the DICOM SR file:
+	 * This method replaces values of dicom tags within the DICOM SR file
+	 * and searches the corresponding examination and returns it:
 	 * - use user name as person name, who created the measurement
 	 * - replace with correct study instance UID from pacs for correct storage
 	 * - add subject name according to shanoir, as viewer sends a strange P-000001.
@@ -128,9 +130,11 @@ public class DicomSRImporterService {
 	 * 
 	 * @param datasetAttributes
 	 */
-	private Attributes modifyDicomSR(Attributes datasetAttributes, Examination examination) {
-		// replace artificial examinationUID with real StudyInstanceUID in DICOM server
+	private Examination modifyDicomSR(Attributes datasetAttributes) {
 		String examinationUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+		Long examinationID = Long.valueOf(examinationUID.substring(StudyInstanceUIDHandler.PREFIX.length()));
+		Examination examination = examinationRepository.findById(examinationID).get();
+		// replace artificial examinationUID with real StudyInstanceUID in DICOM server
 		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
 		datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
 		// replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
@@ -144,28 +148,99 @@ public class DicomSRImporterService {
 		// set user name, as person, who created the measurement
 		final String userName = KeycloakUtil.getTokenUserName();
 		datasetAttributes.setString(Tag.PersonName, VR.PN, userName);
-		return datasetAttributes;
+		return examination;
+	}
+
+	/**
+	 * A measurement dataset is related to the dataset, that has been annotated.
+	 * We use the information in the DICOM SR object to find the correct dataset
+	 * in shanoir database using studyInstanceUID, seriesInstanceUID and SOPInstanceUID.
+	 * 
+	 * @param datasetAttributes
+	 * @return
+	 */
+	private Dataset findDataset(Examination examination, Attributes datasetAttributes) {
+		String studyInstanceUID = datasetAttributes.getString(Tag.StudyInstanceUID);
+		String seriesInstanceUID;
+		String sOPInstanceUID;
+		Sequence evidenceSequence = datasetAttributes.getSequence(Tag.CurrentRequestedProcedureEvidenceSequence);
+		if (evidenceSequence != null) {
+			Attributes itemEvidenceSequence = evidenceSequence.get(0);
+			if (itemEvidenceSequence != null) {
+				Sequence seriesSequence = itemEvidenceSequence.getSequence(Tag.ReferencedSeriesSequence);
+				if (seriesSequence != null) {
+					Attributes itemSeriesSequence = seriesSequence.get(0);
+					if (itemEvidenceSequence != null) {
+						Sequence sOPSequence = itemSeriesSequence.getSequence(Tag.ReferencedSOPSequence);
+						if (sOPSequence != null) {
+							Attributes itemSOPSequence = sOPSequence.get(0);
+							seriesInstanceUID = itemSeriesSequence.getString(Tag.SeriesInstanceUID);
+							sOPInstanceUID = itemSOPSequence.getString(Tag.ReferencedSOPInstanceUID);
+							findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
+						}
+					}
+				}
+			}
+		}
+		LOG.error("Error: missing sequences/attributes in DICOM SR.");
+		return null;
 	}
 	
-	private void createDataset(Examination examination, Attributes datasetAttributes) throws MalformedURLException {
-		// seriesNumber is used as sortingIndex, used to find correct serie == acquisition
-		int seriesNumber = datasetAttributes.getInt(Tag.SeriesNumber, -1);
-		DatasetAcquisition acquisition = datasetAcquisitionRepository.findByExaminationIdAndSortingIndex(examination.getId(), seriesNumber);
+	/**
+	 * Find origin dataset using the 3 UIDs in dataset_file.path attribute.
+	 * 
+	 * @param examination
+	 * @param studyInstanceUID
+	 * @param seriesInstanceUID
+	 * @param sOPInstanceUID
+	 * @return
+	 */
+	private Dataset findDatasetByUIDs(Examination examination, String studyInstanceUID, String seriesInstanceUID, String sOPInstanceUID) {
+		List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
+		for (DatasetAcquisition acquisition : acquisitions) {
+			if (acquisition instanceof MrDatasetAcquisition
+				|| acquisition instanceof CtDatasetAcquisition
+				|| acquisition instanceof PetDatasetAcquisition) {
+				List<Dataset> datasets = acquisition.getDatasets();
+				for (Dataset dataset : datasets) {
+					List<DatasetExpression> expressions = dataset.getDatasetExpressions();
+					for (DatasetExpression expression : expressions) {
+						// only DICOM is of interest here
+						if (expression.getDatasetExpressionFormat().equals(DatasetExpressionFormat.DICOM)) {
+							List<DatasetFile> files = expression.getDatasetFiles();
+							for (DatasetFile file : files) {
+								if (file.isPacs()) {
+									String path = file.getPath();
+									if (path.contains(studyInstanceUID) && path.contains(seriesInstanceUID) && path.contains(sOPInstanceUID)) {
+										return dataset;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		LOG.error("Error: dataset could not be found with UIDs from DICOM SR.");	
+		return null;
+	}
+	
+	private void createDataset(Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException {
 		MeasurementDataset measurementDataset = new MeasurementDataset();
 		measurementDataset.setStudyId(examination.getStudyId());
 		measurementDataset.setSubjectId(examination.getSubjectId());
 		measurementDataset.setCreationDate(LocalDate.now());
-		measurementDataset.setDatasetAcquisition(acquisition);
+		measurementDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
 		// Metadata
 		DatasetMetadata originMetadata = new DatasetMetadata();
-		originMetadata.setName("Imaging Measurement Report");
+		originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
 		originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);		
 		measurementDataset.setOriginMetadata(originMetadata);
 		measurementDataset.setUpdatedMetadata(originMetadata);
 		createDatasetExpression(datasetAttributes, measurementDataset);
-		acquisition.getDatasets().add(measurementDataset);
-		datasetAcquisitionRepository.save(acquisition);
+		dataset.getDatasetAcquisition().getDatasets().add(measurementDataset);
+		datasetAcquisitionRepository.save(dataset.getDatasetAcquisition());
 	}
 
 	private void createDatasetExpression(Attributes datasetAttributes, MeasurementDataset measurementDataset)
