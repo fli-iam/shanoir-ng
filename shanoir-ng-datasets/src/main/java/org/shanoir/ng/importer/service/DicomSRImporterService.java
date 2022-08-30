@@ -62,7 +62,7 @@ public class DicomSRImporterService {
 
 	private static final String SR = "SR";
 
-	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
+	private static final String IMAGING_MEASUREMENT = "Imaging Measurement";
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
@@ -241,7 +241,9 @@ public class DicomSRImporterService {
 		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
 		// Metadata
 		DatasetMetadata originMetadata = new DatasetMetadata();
-		originMetadata.setName(measurementDataset.getTrackingIdentifier() + ": " + measurementDataset.getNumericValue());
+		String datasetName = IMAGING_MEASUREMENT + measurementDataset.getTrackingIdentifier() + ": " + measurementDataset.getNumericValue();
+		originMetadata.setName(datasetName);
+		originMetadata.setComment(datasetName);
 		originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);		
 		measurementDataset.setOriginMetadata(originMetadata);
@@ -268,7 +270,8 @@ public class DicomSRImporterService {
 							if (measurementGroupAttributes != null) {
 								// get tracking identifier
 								String trackingIdentifier = measurementGroupAttributes.getString(Tag.TextValue);
-								measurementDataset.setTrackingIdentifier(trackingIdentifier);
+								String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":"));
+								measurementDataset.setTrackingIdentifier(trackingIdentifierType);
 								// level measured value
 								Sequence measuredValueSequence = measurementGroupAttributes.getSequence(Tag.MeasuredValueSequence);
 								if (measuredValueSequence != null) {
