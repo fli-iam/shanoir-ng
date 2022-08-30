@@ -233,6 +233,7 @@ public class DicomSRImporterService {
 	
 	private void createDataset(Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException {
 		MeasurementDataset measurementDataset = new MeasurementDataset();
+		completeDatasetFromDicomSR(datasetAttributes, measurementDataset);
 		measurementDataset.setStudyId(examination.getStudyId());
 		measurementDataset.setSubjectId(examination.getSubjectId());
 		measurementDataset.setCreationDate(LocalDate.now());
@@ -240,7 +241,7 @@ public class DicomSRImporterService {
 		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
 		// Metadata
 		DatasetMetadata originMetadata = new DatasetMetadata();
-		originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
+		originMetadata.setName(measurementDataset.getTrackingIdentifier() + ": " + measurementDataset.getNumericValue());
 		originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
 		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);		
 		measurementDataset.setOriginMetadata(originMetadata);
@@ -248,6 +249,44 @@ public class DicomSRImporterService {
 		createDatasetExpression(datasetAttributes, measurementDataset);
 		dataset.getDatasetAcquisition().getDatasets().add(measurementDataset);
 		datasetAcquisitionRepository.save(dataset.getDatasetAcquisition());
+	}
+
+	private void completeDatasetFromDicomSR(Attributes datasetAttributes, MeasurementDataset measurementDataset) {
+		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
+		if (contentSequence != null) {
+			Attributes contentSequenceAttributes = contentSequence.get(5);
+			if (contentSequenceAttributes != null) {
+				// level of imaging measurements
+				Sequence imagingMeasurementsSequence = contentSequenceAttributes.getSequence(Tag.ContentSequence);
+				if (imagingMeasurementsSequence != null) {
+					Attributes imagingMeasurementsAttributes = imagingMeasurementsSequence.get(0);
+					if (imagingMeasurementsAttributes != null) {
+						// level of measurement group
+						Sequence measurementGroupSequence = imagingMeasurementsAttributes.getSequence(Tag.ContentSequence);
+						if (measurementGroupSequence != null) {
+							Attributes measurementGroupAttributes = measurementGroupSequence.get(0);
+							if (measurementGroupAttributes != null) {
+								// get tracking identifier
+								String trackingIdentifier = measurementGroupAttributes.getString(Tag.TextValue);
+								measurementDataset.setTrackingIdentifier(trackingIdentifier);
+								// level measured value
+								Sequence measuredValueSequence = measurementGroupAttributes.getSequence(Tag.MeasuredValueSequence);
+								if (measuredValueSequence != null) {
+									Attributes measuredValueAttributes = measuredValueSequence.get(0);
+									if (measuredValueAttributes != null) {
+										// get numeric value and graphic data
+										String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
+										measurementDataset.setNumericValue(numericValue);
+										String graphicData = measuredValueAttributes.getString(Tag.GraphicData);
+										measurementDataset.setGraphicData(graphicData);
+									}
+								}
+							}
+						}
+					}
+				}				
+			}
+		}
 	}
 
 	private void createDatasetExpression(Attributes datasetAttributes, MeasurementDataset measurementDataset)
