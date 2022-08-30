@@ -273,16 +273,13 @@ public class DicomSRImporterService {
 								String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":") + 1);
 								measurementDataset.setTrackingIdentifier(trackingIdentifierType);
 								// level measured value
-								Sequence measuredValueSequence = measurementGroupAttributes.getSequence(Tag.MeasuredValueSequence);
-								if (measuredValueSequence != null) {
-									Attributes measuredValueAttributes = measuredValueSequence.get(0);
-									if (measuredValueAttributes != null) {
-										// get numeric value and graphic data
-										String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
-										measurementDataset.setNumericValue(numericValue);
-										String graphicData = measuredValueAttributes.getString(Tag.GraphicData);
-										measurementDataset.setGraphicData(graphicData);
-									}
+								Attributes measuredValueAttributes = measurementGroupSequence.get(2);
+								if (measuredValueAttributes != null) {
+									// get numeric value and graphic data
+									String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
+									measurementDataset.setNumericValue(numericValue);
+									String graphicData = measuredValueAttributes.getString(Tag.GraphicData);
+									measurementDataset.setGraphicData(graphicData);
 								}
 							}
 						}
