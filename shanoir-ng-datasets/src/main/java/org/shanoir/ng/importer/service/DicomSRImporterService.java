@@ -254,7 +254,7 @@ public class DicomSRImporterService {
 	private void completeDatasetFromDicomSR(Attributes datasetAttributes, MeasurementDataset measurementDataset) {
 		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
 		if (contentSequence != null) {
-			Attributes contentSequenceAttributes = contentSequence.get(5);
+			Attributes contentSequenceAttributes = contentSequence.get(4);
 			if (contentSequenceAttributes != null) {
 				// level of imaging measurements
 				Sequence imagingMeasurementsSequence = contentSequenceAttributes.getSequence(Tag.ContentSequence);
