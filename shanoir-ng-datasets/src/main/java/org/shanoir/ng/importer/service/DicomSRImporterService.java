@@ -270,7 +270,7 @@ public class DicomSRImporterService {
 							if (measurementGroupAttributes != null) {
 								// get tracking identifier
 								String trackingIdentifier = measurementGroupAttributes.getString(Tag.TextValue);
-								String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":"));
+								String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":") + 1);
 								measurementDataset.setTrackingIdentifier(trackingIdentifierType);
 								// level measured value
 								Sequence measuredValueSequence = measurementGroupAttributes.getSequence(Tag.MeasuredValueSequence);
