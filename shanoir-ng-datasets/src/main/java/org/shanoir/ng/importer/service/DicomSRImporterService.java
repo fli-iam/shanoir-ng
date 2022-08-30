@@ -148,6 +148,20 @@ public class DicomSRImporterService {
 		// set user name, as person, who created the measurement
 		final String userName = KeycloakUtil.getTokenUserName();
 		datasetAttributes.setString(Tag.PersonName, VR.PN, userName);
+		// set as well person observer name in content sequence
+		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
+		if (contentSequence != null) {
+			Attributes itemContentSequence = contentSequence.get(1);
+			if (itemContentSequence != null) {
+				Sequence codeSequence = itemContentSequence.getSequence(Tag.ConceptNameCodeSequence);
+				if (codeSequence != null) {
+					Attributes itemCodeSequence = codeSequence.get(0);
+					if (itemCodeSequence != null) {
+						itemCodeSequence.setString(Tag.PersonName, VR.PN, userName);
+					}
+				}
+			}
+		}
 		return examination;
 	}
 
