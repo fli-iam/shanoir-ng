@@ -148,6 +148,8 @@ public class StudyMigrationService {
 			su.setStudyUserRights(rights);
 			su.setStudy(new Study());
 			su.setUserName(username);
+			// Always set confirmed for this user
+			su.setConfirmed(true);
 			suList.add(su);
 			study.setStudyUserList(suList);
 
@@ -156,10 +158,13 @@ public class StudyMigrationService {
 			for (Tag tag : study.getTags()) {
 				tag.setId(null);
 			}
+			
+			// Reset DUA because otherwise the user is not allowed to do anything
+			study.setDataUserAgreementPaths(null);
 
 			StudyDTO newStudy = distantShanoir.createStudy(study);
 
-			// Add protocol/ DUA files
+			// Add protocol files
 			// Can easily be done manually
 
 			for (String fileName : study.getProtocolFilePaths()) {
