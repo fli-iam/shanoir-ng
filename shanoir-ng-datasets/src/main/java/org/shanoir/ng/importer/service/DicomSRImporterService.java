@@ -58,11 +58,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DicomSRImporterService {
 	
-	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
-
 	private static final Logger LOG = LoggerFactory.getLogger(DicomSRImporterService.class);
 
 	private static final String SR = "SR";
+
+	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
@@ -176,7 +176,7 @@ public class DicomSRImporterService {
 							Attributes itemSOPSequence = sOPSequence.get(0);
 							seriesInstanceUID = itemSeriesSequence.getString(Tag.SeriesInstanceUID);
 							sOPInstanceUID = itemSOPSequence.getString(Tag.ReferencedSOPInstanceUID);
-							findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
+							return findDatasetByUIDs(examination, studyInstanceUID, seriesInstanceUID, sOPInstanceUID);
 						}
 					}
 				}
