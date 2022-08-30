@@ -19,10 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +33,8 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -81,8 +80,6 @@ public class WADODownloaderService {
 
 	private static final String WADO_REQUEST_TYPE_WADO_RS = "/instances/";
 	
-	private static final String WADO_REQUEST_SERIE_WADO_RS = "/series/";
-
 	private static final String WADO_REQUEST_TYPE_WADO_URI = "objectUID=";
 	
 	private static final String WADO_REQUEST_STUDY_WADO_URI = "studyUID=";
@@ -102,6 +99,8 @@ public class WADODownloaderService {
 
 	private static final String CONTENT_TYPE = "&contentType";
 
+	private static final Logger LOG = LoggerFactory.getLogger(WADODownloaderService.class);
+	
 	@Autowired
 	private RestTemplate restTemplate;
 	
