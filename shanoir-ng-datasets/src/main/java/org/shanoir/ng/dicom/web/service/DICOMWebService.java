@@ -155,6 +155,27 @@ public class DICOMWebService {
 		}
 		return null;
 	}
+	
+	public ResponseEntity findInstance(String studyInstanceUID, String serieInstanceUID, String sopInstanceUID) {
+		try {
+			String url = this.serverURL + "/" + studyInstanceUID + "/series/" + serieInstanceUID + "/instances/" + sopInstanceUID;
+			HttpGet httpGet = new HttpGet(url);
+			try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
+				HttpEntity entity = response.getEntity();
+				if (entity != null) {
+					ByteArrayResource byteArrayResource = new ByteArrayResource(EntityUtils.toByteArray(entity));
+					HttpHeaders responseHeaders = new HttpHeaders();
+					responseHeaders.setContentLength(entity.getContentLength());
+					return new ResponseEntity(byteArrayResource, responseHeaders, HttpStatus.OK);
+				} else {
+					LOG.error("DICOMWeb: findInstance: empty response entity.");				
+				}
+			}
+		} catch (Exception e) {
+			LOG.error(e.getMessage(), e);
+		}
+		return null;
+	}
 
 	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
 		if (directoryWithDicomFiles == null || !directoryWithDicomFiles.exists() || !directoryWithDicomFiles.isDirectory()) {

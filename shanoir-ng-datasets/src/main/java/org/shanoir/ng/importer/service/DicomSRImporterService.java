@@ -136,7 +136,7 @@ public class DicomSRImporterService {
 		Examination examination = examinationRepository.findById(examinationID).get();
 		// replace artificial examinationUID with real StudyInstanceUID in DICOM server
 		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
-		datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);
+		datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);		
 		// replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
 		Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubjectId());
 		String subjectName = "error_subject_name_not_found_in_db";

@@ -111,6 +111,21 @@ public interface DICOMWebApi {
 			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
 		) throws RestServiceException;
 	
+	@ApiOperation(value = "", notes = "Returns a DICOM instance", response = String.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "found instance/dataset", response = String.class, responseContainer = "List"),
+			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
+	ResponseEntity findInstance(
+			@ApiParam(value = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
+			@ApiParam(value = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID
+		) throws RestServiceException;
+	
 	@ApiOperation(value = "", notes = "Returns a frame of a DICOM instance/dataset, of a study and serie", response = String.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
