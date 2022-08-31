@@ -53,4 +53,17 @@ public interface DatasetFileApi {
 			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "Add all files to the PACS", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "created file", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@PostMapping(value = "file-upload-to-pacs/{datasetFileId}",
+		produces = { "application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	ResponseEntity<Void> addFilesToPacs(
+			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId)
+			throws RestServiceException;
 }

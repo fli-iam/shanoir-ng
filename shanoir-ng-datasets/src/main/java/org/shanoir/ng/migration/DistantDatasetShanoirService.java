@@ -47,6 +47,8 @@ public class DistantDatasetShanoirService {
 	private static final String CREATE_DATASET_FILE = "/shanoir-ng/datasets/datasetfiles";
 
 	private static final String ADD_FILE = "/shanoir-ng/datasets/datasetfiles/file-upload/";
+	
+	private static final String ADD_FILE_TO_PACS = "/shanoir-ng/datasets/datasetfiles/file-upload-to-pacs/";
 
 	@Autowired
 	ObjectMapper mapper;
@@ -107,6 +109,18 @@ public class DistantDatasetShanoirService {
 		}
 	}
 
+	public void moveDatasetFiles(Long datasetFileId) throws ShanoirException {
+		try {
+			HttpHeaders headers = new HttpHeaders();
+			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+
+			HttpEntity<MultiValueMap<String, Object>> requestEntity	= new HttpEntity<>(body, headers);
+			distantKeycloak.getRestTemplate().postForEntity(getURI(ADD_FILE_TO_PACS + datasetFileId), requestEntity, Void.class);
+		} catch (Exception e) {
+			throw new ShanoirException("Could not add all files to PACS for dataset expression", e);
+		}
+	}
+
 	public StudyCard createStudyCard(StudyCard sc) throws ShanoirException {
 		try {
 			ResponseEntity<StudyCard> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_STUDY_CARD), HttpMethod.POST, new HttpEntity<>(sc, getHeader()), StudyCard.class);
@@ -149,17 +163,17 @@ public class DistantDatasetShanoirService {
 	}
 
 
-	public DatasetExpression createDatasetExpression(DatasetExpression ds) throws ShanoirException {
+	public DatasetExpression createDatasetExpression(DatasetExpression de) throws ShanoirException {
 		try {
-			ResponseEntity<DatasetExpression> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_DATASET_EXPRESSION), HttpMethod.POST, new HttpEntity<>(ds, getHeader()), DatasetExpression.class);
+			ResponseEntity<DatasetExpression> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_DATASET_EXPRESSION), HttpMethod.POST, new HttpEntity<>(de, getHeader()), DatasetExpression.class);
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 
 			} else {
-				throw new ShanoirException("Could not create a new distant dataset {} {}" + response.getStatusCode() + response.getBody());
+				throw new ShanoirException("Could not create a new distant dataset expression {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			throw new ShanoirException("Could not create a new distant dataset: ", e);
+			throw new ShanoirException("Could not create a new distant dataset expression: ", e);
 		}
 	}
 
@@ -170,10 +184,10 @@ public class DistantDatasetShanoirService {
 			if (HttpStatus.OK.equals(response.getStatusCode())) {
 				return response.getBody();
 			} else {
-				throw new ShanoirException("Could not create a new distant dataset {} {}" + response.getStatusCode() + response.getBody());
+				throw new ShanoirException("Could not create a new distant dataset file {} {}" + response.getStatusCode() + response.getBody());
 			}
 		} catch (Exception e) {
-			throw new ShanoirException("Could not create a new distant dataset: ", e);
+			throw new ShanoirException("Could not create a new distant dataset file : ", e);
 		}
 	}
 

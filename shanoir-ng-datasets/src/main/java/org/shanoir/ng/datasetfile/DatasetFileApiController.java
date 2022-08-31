@@ -58,10 +58,10 @@ public class DatasetFileApiController implements DatasetFileApi {
 
 	@Value("${dcm4chee-arc.dicom.wado.uri}")
 	private String dicomWADOURI;
-	
+
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
-	
+
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetFileApiController.class);
 
 	@Override
@@ -102,6 +102,28 @@ public class DatasetFileApiController implements DatasetFileApi {
 		}
 	}
 
+	public ResponseEntity<Void> addFilesToPacs(
+			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId)
+					throws RestServiceException {
+		// Transfer to pacs
+		DatasetFile datasetFile = datasetFileService.findById(datasetFileId).orElse(null);
+
+		File expressionFolder = new File(migrationFolder + "/migration-" + datasetFile.getDatasetExpression().getId());
+		try {
+			if (dicomWeb) {
+				stowRsService.sendDicomFilesToPacs(expressionFolder);
+			} else {
+				cStoreService.sendDicomFilesToPacs(expressionFolder);
+			}
+		}
+		catch (Exception e) {
+			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Could not load files to PACS."));
+		} finally {
+			FileUtils.deleteQuietly(expressionFolder);
+		}
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
 	@Override
 	public ResponseEntity<Void> addFile(
 			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId,
@@ -110,21 +132,11 @@ public class DatasetFileApiController implements DatasetFileApi {
 		DatasetFile datasetFile = datasetFileService.findById(datasetFileId).orElse(null);
 		File destination = null;
 		try {
-			destination = new File(migrationFolder + "/migration-" + datasetFile.getId() + File.separator + file.getName() + LocalDateTime.now());
+			destination = new File(migrationFolder + "/migration-" + datasetFile.getDatasetExpression().getId() + File.separator +  LocalDateTime.now() + file.getName());
 			if (datasetFile.isPacs()) {
 				// Copy file to load it in the PACS
-				LOG.error("Loading file to pacs " + destination.getAbsolutePath());
 				destination.getParentFile().mkdirs();
 				file.transferTo(destination);
-				// Transfer to pacs
-				if (dicomWeb) {
-					LOG.error("stow");
-					stowRsService.sendDicomFilesToPacs(destination);
-				} else {
-					LOG.error("cstore");
-					cStoreService.sendDicomFilesToPacs(destination);
-				}
-				FileUtils.deleteQuietly(destination.getParentFile());
 			} else {
 				// Get the dataset file then copy the file to path
 				// MOVE nifti (and others) on disc
@@ -136,10 +148,6 @@ public class DatasetFileApiController implements DatasetFileApi {
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while adding dataset file."));
-		} finally {
-			if (datasetFile.isPacs()) {
-				//FileUtils.deleteQuietly(destination);
-			}
 		}
 	}
 }

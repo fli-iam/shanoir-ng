@@ -403,14 +403,19 @@ public class DatasetMigrationService {
 
 		DatasetExpression createdExpression = distantShanoir.createDatasetExpression(expression);
 		entityManager.detach(expression);
-
+		DatasetFile createdFile = null;
 		for (DatasetFile file : oldFiles) {
-			migrateDatasetFile(file, createdExpression, createdDataset,oldExamId, job);
+			createdFile = migrateDatasetFile(file, createdExpression, createdDataset, oldExamId, job);
+		}
+		// Once all files of the expression were loaded, add them to the pacs if necessary
+		if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
+			distantShanoir.moveDatasetFiles(createdFile.getId());
 		}
 	}
 
-	private void migrateDatasetFile(DatasetFile file, DatasetExpression createdExpression, Dataset createdDataset, Long oldExamId, MigrationJob job) throws ShanoirException {
+	private DatasetFile migrateDatasetFile(DatasetFile file, DatasetExpression createdExpression, Dataset createdDataset, Long oldExamId, MigrationJob job) throws ShanoirException {
 		File workFolder = new File(migrationFolder, "/Migration_" + LocalDateTime.now());
+		DatasetFile createdFile;
 		try {
 			workFolder.mkdirs();
 
@@ -457,7 +462,7 @@ public class DatasetMigrationService {
 
 			// Move file
 			entityManager.detach(file);
-			DatasetFile createdFile = distantShanoir.createDatasetFile(file);
+			createdFile = distantShanoir.createDatasetFile(file);
 			distantShanoir.moveDatasetFile(createdFile, new File(result));
 
 		} catch (Exception e) {
@@ -465,6 +470,7 @@ public class DatasetMigrationService {
 		} finally {
 			FileUtils.deleteQuietly(workFolder);
 		}
+		return createdFile;
 	}
 
 	private void publishEvent(String message, float progress) {
