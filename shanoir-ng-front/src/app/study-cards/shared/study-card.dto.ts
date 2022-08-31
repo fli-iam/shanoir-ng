@@ -91,7 +91,7 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
     public toEntityList(dtos: StudyCardDTO[], result?: StudyCard[]): Promise<StudyCard[]>{
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos) {
+            for (let dto of dtos ? dtos : []) {
                 let entity = new StudyCard();
                 StudyCardDTOService.mapSyncFields(dto, entity);
                 result.push(entity);

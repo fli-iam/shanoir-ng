@@ -16,10 +16,12 @@ package org.shanoir.ng.datasetacquisition.service;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.assertj.core.util.Arrays;
+import org.apache.commons.math3.util.Pair;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -31,6 +33,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -39,14 +42,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
 
-	
+
 	@Autowired
 	private DatasetAcquisitionRepository repository;
-	
+
 
 	@Autowired
 	private StudyUserRightsRepository rightsRepository;
@@ -60,12 +64,12 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	
 	@Autowired
 	private DatasetService datasetService;
-	
+
 	@Override
 	public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
 		return repository.findByStudyCardId(studyCardId);
 	}
-	
+
 	@Override
 	public List<DatasetAcquisition> findByDatasetId(Long[] datasetIds) {
 		return repository.findDistinctByDatasetsIdIn(datasetIds);
@@ -103,8 +107,22 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 			return repository.findAll(pageable);
 		} else {
 			Long userId = KeycloakUtil.getTokenUserId();
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			return repository.findByExaminationStudyIdIn(studyIds, pageable);
+			// Check if user has restrictions.
+			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_SEE_ALL.getId()));
+			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+			Set<Long> unrestrictedStudies = new HashSet<Long>();
+			for (StudyUser studyUser : studyUsers) {
+				if (CollectionUtils.isEmpty(studyUser.getCenterIds())) {
+					unrestrictedStudies.add(studyUser.getStudyId());
+				} else {
+					for (Long centerId : studyUser.getCenterIds()) {
+						studyCenters.add(new Pair<Long, Long>(studyUser.getStudyId(), centerId));						
+					}
+				}
+			}
+			List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
+			studyCenterIds.add(new Pair<Long, Long>(1L, 1L));
+			return repository.findByExaminationByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
 		}
 	}
 
@@ -112,7 +130,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	public DatasetAcquisition create(DatasetAcquisition entity) {
 		DatasetAcquisition savedEntity = repository.save(entity);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
-		
+
 		return savedEntity;
 	}
 
@@ -124,7 +142,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 		}
 		updateValues(entity, entityDb);
 		DatasetAcquisition acq =  repository.save(entityDb);
-		
+
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
 
 		return acq;

@@ -12,10 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-/**
- * https://github.com/swagger-api/swagger-codegen
- * Do not edit the class manually.
- */
 package org.shanoir.ng.datasetacquisition.controler;
 
 import java.util.List;
@@ -62,8 +58,8 @@ public interface DatasetAcquisitionApi {
         produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create", required=true ) @Valid @RequestBody ImportJob importJob) throws RestServiceException;
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
+    ResponseEntity<Void> createNewDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true ) @Valid @RequestBody ImportJob importJob) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Creates new EEG dataset acquisition", response = Void.class, tags={  })
     @ApiResponses(value = {
@@ -76,7 +72,7 @@ public interface DatasetAcquisitionApi {
         produces = { "application/json" },
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob);
 	
 	@ApiOperation(value = "", notes = "If exists, returns the dataset acquisitions corresponding to the given study card", response = DatasetAcquisition.class, responseContainer = "List", tags = {})
@@ -111,7 +107,7 @@ public interface DatasetAcquisitionApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getExamination().getStudyId(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or returnObject == null or returnObject.getBody() == null or @datasetSecurityService.hasRightOnTrustedExaminationDTO(returnObject.getBody().getExamination(), 'CAN_SEE_ALL')")
 	ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId);
 	
@@ -122,7 +118,7 @@ public interface DatasetAcquisitionApi {
 			@ApiResponse(code = 404, message = "no datasetAcquisition found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/datasetacquisition/examination/{examinationId}", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);

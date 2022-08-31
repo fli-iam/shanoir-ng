@@ -15,6 +15,6 @@
 package org.shanoir.ng.utils.assertion;
 
 @FunctionalInterface
-public interface AccessCheckedFunction2Arg<T, U> {
-	void apply(T t, U u) throws Exception;
+public interface AccessCheckedFunction4Arg<T, U, V, W> {
+	void apply(T t, U u, V v, W w) throws Exception;
 }

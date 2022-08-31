@@ -29,9 +29,11 @@ import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.model.Tag;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
@@ -39,6 +41,7 @@ import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
 import org.shanoir.ng.solr.repository.SolrRepository;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -75,6 +78,9 @@ public class SolrServiceImpl implements SolrService {
 
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepo;
+
+	@Autowired
+	private CenterRepository centerRepository;
 
 	@Transactional
 	@Override
@@ -206,10 +212,20 @@ public class SolrServiceImpl implements SolrService {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			result = solrRepository.findByFacetCriteriaForAdmin(query, pageable);
 		} else {
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, query, pageable);
+			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(KeycloakUtil.getTokenUserId()));
+			Map<Long, List<String>> studiesCenter = new HashMap<>();
+			List<Center> centers = Utils.toList(centerRepository.findAll());
+			for(StudyUser su : studyUsers) {
+				studiesCenter.put(su.getStudyId(), su.getCenterIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
+			}
+			result = solrRepository.findByStudyIdInAndFacetCriteria(studiesCenter, query, pageable);
 		}
 		return result;
+	}
+	
+	private String findCenterName(List<Center> centers, Long id) {
+		List<Center> filteredCenters = centers.stream().filter(centerToFilter -> centerToFilter.getId().equals(id)).collect(Collectors.toList());
+		return filteredCenters.size() > 0 ? filteredCenters.get(0).getName() : null;
 	}
 
 	private Pageable prepareTextFields(Pageable pageable) {

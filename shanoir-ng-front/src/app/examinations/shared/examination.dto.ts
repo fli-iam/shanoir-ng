@@ -53,7 +53,7 @@ export class ExaminationDTOService {
     public toEntityList(dtos: ExaminationDTO[], result?: Examination[]): Promise<Examination[]> {
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos) {
+            for (let dto of dtos ? dtos : []) {
                 let entity = new Examination();
                 ExaminationDTOService.mapSyncFields(dto, entity);
                 result.push(entity);

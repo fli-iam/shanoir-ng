@@ -12,10 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-/**
- * https://github.com/swagger-api/swagger-codegen
- * Do not edit the class manually.
- */
 package org.shanoir.ng.dataset.controler;
 
 import java.io.IOException;
@@ -119,7 +115,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<Page<DatasetDTO>> findDatasets(Pageable pageable) throws RestServiceException;
 	
 	@ApiOperation(value = "", notes = "Returns a dataset list", response = List.class, tags = {})
@@ -142,17 +138,6 @@ public interface DatasetApi {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<DatasetDTO>> findDatasetsByStudycardId(@ApiParam(value = "id of the studycard", required = true) @PathVariable("studycardId") Long studycardId);
 	
-	@ApiOperation(value = "", notes = "Returns the list of dataset id by subject id and study id", response = Long.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found datasets", response = Long.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no dataset found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@RequestMapping(value = "/subject/{subjectId}", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnSubjectForEveryStudy(#subjectId, 'CAN_SEE_ALL'))")
-	ResponseEntity<List<Long>> findDatasetIdsBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
-
 	@ApiOperation(value = "", notes = "Returns the list of dataset id by study id", response = Long.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found datasets", response = Long.class, responseContainer = "List"),
@@ -162,6 +147,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/study/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
@@ -187,6 +173,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "find/subject/{subjectId}/study/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectIdStudyId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
@@ -205,8 +192,8 @@ public interface DatasetApi {
     		@ApiParam(value = "Dowloading nifti, decide the nifti converter id") Long converterId,
     		@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.",
     			allowableValues = "dcm, nii", defaultValue = "dcm")
-    		@Valid
-    		@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
+    		@Valid @RequestParam(value = "format", required = false, defaultValue="dcm") String format, 
+    		HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
 
     @ApiOperation(value = "", nickname = "getDicomMetadataByDatasetId", notes = "If exists, returns the dataset dicom metadata corresponding to the given id", response = Resource.class, tags={  })
     @ApiResponses(value = {
@@ -243,7 +230,7 @@ public interface DatasetApi {
         @ApiResponse(code = 404, message = "no dataset found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
     @PostMapping(value = "/massiveDownload")
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasAtLeastRightOnOneDataset(#datasetIds, 'CAN_DOWNLOAD'))")
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_DOWNLOAD'))")
     void massiveDownloadByDatasetIds(
     		@ApiParam(value = "ids of the datasets", required=true) @Valid
     		@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,

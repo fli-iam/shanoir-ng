@@ -19,8 +19,10 @@ import java.util.List;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for examination.
@@ -60,17 +62,38 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 * @return
 	 */
 	List<Examination> findByStudyIdIn(List<Long> studyIds);
-
+	
 	/**
 	 * Get a paginated list of examinations for a list of studies.
 	 * 
 	 * @param studyIds
 	 *            list of study ids.
-	 * @param pageable
+	 * @param sort
 	 *            pagination data.
 	 * @return list of examinations.
 	 */
-	Page<Examination> findByPreclinicalAndStudyIdIn(Boolean preclinical, List<Long> studyIds, Pageable pageable);
+	@Query(value = "SELECT * FROM examination e "
+			+ "LEFT JOIN study_user su "
+			+ "ON su.study_id = e.study_id "
+			+ "AND su.user_id = :userId "
+			+ "JOIN study_user_center suc "
+			+ "ON suc.study_user_id = su.id "
+			+ "AND suc.center_id = e.center_id "
+			+ "AND e.study_id in :studyIds "
+			+ "AND e.preclinical = :preclinical",
+			    countQuery ="SELECT count(*) FROM examination e "
+						+ "LEFT JOIN study_user su "
+						+ "ON su.study_id = e.study_id "
+						+ "AND su.user_id = :userId "
+						+ "JOIN study_user_center suc "
+						+ "ON suc.study_user_id = su.id "
+						+ "AND suc.center_id = e.center_id "
+						+ "AND e.study_id in :studyIds "
+						+ "AND e.preclinical = :preclinical",
+			    nativeQuery = true)
+	Page<Examination>findByPreclinicalAndStudyIdInFilterByCenter(@Param("preclinical")Boolean preclinical, @Param("studyIds") List<Long> studyIds, @Param("userId") Long userId, Pageable pageable);
+
+	Page<Examination> findByPreclinicalAndStudyIdIn(Boolean preclinical, List<Long> studyIds, Pageable page);
 
 	/**
 	 * Get a list of examinations for a subject.

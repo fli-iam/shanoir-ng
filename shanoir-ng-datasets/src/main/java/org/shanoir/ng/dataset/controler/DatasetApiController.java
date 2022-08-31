@@ -258,20 +258,6 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<Long>> findDatasetIdsBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
-		final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
-
-		List<Long> datasetIds = new ArrayList<Long>();
-		for(Examination examination : examinations) {
-			ResponseEntity<List<Long>> response = findDatasetIdsBySubjectIdStudyId(subjectId, examination.getStudyId());
-			if(response.getStatusCode() == HttpStatus.OK) {
-				datasetIds.addAll(response.getBody());
-			}
-		}
-		return new ResponseEntity<List<Long>>(datasetIds, HttpStatus.OK);
-	}
-
-	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
 		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
 		if (datasets.isEmpty()) {
@@ -532,8 +518,6 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response) throws EntityNotFoundException, RestServiceException, IOException {
-		// STEP 2: Check rights => Also filters datasets on rights
-		datasets = datasetSecurityService.hasRightOnAtLeastOneDataset(datasets, "CAN_DOWNLOAD");
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 		File userDir = DatasetFileUtils.getUserImportDir(System.getProperty(JAVA_IO_TMPDIR));

@@ -15,9 +15,7 @@
 package org.shanoir.ng.dataset.dto;
 
 import java.time.LocalDate;
-import java.util.List;
 
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 
@@ -41,6 +39,8 @@ public class DatasetDTO {
 	private Long studyId;
 
 	private Long subjectId;
+	
+	private Long centerId;
 
 	private DatasetMetadataDTO updatedMetadata;
 	
@@ -169,4 +169,11 @@ public class DatasetDTO {
 		this.type = type;
 	}
 
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
 }
