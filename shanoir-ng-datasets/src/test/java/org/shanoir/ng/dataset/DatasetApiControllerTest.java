@@ -393,4 +393,11 @@ public class DatasetApiControllerTest {
 
 		// THEN we expect a failure
 	}
+
+	@Test
+	public void testCorrectDatasetDownloadName() {
+		// We want to test this code:
+		// datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+		assertEquals("abc_ABC___123.-tru____", "abc ABCé('123.-tru_ç&ù".replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
+	}
 }

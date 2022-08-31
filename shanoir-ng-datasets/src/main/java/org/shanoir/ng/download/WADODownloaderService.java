@@ -19,10 +19,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
@@ -34,7 +31,6 @@ import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
-import javax.xml.crypto.Data;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.slf4j.Logger;
@@ -82,13 +78,8 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class WADODownloaderService {
 
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(WADODownloaderService.class);
-
 	private static final String WADO_REQUEST_TYPE_WADO_RS = "/instances/";
 	
-	private static final String WADO_REQUEST_SERIE_WADO_RS = "/series/";
-
 	private static final String WADO_REQUEST_TYPE_WADO_URI = "objectUID=";
 	
 	private static final String WADO_REQUEST_STUDY_WADO_URI = "studyUID=";
@@ -107,6 +98,8 @@ public class WADODownloaderService {
 	private static final String CONTENT_TYPE_DICOM_JSON = "application/json";
 
 	private static final String CONTENT_TYPE = "&contentType";
+
+	private static final Logger LOG = LoggerFactory.getLogger(WADODownloaderService.class);
 	
 	@Autowired
 	private RestTemplate restTemplate;
@@ -148,9 +141,10 @@ public class WADODownloaderService {
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
 					String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
 					String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
-					if (name.contains(File.separator)) {
-						name = name.replaceAll(File.separator, "_");
-					}
+
+					// Replace all forbidden characters.
+					name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
 					File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
 					ByteArrayInputStream bIS = null;
 					try {
