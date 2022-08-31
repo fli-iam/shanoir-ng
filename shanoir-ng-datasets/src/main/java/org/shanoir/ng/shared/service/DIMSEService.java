@@ -60,7 +60,7 @@ public class DIMSEService implements DicomServiceApi {
 		if (directoryWithDicomFiles != null && directoryWithDicomFiles.exists()
 				&& directoryWithDicomFiles.isDirectory()) {
 			File[] dicomFiles = directoryWithDicomFiles.listFiles();
-			LOG.info("Start: C-STORE sending " + dicomFiles.length + " dicom files to PACS from folder: "
+			LOG.error("Start: C-STORE sending " + dicomFiles.length + " dicom files to PACS from folder: "
 					+ directoryWithDicomFiles.getAbsolutePath());
 			List<String> args = new ArrayList<String>();
 			args.add(STORESCU);
@@ -68,7 +68,7 @@ public class DIMSEService implements DicomServiceApi {
 			args.add(dcm4cheeCStoreAETCalled + "@" + dcm4cheeHost + ":" + dcm4cheePortDcm);
 			args.add(directoryWithDicomFiles.getAbsolutePath());
 			execute(args);
-			LOG.info("Finished: C-STORE sending " + dicomFiles.length + " dicom files to PACS from folder: "
+			LOG.error("Finished: C-STORE sending " + dicomFiles.length + " dicom files to PACS from folder: "
 					+ directoryWithDicomFiles.getAbsolutePath());
 		} else {
 			throw new ShanoirException(

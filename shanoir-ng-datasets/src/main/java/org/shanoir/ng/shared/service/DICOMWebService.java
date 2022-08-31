@@ -78,7 +78,7 @@ public class DICOMWebService implements DicomServiceApi {
 			throw new ShanoirException("sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
 		}
 		File[] dicomFiles = directoryWithDicomFiles.listFiles();
-		LOG.info("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
+		LOG.error("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
 
 		try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
 			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
@@ -90,7 +90,7 @@ public class DICOMWebService implements DicomServiceApi {
 			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
 			httpPost.setEntity(entity);
 			CloseableHttpResponse response = httpClient.execute(httpPost);
-			LOG.error(response.toString());
+			LOG.error("COUCOU" + response.toString());
 			response.getEntity();
 			response.close();
 		} catch (ClientProtocolException e) {

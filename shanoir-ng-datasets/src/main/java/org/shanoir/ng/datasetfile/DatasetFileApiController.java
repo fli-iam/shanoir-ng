@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.analysis.function.Exp;
 import org.shanoir.ng.datasetfile.service.DatasetFileApi;
 import org.shanoir.ng.datasetfile.service.DatasetFileService;
 import org.shanoir.ng.migration.DatasetMigrationService;
@@ -107,12 +108,14 @@ public class DatasetFileApiController implements DatasetFileApi {
 					throws RestServiceException {
 		// Transfer to pacs
 		DatasetFile datasetFile = datasetFileService.findById(datasetFileId).orElse(null);
-
 		File expressionFolder = new File(migrationFolder + "/migration-" + datasetFile.getDatasetExpression().getId());
+		LOG.error("Adding files to pacs" + expressionFolder.getAbsolutePath());
 		try {
 			if (dicomWeb) {
+				LOG.error("using stowrs");
 				stowRsService.sendDicomFilesToPacs(expressionFolder);
 			} else {
+				LOG.error("using cstore");
 				cStoreService.sendDicomFilesToPacs(expressionFolder);
 			}
 		}
