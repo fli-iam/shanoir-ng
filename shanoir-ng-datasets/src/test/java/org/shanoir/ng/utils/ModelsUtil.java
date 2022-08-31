@@ -121,6 +121,17 @@ public final class ModelsUtil {
 	 * 
 	 * @return examination.
 	 */
+	public static Examination createExamination(Long id) {
+		final Examination examination = createExamination();
+		examination.setId(id);
+		return examination;
+	}
+	
+	/**
+	 * Create an examination.
+	 * 
+	 * @return examination.
+	 */
 	public static DatasetAcquisition createDatasetAcq() {
 		final DatasetAcquisition dsAcq = new MrDatasetAcquisition();
 		dsAcq.setAcquisitionEquipmentId(1L);

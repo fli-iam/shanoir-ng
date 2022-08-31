@@ -14,10 +14,7 @@
 
 package org.shanoir.ng.utils.assertion;
 
-import org.shanoir.ng.shared.exception.ShanoirException;
-import org.springframework.security.access.AccessDeniedException;
-
 @FunctionalInterface
 public interface AccessCheckedFunction3Arg<T, U, V> {
-	void apply(T t, U u, V v) throws AccessDeniedException, ShanoirException;
+	void apply(T t, U u, V v) throws Exception;
 }
