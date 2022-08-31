@@ -90,6 +90,7 @@ public class DICOMWebService implements DicomServiceApi {
 			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
 			httpPost.setEntity(entity);
 			CloseableHttpResponse response = httpClient.execute(httpPost);
+			LOG.error(response.toString());
 			response.getEntity();
 			response.close();
 		} catch (ClientProtocolException e) {

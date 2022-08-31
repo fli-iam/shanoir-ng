@@ -7,10 +7,13 @@ import javax.validation.Valid;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.datasetfile.service.DatasetFileApi;
 import org.shanoir.ng.datasetfile.service.DatasetFileService;
+import org.shanoir.ng.migration.DatasetMigrationService;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.migration.MigrationConstants;
 import org.shanoir.ng.shared.service.DicomServiceApi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,6 +61,8 @@ public class DatasetFileApiController implements DatasetFileApi {
 	
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
+	
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetFileApiController.class);
 
 	@Override
 	public 	ResponseEntity<DatasetFile> saveNewDatasetFile(
@@ -108,13 +113,16 @@ public class DatasetFileApiController implements DatasetFileApi {
 			destination = new File(migrationFolder + "/migration-" + datasetFile.getId() + File.separator + file.getName() + LocalDateTime.now());
 			if (datasetFile.isPacs()) {
 				// Copy file to load it in the PACS
+				LOG.error("Loading file to pacs " + destination.getAbsolutePath());
 				destination.getParentFile().mkdirs();
 				file.transferTo(destination);
 				// Transfer to pacs
 				if (dicomWeb) {
-					stowRsService.sendDicomFilesToPacs(destination.getParentFile());
+					LOG.error("stow");
+					stowRsService.sendDicomFilesToPacs(destination);
 				} else {
-					cStoreService.sendDicomFilesToPacs(destination.getParentFile());
+					LOG.error("cstore");
+					cStoreService.sendDicomFilesToPacs(destination);
 				}
 				FileUtils.deleteQuietly(destination.getParentFile());
 			} else {
@@ -130,7 +138,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while adding dataset file."));
 		} finally {
 			if (datasetFile.isPacs()) {
-				FileUtils.deleteQuietly(destination);
+				//FileUtils.deleteQuietly(destination);
 			}
 		}
 	}
