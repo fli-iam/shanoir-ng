@@ -113,6 +113,8 @@ public class DistantDatasetShanoirService {
 		try {
 			HttpHeaders headers = new HttpHeaders();
 			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+			
+			LOG.error("Sending to distant PACS");
 
 			HttpEntity<MultiValueMap<String, Object>> requestEntity	= new HttpEntity<>(body, headers);
 			distantKeycloak.getRestTemplate().postForEntity(getURI(ADD_FILE_TO_PACS + datasetFileId), requestEntity, Void.class);
