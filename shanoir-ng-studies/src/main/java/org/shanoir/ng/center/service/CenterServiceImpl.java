@@ -17,6 +17,8 @@ package org.shanoir.ng.center.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -28,8 +30,11 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
+import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +42,7 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -61,6 +67,9 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	private StudyUserRepository studyUserRepo;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(CenterServiceImpl.class);
 	
@@ -101,7 +110,14 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 	
 	@Override
 	public List<IdName> findIdsAndNames(Long studyId) {
-		return centerRepository.findIdsAndNames(studyId);
+		List<IdName> centers =  centerRepository.findIdsAndNames(studyId);
+		StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
+		
+		if (!CollectionUtils.isEmpty(studyUser.getCenters())) {
+			centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
+		}
+
+		return centers;
 	}
 
 	@Override
