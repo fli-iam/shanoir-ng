@@ -239,6 +239,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      * Test if a cell content is a boolean
      */
     isFieldBoolean(col: any): boolean {
+        console.log('is field boolean');
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
         let val = this.getCellValue(this.items[0], col);
         return col.type == 'boolean' || this.isValueBoolean(val);
@@ -572,6 +573,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     fold(i: number) {
         this.subRowOpen[i] = false;
+    }
+
+    isFunction(a: any): boolean {
+        return typeof a === 'function';
     }
 }
 

@@ -28,7 +28,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { findLastIndex, deepEquals } from '../../utils/app.utils';
+import { findLastIndex, arraysEqual, objectsEqual } from '../../utils/app.utils';
 import { GlobalService } from '../services/global.service';
 
 
@@ -100,11 +100,15 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.options && this.options) {
+        console.log('select change')
+        // if(changes.options?.currentValue[0]?.disabled != changes.options?.previousValue[0]?.disabled) {
+        //     console.log(this.options)
+        // }
+        if (changes.options && this.options && !arraysEqual(changes.options?.currentValue, changes.options?.previousValue)) {
             this.searchText = null;
             this.initSelectedOption();
             this.computeMinWidth();
-        } else if (changes.optionArr && this.optionArr) {
+        } else if (changes.optionArr && this.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
             this.searchText = null;
             this.options = [];
             this.optionArr.forEach(item => {
@@ -116,7 +120,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             });
             this.initSelectedOption();
             this.computeMinWidth();
-        } else if (changes.optionBuilder && this.optionBuilder) {
+        } else if (changes.optionBuilder && this.optionBuilder && changes.optionBuilder.currentValue != changes.optionBuilder.previousValue ) {
             this.searchText = null;
             if (this.optionBuilder.list) {
                 this.options = [];
@@ -301,10 +305,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private valuesEqual(value1, value2) {
-        if (value1 == value2) return true;
-        else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
-        else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
-        else return deepEquals(value1, value2);
+        return objectsEqual(value1, value2);
     }
 
     public open() {

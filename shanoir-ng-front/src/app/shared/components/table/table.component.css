@@ -48,7 +48,7 @@ tr.disabled { opacity: 0.7; }
 td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis; position: relative; }
 	td + td { border-left: 1px solid var(--light-grey); }
 	td.bool, td.progress { text-align: center; }
-	td.cell input:not([type='checkbox']), td.cell select { width: 100%; border: none; }
+	td.cell input:not([type='checkbox']), td.cell select { width: auto; border: none; padding-right: 10px; }
 	td.cell-date { text-align: right; }
 	td.cell-number { text-align: right; }
 	td.cell-nofield { text-align: center; }
@@ -57,7 +57,8 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 		td span.button i { color: var(--color-b); }
 	td.loading,
 	td.empty { padding: 20px 20px; text-align: center; }
-	.cell-container { overflow: hidden; text-overflow: ellipsis; }
+	.cell-container:not(.select) { overflow: hidden; text-overflow: ellipsis; }
+	.cell-container.multiselect { white-space: initial; }
 	.cell-container:empty:after { content: '.'; visibility: hidden; }
 
 .loader { float: right; border-left: none !important; }

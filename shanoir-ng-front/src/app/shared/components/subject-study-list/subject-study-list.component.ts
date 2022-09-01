@@ -17,9 +17,12 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Study } from '../../../studies/shared/study.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
+import { isDarkColor } from '../../../utils/app.utils';
 import { AbstractInput } from '../../form/input.abstract';
 import { Option } from '../../select/select.component';
 import { Mode } from '../entity/entity.component.abstract';
+import { BrowserPaging } from '../table/browser-paging.model';
+import { FilterablePageable, Page } from '../table/pageable.model';
 
 @Component({
   selector: 'subject-study-list',
@@ -34,7 +37,7 @@ import { Mode } from '../entity/entity.component.abstract';
 ]
 })
 
-export class SubjectStudyListComponent extends AbstractInput implements OnChanges {
+export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> implements OnChanges {
     
     @Input() mode: Mode;
     @Input() subject: Subject;
@@ -44,9 +47,10 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
     hasTags: boolean;
+    columnDefs: any[];
 
     get legend(): string {
-        return this.compMode == 'study' ? 'Subjects' : 'Studies';
+        return this.compMode == 'study' ? 'Subject' : 'Studie';
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -62,12 +66,50 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
                 }
             }
         }
+        if (changes.subject || changes.study) {
+            this.createColumnDefs();
+        }
     }
     
     writeValue(obj: any): void {
         super.writeValue(obj);
         this.processHasTags();
         this.updateDisabled();
+    }
+
+    getPage(pageable: FilterablePageable): Promise<Page<SubjectStudy>> {
+        return Promise.resolve(new BrowserPaging<SubjectStudy>(this.model, this.columnDefs).getPage(pageable));
+
+    }
+
+    private createColumnDefs() {
+        console.log('create')
+        if (this.compMode == 'study') {
+            this.columnDefs = [{ headerName: 'Subject', field: 'subject.name', defaultSortCol: true }];
+        } else if (this.compMode == 'subject') {
+            this.columnDefs = [{ headerName: 'Study', field: 'study.name', defaultSortCol: true }];
+        }
+        if (this.hasTags) {
+            this.columnDefs.push({ headerName: 'Tags', field: 'userName' });
+        } 
+        this.columnDefs.push(
+            { headerName: 'Tags', field: 'tags', editable: true, multi: true, 
+                possibleValues: (subjectStudy: SubjectStudy) => {
+                    console.log('get possible values ', subjectStudy.subject.name)
+                    return subjectStudy?.study?.tags?.map(tag => {
+                        let opt = new Option(tag, tag.name);
+                        if (tag.color) {
+                            opt.color = tag.color;
+                            opt.backgroundColor = isDarkColor(tag.color) ? 'white' : 'black';
+                        }
+                        return opt;
+                    });
+                }
+            },
+            { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
+            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', suppressSorting: true },
+            { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] },
+        );
     }
 
     private updateDisabled() {
@@ -140,11 +182,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     }
 
     getFontColor(colorInp: string): boolean {
-          var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
-          var r = parseInt(color.substring(0, 2), 16); // hexToR
-          var g = parseInt(color.substring(2, 4), 16); // hexToG
-          var b = parseInt(color.substring(4, 6), 16); // hexToB
-          return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
+          return isDarkColor(colorInp);
     }
 
 

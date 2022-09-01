@@ -248,6 +248,7 @@ import { StudyDTOService } from './studies/shared/study.dto';
 import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
+import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
 
 @NgModule({
     imports: [
@@ -419,7 +420,8 @@ import { VarDirective } from './utils/ng-var.directive';
         ConsoleComponent,
         TagInputComponent,
         StudyUserListComponent,
-        VarDirective
+        VarDirective,
+        MultiSelectComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

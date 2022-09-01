@@ -93,4 +93,4 @@ toggle-switch { margin: 0 10px; }
 .new-file .fa-plus { position: absolute; font-size: 6px; left: 7px; top: 4px; }
 
 :host().read-only { border: none !important; }
-.compact-button { cursor: pointer !important; }
+.compact-button { cursor: pointer !important; color: var(--color-a); }
