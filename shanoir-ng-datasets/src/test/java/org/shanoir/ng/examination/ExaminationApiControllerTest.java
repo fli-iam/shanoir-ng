@@ -42,6 +42,7 @@ import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -90,6 +91,9 @@ public class ExaminationApiControllerTest {
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
 	
 	public static String tempFolderPath;
+
+	@MockBean
+	private DicomSRImporterService dicomSRImporterService;
 
 	@BeforeClass
 	public static void beforeClass() {
