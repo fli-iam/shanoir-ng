@@ -38,6 +38,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +79,9 @@ public class DicomSRImporterService {
 	
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+	
+	@Autowired
+	private SolrService solrService;
 	
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
@@ -251,6 +255,7 @@ public class DicomSRImporterService {
 		createDatasetExpression(datasetAttributes, measurementDataset);
 		dataset.getDatasetAcquisition().getDatasets().add(measurementDataset);
 		datasetAcquisitionRepository.save(dataset.getDatasetAcquisition());
+		solrService.indexDataset(measurementDataset.getId());
 	}
 
 	private void completeDatasetFromDicomSR(Attributes datasetAttributes, MeasurementDataset measurementDataset) {
