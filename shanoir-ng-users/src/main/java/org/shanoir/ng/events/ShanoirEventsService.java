@@ -36,7 +36,7 @@ public class ShanoirEventsService {
 		repository.save(event);
 
 		// Push notification to UI
-		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())) {
+		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType()) || ShanoirEventType.MIGRATE_STUDY_EVENT.equals(event.getEventType())) {
 			sendSseEventsToUI(event);
 		}
 	}

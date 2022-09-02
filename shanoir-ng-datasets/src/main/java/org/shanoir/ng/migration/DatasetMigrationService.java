@@ -167,10 +167,9 @@ public class DatasetMigrationService {
 		List<Examination> examinations = examRepository.findByStudyId(job.getOldStudyId());
 		Map<Long, Long> examMap = new HashMap<>();
 
-		int i = 1;
 		for (Examination exam : examinations) {
 			Long oldId = exam.getId();
-			publishEvent("Migrating Examination: " + oldId , i++ / examinations.size());
+			publishEvent("Migrating Examination: " + oldId , event.getProgress() +  1 / examinations.size());
 
 			Examination createdExam = migrateExamination(exam, job);
 			examMap.put(oldId, createdExam.getId());
