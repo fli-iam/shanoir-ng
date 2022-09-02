@@ -13,8 +13,6 @@
  */
 package org.shanoir.ng.acquisitionequipment.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +20,7 @@ import java.util.Map;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -29,7 +28,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -50,22 +48,13 @@ public class RabbitMqCenterService {
 	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CENTER_QUEUE)
 	@RabbitHandler
 	@Transactional
-	public Map<Long, Long> findCenterIdsFromAcquisitionEquipements(String message) {
+	public String findCenterIdFromAcquisitionEquipement(String message) {
 		try {
-			String[] longs = message.split(",");
-			List<Long> ids = new ArrayList<>();
-			for (String id : longs) {
-				ids.add(Long.valueOf(id));
-			}
-			List<AcquisitionEquipment> equipments = Utils.toList(acquisitionEquipementService.findAllById(ids));
-			if (CollectionUtils.isEmpty(equipments)) {
-				return Collections.emptyMap();
+			AcquisitionEquipment ae = acquisitionEquipementService.findById(Long.valueOf(message)).orElse(null);
+			if (ae == null) {
+				return null;
 			} else {
-				Map<Long, Long> centersMap = new HashMap<>();
-				for (AcquisitionEquipment equip : equipments) {
-					centersMap.put(equip.getId(), equip.getCenter().getId());
-				}
-				return centersMap;
+				return mapper.writeValueAsString(new IdName(ae.getCenter().getId(), ae.getCenter().getName()));
 			}
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(e);
