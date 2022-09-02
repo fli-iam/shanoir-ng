@@ -26,6 +26,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -63,13 +64,13 @@ public class DicomSRImporterService {
 
 	private static final String SR = "SR";
 
-	private static final String IMAGING_MEASUREMENT = "Imaging Measurement";
+	private static final String IMAGING_MEASUREMENT_REPORT = "Imaging Measurement Report";
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
 	
 	@Autowired
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
+	private DatasetService datasetService;
 	
 	@Autowired
 	private SubjectRepository subjectRepository;
@@ -236,26 +237,27 @@ public class DicomSRImporterService {
 	}
 	
 	private void createDataset(Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException {
+		DatasetAcquisition acquisition = dataset.getDatasetAcquisition();
 		MeasurementDataset measurementDataset = new MeasurementDataset();
-		completeDatasetFromDicomSR(datasetAttributes, measurementDataset);
+//		measurementDataset.setDatasetAcquisition(acquisition);
+		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
 		measurementDataset.setStudyId(examination.getStudyId());
 		measurementDataset.setSubjectId(examination.getSubjectId());
 		measurementDataset.setCreationDate(LocalDate.now());
-		measurementDataset.setDatasetAcquisition(dataset.getDatasetAcquisition());
-		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
-		// Metadata
+		completeDatasetFromDicomSR(datasetAttributes, measurementDataset);
+		createMetadata(measurementDataset);
+		createDatasetExpression(datasetAttributes, measurementDataset);
+		datasetService.create(measurementDataset);
+	}
+
+	private void createMetadata(MeasurementDataset measurementDataset) {
 		DatasetMetadata originMetadata = new DatasetMetadata();
-		String datasetName = IMAGING_MEASUREMENT + ": " + measurementDataset.getTrackingIdentifier() + ": " + measurementDataset.getNumericValue();
-		originMetadata.setName(datasetName);
-		originMetadata.setComment(datasetName);
-		originMetadata.setDatasetModalityType(DatasetModalityType.MR_DATASET);
+		originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
+		originMetadata.setComment(IMAGING_MEASUREMENT_REPORT);
+		originMetadata.setDatasetModalityType(DatasetModalityType.GENERIC_DATASET);
 		originMetadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);		
 		measurementDataset.setOriginMetadata(originMetadata);
 		measurementDataset.setUpdatedMetadata(originMetadata);
-		createDatasetExpression(datasetAttributes, measurementDataset);
-		dataset.getDatasetAcquisition().getDatasets().add(measurementDataset);
-		datasetAcquisitionRepository.save(dataset.getDatasetAcquisition());
-		solrService.indexDataset(measurementDataset.getId());
 	}
 
 	private void completeDatasetFromDicomSR(Attributes datasetAttributes, MeasurementDataset measurementDataset) {
