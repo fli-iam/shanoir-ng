@@ -18,7 +18,7 @@ import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
-import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticationProcessingFilter;
+import org.keycloak.adapters.springsecurity.filter.KeycloakAuthenticatedActionsFilter;
 import org.shanoir.ng.dicom.web.StowRSMultipartRelatedRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -85,7 +85,7 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 			.and()
 			.csrf()
 				.disable()
-			.addFilterAfter(multipartRelatedRequestFilter, KeycloakAuthenticationProcessingFilter.class)
+			.addFilterAfter(multipartRelatedRequestFilter, KeycloakAuthenticatedActionsFilter.class)
 			.authorizeRequests()
 				.antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
 				.anyRequest().authenticated();
