@@ -31,7 +31,6 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
@@ -39,7 +38,6 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,9 +78,6 @@ public class DicomSRImporterService {
 	
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
-	
-	@Autowired
-	private SolrService solrService;
 	
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
@@ -237,9 +232,7 @@ public class DicomSRImporterService {
 	}
 	
 	private void createDataset(Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException {
-		DatasetAcquisition acquisition = dataset.getDatasetAcquisition();
 		MeasurementDataset measurementDataset = new MeasurementDataset();
-//		measurementDataset.setDatasetAcquisition(acquisition);
 		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
 		measurementDataset.setStudyId(examination.getStudyId());
 		measurementDataset.setSubjectId(examination.getSubjectId());
