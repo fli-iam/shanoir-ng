@@ -52,6 +52,10 @@ import org.springframework.transaction.annotation.Transactional;
  * viewer created DICOM SR to correspond to shanoir needs, creates
  * the dataset in the database and sends the dicom file to the pacs.
  * 
+ * The import only happens in the servers memory, as the structured
+ * reports are very small memory footprint objects and as this avoids
+ * us any implication of MS Import in this special case.
+ * 
  * @author mkain
  *
  */
@@ -231,18 +235,31 @@ public class DicomSRImporterService {
 		return null;
 	}
 	
+	/**
+	 * Create the dataset in the database.
+	 * 
+	 * @param examination
+	 * @param dataset
+	 * @param datasetAttributes
+	 * @throws MalformedURLException
+	 */
 	private void createDataset(Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException {
 		MeasurementDataset measurementDataset = new MeasurementDataset();
 		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
 		measurementDataset.setStudyId(examination.getStudyId());
 		measurementDataset.setSubjectId(examination.getSubjectId());
 		measurementDataset.setCreationDate(LocalDate.now());
-		completeDatasetFromDicomSR(datasetAttributes, measurementDataset);
+//		completeDatasetFromDicomSR(datasetAttributes, measurementDataset);
 		createMetadata(measurementDataset);
 		createDatasetExpression(datasetAttributes, measurementDataset);
 		datasetService.create(measurementDataset);
 	}
 
+	/**
+	 * Create the dataset metadata.
+	 * 
+	 * @param measurementDataset
+	 */
 	private void createMetadata(MeasurementDataset measurementDataset) {
 		DatasetMetadata originMetadata = new DatasetMetadata();
 		originMetadata.setName(IMAGING_MEASUREMENT_REPORT);
@@ -253,6 +270,16 @@ public class DicomSRImporterService {
 		measurementDataset.setUpdatedMetadata(originMetadata);
 	}
 
+	/**
+	 * This method extracts important data, that could later be stored even
+	 * inside shanoir-database, to optimize mass data export of all measurements
+	 * e.g. for one study. This code works and has been tested to access the most
+	 * important measurement attributes and was hard to construct. Even if currently
+	 * not used, we keep it for a very high later usage.
+	 * 
+	 * @param datasetAttributes
+	 * @param measurementDataset
+	 */
 	private void completeDatasetFromDicomSR(Attributes datasetAttributes, MeasurementDataset measurementDataset) {
 		Sequence contentSequence = datasetAttributes.getSequence(Tag.ContentSequence);
 		if (contentSequence != null) {
@@ -271,7 +298,6 @@ public class DicomSRImporterService {
 							if (measurementGroupAttributes1 != null) {
 								String trackingIdentifier = measurementGroupAttributes1.getString(Tag.TextValue);
 								String trackingIdentifierType = trackingIdentifier.substring(trackingIdentifier.indexOf(":") + 1);
-								measurementDataset.setTrackingIdentifier(trackingIdentifierType);
 							}
 							// level measured values
 							Attributes measurementGroupAttributes2 = measurementGroupSequence.get(2);
@@ -282,7 +308,6 @@ public class DicomSRImporterService {
 									if (measuredValueAttributes != null) {
 										// get numeric value and graphic data
 										String numericValue = measuredValueAttributes.getString(Tag.NumericValue);
-										measurementDataset.setNumericValue(numericValue);
 									}
 								}
 								Sequence graphicDataSequence = measurementGroupAttributes2.getSequence(Tag.ContentSequence);
@@ -290,7 +315,6 @@ public class DicomSRImporterService {
 									Attributes graphicDataAttributes = graphicDataSequence.get(0);
 									if (graphicDataAttributes != null) {
 										String graphicData = graphicDataAttributes.getString(Tag.GraphicData);
-										measurementDataset.setGraphicData(graphicData);										
 									}
 								}
 							}
@@ -301,6 +325,13 @@ public class DicomSRImporterService {
 		}
 	}
 
+	/**
+	 * Create the necessary dataset expression.
+	 * 
+	 * @param datasetAttributes
+	 * @param measurementDataset
+	 * @throws MalformedURLException
+	 */
 	private void createDatasetExpression(Attributes datasetAttributes, MeasurementDataset measurementDataset)
 			throws MalformedURLException {
 		DatasetExpression expression = new DatasetExpression();
@@ -312,6 +343,15 @@ public class DicomSRImporterService {
 		expression.setDatasetFiles(files);
 	}
 
+	/**
+	 * Create the dataset files, as WADO-RS links in that case,
+	 * as OHIF viewer works only with new version of dcm4chee (arc-light 5.x).
+	 * 
+	 * @param datasetAttributes
+	 * @param expression
+	 * @return
+	 * @throws MalformedURLException
+	 */
 	private List<DatasetFile> createDatasetFiles(Attributes datasetAttributes, DatasetExpression expression)
 			throws MalformedURLException {
 		DatasetFile datasetFile = new DatasetFile();
