@@ -56,11 +56,19 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 	private Pair<List<Examination>, Long> find(Iterable<Pair<Long, Long>> studyCenterIds,
 			Iterable<Long> studyIds, Pageable pageable, Boolean preclinical, String subjectName) {
 		
-		String queryEndStr = "from Examination as ex "
-				+ (preclinical != null ? "where ex.preclinical is ?2 " : " ")
-				+ (subjectName != null ? "and ex.subject.name is ?3" : " ")
-				+ "and (ex.studyId in ?1 ";
-		int i = 2;
+		String queryEndStr = "from Examination as ex ";
+		int nbPreParams = 1;
+		if (preclinical != null) {
+			nbPreParams++;
+			queryEndStr +=  "where ex.preclinical is ?" + nbPreParams + " ";
+		}
+		if (subjectName != null) {
+			nbPreParams++;
+			queryEndStr +=  "and ex.subject.name is ?" + nbPreParams + " ";
+		} 
+		queryEndStr += "and (ex.studyId in ?1 ";
+		
+		int i = nbPreParams;
 		for (@SuppressWarnings("unused") Pair<Long, Long> studyCenter : studyCenterIds) {
 			queryEndStr += "or (ex.studyId = ?" + i + " and ex.centerId = ?" + (i + 1) + ") ";
 			i += 2;
@@ -88,7 +96,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 		if (preclinical != null) {
 			query.setParameter(2, preclinical);
 		}
-		i = 2;
+		i = nbPreParams;
 		for (Pair<Long, Long> studyCenter : studyCenterIds) {
 			query.setParameter(i, studyCenter.getFirst());
 			query.setParameter(i + 1, studyCenter.getSecond());
