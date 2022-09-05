@@ -51,6 +51,14 @@ public interface CenterService extends BasicEntityService<Center> {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	Center findByName(String name);
 
+	/**
+	 * Find id and name for all centers.
+	 * 
+	 * @param studyId
+	 * @return list of centers.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	List<Center> findByStudy(Long studyId);
 
 	/**
 	 * Find id and name for all centers.
@@ -68,7 +76,6 @@ public interface CenterService extends BasicEntityService<Center> {
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	List<IdName> findIdsAndNames(Long studyId);
-	
 	
 	/**
 	 * Save an entity.
