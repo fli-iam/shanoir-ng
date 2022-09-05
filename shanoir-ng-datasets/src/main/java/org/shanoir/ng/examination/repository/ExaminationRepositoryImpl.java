@@ -9,6 +9,8 @@ import javax.persistence.Query;
 import org.apache.commons.math3.util.Pair;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ExaminationRepositoryImpl.class);
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -58,22 +62,26 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 		
 		String queryEndStr = "from Examination as ex ";
 		int nbPreParams = 1;
+		int preclinicalIndex = -1;
+		int subjectNameIndex = -1;
 		if (preclinical != null) {
 			nbPreParams++;
-			queryEndStr +=  "where ex.preclinical is ?" + nbPreParams + " ";
+			preclinicalIndex = nbPreParams;
+			queryEndStr +=  "where ex.preclinical is ?" + preclinicalIndex + " ";
 		}
 		if (subjectName != null) {
 			nbPreParams++;
-			queryEndStr +=  "and ex.subject.name is ?" + nbPreParams + " ";
+			subjectNameIndex = nbPreParams;
+			queryEndStr +=  "and ex.subject.name is ?" + subjectNameIndex + " ";
 		} 
 		queryEndStr += "and (ex.studyId in ?1 ";
 		
-		int i = nbPreParams;
+		int i = nbPreParams + 1;
 		for (@SuppressWarnings("unused") Pair<Long, Long> studyCenter : studyCenterIds) {
 			queryEndStr += "or (ex.studyId = ?" + i + " and ex.centerId = ?" + (i + 1) + ") ";
 			i += 2;
 		}
-		queryEndStr += ")";
+		queryEndStr += ") ";
 		
 		String queryStr = "select ex " + queryEndStr;
 		
@@ -90,13 +98,18 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 			}
 		}
 		
+		LOG.debug("examination paging hql query : " + queryStr);
+		
 		Query query = entityManager.createQuery(queryStr);
 		
 		query.setParameter(1, studyIds);
 		if (preclinical != null) {
-			query.setParameter(2, preclinical);
+			query.setParameter(preclinicalIndex, preclinical);
 		}
-		i = nbPreParams;
+		if (subjectName != null) {
+			query.setParameter(subjectNameIndex, subjectName);
+		}
+		i = nbPreParams + 1;
 		for (Pair<Long, Long> studyCenter : studyCenterIds) {
 			query.setParameter(i, studyCenter.getFirst());
 			query.setParameter(i + 1, studyCenter.getSecond());
@@ -109,10 +122,12 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 			Query queryCount = entityManager.createQuery(queryCountStr);			
 			queryCount.setParameter(1, studyIds);
 			if (preclinical != null) {
-				query.setParameter(2, preclinical);
-				queryCount.setParameter(2, preclinical);
+				queryCount.setParameter(preclinicalIndex, preclinical);
 			}
-			i = nbPreParams;
+			if (subjectName != null) {
+				queryCount.setParameter(subjectNameIndex, subjectName);
+			}
+			i = nbPreParams + 1;
 			for (Pair<Long, Long> studyCenter : studyCenterIds) {
 				queryCount.setParameter(i, studyCenter.getFirst());
 				queryCount.setParameter(i + 1, studyCenter.getSecond());
@@ -122,6 +137,8 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 			query.setFirstResult(Math.toIntExact(pageable.getPageNumber() * pageable.getPageSize()));
 			query.setMaxResults(pageable.getPageSize());
 		}
+		
+		LOG.debug("examination paging query : " + query);
 
 		return new Pair<>(query.getResultList(), total);
 	}
