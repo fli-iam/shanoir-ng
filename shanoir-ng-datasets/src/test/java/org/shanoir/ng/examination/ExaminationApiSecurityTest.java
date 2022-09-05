@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.math3.util.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +50,7 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -204,7 +206,10 @@ public class ExaminationApiSecurityTest {
 		//exam 4 is in study 4 > subject 4
 		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
-		given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
+		given(examinationRepository.findPageByStudyCenterOrStudyIdIn(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
+		given(examinationRepository.findPageByStudyCenterOrStudyIdIn(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
+		given(examinationRepository.findPageByStudyCenterOrStudyIdInAndSubjectName(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
+		given(examinationRepository.findAllByStudyCenterOrStudyIdIn(Mockito.any(), Mockito.any())).willReturn(Arrays.asList(new Examination[]{exam1}));
 		
 		// study 1
 		Study study1 = mockStudy(1L);

@@ -235,7 +235,7 @@ public class ExaminationApiControllerTest {
 		assertEquals(exam.getStudyId(), event.getStudyId());
 		assertEquals(exam.getId().toString(), event.getObjectId());
 		// This is import, plese keep it, or change RabbitMQStudiesService#linkExamination method
-		assertEquals("centerId:" + exam.getCenterId() + ";subjectId:" + exam.getSubjectId(), event.getMessage());
+		assertEquals("centerId:" + exam.getCenterId() + ";subjectId:" + (exam.getSubject() != null ? exam.getSubject().getName() : null), event.getMessage());
 
 		assertEquals(ShanoirEventType.CREATE_EXAMINATION_EVENT, event.getEventType());
 	}

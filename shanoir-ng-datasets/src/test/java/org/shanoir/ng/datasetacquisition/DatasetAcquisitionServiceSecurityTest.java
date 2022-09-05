@@ -334,7 +334,7 @@ public class DatasetAcquisitionServiceSecurityTest {
 		//exam 4 is in study 4 > subject 4
 		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
-		given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
+		//given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
 		
 		// study 1
 		Study study1 = mockStudy(1L);
@@ -359,10 +359,10 @@ public class DatasetAcquisitionServiceSecurityTest {
 		given(datasetAcquisitionRepository.findById(4L)).willReturn(Optional.of(dsAcq4));
 		given(datasetAcquisitionRepository.findByStudyCardId(4L)).willReturn(Utils.toList(dsAcq4));
 		
-		given(datasetAcquisitionRepository.findByExaminationByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{}), PageRequest.of(0, 10), 0));
+		given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{}), PageRequest.of(0, 10), 0));
 		List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
 		studyCenterIds.add(new Pair<Long, Long>(1L, 1L));
-		given(datasetAcquisitionRepository.findByExaminationByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newHashSet(new Long[]{}), PageRequest.of(0, 10))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
+		given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newHashSet(new Long[]{}), PageRequest.of(0, 10))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
 		given(datasetAcquisitionRepository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1, dsAcq2, dsAcq3, dsAcq4}), PageRequest.of(0, 10), 0));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Long[]{1L, 2L}));
 		StudyUser su1 = new StudyUser();

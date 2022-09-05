@@ -81,7 +81,7 @@ public class DatasetAcquisitionRepositoryTest {
 	}
 	
 	@Test
-	public void findByExaminationByStudyCenterOrStudyIdInTest() throws Exception {
+	public void findPageByStudyCenterOrStudyIdInTest() throws Exception {
 		List<Pair<Long, Long>> studyCentersList = new ArrayList<>();
 		studyCentersList.add(new Pair<Long, Long>(1L, 1L));
 		Set<Long> studyIds = new HashSet<>();
@@ -91,7 +91,7 @@ public class DatasetAcquisitionRepositoryTest {
 		orders.add(new Order(Direction.ASC, "acquisitionEquipmentId"));
 		Pageable pageable = PageRequest.of(0, 10, Sort.by(orders));
 		
-		Page<DatasetAcquisition> pageDB = repository.findByExaminationByStudyCenterOrStudyIdIn(studyCentersList, studyIds, pageable);
+		Page<DatasetAcquisition> pageDB = repository.findPageByStudyCenterOrStudyIdIn(studyCentersList, studyIds, pageable);
 		assertEquals(2, pageDB.getNumberOfElements());
 	}
 

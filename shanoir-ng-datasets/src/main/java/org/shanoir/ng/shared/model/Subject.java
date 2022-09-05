@@ -22,7 +22,10 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.apache.http.client.utils.Idn;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.core.model.IdNameInterface;
+import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -33,12 +36,14 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Table(name = "subject")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Subject extends IdName {
+public class Subject extends HalEntity implements IdNameInterface {
 	
-	@Id
-	private Long id;
-	 
-	private String name;
+	String name;
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6450012948865306847L;
 
 	/** Relations beetween the subjects and the studies. */
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY, orphanRemoval = true)
@@ -51,40 +56,8 @@ public class Subject extends IdName {
 	 * @param name
 	 */
 	public Subject (Long id, String name) {
-		this.id = id;
-		this.name = name;
-	}
-
-	/**
-	 * @return the id
-	 */
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return the name
-	 */
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name the name to set
-	 */
-	@Override
-	public void setName(String name) {
-		this.name = name;
+		this.setId(id);
+		this.setName(name);
 	}
 
 	/**
@@ -100,5 +73,13 @@ public class Subject extends IdName {
 	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
 		this.subjectStudyList = subjectStudyList;
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}	
 
 }

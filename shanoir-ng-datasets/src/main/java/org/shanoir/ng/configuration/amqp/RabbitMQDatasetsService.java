@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.assertj.core.util.Arrays;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -30,6 +29,7 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.core.model.IdNameInterface;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Center;
@@ -62,9 +62,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * RabbitMQ configuration.
@@ -243,7 +241,7 @@ public class RabbitMQDatasetsService {
 		receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
 	}
 	
-	private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
+	private <T extends IdNameInterface> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
 		IdName received = new IdName();
 		try {
 			received = objectMapper.readValue(receivedStr, IdName.class);

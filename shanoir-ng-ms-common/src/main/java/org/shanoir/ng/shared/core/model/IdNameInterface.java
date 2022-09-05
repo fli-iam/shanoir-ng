@@ -14,60 +14,28 @@
 
 package org.shanoir.ng.shared.core.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class IdName implements IdNameInterface {
-
-	private Long id;
-
-	private String name;
-
-	/**
-	 * Default constructor.
-	 */
-	public IdName() {
-	}
-
-	/**
-	 * Constructor with id and name.
-	 * 
-	 * @param id object id.
-	 * @param name object name.
-	 */
-	public IdName(final Long id, final String name) {
-		this.id = id;
-		this.name = name;
-	}
+public interface IdNameInterface {
 
 	/**
 	 * @return the id
 	 */
-	public Long getId() {
-		return id;
-	}
+	public Long getId();
 
 	/**
 	 * @param id
 	 *            the id to set
 	 */
-	public void setId(Long id) {
-		this.id = id;
-	}
-
+	public void setId(Long id);
+	
 	/**
 	 * @return the name
 	 */
-	public String getName() {
-		return name;
-	}
+	public String getName();
 
 	/**
 	 * @param name
 	 *            the name to set
 	 */
-	public void setName(String name) {
-		this.name = name;
-	}
+	public void setName(String name);
 
 }
