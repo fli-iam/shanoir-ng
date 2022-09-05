@@ -17,7 +17,6 @@ package org.shanoir.ng.center.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.center.model.Center;
@@ -113,6 +112,18 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 		List<IdName> centers =  centerRepository.findIdsAndNames(studyId);
 		StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
 		
+		if (!CollectionUtils.isEmpty(studyUser.getCenters())) {
+			centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
+		}
+
+		return centers;
+	}
+
+	@Override
+	public List<Center> findByStudy(Long studyId) {
+		List<Center> centers = centerRepository.findByStudy(studyId);
+		StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
+
 		if (!CollectionUtils.isEmpty(studyUser.getCenters())) {
 			centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
 		}
