@@ -112,6 +112,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 				query.setParameter(2, preclinical);
 				queryCount.setParameter(2, preclinical);
 			}
+			i = nbPreParams;
 			for (Pair<Long, Long> studyCenter : studyCenterIds) {
 				queryCount.setParameter(i, studyCenter.getFirst());
 				queryCount.setParameter(i + 1, studyCenter.getSecond());
