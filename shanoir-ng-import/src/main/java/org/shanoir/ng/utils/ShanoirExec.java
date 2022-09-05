@@ -66,7 +66,7 @@ public class ShanoirExec {
 	 */
 	public String clidcmExec(final String inputFolder, final String clidcmPath, final String outputFolder) {
 		LOG.debug("clidcmExec : Begin");
-		LOG.info("clidcmExec : {}", clidcmPath);
+		LOG.debug("clidcmExec : {}", clidcmPath);
 
 		String[] cmd = new String[4];
 		cmd[0] = clidcmPath;
@@ -133,7 +133,7 @@ public class ShanoirExec {
 	 */
 	public String dcm2niiExec(final String inputFolder, final String dcm2niiPath, final String outputFolder, boolean is4D) {
 		LOG.debug("dcm2niiExec : Begin");
-		LOG.info("dcm2niiExec : {}", dcm2niiPath);
+		LOG.debug("dcm2niiExec : {}", dcm2niiPath);
 
 		String[] cmd = null;
 
@@ -252,7 +252,7 @@ public class ShanoirExec {
 			}
 		}
 
-		LOG.info("CMD DCM2NII {}", Arrays.asList(cmd));
+		LOG.debug("CMD DCM2NII {}", Arrays.asList(cmd));
 
 		final String result = exec(cmd);
 
@@ -274,7 +274,7 @@ public class ShanoirExec {
 	 */
 	public String mcverterExec(final String inputFolder, final String mcverterPath, final String outputFolder, boolean is4D) {
 		LOG.debug("mcverterExec : Begin");
-		LOG.info("mcverterExec : {}", mcverterPath);
+		LOG.debug("mcverterExec : {}", mcverterPath);
 
 		String[] cmd = null;
 		if(is4D){
@@ -395,7 +395,7 @@ public class ShanoirExec {
 			result += outputGobbler.getStringDisplay();
 		}
 
-		LOG.info("mcverterVersionExec = {}", result);
+		LOG.debug("mcverterVersionExec = {}", result);
 		LOG.debug("mcverterVersionExec : End");
 		return result;
 
@@ -413,11 +413,11 @@ public class ShanoirExec {
 	 */
 	public String dcm2niiVersionExec(final String dcm2niiPath) {
 		LOG.debug("dcm2niiVersionExec : Begin");
-		LOG.info("dcm2niiVersionExec : {}", dcm2niiPath);
+		LOG.debug("dcm2niiVersionExec : {}", dcm2niiPath);
 		String[] cmd = new String[1];
 		cmd[0] = dcm2niiPath;
 		final String result = exec(cmd);
-		LOG.info("dcm2niiVersionExec : {}", result);
+		LOG.debug("dcm2niiVersionExec : {}", result);
 		LOG.debug("dcm2niiVersionExec : End");
 		return result;
 	}
@@ -462,7 +462,7 @@ public class ShanoirExec {
 		cmdLine.append(outputFolder);
 		cmd[2] = cmdLine.toString();
 
-		LOG.info("CMD DICOM2NIFTI {}", Arrays.asList(cmd));
+		LOG.debug("CMD DICOM2NIFTI {}", Arrays.asList(cmd));
 
 		final String result = exec(cmd);
 
@@ -483,7 +483,7 @@ public class ShanoirExec {
 	 */
 	public String dcmdjpeg(final String dcmdjpegPath, final String inputFile, final String outputFile) {
 		LOG.debug("dcmdjpeg : Begin");
-		LOG.info("dcmdjpeg : {}", dcmdjpegPath);
+		LOG.debug("dcmdjpeg : {}", dcmdjpegPath);
 
 		String[] cmd = new String[3];
 		cmd[0] = dcmdjpegPath;

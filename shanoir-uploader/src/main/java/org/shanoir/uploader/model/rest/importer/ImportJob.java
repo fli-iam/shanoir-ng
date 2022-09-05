@@ -70,6 +70,17 @@ public class ImportJob {
 	@JsonProperty("anonymisationProfileToUse")
 	private String anonymisationProfileToUse;
 
+	@JsonProperty("userId")
+	private Long userId;
+	
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
 	public boolean isFromCsv() {
 		return fromCsv;
 	}
@@ -78,7 +89,7 @@ public class ImportJob {
 		this.fromCsv = fromCsv;
 	}
 
-    public boolean isFromDicomZip() {
+	public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
 

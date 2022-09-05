@@ -232,6 +232,9 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 import { SolrPagingCriterionComponent } from './solr/criteria/solr.paging-criterion.component';
 import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
+import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
+import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
+import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { SolrTextSearchModeComponent } from './solr/text-search/solr.text-search-mode.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
@@ -245,6 +248,13 @@ import { StudyDTOService } from './studies/shared/study.dto';
 import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
+import { ProcessingComponent } from './processing/processing.component';
+import { PipelinesComponent } from './processing/pipelines/pipelines.component';
+import { CarminClientService } from './carmin/shared/carmin-client.service';
+import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.component';
+import { ExecutionComponent } from './processing/execution/execution.component';
+import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
+import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
 
 @NgModule({
     imports: [
@@ -405,6 +415,9 @@ import { VarDirective } from './utils/ng-var.directive';
         EventTypePipe,
         SolrPagingCriterionComponent,
         SolrTextSearchComponent,
+        MetadataComponent,
+        StudyCardApplyComponent,
+        ApplyStudyCardOnComponent,
         SolrTextSearchModeComponent,
         ChallengeBlockComponent,
         TagCreatorComponent,
@@ -413,7 +426,12 @@ import { VarDirective } from './utils/ng-var.directive';
         ConsoleComponent,
         TagInputComponent,
         StudyUserListComponent,
-        VarDirective
+        VarDirective,
+        ProcessingComponent,
+        PipelinesComponent,
+        PipelineComponent,
+        ExecutionComponent,
+        CarminDatasetProcessingsComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -437,6 +455,8 @@ import { VarDirective } from './utils/ng-var.directive';
         CenterService,
         ConfirmDialogService,
         ExaminationService,
+        CarminClientService,
+        CarminDatasetProcessingService,
         {
             provide: ErrorHandler,
             useClass: HandleErrorService

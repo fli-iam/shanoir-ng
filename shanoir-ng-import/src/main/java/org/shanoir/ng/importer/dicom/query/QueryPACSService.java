@@ -36,6 +36,7 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,7 @@ public class QueryPACSService {
 	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws ShanoirImportException {
 		ImportJob importJob = new ImportJob();
+		importJob.setUserId(KeycloakUtil.getTokenUserId());
 		importJob.setFromPacs(true);
 		/**
 		 * In case of any patient specific search field is filled, work on patient level. Highest priority.
@@ -162,8 +164,11 @@ public class QueryPACSService {
 			List<Patient> patients = new ArrayList<>();
 			for (int i = 0; i < patientsNbre; i++) {
 				Patient patient = new Patient(attributesPatients.get(i));
-				patients.add(patient);
-				queryStudies(calling, called, dicomQuery, patient);
+				boolean patientExists = patients.stream().anyMatch(p -> p.getPatientID().equals(patient.getPatientID()));
+				if (!patientExists) {
+					patients.add(patient);
+					queryStudies(calling, called, dicomQuery, patient);
+				}
 			}
 			importJob.setPatients(patients);
 		}

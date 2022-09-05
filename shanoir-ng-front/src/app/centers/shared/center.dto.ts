@@ -42,7 +42,7 @@ export class CenterDTOService {
         if (!result) result = [];
         if (dtos) {
             if (dtos) {
-                for (let dto of dtos) {
+                for (let dto of dtos ? dtos : []) {
                     let entity = new Center();
                     CenterDTOService.mapSyncFields(dto, entity);
                     result.push(entity);

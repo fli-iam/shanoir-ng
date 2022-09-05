@@ -20,7 +20,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +31,6 @@ import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
-import javax.xml.crypto.Data;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.slf4j.Logger;
@@ -45,6 +43,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 /**
  * This class is used to download files on using WADO URLs:
@@ -79,12 +78,11 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class WADODownloaderService {
 
-	/** Logger. */
-	private static final Logger LOG = LoggerFactory.getLogger(WADODownloaderService.class);
-
 	private static final String WADO_REQUEST_TYPE_WADO_RS = "/instances/";
-
+	
 	private static final String WADO_REQUEST_TYPE_WADO_URI = "objectUID=";
+	
+	private static final String WADO_REQUEST_STUDY_WADO_URI = "studyUID=";
 
 	private static final String DCM = ".dcm";
 
@@ -94,8 +92,14 @@ public class WADODownloaderService {
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 	
 	private static final String CONTENT_TYPE_DICOM = "application/dicom";
+	
+	private static final String CONTENT_TYPE_DICOM_XML = "application/dicom+xml";
+	
+	private static final String CONTENT_TYPE_DICOM_JSON = "application/json";
 
 	private static final String CONTENT_TYPE = "&contentType";
+
+	private static final Logger LOG = LoggerFactory.getLogger(WADODownloaderService.class);
 	
 	@Autowired
 	private RestTemplate restTemplate;
@@ -117,7 +121,7 @@ public class WADODownloaderService {
 	 * @throws MessagingException
 	 */
 	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
-		for (Iterator iterator = urls.iterator(); iterator.hasNext();) {
+		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			String url = ((URL) iterator.next()).toString();
 			String instanceUID = null;
 			// handle and check at first for WADO-RS URLs by "/instances/"
@@ -137,9 +141,10 @@ public class WADODownloaderService {
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
 					String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
 					String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
-					if (name.contains(File.separator)) {
-						name = name.replaceAll(File.separator, "_");
-					}
+
+					// Replace all forbidden characters.
+					name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
 					File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
 					ByteArrayInputStream bIS = null;
 					try {
@@ -154,6 +159,17 @@ public class WADODownloaderService {
 					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
 				}
 			}
+		}
+	}
+	
+	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {
+		if (url != null) {
+			String urlStr = url.toString();
+			if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURItoWadoRS(urlStr);
+			urlStr = urlStr.split(CONTENT_TYPE)[0].concat("/metadata/");
+			return downloadMetadataFromPACS(urlStr);
+		} else {
+			return null;
 		}
 	}
 
@@ -199,6 +215,22 @@ public class WADODownloaderService {
 			throw new IOException("Download did not work: wrong status code received.");
 		}
 	}
+	
+	
+	private String downloadMetadataFromPACS(final String url) throws IOException, RestClientException {
+		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
+		HttpEntity<String> entity = new HttpEntity<>(headers);
+		LOG.debug("Download metadata from pacs, url : " + url);
+		ResponseEntity<String> response = restTemplate.exchange(url,
+				HttpMethod.GET, entity,String.class, "1");
+		if (response.getStatusCode() == HttpStatus.OK) {
+			return response.getBody();
+		} else {
+			throw new IOException("Download did not work: wrong status code received.");
+		}
+	}
 
 	/**
 	 * This method reads in a file in format MHTML, one representation of a multipart/related response, that is given from
@@ -223,7 +255,7 @@ public class WADODownloaderService {
 			int count = multipart.getCount();
 			for (int i = 0; i < count; i++) {
 				BodyPart bodyPart = multipart.getBodyPart(i);
-				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM)) {
+				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
 					File extractedDicomFile = null;
 					if (count == 1) {
 						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
@@ -236,6 +268,16 @@ public class WADODownloaderService {
 				}
 			}
 		}
+	}
+	
+	
+	private String wadoURItoWadoRS(String url) {
+		return url
+				.replace("wado?requestType=WADO", "rs")
+				.replace("&studyUID=", "/studies/")
+				.replace("&seriesUID=", "/series/")
+				.replace("&objectUID=", "/instances/")
+				.replace("&contentType=application/dicom&", "");
 	}
 
 }

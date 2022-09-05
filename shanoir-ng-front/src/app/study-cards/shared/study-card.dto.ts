@@ -91,7 +91,7 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
     public toEntityList(dtos: StudyCardDTO[], result?: StudyCard[]): Promise<StudyCard[]>{
         if (!result) result = [];
         if (dtos) {
-            for (let dto of dtos) {
+            for (let dto of dtos ? dtos : []) {
                 let entity = new StudyCard();
                 StudyCardDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
@@ -101,7 +101,7 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
             this.studyService.getStudiesNames().then(studies => {
                 for (let entity of result) {
                     if (entity.study) 
-                        entity.study.name = studies.find(study => study.id == entity.study.id).name;
+                        entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
                 }
             }),
             this.acqEqService.getAll().then(acqs => {

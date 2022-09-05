@@ -197,7 +197,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9909:9909"
+     - "9905:9905"
      - "9915:9915"
     depends_on:
       - "database"
