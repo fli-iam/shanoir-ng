@@ -180,6 +180,7 @@ public class RabbitMQDatasetsService {
 	public void receiveSubjectNameUpdate(final String subjectStr) {		
 		Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
 		try {
+			if (su != null && su.getId() == null) throw new IllegalStateException("The subject should must have an id !");
 			Subject received = objectMapper.readValue(subjectStr, Subject.class);
 	
 			// SUBJECT_STUDY
