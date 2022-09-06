@@ -91,7 +91,7 @@ public class DistantDatasetShanoirService {
 
 	public void moveDatasetFile(DatasetFile dsFile, File file) throws ShanoirException {
 		try {
-			LOG.error("Sending dataset files to distant Shanoir");
+			LOG.error("Sending dataset files to distant Shanoir: " + file.getName());
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 			headers.add("Authorization", "Bearer " + distantKeycloak.getAccessToken());
@@ -111,13 +111,8 @@ public class DistantDatasetShanoirService {
 
 	public void moveDatasetFiles(Long datasetFileId) throws ShanoirException {
 		try {
-			HttpHeaders headers = new HttpHeaders();
-			MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-			
-			LOG.error("Sending to distant PACS");
-
-			HttpEntity<MultiValueMap<String, Object>> requestEntity	= new HttpEntity<>(body, headers);
-			distantKeycloak.getRestTemplate().postForEntity(getURI(ADD_FILE_TO_PACS + datasetFileId), requestEntity, Void.class);
+			this.distantKeycloak.getRestTemplate()
+					.exchange(getURI(CREATE_STUDY_CARD), HttpMethod.GET, new HttpEntity<>(datasetFileId, getHeader()), Void.class);
 		} catch (Exception e) {
 			throw new ShanoirException("Could not add all files to PACS for dataset expression", e);
 		}
