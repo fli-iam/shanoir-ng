@@ -244,7 +244,6 @@ public class RabbitMQDatasetsService {
 	
 	private <T extends IdNameInterface> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
 		IdName received = new IdName();
-		LOG.warn("Received string for receiveAndUpdateIdNameEntity : " + receivedStr);
 		try {
 			received = objectMapper.readValue(receivedStr, IdName.class);
 			T existing = repository.findById(received.getId()).orElse(null);
