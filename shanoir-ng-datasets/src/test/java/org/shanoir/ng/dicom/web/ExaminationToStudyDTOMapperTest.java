@@ -16,6 +16,7 @@ package org.shanoir.ng.dicom.web;
 
 import java.text.ParseException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import org.junit.runner.RunWith;
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.model.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -47,9 +49,9 @@ public class ExaminationToStudyDTOMapperTest {
 
 	@Test
 	public void examinationToStudyDTO() throws ParseException {
-//		Examination examination = createExamination();
-//		final StudyDTO studyDTO = examinationToStudyDTOMapper.examinationToStudyDTO(examination);
-//		Assert.assertNotNull(studyDTO);
+		Examination examination = createExamination();
+		final StudyDTO studyDTO = examinationToStudyDTOMapper.examinationToStudyDTO(examination);
+		Assert.assertNotNull(studyDTO);
 	}
 
 	private Examination createExamination() {
@@ -57,7 +59,8 @@ public class ExaminationToStudyDTOMapperTest {
 		examination.setId(EXAMINATION_ID);
 		examination.setComment(EXAMINATION_COMMENT);
 		examination.setExaminationDate(LocalDate.parse(DATE_STR));
-		examination.setSubjectId(SUBJECT_ID);
+		examination.setSubject(new Subject(SUBJECT_ID, "subject"));
+		examination.setDatasetAcquisitions(new ArrayList<>());
 		return examination;
 	}
 

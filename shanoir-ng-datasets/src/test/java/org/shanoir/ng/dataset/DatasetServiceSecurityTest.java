@@ -370,7 +370,7 @@ public class DatasetServiceSecurityTest {
 		//exam 4 is in study 4 > subject 4
 		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
-		given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Utils.toList(exam1)));
+		//given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Utils.toList(exam1)));
 		
 		given(examinationRepository.findByStudyId(1L)).willReturn(Utils.toList(exam1, exam3));
 		given(examinationRepository.findByStudyId(2L)).willReturn(Utils.toList(exam2));

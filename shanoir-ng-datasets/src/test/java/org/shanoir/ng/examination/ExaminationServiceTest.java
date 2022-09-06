@@ -16,7 +16,6 @@ package org.shanoir.ng.examination;
 
 import static org.mockito.BDDMockito.given;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -31,7 +30,6 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -39,7 +37,6 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -78,7 +75,6 @@ public class ExaminationServiceTest {
 		// 		.willReturn(Arrays.asList(ModelsUtil.createExamination()));
 		given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(ModelsUtil.createExamination()));
 		given(examinationRepository.save(Mockito.any(Examination.class))).willReturn(ModelsUtil.createExamination());
-		given(examinationRepository.findByStudyIdIn(Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<Examination>(Arrays.asList(ModelsUtil.createExamination())));
 	}
 
 	@Test
@@ -120,7 +116,7 @@ public class ExaminationServiceTest {
 	public void updateAsAdminTest() throws ShanoirException {
 		// We update the subject -> admin -> SUCCESS
 		Examination updatedExam = createExamination();
-		updatedExam.setSubjectId(null);
+		updatedExam.setSubject(null);
 		final Examination updatedExamination = examinationService.update(updatedExam);
 
 		Assert.assertNotNull(updatedExamination);
@@ -136,7 +132,7 @@ public class ExaminationServiceTest {
 		examination.setComment(UPDATED_EXAMINATION_COMMENT);
 		examination.setCenterId(oldExam.getCenterId());
 		examination.setStudyId(oldExam.getStudyId());
-		examination.setSubjectId(oldExam.getSubjectId());
+		examination.setSubject(oldExam.getSubject());
 
 		return examination;
 	}
