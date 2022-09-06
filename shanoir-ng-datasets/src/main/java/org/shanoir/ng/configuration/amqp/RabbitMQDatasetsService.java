@@ -257,6 +257,7 @@ public class RabbitMQDatasetsService {
 					T newOne = clazz.newInstance();
 					newOne.setId(received.getId());
 					newOne.setName(received.getName());
+					if (newOne.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + receivedStr + "\"");
 					T entity = repository.save(newOne);
 					return entity;
 				} catch ( SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
