@@ -136,6 +136,7 @@ public class RabbitMQDatasetsService {
 			for (Tag tag : stud.getTags()) {
 				tag.setStudy(stud);
 			}
+			if (stud.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + studyStr + "\"");
 			Study studyDb = this.studyRepository.save(stud);
 
 			// SUBJECT_STUDY
@@ -162,9 +163,8 @@ public class RabbitMQDatasetsService {
 					}
 				}
 			}
-			
+			if (stud.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + studyStr + "\"");
 			this.studyRepository.save(stud);
-
 			List<Long> subjectIds = new ArrayList<>();
 			stud.getSubjectStudyList().forEach(subStu -> subjectIds.add(subStu.getSubject().getId()));
 			updateSolr(subjectIds);
@@ -179,6 +179,7 @@ public class RabbitMQDatasetsService {
 	public void receiveSubjectNameUpdate(final String subjectStr) {		
 		Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
 		try {
+			if (su != null && su.getId() == null) throw new IllegalStateException("The subject should must have an id !");
 			Subject received = objectMapper.readValue(subjectStr, Subject.class);
 	
 			// SUBJECT_STUDY
@@ -193,6 +194,7 @@ public class RabbitMQDatasetsService {
 			for (SubjectStudy sustu : su.getSubjectStudyList()) {
 				sustu.setSubject(su);
 			}
+			if (su.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + subjectStr + "\"");
 			subjectRepository.save(su);
 			
 			// Update solr references
@@ -255,7 +257,7 @@ public class RabbitMQDatasetsService {
 					T newOne = clazz.newInstance();
 					newOne.setId(received.getId());
 					newOne.setName(received.getName());
-					if (newOne.getId() == null) throw new IllegalStateException("The entity should must have an id !");
+					if (newOne.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + receivedStr + "\"");
 					T entity = repository.save(newOne);
 					return entity;
 				} catch ( SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {
