@@ -29,7 +29,6 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.core.model.IdNameInterface;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Center;
@@ -241,7 +240,7 @@ public class RabbitMQDatasetsService {
 		receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
 	}
 	
-	private <T extends IdNameInterface> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
+	private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
 		IdName received = new IdName();
 		try {
 			received = objectMapper.readValue(receivedStr, IdName.class);
@@ -256,6 +255,7 @@ public class RabbitMQDatasetsService {
 					T newOne = clazz.newInstance();
 					newOne.setId(received.getId());
 					newOne.setName(received.getName());
+					if (newOne.getId() == null) throw new IllegalStateException("The entity should must have an id !");
 					T entity = repository.save(newOne);
 					return entity;
 				} catch ( SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException e) {

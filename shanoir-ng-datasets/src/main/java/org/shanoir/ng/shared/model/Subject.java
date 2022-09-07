@@ -22,10 +22,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.apache.http.client.utils.Idn;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.core.model.IdNameInterface;
-import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -36,18 +33,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Table(name = "subject")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Subject extends HalEntity implements IdNameInterface {
-	
-	String name;
-	
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6450012948865306847L;
+public class Subject extends IdName {
 
 	/** Relations beetween the subjects and the studies. */
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
+	
+	@Id
+	protected Long id;
+	
+	protected String name;
 	
 	public Subject() {}
 	
@@ -73,13 +68,4 @@ public class Subject extends HalEntity implements IdNameInterface {
 	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
 		this.subjectStudyList = subjectStudyList;
 	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}	
-
 }

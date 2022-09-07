@@ -17,7 +17,7 @@ package org.shanoir.ng.shared.core.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class IdName implements IdNameInterface {
+public class IdName {
 
 	private Long id;
 
