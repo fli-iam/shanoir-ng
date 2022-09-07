@@ -137,7 +137,7 @@ public class RabbitMQDatasetsService {
 				tag.setStudy(stud);
 			}
 			if (stud.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + studyStr + "\"");
-			Study studyDb = this.studyRepository.save(stud);
+			Study studyDb = this.studyRepository.save(stud); 
 
 			// SUBJECT_STUDY
 			if (stud.getSubjectStudyList() != null) {
@@ -333,7 +333,7 @@ public class RabbitMQDatasetsService {
 			
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
-			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
 		}
 	}
 
@@ -367,7 +367,7 @@ public class RabbitMQDatasetsService {
 			studyRepository.deleteById(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
-			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
 		}
 	}
 }
