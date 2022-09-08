@@ -29,7 +29,6 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.core.model.IdNameInterface;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.Center;
@@ -137,7 +136,8 @@ public class RabbitMQDatasetsService {
 			for (Tag tag : stud.getTags()) {
 				tag.setStudy(stud);
 			}
-			Study studyDb = this.studyRepository.save(stud);
+			if (stud.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + studyStr + "\"");
+			Study studyDb = this.studyRepository.save(stud); 
 
 			// SUBJECT_STUDY
 			if (stud.getSubjectStudyList() != null) {
@@ -163,9 +163,8 @@ public class RabbitMQDatasetsService {
 					}
 				}
 			}
-			
+			if (stud.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + studyStr + "\"");
 			this.studyRepository.save(stud);
-
 			List<Long> subjectIds = new ArrayList<>();
 			stud.getSubjectStudyList().forEach(subStu -> subjectIds.add(subStu.getSubject().getId()));
 			updateSolr(subjectIds);
@@ -195,6 +194,7 @@ public class RabbitMQDatasetsService {
 			for (SubjectStudy sustu : su.getSubjectStudyList()) {
 				sustu.setSubject(su);
 			}
+			if (su.getId() == null) throw new IllegalStateException("The entity should must have an id ! Received string : \"" + subjectStr + "\"");
 			subjectRepository.save(su);
 			
 			// Update solr references
@@ -242,7 +242,7 @@ public class RabbitMQDatasetsService {
 		receiveAndUpdateIdNameEntity(centerStr, Center.class, centerRepository);
 	}
 	
-	private <T extends IdNameInterface> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
+	private <T extends IdName> T receiveAndUpdateIdNameEntity(final String receivedStr, final Class<T> clazz, final CrudRepository<T, Long> repository) {
 		IdName received = new IdName();
 		try {
 			received = objectMapper.readValue(receivedStr, IdName.class);
@@ -333,7 +333,7 @@ public class RabbitMQDatasetsService {
 			
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
-			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
 		}
 	}
 
@@ -367,7 +367,7 @@ public class RabbitMQDatasetsService {
 			studyRepository.deleteById(Long.valueOf(event.getObjectId()));
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
-			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage());
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
 		}
 	}
 }
