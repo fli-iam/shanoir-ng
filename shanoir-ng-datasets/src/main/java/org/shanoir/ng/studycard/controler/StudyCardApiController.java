@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.json.Json;
+import javax.json.stream.JsonParser;
 import javax.mail.MessagingException;
 
 import org.dcm4che3.data.Attributes;
@@ -249,8 +250,8 @@ public class StudyCardApiController implements StudyCardApi {
 					DatasetUtils.getDatasetFilePathURLs(acquisition.getDatasets().get(0), urls, DatasetExpressionFormat.DICOM);
 					if (!urls.isEmpty()) {
 						String jsonMetadataStr = downloader.downloadDicomMetadataForURL(urls.get(0));
-						JSONReader jsonReader = new JSONReader(Json.createParser(new StringReader(jsonMetadataStr)));
-						Attributes dicomAttributes = jsonReader.getFileMetaInformation();
+						JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
+						Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
 						if (dicomAttributes != null) {
 							studyCardProcessingService.applyStudyCard(acquisition, studyCard, dicomAttributes);																
 						} else {

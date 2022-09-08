@@ -69,6 +69,6 @@ export class ImagesUrlUtil {
     public static BRUKER_ICON_PATH = 'assets/images/bruker.16x16.png';
     public static EEG_ICON_PATH = 'assets/images/icons/eeg.png';
     public static BIDS_ICON_PATH = 'assets/images/icons/bids_icon.png';
-    
+    public static PIPELINE_IMAGE_ICON_PATH = 'assets/images/icons/pipeline-icon.png'
     
 }

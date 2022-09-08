@@ -8,6 +8,6 @@ import org.apache.commons.math3.util.Pair;
 
 public interface DatasetAcquisitionRepositoryCustom {
 	
-	Page<DatasetAcquisition> findByExaminationByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds, Pageable pageable);
+	Page<DatasetAcquisition> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds, Pageable pageable);
 
 }
