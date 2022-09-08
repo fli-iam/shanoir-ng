@@ -115,7 +115,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         ));
         // load called tab
         this.subscribtions.push(
-            this.activatedRoute.fragment.subscribe(fragment => { 
+            this.activatedRoute.fragment?.subscribe(fragment => { 
                 if (fragment) {
                     this.activeTab = fragment;
                 } 
