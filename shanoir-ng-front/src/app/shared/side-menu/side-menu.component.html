@@ -14,13 +14,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="instance"><span class="instance-frame"><span class="instance-name"></span></span></div>
 <div class="logo">
-    <a *ngIf="isAuthenticated()" [routerLink]="['/home']">
+    <a *ngIf="authenticated" [routerLink]="['/home']">
         <img [src]="shanoirLogoUrl" />
     </a>
-    <img *ngIf="!isAuthenticated()" [src]="shanoirLogoUrl" />
+    <img *ngIf="!authenticated" [src]="shanoirLogoUrl" />
 </div>
 
-<div *ngIf="isAuthenticated()" class="user">
+<div *ngIf="authenticated" class="user">
     <div class="user-logo" [class.admin]="keycloakService.isUserAdmin()">
         <i *ngIf="!keycloakService.isUserAdminOrExpert()" class="fas fa-user"></i>
         <i *ngIf="keycloakService.isUserExpert()" class="fas fa-user-tie"></i>

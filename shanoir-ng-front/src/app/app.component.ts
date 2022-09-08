@@ -39,6 +39,7 @@ export class AppComponent {
 
     @HostBinding('@parent') public menuOpen: boolean = true;
     @ViewChild('console') consoleComponenent: ConsoleComponent;
+    authenticated: boolean = KeycloakService.auth.loggedIn;
 
     constructor(
             public viewContainerRef: ViewContainerRef,
@@ -69,10 +70,6 @@ export class AppComponent {
 
     toggleMenu(open: boolean) {
         this.menuOpen = open;
-    }
-
-    isAuthenticated(): boolean {
-        return KeycloakService.auth.loggedIn;
     }
 
     private duaAlert() {

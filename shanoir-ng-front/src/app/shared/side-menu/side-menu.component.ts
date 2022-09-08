@@ -40,6 +40,7 @@ export class SideMenuComponent {
     public state: SideMenuState;
     public VERSION = VERSION;
     private sessionKey: string = KeycloakService.auth.userId + 'menuState';
+    authenticated: boolean = KeycloakService.auth.loggedIn;
 
     constructor(
             public keycloakService: KeycloakService, 
@@ -52,6 +53,8 @@ export class SideMenuComponent {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
             this.userId = KeycloakService.auth.userId;
         }
+        this.authenticated = KeycloakService.auth.loggedIn;
+
 
         let storedState = sessionStorage.getItem(this.sessionKey);
         if (storedState) this.state = JSON.parse(storedState) as SideMenuState;
@@ -62,11 +65,6 @@ export class SideMenuComponent {
         event.preventDefault();
         this.keycloakService.logout();
     }
-
-    isAuthenticated(): boolean {
-        return KeycloakService.auth.loggedIn;
-    }
-
     isUserAdmin(): boolean {
         return this.keycloakService.isUserAdmin();
     }
