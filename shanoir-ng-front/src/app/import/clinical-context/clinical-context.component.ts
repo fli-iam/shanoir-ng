@@ -275,6 +275,8 @@ export class ClinicalContextComponent implements OnDestroy {
                             }
                         } else if (this.importMode == 'DICOM') {
                             opt.compatible = false;
+                        } else {
+                            return null;
                         }
                         return opt;
                     });
@@ -287,26 +289,55 @@ export class ClinicalContextComponent implements OnDestroy {
                 });
             }
         }
-        this.centerOptions = []; 
+        this.centerOptions = [];
         this.acquisitionEquipmentOptions = []; 
         this.subjects = [];
         this.examinations = [];
         let foundCompatibleCenter: boolean = false;
         if (this.study && this.study.id && this.study.studyCenterList) {
-            for (let studyCenter of this.study.studyCenterList) {
-                let centerOption = new Option<Center>(studyCenter.center, studyCenter.center.name);
-                if (!this.useStudyCard && this.importMode == 'DICOM') {
-                    centerOption.compatible = studyCenter.center && this.centerCompatible(studyCenter.center);
-                    if (!foundCompatibleCenter && centerOption.compatible) {
-                        foundCompatibleCenter = true;
-                        this.center = centerOption.value;
-                        end = Promise.all([end, this.onSelectCenter()]);
+            end = Promise.all([end, this.centerService.getCentersByStudyId(this.study.id).then(centers =>{
+                for (let center of centers) {
+                    let centerOption = new Option<Center>(center, center.name);
+                    if (!this.useStudyCard && this.importMode == 'DICOM') {
+                        centerOption.compatible = center && this.centerCompatible(center);
+                        if (!foundCompatibleCenter && centerOption.compatible) {
+                            foundCompatibleCenter = true;
+                            this.center = centerOption.value;
+                            end = Promise.all([end, this.onSelectCenter()]);
+                        }
                     }
+                    this.centerOptions.push(centerOption);
                 }
-                this.centerOptions.push(centerOption);
-            }
+            })]);
         }
         return end.then(() => {
+            // filter study cards id necessary once both promises are done
+            if (this.useStudyCard) {
+                let studyCards =[];
+                let scFound = false;
+                for (let sc of this.studycardOptions) {
+                    if (sc.value.acquisitionEquipment.center) {
+                        for (let center of this.centerOptions) {
+                            // center was found -> keep the study card
+                            if (center.value.id === sc.value.acquisitionEquipment.center.id) 
+                            {
+                                studyCards.push(sc);
+                                if (this.studycard.id === sc.value.id) {
+                                    scFound = true;
+                                }
+                                continue;
+                            }
+                        }
+                    }
+                }
+                this.studycardOptions = studyCards;
+                if (!scFound) {
+                    this.studycard = null;
+                    this.onSelectStudyCard();
+                    this.center = null;
+                    this.onSelectCenter();
+                }
+            }
             this.onContextChange();
             this.loading = false;
         }).catch(() => {
