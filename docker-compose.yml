@@ -237,7 +237,7 @@ services:
   # https://github.com/dcm4che-dockerfiles/dcm4chee-arc-psql/blob/master/docker-compose.yml
   ldap:
     container_name: "${SHANOIR_PREFIX}ldap"
-    image: dcm4che/slapd-dcm4chee:2.6.2-26.1
+    image: dcm4che/slapd-dcm4chee:2.6.2-27.0
     logging:
       driver: json-file
       options:
@@ -252,7 +252,7 @@ services:
       - "dcm4chee-sldap-data:/etc/openldap/slapd.d"
   dcm4chee-database:
     container_name: "${SHANOIR_PREFIX}dcm4chee-database"
-    image: dcm4che/postgres-dcm4chee:14.2-26
+    image: dcm4che/postgres-dcm4chee:14.4-27
     logging:
       driver: json-file
       options:
@@ -266,7 +266,7 @@ services:
       - "dcm4chee-database-data:/var/lib/postgresql/data"
   dcm4chee-arc:
     container_name: "${SHANOIR_PREFIX}dcm4chee-arc"
-    image: dcm4che/dcm4chee-arc-psql:5.26.1
+    image: dcm4che/dcm4chee-arc-psql:5.27.0
     logging:
       driver: json-file
       options:
