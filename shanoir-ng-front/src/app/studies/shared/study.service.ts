@@ -15,6 +15,7 @@ import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/com
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
+import { saveAs } from 'file-saver';
 
 import { BidsElement } from '../../bids/model/bidsElement.model';
 import { DataUserAgreement } from '../../dua/shared/dua.model';

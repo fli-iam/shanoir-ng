@@ -31,8 +31,8 @@ import { IMyOptions, MyDatePicker } from 'mydatepicker';
         </span>
     `,
     styles: [
-        ':host() { display: inline-block; height: 19px; }',
-        ':host():has(input:focus) { border-bottom: 2px solid var(--color-a); }'
+        ':host { display: inline-block; height: 19px; }',
+        ':host:has(input:focus) { border-bottom: 2px solid var(--color-a); }'
     ],
     providers: [
         {

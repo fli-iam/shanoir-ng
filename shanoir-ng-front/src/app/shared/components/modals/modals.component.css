@@ -1,4 +1,4 @@
-:host() { 
+:host { 
     background-color: var(--color-overlay);
     display: table;
     position: absolute;

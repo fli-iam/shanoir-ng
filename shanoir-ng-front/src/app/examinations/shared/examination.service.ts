@@ -14,7 +14,7 @@
 
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpResponse, HttpEvent, HttpEventType  } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { saveAs } from 'file-saver';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';

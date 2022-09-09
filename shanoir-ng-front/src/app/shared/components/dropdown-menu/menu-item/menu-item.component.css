@@ -1,4 +1,4 @@
-:host() { width: 100%; display: block; margin: 2px 0; }
+:host { width: 100%; display: block; margin: 2px 0; }
 
 .menu-item { padding: 0; display: block; margin: 0; color: var(--dark-grey); position: relative; text-align: right; white-space: nowrap; height: 20px; }
 
