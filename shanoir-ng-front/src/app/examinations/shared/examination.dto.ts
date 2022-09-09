@@ -19,7 +19,6 @@ import { IdName } from '../../shared/models/id-name.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
-import { SubjectService } from '../../subjects/shared/subject.service';
 import { Examination } from './examination.model';
 import { InstrumentBasedAssessment } from "../instrument-assessment/instrument.model"
 
@@ -28,8 +27,7 @@ export class ExaminationDTOService {
 
     constructor(
         private studyService: StudyService,
-        private centerService: CenterService,
-        private subjectService: SubjectService) {}
+        private centerService: CenterService) {}
 
     /**
      * Convert from a DTO to an Entity
@@ -41,7 +39,6 @@ export class ExaminationDTOService {
         ExaminationDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
         if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
-        if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject)); //TODO : subject is on the same ms
         if (dto.centerId) promises.push(this.centerService.get(dto.centerId).then(center => result.center = center));
         return Promise.all(promises).then(() => result);
     }
@@ -62,12 +59,10 @@ export class ExaminationDTOService {
         return Promise.all([
             this.studyService.getStudiesNames(),
             this.centerService.getCentersNames(),
-            this.subjectService.getSubjectsNames()
-        ]).then(([studies, centers, subjects]: [IdName[], IdName[], IdName[]]) => {
+        ]).then(([studies, centers]: [IdName[], IdName[]]) => {
             for (let entity of result) {
                 if (entity.study) entity.study = studies.find(study => study.id == entity.study.id);
                 if (entity.center) entity.center = centers.find(center => center.id == entity.center.id);
-                if (entity.subject) entity.subject = subjects.find(subject => subject.id == entity.subject.id);
             }
             return result;
         });
@@ -90,9 +85,10 @@ export class ExaminationDTOService {
             entity.center = new Center();
             entity.center.id = dto.centerId;
         }
-        if (dto.subjectId) {
+        if (dto.subject) {
             entity.subject = new Subject();
-            entity.subject.id = dto.subjectId;
+            entity.subject.id = dto.subject.id;
+            entity.subject.name = dto.subject.name;
         }
         return entity;
     }
@@ -105,7 +101,7 @@ export class ExaminationDTO {
     examinationDate: Date;
     note: string;
     studyId: number;
-    subjectId: number;
+    subject: IdName;
     subjectWeight: number;
     preclinical: boolean;
     instrumentBasedAssessmentList: InstrumentBasedAssessment[];
@@ -119,7 +115,7 @@ export class ExaminationDTO {
             this.examinationDate = examination.examinationDate;
             this.note = examination.note;
             this.studyId = examination.study ? examination.study.id : null;
-            this.subjectId = examination.subject ? examination.subject.id : null;
+            this.subject = examination.subject ? new IdName(examination.subject.id, examination.subject.name) : null;
             this.subjectWeight = examination.subjectWeight;
             this.preclinical = examination.preclinical;
             this.extraDataFilePathList = examination.extraDataFilePathList;
