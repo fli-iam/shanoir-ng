@@ -312,42 +312,51 @@ export class ClinicalContextComponent implements OnDestroy {
                 }
             })]);
         }
-        return endStudy.then(() => {
-            // filter study cards id necessary once both promises are done
-            if (this.useStudyCard && !this.reload) {
-                let studyCards =[];
-                let scFound = false;
-                for (let sc of this.studycardOptions) {
-                    if (sc.value.acquisitionEquipment.center) {
-                        for (let center of this.centerOptions) {
-                            // center was found -> keep the study card
-                            if (center.value.id === sc.value.acquisitionEquipment.center.id && studyCards.indexOf(sc) == -1) 
-                            {
-                                studyCards.push(sc);
-                                if (this.studycard?.id === sc.value.id) {
-                                    scFound = true;
+        if (!this.reload) {
+            return endStudy.then(() => {
+                this.onContextChange();
+                this.loading = false;
+            }).catch(() => {
+                this.loading = false;
+            });
+        } else {
+            return endStudy.then(() => {
+                // filter study cards id necessary once both promises are done
+                if (this.useStudyCard) {
+                    let studyCards =[];
+                    let scFound = false;
+                    for (let sc of this.studycardOptions) {
+                        if (sc.value.acquisitionEquipment.center) {
+                            for (let center of this.centerOptions) {
+                                // center was found -> keep the study card
+                                if (center.value.id === sc.value.acquisitionEquipment.center.id && studyCards.indexOf(sc) == -1) 
+                                {
+                                    studyCards.push(sc);
+                                    if (this.studycard?.id === sc.value.id) {
+                                        scFound = true;
+                                    }
                                 }
                             }
                         }
                     }
+                    this.studycardOptions = studyCards;
+                    if (!scFound) {
+                        this.studycard = null;
+                        this.onSelectStudyCard().then(() => {
+                            this.center = null;
+                            this.onSelectCenter();
+                        }) ;
+                    }
                 }
-                this.studycardOptions = studyCards;
-                if (!scFound) {
-                    this.studycard = null;
-                    this.onSelectStudyCard().then(() => {
-                        this.center = null;
-                        this.onSelectCenter();
-                    }) ;
-                }
-            }
-            this.onContextChange();
-            this.loading = false;
-            this.reload = false;
-        }).catch((error) => {
-            console.error(error);
-            this.loading = false;
-            this.reload = false;
-        });
+                this.onContextChange();
+                this.loading = false;
+                this.reload = false;
+            }).catch((error) => {
+                console.error(error);
+                this.loading = false;
+                this.reload = false;
+            });
+        }
     }
 
     public onSelectStudyCard(): Promise<any> {
