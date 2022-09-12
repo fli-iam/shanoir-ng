@@ -25,7 +25,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box 
                         [(ngModel)]="study" 
-                        (userChange)="onSelectStudy(); onContextChange();" 
+                        (userChange)="onSelectStudy(false); onContextChange();" 
                         (onViewClick)="showStudyDetails()" 
                         [viewDisabled]="!study" 
                         [options]="studyOptions"

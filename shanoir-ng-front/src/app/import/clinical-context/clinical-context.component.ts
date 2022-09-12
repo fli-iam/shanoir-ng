@@ -148,7 +148,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 if (studyOption) {
                     this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
                 }
-                this.onSelectStudy().then(() => {
+                this.onSelectStudy(true).then(() => {
                     if (this.useStudyCard != useStudyCard) { 
                         this.useStudyCard = useStudyCard;
                         this.onToggleUseStudyCard();
@@ -195,7 +195,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 let compatibleFounded = this.studyOptions.find(study => study.compatible);
                 if (compatibleFounded) {
                     this.study = compatibleFounded.value;
-                    this.onSelectStudy();
+                    this.onSelectStudy(false);
                 }
             })
     }
@@ -240,7 +240,7 @@ export class ClinicalContextComponent implements OnDestroy {
         return center.acquisitionEquipments && center.acquisitionEquipments.find(eq => this.acqEqCompatible(eq)) != undefined;
     }
 
-    public onSelectStudy(): Promise<void> {
+    public onSelectStudy(reload: boolean): Promise<void> {
         this.loading = true;
         this.studycardOptions = null;
         if (this.study && this.isAdminOfStudy[this.study.id] == undefined) {
@@ -312,14 +312,14 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         return end.then(() => {
             // filter study cards id necessary once both promises are done
-            if (this.useStudyCard) {
+            if (this.useStudyCard && !reload) {
                 let studyCards =[];
                 let scFound = false;
                 for (let sc of this.studycardOptions) {
                     if (sc.value.acquisitionEquipment.center) {
                         for (let center of this.centerOptions) {
                             // center was found -> keep the study card
-                            if (center.value.id === sc.value.acquisitionEquipment.center.id) 
+                            if (center.value.id === sc.value.acquisitionEquipment.center.id && studyCards.indexOf(sc) == -1) 
                             {
                                 studyCards.push(sc);
                                 if (this.studycard?.id === sc.value.id) {
@@ -332,9 +332,10 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.studycardOptions = studyCards;
                 if (!scFound) {
                     this.studycard = null;
-                    this.onSelectStudyCard();
-                    this.center = null;
-                    this.onSelectCenter();
+                    this.onSelectStudyCard().then(() => {
+                        this.center = null;
+                        this.onSelectCenter();
+                    }) ;
                 }
             }
             this.onContextChange();
