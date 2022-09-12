@@ -322,10 +322,9 @@ export class ClinicalContextComponent implements OnDestroy {
                             if (center.value.id === sc.value.acquisitionEquipment.center.id) 
                             {
                                 studyCards.push(sc);
-                                if (this.studycard.id === sc.value.id) {
+                                if (this.studycard?.id === sc.value.id) {
                                     scFound = true;
                                 }
-                                continue;
                             }
                         }
                     }
@@ -340,7 +339,8 @@ export class ClinicalContextComponent implements OnDestroy {
             }
             this.onContextChange();
             this.loading = false;
-        }).catch(() => {
+        }).catch((error) => {
+            console.error(error);
             this.loading = false;
         });
     }
