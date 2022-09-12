@@ -339,7 +339,8 @@ export class ClinicalContextComponent implements OnDestroy {
             }
             this.onContextChange();
             this.loading = false;
-        }).catch(() => {
+        }).catch((error) => {
+            console.error(error);
             this.loading = false;
         });
     }
