@@ -318,11 +318,13 @@ public class DatasetSecurityService {
 			return true;
 		}
     	
-    	Set<Long> studyIds = new HashSet<Long>();
+    	// Also check for centers    	
     	for (DatasetAcquisition acq : datasetAcquisitions) {
-    		studyIds.add(acq.getExamination().getStudyId());
+			if (!this.hasRightOnStudyCenter(acq.getExamination().getCenterId(), acq.getExamination().getStudyId(), rightStr)) {
+				return false;
+			}
     	}
-    	return studyIds.equals(commService.hasRightOnStudies(studyIds, rightStr));
+    	return true;
     }
     
     /**
@@ -374,11 +376,9 @@ public class DatasetSecurityService {
 		}
     	
     	Iterable<Dataset> datasets = datasetRepository.findAllById(datasetIds);
-    	Set<Long> studyIds = new HashSet<Long>();
     	 
     	boolean hasRight = true;
     	for (Dataset dataset : datasets) {
-    		studyIds.add(dataset.getStudyId());
     		hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
     	}
     	return hasRight;

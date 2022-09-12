@@ -293,6 +293,7 @@ public class StudyCardApiSecurityTest {
 		
 		DatasetAcquisition dsAcq1 = mockDsAcq(1L, 1L, 1L, 1L);
 		given(datasetAcquisitionRepository.findById(1L)).willReturn(Optional.of(dsAcq1));
+		given(datasetAcquisitionRepository.findAllById(Utils.toList(1L))).willReturn(Utils.toList(dsAcq1));
 		given(datasetAcquisitionRepository.findByStudyCardId(1L)).willReturn(Utils.toList(dsAcq1));
 		DatasetAcquisition dsAcq3 = mockDsAcq(3L, 3L, 3L, 1L);
 		given(datasetAcquisitionRepository.findById(3L)).willReturn(Optional.of(dsAcq3));
