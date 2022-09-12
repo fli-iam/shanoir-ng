@@ -244,7 +244,7 @@ export class ClinicalContextComponent implements OnDestroy {
 
     public onSelectStudy(): Promise<void> {
         this.loading = true;
-        this.studycardOptions = null;
+        this.studycardOptions = [];
         if (this.study && this.isAdminOfStudy[this.study.id] == undefined) {
             if (this.keycloakService.isUserAdmin) {
                 this.isAdminOfStudy[this.study.id] = true;
