@@ -323,6 +323,24 @@ public class DatasetSecurityService {
     	}
     	return studyIds.equals(commService.hasRightOnStudies(studyIds, rightStr));
     }
+    
+    /**
+     * Check that the connected user has the given right for the given dataset acquisitions.
+     * !!! The acquisitions must be trusted, meaning they must come from the database, not from the user !!!
+     * 
+     * @param datasetId the dataset acquisition id
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasRightOnEveryDatasetAcquisition(List<Long> datasetAcquisitionIds, String rightStr) throws EntityNotFoundException {
+    	boolean hasRight = false;
+    	for(Long id : datasetAcquisitionIds) {
+    		hasRight = hasRight || hasRightOnDatasetAcquisition(id, rightStr);
+    	}
+    	return hasRight;
+    }
+    
 
     /**
      * Check that the connected user has the given right for at least one of the given datasets.
