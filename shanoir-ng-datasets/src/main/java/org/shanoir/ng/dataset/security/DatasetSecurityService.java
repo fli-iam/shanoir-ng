@@ -326,9 +326,8 @@ public class DatasetSecurityService {
     
     /**
      * Check that the connected user has the given right for the given dataset acquisitions.
-     * !!! The acquisitions must be trusted, meaning they must come from the database, not from the user !!!
      * 
-     * @param datasetId the dataset acquisition id
+     * @param datasetAcquisitionIds the dataset acquisition ids
      * @param rightStr the right
      * @return true or false
      * @throws EntityNotFoundException
