@@ -45,6 +45,7 @@ import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -333,11 +334,8 @@ public class DatasetSecurityService {
      * @throws EntityNotFoundException
      */
     public boolean hasRightOnEveryDatasetAcquisition(List<Long> datasetAcquisitionIds, String rightStr) throws EntityNotFoundException {
-    	boolean hasRight = false;
-    	for(Long id : datasetAcquisitionIds) {
-    		hasRight = hasRight || hasRightOnDatasetAcquisition(id, rightStr);
-    	}
-    	return hasRight;
+    	List<DatasetAcquisition> trustedDatasetAcquisitions = Utils.toList(datasetAcquisitionRepository.findAllById(datasetAcquisitionIds));
+    	return hasRightOnEveryTrustedDatasetAcquisition(trustedDatasetAcquisitions, rightStr);
     }
     
 
