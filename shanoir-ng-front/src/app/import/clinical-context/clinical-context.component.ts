@@ -96,6 +96,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public modality: string;
     openSubjectStudy: boolean = false;
     loading: boolean = false;
+    private reload: boolean = false;
     
     constructor(
             public studyService: StudyService,
@@ -134,6 +135,7 @@ export class ClinicalContextComponent implements OnDestroy {
 
     private reloadSavedData() {
         if (this.importDataService.contextBackup) {
+            this.reload = true;
             let study = this.importDataService.contextBackup.study;
             let studyCard = this.importDataService.contextBackup.studyCard;
             let useStudyCard = this.importDataService.contextBackup.useStudyCard;
@@ -148,7 +150,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 if (studyOption) {
                     this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
                 }
-                this.onSelectStudy(true).then(() => {
+                this.onSelectStudy().then(() => {
                     if (this.useStudyCard != useStudyCard) { 
                         this.useStudyCard = useStudyCard;
                         this.onToggleUseStudyCard();
@@ -195,7 +197,7 @@ export class ClinicalContextComponent implements OnDestroy {
                 let compatibleFounded = this.studyOptions.find(study => study.compatible);
                 if (compatibleFounded) {
                     this.study = compatibleFounded.value;
-                    this.onSelectStudy(false);
+                    this.onSelectStudy();
                 }
             })
     }
@@ -240,7 +242,7 @@ export class ClinicalContextComponent implements OnDestroy {
         return center.acquisitionEquipments && center.acquisitionEquipments.find(eq => this.acqEqCompatible(eq)) != undefined;
     }
 
-    public onSelectStudy(reload: boolean): Promise<void> {
+    public onSelectStudy(): Promise<void> {
         this.loading = true;
         this.studycardOptions = null;
         if (this.study && this.isAdminOfStudy[this.study.id] == undefined) {
@@ -312,7 +314,7 @@ export class ClinicalContextComponent implements OnDestroy {
         }
         return end.then(() => {
             // filter study cards id necessary once both promises are done
-            if (this.useStudyCard && !reload) {
+            if (this.useStudyCard && !this.reload) {
                 let studyCards =[];
                 let scFound = false;
                 for (let sc of this.studycardOptions) {
@@ -340,9 +342,11 @@ export class ClinicalContextComponent implements OnDestroy {
             }
             this.onContextChange();
             this.loading = false;
+            this.reload = false;
         }).catch((error) => {
             console.error(error);
             this.loading = false;
+            this.reload = false;
         });
     }
 
