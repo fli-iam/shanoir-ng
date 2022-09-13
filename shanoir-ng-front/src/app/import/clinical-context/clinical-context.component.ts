@@ -277,8 +277,6 @@ export class ClinicalContextComponent implements OnDestroy {
                             }
                         } else if (this.importMode == 'DICOM') {
                             opt.compatible = false;
-                        } else {
-                            return null;
                         }
                         return opt;
                     });
@@ -342,10 +340,7 @@ export class ClinicalContextComponent implements OnDestroy {
                     this.studycardOptions = studyCards;
                     if (!scFound) {
                         this.studycard = null;
-                        this.onSelectStudyCard().then(() => {
-                            this.center = null;
-                            this.onSelectCenter();
-                        }) ;
+                        this.onSelectStudyCard();
                     }
                 }
                 this.onContextChange();
