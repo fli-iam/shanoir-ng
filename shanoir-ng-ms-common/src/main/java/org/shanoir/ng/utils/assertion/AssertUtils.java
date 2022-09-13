@@ -134,6 +134,7 @@ public abstract class AssertUtils {
 				+ " at " 
 				+ e.getStackTrace()[0].getFileName() 
 				+ ":" 
-				+ e.getStackTrace()[0].getLineNumber();
+				+ e.getStackTrace()[0].getLineNumber()
+				+ " - details : \n" + e.toString();
 	}
 }

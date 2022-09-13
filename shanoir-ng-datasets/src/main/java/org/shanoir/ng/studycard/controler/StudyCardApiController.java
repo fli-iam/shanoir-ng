@@ -240,8 +240,8 @@ public class StudyCardApiController implements StudyCardApi {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		
-		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
 		List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
+		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
 		
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (!acquisition.getDatasets().isEmpty()) {
