@@ -21,6 +21,8 @@ import java.util.Map;
 
 import org.shanoir.ng.shared.event.ShanoirEvent;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * @author atouboul
  *
@@ -64,6 +66,16 @@ public class ImportJob implements Serializable {
 	private String studyName;
 
 	private ShanoirEvent shanoirEvent;
+	
+	private Long userId;
+	
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
 
 	private Map<String, String> properties = new HashMap();
 

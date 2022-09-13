@@ -66,6 +66,17 @@ public abstract class AssertUtils {
 		}
 	}
 	
+	public static <T, U, V, W> void assertAccessDenied(AccessCheckedFunction4Arg<T, U, V, W> function, T arg1, U arg2, V arg3, W arg4) throws ShanoirException {
+		try {
+			try { 
+				function.apply(arg1, arg2, arg3, arg4);
+				fail("This should return an AccessDeniedException.");
+			} catch (AccessDeniedException e) {}			
+		} catch (Exception e) {
+			fail(buildFailMsg(e));
+		}
+	}
+	
 	
 	public static void assertAccessAuthorized(AccessCheckedFunction0Arg function) throws ShanoirException {
 		try {
@@ -107,12 +118,23 @@ public abstract class AssertUtils {
 		} catch (Exception e) {}
 	}
 	
+	public static <T, U, V, W> void assertAccessAuthorized(AccessCheckedFunction4Arg<T, U, V, W> function, T arg1, U arg2, V arg3, W arg4) throws ShanoirException {
+		try {
+			try { 
+				function.apply(arg1, arg2, arg3, arg4);
+			} catch (AccessDeniedException e) {
+				fail("This should not return an AccessDeniedException.");
+			}			
+		} catch (Exception e) {}
+	}
+	
 	private static String buildFailMsg(Exception e) {
 		return "This should return an AccessDeniedException but got a " 
 				+ e.getClass().getSimpleName() 
 				+ " at " 
 				+ e.getStackTrace()[0].getFileName() 
 				+ ":" 
-				+ e.getStackTrace()[0].getLineNumber();
+				+ e.getStackTrace()[0].getLineNumber()
+				+ " - details : \n" + e.toString();
 	}
 }

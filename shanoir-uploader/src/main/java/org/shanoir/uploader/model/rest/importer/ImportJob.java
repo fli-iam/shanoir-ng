@@ -34,6 +34,9 @@ public class ImportJob {
     @JsonProperty("fromPacs")
     private boolean fromPacs;
     
+    @JsonProperty("fromCsv")
+	private boolean fromCsv;
+    
 	@JsonProperty("workFolder")
 	private String workFolder;
 
@@ -43,7 +46,7 @@ public class ImportJob {
     @JsonProperty("examinationId")
     private Long examinationId;
     
-    @JsonProperty("studyId")
+	@JsonProperty("studyId")
     private Long studyId;
     
     @JsonProperty("studyName")
@@ -66,8 +69,27 @@ public class ImportJob {
 	
 	@JsonProperty("anonymisationProfileToUse")
 	private String anonymisationProfileToUse;
+
+	@JsonProperty("userId")
+	private Long userId;
 	
-    public boolean isFromDicomZip() {
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public boolean isFromCsv() {
+		return fromCsv;
+	}
+
+	public void setFromCsv(boolean fromCsv) {
+		this.fromCsv = fromCsv;
+	}
+
+	public boolean isFromDicomZip() {
 		return fromDicomZip;
 	}
 

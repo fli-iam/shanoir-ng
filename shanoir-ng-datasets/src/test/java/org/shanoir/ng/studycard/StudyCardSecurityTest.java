@@ -77,15 +77,15 @@ public class StudyCardSecurityTest {
 		Set<Long> ids = Mockito.anySet();
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
-		assertAccessDenied(t -> { try { api.deleteStudyCard(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
+		assertAccessDenied(api::deleteStudyCard, 1L);
 		assertAccessDenied(api::findStudyCardByAcqEqId, 1L);
 		assertAccessDenied(api::findStudyCardById, 1L);
 		assertAccessDenied(api::findStudyCardByStudyId, 1L);
 		assertAccessDenied(api::findStudyCards);
 		IdList idList = new IdList(); idList.getIdList().add(1L); idList.getIdList().add(2L);
 		assertAccessDenied(api::searchStudyCards, idList);
-		assertAccessDenied((t, u, v) -> { try { api.updateStudyCard(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockStudyCard(1L), mockBindingResult);
-		assertAccessDenied((t, u) -> { try { api.saveNewStudyCard(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, mockStudyCard(), mockBindingResult);
+		assertAccessDenied(api::updateStudyCard, 1L, mockStudyCard(1L), mockBindingResult);
+		assertAccessDenied(api::saveNewStudyCard, mockStudyCard(), mockBindingResult);
 	}
 	
 	@Test
@@ -104,9 +104,9 @@ public class StudyCardSecurityTest {
 		IdList idList = new IdList(); idList.getIdList().add(1L); idList.getIdList().add(2L);
 		assertAccessAuthorized(api::searchStudyCards, idList);
 		
-		assertAccessDenied(t -> { try { api.deleteStudyCard(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
-		assertAccessDenied((t, u, v) -> { try { api.updateStudyCard(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockStudyCard(1L), mockBindingResult);
-		assertAccessDenied((t, u) -> { try { api.saveNewStudyCard(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, mockStudyCard(), mockBindingResult);
+		assertAccessDenied(api::deleteStudyCard, 1L);
+		assertAccessDenied(api::updateStudyCard, 1L, mockStudyCard(1L), mockBindingResult);
+		assertAccessDenied(api::saveNewStudyCard, mockStudyCard(), mockBindingResult);
 	}
 	
 	@Test
@@ -131,20 +131,20 @@ public class StudyCardSecurityTest {
 			
 		StudyCard sc0 = mockStudyCard();
 		sc0.setStudyId(3L);
-		assertAccessDenied((t, u) -> { try { api.saveNewStudyCard(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, sc0, mockBindingResult);
+		assertAccessDenied(api::saveNewStudyCard, sc0, mockBindingResult);
 		sc0.setStudyId(1L);
-		assertAccessAuthorized((t, u) -> { try { api.saveNewStudyCard(t, u); } catch (RestServiceException e) { }}, sc0, mockBindingResult);
+		assertAccessAuthorized(api::saveNewStudyCard, sc0, mockBindingResult);
 
-		assertAccessDenied((t, u, v) -> { try { api.updateStudyCard(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 3L, mockStudyCard(3L), mockBindingResult);
+		assertAccessDenied(api::updateStudyCard, 3L, mockStudyCard(3L), mockBindingResult);
 		StudyCard sc = mockStudyCard(1L);
 		sc.setStudyId(3L);
-		assertAccessDenied((t, u, v) -> { try { api.updateStudyCard(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, sc, mockBindingResult);
+		assertAccessDenied(api::updateStudyCard, 1L, sc, mockBindingResult);
 		sc.setStudyId(1L);
-		assertAccessDenied((t, u, v) -> { try { api.updateStudyCard(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 2L, sc, mockBindingResult);
-		assertAccessAuthorized((t, u, v) -> { try { api.updateStudyCard(t, u, v); } catch (RestServiceException e) { }}, 1L, sc, mockBindingResult);
+		assertAccessDenied(api::updateStudyCard, 2L, sc, mockBindingResult);
+		assertAccessAuthorized(api::updateStudyCard, 1L, sc, mockBindingResult);
 		
-		assertAccessDenied(t -> { try { api.deleteStudyCard(t); } catch (RestServiceException e) { fail(e.toString()); }}, 3L);
-		assertAccessAuthorized(t -> { try { api.deleteStudyCard(t); } catch (RestServiceException e) { }}, 1L);
+		assertAccessDenied(api::deleteStudyCard, 3L);
+		assertAccessAuthorized(api::deleteStudyCard, 1L);
 	}
 
 	@Test
@@ -154,15 +154,15 @@ public class StudyCardSecurityTest {
 		Set<Long> ids = Mockito.anySet();
 		given(commService.hasRightOnStudies(ids, Mockito.anyString())).willReturn(ids);
 		
-		assertAccessAuthorized(t -> { try { api.deleteStudyCard(t); } catch (RestServiceException e) { fail(e.toString()); }}, 1L);
+		assertAccessAuthorized(api::deleteStudyCard, 1L);
 		assertAccessAuthorized(api::findStudyCardByAcqEqId, 1L);
 		assertAccessAuthorized(api::findStudyCardById, 1L);
 		assertAccessAuthorized(api::findStudyCardByStudyId, 1L);
 		assertAccessAuthorized(api::findStudyCards);
 		IdList idList = new IdList(); idList.getIdList().add(1L); idList.getIdList().add(2L);
 		assertAccessAuthorized(api::searchStudyCards, idList);
-		assertAccessAuthorized((t, u, v) -> { try { api.updateStudyCard(t, u, v); } catch (RestServiceException e) { fail(e.toString()); }}, 1L, mockStudyCard(1L), mockBindingResult);
-		assertAccessAuthorized((t, u) -> { try { api.saveNewStudyCard(t, u); } catch (RestServiceException e) { fail(e.toString()); }}, mockStudyCard(), mockBindingResult);
+		assertAccessAuthorized(api::updateStudyCard, 1L, mockStudyCard(1L), mockBindingResult);
+		assertAccessAuthorized(api::saveNewStudyCard, mockStudyCard(), mockBindingResult);
 	}
 	
 	

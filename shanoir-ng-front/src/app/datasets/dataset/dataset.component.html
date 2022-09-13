@@ -62,6 +62,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type == 'Eeg' && !dataset.datasetProcessing" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('eeg')">Download EEG<i class="fas fa-download"></i></button>
             	<button *ngIf="mode=='view' && hasDownloadRight && dataset.datasetProcessing" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download Processed dataset<i class="fas fa-download"></i></button>
                 <button *ngIf="mode=='view' && hasDownloadRight && dataset.type == 'BIDS'" [disabled]="downloading" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('BIDS')">Download BIDS dataset file<i class="fas fa-download"></i></button>
+				<button *ngIf="mode=='view' && hasDownloadRight && dataset.type != 'Eeg'" type="button" class="right-icon" (click)="seeDicomMetadata()">Show DICOM metadata<i class="fas fa-file-code"></i></button>
             </form-footer>
 		</div>
 	</form>

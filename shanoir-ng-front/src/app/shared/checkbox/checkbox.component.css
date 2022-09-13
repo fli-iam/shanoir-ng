@@ -8,6 +8,10 @@
     font-size: 15px;
 }
 
+:host().view {
+    border: none;
+}
+
 :host().disabled {
     opacity: 0.5;
 }

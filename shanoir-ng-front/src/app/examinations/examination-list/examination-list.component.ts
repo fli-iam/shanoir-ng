@@ -76,7 +76,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                 route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];
-        return colDef;       
+        return colDef;
     }
 
     getCustomActionsDefs(): any[] {
@@ -104,8 +104,9 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     canDelete(exam: Examination): boolean {
         return this.keycloakService.isUserAdmin() || (
-            exam.study &&
-            this.studiesICanAdmin.includes(exam.study.id)
+            exam.study
+            && this.studiesICanAdmin
+            && this.studiesICanAdmin.includes(exam.study.id)
         );
     }
 }

@@ -197,7 +197,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9909:9909"
+     - "9905:9905"
      - "9915:9915"
     depends_on:
       - "database"
@@ -233,9 +233,11 @@ services:
       - "8983:8983"
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
+  # The config for the dcm4chee containers is derived from this template:
+  # https://github.com/dcm4che-dockerfiles/dcm4chee-arc-psql/blob/master/docker-compose.yml
   ldap:
     container_name: "${SHANOIR_PREFIX}ldap"
-    image: dcm4che/slapd-dcm4chee:2.4.44-13.0
+    image: dcm4che/slapd-dcm4chee:2.6.2-27.0
     logging:
       driver: json-file
       options:
@@ -246,11 +248,11 @@ services:
       - "389:389"
     env_file: ./docker-compose/dcm4chee/variables.env
     volumes:
-      - "dcm4chee-ldap-data:/var/lib/ldap"
-      - "dcm4chee-sldap-data:/etc/ldap/slapd.d"
+      - "dcm4chee-ldap-data:/var/lib/openldap/openldap-data"
+      - "dcm4chee-sldap-data:/etc/openldap/slapd.d"
   dcm4chee-database:
     container_name: "${SHANOIR_PREFIX}dcm4chee-database"
-    image: dcm4che/postgres-dcm4chee:10.0-13
+    image: dcm4che/postgres-dcm4chee:14.4-27
     logging:
       driver: json-file
       options:
@@ -264,7 +266,7 @@ services:
       - "dcm4chee-database-data:/var/lib/postgresql/data"
   dcm4chee-arc:
     container_name: "${SHANOIR_PREFIX}dcm4chee-arc"
-    image: dcm4che/dcm4chee-arc-psql:5.13.0
+    image: dcm4che/dcm4chee-arc-psql:5.27.0
     logging:
       driver: json-file
       options:
@@ -280,7 +282,7 @@ services:
     env_file: ./docker-compose/dcm4chee/variables.env
     environment:
       POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
-      WILDFLY_CHOWN: /opt/wildfly/standalone /storage
+      WILDFLY_CHOWN: /storage
       WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
     depends_on:
       - "ldap"

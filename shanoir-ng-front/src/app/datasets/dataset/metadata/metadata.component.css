@@ -1,0 +1,4 @@
+table { margin: 30px 0; }
+td { padding : 0 10px; }
+tr:hover { background-color: var(--color-b-light); }
+.no-metadata { margin-bottom: 50px; }

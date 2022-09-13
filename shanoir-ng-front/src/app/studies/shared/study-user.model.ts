@@ -11,12 +11,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Center } from '../../centers/shared/center.model';
+import { Id } from '../../shared/models/id.model';
+import { User } from '../../users/shared/user.model';
+import { StudyUserRight } from './study-user-right.enum';
+import { Study } from './study.model';
 
-import { IdName } from "../../shared/models/id-name.model";
-import { Id } from "../../shared/models/id.model";
-import { User } from "../../users/shared/user.model";
-import { StudyUserRight} from "./study-user-right.enum";
-import { Study } from "./study.model";
 
 export class StudyUser {
     id: number;
@@ -29,6 +29,7 @@ export class StudyUser {
     userName: string;
     user: User;
     confirmed: boolean = false;
+    centers: Center[];
 
     public completeMember(users: User[]) {
         StudyUser.completeMember(this, users);
@@ -50,6 +51,7 @@ export class StudyUserDTO {
     userName: string;
     user: User;
     confirmed: boolean = false;
+    centerIds: number[];
 
     constructor(studyUser: StudyUser) {
         this.id = studyUser.id;
@@ -61,5 +63,6 @@ export class StudyUserDTO {
         this.userName = studyUser.userName;
         this.user = studyUser.user;
         this.confirmed = studyUser.confirmed;
+        this.centerIds = studyUser.centers?.map(center => center.id);
     }
 }
