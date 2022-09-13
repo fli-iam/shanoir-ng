@@ -35,6 +35,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class handles all calls to the shanoir backup pacs using DICOMWeb.
+ * For the exception handling: all query methods return null and log an error,
+ * as the user will see an empty result list. For all storage calls, that are
+ * important to arrive an exception is thrown back to the user to avoid silent
+ * none storage.
+ * 
+ * @author mkain
+ *
+ */
 @Component
 public class DICOMWebService {
 
@@ -177,8 +187,9 @@ public class DICOMWebService {
 		return null;
 	}
 
-	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
+	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws ShanoirException {
 		if (directoryWithDicomFiles == null || !directoryWithDicomFiles.exists() || !directoryWithDicomFiles.isDirectory()) {
+			LOG.error("sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
 			throw new ShanoirException("sendDicomFilesToPacs called with null, or file: not existing or not a directory.");
 		}
 		File[] dicomFiles = directoryWithDicomFiles.listFiles();
@@ -188,16 +199,19 @@ public class DICOMWebService {
 		multipartEntityBuilder.setMimeSubtype(RELATED);
 		// create one multipart part for each file
 		for (File dicomFile : dicomFiles) {
-			FileInputStream fileIS = new FileInputStream(dicomFile);
-			// create content body
-			ContentBody contentBody = new InputStreamBody(
-					new ByteArrayInputStream(fileIS.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
-			// build MultipartPart
-			MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
-			partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
-			partBuilder.setBody(contentBody);
-			MultipartPart multipartPart = partBuilder.build();
-			multipartEntityBuilder.addPart(multipartPart);
+			try(FileInputStream fileIS = new FileInputStream(dicomFile)) {
+				ContentBody contentBody = new InputStreamBody(
+						new ByteArrayInputStream(fileIS.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
+				// build MultipartPart
+				MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
+				partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
+				partBuilder.setBody(contentBody);
+				MultipartPart multipartPart = partBuilder.build();
+				multipartEntityBuilder.addPart(multipartPart);
+			} catch(Exception e) {
+				LOG.error(e.getMessage(), e);
+				throw new ShanoirException(e.getMessage());
+			}
 		}
 		HttpEntity entity = multipartEntityBuilder.build();
 		sendMultipartRequest(entity);
@@ -205,38 +219,44 @@ public class DICOMWebService {
 	}
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	public void sendDicomInputStreamToPacs(InputStream inputStream) throws Exception {
+	public void sendDicomInputStreamToPacs(InputStream inputStream) throws ShanoirException {
 		LOG.info("Start: STOW-RS sending dicom file input stream to PACS.");
-		// create content body
-		ContentBody contentBody = new InputStreamBody(
-				new ByteArrayInputStream(inputStream.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
-		// build MultipartPart
-		MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
-		partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
-		partBuilder.setBody(contentBody);
-		MultipartPart multipartPart = partBuilder.build();
-		// build MultipartEntity
-		MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
-		multipartEntityBuilder.setBoundary(BOUNDARY);
-		multipartEntityBuilder.setMimeSubtype(RELATED);
-		multipartEntityBuilder.addPart(multipartPart);
-		HttpEntity entity = multipartEntityBuilder.build();
-		sendMultipartRequest(entity);
+		try {
+			// create content body
+			ContentBody contentBody = new InputStreamBody(
+					new ByteArrayInputStream(inputStream.readAllBytes()), ContentType.create(CONTENT_TYPE_DICOM));
+			// build MultipartPart
+			MultipartPartBuilder partBuilder = MultipartPartBuilder.create();
+			partBuilder.addHeader(CONTENT_TYPE, CONTENT_TYPE_DICOM);
+			partBuilder.setBody(contentBody);
+			MultipartPart multipartPart = partBuilder.build();
+			// build MultipartEntity
+			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create();
+			multipartEntityBuilder.setBoundary(BOUNDARY);
+			multipartEntityBuilder.setMimeSubtype(RELATED);
+			multipartEntityBuilder.addPart(multipartPart);
+			HttpEntity entity = multipartEntityBuilder.build();
+			sendMultipartRequest(entity);
+		} catch(Exception e) {
+			LOG.error(e.getMessage(), e);
+			throw new ShanoirException(e.getMessage());
+		}
 		LOG.info("Finished: STOW-RS sending dicom file input stream to PACS.");
 	}
 
-	private void sendMultipartRequest(HttpEntity entity) throws IOException {
+	private void sendMultipartRequest(HttpEntity entity) throws ShanoirException {
 		HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRS);
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
 		httpPost.setEntity(entity);
 		try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
 			int code = response.getCode();
 			if (code != HttpStatus.OK.value()) {
-				LOG.error("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);				
+				LOG.error("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
+				throw new ShanoirException("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
 			}
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
-			throw e;
+			throw new ShanoirException(e.getMessage());
 		}
 	}
 
@@ -273,11 +293,14 @@ public class DICOMWebService {
 			if (response.getCode() == HttpStatus.NO_CONTENT.value()) {
 				LOG.info("Rejected from PACS: " + url);
 			} else {
-				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase());
-				throw new ShanoirException("Could not reject instance from PACS: " + rejectURL);
+				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
+					+ "for rejectURL: " + rejectURL);
+				throw new ShanoirException(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
+				+ "for rejectURL: " + rejectURL);
 			}
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
+			throw new ShanoirException(e.getMessage());
 		}
 		// STEP 2: Delete from the PACS
 		HttpDelete delete = new HttpDelete(deleteUrl);
@@ -286,11 +309,14 @@ public class DICOMWebService {
 			if (response.getCode() == HttpStatus.OK.value()) {
 				LOG.info("Deleted from PACS: " + url);
 			} else {
-				LOG.error(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase());
-				throw new ShanoirException("Could not delete instance from PACS: " + deleteUrl);
+				LOG.error(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
+					+ "for deleteURL: " + deleteUrl);
+				throw new ShanoirException(response.getCode() + ": Could not delete instance from PACS: " + response.getReasonPhrase()
+				+ "for deleteURL: " + deleteUrl);
 			}
 		} catch (IOException e) {
 			LOG.error(e.getMessage(), e);
+			throw new ShanoirException(e.getMessage());
 		}
 	}
 
