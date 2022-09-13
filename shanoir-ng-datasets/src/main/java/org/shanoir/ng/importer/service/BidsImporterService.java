@@ -218,7 +218,7 @@ public class BidsImporterService {
 			} else {
 				// Create the dataset with informations from job
 				datasetToCreate = new BidsDataset();
-				datasetToCreate.setSubjectId(examination.getSubjectId());
+				datasetToCreate.setSubjectId(examination.getSubject() != null ? examination.getSubject().getId() : null);
 				datasetToCreate.setCreationDate(LocalDate.now());
 				datasetToCreate.setDatasetAcquisition(datasetAcquisition);
 

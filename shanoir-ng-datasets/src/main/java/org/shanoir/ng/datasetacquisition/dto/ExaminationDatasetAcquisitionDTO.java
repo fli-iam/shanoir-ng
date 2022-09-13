@@ -32,6 +32,8 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 	private List<DatasetAndProcessingsDTO> datasets;
 	
 	private Long studyId;
+	
+	private Long examinationId;
 
 	private Integer sortingIndex;
 
@@ -71,5 +73,13 @@ public class ExaminationDatasetAcquisitionDTO extends IdName {
 
 	public void setSortingIndex(Integer sortingIndex) {
 		this.sortingIndex = sortingIndex;
+	}
+
+	public Long getExaminationId() {
+		return examinationId;
+	}
+
+	public void setExaminationId(Long examinationId) {
+		this.examinationId = examinationId;
 	}
 }

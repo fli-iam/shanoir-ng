@@ -42,6 +42,8 @@ const BACKEND_API_STUDIES_MS_URL: string = BACKEND_API_URL + '/studies';
 // Centers http api
 export const BACKEND_API_CENTER_URL: string = BACKEND_API_STUDIES_MS_URL + '/centers';
 export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/names';
+export const BACKEND_API_CENTER_STUDY_URL: string = BACKEND_API_CENTER_URL + '/study';
+
 
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';

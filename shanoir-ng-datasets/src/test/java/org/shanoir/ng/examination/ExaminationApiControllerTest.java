@@ -70,8 +70,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for examination controller.
@@ -106,8 +105,6 @@ public class ExaminationApiControllerTest {
 	private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	private Gson gson;
-
 	@Autowired
 	private MockMvc mvc;
 
@@ -137,11 +134,12 @@ public class ExaminationApiControllerTest {
 
 	@MockBean
 	ExaminationRepository examRepo;
+	
+	@Autowired
+	ObjectMapper objectMapper;
 
 	@Before
 	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
 		doNothing().when(examinationServiceMock).deleteById(1L);
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
 		Examination exam = new Examination();
@@ -213,7 +211,7 @@ public class ExaminationApiControllerTest {
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PageRequest.of(0, 10))))
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(PageRequest.of(0, 10))))
 		.andExpect(status().isOk());
 	}
 
@@ -227,7 +225,7 @@ public class ExaminationApiControllerTest {
 		given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
 
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination())))
 		.andExpect(status().isOk());
 		
 		// Check event here to verify that the message is well set to event
@@ -239,7 +237,7 @@ public class ExaminationApiControllerTest {
 		assertEquals(exam.getStudyId(), event.getStudyId());
 		assertEquals(exam.getId().toString(), event.getObjectId());
 		// This is import, plese keep it, or change RabbitMQStudiesService#linkExamination method
-		assertEquals("centerId:" + exam.getCenterId() + ";subjectId:" + exam.getSubjectId(), event.getMessage());
+		assertEquals("centerId:" + exam.getCenterId() + ";subjectId:" + (exam.getSubject() != null ? exam.getSubject().getName() : null), event.getMessage());
 
 		assertEquals(ShanoirEventType.CREATE_EXAMINATION_EVENT, event.getEventType());
 	}
@@ -247,10 +245,9 @@ public class ExaminationApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateExaminationTest() throws Exception {
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-
+		given(examinationServiceMock.findById(1L)).willReturn(ModelsUtil.createExamination(1L));
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination(1L))))
 		.andExpect(status().isNoContent());
 	}
 

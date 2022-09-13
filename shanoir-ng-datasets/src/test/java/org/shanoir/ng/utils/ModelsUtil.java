@@ -29,6 +29,7 @@ import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.studycard.model.StudyCard;
 
 /**
@@ -110,9 +111,20 @@ public final class ModelsUtil {
 		examination.setInvestigatorId(EXAMINATION_INVESTIGATOR_ID);
 		examination.setNote(EXAMINATION_NOTE);
 		examination.setStudyId(EXAMINATION_STUDY_ID);
-		examination.setSubjectId(EXAMINATION_SUBJECT_ID);
+		examination.setSubject(new Subject(EXAMINATION_SUBJECT_ID, ""));
 		examination.setPreclinical(false);
 		examination.setDatasetAcquisitions(Collections.emptyList());
+		return examination;
+	}
+	
+	/**
+	 * Create an examination.
+	 * 
+	 * @return examination.
+	 */
+	public static Examination createExamination(Long id) {
+		final Examination examination = createExamination();
+		examination.setId(id);
 		return examination;
 	}
 	

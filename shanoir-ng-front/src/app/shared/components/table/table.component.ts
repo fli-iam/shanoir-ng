@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { ApplicationRef, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { fromEvent, Subscription } from 'rxjs';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
@@ -38,6 +38,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() customActionDefs: any[];
     @Input() selectionAllowed: boolean = false;
     @Input() selection: Set<number> = new Set();
+    @Input() selectedId: number;
     @Output() selectionChange: EventEmitter<Set<number>> = new EventEmitter<Set<number>>();
     selectAll: boolean | 'indeterminate' = false;
     @Input() browserSearch: boolean = true;
@@ -62,6 +63,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     private subscriptions: Subscription[] = [];
     private hash: string;
     private colSave: { width: string, hidden: boolean }[];
+    compactMode: boolean = false;
     nbColumns: number;
     expended: boolean[] = [];
     subRowOpen: any = {};
@@ -99,6 +101,15 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(this.globalClickService.onGlobalMouseUp.subscribe(() => this.stopDrag()));
+        this.subscriptions.push(fromEvent(window, 'resize').subscribe( evt => {
+            this.checkCompactMode();
+        }));
+        this.checkCompactMode();
+    }
+
+    private checkCompactMode() {
+        let width: number = this.elementRef.nativeElement.offsetWidth; 
+        this.compactMode = width < 620;
     }
 
     private reloadPreviousState() {

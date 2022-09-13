@@ -25,6 +25,7 @@ import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
@@ -120,6 +121,9 @@ public class BIDSServiceImpl implements BIDSService {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+	
+	@Autowired
+	DatasetSecurityService datasetSecurityService;
 
 	@Override
 	/**

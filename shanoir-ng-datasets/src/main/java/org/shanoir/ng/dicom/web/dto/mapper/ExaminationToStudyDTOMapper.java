@@ -27,9 +27,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Mapper(componentModel = "spring")
 public abstract class ExaminationToStudyDTOMapper {
 	
-	@Autowired
-	protected SubjectRepository subjectRepository;
-	
 	public StudyDTO examinationToStudyDTO(Examination examination) {
 		StudyDTO studyDTO = new StudyDTO();
 		final String studyInstanceUID = UIDGeneration.ROOT + ".1." + examination.getId();
@@ -43,19 +40,17 @@ public abstract class ExaminationToStudyDTOMapper {
 		studyDTO.setAccessionNumber("");
 		// 4 patient specific values
 		// @TODO optimize here: not ask the database for each subject id, use a cached list?
-		Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubjectId());
-		String subjectName = "error_subject_name_not_found_in_db";
-		if (subjectOpt.isPresent()) {
-			subjectName = subjectOpt.get().getName();
-		}
+		String subjectName = examination.getSubject() != null ? examination.getSubject().getName() : null;
 		studyDTO.setPatientName(subjectName);
-		studyDTO.setPatientID(examination.getSubjectId().toString());
+		studyDTO.setPatientID(subjectName);
 		studyDTO.setPatientBirthDate("01011960"); // @TODO not yet in ms datasets database
 		studyDTO.setPatientSex("F"); // @TODO not yet in ms datasets database
 		
 		addSeries(examination, studyDTO);
 		studyDTO.setNumInstances(1);
-		studyDTO.setModalities(studyDTO.getSeries().get(0).getModality());
+		if (studyDTO.getSeries().size() > 0) {
+			studyDTO.setModalities(studyDTO.getSeries().get(0).getModality());			
+		}
 		
 		return studyDTO;
 	}

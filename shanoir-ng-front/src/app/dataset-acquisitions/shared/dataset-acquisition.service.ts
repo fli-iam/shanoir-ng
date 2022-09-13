@@ -64,6 +64,7 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
             .then((page: Page<DatasetAcquisitionDTO>) => {
                 if (!page) return null;
                 let immediateResult: DatasetAcquisition[] = [];
+                console.log(page);
                 this.dsAcqDtoService.toDatasetAcquisitions(page.content, immediateResult);
                 return Page.transType<DatasetAcquisition>(page, immediateResult);
             });

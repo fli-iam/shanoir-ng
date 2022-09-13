@@ -38,6 +38,10 @@ public class SubjectExaminationDTO {
 	private Long id;
 	
 	private List<String> extraDataFilePathList;
+	
+	private Long centerId;
+	
+	private Long studyId;
 
 	/**
 	 * @return the comment
@@ -107,4 +111,19 @@ public class SubjectExaminationDTO {
 		this.extraDataFilePathList = extraDataFilePathList;
 	}
 
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
 }
