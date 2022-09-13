@@ -388,12 +388,13 @@ public class DicomSRImporterService {
 		 * to produce a new input stream to send later by http client to the DICOM server.
 		 */
 		ByteArrayOutputStream bAOS = new ByteArrayOutputStream();
-		DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID));
-		dOS.writeDataset(metaInformationAttributes, datasetAttributes);
-		InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray());
-		dicomWebService.sendDicomInputStreamToPacs(finalInputStream);
-		finalInputStream.close();
-		dOS.close();
+		// close calls to the outer stream, close the inner stream
+		try(DicomOutputStream dOS = new DicomOutputStream(bAOS, metaInformationAttributes.getString(Tag.TransferSyntaxUID))) {
+			dOS.writeDataset(metaInformationAttributes, datasetAttributes);
+			try(InputStream finalInputStream = new ByteArrayInputStream(bAOS.toByteArray())) {
+				dicomWebService.sendDicomInputStreamToPacs(finalInputStream);				
+			}
+		}
 	}
 
 }
