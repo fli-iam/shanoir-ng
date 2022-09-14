@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: fetch the master branch
+      run: git fetch --no-tags --no-recurse-submodules --depth=1 origin +refs/heads/master:refs/remotes/origin/master
     - name: check migration names
       run: cd docker-compose/database && ./check_migration_names.py
     - name: Set up JDK 11
