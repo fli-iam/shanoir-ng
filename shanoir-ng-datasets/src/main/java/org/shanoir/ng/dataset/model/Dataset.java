@@ -331,6 +331,17 @@ public abstract class Dataset extends AbstractEntity {
 		}
 		return getDatasetAcquisition().getExamination().getStudyId();
 	}
+	
+	/**
+	 * @return the studyId
+	 */
+	@Transient
+	public Long getCenterId() {
+		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
+			return studyId;
+		}
+		return getDatasetAcquisition().getExamination().getCenterId();
+	}
 
 	/**
 	 * @return the subjectId

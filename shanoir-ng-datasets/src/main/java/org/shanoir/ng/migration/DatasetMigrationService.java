@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.model.DiffusionGradient;
 import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.InversionTime;
 import org.shanoir.ng.shared.model.RepetitionTime;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.StudyCardCondition;
@@ -67,6 +68,9 @@ public class DatasetMigrationService {
 
 	@Autowired
 	ExaminationService examService;
+
+	@Autowired
+	SubjectRepository subjectRepository;
 
 	@Autowired
 	DistantDatasetShanoirService distantShanoir;
@@ -214,7 +218,7 @@ public class DatasetMigrationService {
 		long oldId = exam.getId();
 		exam.setId(null);
 		exam.setCenterId(job.getCentersMap().get(exam.getCenterId()));
-		exam.setSubjectId(job.getSubjectsMap().get(exam.getSubjectId()));
+		exam.setSubject(subjectRepository.findById(job.getSubjectsMap().get(exam.getSubject().getId())).get());
 		exam.setStudyId(job.getStudy().getId());
 
 		// We just remove these elements that are not pertinent
@@ -422,7 +426,7 @@ public class DatasetMigrationService {
 			String result = null;
 			if (DatasetExpressionFormat.DICOM.equals(file.getDatasetExpression().getDatasetExpressionFormat())) {
 				// Dicom
-				result = downloader.downloadDicomFilesForURL(file.getPath(), workFolder, "", createdDataset);
+				result = downloader.downloadDicomFilesForURL(file.getPath(), workFolder, "", createdDataset, 0);
 			} else {
 				// Nifti
 				URL url = new URL(file.getPath().replaceAll("%20", " "));

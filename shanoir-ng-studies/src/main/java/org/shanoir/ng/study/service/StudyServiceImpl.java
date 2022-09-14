@@ -373,7 +373,7 @@ public class StudyServiceImpl implements StudyService {
 	@Transactional
 	protected void updateStudyUsers(Study studyDb, Study study) {
 		if (study.getStudyUserList() == null) {
-			return;
+			study.setStudyUserList(new ArrayList<>());
 		}
 		// New lists of created / updated to send via RabbitMQ
 		List<StudyUser> toBeCreated = new ArrayList<>();
@@ -423,6 +423,7 @@ public class StudyServiceImpl implements StudyService {
 			existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
 			existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
 			existingSu.setConfirmed(replacingSu.isConfirmed());
+			existingSu.setCenters(replacingSu.getCenters());
 			toBeUpdated.add(existingSu);
 		}
 

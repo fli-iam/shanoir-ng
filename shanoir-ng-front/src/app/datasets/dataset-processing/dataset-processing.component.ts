@@ -29,6 +29,8 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { CarminDatasetProcessingService } from 'src/app/carmin/shared/carmin-dataset-processing.service';
+import { CarminDatasetProcessing } from 'src/app/carmin/models/CarminDatasetProcessing';
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -55,12 +57,15 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     private outputDatasetsToRemove: Dataset[] = [];
     public inputDatasetsColumnDefs: any[];
     public outputDatasetsColumnDefs: any[];
+    public isCarminDatasetProcessingEntity: boolean = false;
+    public carminDatasetProcessing: CarminDatasetProcessing;
 
     constructor(
             private route: ActivatedRoute,
             private studyService: StudyService,
             private datasetService: DatasetService,
-            private datasetProcessingService: DatasetProcessingService
+            private datasetProcessingService: DatasetProcessingService,
+            private carminDatasetProcessingService: CarminDatasetProcessingService
             ) {
 
         super(route, 'dataset-processing');
@@ -87,6 +92,17 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     initView(): Promise<void> {
         return this.datasetProcessingService.get(this.id).then((entity)=> {
+            // checking if the datasetProcessing is carmin type.
+            this.carminDatasetProcessingService.getCarminDatasetProcessing(entity.id).subscribe(
+                (carminDatasetProcessing: CarminDatasetProcessing) => {
+                    this.setCarminDatasetProcessing(carminDatasetProcessing);
+                },
+                (error)=>{
+                    // 404 : if it's not found then it's not carmin type !
+                    this.resetCarminDatasetProcessing();
+                }
+            )
+            
             this.setDatasetProcessing(entity);
         })
     }
@@ -100,6 +116,14 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     initCreate(): Promise<void> {
         this.datasetProcessing = new DatasetProcessing();
         return Promise.resolve();
+    }
+
+    setCarminDatasetProcessing(carminDatasetProcessing: CarminDatasetProcessing){
+        this.isCarminDatasetProcessingEntity = true;
+        this.carminDatasetProcessing = carminDatasetProcessing;
+    }
+    resetCarminDatasetProcessing(){
+        this.isCarminDatasetProcessingEntity = false;
     }
 
     setDatasetProcessing(datasetProcessing: DatasetProcessing): Promise<void> {
@@ -200,15 +224,17 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             }},
             {headerName: "Name", field: "name", type: "string", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.name);
+            },route: (dataset : Dataset)=>{
+                return `/dataset/details/${dataset.id}`
             }},
             {headerName: "Dataset type", field: "type", type: "string", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.type);
             }},
             {headerName: "Study", field: "study", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.study.name);
+                return checkNullValue(params.data.study?.name);
             }},
             {headerName: "Subject", field: "subject", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.subject.name);
+                return checkNullValue(params.data.subject?.name);
             }},
             {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.creationDate);
@@ -223,17 +249,19 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             {headerName: "ID", field: "id", type: "reference", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.id);
             }},
-            {headerName: "Name", field: "name", type: "string", cellRenderer: function (params: any) {
+            {headerName: "Name", field: "name", type: "link", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.name);
+            }, route: (dataset : Dataset)=>{
+                return `/dataset/details/${dataset.id}`
             }},
             {headerName: "Dataset type", field: "type", type: "string", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.type);
             }},
             {headerName: "Study", field: "study", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.study.name);
+                return checkNullValue(params.data.study?.name);
             }},
             {headerName: "Subject", field: "subject", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.subject.name);
+                return checkNullValue(params.data.subject?.name);
             }},
             {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: function (params: any) {
                 return dateRenderer(params.data.creationDate);
@@ -284,6 +312,11 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.outputDatasetsToRemove.push(item);
         this.outputDatasetsBrowserPaging.setItems(this.datasetProcessing.outputDatasets);
         this.outputDatasetsTable.refresh();
+    }
+
+    private isCarminDatasetProcessing(datasetProcessing: DatasetProcessing){
+        if(datasetProcessing.comment == null || !datasetProcessing.comment.startsWith("workflow-")) return false;
+        return true;
     }
 
 }

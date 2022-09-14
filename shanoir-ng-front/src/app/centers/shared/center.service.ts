@@ -43,6 +43,11 @@ export class CenterService extends EntityService<Center> {
             .toPromise();
     }
 
+    getCentersByStudyId(studyId: number): Promise<Center[]> {
+        return this.http.get<Center[]>(AppUtils.BACKEND_API_CENTER_STUDY_URL + "/" + studyId)
+            .toPromise();
+    }
+
     protected mapEntity = (dto: CenterDTO, result?: Center): Promise<Center> => {
         if (result == undefined) result = this.getEntityInstance();
         return this.centerDTOService.toEntity(dto, result);

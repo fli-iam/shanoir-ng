@@ -214,7 +214,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Override
 	public ResponseEntity<Page<DatasetAcquisitionDTO>> findDatasetAcquisitions(final Pageable pageable) throws RestServiceException {
 		Page<DatasetAcquisition> datasetAcquisitions = datasetAcquisitionService.findPage(pageable);
-		if (datasetAcquisitions.getContent().isEmpty()) {
+		if (datasetAcquisitions == null || datasetAcquisitions.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);

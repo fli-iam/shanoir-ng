@@ -33,19 +33,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 
                 <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)">
                     <!-- default display -->
-                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress'">{{vars.render.text ? vars.render.text : vars.render}}</ng-container>
+                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress'">{{vars.render.text ? vars.render.text : vars.render}}</ng-container>
 
                     <!-- link -->
-                    <a class="link" *ngIf="!(editMode && vars.editable) && vars.route"
+                    <a class="link" *ngIf="!(editMode && vars.editable) && vars.route"
                         [routerLink]="vars.route" routerLinkActive="active">{{vars.render.text ? vars.render.text : vars.render}}<i class="fas fa-external-link-alt"></i></a>
 
                     <!-- editable text / number -->
-                    <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
+                    <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
                         <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
                     </ng-container>
 
                     <!-- editable text / number with dropdown -->
-                    <ng-container *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
+                    <ng-container *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
                         <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
                             <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
                         </select>
@@ -148,7 +148,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [class.even]="i%2==0"
     [class.disabled]="rowDisabled(item)"
     [class.edit]="editMode"
-    [class.selected]="selectionAllowed && isSelected(item)"
+    [class.selected]="(selectionAllowed && isSelected(item)) || selectedId == item.id"
     [class.opened]="subRowsDefs && subRowOpen[i]">
     <td *ngIf="subRowsDefs" class="checkbox-cell deploy-cell">
         <i *ngIf="!subRowOpen[i]" (click)="deploy(i)" class="fa-solid fa-plus"></i>
@@ -204,8 +204,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span *ngIf="page && browserSearch">Found : {{page?.numberOfElements}}</span>
                 <span *ngIf="page">Total : {{page?.totalElements}}</span>
                 <span>Page size : <input class="max-results" [(ngModel)]="maxResultsField" (change)="updateMaxResults()" type="text"/></span>
-                <span (click)="settingsDialog.show()" class="clickable left-icon"><i class="fas fa-cog"></i>Columns settings</span>
-                <span (click)="resetColumns()" class="clickable left-icon"><i class="fas fa-undo-alt"></i>Reset columns</span>
+                <span (click)="settingsDialog.show()" class="clickable" [class.left-icon]="!compactMode" title="Columns settings">
+                    <i class="fas fa-cog"></i>
+                    <span *ngIf="!compactMode">Columns settings</span>
+                </span>
+                <span (click)="resetColumns()" class="clickable" [class.left-icon]="!compactMode" title="Reset columns">
+                    <i class="fas fa-undo-alt"></i>
+                    <span *ngIf="!compactMode">Reset columns</span>
+                </span>
             </ng-container>
         </span>
     </th>

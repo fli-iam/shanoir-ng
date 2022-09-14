@@ -269,6 +269,7 @@ export class StudyComponent extends EntityComponent<Study> {
             studyCenter.center.id = this.selectedCenter.id;
             studyCenter.center.name = this.selectedCenter.name;
             this.study.studyCenterList.push(studyCenter);
+            this.study.studyCenterList = [...this.study.studyCenterList];
 
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         }

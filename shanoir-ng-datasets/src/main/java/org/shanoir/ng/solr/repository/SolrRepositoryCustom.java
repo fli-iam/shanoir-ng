@@ -3,16 +3,13 @@
  */
 package org.shanoir.ng.solr.repository;
 
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.paging.FacetPageable;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 
 /**
@@ -23,5 +20,6 @@ public interface SolrRepositoryCustom {
 	
 	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException;
 	
-	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Collection<Long> studyIds, ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
+	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Map<Long, List<String>> studiesCenter, ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
+
 }
