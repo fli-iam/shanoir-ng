@@ -460,9 +460,9 @@ public class DatasetMigrationService {
 				path = path.replace(dcm4cheeHost, MigrationConstants.DCM4CHEE_HOST_CONSTANT);
 				path = path.replace(dcm4cheePortWeb, MigrationConstants.DCM4CHEE_PORT_CONSTANT);
 				if (dicomWeb) {
-					path = path.replace(dicomWADOURI, MigrationConstants.DCM4CHEE_WADO_URI_CONSTANT);
-				} else {
 					path = path.replace(dicomWebRS, MigrationConstants.DCM4CHEE_WEB_RS_CONSTANT);
+				} else {
+					path = path.replace(dicomWADOURI, MigrationConstants.DCM4CHEE_WADO_URI_CONSTANT);
 				}
 				file.setPath(path);
 			}
