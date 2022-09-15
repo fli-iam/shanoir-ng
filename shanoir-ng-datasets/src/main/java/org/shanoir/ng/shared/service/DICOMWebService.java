@@ -79,7 +79,7 @@ public class DICOMWebService implements DicomServiceApi {
 		}
 		File[] dicomFiles = directoryWithDicomFiles.listFiles();
 		LOG.error("Start: STOW-RS sending " + dicomFiles.length + " dicom files to PACS from folder: " + directoryWithDicomFiles.getAbsolutePath());
-
+		LOG.error("" + dicomFiles);
 		try(CloseableHttpClient httpClient = HttpClients.createDefault()) {
 			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
 			for (File dicomFile : dicomFiles) {
@@ -90,7 +90,6 @@ public class DICOMWebService implements DicomServiceApi {
 			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
 			httpPost.setEntity(entity);
 			CloseableHttpResponse response = httpClient.execute(httpPost);
-			LOG.error("COUCOU" + response.toString());
 			response.getEntity();
 			response.close();
 		} catch (ClientProtocolException e) {
