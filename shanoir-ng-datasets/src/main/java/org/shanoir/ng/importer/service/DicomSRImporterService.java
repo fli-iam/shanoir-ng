@@ -142,7 +142,7 @@ public class DicomSRImporterService {
 		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
 		datasetAttributes.setString(Tag.StudyInstanceUID, VR.UI, studyInstanceUID);		
 		// replace subject name, that is sent by the viewer wrongly with P-0000001 etc.
-		Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubjectId());
+		Optional<Subject> subjectOpt = subjectRepository.findById(examination.getSubject().getId());
 		String subjectName = "error_subject_name_not_found_in_db";
 		if (subjectOpt.isPresent()) {
 			subjectName = subjectOpt.get().getName();
@@ -247,7 +247,7 @@ public class DicomSRImporterService {
 		MeasurementDataset measurementDataset = new MeasurementDataset();
 		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
 		measurementDataset.setStudyId(examination.getStudyId());
-		measurementDataset.setSubjectId(examination.getSubjectId());
+		measurementDataset.setSubjectId(examination.getSubject().getId());
 		measurementDataset.setCreationDate(LocalDate.now());
 //		completeDatasetFromDicomSR(datasetAttributes, measurementDataset);
 		createMetadata(measurementDataset);
