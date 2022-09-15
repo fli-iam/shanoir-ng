@@ -56,10 +56,9 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
         return Promise.resolve(result);
     }
 
-    protected mapEntityList = (dtos: DatasetProcessingDTO[]): Promise<DatasetProcessing[]> => {
-        let result: DatasetProcessing[] = [];
-        if (dtos) this.datasetProcessingDTOService.toEntityList(dtos, result);
-        return Promise.resolve(result);
+    protected mapEntityList = (dtos: DatasetProcessingDTO[], result?: DatasetProcessing[]): Promise<DatasetProcessing[]> => {
+        if (result == undefined) result = [];
+        return this.datasetProcessingDTOService.toEntityList(dtos, result);
     }
     
     public stringify(entity: DatasetProcessing) {

@@ -16,5 +16,7 @@ div.warning { color: orangered; }
 .apply.warning:not(:disabled):hover { background-color: #fe8545; }
 
 .button-div { margin: 20px 0 40px; }
-.done { color: darkgreen; font-size: 35px; font-weight: bold; }
+.done, .error { font-size: 35px; font-weight: bold; }
+.done { color: darkgreen; }
+.done { color: var(--color-error); }
 checkbox { vertical-align: bottom; }
