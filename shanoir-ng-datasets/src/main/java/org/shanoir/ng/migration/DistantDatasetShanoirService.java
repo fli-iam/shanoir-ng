@@ -3,6 +3,8 @@ package org.shanoir.ng.migration;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -111,8 +113,7 @@ public class DistantDatasetShanoirService {
 
 	public void moveDatasetFiles(Long datasetFileId) throws ShanoirException {
 		try {
-			ResponseEntity<Void> result = this.distantKeycloak.getRestTemplate()
-					.exchange(getURI(ADD_FILE_TO_PACS), HttpMethod.GET, new HttpEntity<>(datasetFileId, getHeader()), Void.class);
+			ResponseEntity<Void> result = this.distantKeycloak.getRestTemplate().exchange(getURI(ADD_FILE_TO_PACS + datasetFileId), HttpMethod.GET, new HttpEntity<>(getHeader()), Void.class);
 			LOG.error("Result: "  + result);
 		} catch (Exception e) {
 			throw new ShanoirException("Could not add all files to PACS for dataset expression", e);
