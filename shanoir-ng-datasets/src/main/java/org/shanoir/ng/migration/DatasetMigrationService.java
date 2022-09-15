@@ -24,6 +24,7 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -34,6 +35,7 @@ import org.shanoir.ng.shared.model.DiffusionGradient;
 import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.InversionTime;
 import org.shanoir.ng.shared.model.RepetitionTime;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardAssignment;
@@ -218,7 +220,8 @@ public class DatasetMigrationService {
 		long oldId = exam.getId();
 		exam.setId(null);
 		exam.setCenterId(job.getCentersMap().get(exam.getCenterId()));
-		exam.setSubject(subjectRepository.findById(job.getSubjectsMap().get(exam.getSubject().getId())).get());
+		IdName subject = job.getSubjectsMap().get(exam.getSubject().getId());
+		exam.setSubject(new Subject(subject.getId(), subject.getName()));
 		exam.setStudyId(job.getStudy().getId());
 
 		// We just remove these elements that are not pertinent

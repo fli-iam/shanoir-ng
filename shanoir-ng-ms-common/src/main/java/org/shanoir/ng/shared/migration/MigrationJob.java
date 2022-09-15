@@ -16,7 +16,7 @@ public class MigrationJob {
 	
 	private Long oldStudyId;
 
-	private Map<Long, Long> subjectsMap;
+	private Map<Long, IdName> subjectsMap;
 
 	private Map<Long, Long> studyCardsMap;
 
@@ -51,14 +51,14 @@ public class MigrationJob {
 	/**
 	 * @return the subjectsMap
 	 */
-	public Map<Long, Long> getSubjectsMap() {
+	public Map<Long, IdName> getSubjectsMap() {
 		return subjectsMap;
 	}
 
 	/**
 	 * @param subjectsMap the subjectsMap to set
 	 */
-	public void setSubjectsMap(Map<Long, Long> subjectsMap) {
+	public void setSubjectsMap(Map<Long, IdName> subjectsMap) {
 		this.subjectsMap = subjectsMap;
 	}
 
