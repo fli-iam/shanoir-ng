@@ -111,8 +111,9 @@ public class DistantDatasetShanoirService {
 
 	public void moveDatasetFiles(Long datasetFileId) throws ShanoirException {
 		try {
-			this.distantKeycloak.getRestTemplate()
-					.exchange(getURI(CREATE_STUDY_CARD), HttpMethod.GET, new HttpEntity<>(datasetFileId, getHeader()), Void.class);
+			ResponseEntity<Void> result = this.distantKeycloak.getRestTemplate()
+					.exchange(getURI(ADD_FILE_TO_PACS), HttpMethod.GET, new HttpEntity<>(datasetFileId, getHeader()), Void.class);
+			LOG.error("Result: "  + result);
 		} catch (Exception e) {
 			throw new ShanoirException("Could not add all files to PACS for dataset expression", e);
 		}

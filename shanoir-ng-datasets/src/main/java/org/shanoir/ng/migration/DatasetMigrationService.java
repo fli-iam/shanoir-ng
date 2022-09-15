@@ -415,6 +415,7 @@ public class DatasetMigrationService {
 		}
 		// Once all files of the expression were loaded, add them to the pacs if necessary
 		if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
+			LOG.error("We move the following dataset expression " + expression);
 			distantShanoir.moveDatasetFiles(createdFile.getId());
 		}
 	}
