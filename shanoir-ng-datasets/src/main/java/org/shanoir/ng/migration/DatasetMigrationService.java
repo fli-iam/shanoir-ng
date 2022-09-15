@@ -326,7 +326,7 @@ public class DatasetMigrationService {
 
 	private Dataset migrateDataset(Dataset ds, DatasetAcquisition acq, Long oldExamId, MigrationJob job) throws ShanoirException {
 		ds.setId(null);
-		ds.setSubjectId(job.getSubjectsMap().get(ds.getSubjectId()));
+		ds.setSubjectId(job.getSubjectsMap().get(ds.getSubjectId()).getId());
 		DatasetAcquisition acqDTO = new MrDatasetAcquisition();
 		acqDTO.setId(acq.getId());
 		Examination examDTO = new Examination();

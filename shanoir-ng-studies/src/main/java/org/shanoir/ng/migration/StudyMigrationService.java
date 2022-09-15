@@ -82,7 +82,7 @@ public class StudyMigrationService {
 		try {
 			Study study = this.studyService.findById(studyId);
 
-			Map<Long,Long> subjectMap = new HashMap<>();
+			Map<Long,IdName> subjectMap = new HashMap<>();
 
 			// Remove all groupsOfSubjects
 			study.setExperimentalGroupsOfSubjects(null);
@@ -100,7 +100,7 @@ public class StudyMigrationService {
 				Subject sub = distantShanoir.createSubject(subj);
 				subj.setId(oldId);
 				// Keep updated a map of oldSubjectId => distantSubjectId
-				subjectMap.put(oldId, sub.getId());
+				subjectMap.put(oldId, new IdName(sub.getId(), sub.getName()));
 			}
 
 			event.setMessage("Migrating centers...");
@@ -129,7 +129,7 @@ public class StudyMigrationService {
 				}
 
 				Subject newSubject = new Subject();
-				newSubject.setId(subjectMap.get(subjectStudy.getSubject().getId()));
+				newSubject.setId(subjectMap.get(subjectStudy.getSubject().getId()).getId());
 				subjectStudy.setSubject(newSubject);
 			}
 			// Reset studyExaminations

@@ -25,6 +25,7 @@ import org.shanoir.ng.preclinical.therapies.TherapyRepository;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -151,7 +152,7 @@ public class PreclinicalMigrationService {
 		prepareReferences();
 
 		// Animal_subject
-		for (Entry<Long, Long> entry : job.getSubjectsMap().entrySet()) {
+		for (Entry<Long, IdName> entry : job.getSubjectsMap().entrySet()) {
 			for (AnimalSubject animalSubject : animalSubjectRepository.findBySubjectId(entry.getKey())) {
 				LOG.error("moving Animal subject " + animalSubject.getId() + animalSubject.getSubjectId());
 				migrateSubject(animalSubject, job);
@@ -213,7 +214,7 @@ public class PreclinicalMigrationService {
 		Long oldId = animalSubject.getId();
 		Long oldSubjectId = animalSubject.getSubjectId();
 		animalSubject.setId(null);
-		animalSubject.setSubjectId(job.getSubjectsMap().get(animalSubject.getSubjectId()));
+		animalSubject.setSubjectId(job.getSubjectsMap().get(animalSubject.getSubjectId()).getId());
 		migrateReference(animalSubject.getBiotype(), job);
 		migrateReference(animalSubject.getProvider(), job);
 		migrateReference(animalSubject.getSpecie(), job);
