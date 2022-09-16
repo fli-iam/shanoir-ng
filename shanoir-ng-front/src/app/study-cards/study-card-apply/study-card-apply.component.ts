@@ -35,6 +35,7 @@ export class StudyCardApplyComponent {
     private datasets: Dataset[];
     columnsDefs: any = this.getColumnDefs();
     selected: Set<number> = new Set();
+    onError: boolean = false;
 
 
     constructor(
@@ -110,7 +111,10 @@ export class StudyCardApplyComponent {
                 + ' datasets? Note that any previous study card application will be permanentely overwriten by new values.'
         ).then(res => {
             if (res) {
-                this.studycardService.applyStudyCardOn(this.studycard.id, datasetIds);
+                return this.studycardService.applyStudyCardOn(this.studycard.id, datasetIds).catch(error => {
+                    this.onError = true;
+                    throw error;
+                });
             }
         });
     }
