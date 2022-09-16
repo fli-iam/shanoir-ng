@@ -36,6 +36,8 @@ import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, 
 import { Range } from '../shared/models/range.model';
 import { ProcessingService } from '../processing/processing.service';
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
+import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -75,7 +77,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
-            private solrService: SolrService, private router: Router, private datasetService: DatasetService,
+            private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
             private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
 
@@ -360,10 +362,25 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             });
     }
 
-    protected openApplyStudyCard = () => {
-        this.router.navigate(['study-card/apply-on-datasets']).then(success => {
-            this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
+    protected openApplyStudyCard = () => { 
+        this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
+            let nonAdminAcqs: DatasetAcquisition[] = acquisitions?.filter(acq => 
+                !this.rights.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
+            );
+            let studies: Set<string> = new Set();
+            nonAdminAcqs.forEach(acq => studies.add(acq.examination?.study?.name));
+            if (nonAdminAcqs.length > 0) {
+                this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to apply studycards on data from studies you don\'t administrate. '
+                    + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...studies].join(', '));
+            } else {
+                this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+                    this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
+                });
+            }
+
         });
+
+
     }
 
     private getCommonColumnDefs() {
