@@ -364,20 +364,25 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     protected openApplyStudyCard = () => { 
         this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
-            let nonAdminAcqs: DatasetAcquisition[] = acquisitions?.filter(acq => 
-                !this.rights.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
-            );
-            let studies: Set<string> = new Set();
-            nonAdminAcqs.forEach(acq => studies.add(acq.examination?.study?.name));
-            if (nonAdminAcqs.length > 0) {
-                this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to apply studycards on data from studies you don\'t administrate. '
-                    + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...studies].join(', '));
+            if (this.role != 'admin') {
+                let nonAdminAcqs: DatasetAcquisition[] = acquisitions?.filter(acq => 
+                    !this.rights?.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
+                );
+                let studies: Set<string> = new Set();
+                nonAdminAcqs.forEach(acq => studies.add(acq.examination?.study?.name));
+                if (nonAdminAcqs.length > 0) {
+                    this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to apply studycards on data from studies you don\'t administrate. '
+                        + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...studies].join(', '));
+                } else {
+                    this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+                        this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
+                    });
+                }
             } else {
                 this.router.navigate(['study-card/apply-on-datasets']).then(success => {
                     this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
                 });
             }
-
         });
 
 
