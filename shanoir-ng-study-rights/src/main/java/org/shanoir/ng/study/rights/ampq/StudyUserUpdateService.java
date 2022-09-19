@@ -67,6 +67,7 @@ public class StudyUserUpdateService {
 			existingSu.setReceiveNewImportReport(replacingSu.isReceiveNewImportReport());
 			existingSu.setStudyUserRights(replacingSu.getStudyUserRights());
 			existingSu.setConfirmed(replacingSu.isConfirmed());
+			existingSu.setCenterIds(replacingSu.getCenterIds());
         }
         
         if (!toBeCreated.isEmpty()) {

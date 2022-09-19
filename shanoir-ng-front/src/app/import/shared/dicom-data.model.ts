@@ -30,6 +30,7 @@ export class ImportJob {
     archive: string;
     subjectName: String;
     studyName: String;
+    userId: number;
 }
 
 export class PatientDicom {

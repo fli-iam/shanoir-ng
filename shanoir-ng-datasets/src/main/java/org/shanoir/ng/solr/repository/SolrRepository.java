@@ -21,6 +21,7 @@ package org.shanoir.ng.solr.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.springframework.data.domain.Page;
@@ -50,7 +51,7 @@ public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository
 
 	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable);
 
-	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Collection<Long> studyIds, Collection<Long> datasetIds, Pageable pageable);
+	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn( List<Long> studyIds, Collection<Long> datasetIds, Pageable pageable);
 
 	public void deleteByDatasetIdIn(List<Long> datasetIds);
 }

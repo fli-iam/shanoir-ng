@@ -110,6 +110,16 @@ public class CenterApiController implements CenterApi {
 	}
 
 	@Override
+	public ResponseEntity<List<CenterDTO>> findCentersByStudy (
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+		final List<Center> centers = centerService.findByStudy(studyId);
+		if (centers.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(centerMapper.centersToCenterDTOs(centers), HttpStatus.OK);
+	}
+
+	@Override
 	public ResponseEntity<List<IdName>> findCentersNames() {
 		List<IdName> centers = centerService.findIdsAndNames();
 		// Remove "unknown" center

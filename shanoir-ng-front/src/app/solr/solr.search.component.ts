@@ -34,7 +34,10 @@ import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { Range } from '../shared/models/range.model';
+import { ProcessingService } from '../processing/processing.service';
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
+import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -74,9 +77,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
-            private solrService: SolrService, private router: Router, private datasetService: DatasetService,
+            private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
-            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService) {
+            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
@@ -359,6 +362,32 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             });
     }
 
+    protected openApplyStudyCard = () => { 
+        this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
+            if (this.role != 'admin') {
+                let nonAdminAcqs: DatasetAcquisition[] = acquisitions?.filter(acq => 
+                    !this.rights?.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
+                );
+                let studies: Set<string> = new Set();
+                nonAdminAcqs.forEach(acq => studies.add(acq.examination?.study?.name));
+                if (nonAdminAcqs.length > 0) {
+                    this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to apply studycards on data from studies you don\'t administrate. '
+                        + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...studies].join(', '));
+                } else {
+                    this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+                        this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
+                    });
+                }
+            } else {
+                this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+                    this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
+                });
+            }
+        });
+
+
+    }
+
     private getCommonColumnDefs() {
         function dateRenderer(date: number) {
             if (date) {
@@ -411,12 +440,14 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getCustomActionsDefs(): any[] {
         let customActionDefs:any = [];
         customActionDefs.push(
-            {title: "Clear selection", awesome: "fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
-            {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
-            {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
-            {title: "Download as EEG", awesome: "fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
-            {title: "Download as BIDS", awesome: "fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
-            {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
+            {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
+            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
+            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
+            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
+            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
+            {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
+            {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true }
         );
         return customActionDefs; 
     }
@@ -429,11 +460,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 this.table.clearSelection();
                 this.selectionTable.refresh();
             }, disabledIfNoResult: true},
-            {title: "Download as DICOM", awesome: "fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
-            {title: "Download as Nifti", awesome: "fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
-            {title: "Download as EEG", awesome: "fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
-            {title: "Download as BIDS", awesome: "fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
-            {title: "Delete selected", awesome: "fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
+            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
+            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
+            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
+            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
+            {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
+            {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true }
         );
         return customActionDefs;
     }
@@ -463,6 +496,11 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getFacetFieldPage(pageable: FacetPageable, facetName: string): Promise<FacetResultPage> {
         return this.solrService.getFacet(facetName, pageable, this.solrRequest);
     }
+    initExecutionMode(){
+        this.processingService.setDatasets(this.selectedDatasetIds);
+        this.router.navigate(['/processing']);
+    }
+
 }
 
 export interface SelectionBlock {

@@ -42,6 +42,8 @@ const BACKEND_API_STUDIES_MS_URL: string = BACKEND_API_URL + '/studies';
 // Centers http api
 export const BACKEND_API_CENTER_URL: string = BACKEND_API_STUDIES_MS_URL + '/centers';
 export const BACKEND_API_CENTER_NAMES_URL: string = BACKEND_API_CENTER_URL + '/names';
+export const BACKEND_API_CENTER_STUDY_URL: string = BACKEND_API_CENTER_URL + '/study';
+
 
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
@@ -127,8 +129,8 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
 // carmin
-// TODO change the url
 export const CARMIN_BASE_URL : string = BACKEND_API_URL + "/vip/rest";
+export const BACKEND_API_CARMIN_DATASET_PROCESSING_URL: string = BACKEND_API_DATASET_MS_URL + '/carminDatasetProcessing';
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;

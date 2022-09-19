@@ -42,6 +42,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</a>
 			</span>
 		</li>
+		<li *ngIf="mode == 'view' && dataset && dataset.datasetAcquisition && dataset.datasetAcquisition.examination">
+            <label>Examination</label>
+            <span class="right-col">
+                <a [routerLink]="['/examination/details/', dataset?.datasetAcquisition?.examination?.id]">
+                    {{dataset.datasetAcquisition?.examination?.comment}}
+                </a>
+            </span>
+        </li>
 		<li>
 			<label i18n="Dataset detail|Dataset subject@@datasetDetailSubject">Subject</label>
 			<span class="right-col" [ngSwitch]="mode">

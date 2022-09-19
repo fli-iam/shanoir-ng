@@ -68,7 +68,7 @@ export class DatasetProcessingDTOService {
         if (!result) result = [];
         let promises: Promise<any>[] = [];
         if (dtos) {
-            for (let dto of dtos) {
+            for (let dto of dtos ? dtos : []) {
                 let entity = new DatasetProcessing();
                 DatasetProcessingDTOService.mapSyncFields(dto, entity);
                 result.push(entity);

@@ -23,7 +23,9 @@ import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.validation.constraints.NotNull;
@@ -33,6 +35,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
+import org.shanoir.ng.shared.model.Subject;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -110,7 +113,9 @@ public class Examination extends HalEntity {
 	private Long studyId;
 
 	/** Subject. Can be null only if experimentalGroupOfSubjects is not null. */
-	private Long subjectId;
+	@ManyToOne
+	@JoinColumn(name = "subject_id")
+	private Subject subject;
 
 	/**
 	 * Subject weight at the time of the examination
@@ -316,19 +321,12 @@ public class Examination extends HalEntity {
 		this.studyId = studyId;
 	}
 
-	/**
-	 * @return the subjectId
-	 */
-	public Long getSubjectId() {
-		return subjectId;
+	public Subject getSubject() {
+		return subject;
 	}
 
-	/**
-	 * @param subjectId
-	 *            the subjectId to set
-	 */
-	public void setSubjectId(Long subjectId) {
-		this.subjectId = subjectId;
+	public void setSubject(Subject subject) {
+		this.subject = subject;
 	}
 
 	/**

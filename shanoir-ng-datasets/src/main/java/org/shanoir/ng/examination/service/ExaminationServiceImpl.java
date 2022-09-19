@@ -17,11 +17,15 @@ package org.shanoir.ng.examination.service;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.util.Pair;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -32,9 +36,8 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -62,9 +65,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
-
+	
 	@Autowired
-	private StudyUserRightsRepository rightsRepository;
+	private SecurityService securityService;
 
 	@Autowired
 	private SolrService solrService;
@@ -125,9 +128,10 @@ public class ExaminationServiceImpl implements ExaminationService {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return examinationRepository.findAll();
 		} else {
-			Long userId = KeycloakUtil.getTokenUserId();
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			return examinationRepository.findByStudyIdIn(studyIds);
+			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+			Set<Long> unrestrictedStudies = new HashSet<Long>();
+			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+			return examinationRepository.findAllByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies);
 		}
 	}
 	
@@ -136,27 +140,32 @@ public class ExaminationServiceImpl implements ExaminationService {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return examinationRepository.findAllByPreclinical(pageable, preclinical);
 		} else {
-			Long userId = KeycloakUtil.getTokenUserId();
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			return examinationRepository.findByPreclinicalAndStudyIdIn(preclinical, studyIds, pageable);
+			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+			Set<Long> unrestrictedStudies = new HashSet<Long>();
+			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+			return examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable, preclinical);
 		}
 	}
-	
+
 	@Override
 	public Page<Examination> findPage(final Pageable pageable, String patientName) {
+		if (patientName.length() > 64) {
+			throw new IllegalArgumentException("A patient name cannot be longer than 64 chars, it exceed the data representation limit");
+		}
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			if (StringUtils.isNotEmpty(patientName) && patientName.length() <= 64) {
+			if (StringUtils.isNotEmpty(patientName)) {
 				return examinationRepository.findAllBySubjectName(patientName, pageable);
 			} else {
 				return examinationRepository.findAll(pageable);
 			}
 		} else {
-			Long userId = KeycloakUtil.getTokenUserId();
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
-			if (StringUtils.isNotEmpty(patientName) && patientName.length() <= 64) {
-				return examinationRepository.findByStudyIdInAndBySubjectName(studyIds, patientName, pageable);
+			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+			Set<Long> unrestrictedStudies = new HashSet<Long>();
+			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+			if (StringUtils.isNotEmpty(patientName)) {
+				return examinationRepository.findPageByStudyCenterOrStudyIdInAndSubjectName(studyCenters, unrestrictedStudies, patientName, pageable);
 			} else {
-				return examinationRepository.findByStudyIdIn(studyIds, pageable);
+				return examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
 			}
 		}
 	}
@@ -190,13 +199,14 @@ public class ExaminationServiceImpl implements ExaminationService {
 			throw new EntityNotFoundException(Examination.class, examination.getId());
 		}
 		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getCenterId().equals(examination.getCenterId())) {
-			throw new ShanoirException("Cannot update the center of the examination, please ask an administrator.", HttpStatus.FORBIDDEN.value());
+			throw new AccessDeniedException("Cannot update the center of the examination, please ask an administrator.");
 		}
 		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getStudyId().equals(examination.getStudyId())) {
-			throw new ShanoirException("Cannot update the study of the examination, please ask an administrator.", HttpStatus.FORBIDDEN.value());
+			throw new AccessDeniedException("Cannot update the study of the examination, please ask an administrator.");
 		}
-		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") && !examinationDb.getSubjectId().equals(examination.getSubjectId())) {
-			throw new ShanoirException("Cannot update the subject of the examination, please ask an administrator.", HttpStatus.FORBIDDEN.value());
+		if (!KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN") 
+				&& !((examinationDb.getSubject() == null && examination.getSubject() == null) || examinationDb.getSubject().getId().equals(examination.getSubject().getId()))) {
+			throw new AccessDeniedException("Cannot update the subject of the examination, please ask an administrator.");
 		}
 		updateExaminationValues(examinationDb, examination);
 		examinationRepository.save(examinationDb);

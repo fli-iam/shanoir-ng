@@ -232,6 +232,9 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 import { SolrPagingCriterionComponent } from './solr/criteria/solr.paging-criterion.component';
 import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
+import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
+import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
+import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { SolrTextSearchModeComponent } from './solr/text-search/solr.text-search-mode.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
@@ -246,6 +249,13 @@ import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
 import { AccessRequestComponent } from './users/access-request/access-request.component';
+import { ProcessingComponent } from './processing/processing.component';
+import { PipelinesComponent } from './processing/pipelines/pipelines.component';
+import { CarminClientService } from './carmin/shared/carmin-client.service';
+import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.component';
+import { ExecutionComponent } from './processing/execution/execution.component';
+import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
+import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
 
 @NgModule({
     imports: [
@@ -406,6 +416,9 @@ import { AccessRequestComponent } from './users/access-request/access-request.co
         EventTypePipe,
         SolrPagingCriterionComponent,
         SolrTextSearchComponent,
+        MetadataComponent,
+        StudyCardApplyComponent,
+        ApplyStudyCardOnComponent,
         SolrTextSearchModeComponent,
         ChallengeBlockComponent,
         TagCreatorComponent,
@@ -415,7 +428,12 @@ import { AccessRequestComponent } from './users/access-request/access-request.co
         TagInputComponent,
         StudyUserListComponent,
         VarDirective,
-        AccessRequestComponent
+        AccessRequestComponent,
+        ProcessingComponent,
+        PipelinesComponent,
+        PipelineComponent,
+        ExecutionComponent,
+        CarminDatasetProcessingsComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -439,6 +457,8 @@ import { AccessRequestComponent } from './users/access-request/access-request.co
         CenterService,
         ConfirmDialogService,
         ExaminationService,
+        CarminClientService,
+        CarminDatasetProcessingService,
         {
             provide: ErrorHandler,
             useClass: HandleErrorService

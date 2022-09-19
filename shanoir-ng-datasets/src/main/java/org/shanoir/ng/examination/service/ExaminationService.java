@@ -80,7 +80,7 @@ public interface ExaminationService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
 	Page<Examination> findPage(final Pageable pageable, String patientName);
-
+	
 	/**
 	 * Find examination by its id.
 	 *
@@ -88,7 +88,7 @@ public interface ExaminationService {
 	 * @return an examination or null.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudyCenter(returnObject.getCenterId(), returnObject.getStudyId(), 'CAN_SEE_ALL')")
 	Examination findById(Long id);
 
 	/**
@@ -107,6 +107,8 @@ public interface ExaminationService {
 	 * @return
 	 * @author yyao
 	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL')")
 	List<Examination> findByStudyId(Long studyId);
 
 	/**
@@ -117,6 +119,7 @@ public interface ExaminationService {
 	 * @return list of examinations.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	@PostAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.filterExaminationList(returnObject, 'CAN_SEE_ALL'))")
 	List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId);
 
 	/**
@@ -125,7 +128,7 @@ public interface ExaminationService {
 	 * @param examination  examination to create.
 	 * @return created examination.
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examination.getCenterId(), #examination.getStudyId(), 'CAN_IMPORT'))")
 	Examination save(Examination examination);
 	
 	/**
@@ -136,7 +139,7 @@ public interface ExaminationService {
 	 * @throws EntityNotFoundException
 	 * @throws ShanoirException 
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
 	Examination update(Examination examination) throws EntityNotFoundException, ShanoirException;
 
 	/**
@@ -149,7 +152,7 @@ public interface ExaminationService {
 
 	String addExtraDataFromFile(Long examinationId, File file);
 
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_DOWNLOAD') or @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_ADMINISTRATE')))")
 	String getExtraDataFilePath(Long examinationId, String fileName);
 
 }
