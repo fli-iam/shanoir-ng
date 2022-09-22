@@ -68,6 +68,7 @@ public interface ExaminationService {
 	 * @return list of examinations.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
 	Page<Examination> findPage(final Pageable pageable, boolean preclinical);
 	
 	/**
@@ -79,7 +80,7 @@ public interface ExaminationService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationPage(returnObject, 'CAN_SEE_ALL')")
 	Page<Examination> findPage(final Pageable pageable, String patientName);
-
+	
 	/**
 	 * Find examination by its id.
 	 *

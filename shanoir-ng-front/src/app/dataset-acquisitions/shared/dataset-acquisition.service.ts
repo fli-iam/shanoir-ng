@@ -52,10 +52,9 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
         return Promise.resolve(result);
     }
 
-    protected mapEntityList = (entities: any[]): Promise<DatasetAcquisition[]> => {
-        let result: DatasetAcquisition[] = [];
-        if (entities) this.dsAcqDtoService.toDatasetAcquisitions(entities, result);
-        return Promise.resolve(result);
+    protected mapEntityList = (dtos: DatasetAcquisitionDTO[], result?: DatasetAcquisition[]): Promise<DatasetAcquisition[]> => {
+        if (result == undefined) result = [];
+        return this.dsAcqDtoService.toDatasetAcquisitions(dtos, result);
     }
 
     getPage(pageable: Pageable): Promise<Page<DatasetAcquisition>> {

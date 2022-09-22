@@ -22,7 +22,7 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Page<DatasetAcquisition> findByExaminationByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
+	public Page<DatasetAcquisition> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
 			Iterable<Long> studyIds, Pageable pageable) {
 		
 		String queryEndStr = "from DatasetAcquisition as da "

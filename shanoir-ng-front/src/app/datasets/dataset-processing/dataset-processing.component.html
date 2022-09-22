@@ -81,7 +81,32 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</li>
 
 			</ol>
-
+			<ol *ngIf="isCarminDatasetProcessingEntity">
+				<legend>
+					VIP Execution details 
+					<tool-tip>Initializing an execution in a VM needs to be done using CARMIN-VIP</tool-tip>
+				</legend>
+				<li>
+					<label class="right-col">pipelineIdentifier</label>
+					<span class="right-col">
+						{{carminDatasetProcessing.pipelineIdentifier}}
+					</span>
+				</li>
+				<li>
+					<label class="right-col">Workflow identifier</label>
+					<span class="right-col">
+						{{carminDatasetProcessing.identifier}}
+					</span>
+				</li>
+				<li>
+					<label class="right-col">Status</label>
+					<span class="right-col">
+						{{carminDatasetProcessing.status}}
+					</span>
+				</li>
+				
+			</ol>
+			
 			<ol>
 				<legend>
 					Input datasets

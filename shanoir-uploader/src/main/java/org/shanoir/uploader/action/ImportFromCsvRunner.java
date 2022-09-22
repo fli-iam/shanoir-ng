@@ -1,13 +1,9 @@
 package org.shanoir.uploader.action;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -27,7 +23,6 @@ import javax.swing.SwingWorker;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
-import org.junit.Test;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.DicomTreeNode;
@@ -450,10 +445,10 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		logger.info("10 Import.json");
 
 		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study2, sc);
+		importJob.setFromCsv(true);
 		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
-
 		return true;
 	}
 

@@ -39,6 +39,13 @@ VALUES
 	(4,1573009,'150',5,5),
 	(5,1573009,'150',5,6),
 	(6,1573013,'781.00',2,6);
+	
+INSERT INTO subject
+	(id, name)
+VALUES
+	(1, 'Subject One'),
+	(2, 'Subject Two'),
+	(3, 'Subject three');
 
 INSERT INTO examination
 	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id)

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.math3.util.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,8 +37,10 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -53,6 +56,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import com.google.common.collect.Sets;
 
 /**
  * User security service test.
@@ -267,7 +272,7 @@ public class ExaminationServiceSecurityTest {
 		exam.setExaminationDate(LocalDate.now());
 		exam.setCenterId(centerId);
 		exam.setStudyId(studyId);
-		exam.setSubjectId(subjectId);
+		exam.setSubject(new Subject(subjectId, ""));
 		return exam;
 	}
 	
@@ -340,7 +345,19 @@ public class ExaminationServiceSecurityTest {
 		//exam 4 is in study 4 > subject 4
 		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
-		given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
+		//given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
+		
+		given(examinationRepository.findPageByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class), Mockito.anyBoolean())).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{}), PageRequest.of(0, 10), 0));
+		List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
+		studyCenterIds.add(new Pair<Long, Long>(1L, 1L));
+		given(examinationRepository.findPageByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newHashSet(new Long[]{}), PageRequest.of(0, 10), false)).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1}), PageRequest.of(0, 10), 1));
+		given(examinationRepository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1, exam2, exam3, exam3}), PageRequest.of(0, 10), 0));
+		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Long[]{1L, 2L}));
+		StudyUser su1 = new StudyUser();
+		su1.setStudyId(1L);
+		su1.setCenterIds(Arrays.asList(new Long[]{1L}));
+		given(rightsRepository.findByUserIdAndRight(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new StudyUser[]{su1}));
+		
 		
 		// study 1
 		Study study1 = mockStudy(1L);

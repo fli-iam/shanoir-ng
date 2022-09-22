@@ -249,6 +249,13 @@ import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
 import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
+import { ProcessingComponent } from './processing/processing.component';
+import { PipelinesComponent } from './processing/pipelines/pipelines.component';
+import { CarminClientService } from './carmin/shared/carmin-client.service';
+import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.component';
+import { ExecutionComponent } from './processing/execution/execution.component';
+import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
+import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
 
 @NgModule({
     imports: [
@@ -421,7 +428,12 @@ import { MultiSelectComponent } from './shared/multi-select/multi-select.compone
         TagInputComponent,
         StudyUserListComponent,
         VarDirective,
-        MultiSelectComponent
+        MultiSelectComponent,
+        ProcessingComponent,
+        PipelinesComponent,
+        PipelineComponent,
+        ExecutionComponent,
+        CarminDatasetProcessingsComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -445,6 +457,8 @@ import { MultiSelectComponent } from './shared/multi-select/multi-select.compone
         CenterService,
         ConfirmDialogService,
         ExaminationService,
+        CarminClientService,
+        CarminDatasetProcessingService,
         {
             provide: ErrorHandler,
             useClass: HandleErrorService

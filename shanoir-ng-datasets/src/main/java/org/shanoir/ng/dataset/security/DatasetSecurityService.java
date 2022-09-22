@@ -45,6 +45,7 @@ import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -317,12 +318,28 @@ public class DatasetSecurityService {
 			return true;
 		}
     	
-    	Set<Long> studyIds = new HashSet<Long>();
+    	// Also check for centers    	
     	for (DatasetAcquisition acq : datasetAcquisitions) {
-    		studyIds.add(acq.getExamination().getStudyId());
+			if (!this.hasRightOnStudyCenter(acq.getExamination().getCenterId(), acq.getExamination().getStudyId(), rightStr)) {
+				return false;
+			}
     	}
-    	return studyIds.equals(commService.hasRightOnStudies(studyIds, rightStr));
+    	return true;
     }
+    
+    /**
+     * Check that the connected user has the given right for the given dataset acquisitions.
+     * 
+     * @param datasetAcquisitionIds the dataset acquisition ids
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasRightOnEveryDatasetAcquisition(List<Long> datasetAcquisitionIds, String rightStr) throws EntityNotFoundException {
+    	List<DatasetAcquisition> trustedDatasetAcquisitions = Utils.toList(datasetAcquisitionRepository.findAllById(datasetAcquisitionIds));
+    	return hasRightOnEveryTrustedDatasetAcquisition(trustedDatasetAcquisitions, rightStr);
+    }
+    
 
     /**
      * Check that the connected user has the given right for at least one of the given datasets.
@@ -359,11 +376,9 @@ public class DatasetSecurityService {
 		}
     	
     	Iterable<Dataset> datasets = datasetRepository.findAllById(datasetIds);
-    	Set<Long> studyIds = new HashSet<Long>();
     	 
     	boolean hasRight = true;
     	for (Dataset dataset : datasets) {
-    		studyIds.add(dataset.getStudyId());
     		hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
     	}
     	return hasRight;

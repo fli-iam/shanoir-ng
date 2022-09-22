@@ -232,7 +232,7 @@ public class ExaminationApiController implements ExaminationApi {
 		validate(result);
 		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
 		// NB: Message as centerId / subjectId is important in RabbitMQStudiesService
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + createdExamination.getSubjectId(), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
 	}
 
@@ -293,7 +293,7 @@ public class ExaminationApiController implements ExaminationApi {
 		Examination examination = new Examination();
 		examination.setComment(file.getOriginalFilename());
 		examination.setCenterId(centerId);
-		examination.setSubjectId(subject.getId());
+		examination.setSubject(subject);
 		examination.setStudyId(subject.getSubjectStudyList().get(0).getStudy().getId());
 		examination.setExaminationDate(LocalDate.now());
 		List<String> pathList = new ArrayList<>();

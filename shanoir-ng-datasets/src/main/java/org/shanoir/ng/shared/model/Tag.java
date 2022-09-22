@@ -5,6 +5,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class Tag {
 
@@ -15,6 +17,7 @@ public class Tag {
 
 	private String color;
 
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "study_id")
 	private Study study;

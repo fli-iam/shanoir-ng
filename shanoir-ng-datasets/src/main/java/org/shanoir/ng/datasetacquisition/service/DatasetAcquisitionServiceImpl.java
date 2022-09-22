@@ -32,6 +32,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -51,11 +52,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 	@Autowired
 	private DatasetAcquisitionRepository repository;
 
-
 	@Autowired
-	private StudyUserRightsRepository rightsRepository;
-
-
+	private SecurityService securityService;
+	
 	@Autowired
 	private ShanoirEventService shanoirEventService;
 
@@ -106,23 +105,10 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return repository.findAll(pageable);
 		} else {
-			Long userId = KeycloakUtil.getTokenUserId();
-			// Check if user has restrictions.
-			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_SEE_ALL.getId()));
 			List<Pair<Long, Long>> studyCenters = new ArrayList<>();
 			Set<Long> unrestrictedStudies = new HashSet<Long>();
-			for (StudyUser studyUser : studyUsers) {
-				if (CollectionUtils.isEmpty(studyUser.getCenterIds())) {
-					unrestrictedStudies.add(studyUser.getStudyId());
-				} else {
-					for (Long centerId : studyUser.getCenterIds()) {
-						studyCenters.add(new Pair<Long, Long>(studyUser.getStudyId(), centerId));						
-					}
-				}
-			}
-			List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
-			studyCenterIds.add(new Pair<Long, Long>(1L, 1L));
-			return repository.findByExaminationByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
+			securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+			return repository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
 		}
 	}
 
