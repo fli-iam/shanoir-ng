@@ -135,7 +135,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </span>
 </caption>
 <!-- Headers -->
-<thead >
+<thead (mousemove)="moveDrag($event)">
 <tr class="full-row">
     <th *ngIf="subRowsDefs" class="checkbox-col"></th>
     <th *ngIf="selectionAllowed" class="checkbox-col"></th>
@@ -145,7 +145,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </tr>
 </thead>
 <!-- Table content -->
-<tbody *ngIf="items?.length > 0" >
+<tbody *ngIf="items?.length > 0" (mousemove)="moveDrag($event)">
 <ng-container *ngFor="let item of items; let i = index">
 <tr
     [class.odd]="i%2!=0" 
