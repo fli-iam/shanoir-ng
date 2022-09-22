@@ -26,5 +26,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [disabled]="disabled"
     [placeholder]="placeholder"
     [compactMode]="true"
-    (selectOption)="onSelectOption($event)">
+    (selectOption)="onSelectOption($event?.value?.id)">
 </select-box>

@@ -67,6 +67,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public way: 'up' | 'down' = 'down';
     public hideToComputeHeight: boolean = false;
     private onTouchedCallback = () => {};
+    @Output() onTouch = new EventEmitter();
     private onChangeCallback = (_: any) => {};
     public inputText: string;
     private _searchText: string = null;
@@ -100,12 +101,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        console.log('select change')
-        // if(changes.options?.currentValue[0]?.disabled != changes.options?.previousValue[0]?.disabled) {
-        //     console.log(this.options)
-        // }
         if (changes.options && this.options && !arraysEqual(changes.options?.currentValue, changes.options?.previousValue)) {
             this.searchText = null;
+            this.computeDisplayedOptions();
             this.initSelectedOption();
             this.computeMinWidth();
         } else if (changes.optionArr && this.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
@@ -575,6 +573,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.close();
             this.onTouchedCallback();
+            this.onTouch.emit();
         } 
     }
 

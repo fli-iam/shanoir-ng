@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, forwardRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { Study } from '../../../studies/shared/study.model';
@@ -23,6 +23,7 @@ import { Option } from '../../select/select.component';
 import { Mode } from '../entity/entity.component.abstract';
 import { BrowserPaging } from '../table/browser-paging.model';
 import { FilterablePageable, Page } from '../table/pageable.model';
+import { TableComponent } from '../table/table.component';
 
 @Component({
   selector: 'subject-study-list',
@@ -48,6 +49,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     @Input() displaySubjectType: boolean = true;
     hasTags: boolean;
     columnDefs: any[];
+    @ViewChild('table') table: TableComponent;
 
     get legend(): string {
         return this.compMode == 'study' ? 'Subject' : 'Studie';
@@ -83,7 +85,6 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     }
 
     private createColumnDefs() {
-        console.log('create')
         if (this.compMode == 'study') {
             this.columnDefs = [{ headerName: 'Subject', field: 'subject.name', defaultSortCol: true }];
         } else if (this.compMode == 'subject') {
@@ -95,7 +96,6 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         this.columnDefs.push(
             { headerName: 'Tags', field: 'tags', editable: true, multi: true, 
                 possibleValues: (subjectStudy: SubjectStudy) => {
-                    console.log('get possible values ', subjectStudy.subject.name)
                     return subjectStudy?.study?.tags?.map(tag => {
                         let opt = new Option(tag, tag.name);
                         if (tag.color) {
@@ -108,8 +108,17 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
             },
             { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
             { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', suppressSorting: true },
-            { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] },
         );
+        if (this.displaySubjectType) {
+            this.columnDefs.push(
+                { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] },
+            );
+        }
+        if (this.mode != 'view') {
+            this.columnDefs.push(
+                { headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectStudy(item) }
+            );
+        }
     }
 
     private updateDisabled() {
@@ -160,6 +169,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         this.model.push(newSubjectStudy);
         this.processHasTags();
         this.propagateChange(this.model);
+        this.table.refresh();
     }
 
     private processHasTags() {
@@ -179,12 +189,8 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
                 if (option) option.disabled = false;
             }
         }
+        this.table.refresh();
     }
-
-    getFontColor(colorInp: string): boolean {
-          return isDarkColor(colorInp);
-    }
-
 
     onChange() {
         this.propagateChange(this.model);

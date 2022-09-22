@@ -60,8 +60,9 @@ input:focus:hover { cursor: initial; }
 
 .option { height: 20px; display:block; border: none; white-space: nowrap; color: var(--dark-grey); cursor: pointer; padding: 0 5px; }
 .option.selected { background-color: var(--color-b-light); }
-.option.focused { background-color: var(--grey); }
+.option.focused { background-color: var(--grey) !important; }
 .option.disabled { opacity: 0.5; cursor: default !important; }
+.inner-option { vertical-align: middle; padding: 0 4px; border-radius: 3px; }
 
 .list.scrollable { padding-right: 0px; }
 .scrollbar { position: absolute; top: 0; bottom: 0; right: 0; width: 10px; background-color: transparent; }

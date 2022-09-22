@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Input, OnChanges, Output, PipeTransform, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, forwardRef, HostListener, Input, OnChanges, Output, PipeTransform, SimpleChanges } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { arraysEqual, objectsEqual } from '../../utils/app.utils';
 import { Option } from '../select/select.component';
@@ -32,18 +32,23 @@ import { Option } from '../select/select.component';
 export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
 
     @Output() userChange = new EventEmitter();
-    @Input() options: Option<any>[];
+    @Input() options: Option<{id: number}>[];
     @Input() optionArr: any[];
     @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
     @Input() pipe: PipeTransform;
     @Input() disabled: boolean = false;
     @Input() readOnly: boolean = false;
     @Input() placeholder: string;
+    @Output() onTouch = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
     modelArray: any[];
     selectedOptions: Option<any>[] = [];
 
+
+    constructor(
+        private element: ElementRef
+    ) {}
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes.optionArr && this.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
@@ -52,7 +57,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
                 let label: string = this.getLabel(item);
                 let newOption: Option<any> = new Option<any>(item, label);
                 if (item.color) newOption.color = item.color;
-                if (item.backgroundColor) newOption.color = item.backgroundColor;
+                if (item.backgroundColor) newOption.backgroundColor = item.backgroundColor;
                 this.options.push(newOption);
             });
             this.updateData();
@@ -110,16 +115,28 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
         });
     }
 
-    onSelectOption(option: Option<any>) {
+    onSelectOption(id: number) {
+        let option: Option<{id: number}> = this.options?.find(opt => opt?.value?.id == id);
         this.modelArray.push(option.value);
         this.selectedOptions.push(option);
         option.disabled = true;
+        this.options = [...this.options];
+        this.onChangeCallback(this.modelArray);
     }
 
     onRemoveOption(option: Option<any>, index: number) {
         this.modelArray.splice(index, 1);
         this.selectedOptions.splice(index, 1);
         option.disabled = false;
+        this.onChangeCallback(this.modelArray);
+    }
+
+    @HostListener('focusout', ['$event']) 
+    onFocusOut(event: FocusEvent) {
+        if (!this.element.nativeElement.contains(event.relatedTarget)) {
+            this.onTouchedCallback();
+            this.onTouch.emit();
+        } 
     }
 
 }

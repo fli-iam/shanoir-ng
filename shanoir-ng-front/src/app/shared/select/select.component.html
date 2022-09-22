@@ -61,9 +61,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [class.not-compatible]="option.compatible != undefined && !option.compatible"
                 [class.focused]="i == focusedOptionIndex"
                 (mousemove)="focusedOptionIndex = i"
-                [style.color]="option.color"
-                [style.background-color]="option.backgroundColor">
-            {{option.label}}
+                [style.color]="option.color">
+            <span [style.background-color]="option.backgroundColor" class="inner-option">
+                {{option.label}}
+            </span>
         </div>
         <div *ngIf="scrollable" class="scrollbar">
             <div class="top-scroll-button" 

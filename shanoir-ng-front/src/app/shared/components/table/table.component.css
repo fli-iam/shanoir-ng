@@ -72,7 +72,7 @@ a.link { text-decoration: none; color: inherit; }
 .cell-button i:hover { color: var(--color-a); }
 
 checkbox { vertical-align: middle; }
-td checkbox { transform: scale(0.8); }
+td checkbox { transform: scale(0.8); border-color: var(--color-b-light2); }
 
 .triangle { position: absolute;  left: 0; right: 0; z-index: 1; }
 .triangle.up { top: -12px; }

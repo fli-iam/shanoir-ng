@@ -91,7 +91,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 this.nbColumns = this.columnDefs.length;
                 if (this.selectionAllowed) this.nbColumns++;
                 if (this.subRowsDefs) this.nbColumns++;
-            })
+            });
         }
     }
 
@@ -105,6 +105,19 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             this.checkCompactMode();
         }));
         this.checkCompactMode();
+    }
+
+    private computeItemVars() {
+        this.page.content?.forEach((item, itemIndex) => {
+            this.columnDefs?.forEach((col, colIndex) => {
+                if (col.possibleValues) {
+                    if (!this.page._savedContentRendering) this.page._savedContentRendering = [];
+                    if (!this.page._savedContentRendering[itemIndex]) this.page._savedContentRendering[itemIndex] = [];
+                    if (!this.page._savedContentRendering[itemIndex][colIndex]) this.page._savedContentRendering[itemIndex][colIndex] = {};
+                    this.page._savedContentRendering[itemIndex][colIndex].possibleValues = this.isFunction(col.possibleValues) ? col.possibleValues(item) : col.possibleValues;
+                }
+            });
+        });
     }
 
     private checkCompactMode() {
@@ -239,7 +252,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
      * Test if a cell content is a boolean
      */
     isFieldBoolean(col: any): boolean {
-        console.log('is field boolean');
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
         let val = this.getCellValue(this.items[0], col);
         return col.type == 'boolean' || this.isValueBoolean(val);
@@ -298,6 +310,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         this.isLoading = true;
         return this.getPage(this.getPageable(), forceRefresh).then(page => {
             this.page = page;
+            this.computeItemVars();
             this.maxResultsField = page ? page.size : 0;
             this.computeSelectAll();
             setTimeout(() => {
@@ -414,25 +427,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     onSelectAllChange() {
         if (this.selectAll == true) {
-
-            // let pageableAll: Pageable;
-            // if (this.filter) {
-            //     pageableAll = new FilterablePageable(
-            //         1, 
-            //         this.page.totalElements,
-            //         null,
-            //         this.filter
-            //     );
-            // } else {
-            //     pageableAll = new Pageable(
-            //         1, 
-            //         this.page.totalElements
-            //     );
-            // }
-            // this.getPage(pageableAll).then(page => {
-            //     this.selection = new Map();
-            //     page.content.forEach(elt => this.selection.set(elt.id, elt));
-            // });
             this.page.content.forEach(elt => this.selection.add(elt['id']));
             this.emitSelectionChange();
         } else if (this.selectAll == false) {
@@ -560,7 +554,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             col.width = this.colSave[i].width;
             col.hidden = this.colSave[i].hidden;
         });
-        this.subRowsDefs.forEach((col, i) => {
+        this.subRowsDefs?.forEach((col, i) => {
             col.width = this.colSave[this.columnDefs.length + i].width;
             col.hidden = this.colSave[this.columnDefs.length + i].hidden;
         });

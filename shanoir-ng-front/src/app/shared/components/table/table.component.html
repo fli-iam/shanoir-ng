@@ -12,14 +12,14 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<ng-template #tableRow let-item="rowItem" let-columnDefs="columnDefinitions">
-    <ng-container *ngFor="let col of columnDefs; let i = index">
+<ng-template #tableRow let-item="rowItem" let-itemIndex="i" let-columnDefs="columnDefinitions">
+    <ng-container *ngFor="let col of columnDefs; let colIndex = index">
         <ng-container *ngVar="{
                 render: renderCell(item, col), 
                 route: col.route ? col.route(item) : null,
                 boolean: isFieldBoolean(col),
                 editable: cellEditable(item, col),
-                possibleValues: col.possibleValues ? (isFunction(col.possibleValues) ? col.possibleValues(item) : col.possibleValues) : null,
+                possibleValues: (page?._savedContentRendering && page?._savedContentRendering[itemIndex]) ? page._savedContentRendering[itemIndex][colIndex]?.possibleValues : null,
                 cellValue: getCellValue(item, col)
         } as vars">
             <td 
@@ -79,7 +79,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <progress-bar [progress]="vars.render" width="100"></progress-bar>
                     </ng-container>
                 </div>
-                <div *ngIf="i < columnDefs.length - 1" class="resizer" (mousedown)="startDrag(i, refTd, $event, columnDefs)" (mouseup)="stopDrag()"></div>
+                <div *ngIf="colIndex < columnDefs.length - 1" class="resizer" (mousedown)="startDrag(colIndex, refTd, $event, columnDefs)" (mouseup)="stopDrag()"></div>
             </td>
         </ng-container>
     </ng-container>
@@ -159,7 +159,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i *ngIf="subRowOpen[i]" (click)="fold(i)" class="fa-solid fa-minus"></i>
     </td>
     <td *ngIf="selectionAllowed" class="checkbox-cell"><checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox></td>
-    <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{rowItem: item, columnDefinitions: columnDefs}"></ng-template>
+    <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{rowItem: item, i: i, columnDefinitions: columnDefs}"></ng-template>
 
 </tr>
 <tr class="sub-container-tr" *ngIf="subRowsDefs && subRowOpen[i]" @slideDown>
@@ -173,7 +173,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </thead>
             <tbody>
                 <tr *ngFor="let subItem of item[subRowsKey]">
-                    <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{rowItem: subItem, columnDefinitions: subRowsDefs}"></ng-template>
+                    <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{rowItem: subItem, i: i, columnDefinitions: subRowsDefs}"></ng-template>
                 </tr>
             </tbody>
         </table>
