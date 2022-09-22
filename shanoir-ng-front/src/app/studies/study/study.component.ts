@@ -68,6 +68,8 @@ export class StudyComponent extends EntityComponent<Study> {
     protected hasDownloadRight: boolean;
     
     public openPrefix: boolean = false;
+    
+    public invitationKey: string;
 
     centerOptions: Option<IdName>[];
     studyStatusOptions: Option<string>[] = [
@@ -96,6 +98,14 @@ export class StudyComponent extends EntityComponent<Study> {
 
     getService(): EntityService<Study> {
         return this.studyService;
+    }
+
+    public getInvitationKey() {
+        if(this.study.invitationKey) {
+            this.invitationKey = this.study.invitationKey;
+        } else {
+            this.studyService.getInvitationKey(this.study.id).then(invitation => this.invitationKey = invitation);
+        }   
     }
 
     initView(): Promise<void> {

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -137,11 +138,11 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public Study create(final Study study) throws MicroServiceCommunicationException {
+		this.generateInvitationKey(study);
 		if (study.getStudyCenterList() != null) {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 				studyCenter.setStudy(study);
 			}
-
 		}
 		
 		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
@@ -223,6 +224,14 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
+	public void generateInvitationKey(Study study) {
+		// generate study invitation key UUID
+        UUID uuid = UUID.randomUUID();
+        String uuidAsString = uuid.toString();
+        study.setInvitationKey(uuidAsString);
+	}
+
+	@Override
 	public Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException {
 		Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 		
@@ -230,6 +239,9 @@ public class StudyServiceImpl implements StudyService {
 		
 		if (studyDb == null) {
 			throw new EntityNotFoundException(Study.class, study.getId());
+		}
+		if (studyDb.getInvitationKey() == null) {
+			generateInvitationKey(studyDb);
 		}
 
 		studyDb.setClinical(study.isClinical());

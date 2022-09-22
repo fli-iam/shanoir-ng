@@ -13,29 +13,32 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2 class="header command-zone"i18n="Account request|Title@@accountRequestTitle">Request an access to a new study.</h2>
-<fieldset>
-    <ol>
-        <li>
-            <label i18n="access request|study label@@study" class="required-label">Study</label>
-            <span class="right-col">
-            <select-box
-                    [disabled]="!accessRequest.invitationKey" 
-                    [(ngModel)]="accessRequest.studyId" 
-                    [options]="studyOptions">
-            </select-box>
-            </span>
-        </li>
-        <li>
-            <label i18n="access request|Invitation key label@@invitationKey" class="required-label">Invitation key</label>
-            <span class="right-col">
-                <input type="text" id="invitationKey" formControlName="invitationKey" [(ngModel)]="accessRequest.invitationKey"/>
-            </span>
-        </li>
-        <li>
-            <label i18n="access request|Motivation label@@motivation" class="required-label">Motivation</label>
-            <span class="right-col">
-                <input type="text" id="motivation" formControlName="motivation" [(ngModel)]="accessRequest.motivation"/>
-            </span>
-        </li>
-    </ol>
-</fieldset>
+<div #formContainer class="content-component">
+    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+	    <ol>
+	        <li>
+	            <label i18n="access request|study label@@study" class="required-label">Study</label>
+	            <span class="right-col">
+	            <select-box
+	                    formControlName="studyId"
+	                    [disabled]="accessRequest.invitationKey != null" 
+	                    [(ngModel)]="accessRequest.studyId" 
+	                    [options]="studyOptions">
+	            </select-box>
+	            </span>
+	        </li>
+	        <li>
+	            <label i18n="access request|Invitation key label@@invitationKey" class="required-label">Invitation key</label>
+	            <span class="right-col">
+	                <input type="text" formControlName="invitationKey" [(ngModel)]="accessRequest.invitationKey"/>
+	            </span>
+	        </li>
+	        <li>
+	            <label i18n="access request|Motivation label@@motivation" class="required-label">Motivation</label>
+	            <span class="right-col">
+	                <input type="text" formControlName="motivation" [(ngModel)]="accessRequest.motivation"/>
+	            </span>
+	        </li>
+	    </ol>
+    </form>
+</div>

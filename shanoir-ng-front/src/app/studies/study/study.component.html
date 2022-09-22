@@ -304,6 +304,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'members'">
+			    <button (click)="getInvitationKey()" >Invitation Key</button>
+			    <span *ngIf="invitationKey"> {{invitationKey}}</span>
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 				<studyuser-list
 				    formControlName="studyUserList"

@@ -276,4 +276,16 @@ public interface StudyApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws IOException;
 
+	@ApiOperation(value = "", notes = "Returns the invitation key for the study", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "dua deleted", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@GetMapping(value = "invitationKey/{studyId}", produces = {"application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<String> getInvitationKey(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws IOException, RestServiceException;
+
 }

@@ -245,6 +245,7 @@ export class StudyDTO {
     withExamination: boolean;
     tags: Tag[];
     studyCards: StudyCardDTO[];
+    invitationKey: string;
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
@@ -278,6 +279,7 @@ export class StudyDTO {
         this.visibleByDefault = study.visibleByDefault;
         this.withExamination = study.withExamination;
         this.tags = study.tags;
+        this.invitationKey = study.invitationKey;
     }
 
 }

@@ -778,7 +778,8 @@ let routes: Routes = [
 	},
     {
         path: 'access-request',
-        component: AccessRequestComponent
+        component: AccessRequestComponent,
+        data: { mode: 'create' }
     },
 
 ];

@@ -136,4 +136,9 @@ public interface StudyService {
 	 */
 	List<Study> findPublicStudies();
 
+	/**
+	 * Generates study invitation key
+	 * @param study the study on which we want to create the invitation key
+	 */
+	void generateInvitationKey(Study study);
 }

@@ -46,6 +46,7 @@ import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
@@ -74,6 +75,9 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private StudyService studyService;
+
+	@Autowired
+	private StudyRepository studyRepository;
 
 	@Autowired
 	private StudyMapper studyMapper;
@@ -212,6 +216,16 @@ public class StudyApiController implements StudyApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", e));
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@Override
+	public ResponseEntity<String> getInvitationKey(@PathVariable("studyId") final Long studyId) throws RestServiceException {
+		Study study = this.studyService.findById(studyId);
+		if (study.getInvitationKey() == null) {
+			this.studyService.generateInvitationKey(study);
+			study = studyRepository.save(study);
+		}
+		return new ResponseEntity<String>(study.getInvitationKey(), HttpStatus.OK);
 	}
 
 	@Override
