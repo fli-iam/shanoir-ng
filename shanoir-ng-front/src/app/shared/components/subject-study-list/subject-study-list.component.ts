@@ -50,6 +50,8 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     hasTags: boolean;
     columnDefs: any[];
     @ViewChild('table') table: TableComponent;
+    private hasTagsPromise: Promise<void> = new Promise((resolve, reject) => this.hasTagsPromiseResolve = resolve);
+    private hasTagsPromiseResolve: (value: void | PromiseLike<void>) => void;
 
     get legend(): string {
         return this.compMode == 'study' ? 'Subject' : 'Studie';
@@ -85,40 +87,43 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     }
 
     private createColumnDefs() {
-        if (this.compMode == 'study') {
-            this.columnDefs = [{ headerName: 'Subject', field: 'subject.name', defaultSortCol: true }];
-        } else if (this.compMode == 'subject') {
-            this.columnDefs = [{ headerName: 'Study', field: 'study.name', defaultSortCol: true }];
-        }
-        if (this.hasTags) {
-            this.columnDefs.push({ headerName: 'Tags', field: 'userName' });
-        } 
-        this.columnDefs.push(
-            { headerName: 'Tags', field: 'tags', editable: true, multi: true, 
-                possibleValues: (subjectStudy: SubjectStudy) => {
-                    return subjectStudy?.study?.tags?.map(tag => {
-                        let opt = new Option(tag, tag.name);
-                        if (tag.color) {
-                            opt.color = tag.color;
-                            opt.backgroundColor = isDarkColor(tag.color) ? 'white' : 'black';
+        this.hasTagsPromise.then(() => {
+            if (this.compMode == 'study') {
+                this.columnDefs = [{ headerName: 'Subject', field: 'subject.name', defaultSortCol: true }];
+            } else if (this.compMode == 'subject') {
+                this.columnDefs = [{ headerName: 'Study', field: 'study.name', defaultSortCol: true }];
+            }
+            if (this.hasTags) {
+                this.columnDefs.push(
+                    { headerName: 'Tags', field: 'tags', editable: true, multi: true, 
+                        possibleValues: (subjectStudy: SubjectStudy) => {
+                            return subjectStudy?.study?.tags?.map(tag => {
+                                let opt = new Option(tag, tag.name);
+                                if (tag.color) {
+                                    opt.color = tag.color;
+                                    opt.backgroundColor = isDarkColor(tag.color) ? 'white' : 'black';
+                                }
+                                return opt;
+                            });
                         }
-                        return opt;
-                    });
-                }
-            },
-            { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
-            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', suppressSorting: true },
-        );
-        if (this.displaySubjectType) {
+                    }
+                );
+            } 
             this.columnDefs.push(
-                { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] },
+                { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
+                { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', suppressSorting: true },
             );
-        }
-        if (this.mode != 'view') {
-            this.columnDefs.push(
-                { headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectStudy(item) }
-            );
-        }
+            if (this.displaySubjectType) {
+                this.columnDefs.push(
+                    { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] },
+                );
+            }
+            if (this.mode != 'view') {
+                this.columnDefs.push(
+                    { headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectStudy(item) }
+                );
+            }
+        });
     }
 
     private updateDisabled() {
@@ -174,6 +179,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
 
     private processHasTags() {
         this.hasTags = !!this.model && !!(this.model as SubjectStudy[]).find(subStu => subStu.study && subStu.study.tags && subStu.study.tags.length > 0);
+        this.hasTagsPromiseResolve();
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {

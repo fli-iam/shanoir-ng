@@ -114,3 +114,8 @@ tr.opened { border-left: 1px solid var(--grey); border-top: 1px solid var(--grey
 .sub-container-table .col-title { white-space: nowrap; }
 .sub-container-table th:not(:first-child) { border-left: 1px solid var(--very-light-grey); }
 .deploy-cell i { color: var(--color-b); padding: 0 5px; }
+
+.block { padding: 1px 5px; border-radius: 10px; border: 1px solid var(--grey); white-space: nowrap; margin-right: 5px; margin-bottom: 3px; vertical-align: middle; display: inline-block;}
+.block i { vertical-align: -1px; }
+.block i, .label { white-space: nowrap; }
+.label { vertical-align: -1px; }

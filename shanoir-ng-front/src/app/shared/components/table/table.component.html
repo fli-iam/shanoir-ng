@@ -34,19 +34,28 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 
                 <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi">
                     <!-- default display -->
-                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress'">{{vars.render.text ? vars.render.text : vars.render}}</ng-container>
+                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi">{{vars.render.text ? vars.render.text : vars.render}}</ng-container>
 
                     <!-- link -->
-                    <a class="link" *ngIf="!(editMode && vars.editable) && vars.route"
+                    <a class="link" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi"
                         [routerLink]="vars.route" routerLinkActive="active">{{vars.render.text ? vars.render.text : vars.render}}<i class="fas fa-external-link-alt"></i></a>
+
+                    <!--  -->
+                    <ng-container *ngIf="!editMode && col.multi">
+                        <span *ngFor="let oneVal of getFieldRawValue(item, col['field'])" class="block">
+                            <span class="label" [style.color]="oneVal.backgroundColor" [style.background-color]="oneVal.color">
+                                {{oneVal.label ? oneVal.label : (oneVal.name ? oneVal.name : oneVal)}}
+                            </span>
+                        </span>                         
+                    </ng-container>
 
                     <!-- editable text / number -->
                     <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !vars.possibleValues">
                         <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
                     </ng-container>
 
-                    <!-- editable text / number with dropdown -->
-                    <ng-container *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues">
+                    <!-- editable with dropdown -->
+                    <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues">
                         <select *ngIf="!col.multi" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
                             <option *ngFor="let possibleValue of vars.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
                         </select>
