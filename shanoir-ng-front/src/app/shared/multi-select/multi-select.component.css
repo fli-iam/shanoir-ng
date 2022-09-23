@@ -3,5 +3,5 @@
 .block i { vertical-align: -1px; }
 .block i, .label { white-space: nowrap; }
 .label { vertical-align: -1px; }
-select-box { width: auto; }
+select-box { width: auto; vertical-align: middle; }
 .remove { cursor: pointer; }
