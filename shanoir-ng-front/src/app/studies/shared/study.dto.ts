@@ -14,7 +14,6 @@
 import { Injectable } from '@angular/core';
 
 import { Center } from '../../centers/shared/center.model';
-import { IdName } from '../../shared/models/id-name.model';
 import { Id } from '../../shared/models/id.model';
 import { StudyCardDTOServiceAbstract } from '../../study-cards/shared/study-card.dto.abstract';
 import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';

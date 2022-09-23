@@ -12,13 +12,14 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<ng-template #tableRow let-item="rowItem" let-columnDefs="columnDefinitions">
-    <ng-container *ngFor="let col of columnDefs; let i = index">
+<ng-template #tableRow let-item="rowItem" let-itemIndex="i" let-columnDefs="columnDefinitions">
+    <ng-container *ngFor="let col of columnDefs; let colIndex = index">
         <ng-container *ngVar="{
                 render: renderCell(item, col), 
                 route: col.route ? col.route(item) : null,
                 boolean: isFieldBoolean(col),
                 editable: cellEditable(item, col),
+                possibleValues: (page?._savedContentRendering && page?._savedContentRendering[itemIndex]) ? page._savedContentRendering[itemIndex][colIndex]?.possibleValues : null,
                 cellValue: getCellValue(item, col)
         } as vars">
             <td 
@@ -26,29 +27,41 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}" 
                     [class.bool]="vars.boolean"
                     [class.progress]="col.type == 'progress'"
-                    [attr.title]="col.tip != undefined ? col.tip : (vars.render.text ? vars.render.text : vars.render)"
+                    [attr.title]="col.tip != undefined ? col.tip : (vars.render.text ? vars.render.text : '')"
                     [style.color]="vars.render.color"
                     #refTd
                     >
                 
-                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)">
+                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi">
                     <!-- default display -->
-                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress'">{{vars.render.text ? vars.render.text : vars.render}}</ng-container>
+                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi">{{vars.render.text ? vars.render.text : vars.render}}</ng-container>
 
                     <!-- link -->
-                    <a class="link" *ngIf="!(editMode && vars.editable) && vars.route"
+                    <a class="link" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi"
                         [routerLink]="vars.route" routerLinkActive="active">{{vars.render.text ? vars.render.text : vars.render}}<i class="fas fa-external-link-alt"></i></a>
 
+                    <!--  -->
+                    <ng-container *ngIf="!editMode && col.multi">
+                        <span *ngFor="let oneVal of getFieldRawValue(item, col['field'])" class="block" [style.color]="oneVal.backgroundColor" [style.background-color]="oneVal.color">
+                            <span class="label">
+                                {{oneVal.label ? oneVal.label : (oneVal.name ? oneVal.name : oneVal)}}
+                            </span>
+                        </span>                         
+                    </ng-container>
+
                     <!-- editable text / number -->
-                    <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !col.possibleValues">
+                    <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !vars.possibleValues">
                         <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
                     </ng-container>
 
-                    <!-- editable text / number with dropdown -->
-                    <ng-container *ngIf="editMode && cellEditable(item, col) && (isColumnText(col) || isColumnNumber(col)) && col.possibleValues">
-                        <select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
-                            <option *ngFor="let possibleValue of col.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
+                    <!-- editable with dropdown -->
+                    <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues">
+                        <select *ngIf="!col.multi" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
+                            <option *ngFor="let possibleValue of vars.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
                         </select>
+                        <ng-container *ngIf="col.multi">
+                            <multi-select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" [options]="vars.possibleValues"></multi-select>
+                        </ng-container>
                     </ng-container>
 
                     <!-- display a boolean -->
@@ -75,7 +88,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <progress-bar [progress]="vars.render" width="100"></progress-bar>
                     </ng-container>
                 </div>
-                <div *ngIf="i < columnDefs.length - 1" class="resizer" (mousedown)="startDrag(i, refTd, $event, columnDefs)" (mouseup)="stopDrag()"></div>
+                <div *ngIf="colIndex < columnDefs.length - 1" class="resizer" (mousedown)="startDrag(colIndex, refTd, $event, columnDefs)" (mouseup)="stopDrag()"></div>
             </td>
         </ng-container>
     </ng-container>
@@ -155,7 +168,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <i *ngIf="subRowOpen[i]" (click)="fold(i)" class="fa-solid fa-minus"></i>
     </td>
     <td *ngIf="selectionAllowed" class="checkbox-cell"><checkbox (ngModelChange)="onSelectChange(item, $event)" [ngModel]="isSelected(item)"></checkbox></td>
-    <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{rowItem: item, columnDefinitions: columnDefs}"></ng-template>
+    <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{rowItem: item, i: i, columnDefinitions: columnDefs}"></ng-template>
 
 </tr>
 <tr class="sub-container-tr" *ngIf="subRowsDefs && subRowOpen[i]" @slideDown>
@@ -169,7 +182,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </thead>
             <tbody>
                 <tr *ngFor="let subItem of item[subRowsKey]">
-                    <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{rowItem: subItem, columnDefinitions: subRowsDefs}"></ng-template>
+                    <ng-template [ngTemplateOutlet]="tableRow" [ngTemplateOutletContext]="{rowItem: subItem, i: i, columnDefinitions: subRowsDefs}"></ng-template>
                 </tr>
             </tbody>
         </table>
