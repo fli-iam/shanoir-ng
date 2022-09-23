@@ -26,6 +26,7 @@ import { FilterablePageable, Page } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { SuperObservable } from '../../../utils/super-observable'
 import { combineLatest, Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'subject-study-list',
@@ -56,9 +57,8 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     private subjectStudyListObs: SuperObservable<SubjectStudy[]> = new SuperObservable();
     private subscriptions: Subscription[] = [];
     
-    constructor() {
+    constructor(private router: Router) {
         super();
-
         this.subscriptions.push(
             combineLatest([this.subjectOrStudyObs._observable, this.subjectStudyListObs._observable]).subscribe(() => {
                 this.processHasTags();
@@ -129,18 +129,25 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         } 
         this.columnDefs.push(
             { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
-            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', suppressSorting: true },
+            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', suppressSorting: true }
         );
         if (this.displaySubjectType) {
             this.columnDefs.push(
                 { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] },
             );
         }
+        this.columnDefs.push(
+            { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item.id) }
+        );
         if (this.mode != 'view') {
             this.columnDefs.push(
                 { headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectStudy(item) }
             );
         }
+    }
+
+    goToView(id: number): void {
+        this.router.navigate(['/subject/details/' + id]);
     }
 
     private updateDisabled() {
