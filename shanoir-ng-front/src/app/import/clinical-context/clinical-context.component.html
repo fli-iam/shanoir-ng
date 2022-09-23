@@ -82,14 +82,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label [class.required-label]="!useStudyCard">Select a center</label> 
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || center"
-                        [disabled]="!useStudyCard && (!study || !centerOptions)"
+                        [disabled]="(!useStudyCard && (!study || !centerOptions)) || loading"
                         [readOnly]="useStudyCard"
                         [(ngModel)]="center" 
                         (userChange)="onSelectCenter(); onContextChange();" 
                         (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
                         (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
-                        [options]="centerOptions"
-                        [disabled]="loading">
+                        [options]="centerOptions">
                 </select-box>
             </span>
         </li>
@@ -109,14 +108,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label [class.required-label]="!useStudyCard">Select an acquisition equipment</label> 
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || acquisitionEquipment"
-                        [disabled]="!useStudyCard && (!center || !acquisitionEquipmentOptions)"
+                        [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading"
                         [readOnly]="useStudyCard"
                         [(ngModel)]="acquisitionEquipment" 
                         (userChange)="onSelectAcquisitonEquipment(); onContextChange();"
                         (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
                         (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
-                        [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe"
-                        [disabled]="loading">
+                        [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
                 </select-box>
             </span>
         </li>
@@ -143,13 +141,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
                 <select-box 
-                        [disabled]="!study || !acquisitionEquipment" 
+                        [disabled]="loading || !study || !acquisitionEquipment" 
                         [(ngModel)]="subject" 
                         (userChange)="onSelectSubject(); onContextChange();" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
                         (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
-                        [optionArr]="subjects"
-                        [disabled]="loading">
+                        [optionArr]="subjects">
                 </select-box>
             </span>
         </li>
@@ -209,7 +206,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select-box [disabled]="!study || !subject" [(ngModel)]="examination" (userChange)="onSelectExam(); onContextChange();"
+                <select-box [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam(); onContextChange();"
                         (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
                         (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject" [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
                 </select-box>  

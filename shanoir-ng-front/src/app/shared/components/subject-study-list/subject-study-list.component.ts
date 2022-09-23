@@ -24,9 +24,9 @@ import { Mode } from '../entity/entity.component.abstract';
 import { BrowserPaging } from '../table/browser-paging.model';
 import { FilterablePageable, Page } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
-import { SuperObservable } from '../../../utils/super-observable'
 import { combineLatest, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { Subject as RxjsSubject} from 'rxjs';
 
 @Component({
   selector: 'subject-study-list',
@@ -53,14 +53,14 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     hasTags: boolean;
     columnDefs: any[];
     @ViewChild('table') table: TableComponent;
-    private subjectOrStudyObs: SuperObservable<Subject | Study> = new SuperObservable();
-    private subjectStudyListObs: SuperObservable<SubjectStudy[]> = new SuperObservable();
+    private subjectOrStudyObs: RxjsSubject <Subject | Study> = new RxjsSubject();
+    private subjectStudyListObs: RxjsSubject<SubjectStudy[]> = new RxjsSubject();
     private subscriptions: Subscription[] = [];
     
     constructor(private router: Router) {
         super();
         this.subscriptions.push(
-            combineLatest([this.subjectOrStudyObs._observable, this.subjectStudyListObs._observable]).subscribe(() => {
+            combineLatest([this.subjectOrStudyObs, this.subjectStudyListObs]).subscribe(() => {
                 this.processHasTags();
                 this.createColumnDefs();
             })
