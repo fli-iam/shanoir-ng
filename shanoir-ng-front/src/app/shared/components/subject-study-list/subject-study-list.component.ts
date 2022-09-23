@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, forwardRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { Study } from '../../../studies/shared/study.model';
@@ -25,7 +25,7 @@ import { BrowserPaging } from '../table/browser-paging.model';
 import { FilterablePageable, Page } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
 import { SuperObservable } from '../../../utils/super-observable'
-import { combineLatest } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 
 @Component({
   selector: 'subject-study-list',
@@ -40,7 +40,7 @@ import { combineLatest } from 'rxjs';
 ]
 })
 
-export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> implements OnChanges {
+export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> implements OnChanges, OnDestroy {
     
     @Input() mode: Mode;
     @Input() subject: Subject;
@@ -54,14 +54,17 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     @ViewChild('table') table: TableComponent;
     private subjectOrStudyObs: SuperObservable<Subject | Study> = new SuperObservable();
     private subjectStudyListObs: SuperObservable<SubjectStudy[]> = new SuperObservable();
+    private subscriptions: Subscription[] = [];
     
     constructor() {
         super();
 
-        combineLatest([this.subjectOrStudyObs._observable, this.subjectStudyListObs._observable]).subscribe(() => {
-            this.processHasTags();
-            this.createColumnDefs();
-        });
+        this.subscriptions.push(
+            combineLatest([this.subjectOrStudyObs._observable, this.subjectStudyListObs._observable]).subscribe(() => {
+                this.processHasTags();
+                this.createColumnDefs();
+            })
+        );
 
     }
 
@@ -85,6 +88,10 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         if (changes.subject || changes.study) {
             this.subjectOrStudyObs.next(changes.subject ? this.subject : this.study);
         }
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
     
     writeValue(obj: any): void {
