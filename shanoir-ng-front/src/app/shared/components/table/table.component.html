@@ -42,8 +42,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                     <!--  -->
                     <ng-container *ngIf="!editMode && col.multi">
-                        <span *ngFor="let oneVal of getFieldRawValue(item, col['field'])" class="block">
-                            <span class="label" [style.color]="oneVal.backgroundColor" [style.background-color]="oneVal.color">
+                        <span *ngFor="let oneVal of getFieldRawValue(item, col['field'])" class="block" [style.color]="oneVal.backgroundColor" [style.background-color]="oneVal.color">
+                            <span class="label">
                                 {{oneVal.label ? oneVal.label : (oneVal.name ? oneVal.name : oneVal)}}
                             </span>
                         </span>                         

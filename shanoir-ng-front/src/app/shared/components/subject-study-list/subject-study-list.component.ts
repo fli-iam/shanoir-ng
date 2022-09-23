@@ -24,6 +24,8 @@ import { Mode } from '../entity/entity.component.abstract';
 import { BrowserPaging } from '../table/browser-paging.model';
 import { FilterablePageable, Page } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
+import { SuperObservable } from '../../../utils/super-observable'
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'subject-study-list',
@@ -50,11 +52,21 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     hasTags: boolean;
     columnDefs: any[];
     @ViewChild('table') table: TableComponent;
-    private hasTagsPromise: Promise<void> = new Promise((resolve, reject) => this.hasTagsPromiseResolve = resolve);
-    private hasTagsPromiseResolve: (value: void | PromiseLike<void>) => void;
+    private subjectOrStudyObs: SuperObservable<Subject | Study> = new SuperObservable();
+    private subjectStudyListObs: SuperObservable<SubjectStudy[]> = new SuperObservable();
+    
+    constructor() {
+        super();
+
+        combineLatest([this.subjectOrStudyObs._observable, this.subjectStudyListObs._observable]).subscribe(() => {
+            this.processHasTags();
+            this.createColumnDefs();
+        });
+
+    }
 
     get legend(): string {
-        return this.compMode == 'study' ? 'Subject' : 'Studie';
+        return this.compMode == 'study' ? 'Subject' : 'Study';
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -71,13 +83,13 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
             }
         }
         if (changes.subject || changes.study) {
-            this.createColumnDefs();
+            this.subjectOrStudyObs.next(changes.subject ? this.subject : this.study);
         }
     }
     
     writeValue(obj: any): void {
         super.writeValue(obj);
-        this.processHasTags();
+        this.subjectStudyListObs.next(obj);
         this.updateDisabled();
     }
 
@@ -87,43 +99,41 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     }
 
     private createColumnDefs() {
-        this.hasTagsPromise.then(() => {
-            if (this.compMode == 'study') {
-                this.columnDefs = [{ headerName: 'Subject', field: 'subject.name', defaultSortCol: true }];
-            } else if (this.compMode == 'subject') {
-                this.columnDefs = [{ headerName: 'Study', field: 'study.name', defaultSortCol: true }];
-            }
-            if (this.hasTags) {
-                this.columnDefs.push(
-                    { headerName: 'Tags', field: 'tags', editable: true, multi: true, 
-                        possibleValues: (subjectStudy: SubjectStudy) => {
-                            return subjectStudy?.study?.tags?.map(tag => {
-                                let opt = new Option(tag, tag.name);
-                                if (tag.color) {
-                                    opt.color = tag.color;
-                                    opt.backgroundColor = isDarkColor(tag.color) ? 'white' : 'black';
-                                }
-                                return opt;
-                            });
-                        }
-                    }
-                );
-            } 
+        if (this.compMode == 'study') {
+            this.columnDefs = [{ headerName: 'Subject', field: 'subject.name', defaultSortCol: true }];
+        } else if (this.compMode == 'subject') {
+            this.columnDefs = [{ headerName: 'Study', field: 'study.name', defaultSortCol: true }];
+        }
+        if (this.hasTags) {
             this.columnDefs.push(
-                { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
-                { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', suppressSorting: true },
+                { headerName: 'Tags', field: 'tags', editable: true, multi: true, 
+                    possibleValues: (subjectStudy: SubjectStudy) => {
+                        return subjectStudy?.study?.tags?.map(tag => {
+                            let opt = new Option(tag, tag.name);
+                            if (tag.color) {
+                                opt.backgroundColor = tag.color;
+                                opt.color = isDarkColor(tag.color) ? 'white' : 'black';
+                            }
+                            return opt;
+                        });
+                    }
+                }
             );
-            if (this.displaySubjectType) {
-                this.columnDefs.push(
-                    { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] },
-                );
-            }
-            if (this.mode != 'view') {
-                this.columnDefs.push(
-                    { headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectStudy(item) }
-                );
-            }
-        });
+        } 
+        this.columnDefs.push(
+            { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
+            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', suppressSorting: true },
+        );
+        if (this.displaySubjectType) {
+            this.columnDefs.push(
+                { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] },
+            );
+        }
+        if (this.mode != 'view') {
+            this.columnDefs.push(
+                { headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectStudy(item) }
+            );
+        }
     }
 
     private updateDisabled() {
@@ -178,8 +188,8 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     }
 
     private processHasTags() {
-        this.hasTags = !!this.model && !!(this.model as SubjectStudy[]).find(subStu => subStu.study && subStu.study.tags && subStu.study.tags.length > 0);
-        this.hasTagsPromiseResolve();
+        this.hasTags = (!!this.model && !!(this.model as SubjectStudy[]).find(subStu => subStu.study && subStu.study.tags && subStu.study.tags.length > 0))
+                || this.study?.tags?.length > 0;
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
