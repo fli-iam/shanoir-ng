@@ -369,12 +369,9 @@ export class ClinicalContextComponent implements OnDestroy {
             } else {
                 this.center = this.studycard?.acquisitionEquipment?.center;
             }
-            this.onSelectCenter();
-            this.acquisitionEquipment = this.studycard.acquisitionEquipment;
             this.niftiConverter = this.studycard.niftiConverter;
             endSc = Promise.all([
                 this.onSelectCenter(),
-                this.onSelectAcquisitonEquipment()
             ]);
         }
         this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
