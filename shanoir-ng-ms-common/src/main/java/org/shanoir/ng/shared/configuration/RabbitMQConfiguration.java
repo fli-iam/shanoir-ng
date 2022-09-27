@@ -127,8 +127,8 @@ public class RabbitMQConfiguration {
 	/** Queue to create a study_user when subscribing to a study */
 	public static final String STUDY_SUBSCRIPTION_QUEUE = "study-subscription-queue";
 
-	/** Queue to get study id from invitation key */
-	public static final String STUDY_KEY_QUEUE = "study-key-queue";
+	/** Queue used to get the list of studies I can Admin. */
+	public static final String STUDY_I_CAN_ADMIN_QUEUE = "study-i-can-admin";
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
@@ -398,9 +398,10 @@ public class RabbitMQConfiguration {
 	public static Queue studySubscriptionQueue() {
 		return new Queue(STUDY_SUBSCRIPTION_QUEUE, true);
 	}
-
+	
 	@Bean
-	public static Queue studyKeyQueue() {
-		return new Queue(STUDY_KEY_QUEUE, true);
+	public static Queue studyICanAdmin() {
+		return new Queue(STUDY_I_CAN_ADMIN_QUEUE, true);
 	}
+
 }

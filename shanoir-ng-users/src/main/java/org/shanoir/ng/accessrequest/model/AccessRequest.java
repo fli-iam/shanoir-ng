@@ -21,8 +21,6 @@ public class AccessRequest extends HalEntity {
 	private User user;
 	
 	private String motivation;
-	
-	private String invitationKey;
 
 	private Boolean status;
 
@@ -52,20 +50,6 @@ public class AccessRequest extends HalEntity {
 	 */
 	public void setMotivation(String motivation) {
 		this.motivation = motivation;
-	}
-
-	/**
-	 * @return the invitationKey
-	 */
-	public String getInvitationKey() {
-		return invitationKey;
-	}
-
-	/**
-	 * @param invitationKey the invitationKey to set
-	 */
-	public void setInvitationKey(String invitationKey) {
-		this.invitationKey = invitationKey;
 	}
 
 	public User getUser() {

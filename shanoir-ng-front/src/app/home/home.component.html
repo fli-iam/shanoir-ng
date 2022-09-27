@@ -89,6 +89,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </td>
         </tr></table>        
     </div>
+    <div class="block access requests" *ngIf="accessRequests && nbAccessRequest > 0">
+        <table><tr>
+            <td class="icon">
+                <i class="far fa-flag"></i>
+                <div class="block-title">Access request</div>
+            </td>
+            <td>
+                <div class="pannel">
+                    <table>
+                        <tr *ngFor="let notif of accessRequests" routerLink="/accessRequest" class="notification-list link">
+                            <th>Access request from : {{notif.user}}</th>
+                            <th>On study: {{getStudyName(notif.studyId)}}</th>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr></table>        
+    </div>
     <div class="block jobs" *ngIf="jobs && jobs.length > 0">
         <table><tr>
             <td class="icon link" routerLink="/task">

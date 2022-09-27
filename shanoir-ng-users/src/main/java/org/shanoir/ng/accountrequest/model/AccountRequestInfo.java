@@ -53,8 +53,6 @@ public class AccountRequestInfo extends AbstractEntity {
 
 	private Long studyId;
 
-	private String invitationKey;
-
 	private String message;
 
 	/**
@@ -147,14 +145,6 @@ public class AccountRequestInfo extends AbstractEntity {
 
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
-	}
-
-	public String getInvitationKey() {
-		return invitationKey;
-	}
-
-	public void setInvitationKey(String invitationKey) {
-		this.invitationKey = invitationKey;
 	}
 
 	public String getMessage() {

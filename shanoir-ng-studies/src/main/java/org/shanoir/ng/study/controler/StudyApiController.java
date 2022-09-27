@@ -219,16 +219,6 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<String> getInvitationKey(@PathVariable("studyId") final Long studyId) throws RestServiceException {
-		Study study = this.studyService.findById(studyId);
-		if (study.getInvitationKey() == null) {
-			this.studyService.generateInvitationKey(study);
-			study = studyRepository.save(study);
-		}
-		return new ResponseEntity<String>(study.getInvitationKey(), HttpStatus.OK);
-	}
-
-	@Override
 	public ResponseEntity<List<StudyUserRight>> rights(@PathVariable("studyId") final Long studyId)
 			throws RestServiceException {
 		List<StudyUserRight> rights = this.studyUserService.getRightsForStudy(studyId);

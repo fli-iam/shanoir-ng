@@ -1,10 +1,13 @@
 package org.shanoir.ng.accessrequest.controller;
 
+import java.util.List;
+
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.user.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -52,4 +55,15 @@ public interface AccessRequestApi {
 			@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
 			@ApiParam(value = "Accept or refuse the request", required = true) @RequestBody boolean validation,
 			BindingResult result) throws RestServiceException;
+
+	@ApiOperation(value = "byUser", notes = "Find all the access request for the given user", response = AccessRequest.class, tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
+			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
+	@GetMapping(value = "byUser", produces = { "application/json" }, consumes = {
+			"application/json" })
+	ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException;
 }

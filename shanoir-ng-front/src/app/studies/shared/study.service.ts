@@ -28,7 +28,6 @@ import { StudyUserRight } from './study-user-right.enum';
 import { CenterStudyDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO } from './study.dto';
 import { Study } from './study.model';
 
-
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
 
@@ -50,10 +49,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .then(entities => entities?.map((entity) => Object.assign(new Study(), entity)) || []);
     }
 
-    getInvitationKey(studyId: number): Promise<string> {
-        return this.http.get<string>(AppUtils.BACKEND_API_STUDY_INVITATION_KEY + '/' + studyId)
-        .toPromise();
-    }
 
     getStudiesNames(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)

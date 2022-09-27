@@ -60,7 +60,6 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
 
     buildForm(): FormGroup {
         return this.formBuilder.group({
-            'invitationKey': [this.accessRequest.invitationKey, []],
             'motivation': [this.accessRequest.motivation, []],
             'studyId': [this.accessRequest.studyId, []]
         });

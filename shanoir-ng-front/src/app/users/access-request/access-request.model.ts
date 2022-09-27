@@ -21,5 +21,4 @@ export class AccessRequest extends Entity {
     studyId: number;
     user: User;
     motivation: string;
-    invitationKey: String;
 }

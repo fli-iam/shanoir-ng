@@ -128,14 +128,6 @@ public class RabbitMQStudiesService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_KEY_QUEUE)
-	@RabbitHandler
-	@Transactional
-	public Long getStudyFromInvitationKey(String invitation) {
-		Study study = this.studyRepo.findByInvitationKey(invitation);
-		return study == null ? null : study.getId();
-	}
-
 	/**
 	 * Receives a shanoirEvent as a json object, concerning a challenge subscription
 	 * @param commandArrStr the task as a json string.

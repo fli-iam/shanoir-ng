@@ -81,8 +81,6 @@ public class StudyDTO {
 	private List<StudyUser> studyUserList;
 
 	private boolean challenge;
-	
-	private String invitationKey;
 
 	/**
 	 * Default constructor.
@@ -424,14 +422,6 @@ public class StudyDTO {
 	 */
 	public void setTags(List<TagDTO> tags) {
 		this.tags = tags;
-	}
-
-	public String getInvitationKey() {
-		return invitationKey;
-	}
-
-	public void setInvitationKey(String invitationKey) {
-		this.invitationKey = invitationKey;
 	}
 
 }

@@ -21,16 +21,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	            <span class="right-col">
 	            <select-box
 	                    formControlName="studyId"
-	                    [disabled]="accessRequest.invitationKey != null" 
 	                    [(ngModel)]="accessRequest.studyId" 
 	                    [options]="studyOptions">
 	            </select-box>
-	            </span>
-	        </li>
-	        <li>
-	            <label i18n="access request|Invitation key label@@invitationKey" class="required-label">Invitation key</label>
-	            <span class="right-col">
-	                <input type="text" formControlName="invitationKey" [(ngModel)]="accessRequest.invitationKey"/>
 	            </span>
 	        </li>
 	        <li>

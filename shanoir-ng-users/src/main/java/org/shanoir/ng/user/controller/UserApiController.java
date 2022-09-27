@@ -67,20 +67,13 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			User userSaved = getUserService().confirmAccountRequest(user);
 
 			if (userSaved.getAccountRequestInfo() != null && 
-					(userSaved.getAccountRequestInfo().getStudyId() != null || userSaved.getAccountRequestInfo().getInvitationKey() != null)) {
+					(userSaved.getAccountRequestInfo().getStudyId() != null)) {
 				
-				if (userSaved.getAccountRequestInfo().getInvitationKey() != null) {
-					Long studyId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_KEY_QUEUE, userSaved.getAccountRequestInfo().getInvitationKey());
-					if (studyId != null) {
-						userSaved.getAccountRequestInfo().setStudyId(studyId);
-					}
- 				}
 				if (userSaved.getAccountRequestInfo().getStudyId() != null) {
 					// Directly create an access request for the given study
 					AccessRequest request = new AccessRequest();
 					request.setUser(userSaved);
 					request.setStudyId(userSaved.getAccountRequestInfo().getStudyId());
-					request.setInvitationKey(userSaved.getAccountRequestInfo().getInvitationKey());
 					request.setMotivation(userSaved.getAccountRequestInfo().getMessage());
 					// So that when the user account request is accepted, it directly has access to the data
 					
@@ -88,7 +81,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 				}
 			}
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (AccountNotOnDemandException e) {

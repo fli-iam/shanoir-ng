@@ -41,4 +41,9 @@ public class AccessRequestServiceImpl implements AccessRequestService {
 		this.accessRequestRepository.deleteById(id);
 	}
 
+	@Override
+	public List<AccessRequest> findByStudyId(List<Long> studiesId) {
+		return this.accessRequestRepository.findByStudyIdIn(studiesId);
+	}
+
 }

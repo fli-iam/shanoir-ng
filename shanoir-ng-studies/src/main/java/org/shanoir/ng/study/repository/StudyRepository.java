@@ -23,13 +23,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudyRepository extends CrudRepository<Study, Long> {
-
-	/**
-	 * Gets the study with the given invitation key which is normaly unique.
-	 * @param invitationKey the invitation key
-	 * @return the associated study, null otherwise.
-	 */
-	Study findByInvitationKey(String invitationKey);
 	
 	/**
 	 * Get all studies
