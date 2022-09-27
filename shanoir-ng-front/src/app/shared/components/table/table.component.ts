@@ -108,7 +108,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private computeItemVars() {
-        this.page.content?.forEach((item, itemIndex) => {
+        this.page?.content?.forEach((item, itemIndex) => {
             this.columnDefs?.forEach((col, colIndex) => {
                 if (col.possibleValues) {
                     if (!this.page._savedContentRendering) this.page._savedContentRendering = [];

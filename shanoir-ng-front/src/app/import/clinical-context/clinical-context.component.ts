@@ -323,7 +323,9 @@ export class ClinicalContextComponent implements OnDestroy {
         let subjectList: SubjectWithSubjectStudy[] = []; 
         this.openSubjectStudy = false;
         let endAcq: Promise<any>;
-        if(this.importMode == 'BRUKER') {
+        if (!studyId) {
+            endAcq = Promise.resolve(); 
+        } else if(this.importMode == 'BRUKER') {
             endAcq = this.studyService
                 .findSubjectsByStudyIdPreclinical(studyId, true)
                 .then(subjects => subjectList = subjects);
@@ -376,7 +378,7 @@ export class ClinicalContextComponent implements OnDestroy {
 
     public onSelectStudy(): Promise<void> {
         this.loading = true;
-        this.computeIsAdminOfStudy(this.study.id);
+        this.computeIsAdminOfStudy(this.study?.id);
 
         let studycardsOrCentersPromise: Promise<void>;
         if (this.useStudyCard) {
@@ -391,7 +393,7 @@ export class ClinicalContextComponent implements OnDestroy {
             });
         } 
 
-        let subjectsPromise: Promise<void> = this.getSubjectList(this.study.id).then(subjects => {
+        let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
             this.subjects = subjects;       
         });
         return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading = false)
