@@ -95,7 +95,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public scHasDifferentModality: string;
     public modality: string;
     openSubjectStudy: boolean = false;
-    loading: boolean = false;
+    loading: number = 0;
     private reload: boolean = false;
     
     constructor(
@@ -142,7 +142,6 @@ export class ClinicalContextComponent implements OnDestroy {
             let center = this.importDataService.contextBackup.center;
             let acquisitionEquipment = this.importDataService.contextBackup.acquisitionEquipment;
             let subject = this.importDataService.contextBackup.subject;
-            console.log('get importDataService.contextBackup.subject', subject?.id)
             let examination = this.importDataService.contextBackup.examination;
             let niftiConverter = this.importDataService.contextBackup.niftiConverter;
             if (study) {
@@ -377,7 +376,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public onSelectStudy(): Promise<void> {
-        this.loading = true;
+        this.loading++;
         this.computeIsAdminOfStudy(this.study?.id);
 
         let studycardsOrCentersPromise: Promise<void>;
@@ -396,16 +395,16 @@ export class ClinicalContextComponent implements OnDestroy {
         let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
             this.subjects = subjects;       
         });
-        return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading = false)
+        return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
             .then(() => this.onContextChange());
     }
 
     public onSelectStudyCard(): Promise<any> {
-        this.loading = true;
+        this.loading++;
         this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
         this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
         return this.selectDataFromStudyCard(this.studycard, this.study?.studyCenterList)
-            .finally(() => this.loading = false)
+            .finally(() => this.loading--)
             .then(() => this.onContextChange());
     }
 
@@ -422,7 +421,7 @@ export class ClinicalContextComponent implements OnDestroy {
     }
 
     public onSelectCenter(): Promise<any> {
-        this.loading = true;
+        this.loading++;
         this.acquisitionEquipment = null;
         if (this.center) {
             this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;;
@@ -431,13 +430,13 @@ export class ClinicalContextComponent implements OnDestroy {
 
         this.acquisitionEquipmentOptions = this.getEquipmentOptions(this.center);
         this.selectDefaultEquipment(this.acquisitionEquipmentOptions);
-        this.loading = false;
+        this.loading--;
         this.onContextChange();
         return Promise.resolve();
     }
 
     public onSelectSubject(): Promise<any> {
-        this.loading = true;
+        this.loading++;
         if (this.subject && !this.subject.subjectStudy) this.subject = null;
 
         this.examinations = [];
@@ -457,7 +456,7 @@ export class ClinicalContextComponent implements OnDestroy {
             this.openSubjectStudy = false;
         }
         return endSubject
-            .finally(() => this.loading = false)
+            .finally(() => this.loading--)
             .then(() => this.onContextChange());
     }
 
@@ -609,15 +608,10 @@ export class ClinicalContextComponent implements OnDestroy {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.test();
                     this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
                 })
             );
         });
-    }
-
-    test() {
-        console.log("context backup set exam");
     }
 
     private getPrefilledExam(): Examination {
