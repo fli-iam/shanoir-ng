@@ -1,6 +1,5 @@
 package org.shanoir.ng.importer.dicom;
 
-import org.assertj.core.util.Arrays;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
@@ -66,8 +65,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	 */
 	public boolean checkSerieIsIgnored(Attributes attributes) {
 		String modality = attributes.getString(Tag.Modality);
-		String[] allowedModalities = {"RTSTRUCT", "RTDOSE", "RTPLAN"};
-		if (AcquisitionModality.codeOf(modality) != null || Arrays.asList(allowedModalities).contains(modality)) {
+		if (AcquisitionModality.codeOf(modality) != null) {
 			return false;
 		}
 		return true;
