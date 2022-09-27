@@ -15,6 +15,7 @@
 package org.shanoir.ng.importer.strategies.datasetexpression;
 
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -58,7 +59,7 @@ public class DatasetExpressionContext implements DatasetExpressionStrategy {
 
 	@Override
 	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
-			ExpressionFormat expressionFormat) throws MalformedURLException {
+			ExpressionFormat expressionFormat) throws IOException {
 		if (datasetExpressionStrategy != null) {
 			return datasetExpressionStrategy.generateDatasetExpression(serie, importJob, expressionFormat);
 		}

@@ -17,6 +17,8 @@ package org.shanoir.ng.importer.strategies.datasetexpression;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 import org.dcm4che3.data.Attributes;
@@ -25,6 +27,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
@@ -46,24 +49,24 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
-	
+
 	@Value("${dcm4chee-arc.host}")
 	private String dcm4cheeHost;
 
 	@Value("${dcm4chee-arc.port.web}")
 	private String dcm4cheePortWeb;
-	
+
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
-	
+
 	@Value("${dcm4chee-arc.dicom.wado.uri}")
 	private String dicomWADOURI;
-	
+
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
 
 	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws MalformedURLException {
+	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws IOException {
 		DatasetExpression pacsDatasetExpression = new DatasetExpression();
 		pacsDatasetExpression.setCreationDate(LocalDateTime.now());
 		pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
@@ -84,7 +87,11 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 					LOG.error(e.getMessage(), e);
 				}
 				DatasetFile pacsDatasetFile = new DatasetFile();
+				pacsDatasetFile.setSize(0L);
 				pacsDatasetFile.setPacs(true);
+				for (org.shanoir.ng.importer.dto.DatasetFile file : expressionFormat.getDatasetFiles()) {
+					pacsDatasetFile.setSize(pacsDatasetFile.getSize() + Files.size(Paths.get(file.getPath())));
+				}
 
 				final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
 				final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
@@ -102,7 +109,7 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 				}
 				URL wadoURL = new URL(wadoStrBuf.toString());
 				pacsDatasetFile.setPath(wadoURL.toString());
-				
+
 				pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
 				pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
 

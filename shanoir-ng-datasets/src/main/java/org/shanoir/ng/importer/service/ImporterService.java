@@ -383,7 +383,7 @@ public class ImporterService {
 	 * Create a dataset acquisition, and associated dataset.
 	 * @param importJob the import job from importer MS.
 	 */
-	public void createEegDataset(final EegImportJob importJob) {
+	public void createEegDataset(final EegImportJob importJob) throws IOException {
 
 		Long userId = KeycloakUtil.getTokenUserId();
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
@@ -461,6 +461,7 @@ public class ImporterService {
 						if (finalLocation != null) {
 							DatasetFile file = new DatasetFile();
 							file.setDatasetExpression(expression);
+							file.setSize(Files.size(finalLocation));
 							file.setPath(finalLocation.toUri().toString());
 							file.setPacs(false);
 							files.add(file);
@@ -531,7 +532,7 @@ public class ImporterService {
 	 * Create a processed dataset dataset associated with a dataset processing.
 	 * @param importJob the import job from importer MS.
 	 */
-	public void createProcessedDataset(final ProcessedDatasetImportJob importJob) {
+	public void createProcessedDataset(final ProcessedDatasetImportJob importJob) throws IOException {
 
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath().toString(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
@@ -635,6 +636,7 @@ public class ImporterService {
 			DatasetFile datasetFile = new DatasetFile();
 			datasetFile.setPacs(false);
 			datasetFile.setPath(location.toUri().toString());
+			datasetFile.setSize(Files.size(location));
 			
 			DatasetExpression expression = new DatasetExpression();
 			expression.setDataset(dataset);

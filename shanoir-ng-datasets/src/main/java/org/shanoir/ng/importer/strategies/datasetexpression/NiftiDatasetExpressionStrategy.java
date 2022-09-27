@@ -52,7 +52,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 	
 	@Override
 	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
-			ExpressionFormat expressionFormat) {
+			ExpressionFormat expressionFormat) throws IOException {
 		
 		DatasetExpression niftiDatasetExpression = new DatasetExpression();
 		niftiDatasetExpression.setCreationDate(LocalDateTime.now());
@@ -116,6 +116,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 					niftiDatasetFile.setPath(niftiFinalLocation.toUri().toString().replaceAll(" ", "%20"));
 					niftiDatasetExpression.getDatasetFiles().add(niftiDatasetFile);
 					niftiDatasetFile.setDatasetExpression(niftiDatasetExpression);
+					niftiDatasetFile.setSize(Files.size(niftiFinalLocation));
 				}
 				index++;
 			}

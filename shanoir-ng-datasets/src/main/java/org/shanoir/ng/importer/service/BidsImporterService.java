@@ -255,9 +255,11 @@ public class BidsImporterService {
 			Path importedFileFinalLocation = Files.copy(importedFile.toPath(), Paths.get(outPath), StandardCopyOption.REPLACE_EXISTING);
 
 			DatasetFile dsFile = new DatasetFile();
+
 			dsFile.setDatasetExpression(expression);
 			dsFile.setPacs(false);
 			dsFile.setPath(importedFileFinalLocation.toUri().toString().replaceAll(" ", "%20"));
+			dsFile.setSize(Files.size(importedFileFinalLocation));
 			files.add(dsFile);
 			if(equipmentId == 0L && importedFile.getName().endsWith(".json") && Files.size(Path.of(importedFile.getPath())) < 1000000) {
 				// Check equipment in json file

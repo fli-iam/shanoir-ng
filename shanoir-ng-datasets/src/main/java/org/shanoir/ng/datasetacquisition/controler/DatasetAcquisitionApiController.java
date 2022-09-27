@@ -99,7 +99,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) {
+	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) throws IOException {
 		importerService.createEegDataset(importJob);
 		importerService.cleanTempFiles(importJob.getWorkFolder());
 		return new ResponseEntity<Void>(HttpStatus.OK);

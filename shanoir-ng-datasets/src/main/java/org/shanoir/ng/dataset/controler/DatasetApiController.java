@@ -25,9 +25,6 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +33,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -47,7 +43,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
@@ -57,12 +52,9 @@ import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -99,7 +91,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.util.UriUtils;
 
 import io.swagger.annotations.ApiParam;
 
@@ -151,9 +142,6 @@ public class DatasetApiController implements DatasetApi {
 
 	@Autowired
 	private WADODownloaderService downloader;
-
-	@Autowired
-	private DatasetSecurityService datasetSecurityService;
 
 	@Autowired
 	private SubjectRepository subjectRepo;
@@ -463,7 +451,7 @@ public class DatasetApiController implements DatasetApi {
 		}
 	}
 	
-	public ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) {
+	public ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException {
 		importerService.createProcessedDataset(importJob);
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
 		importerService.cleanTempFiles(originalNiftiName.getParent());
@@ -646,122 +634,6 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	/**
-<<<<<<< HEAD
-	 * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
-	 * @param urls
-	 * @param workFolder
-	 * @param subjectName the subjectName
-	 * @throws IOException
-	 * @throws MessagingException
-	 */
-	private void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName, boolean keepName) throws IOException {
-		int index = 0;
-		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-			URL url =  iterator.next();
-			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
-
-			// Consider processed datasets
-			if (dataset.getDatasetProcessing() != null || dataset.getDatasetAcquisition() == null) {
-				File destFile = new File(workFolder.getAbsolutePath() + File.separator + srcFile.getName());
-				Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				index++;
-				continue;
-			}
-			
-			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii(.gz)
-			StringBuilder name = new StringBuilder("");
-
-			if (keepName) {
-				name.append(srcFile.getName());
-			} else {
-				name.append(subjectName).append("_");
-				if (dataset instanceof EegDataset) {
-					name.append(dataset.getName()).append("_");
-				} else {
-					if (dataset.getUpdatedMetadata().getComment() != null) {
-						name.append(dataset.getUpdatedMetadata().getComment()).append("_");
-					}
-					name.append(dataset.getDatasetAcquisition().getSortingIndex()).append("_");
-					if (dataset.getUpdatedMetadata().getName() != null && dataset.getUpdatedMetadata().getName().lastIndexOf(" ") != -1) {
-						name.append(dataset.getUpdatedMetadata().getName().substring(dataset.getUpdatedMetadata().getName().lastIndexOf(" ") + 1)).append("_");
-					}
-				}
-				name.append(dataset.getDatasetAcquisition().getRank()).append("_")
-				.append(index)
-				.append(".");
-				if (srcFile.getName().endsWith(".nii.gz")) {
-					name.append("nii.gz");
-				} else {
-					name.append(FilenameUtils.getExtension(srcFile.getName()));
-				}
-			}
-			String fileName = name.toString();
-			// Replace all forbidden characters.
-			fileName = fileName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-
-			File destFile = new File(workFolder.getAbsolutePath() + File.separator + fileName);
-			Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			index++;
-		}
-	}
-
-	/**
-	 * Reads all dataset files depending on the format attached to one dataset.
-	 * @param dataset
-	 * @param pathURLs
-	 * @throws MalformedURLException
-	 */
-	private void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format) throws MalformedURLException {
-		List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
-		for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
-			DatasetExpression datasetExpression = itExpressions.next();
-			if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
-				List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
-				for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext();) {
-					DatasetFile datasetFile = itFiles.next();
-					URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
-					pathURLs.add(url);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Zip
-	 * 
-	 * @param sourceDirPath
-	 * @param zipFilePath
-	 * @throws IOException
-	 */
-	private void zip(final String sourceDirPath, final String zipFilePath) throws IOException {
-		Path p = Paths.get(zipFilePath);
-		// 1. Create an outputstream (zip) on the destination
-		try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
-
-			// 2. "Walk" => iterate over the source file
-			Path pp = Paths.get(sourceDirPath);
-			try(Stream<Path> walker = Files.walk(pp)) {
-
-				// 3. We only consider directories, and we copyt them directly by "relativising" them then copying them to the output
-				walker.filter(path -> !path.toFile().isDirectory())
-				.forEach(path -> {
-					ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-					try {
-						zos.putNextEntry(zipEntry);
-						Files.copy(path, zos);
-						zos.closeEntry();
-					} catch (IOException e) {
-						LOG.error(e.getMessage(), e);
-					}
-				});
-			}
-			zos.finish();
-		}
-	}
-
-	/**
-=======
->>>>>>> develop
 	 * Zip a single file
 	 * 
 	 * @param sourceFile

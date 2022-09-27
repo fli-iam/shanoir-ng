@@ -47,6 +47,9 @@ public class DatasetFile extends AbstractEntity {
 	@Column(columnDefinition = "TEXT")
 	private String path;
 
+	/** size of the associated file. */
+	private Long size;
+
 	/**
 	 * @return the datasetExpression
 	 */
@@ -115,6 +118,14 @@ public class DatasetFile extends AbstractEntity {
 	 */
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	public Long getSize() {
+		return size;
+	}
+
+	public void setSize(Long size) {
+		this.size = size;
 	}
 
 }
