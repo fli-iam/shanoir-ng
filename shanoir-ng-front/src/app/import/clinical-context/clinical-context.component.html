@@ -111,7 +111,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [disabled]="(!useStudyCard && (!center || !acquisitionEquipmentOptions)) || loading"
                         [readOnly]="useStudyCard"
                         [(ngModel)]="acquisitionEquipment" 
-                        (userChange)="onSelectAcquisitonEquipment(); onContextChange();"
+                        (userChange)="onContextChange();"
                         (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
                         (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
                         [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">

@@ -142,6 +142,7 @@ export class ClinicalContextComponent implements OnDestroy {
             let center = this.importDataService.contextBackup.center;
             let acquisitionEquipment = this.importDataService.contextBackup.acquisitionEquipment;
             let subject = this.importDataService.contextBackup.subject;
+            console.log('get importDataService.contextBackup.subject', subject?.id)
             let examination = this.importDataService.contextBackup.examination;
             let niftiConverter = this.importDataService.contextBackup.niftiConverter;
             if (study) {
@@ -156,27 +157,28 @@ export class ClinicalContextComponent implements OnDestroy {
                         this.onToggleUseStudyCard();
                     } else if (useStudyCard && studyCard){
                         this.studycard = studyCard;
-                        this.onSelectStudyCard();
-                    }
-                    if (center) {
-                        this.center = center;
-                        let centerOption = this.centerOptions.find(c => c.value.id == center.id);
-                        if (centerOption) {
-                            this.center = centerOption.value;  // in case it has been modified by an on-the-fly equipment creation
-                        }
-                        this.onSelectCenter();
-                    }
-                    if (acquisitionEquipment) {
-                        this.acquisitionEquipment = acquisitionEquipment;
-                        this.onSelectAcquisitonEquipment();
+                        this.onSelectStudyCard().then(() => {
+                            if (center) {
+                                this.center = center;
+                                let centerOption = this.centerOptions.find(c => c.value.id == center.id);
+                                if (centerOption) {
+                                    this.center = centerOption.value;  // in case it has been modified by an on-the-fly equipment creation
+                                }
+                                this.onSelectCenter();
+                            }
+                            if (acquisitionEquipment) {
+                                this.acquisitionEquipment = acquisitionEquipment;
+                            }
+                        });
                     }
                     if (subject) {
                         this.subject = subject;
-                        this.onSelectSubject();
-                    }
-                    if (examination) {
-                        this.examination = examination;
-                        this.onSelectExam();
+                        this.onSelectSubject().then(() => {
+                            if (examination) {
+                                this.examination = examination;
+                                this.onSelectExam();
+                            }
+                        });
                     }
                     if (niftiConverter) {
                         this.niftiConverter = niftiConverter;
@@ -242,146 +244,167 @@ export class ClinicalContextComponent implements OnDestroy {
         return center.acquisitionEquipments && center.acquisitionEquipments.find(eq => this.acqEqCompatible(eq)) != undefined;
     }
 
-    public onSelectStudy(): Promise<void> {
-        this.loading = true;
-        this.studycardOptions = [];
-        if (this.study && this.isAdminOfStudy[this.study.id] == undefined) {
+    private computeIsAdminOfStudy(studyId: number) {
+        if (this.study && this.isAdminOfStudy[studyId] == undefined) {
             if (this.keycloakService.isUserAdmin) {
-                this.isAdminOfStudy[this.study.id] = true;
+                this.isAdminOfStudy[studyId] = true;
             } else {
-                this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[this.study.id] = result);
+                this.hasAdminRightOn(this.study).then((result) => this.isAdminOfStudy[studyId] = result);
             }
         }
-        let endStudy: Promise<any> = Promise.resolve();
-        if (this.useStudyCard) {
-            this.studycard = this.center = this.acquisitionEquipment = this.subject = this.examination = null;
-            this.openSubjectStudy = false;
-            if (this.study) {
-                let studyEquipments: AcquisitionEquipment[] = [];
-                this.study.studyCenterList.forEach(sc => {
-                    sc.center.acquisitionEquipments.forEach(eq => {
-                        if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
-                    });
-                });
-                endStudy = this.studycardService.getAllForStudy(this.study.id).then(studycards => {
-                    if (!studycards) studycards = [];
-                    this.studycardOptions = studycards.map(sc => {
-                        let opt = new Option(sc, sc.name);
-                        if (sc.acquisitionEquipment) {
-                            let scEq = studyEquipments.find(se => se.id == sc.acquisitionEquipment.id);
-                            if (this.importMode == 'DICOM') {
-                                opt.compatible = this.acqEqCompatible(scEq);
-                            }
-                            if (!this.studycard && opt.compatible) {
-                                this.studycard = sc;
-                            }
-                        } else if (this.importMode == 'DICOM') {
-                            opt.compatible = false;
-                        }
-                        return opt;
-                    });
-                    if (this.studycard) {
-                        return this.onSelectStudyCard();
-                    } else if (!this.studycard && studycards && studycards.length == 1) {
-                        this.studycard = studycards[0];
-                        return this.onSelectStudyCard();
+    }
+
+    private getStudyCardOptions(study: Study): Promise<Option<StudyCard>[]> {
+        let studyEquipments: AcquisitionEquipment[] = [];
+        if (!study) return Promise.resolve([]);
+        /* find equipments for this study - needed for checking studycards compatibilities */
+        study.studyCenterList.forEach(sc => {
+            sc.center.acquisitionEquipments.forEach(eq => {
+                if (studyEquipments.findIndex(se => se.id == eq.id) == -1) studyEquipments.push(eq);
+            });
+        });
+        /* build the studycards options and set their compatibilies */
+        return this.studycardService.getAllForStudy(study.id).then(studycards => {
+            if (!studycards) studycards = [];
+            return studycards.map(sc => {
+                let opt = new Option(sc, sc.name);
+                if (sc.acquisitionEquipment) {
+                    let scEq = studyEquipments.find(se => se.id == sc.acquisitionEquipment.id);
+                    if (this.importMode == 'DICOM') {
+                        opt.compatible = this.acqEqCompatible(scEq);
                     }
-                });
-            }
+                } else if (this.importMode == 'DICOM') {
+                    opt.compatible = false;
+                }
+                return opt;
+            });
+        });
+    }
+
+    private selectDefaultStudyCard(options: Option<StudyCard>[]): Promise<void> {
+        let founded = options?.find(option => option.compatible)?.value;
+        if (founded) {
+            this.studycard = founded;
+            return this.onSelectStudyCard();
+        } else if (options?.length > 0) {
+            this.studycard = options[0].value;
+            return this.onSelectStudyCard();
         }
-        this.centerOptions = [];
-        this.acquisitionEquipmentOptions = []; 
-        this.subjects = [];
-        this.examinations = [];
-        let foundCompatibleCenter: boolean = false;
-        if (this.study && this.study.id && this.study.studyCenterList) {
-            endStudy = Promise.all([endStudy, this.centerService.getCentersByStudyId(this.study.id).then(centers =>{
-                for (let center of centers) {
+    }
+
+    private getCenterOptions(study: Study): Promise<Option<Center>[]> {
+        if (study && study.id && study.studyCenterList) {
+            return this.centerService.getCentersByStudyId(study.id).then(centers => {
+                return centers.map(center => {
                     let centerOption = new Option<Center>(center, center.name);
                     if (!this.useStudyCard && this.importMode == 'DICOM') {
                         centerOption.compatible = center && this.centerCompatible(center);
-                        if (!foundCompatibleCenter && centerOption.compatible) {
-                            foundCompatibleCenter = true;
-                            this.center = centerOption.value;
-                            endStudy = Promise.all([endStudy, this.onSelectCenter()]);
-                        }
                     }
-                    this.centerOptions.push(centerOption);
-                }
-            })]);
-        }
-        if (!this.reload) {
-            return endStudy.then(() => {
-                this.onContextChange();
-                this.loading = false;
-            }).catch(() => {
-                this.loading = false;
+                    return centerOption;
+                });
             });
         } else {
-            return endStudy.then(() => {
-                // filter study cards id necessary once both promises are done
-                if (this.useStudyCard) {
-                    let studyCards =[];
-                    let scFound = false;
-                    for (let sc of this.studycardOptions) {
-                        if (sc.value.acquisitionEquipment.center) {
-                            for (let center of this.centerOptions) {
-                                // center was found -> keep the study card
-                                if (center.value.id === sc.value.acquisitionEquipment.center.id && studyCards.indexOf(sc) == -1) 
-                                {
-                                    studyCards.push(sc);
-                                    if (this.studycard?.id === sc.value.id) {
-                                        scFound = true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    this.studycardOptions = studyCards;
-                    if (!scFound) {
-                        this.studycard = null;
-                        this.onSelectStudyCard();
-                    }
-                }
-                this.onContextChange();
-                this.loading = false;
-                this.reload = false;
-            }).catch((error) => {
-                console.error(error);
-                this.loading = false;
-                this.reload = false;
+            return Promise.resolve([]);
+        }
+    }
+
+    private selectDefaultCenter(options: Option<Center>[]): Promise<void> {
+        let founded = options?.find(option => option.compatible)?.value;
+        if (founded) {
+            this.center = founded;
+            return this.onSelectCenter();
+        } else if (options?.length > 0) {
+            this.center = options[0].value;
+            return this.onSelectCenter();
+        }
+    }
+
+    private getSubjectList(studyId: number): Promise<SubjectWithSubjectStudy[]> {
+        let subjectList: SubjectWithSubjectStudy[] = []; 
+        this.openSubjectStudy = false;
+        let endAcq: Promise<any>;
+        if(this.importMode == 'BRUKER') {
+            endAcq = this.studyService
+                .findSubjectsByStudyIdPreclinical(studyId, true)
+                .then(subjects => subjectList = subjects);
+        } else {
+            endAcq = this.studyService
+                .findSubjectsByStudyId(studyId)
+                .then(subjects => subjectList = subjects);
+        }
+        return endAcq.then(() => {
+            this.onContextChange();
+            return subjectList;
+        });
+    }
+
+    /**
+     * auto-select center, equipment, nifti converter from studycard
+     */
+    private selectDataFromStudyCard(studyCard: StudyCard, studyCenterList: StudyCenter[]) {
+        if (studyCard && studyCenterList) {
+            this.acquisitionEquipment = null;
+            let eqFound: AcquisitionEquipment;
+            let scFound: StudyCenter = studyCenterList?.find(sc => {
+                eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
+                return (!!eqFound);
+            })   
+            this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
+            this.niftiConverter = this.studycard.niftiConverter;
+            return this.onSelectCenter().then(() => {
+                this.acquisitionEquipment = eqFound;
             });
         }
     }
 
+    private getEquipmentOptions(center: Center): Option<AcquisitionEquipment>[] {
+        return center?.acquisitionEquipments.map(acqEq => {
+            let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
+            if (this.importMode == 'DICOM') {
+                option.compatible = this.acqEqCompatible(acqEq);
+            }
+            return option;
+        });
+    }
+
+    private selectDefaultEquipment(options: Option<AcquisitionEquipment>[]) {
+        let founded = options?.find(option => option.compatible)?.value;
+        if (founded) {
+            this.acquisitionEquipment = founded;
+        } 
+    }
+
+    public onSelectStudy(): Promise<void> {
+        this.loading = true;
+        this.computeIsAdminOfStudy(this.study.id);
+
+        let studycardsOrCentersPromise: Promise<void>;
+        if (this.useStudyCard) {
+            studycardsOrCentersPromise = this.getStudyCardOptions(this.study).then(options => {
+                this.studycardOptions = options;
+                return this.selectDefaultStudyCard(options);
+            });
+        } else {
+            studycardsOrCentersPromise = this.getCenterOptions(this.study).then(options => {
+                this.centerOptions = options;
+                return this.selectDefaultCenter(options);
+            });
+        } 
+
+        let subjectsPromise: Promise<void> = this.getSubjectList(this.study.id).then(subjects => {
+            this.subjects = subjects;       
+        });
+        return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading = false)
+            .then(() => this.onContextChange());
+    }
+
     public onSelectStudyCard(): Promise<any> {
         this.loading = true;
-        let endSc: Promise<any> = Promise.resolve();
-        if (this.study && this.studycard && this.studycard.acquisitionEquipment) {
-            this.acquisitionEquipment = null;
-            let scFound = this.study.studyCenterList.find(sc => {
-                let eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
-                if (eqFound) return true;
-                else return false;
-            })
-            if (scFound) {
-                this.center = scFound.center;
-            } else {
-                this.center = this.studycard?.acquisitionEquipment?.center;
-            }
-            this.niftiConverter = this.studycard.niftiConverter;
-            endSc = Promise.all([
-                this.onSelectCenter(),
-            ]);
-        }
         this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
         this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
-        return endSc.then(() => {
-            this.onContextChange();
-            this.loading = false;
-        }).catch(() => {
-            this.loading = false;
-        });
+        return this.selectDataFromStudyCard(this.studycard, this.study?.studyCenterList)
+            .finally(() => this.loading = false)
+            .then(() => this.onContextChange());
     }
 
     onToggleUseStudyCard() {
@@ -393,78 +416,28 @@ export class ClinicalContextComponent implements OnDestroy {
                 this.onSelectStudyCard();
             }
         }
-
         this.importDataService.contextBackup.useStudyCard = this.useStudyCard;
     }
 
     public onSelectCenter(): Promise<any> {
         this.loading = true;
-        this.acquisitionEquipment = this.subject = this.examination = null;
+        this.acquisitionEquipment = null;
         if (this.center) {
-            let index = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id === this.center.id);
-            if (index > -1) this.subjectNamePrefix = this.study.studyCenterList[index].subjectNamePrefix;
+            this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;;
         }
         this.openSubjectStudy = false;
-        this.acquisitionEquipmentOptions = [];
-        this.subjects =  [];
-        this.examinations = [];
-        let endCenter: Promise<any> = Promise.resolve();
-        if (this.useStudyCard) {
-             this.acquisitionEquipment = this.studycard?.acquisitionEquipment;
-             endCenter = Promise.all([endCenter, this.onSelectAcquisitonEquipment()]);
-        } else {
-            if (this.center && this.center.acquisitionEquipments) {
-                for (let acqEq of this.center.acquisitionEquipments) {
-                    let option = new Option<AcquisitionEquipment>(acqEq, this.acqEqPipe.transform(acqEq));
-                    if (this.importMode == 'DICOM') {
-                        option.compatible = this.acqEqCompatible(acqEq);
-                        if (option.compatible) {
-                            this.acquisitionEquipment = option.value;
-                            endCenter = Promise.all([endCenter, this.onSelectAcquisitonEquipment()]);
-                        }
-                    }
-                    this.acquisitionEquipmentOptions.push(option);
-                }
-            }
-        }
-        return endCenter.then(() => {
-            this.onContextChange();
-            this.loading = false;
-        }).catch(() => {
-            this.loading = false;
-        });
-    }
 
-    public onSelectAcquisitonEquipment(): Promise<any> {
-        this.loading = true;
-        this.subject = this.examination = null;
-        this.openSubjectStudy = false;
-        this.subjects =  [];
-        this.examinations = [];
-        let endAcq: Promise<any> = Promise.resolve();
-        if (this.acquisitionEquipment) {
-            if(this.importMode == 'BRUKER') {
-                endAcq = this.studyService
-                    .findSubjectsByStudyIdPreclinical(this.study.id, true)
-                    .then(subjects => this.subjects = subjects);
-            } else {
-                endAcq = this.studyService
-                    .findSubjectsByStudyId(this.study.id)
-                    .then(subjects => this.subjects = subjects);
-            }
-        }
-        return endAcq.then(() => {
-            this.onContextChange();
-            this.loading = false;
-        }).catch(() => {
-            this.loading = false;
-        });
+        this.acquisitionEquipmentOptions = this.getEquipmentOptions(this.center);
+        this.selectDefaultEquipment(this.acquisitionEquipmentOptions);
+        this.loading = false;
+        this.onContextChange();
+        return Promise.resolve();
     }
 
     public onSelectSubject(): Promise<any> {
         this.loading = true;
         if (this.subject && !this.subject.subjectStudy) this.subject = null;
-        this.examination = null;
+
         this.examinations = [];
         let endSubject: Promise<any> = Promise.resolve();
         if (this.subject) {
@@ -475,18 +448,15 @@ export class ClinicalContextComponent implements OnDestroy {
             }
             endSubject = Promise.all([endSubject,
                 this.examinationService
-                .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
-                .then(examinations => this.examinations = examinations)
+                    .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
+                    .then(examinations => this.examinations = examinations)
             ]);
         } else {
             this.openSubjectStudy = false;
         }
-        return endSubject.then(() => {
-            this.onContextChange();
-            this.loading = false;
-        }).catch(() => {
-            this.loading = false;
-        });
+        return endSubject
+            .finally(() => this.loading = false)
+            .then(() => this.onContextChange());
     }
 
     public onSelectExam(): void {
@@ -570,6 +540,7 @@ export class ClinicalContextComponent implements OnDestroy {
                     if (this.importMode == 'BRUKER') {
                         this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
                     } else {
+                        console.log('set importDataService.contextBackup.subject')
                         this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
                     }
                 })
@@ -636,10 +607,15 @@ export class ClinicalContextComponent implements OnDestroy {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+                    this.test();
                     this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
                 })
             );
         });
+    }
+
+    test() {
+        console.log("context backup set exam");
     }
 
     private getPrefilledExam(): Examination {
