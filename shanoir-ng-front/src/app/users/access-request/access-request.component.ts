@@ -21,34 +21,40 @@ import { StudyService } from '../../studies/shared/study.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ActivatedRoute } from '@angular/router';
-import { ModesAware } from "../../preclinical/shared/mode/mode.decorator";
-
+import { AccessRequestService } from './access-request.service';
+import { IdName } from 'src/app/shared/models/id-name.model';
 
 @Component({
     selector: 'accountRequest',
     templateUrl: 'access-request.component.html',
     styleUrls: ['access-request.component.css']
 })
-@ModesAware
+
 export class AccessRequestComponent extends EntityComponent<AccessRequest> {
 
     constructor(
             protected activatedRoute: ActivatedRoute,
             public userService: UserService,
-            public studyService: StudyService) {
+            public studyService: StudyService,
+            public accessRequestService: AccessRequestService) {
                 super(activatedRoute, 'access-request');
             }
 
-    public accessRequest: AccessRequest;
     public studyOptions:  Option<number>[];
+    studies: IdName[];
+
+
+    public get accessRequest(): AccessRequest { return this.entity; }
+    public set accessRequest(accreq: AccessRequest) { 
+        this.entity = accreq;
+    }
 
     getService(): EntityService<AccessRequest> {
-        return null;
+        return this.accessRequestService;
     }
 
     initCreate(): Promise<void> {
         this.accessRequest = new AccessRequest();
-
         return this.studyService.getPublicStudies().then(result => {
             if (result) {
                 this.studyOptions = result.map(element => new Option(element.id, element.name));
@@ -68,7 +74,25 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     initEdit(): Promise<void> {
         throw new Error('Should not be here');
     }
+
     initView(): Promise<void> {
-        throw new Error('Should not be here');
+        this.studyService.getPublicStudies().then(studies =>
+            {this.studies = studies;}
+        );
+        return this.accessRequestService.get(this.id).then(accessRequest => { this.accessRequest = accessRequest; });
     }
+    
+    public async hasDeleteRight(): Promise<boolean> {
+        return false;
+    }
+    
+    public async hasEditRight(): Promise<boolean> {
+        return false;
+    }
+
+    public getStudyName(studyId: number): String {
+        return this.studies.find(study => study.id == studyId).name;
+    }
+
+
 }

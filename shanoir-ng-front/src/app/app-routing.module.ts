@@ -781,6 +781,12 @@ let routes: Routes = [
         component: AccessRequestComponent,
         data: { mode: 'create' }
     },
+    {
+        path: 'access-request/details/:id',
+        component: AccessRequestComponent,
+        data: { mode: 'view' }
+    },
+
 
 ];
 

@@ -163,7 +163,7 @@ public class RabbitMQStudiesService {
 			}
 			studyService.addStudyUserToStudy(subscription, studyToUpdate);
 		} catch (Exception e) {
-			LOG.error("Could not directly subscribe a user to the challenge: ", e);
+			LOG.error("Could not directly subscribe a user to the study: ", e);
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage(), e);
 		}
 	}

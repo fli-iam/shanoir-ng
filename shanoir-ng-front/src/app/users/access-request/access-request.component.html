@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <div #formContainer class="content-component">
     <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 	    <ol>
-	        <li>
+	        <li *ngIf="mode == 'create'">
 	            <label i18n="access request|study label@@study" class="required-label">Study</label>
 	            <span class="right-col">
 	            <select-box
@@ -26,12 +26,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	            </select-box>
 	            </span>
 	        </li>
-	        <li>
+	        <li *ngIf="mode == 'view'">
+	            <label i18n="access request|study label@@study" class="required-label">Study</label>
+                <span class="right-col">
+                    {{getStudyName(accessRequest.studyId)}}
+                </span>
+	        </li>
+	        <li *ngIf="mode == 'create'">
+
 	            <label i18n="access request|Motivation label@@motivation" class="required-label">Motivation</label>
 	            <span class="right-col">
-	                <input type="text" formControlName="motivation" [(ngModel)]="accessRequest.motivation"/>
+	                <textarea formControlName="motivation" [(ngModel)]="accessRequest.motivation"></textarea>
 	            </span>
 	        </li>
+	        <li *ngIf="mode == 'view'">
+                <label i18n="access request|study label@@study" class="required-label">Motivation</label>
+                <span class="right-col">
+                    {{accessRequest.motivation}}
+                </span>
+            </li>
 	    </ol>
     </form>
+    <form-footer
+    [state]="footerState"
+    (save)="save()"
+    (back)="goBack()"
+    ></form-footer>
 </div>

@@ -1,6 +1,5 @@
 package org.shanoir.ng.accessrequest.controller;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
@@ -11,6 +10,8 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -43,12 +44,17 @@ public class AccessRequestApiController implements AccessRequestApi {
 	EmailService emailService;
 
 	@Autowired
+	UserService userService;
+
+	@Autowired
 	RabbitTemplate rabbitTemplate;
 	
-	public ResponseEntity<Void> saveNewAccessRequest(
+	public ResponseEntity<AccessRequest> saveNewAccessRequest(
 			@ApiParam(value = "uaccess request to create", required = true) @RequestBody AccessRequest request,
 			BindingResult result) throws RestServiceException {
 		// Create a new access request
+		User user = userService.findById(KeycloakUtil.getTokenUserId());
+		request.setUser(user);
 		AccessRequest createdRequest = accessRequestService.create(request);
 		
 		// Send event
@@ -58,7 +64,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 		// TODO:
 		//emailService.notifyStudyManagerAccessRequest(createdRequest);
 
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return new ResponseEntity<AccessRequest>(createdRequest, HttpStatus.OK);
 	}
 
 	@Override
@@ -66,7 +72,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 		// Get all studies I administrate
 		List<Long> studiesId;
 		try {
-			studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_USER_QUEUE, KeycloakUtil.getTokenUserId());
+			studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, KeycloakUtil.getTokenUserId());
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException("Error while retrieving studies I can admin. Please contact an admin.", e);			
 		}
@@ -115,5 +121,10 @@ public class AccessRequestApiController implements AccessRequestApi {
 		//emailService.notifyUserAddedToStudy(accessRequestService);	
 
 		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
+	public ResponseEntity<AccessRequest> getByid(@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException {
+		AccessRequest acceReq = this.accessRequestService.findById(accessRequestId).get();
+		return new ResponseEntity<AccessRequest>(acceReq, HttpStatus.OK);
 	}
 }
