@@ -13,8 +13,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header command-zone">3. Set the clinical context {{importMode}}</div>
-<div *ngIf="reloading" class="global-loading">
-        <i class="fa fa-cog fa-spin"></i>
+<div *ngIf="reloading" class="global-loading left-icon">
+    <i class="fa fa-cog fa-spin"></i>
+    Please wait ...
 </div>
 <fieldset *ngIf="!reloading" class="step" @preventInitialChildAnimations>
     <ol>

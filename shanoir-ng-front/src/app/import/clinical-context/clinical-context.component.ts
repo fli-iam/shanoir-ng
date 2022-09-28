@@ -124,6 +124,7 @@ export class ClinicalContextComponent implements OnDestroy {
 
         this.importMode = this.breadcrumbsService.findImportMode();
         
+        this.reloading = !!this.importDataService.contextBackup;
         this.setPatient(this.importDataService.patients[0]).then(() => {
             this.reloadSavedData();
             this.onContextChange();
