@@ -87,6 +87,7 @@ export class Order {
 
 export class Page<T> {
     public content: T[] = [];
+    public _savedContentRendering: any[];
     public number: number = 0;
     public numberOfElements: number = 0;
     public size: number = 0;

@@ -177,4 +177,8 @@ public class ExaminationDTO {
 	public void setSubject(SubjectDTO subject) {
 		this.subject = subject;
 	}
+
+	public void setSubjectId(Long subjectId) {
+		this.subject = new SubjectDTO(subjectId, "");
+	}
 }

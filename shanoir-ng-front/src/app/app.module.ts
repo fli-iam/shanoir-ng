@@ -248,6 +248,7 @@ import { StudyDTOService } from './studies/shared/study.dto';
 import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
+import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
 import { ProcessingComponent } from './processing/processing.component';
 import { PipelinesComponent } from './processing/pipelines/pipelines.component';
 import { CarminClientService } from './carmin/shared/carmin-client.service';
@@ -427,6 +428,7 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         TagInputComponent,
         StudyUserListComponent,
         VarDirective,
+        MultiSelectComponent,
         ProcessingComponent,
         PipelinesComponent,
         PipelineComponent,
