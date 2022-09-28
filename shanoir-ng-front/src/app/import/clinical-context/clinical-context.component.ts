@@ -96,7 +96,7 @@ export class ClinicalContextComponent implements OnDestroy {
     public modality: string;
     openSubjectStudy: boolean = false;
     loading: number = 0;
-    private reload: boolean = false;
+    reloading: boolean = false;
     
     constructor(
             public studyService: StudyService,
@@ -135,7 +135,8 @@ export class ClinicalContextComponent implements OnDestroy {
 
     private reloadSavedData() {
         if (this.importDataService.contextBackup) {
-            this.reload = true;
+            this.reloading = true;
+            let promises: Promise<any>[] = [];
             let study = this.importDataService.contextBackup.study;
             let studyCard = this.importDataService.contextBackup.studyCard;
             let useStudyCard = this.importDataService.contextBackup.useStudyCard;
@@ -150,40 +151,50 @@ export class ClinicalContextComponent implements OnDestroy {
                 if (studyOption) {
                     this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
                 }
-                this.onSelectStudy().then(() => {
+                promises.push(this.onSelectStudy().then(() => {
                     if (this.useStudyCard != useStudyCard) { 
                         this.useStudyCard = useStudyCard;
                         this.onToggleUseStudyCard();
                     } else if (useStudyCard && studyCard){
                         this.studycard = studyCard;
-                        this.onSelectStudyCard().then(() => {
-                            if (center) {
-                                this.center = center;
-                                let centerOption = this.centerOptions.find(c => c.value.id == center.id);
-                                if (centerOption) {
-                                    this.center = centerOption.value;  // in case it has been modified by an on-the-fly equipment creation
-                                }
-                                this.onSelectCenter();
-                            }
-                            if (acquisitionEquipment) {
-                                this.acquisitionEquipment = acquisitionEquipment;
-                            }
-                        });
+                        promises.push(this.onSelectStudyCard().then(() => this.restoreCenter(center, acquisitionEquipment)));
+                    } else {
+                        this.restoreCenter(center, acquisitionEquipment);
                     }
                     if (subject) {
                         this.subject = subject;
-                        this.onSelectSubject().then(() => {
+                        promises.push(this.onSelectSubject().then(() => {
                             if (examination) {
                                 this.examination = examination;
-                                this.onSelectExam();
+                                return this.onSelectExam();
                             }
-                        });
+                        }));
                     }
                     if (niftiConverter) {
                         this.niftiConverter = niftiConverter;
                     }
-                });
+                }));
+                Promise.all(promises).finally(() => this.reloading = false);
             }
+        }
+    }
+
+    private restoreEquipment(acquisitionEquipment: AcquisitionEquipment) {
+        if (acquisitionEquipment) {
+            this.acquisitionEquipment = acquisitionEquipment;
+        }
+    }
+
+    private restoreCenter(center: Center, acquisitionEquipment: AcquisitionEquipment) {
+        if (center) {
+            this.center = center;
+            let centerOption = this.centerOptions.find(c => c.value.id == center.id);
+            if (centerOption) {
+                this.center = centerOption.value; 
+            }
+            return this.onSelectCenter().then(() => this.restoreEquipment(acquisitionEquipment));
+        } else {
+            this.restoreEquipment(acquisitionEquipment);
         }
     }
 
@@ -422,6 +433,7 @@ export class ClinicalContextComponent implements OnDestroy {
 
     public onSelectCenter(): Promise<any> {
         this.loading++;
+        
         this.acquisitionEquipment = null;
         if (this.center) {
             this.subjectNamePrefix = this.study.studyCenterList.find(studyCenter => studyCenter.center.id === this.center.id)?.subjectNamePrefix;;
@@ -541,7 +553,6 @@ export class ClinicalContextComponent implements OnDestroy {
                     if (this.importMode == 'BRUKER') {
                         this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
                     } else {
-                        console.log('set importDataService.contextBackup.subject')
                         this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
                     }
                 })

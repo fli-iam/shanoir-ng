@@ -13,8 +13,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header command-zone">3. Set the clinical context {{importMode}}</div>
-<fieldset class="step" @preventInitialChildAnimations>
-
+<div *ngIf="reloading" class="global-loading">
+        <i class="fa fa-cog fa-spin"></i>
+</div>
+<fieldset *ngIf="!reloading" class="step" @preventInitialChildAnimations>
     <ol>
         <legend>
             Research study
@@ -234,4 +236,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </ol>
 
 </fieldset>
-<button class="next" [disabled]="!valid" (click)="next()">Import now</button>
+<button *ngIf="!reloading" class="next" [disabled]="!valid" (click)="next()">Import now</button>
