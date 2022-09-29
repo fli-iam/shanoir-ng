@@ -74,17 +74,16 @@ export class EegUploadComponent {
                 if (event.type === HttpEventType.Sent) {
                     this.progressBar.progress = -1;
                 } else if (event.type === HttpEventType.UploadProgress) {
-                    this.progressBar.progress = (event.loaded / event.total);
+                    this.progressBar.progress = (event.loaded / (event.total + 0.05));
                 } else if (event instanceof HttpResponse) {
                     this.importDataService.eegImportJob =  event.body;
                     this.errorMessage = "";
                     this.importService.analyseEegFile(this.importDataService.eegImportJob).then((importJobAnalysed: EegImportJob) => {
-                    this.importDataService.eegImportJob = importJobAnalysed;
-                    this.setArchiveStatus('uploaded');
-                    this.errorMessage = "";
-                });
-                    this.setArchiveStatus('uploaded');
-                    this.errorMessage = "";
+                        this.importDataService.eegImportJob = importJobAnalysed;
+                        this.setArchiveStatus('uploaded');
+                        this.progressBar.progress = 1;
+                        this.errorMessage = "";
+                    });
                 }
             }, error => {
                 this.setArchiveStatus('error');
