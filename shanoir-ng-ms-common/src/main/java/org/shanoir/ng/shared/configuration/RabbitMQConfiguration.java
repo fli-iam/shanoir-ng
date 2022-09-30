@@ -129,6 +129,9 @@ public class RabbitMQConfiguration {
 
 	/** Queue used to get the list of studies I can Admin. */
 	public static final String STUDY_I_CAN_ADMIN_QUEUE = "study-i-can-admin";
+	
+	/** Queue used to send invitation email for a given study. */
+	public static final String STUDY_INVITATION_QUEUE = "study-invitation-queue";
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
@@ -400,8 +403,13 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
-	public static Queue studyICanAdmin() {
+	public static Queue studyICanAdminQueue() {
 		return new Queue(STUDY_I_CAN_ADMIN_QUEUE, true);
 	}
 
+	@Bean
+	public static Queue studyInvitationQueue() {
+		return new Queue(STUDY_INVITATION_QUEUE, true);
+	}
+	
 }

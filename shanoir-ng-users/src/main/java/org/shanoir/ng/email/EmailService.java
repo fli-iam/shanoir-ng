@@ -19,6 +19,7 @@ import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.user.model.User;
 
 /**
@@ -146,5 +147,8 @@ public interface EmailService {
 	 * @param accessRequestService the access request
 	 */
 	void notifyUserAddedToStudy(AccessRequestService accessRequestService);
+
+	/** Invites an user to join a study. */
+	void inviteToStudy(StudyInvitationEmail mail);
 
 }

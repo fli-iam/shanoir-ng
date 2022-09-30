@@ -29,6 +29,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -75,9 +76,6 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private StudyService studyService;
-
-	@Autowired
-	private StudyRepository studyRepository;
 
 	@Autowired
 	private StudyMapper studyMapper;
@@ -399,6 +397,30 @@ public class StudyApiController implements StudyApi {
 			studiesDTO.add(studyMapper.studyToIdNameDTO(study));
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
+	}
+	
+	public ResponseEntity<Void> inviteToStudy(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "invited email", required = true) @RequestBody String email)
+			throws IOException {
+		// Get study
+		Study study = this.studyService.findById(studyId);
+
+		// Generate invitation key
+		String invitationKey = this.studyService.generateInvitationKey(study);
+		
+		//Create email
+		StudyInvitationEmail mail = new StudyInvitationEmail();
+		mail.setUserId(KeycloakUtil.getTokenUserId());
+		mail.setInvitationKey(invitationKey);
+		mail.setStudyId("" + study.getId());
+		mail.setStudyName(study.getName());
+		mail.setInvitedMail(email);
+
+		// Send an email to the user
+		
+		
+		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
 }

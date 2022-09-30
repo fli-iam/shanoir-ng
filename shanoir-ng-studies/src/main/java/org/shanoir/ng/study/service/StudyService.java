@@ -136,4 +136,8 @@ public interface StudyService {
 	 */
 	List<Study> findPublicStudies();
 
+	String generateInvitationKey(Study study);
+
+	Study getStudyFromKey(String key);
+
 }

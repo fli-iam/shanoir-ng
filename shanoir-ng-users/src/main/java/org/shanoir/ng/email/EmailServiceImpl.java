@@ -28,6 +28,7 @@ import org.shanoir.ng.email.model.DatasetDetail;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -565,10 +566,17 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyUserAddedToStudy(AccessRequestService accessRequestService) {
-		throw new NotImplementedException("To be done");
+	public void inviteToStudy(StudyInvitationEmail mail) {
+		// Check if user with this mail exists.
+		
+		// If yes, send a mail with a direct link to access request.
+		
+		// Otherwise, send a link with a link to subscription (with invitation key hidden bonus)
 		
 	}
 
-
+	@Override
+	public void notifyUserAddedToStudy(AccessRequestService accessRequestService) {
+		// TODO Auto-generated method stub
+	}
 }

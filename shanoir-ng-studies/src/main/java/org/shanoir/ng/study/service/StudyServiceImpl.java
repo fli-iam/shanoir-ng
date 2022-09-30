@@ -66,6 +66,8 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.BiMap;
+import com.google.common.math.DoubleMath;
 
 /**
  * Implementation of study service.
@@ -108,6 +110,8 @@ public class StudyServiceImpl implements StudyService {
 	
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	private Map<String, Study> studyKeymap;
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -581,6 +585,18 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public List<Study> findPublicStudies() {
 		return this.studyRepository.findByVisibleByDefaultTrue();
+	}
+
+	@Override
+	public String generateInvitationKey(Study study) {
+		String key = UUID.randomUUID().toString();
+		this.studyKeymap.put(key, study);
+		return key;
+	}
+
+	@Override
+	public Study getStudyFromKey(String key) {
+		return this.studyKeymap.get(key);
 	}
 
 }
