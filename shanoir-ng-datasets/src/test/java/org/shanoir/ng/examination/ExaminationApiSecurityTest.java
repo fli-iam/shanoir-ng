@@ -37,9 +37,12 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectDTO;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
@@ -96,8 +99,6 @@ public class ExaminationApiSecurityTest {
 	@Before
 	public void setup() {
 		mockBindingResult = new BeanPropertyBindingResult(mockExam(1L), "examination");
-		
-		
 	}
 	
 	@Test
@@ -358,7 +359,7 @@ public class ExaminationApiSecurityTest {
 		dto.setExaminationDate(LocalDate.now());
 		dto.setCenterId(centerId);
 		dto.setStudyId(studyId);
-		dto.setSubjectId(subjectId);
+		dto.setSubject(new SubjectDTO(subjectId, ""));
 		return dto;
 	}
 	

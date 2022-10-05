@@ -11,63 +11,60 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+package org.shanoir.ng.shared.model;
 
-package org.shanoir.ng.shared.core.model;
+import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+/**
+ * @author yyao
+ *
+ */
+public class SubjectDTO {
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class IdName {
-
-	private Long id;
-
-	private String name;
-
+	private List<SubjectStudyDTO> subjectStudyList;
+	
+	protected Long id;
+	
+	protected String name;
+	
+	public SubjectDTO(){};
+	
 	/**
-	 * Default constructor.
+	 * @param id
+	 * @param name
 	 */
-	public IdName() {
+	public SubjectDTO (Long id, String name) {
+		this.setId(id);
+		this.setName(name);
 	}
 
 	/**
-	 * Constructor with id and name.
-	 * 
-	 * @param id object id.
-	 * @param name object name.
+	 * @return the subjectStudyList
 	 */
-	public IdName(final Long id, final String name) {
-		this.id = id;
-		this.name = name;
+	public List<SubjectStudyDTO> getSubjectStudyList() {
+		return subjectStudyList;
 	}
 
 	/**
-	 * @return the id
+	 * @param subjectStudyList the subjectStudyList to set
 	 */
+	public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
+		this.subjectStudyList = subjectStudyList;
+	}
+
 	public Long getId() {
 		return id;
 	}
 
-	/**
-	 * @param id
-	 *            the id to set
-	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 
-	/**
-	 * @return the name
-	 */
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @param name
-	 *            the name to set
-	 */
 	public void setName(String name) {
 		this.name = name;
 	}
-
 }

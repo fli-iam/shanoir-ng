@@ -155,7 +155,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 				filter+=" OR ";
 			}
 			if (CollectionUtils.isEmpty(entry.getValue())) {
-				filter = filter + STUDY_NAME_FACET + ":" + entry.getKey();
+				filter = filter + STUDY_ID_FACET + ":" + entry.getKey();
 			} else {
 				boolean first = true;
 				for (String centerName: entry.getValue()) {

@@ -17,6 +17,7 @@ import { NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { AbstractInput } from '../shared/form/input.abstract';
 import { Study } from '../studies/shared/study.model';
+import { isDarkColor } from '../utils/app.utils';
 import { Tag } from './tag.model';
 
 
@@ -34,7 +35,7 @@ export type Mode =  "view" | "edit" | "create";
 ]
 })
 
-export class TagCreatorComponent extends AbstractInput {
+export class TagCreatorComponent extends AbstractInput<Tag[]> {
     @Input() study: Study;
     @Input() mode: Mode;
     @Output() onChange: EventEmitter<any> = new EventEmitter();
@@ -62,7 +63,7 @@ export class TagCreatorComponent extends AbstractInput {
                 this.text = null;
                 this.selectedColor = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0'); // random color
                 this.addTagVisible = false;
-                this.displayedTags.add({tag: newTag, darkFont: this.getFontColor(newTag.color)});
+                this.displayedTags.add({tag: newTag, darkFont: isDarkColor(newTag.color)});
                 this.propagateChange(this.model);
                 this.onChange.emit(this.model);
             }
@@ -95,20 +96,12 @@ export class TagCreatorComponent extends AbstractInput {
         this.displayedTags = new Set();
         if (this.model) {
             (this.model as Tag[]).forEach(tag => 
-                this.displayedTags.add({tag: tag, darkFont: this.getFontColor(tag.color)})
+                this.displayedTags.add({tag: tag, darkFont: isDarkColor(tag.color)})
             );
         }
     }
 
-    private getFontColor(colorInp: string): boolean {
-          var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
-          var r = parseInt(color.substring(0, 2), 16); // hexToR
-          var g = parseInt(color.substring(2, 4), 16); // hexToG
-          var b = parseInt(color.substring(4, 6), 16); // hexToB
-          return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
-    }
-
     onColorChange() {
-        this.newTagDarkFont = this.getFontColor(this.selectedColor);
+        this.newTagDarkFont = isDarkColor(this.selectedColor);
     }
 }

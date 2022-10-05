@@ -27,8 +27,6 @@ import javax.persistence.Table;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.core.model.IdNameInterface;
-import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -39,12 +37,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Entity
 @Table(name = "study")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Study extends HalEntity implements IdNameInterface {
-	 
-	private static final long serialVersionUID = -2224112571103245441L;
+public class Study extends IdName {
 
-	private String name;
-
+	@Id
+	protected Long id;
+	
+	protected String name;
+	
 	@ManyToMany
 	@JoinTable(name = "related_datasets", joinColumns = @JoinColumn(name = "study_id"), inverseJoinColumns = @JoinColumn(name = "dataset_id"))
 	private List<Dataset> relatedDatasets;
@@ -95,7 +94,7 @@ public class Study extends HalEntity implements IdNameInterface {
 	 */
 	public Study(Long id, String name) {
 		this.setId(id);
-		this.name = name;
+		this.setName(name);
 	}
 
 	/**
@@ -111,19 +110,25 @@ public class Study extends HalEntity implements IdNameInterface {
 	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
 		this.subjectStudyList = subjectStudyList;
 	}
+	
+	@Override
+	public Long getId() {
+		return id;
+	}
 
-	/**
-	 * @return the name
-	 */
+	@Override
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	@Override
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @param name the name to set
-	 */
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
-
+	
 }
