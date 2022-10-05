@@ -18,7 +18,7 @@ for path in pathlib.Path("db-changes").glob("*"):
         print(f"{30*'#'} {db} {45*'#'}"[:79])
 
         # get the existing migrations from the RELEASE_BRANCH
-        proc = subprocess.run(["git", "ls-tree", f"{RELEASE_BRANCH}/develop:db-changes/{db}"],
+        proc = subprocess.run(["git", "ls-tree", RELEASE_BRANCH], cwd=f"db-changes/{db}",
                 encoding="utf-8", capture_output=True, errors="replace")
         if proc.returncode == 0:
             released_migrations = set(line.split("\t", 1)[1] for line in proc.stdout.splitlines())
@@ -47,7 +47,7 @@ for path in pathlib.Path("db-changes").glob("*"):
 
 print("#"*79)
 if errors:
-    print(f"{errors} errors (migrations must be ordered after all migrations in {RELEASE_BRANCH})")
+    print(f"{errors} errors (new migrations must have a greater sequence number than all existing migrations in {RELEASE_BRANCH})")
     sys.exit(1)
 else:
     print ("success")
