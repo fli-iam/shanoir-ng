@@ -14,6 +14,11 @@
 
 package org.shanoir.ng.importer.model;
 
+import java.time.LocalDate;
+
+import javax.persistence.Transient;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -27,6 +32,10 @@ public class Subject {
 
 	@JsonProperty("name")
 	private String name;
+
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	@Transient
+	private LocalDate birthDate;
 
 	public long getId() {
 		return id;
@@ -42,6 +51,14 @@ public class Subject {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public LocalDate getBirthDate() {
+		return birthDate;
+	}
+
+	public void setBirthDate(LocalDate birthDate) {
+		this.birthDate = birthDate;
 	}
 
 }

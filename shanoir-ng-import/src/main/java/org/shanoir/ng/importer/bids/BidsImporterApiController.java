@@ -188,7 +188,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 					if (examDate == null) {
 						examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneId.systemDefault());
 					}
-					examination = createExam(studyId, centerId, subjectId, sessionLabel, examDate);
+					examination = ImportUtils.createExam(studyId, centerId, subjectId, sessionLabel, examDate);
 					examCreated = true;
 
 					// Create multiple examinations for every session folder
@@ -215,7 +215,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 							// Set exam date by default using file creation date
 							examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneOffset.UTC);
 						}
-						examination = createExam(studyId, centerId, subjectId, null, examDate);
+						examination = ImportUtils.createExam(studyId, centerId, subjectId, null, examDate);
 						examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 						
 						if (examId == null) {
@@ -331,32 +331,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 			examDates.put(sessionLabel, LocalDate.from(date));
 		}
 		return examDates;
-	}
-
-	/**
-	 * Create an exam from fiew attributes
-	 * @return the created exam
-	 */
-	private ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, String comment, LocalDate examDate) {
-		// Create one examination
-		ExaminationDTO examination = new ExaminationDTO();
-		IdName study = new IdName();
-		study.setId(studyId);
-		examination.setStudy(study);
-
-		IdName subj = new IdName();
-		subj.setId(subjectId);
-		examination.setSubject(subj);
-
-		IdName center = new IdName();
-		center.setId(centerId);
-		examination.setCenter(center);
-
-		examination.setComment(comment);
-
-		examination.setExaminationDate(examDate);
-		
-		return examination;
 	}
 
 	/**

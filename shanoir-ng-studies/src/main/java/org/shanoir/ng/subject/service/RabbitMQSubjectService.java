@@ -119,15 +119,6 @@ public class RabbitMQSubjectService {
 		}
 	}
 
-	/**
-	 * This methods allows to get the particpants.tsv file from BIDS/SEF import and deserialize it into subjects
-	 * Then the non existing ones are created
-	 * We finally return the full list of subjects
-	 * @param participantsFilePath the partcipants.tsv file given
-	 * @return A list of subjects updated with their IDs.
-	 * If an error occurs, a list of a single subject with no ID and only a name is sent back
-	 * @throws JsonProcessingException
-	 */
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE)
 	@RabbitHandler
 	@Transactional
