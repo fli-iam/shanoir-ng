@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { ApplicationRef, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { fromEvent, Subscription } from 'rxjs';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
@@ -38,6 +38,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() customActionDefs: any[];
     @Input() selectionAllowed: boolean = false;
     @Input() selection: Set<number> = new Set();
+    @Input() selectedId: number;
     @Output() selectionChange: EventEmitter<Set<number>> = new EventEmitter<Set<number>>();
     selectAll: boolean | 'indeterminate' = false;
     @Input() browserSearch: boolean = true;
@@ -62,6 +63,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     private subscriptions: Subscription[] = [];
     private hash: string;
     private colSave: { width: string, hidden: boolean }[];
+    compactMode: boolean = false;
     nbColumns: number;
     expended: boolean[] = [];
     subRowOpen: any = {};
@@ -89,7 +91,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 this.nbColumns = this.columnDefs.length;
                 if (this.selectionAllowed) this.nbColumns++;
                 if (this.subRowsDefs) this.nbColumns++;
-            })
+            });
         }
     }
 
@@ -99,6 +101,28 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     ngOnInit() {
         this.subscriptions.push(this.globalClickService.onGlobalMouseUp.subscribe(() => this.stopDrag()));
+        this.subscriptions.push(fromEvent(window, 'resize').subscribe( evt => {
+            this.checkCompactMode();
+        }));
+        this.checkCompactMode();
+    }
+
+    private computeItemVars() {
+        this.page?.content?.forEach((item, itemIndex) => {
+            this.columnDefs?.forEach((col, colIndex) => {
+                if (col.possibleValues) {
+                    if (!this.page._savedContentRendering) this.page._savedContentRendering = [];
+                    if (!this.page._savedContentRendering[itemIndex]) this.page._savedContentRendering[itemIndex] = [];
+                    if (!this.page._savedContentRendering[itemIndex][colIndex]) this.page._savedContentRendering[itemIndex][colIndex] = {};
+                    this.page._savedContentRendering[itemIndex][colIndex].possibleValues = this.isFunction(col.possibleValues) ? col.possibleValues(item) : col.possibleValues;
+                }
+            });
+        });
+    }
+
+    private checkCompactMode() {
+        let width: number = this.elementRef.nativeElement.offsetWidth; 
+        this.compactMode = width < 620;
     }
 
     private reloadPreviousState() {
@@ -286,6 +310,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         this.isLoading = true;
         return this.getPage(this.getPageable(), forceRefresh).then(page => {
             this.page = page;
+            this.computeItemVars();
             this.maxResultsField = page ? page.size : 0;
             this.computeSelectAll();
             setTimeout(() => {
@@ -402,25 +427,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     onSelectAllChange() {
         if (this.selectAll == true) {
-
-            // let pageableAll: Pageable;
-            // if (this.filter) {
-            //     pageableAll = new FilterablePageable(
-            //         1, 
-            //         this.page.totalElements,
-            //         null,
-            //         this.filter
-            //     );
-            // } else {
-            //     pageableAll = new Pageable(
-            //         1, 
-            //         this.page.totalElements
-            //     );
-            // }
-            // this.getPage(pageableAll).then(page => {
-            //     this.selection = new Map();
-            //     page.content.forEach(elt => this.selection.set(elt.id, elt));
-            // });
             this.page.content.forEach(elt => this.selection.add(elt['id']));
             this.emitSelectionChange();
         } else if (this.selectAll == false) {
@@ -548,7 +554,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             col.width = this.colSave[i].width;
             col.hidden = this.colSave[i].hidden;
         });
-        this.subRowsDefs.forEach((col, i) => {
+        this.subRowsDefs?.forEach((col, i) => {
             col.width = this.colSave[this.columnDefs.length + i].width;
             col.hidden = this.colSave[this.columnDefs.length + i].hidden;
         });
@@ -561,6 +567,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     fold(i: number) {
         this.subRowOpen[i] = false;
+    }
+
+    isFunction(a: any): boolean {
+        return typeof a === 'function';
     }
 }
 

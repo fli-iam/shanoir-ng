@@ -86,12 +86,13 @@ export class Order {
 }
 
 export class Page<T> {
-    public content: T[];
-    public number: number;
-    public numberOfElements: number;
-    public size: number;
-    public totalElements: number;
-    public totalPages: number;
+    public content: T[] = [];
+    public _savedContentRendering: any[];
+    public number: number = 0;
+    public numberOfElements: number = 0;
+    public size: number = 0;
+    public totalElements: number = 0;
+    public totalPages: number = 0;
 
     static transType<U>(page: Page<any>, content: U[]): Page<U> {
         let newPage: Page<U> = new Page<U>();

@@ -27,7 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface DatasetAcquisitionService {
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnStudy(returnObject.getExamination().getStudyId(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or returnObject == null or @datasetSecurityService.hasRightOnExamination(returnObject.getExamination().getId(), 'CAN_SEE_ALL')")
 	DatasetAcquisition findById(Long id);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -50,7 +50,7 @@ public interface DatasetAcquisitionService {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetAcquisitionPage(returnObject, 'CAN_SEE_ALL')")
 	public Page<DatasetAcquisition> findPage(final Pageable pageable);
 
-	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#entity.getExamination().getStudyId(), 'CAN_IMPORT')))")
+	@PreAuthorize("#entity.getId() == null and (hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#entity.getExamination().getId(), 'CAN_IMPORT')))")
 	DatasetAcquisition create(DatasetAcquisition entity);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasUpdateRightOnDatasetAcquisition(#entity, 'CAN_ADMINISTRATE')")

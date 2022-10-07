@@ -19,6 +19,10 @@ import java.util.List;
 
 import org.shanoir.ng.examination.model.InstrumentBasedAssessment;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.model.SubjectDTO;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Examination DTO with necessary information for front
@@ -41,7 +45,7 @@ public class ExaminationDTO {
 
 	private Long studyId;
 
-	private Long subjectId;
+	private SubjectDTO subject;
 
 	private Double subjectWeight;
 	
@@ -149,14 +153,6 @@ public class ExaminationDTO {
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
 	}
-
-	public Long getSubjectId() {
-		return subjectId;
-	}
-
-	public void setSubjectId(Long subjectId) {
-		this.subjectId = subjectId;
-	}
 	
 	public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
 		return instrumentBasedAssessmentList;
@@ -174,4 +170,15 @@ public class ExaminationDTO {
 		this.extraDataFilePathList = extraDataFilePathList;
 	}
 
+	public SubjectDTO getSubject() {
+		return subject;
+	}
+
+	public void setSubject(SubjectDTO subject) {
+		this.subject = subject;
+	}
+
+	public void setSubjectId(Long subjectId) {
+		this.subject = new SubjectDTO(subjectId, "");
+	}
 }
