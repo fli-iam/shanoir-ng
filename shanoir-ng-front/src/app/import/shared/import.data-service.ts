@@ -38,6 +38,26 @@ export class ContextData {
         public subject: SubjectWithSubjectStudy,
         public examination: SubjectExamination,
         public niftiConverter: NiftiConverter,
+        public datasetType: DatasetType,
+        public processedDatasetFilePath: string,
+        public processedDatasetType: ProcessedDatasetType,
+        public processedDatasetName: string,
+        public processedDatasetComment: string,
+        public datasetProcessing: DatasetProcessing,
+    ) {}
+}
+
+export class EegContextData  {
+    
+    constructor (
+        public study: Study,
+        public studyCard: StudyCard,
+        public useStudyCard: boolean,
+        public center: Center, 
+        public acquisitionEquipment: AcquisitionEquipment,
+        public subject: SubjectWithSubjectStudy,
+        public examination: SubjectExamination,
+        public niftiConverter: NiftiConverter,
         public coordinatesSystem: string,
         public datasetType: DatasetType,
         public processedDatasetFilePath: string,
@@ -47,6 +67,22 @@ export class ContextData {
         public datasetProcessing: DatasetProcessing,
     ) {}
 }
+
+export class ProcessedContextData {
+    constructor (
+        public study: Study,
+        public subject: SubjectWithSubjectStudy,
+        public datasetType: DatasetType,
+        public processedDatasetFilePath: string,
+        public processedDatasetType: ProcessedDatasetType,
+        public processedDatasetName: string,
+        public processedDatasetComment: string,
+        public datasetProcessing: DatasetProcessing,
+    ) {}
+}
+
+
+
 
 @Injectable()
 export class ImportDataService {

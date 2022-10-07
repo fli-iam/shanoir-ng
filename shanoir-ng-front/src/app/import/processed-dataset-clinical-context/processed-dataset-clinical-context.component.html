@@ -27,8 +27,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         (userChange)="onSelectStudy(); onContextChange();" 
                         (onViewClick)="showStudyDetails()" 
                         [viewDisabled]="!study" 
-                        [options]="studyOptions">
+                        [options]="studyOptions"
+                        [disabled]="loading">
                 </select-box>
+
             </span>
         </li>
         
@@ -43,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
                 <select-box 
-                        [disabled]="!study" 
+                        [disabled]="loading || !study" 
                         [(ngModel)]="subject" 
                         (userChange)="onSelectSubject(); onContextChange();" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
@@ -100,4 +102,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </ol>
 
 </fieldset>
-<button class="next" [disabled]="!valid" (click)="next()">Import now</button>
+<button *ngIf="!reloading" class="next" [disabled]="!valid" (click)="next()">Import now</button>

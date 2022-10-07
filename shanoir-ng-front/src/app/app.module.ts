@@ -78,7 +78,9 @@ import { ExaminationService } from './examinations/shared/examination.service';
 import { SubjectExaminationPipe } from './examinations/shared/subject-examination.pipe';
 import { HomeComponent } from './home/home.component';
 import { BidsUploadComponent } from './import/bids/bids-upload.component';
-import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { BasicClinicalContextComponent } from './import/basic-clinical-context/basic-clinical-context.component';
+import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
+import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
@@ -334,9 +336,11 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         BidsUploadComponent,
         QueryPacsComponent,
         ImportProcessedDatasetComponent,
-        ClinicalContextComponent,
+        BasicClinicalContextComponent,
+        PreClinicalContextComponent,
         EegClinicalContextComponent,
         ProcessedDatasetClinicalContextComponent,
+        PacsClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,

@@ -12,7 +12,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="header command-zone">3. Set the clinical context {{importMode}}</div>
+<div class="header command-zone">3. Set the clinical context</div>
 <div *ngIf="reloading" class="global-loading left-icon">
     <i class="fa fa-cog fa-spin"></i>
     Please wait ...
@@ -98,11 +98,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li class="info" *ngIf="center && !centerCompatible(center)">
             <i class="fas fa-exclamation-triangle"></i>
             <strong>This center may not be not compatible with the imported data !</strong>
-            <br/>Your archive contains this data : 
-            <code>
-                {{patient?.studies[0]?.series[0]?.institution?.institutionName}} - 
-                {{patient?.studies[0]?.series[0]?.institution?.institutionAddress}}
-            </code>
+            <ng-container *ngIf="importedCenterDataStr">
+                <br/>Your archive contains this data : 
+                <code>{{importedCenterDataStr}}</code>
+            </ng-container>
             <ng-container *ngIf="!useStudyCard">
                 <br/>If the center you need is not in the above list, you can create a new center from this data by clicking on the 'add' button.
             </ng-container>
@@ -125,12 +124,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <i class="fas fa-exclamation-triangle"></i>
             <strong>The acquisition equipment may not be not compatible with the imported data !</strong>
             <strong>selected : {{acquisitionEquipment.serialNumber}}</strong>
-            <br/>Your archive contains this data : 
-            <code>
-                {{patient?.studies[0]?.series[0]?.equipment?.manufacturer}} - 
-                {{patient?.studies[0]?.series[0]?.equipment?.manufacturerModelName}} - 
-                {{patient?.studies[0]?.series[0]?.equipment?.deviceSerialNumber}}
-            </code>
+            <ng-container *ngIf="importedEquipmentDataStr">
+                <br/>Your archive contains this data : 
+                <code>{{importedEquipmentDataStr}}</code>
+            </ng-container>
             <br/>If the acquisition equipment you need is not in the above list, you can create a new acquisition equipment from this data by clicking on the 'add' button.
         </li>
     </ol>
@@ -153,7 +150,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </select-box>
             </span>
         </li>
-        <li *ngIf="importMode != 'BRUKER'" class="required">
+        <li *ngIf="editSubjectStudy" class="required">
             <label class="required-label">Subject Type</label>
             <span class="right-col">
                 <select-box 
