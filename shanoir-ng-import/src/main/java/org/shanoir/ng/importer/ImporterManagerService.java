@@ -149,6 +149,9 @@ public class ImporterManagerService {
 				// perform anonymization only in case of profile explicitly set
 				if (importJob.getAnonymisationProfileToUse() != null && !importJob.getAnonymisationProfileToUse().isEmpty()) {
 					ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
+					if (patient.getSubject() == null) {
+						System.err.println(dicomFiles);
+					}
 					final String subjectName = patient.getSubject().getName();
 					try {
 						ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
@@ -164,6 +167,7 @@ public class ImporterManagerService {
 			long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());
 			LOG.info("user=" + KeycloakUtil.getTokenUserName() + ",size=" + ImportUtils.readableFileSize(importJobDirSize) + "," + importJob.toString());
 		} catch (Exception e) {
+			e.printStackTrace();
 			LOG.error("Error during import for study {} and examination {}", importJob.getStudyId(), importJob.getExaminationId(), e);
 			event.setMessage("ERROR while importing data for study " + importJob.getStudyId() + " for examination " + importJob.getExaminationId() + ", please contact an administrator");
 			event.setStatus(ShanoirEvent.ERROR);

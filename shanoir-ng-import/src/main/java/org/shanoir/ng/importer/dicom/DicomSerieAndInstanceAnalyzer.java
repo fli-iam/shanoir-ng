@@ -65,12 +65,12 @@ public class DicomSerieAndInstanceAnalyzer {
 	 */
 	public boolean checkSerieIsIgnored(Attributes attributes) {
 		String modality = attributes.getString(Tag.Modality);
-		if (AcquisitionModality.codeOf(modality) != null) {
+		if (AcquisitionModality.codeOf(modality) != null || "RTSTRUCT".equals(modality) || "RTDOSE".equals(modality) || "RTPLAN".equals(modality)) {
 			return false;
 		}
 		return true;
 	}
-	
+
 	public void checkSerieIsSpectroscopy(Serie serie) {
 		final String sopClassUID = serie.getSopClassUID();
 		final String seriesDescription = serie.getSeriesDescription();	

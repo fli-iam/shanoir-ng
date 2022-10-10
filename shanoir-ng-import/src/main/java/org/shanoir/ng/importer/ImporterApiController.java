@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -724,7 +725,7 @@ public class ImporterApiController implements ImporterApi {
 		importJob.setPatients(patients);
 		importJob.setFromDicomZip(true);
 		importJob.setAnonymisationProfileToUse(exchange.getAnonymisationProfileToUse());
-		// Work folder is always relative to general import directory and userId (not
+		// Work folder is always relative to general import directory and usernullId (not
 		// shown to outside world)
 		importJob.setWorkFolder(tempDir.getAbsolutePath());
 		/**
@@ -817,6 +818,8 @@ public class ImporterApiController implements ImporterApi {
 					"Wrong content type of file upload, .zip required.", null));
 		}
 		
+		ImportJob job = null;
+		
 		try {
 			File userImportDir = ImportUtils.getUserImportDir(importDir);			
 			File tempFile = ImportUtils.saveTempFile(userImportDir, dicomZipFile);
@@ -837,7 +840,7 @@ public class ImporterApiController implements ImporterApi {
 
 			// STEP 4: Iterate over examination folders
 			for (File examFolder : examinationsFolders) {
-				ImportJob job = null;
+				job = null;
 				// Check of it's a folder
 				if (!examFolder.isDirectory()) {
 					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -869,6 +872,8 @@ public class ImporterApiController implements ImporterApi {
 						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Subject oculd not be created, please check data", null));
 					}
 					subject.setId(subjectId);
+					// Wait a second for the subject to be created dataset side ?
+					Thread.sleep(1000);
 				}
 
 				// STEP 4.1 Get informations about center / study card
@@ -886,6 +891,7 @@ public class ImporterApiController implements ImporterApi {
 						if (newStudyCardId != null)  {
 							studyCardId = newStudyCardId;
 						}
+						job.setAcquisitionEquipmentId(equipmentId);
 					}
 				}
 
@@ -899,8 +905,7 @@ public class ImporterApiController implements ImporterApi {
 				if (examId == null) {
 					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating examination", null));
 				}
-				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "" + examination.getStudyId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
-				
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubjectId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
 				// STEP 4.3 Complete importJob with subject / study /examination
 				job.setSubjectName(subjectName);
@@ -909,6 +914,15 @@ public class ImporterApiController implements ImporterApi {
 				job.setFromPacs(false);
 				job.setStudyId(studyId);
 				job.setStudyName(studyName);
+				job.getPatients().get(0).setSubject(subject);
+				job.setConverterId(6L);
+				
+				// STEP 4.4 Select all series
+				for(Study study : job.getPatients().get(0).getStudies()) {
+					for (Serie serie : study.getSeries()) {
+						serie.setSelected(true);
+					}
+				}
 
 				// STEP 4.4 Send to dataset for logical import
 				this.startImportJob(job);
@@ -919,7 +933,10 @@ public class ImporterApiController implements ImporterApi {
 		} catch (IOException e) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
 					"The file could not be correctly unziped on the server. Please check consistency.", e));
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
-		return null;
+		return new ResponseEntity<ImportJob>(job, HttpStatus.OK);
+
     }
 }

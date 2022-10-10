@@ -50,6 +50,7 @@ export class DicomUploadComponent implements OnDestroy {
     modality: string;
     studyOptions: Option<Study>[] = [];
     studycardOptions: Option<StudyCard>[] = [];
+    otherErrorMessage: string;
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
     constructor(
@@ -129,17 +130,24 @@ export class DicomUploadComponent implements OnDestroy {
                         this.progressBar.progress = (event.loaded / event.total);
                     } else if (event instanceof HttpResponse) {
                         let patientDicomList =  event.body;
-                        this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
-                        this.importDataService.patientList = patientDicomList;
+                        this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
+                        if (this.modality) {
+                            this.importDataService.patientList = patientDicomList;
+                        }
                         this.setArchiveStatus('uploaded');
                     }
                 }, error => {
                     this.setArchiveStatus('error');
                     this.progressBar.progress = 0;
-                    if (error && error.error && error.error.message) {
-                        this.dicomDirMissingError = error.error.message.indexOf("DICOMDIR is missing") != -1
+                    if (error?.error?.message) {
+                        if (error.error.message.indexOf("DICOMDIR is missing") != -1) {
+                            this.dicomDirMissingError = true;
+                        } else {
+                            this.otherErrorMessage = error.error.message;
+                        }
+                    } else {
+                        this.fileTooBigError = error.status === 413;
                     }
-                    this.fileTooBigError = error.status === 413;
                 })
             );
         }
