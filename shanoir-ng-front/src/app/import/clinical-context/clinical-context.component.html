@@ -28,7 +28,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box 
                         [(ngModel)]="study" 
-                        (userChange)="onSelectStudy(); onContextChange();" 
+                        (userChange)="onSelectStudy()" 
                         (onViewClick)="showStudyDetails()" 
                         [viewDisabled]="!study" 
                         [options]="studyOptions"
@@ -51,7 +51,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box 
                         [(ngModel)]="studycard" 
-                        (userChange)="onSelectStudyCard(); onContextChange();" 
+                        (userChange)="onSelectStudyCard()" 
                         (onViewClick)="showStudyCardDetails()" 
                         [viewDisabled]="!studycard" 
                         [options]="studycardOptions"
@@ -88,7 +88,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [disabled]="(!useStudyCard && (!study || !centerOptions)) || loading"
                         [readOnly]="useStudyCard"
                         [(ngModel)]="center" 
-                        (userChange)="onSelectCenter(); onContextChange();" 
+                        (userChange)="onSelectCenter()" 
                         (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
                         (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
                         [options]="centerOptions">
@@ -143,7 +143,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box 
                         [disabled]="loading || !study || !acquisitionEquipment" 
                         [(ngModel)]="subject" 
-                        (userChange)="onSelectSubject(); onContextChange();" 
+                        (userChange)="onSelectSubject();" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
                         (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
                         [optionArr]="subjects">
@@ -206,7 +206,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <label class="required-label">Select an examination</label> 
             <span class="right-col">
-                <select-box [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam(); onContextChange();"
+                <select-box [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
                         (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
                         (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject" [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
                 </select-box>  
@@ -221,7 +221,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="right-col">
                 <select-box *ngIf="!useStudyCard || niftiConverter"
                         [(ngModel)]="niftiConverter" 
-                        (userChange)="onSelectNifti(); onContextChange();" 
+                        (userChange)="onSelectNifti()" 
                         [optionArr]="niftiConverters"
                         [readOnly]="useStudyCard">
                 </select-box>
