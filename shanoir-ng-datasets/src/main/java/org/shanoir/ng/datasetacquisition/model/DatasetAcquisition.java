@@ -234,5 +234,4 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@Transient
 	public abstract String getType();
 
-
 }

@@ -25,7 +25,7 @@ import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-
+import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'examination-node',
@@ -83,6 +83,10 @@ export class ExaminationNodeComponent implements OnChanges {
 
     showExaminationDetails() {
         this.router.navigate(['/examination/details/' + this.node.id]);
+    }
+    
+    viewExaminationDicoms() {
+        window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.node.id, '_blank');
     }
 
     downloadFile(file) {

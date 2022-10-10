@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -67,6 +68,9 @@ public class DICOMJsonApiControllerTest {
 
 	@MockBean
 	private ExaminationService examinationServiceMock;
+	
+	@MockBean
+	private DicomSRImporterService dicomSRImporterService;
 
 	@Before
 	public void setup() throws ShanoirException {

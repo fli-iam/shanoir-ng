@@ -17,7 +17,6 @@ import { allOfEnum, capitalsAndUnderscoresToDisplayable } from "../../utils/app.
 
 
 export enum DatasetType {
-
   Calibration = 'Calibration',
   Ct = 'Ct',
   Eeg = 'Eeg',
@@ -32,6 +31,7 @@ export enum DatasetType {
   Statistical = 'Statistical',
   Template = 'Template',
   BIDS = 'BIDS',
+  Measurement = 'Measurement'
 } export namespace DatasetType {
   
   export function all(): Array<DatasetType> {
