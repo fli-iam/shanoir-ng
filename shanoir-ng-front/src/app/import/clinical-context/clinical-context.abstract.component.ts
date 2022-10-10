@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Directive, OnDestroy } from '@angular/core';
+import { Directive, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 
@@ -44,7 +44,7 @@ import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 
 @Directive()
-export abstract class AbstractClinicalContextComponent implements OnDestroy {
+export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
     
     public studyOptions: Option<Study>[] = [];
     public studycardOptions: Option<StudyCard>[] = [];
@@ -78,6 +78,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
     loading: number = 0;
     reloading: boolean = false;
     editSubjectStudy: boolean = true;
+    protected stepTs: number;
     
     constructor(
             public studyService: StudyService,
@@ -100,10 +101,16 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
-        breadcrumbsService.nameStep('3. Context'); 
+        breadcrumbsService.nameStep('3. Context');
+        
         this.preConstructor();
+        this.niftiConverters = [];
+        this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
+        this.postConstructor()
+    }
 
-        this.reloading = !!this.importDataService.contextBackup;
+    ngOnInit(): void {
+        this.reloading = !!this.importDataService.contextBackup(this.stepTs);
         this.fetchStudies().then(() => {
             if (this.reloading) {
                 this.reloadSavedData().finally(() => this.reloading = false);
@@ -111,10 +118,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
                 this.onContextChange();
             }
         });
-        this.niftiConverters = [];
-        this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
-
-        this.postConstructor();
     }
 
     protected exitCondition(): boolean {
@@ -128,14 +131,14 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
     protected reloadSavedData(): Promise<void> {
             this.reloading = true;
             let promises: Promise<any>[] = [];
-            let study = this.importDataService.contextBackup.study;
-            let studyCard = this.importDataService.contextBackup.studyCard;
-            let useStudyCard = this.importDataService.contextBackup.useStudyCard;
-            let center = this.importDataService.contextBackup.center;
-            let acquisitionEquipment = this.importDataService.contextBackup.acquisitionEquipment;
-            let subject = this.importDataService.contextBackup.subject;
-            let examination = this.importDataService.contextBackup.examination;
-            let niftiConverter = this.importDataService.contextBackup.niftiConverter;
+            let study = this.importDataService.contextBackup(this.stepTs).study;
+            let studyCard = this.importDataService.contextBackup(this.stepTs).studyCard;
+            let useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
+            let center = this.importDataService.contextBackup(this.stepTs).center;
+            let acquisitionEquipment = this.importDataService.contextBackup(this.stepTs).acquisitionEquipment;
+            let subject = this.importDataService.contextBackup(this.stepTs).subject;
+            let examination = this.importDataService.contextBackup(this.stepTs).examination;
+            let niftiConverter = this.importDataService.contextBackup(this.stepTs).niftiConverter;
             this.study = study;
             let studyOption = this.studyOptions.find(s => s.value.id == study.id);
             if (studyOption) {
@@ -365,7 +368,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
         } 
 
         let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
-            this.subjects = subjects;       
+            this.subjects = subjects ? subjects : [];
         });
         return Promise.all([studycardsOrCentersPromise, subjectsPromise]).finally(() => this.loading--)
             .then(() => this.onContextChange());
@@ -390,7 +393,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
                 this.onSelectStudyCard();
             }
         }
-        this.importDataService.contextBackup.useStudyCard = this.useStudyCard;
+        this.importDataService.contextBackup(this.stepTs).useStudyCard = this.useStudyCard;
     }
 
     public onSelectCenter(): Promise<any> {
@@ -438,7 +441,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
     }
 
     public onContextChange() {
-        this.importDataService.contextBackup = this.getContext();
+        this.importDataService.setContextBackup(this.stepTs, this.getContext());
         if (this.valid) {
             this.importDataService.contextData = this.getContext();
         }
@@ -455,7 +458,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
             this.breadcrumbsService.currentStep.entity = this.getPrefilledCenter();
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.importDataService.contextBackup.center = this.updateStudyCenter(entity as Center);
+                    this.importDataService.contextBackup(this.stepTs).center = this.updateStudyCenter(entity as Center);
                 })
             );
         });
@@ -482,7 +485,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
             this.fillCreateAcqEqStep(this.breadcrumbsService.currentStep);
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.importDataService.contextBackup.acquisitionEquipment = (entity as AcquisitionEquipment);
+                    this.importDataService.contextBackup(this.stepTs).acquisitionEquipment = (entity as AcquisitionEquipment);
                 })
             );
         });
@@ -495,7 +498,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
             this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
                 })
             );
         });
@@ -532,7 +535,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
             this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
+                    this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
                 })
             );
         });
@@ -593,12 +596,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
     get valid(): boolean {
         let context = this.getContext();
         return (
-            context.study
+            !!context.study
             && (!context.useStudyCard || context.studyCard)
             && !!context.center
             && !!context.acquisitionEquipment
             && !!context.subject
-            && !!context.subject.subjectStudy.subjectType 
+            && !!context.subject?.subjectStudy?.subjectType 
             && !!context.examination
             && !!context.niftiConverter
         );
@@ -673,7 +676,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
         this.router.navigate(['/study-card/edit/' + studycard.id]).then(success => {
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
-                    this.importDataService.contextBackup.studyCard = entity as StudyCard;
+                    this.importDataService.contextBackup(this.stepTs).studyCard = entity as StudyCard;
                 })
             );
         });
@@ -684,7 +687,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy {
         this.router.navigate(['/study-card/create', {studyId: this.study.id}]).then(success => {
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, true).subscribe(entity => {
-                    this.importDataService.contextBackup.studyCard = entity as StudyCard;
+                    this.importDataService.contextBackup(this.stepTs).studyCard = entity as StudyCard;
                 })
             );
         });

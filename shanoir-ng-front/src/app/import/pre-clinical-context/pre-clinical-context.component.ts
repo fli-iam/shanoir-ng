@@ -49,6 +49,10 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         this.useStudyCard = false;
     }
 
+    protected exitCondition(): boolean {
+        return !this.importDataService.patients || !this.importDataService.patients[0];
+    }
+
     protected getSubjectList(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         this.openSubjectStudy = false;
         if (!studyId) {

@@ -84,7 +84,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.datasetProcessing = entity;
-                    this.importDataService.contextBackup.datasetProcessing = entity;
+                    this.importDataService.contextBackup(this.stepTs).datasetProcessing = entity;
                 })
             );
         });
@@ -95,14 +95,14 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     }
 
     protected reloadSavedData(): Promise<void> {
-        if (this.importDataService.contextBackup) {
+        if (this.importDataService.contextBackup(this.stepTs)) {
             this.reloading = true;
-            let processedDatasetFilePath = this.importDataService.contextBackup.processedDatasetFilePath;
-            let datasetType = this.importDataService.contextBackup.datasetType;
-            let processedDatasetType = this.importDataService.contextBackup.processedDatasetType;
-            let processedDatasetName = this.importDataService.contextBackup.processedDatasetName
-            let processedDatasetComment = this.importDataService.contextBackup.processedDatasetComment;
-            let datasetProcessing = this.importDataService.contextBackup.datasetProcessing;
+            let processedDatasetFilePath = this.importDataService.contextBackup(this.stepTs).processedDatasetFilePath;
+            let datasetType = this.importDataService.contextBackup(this.stepTs).datasetType;
+            let processedDatasetType = this.importDataService.contextBackup(this.stepTs).processedDatasetType;
+            let processedDatasetName = this.importDataService.contextBackup(this.stepTs).processedDatasetName
+            let processedDatasetComment = this.importDataService.contextBackup(this.stepTs).processedDatasetComment;
+            let datasetProcessing = this.importDataService.contextBackup(this.stepTs).datasetProcessing;
             if (processedDatasetFilePath) {
                 this.processedDatasetFilePath = processedDatasetFilePath;
             }
@@ -118,8 +118,8 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
             if (processedDatasetComment) {
                 this.processedDatasetComment = processedDatasetComment;
             }
-            let study = this.importDataService.contextBackup.study;
-            let subject = this.importDataService.contextBackup.subject;
+            let study = this.importDataService.contextBackup(this.stepTs).study;
+            let subject = this.importDataService.contextBackup(this.stepTs).subject;
 
             this.study = study;
             return this.onSelectStudy().then(() => {

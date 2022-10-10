@@ -12,11 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit, ViewChild } from '@angular/core';
+
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
-import { Center } from '../../centers/shared/center.model';
 import { Event } from '../../datasets/dataset/eeg/dataset.eeg.model';
-
 import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 import { CoordSystems } from '../../enum/coord-system.enum';
 import { Examination } from '../../examinations/shared/examination.model';
@@ -29,7 +28,6 @@ import { Option } from '../../shared/select/select.component';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { EegContextData } from '../shared/import.data-service';
@@ -127,7 +125,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
 
     protected getContext(): EegContextData {
         return new EegContextData(this.study, null, false, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, null, this.coordsystem, null, null, null, null, null, null);
+            this.subject, this.examination, this.niftiConverter, this.coordsystem, null, null, null, null, null, null);
     }
    
     get valid(): boolean {

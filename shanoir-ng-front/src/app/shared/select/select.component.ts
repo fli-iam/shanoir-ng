@@ -101,12 +101,14 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.options && this.options && !arraysEqual(changes.options?.currentValue, changes.options?.previousValue)) {
+        if (changes.options && !arraysEqual(changes.options?.currentValue, changes.options?.previousValue)) {
+            if (!this.options) this.options = [];
             this.searchText = null;
             this.computeDisplayedOptions();
             this.initSelectedOption();
             this.computeMinWidth();
-        } else if (changes.optionArr && this.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
+        } else if (changes.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
+            if (!this.optionArr) this.optionArr = [];
             this.searchText = null;
             this.options = [];
             this.optionArr.forEach(item => {
