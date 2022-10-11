@@ -726,7 +726,7 @@ public class ImporterApiController implements ImporterApi {
 		importJob.setPatients(patients);
 		importJob.setFromDicomZip(true);
 		importJob.setAnonymisationProfileToUse(exchange.getAnonymisationProfileToUse());
-		// Work folder is always relative to general import directory and usernullId (not
+		// Work folder is always relative to general import directory and userId (not
 		// shown to outside world)
 		importJob.setWorkFolder(tempDir.getAbsolutePath());
 		/**

@@ -21,6 +21,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class DicomSerieAndInstanceAnalyzer {
 	
+	private static final String RTPLAN = "RTPLAN";
+
+	private static final String RTDOSE = "RTDOSE";
+
+	private static final String RTSTRUCT = "RTSTRUCT";
+
 	private static final Logger LOG = LoggerFactory.getLogger(DicomSerieAndInstanceAnalyzer.class);
 
 	private static final String DOUBLE_EQUAL = "==";
@@ -65,7 +71,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	 */
 	public boolean checkSerieIsIgnored(Attributes attributes) {
 		String modality = attributes.getString(Tag.Modality);
-		if (AcquisitionModality.codeOf(modality) != null || "RTSTRUCT".equals(modality) || "RTDOSE".equals(modality) || "RTPLAN".equals(modality)) {
+		if (AcquisitionModality.codeOf(modality) != null || RTSTRUCT.equals(modality) || RTDOSE.equals(modality) || RTPLAN.equals(modality)) {
 			return false;
 		}
 		return true;
