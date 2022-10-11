@@ -35,7 +35,7 @@ import { EegContextData } from '../shared/import.data-service';
 
 @Component({
     selector: 'eeg-clinical-context',
-    templateUrl: '../clinical-context/clinical-context.component.html',
+    templateUrl: 'eeg-clinical-context.component.html',
     styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
     animations: [slideDown, preventInitialChildAnimations]
 })
@@ -70,7 +70,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     }
     
     ngOnInit(): void {
-        // Init events table
+        super.ngOnInit();
         this.initEventsTable();
     }
     
@@ -125,13 +125,20 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
 
     protected getContext(): EegContextData {
         return new EegContextData(this.study, null, false, this.center, this.acquisitionEquipment,
-            this.subject, this.examination, this.niftiConverter, this.coordsystem, null, null, null, null, null, null);
+            this.subject, this.examination, null, this.coordsystem, null, null, null, null, null, null);
     }
-   
+
     get valid(): boolean {
         let context = this.getContext();
-        return super.valid 
-                && ((context.coordinatesSystem != undefined && context.coordinatesSystem != null && this.hasPosition) || !this.hasPosition);
+        return (
+            !!context.study
+            && !!context.center
+            && !!context.acquisitionEquipment
+            && !!context.subject
+            && !!context.subject?.subjectStudy?.subjectType 
+            && !!context.examination
+            && (!!context.coordinatesSystem || !this.hasPosition)
+        );
     }
 
     public getNextUrl(): string {
@@ -219,8 +226,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
                 return true;
             } else return false;
         });
-    }
-    
+    }    
 }
 
 export class EventContext {
