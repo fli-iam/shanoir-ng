@@ -31,11 +31,12 @@ export class ImportService {
                 observe: 'events'});
     }
 
-    uploadFileMultiple(formData: FormData, studyId: number, studyName: string, studyCardId: number, centerId: number): Observable<HttpEvent<ImportJob>> {
-           return  this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_MUTIPLE_DICOM_URL + "study/" + studyId + "/studyName/" + studyName + "/studyCard/" + studyCardId + "/center/" + centerId + "/", formData,
+    uploadFileMultiple(formData: FormData, job: ImportJob): Observable<HttpEvent<ImportJob>> {
+           return  this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_MUTIPLE_DICOM_URL + "study/" + job.studyId + "/studyName/" + job.studyName + "/studyCard/" + job.studyCardId + "/center/" + job.centerId + "/converter/" + job.converterId + "/", formData,
                 {reportProgress: true,
                 observe: 'events'});
     }
+
 
     uploadEegFile(formData: FormData): Observable<HttpEvent<EegImportJob>> {
         return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData,

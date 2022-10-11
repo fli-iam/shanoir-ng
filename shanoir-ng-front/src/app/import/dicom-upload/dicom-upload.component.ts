@@ -28,6 +28,7 @@ import { Center } from '../../centers/shared/center.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Option } from '../../shared/select/select.component';
+import { ImportJob } from '../shared/dicom-data.model';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -120,8 +121,16 @@ export class DicomUploadComponent implements OnDestroy {
             );
         } else {
             // Send to multiple
+            let job = new ImportJob();
+            job.acquisitionEquipmentId = this.studyCard.acquisitionEquipment.id;
+            job.converterId = this.studyCard.niftiConverter.id;
+            job.studyId = this.study.id;
+            job.studyName = this.study.name;
+            job.studyCardId = this.studyCard.id;
+            job.centerId = this.studyCard.acquisitionEquipment.center.id;
+            
             this.subscribtions.push(
-            this.importService.uploadFileMultiple(formData, this.study.id, this.study.name, this.studyCard.id, this.center.id)
+            this.importService.uploadFileMultiple(formData, job)
                 .subscribe(
                     event => {
                     if (event.type === HttpEventType.Sent) {

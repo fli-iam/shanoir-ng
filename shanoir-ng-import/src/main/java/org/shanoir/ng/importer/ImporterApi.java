@@ -96,7 +96,7 @@ public interface ImporterApi {
         @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
         @ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
-    @PostMapping(value = "/upload_multiple_dicom/study/{studyId}/studyName/{studyName}/studyCard/{studyCardId}/center/{centerId}/",
+    @PostMapping(value = "/upload_multiple_dicom/study/{studyId}/studyName/{studyName}/studyCard/{studyCardId}/center/{centerId}/converter/{converterId}/",
         produces = { "application/json" },
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
@@ -104,7 +104,8 @@ public interface ImporterApi {
     		@ApiParam(value = "studyId", required = true) @PathVariable("studyId") Long studyId,
     		@ApiParam(value = "studyName", required = true) @PathVariable("studyName") String studyName,
     		@ApiParam(value = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
-    		@ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId) throws RestServiceException;
+    		@ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId,
+    		@ApiParam(value = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException;
 
     @ApiOperation(value = "Upload one EEG file", notes = "Upload channel and metadata from EEG file", response = Void.class, tags = {"Import one EEG file", })
     @ApiResponses(value = {

@@ -37,6 +37,14 @@ public class Subject {
 	@Transient
 	private LocalDate birthDate;
 
+	@Transient
+	@JsonProperty("sex")
+	private String sex;
+
+	@Transient
+	@JsonProperty("imagedObjectCategory")
+	private Integer imagedObjectCategory;
+
 	public long getId() {
 		return id;
 	}
@@ -59,6 +67,34 @@ public class Subject {
 
 	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
+	}
+
+	/**
+	 * @return the sex
+	 */
+	public String getSex() {
+		return sex;
+	}
+
+	/**
+	 * @param sex the sex to set
+	 */
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
+
+	/**
+	 * @return the imagedObjectCategory
+	 */
+	public Integer getImagedObjectCategory() {
+		return imagedObjectCategory;
+	}
+
+	/**
+	 * @param imagedObjectCategory the imagedObjectCategory to set
+	 */
+	public void setImagedObjectCategory(Integer imagedObjectCategory) {
+		this.imagedObjectCategory = imagedObjectCategory;
 	}
 
 }

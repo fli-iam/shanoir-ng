@@ -25,6 +25,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -807,25 +808,21 @@ public class ImporterApiController implements ImporterApi {
     		@ApiParam(value = "studyId", required = true) @PathVariable("studyId") Long studyId,
     		@ApiParam(value = "studyName", required = true) @PathVariable("studyName") String studyName,
     		@ApiParam(value = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
-    		@ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId) throws RestServiceException {
+    		@ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId,
+    		@ApiParam(value = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException {
     	// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
 		}
-		if (!ImportUtils.isZipFile(dicomZipFile)) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					"Wrong content type of file upload, .zip required.", null));
-		}
-		
+
 		ImportJob job = null;
-		
+
 		try {
 			File userImportDir = ImportUtils.getUserImportDir(importDir);			
 			File tempFile = ImportUtils.saveTempFile(userImportDir, dicomZipFile);
 			File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
 
-		
 			// STEP 2: Analyze file structure and verify for mismatch
 			File[] subjectFolders = importJobDir.listFiles();
 			if (subjectFolders == null || subjectFolders.length != 1) {
@@ -837,6 +834,7 @@ public class ImporterApiController implements ImporterApi {
 
 			String subjectName = studyName + "_" + subjectFolder.getName();
 			Subject subject = null;
+			
 
 			// STEP 4: Iterate over examination folders
 			for (File examFolder : examinationsFolders) {
@@ -861,6 +859,9 @@ public class ImporterApiController implements ImporterApi {
 					subject = new Subject();
 					subject.setName(subjectName);
 					subject.setBirthDate(pat.getPatientBirthDate());
+					subject.setSex(pat.getPatientSex());
+					// LIVING_HUMAN_BEING by default
+					subject.setImagedObjectCategory(1);
 					// Here the ID is used to carry the study ID
 					subject.setId(studyId);
 
@@ -877,7 +878,7 @@ public class ImporterApiController implements ImporterApi {
 				}
 
 				// STEP 4.1 Get informations about center / study card
-				// TODO/ Do this only if modality = MR !!
+				// TODO: Do this only if modality = MR !!
 				// Get equipment id
 				if (job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber() != null) {
 					Long equipmentId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
@@ -915,8 +916,8 @@ public class ImporterApiController implements ImporterApi {
 				job.setStudyId(studyId);
 				job.setStudyName(studyName);
 				job.getPatients().get(0).setSubject(subject);
-				job.setConverterId(6L);
-				
+				job.setConverterId(converterId);
+
 				// STEP 4.4 Select all series
 				for(Study study : job.getPatients().get(0).getStudies()) {
 					for (Serie serie : study.getSeries()) {
