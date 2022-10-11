@@ -163,11 +163,6 @@ public class ImporterService {
 
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
 		LOG.info("createAllDatasetAcquisition: " + this.toString() + " instances: " + getInstancesCreated());
-		try {
-			System.err.println(objectMapper.writeValueAsString(importJob));
-		} catch (JsonProcessingException e1) {
-			e1.printStackTrace();
-		}
 		ShanoirEvent event = importJob.getShanoirEvent();
 		event.setMessage("Creating datasets...");
 		eventService.publishEvent(event);
