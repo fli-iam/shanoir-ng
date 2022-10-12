@@ -25,11 +25,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -166,7 +164,7 @@ public class ImporterApiController implements ImporterApi {
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
 
@@ -392,16 +390,16 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-    public ResponseEntity<EegImportJob> analyzeEegZipFile(@ApiParam(value = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException {
+	public ResponseEntity<EegImportJob> analyzeEegZipFile(@ApiParam(value = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException {
 		try {
 			List<EegDataset> datasets = new ArrayList<>();
-			
+
 			File dataFileDir = new File(importJob.getWorkFolder() + File.separator
 					+ importJob.getArchive().replace(".zip", ""));
 
 			LOG.error(dataFileDir.getAbsolutePath());
 
-			
+
 			// Get .VHDR file
 			File[] bvMatchingFiles = dataFileDir.listFiles(new FilenameFilter() {
 				@Override
@@ -805,12 +803,12 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	public ResponseEntity<ImportJob> uploadMultipleDicom(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
-    		@ApiParam(value = "studyId", required = true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "studyName", required = true) @PathVariable("studyName") String studyName,
-    		@ApiParam(value = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
-    		@ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId,
-    		@ApiParam(value = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException {
-    	// STEP 1: Unzip file
+			@ApiParam(value = "studyId", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "studyName", required = true) @PathVariable("studyName") String studyName,
+			@ApiParam(value = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
+			@ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId,
+			@ApiParam(value = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException {
+		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
@@ -834,7 +832,7 @@ public class ImporterApiController implements ImporterApi {
 
 			String subjectName = studyName + "_" + subjectFolder.getName();
 			Subject subject = null;
-			
+
 
 			// STEP 4: Iterate over examination folders
 			for (File examFolder : examinationsFolders) {
@@ -851,7 +849,7 @@ public class ImporterApiController implements ImporterApi {
 
 				// STEP 4.0 "Fake" upload file to get create the dicomdir and temporary folder
 				job = this.uploadDicomZipFile(mockedFile).getBody();
-				
+
 				// Create subject only once.
 				if (subject == null) {
 					Patient pat = job.getPatients().get(0);
@@ -887,7 +885,7 @@ public class ImporterApiController implements ImporterApi {
 						props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentId);
 						props.setProperty("STUDY_ID_PROPERTY", "" + studyId);
 						props.setProperty("STUDYCARD_ID_PROPERTY", "" + studyCardId);
-						
+
 						Long newStudyCardId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_STUDY_CARD_QUEUE, props);
 						if (newStudyCardId != null)  {
 							studyCardId = newStudyCardId;
@@ -902,7 +900,7 @@ public class ImporterApiController implements ImporterApi {
 
 				// Create multiple examinations for every session folder
 				Long examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
-				
+
 				if (examId == null) {
 					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating examination", null));
 				}
@@ -939,5 +937,5 @@ public class ImporterApiController implements ImporterApi {
 		}
 		return new ResponseEntity<ImportJob>(job, HttpStatus.OK);
 
-    }
+	}
 }
