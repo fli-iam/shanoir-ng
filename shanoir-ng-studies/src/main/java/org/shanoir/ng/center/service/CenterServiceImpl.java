@@ -124,7 +124,7 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 		List<Center> centers = centerRepository.findByStudy(studyId);
 		StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
 
-		if (!CollectionUtils.isEmpty(studyUser.getCenters())) {
+		if (studyUser != null && !CollectionUtils.isEmpty(studyUser.getCenterIds())) {
 			centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
 		}
 
