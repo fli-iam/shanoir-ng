@@ -85,7 +85,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean | undefined {
-        return this.equipmentsEquals(acquisitionEquipment, this.getFirstSelectedSerie().equipment);
+        return this.equipmentsEquals(acquisitionEquipment, this.getFirstSelectedSerie()?.equipment);
     }
 
     centerCompatible(center: Center): boolean | undefined {
@@ -170,6 +170,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected getFirstSelectedSerie(): SerieDicom {
+        if (!this.patient) return null;
         for (let study of this.patient.studies) {
             for (let serie of study.series) {
                 if (serie.selected) return serie;
@@ -179,6 +180,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     protected getFirstSelectedStudy(): StudyDicom {
+        if (!this.patient) return null;
         for (let study of this.patient.studies) {
             for (let serie of study.series) {
                 if (serie.selected) return study;
@@ -187,12 +189,12 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
        return null;
     }
 
-    getImportedCenterDataStr(): string {
+    get importedCenterDataStr(): string {
         return this.patient?.studies[0]?.series[0]?.institution?.institutionName + " - " 
                 + this.patient?.studies[0]?.series[0]?.institution?.institutionAddress;
     }
 
-    getImportedEquipmentDataStr(): string {
+    get importedEquipmentDataStr(): string {
         return this.patient?.studies[0]?.series[0]?.equipment?.manufacturer
                 + '-' + this. patient?.studies[0]?.series[0]?.equipment?.manufacturerModelName
                 + '-' + this.patient?.studies[0]?.series[0]?.equipment?.deviceSerialNumber;

@@ -97,7 +97,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             protected consoleService: ConsoleService,
             protected importService: ImportService) {
 
-        if (this.exitCondition()) {   
+        if (this.exitCondition()) {
             this.router.navigate(['imports'], {replaceUrl: true});
             return;
         }
