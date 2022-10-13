@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -36,6 +37,7 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
  * @author msimon
  */
 @Entity
+@DiscriminatorValue("datasetProcessingType")
 public class DatasetProcessing extends AbstractEntity {
 
 	/**
