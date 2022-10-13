@@ -51,6 +51,10 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
     getNextUrl(): string {
         return '/imports/processed-dataset';
     }
+    
+    protected exitCondition(): boolean {
+        return !this.importDataService.processedDatasetImportJob;
+    }
 
     importData(): Promise<any> {
         let context = this.importDataService.contextData;
@@ -100,7 +104,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
             let processedDatasetFilePath = this.importDataService.contextBackup(this.stepTs).processedDatasetFilePath;
             let datasetType = this.importDataService.contextBackup(this.stepTs).datasetType;
             let processedDatasetType = this.importDataService.contextBackup(this.stepTs).processedDatasetType;
-            let processedDatasetName = this.importDataService.contextBackup(this.stepTs).processedDatasetName
+            let processedDatasetName = this.importDataService.contextBackup(this.stepTs).processedDatasetName;
             let processedDatasetComment = this.importDataService.contextBackup(this.stepTs).processedDatasetComment;
             let datasetProcessing = this.importDataService.contextBackup(this.stepTs).datasetProcessing;
             if (processedDatasetFilePath) {
@@ -170,7 +174,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
             context.study != null
             && context.subject != null
             && context.datasetType != null
-			&& context.processedDatasetName != null &&  context.processedDatasetName != ""
+			&& context.processedDatasetName != null && context.processedDatasetName != ""
             && context.processedDatasetFilePath != null
             && context.processedDatasetType != null
             && context.datasetProcessing != null

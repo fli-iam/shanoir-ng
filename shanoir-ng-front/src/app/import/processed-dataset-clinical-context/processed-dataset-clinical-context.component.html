@@ -77,11 +77,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <li>
             <label class="required-label">Name</label>
-            <input required type="text" id="processedDatasetName" [(ngModel)]="processedDatasetName" (userChange)="onContextChange();"/>
+            <input required type="text" id="processedDatasetName" [(ngModel)]="processedDatasetName" (change)="onContextChange()"/>
         </li>
         <li>
             <label>Comment</label>
-            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDatasetComment"/>
+            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDatasetComment" (change)="onContextChange()"/>
         </li>
     </ol>
     <ol *ngIf="subject">
