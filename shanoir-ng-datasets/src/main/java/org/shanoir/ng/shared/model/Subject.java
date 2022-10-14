@@ -43,7 +43,7 @@ public class Subject extends IdName {
 	protected Long id;
 	
 	protected String name;
-
+	
 	public Subject() {}
 	
 	/**

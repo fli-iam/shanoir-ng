@@ -896,8 +896,6 @@ public class ImporterApiController implements ImporterApi {
 				// STEP 4.2 Create examination
 				ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(), job.getPatients().get(0).getStudies().get(0).getStudyDate(), subject.getName());
 				
-				LOG.error(objectMapper.writeValueAsString(examination));
-				
 				// Create multiple examinations for every session folder
 				Long examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 

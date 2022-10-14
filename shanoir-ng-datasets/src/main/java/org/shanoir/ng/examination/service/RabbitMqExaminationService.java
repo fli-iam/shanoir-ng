@@ -56,7 +56,6 @@ public class RabbitMqExaminationService {
 	public Long createExamination(Message message) {
 		try {
 			Examination exam = mapper.readValue(message.getBody(), Examination.class);
-			System.err.println(mapper.writeValueAsString(exam));
 
 			exam = examRepo.save(exam);
 			return exam.getId();
