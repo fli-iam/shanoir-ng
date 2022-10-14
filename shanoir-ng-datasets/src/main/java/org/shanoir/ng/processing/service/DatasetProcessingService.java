@@ -15,9 +15,12 @@
 package org.shanoir.ng.processing.service;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+
 import java.util.Optional;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 
 /**
  * DatasetProcessing service.
@@ -35,5 +38,26 @@ public interface DatasetProcessingService extends BasicEntityService<DatasetProc
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	Optional<DatasetProcessing> findByComment(String comment);
+	
+    /**
+     * Save an entity.
+     *
+     * @param entity the entity to create.
+     * @return created entity.
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and #entity.getId() == null")
+    DatasetProcessing create(DatasetProcessing entity);
+
+    /**
+     * Update an entity.
+     *
+     * @param entity the entity to update.
+     * @return updated entity.
+     * @throws EntityNotFoundException
+     * @throws MicroServiceCommunicationException 
+     */
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    DatasetProcessing update(DatasetProcessing entity) throws EntityNotFoundException;
+
 
 }
