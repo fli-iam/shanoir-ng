@@ -15,8 +15,7 @@
 package org.shanoir.ng.importer.model;
 
 import java.time.LocalDate;
-
-import javax.persistence.Transient;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,17 +33,16 @@ public class Subject {
 	private String name;
 
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-	@Transient
 	private LocalDate birthDate;
 
-	@Transient
 	@JsonProperty("sex")
 	private String sex;
 
-	@Transient
 	@JsonProperty("imagedObjectCategory")
 	private Integer imagedObjectCategory;
 
+	private List<SubjectStudy> subjectStudyList;
+	
 	public long getId() {
 		return id;
 	}
@@ -95,6 +93,14 @@ public class Subject {
 	 */
 	public void setImagedObjectCategory(Integer imagedObjectCategory) {
 		this.imagedObjectCategory = imagedObjectCategory;
+	}
+
+	public List<SubjectStudy> getSubjectStudyList() {
+		return subjectStudyList;
+	}
+
+	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+		this.subjectStudyList = subjectStudyList;
 	}
 
 }

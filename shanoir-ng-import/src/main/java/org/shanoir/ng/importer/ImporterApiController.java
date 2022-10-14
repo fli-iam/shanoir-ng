@@ -25,6 +25,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -59,7 +60,9 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.importer.model.SubjectStudy;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -832,6 +835,8 @@ public class ImporterApiController implements ImporterApi {
 
 			String subjectName = studyName + "_" + subjectFolder.getName();
 			Subject subject = null;
+			
+			// Check is subject actually already exists
 
 
 			// STEP 4: Iterate over examination folders
@@ -849,37 +854,29 @@ public class ImporterApiController implements ImporterApi {
 
 				// STEP 4.0 "Fake" upload file to get create the dicomdir and temporary folder
 				job = this.uploadDicomZipFile(mockedFile).getBody();
+				Patient patient = job.getPatients().get(0);
 
 				// Create subject only once.
 				if (subject == null) {
-					Patient pat = job.getPatients().get(0);
+					
 					// Create subject
-					subject = new Subject();
-					subject.setName(subjectName);
-					subject.setBirthDate(pat.getPatientBirthDate());
-					subject.setSex(pat.getPatientSex());
-					// LIVING_HUMAN_BEING by default
-					subject.setImagedObjectCategory(1);
-					// Here the ID is used to carry the study ID
-					subject.setId(studyId);
-
+					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(subject, new IdName(studyId, studyName))));
+					
 					LOG.debug("We found a subject " + subjectName);
 
 					// Create subject
 					Long subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, objectMapper.writeValueAsString(subject));
 					if (subjectId == null) {
-						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Subject oculd not be created, please check data", null));
+						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Subject could not be created, please check data", null));
 					}
 					subject.setId(subjectId);
-					// Wait a second for the subject to be created dataset side ?
-					Thread.sleep(1000);
 				}
 
 				// STEP 4.1 Get informations about center / study card
-				// TODO: Do this only if modality = MR !!
 				// Get equipment id
+				Long equipmentId = null;
 				if (job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber() != null) {
-					Long equipmentId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
+					equipmentId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
 					if (equipmentId != null) {
 						Properties props = new Properties();
 						props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentId);
@@ -894,7 +891,10 @@ public class ImporterApiController implements ImporterApi {
 					}
 				}
 
-				job.setStudyCardId(studyCardId);
+				if ("MR".equals(patient.getStudies().get(0).getSeries().get(0).getModality())) {
+					job.setStudyCardId(studyCardId);
+				}
+
 				// STEP 4.2 Create examination
 				ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(), job.getPatients().get(0).getStudies().get(0).getStudyDate());
 
@@ -912,6 +912,7 @@ public class ImporterApiController implements ImporterApi {
 				job.setFromDicomZip(true);
 				job.setFromPacs(false);
 				job.setStudyId(studyId);
+				job.setCenterId(centerId);
 				job.setStudyName(studyName);
 				job.getPatients().get(0).setSubject(subject);
 				job.setConverterId(converterId);
@@ -932,8 +933,6 @@ public class ImporterApiController implements ImporterApi {
 		} catch (IOException e) {
 			throw new RestServiceException(new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
 					"The file could not be correctly unziped on the server. Please check consistency.", e));
-		} catch (InterruptedException e) {
-			Thread.currentThread().interrupt();
 		}
 		return new ResponseEntity<ImportJob>(job, HttpStatus.OK);
 

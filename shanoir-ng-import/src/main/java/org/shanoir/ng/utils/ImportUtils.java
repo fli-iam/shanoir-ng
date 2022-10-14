@@ -38,6 +38,8 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
+import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.importer.model.SubjectStudy;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -66,8 +68,6 @@ public class ImportUtils {
 	private static final String ZIP_FILE_SUFFIX = ".zip";
 
 	private static final String FILE_POINT = ".";
-
-	private static final String DICOMDIR = "DICOMDIR";
 
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
@@ -612,6 +612,17 @@ public class ImportUtils {
 		examination.setExaminationDate(examDate);
 		
 		return examination;
+	}
+
+	public static Subject createSubject(String name, LocalDate birthDate, String sex, Integer imagedObjectCategory,
+			List<SubjectStudy> subjectStudyList) {
+		Subject subject = new Subject();
+		subject.setName(name);
+		subject.setBirthDate(birthDate);
+		subject.setSex(sex);
+		subject.setImagedObjectCategory(imagedObjectCategory);
+		subject.setSubjectStudyList(subjectStudyList);
+		return subject;
 	}
 
 }

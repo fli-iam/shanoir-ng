@@ -33,10 +33,7 @@ public class ImportJob {
 
     @JsonProperty("fromPacs")
     private boolean fromPacs;
-    
-    @JsonProperty("fromCsv")
-	private boolean fromCsv;
-    
+
 	@JsonProperty("workFolder")
 	private String workFolder;
 
@@ -79,14 +76,6 @@ public class ImportJob {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
-	}
-
-	public boolean isFromCsv() {
-		return fromCsv;
-	}
-
-	public void setFromCsv(boolean fromCsv) {
-		this.fromCsv = fromCsv;
 	}
 
 	public boolean isFromDicomZip() {

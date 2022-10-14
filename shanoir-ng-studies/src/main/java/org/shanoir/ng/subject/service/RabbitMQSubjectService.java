@@ -129,10 +129,9 @@ public class RabbitMQSubjectService {
 
 			Subject subject = mapper.readValue(subjectAsString, Subject.class);
 
-			// Be carefull, ID field is used to carry the study ID here.
-			Long studyId = subject.getId();
+			Long studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
+			
 			Study study = studyRepository.findById(studyId).get();
-			subject.setId(null);
 
 			// Check subject existence by name
 			Subject existingSubject = this.subjectRepository.findByName(subject.getName());

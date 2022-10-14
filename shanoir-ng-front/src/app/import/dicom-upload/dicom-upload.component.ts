@@ -39,7 +39,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     animations: [slideDown]
 })
 export class DicomUploadComponent implements OnDestroy {
-    subscribtions: Subscription[] = [];
+    subscriptions: Subscription[] = [];
     archiveStatus: Status = 'none';
     extensionError: boolean;
     dicomDirMissingError: boolean;
@@ -96,7 +96,7 @@ export class DicomUploadComponent implements OnDestroy {
         let formData: FormData = new FormData();
         formData.append('file', file[0], file[0].name);
         if (!this.multipleExamImport) {
-            this.subscribtions.push(
+            this.subscriptions.push(
             this.importService.uploadFile(formData)
                 .subscribe(
                     event => {
@@ -129,7 +129,7 @@ export class DicomUploadComponent implements OnDestroy {
             job.studyCardId = this.studyCard.id;
             job.centerId = this.studyCard.acquisitionEquipment.center.id;
             
-            this.subscribtions.push(
+            this.subscriptions.push(
             this.importService.uploadFileMultiple(formData, job)
                 .subscribe(
                     event => {
@@ -201,8 +201,8 @@ export class DicomUploadComponent implements OnDestroy {
     }
     
     ngOnDestroy() {
-        for(let subscribtion of this.subscribtions) {
-            subscribtion.unsubscribe();
+        for(let subscription of this.subscriptions) {
+            subscription.unsubscribe();
         }
     }
     
