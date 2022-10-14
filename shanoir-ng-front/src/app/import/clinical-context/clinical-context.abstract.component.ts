@@ -29,6 +29,7 @@ import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { ConsoleService } from '../../shared/console/console.service';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { ShanoirError } from '../../shared/models/error.model';
 import { Option } from '../../shared/select/select.component';
 import { StudyCenter } from '../../studies/shared/study-center.model';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
@@ -111,13 +112,15 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     ngOnInit(): void {
         this.reloading = !!this.importDataService.contextBackup(this.stepTs);
-        this.fetchStudies().then(() => {
-            if (this.reloading) {
+        if (this.reloading) {
+            this.fetchStudies(false).then(() => {
                 this.reloadSavedData().finally(() => this.reloading = false);
-            } else {
-                this.onContextChange();
-            }
-        });
+            }).catch(error => {
+                throw new ShanoirError({error: {message: 'the study list failed loading', details: error}});
+            });
+        } else {
+            this.fetchStudies(true);
+        }
     }
 
     protected exitCondition(): boolean {
@@ -189,15 +192,17 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
     }
 
-    fetchStudies(): Promise<void> {
+    fetchStudies(selectDefault: boolean = true): Promise<void> {
         return this.completeStudyCenters()
             /* For the moment, we import only zip files with the same equipment, 
             That's why the calculation is only based on the equipment of the first series of the first study */
             .then(() => {
-                let compatibleFounded = this.studyOptions.find(study => study.compatible);
-                if (compatibleFounded) {
-                    this.study = compatibleFounded.value;
-                    this.onSelectStudy();
+                if (selectDefault) {
+                    let compatibleFounded = this.studyOptions.find(study => study.compatible);
+                    if (compatibleFounded) {
+                        this.study = compatibleFounded.value;
+                        return this.onSelectStudy();
+                    }
                 }
             });
     }
