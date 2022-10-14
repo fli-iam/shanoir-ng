@@ -45,31 +45,27 @@ INSERT INTO study_cards
 	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)
 VALUES 
 	(1,1,false,0,'StudyCard1',1,1),
-	(2,null,false,0,'QualityCard1',null,1);
+	(2,null,false,0,'QualityCard_UCAN',null,1);
 
 INSERT INTO study_card_rule
-	(id, type, study_card_id)
+	(id, study_card_id, type)
 VALUES
-	(1,1,2),
-	(2,2,2),
-	(3,3,2);
+	(1,2,1),
+	(2,2,1);
 
 INSERT INTO study_card_condition
-	(id, dicom_tag_or_field, operation, rule_id)
+	(id, rule_id, dicom_tag_or_field, operation)
 VALUES 
-	(1,2,4,1),
-	(2,2,4,1),
-	(3,1573009,5,2),
-	(4,1573013,6,3);
+	(1,1,2,4),
+	(2,2,2,4);
 
 INSERT INTO study_card_condition_value
-	(id, value, study_card_condition_id)
-VALUES 
-	(1,'TOF',1),
-	(2,'flight',1),
-	(3,'gadolinium',2),
-	(4,'contrast',2),
-	(5,'enhanced',2),
-	(6,'Gd',2),
-	(7,'150',3),
-	(8,'781.00',4);
+	(id, study_card_condition_id, value)
+VALUES
+	(1,1,'tof'),
+	(2,1,'flight'),
+	(3,2,'gado'),
+	(4,2,'gd'),
+	(5,2,'gadolinium'),
+	(6,2,'contrast'),
+	(7,2,'enhanced');
