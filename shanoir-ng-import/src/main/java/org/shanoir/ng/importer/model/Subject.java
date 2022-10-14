@@ -41,6 +41,7 @@ public class Subject {
 	@JsonProperty("imagedObjectCategory")
 	private Integer imagedObjectCategory;
 
+	@JsonProperty("subjectStudyList")
 	private List<SubjectStudy> subjectStudyList;
 	
 	public long getId() {

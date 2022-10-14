@@ -134,9 +134,10 @@ public class BidsImporterApiController implements BidsImporterApi {
 		Long subjectId = null;
 		for (File subjectFile : importJobDir.listFiles()) {
 			String fileName = subjectFile.getName();
+			String subjectName = null;
 			if (fileName.startsWith("sub-")) {
 				// We found a subject
-				String subjectName = studyName + "_" + subjectFile.getName().split("sub-")[1];
+				subjectName = studyName + "_" + subjectFile.getName().split("sub-")[1];
 				Subject subject = new Subject();
 				subject.setName(subjectName);
 				subject.setSubjectStudyList(Collections.singletonList(new SubjectStudy(subject, new IdName(studyId, studyName))));
@@ -188,7 +189,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 					if (examDate == null) {
 						examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneId.systemDefault());
 					}
-					examination = ImportUtils.createExam(studyId, centerId, subjectId, sessionLabel, examDate);
+					examination = ImportUtils.createExam(studyId, centerId, subjectId, sessionLabel, examDate, subjectName);
 					examCreated = true;
 
 					// Create multiple examinations for every session folder
@@ -197,7 +198,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 					if (examId == null) {
 						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
 					}
-					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubjectId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
+					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 					
 					LOG.debug("We found a session " + sessionFile.getName());
 					importJob.setExaminationId(examId);
@@ -215,7 +216,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 							// Set exam date by default using file creation date
 							examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneOffset.UTC);
 						}
-						examination = ImportUtils.createExam(studyId, centerId, subjectId, null, examDate);
+						examination = ImportUtils.createExam(studyId, centerId, subjectId, null, examDate, subjectName);
 						examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 						
 						if (examId == null) {

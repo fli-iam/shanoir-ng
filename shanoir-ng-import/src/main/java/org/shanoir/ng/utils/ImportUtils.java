@@ -592,7 +592,7 @@ public class ImportUtils {
 	 * Create an exam from fiew attributes
 	 * @return the created exam
 	 */
-	public static ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, String comment, LocalDate examDate) {
+	public static ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, String comment, LocalDate examDate, String subjectName) {
 		// Create one examination
 		ExaminationDTO examination = new ExaminationDTO();
 		IdName study = new IdName();
@@ -601,6 +601,7 @@ public class ImportUtils {
 
 		IdName subj = new IdName();
 		subj.setId(subjectId);
+		subj.setName(subjectName);
 		examination.setSubject(subj);
 
 		IdName center = new IdName();

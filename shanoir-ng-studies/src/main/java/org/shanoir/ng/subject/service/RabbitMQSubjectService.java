@@ -140,7 +140,8 @@ public class RabbitMQSubjectService {
 			if (existingSubject != null) {
 				if(existingSubject.getSubjectStudyList() == null) {
 					existingSubject.setSubjectStudyList(new ArrayList<>());
-				} else if (!studyListContains(existingSubject.getSubjectStudyList(), studyId)) {
+				}
+				if (!studyListContains(existingSubject.getSubjectStudyList(), studyId)) {
 					SubjectStudy subjectStudy = new SubjectStudy();
 					subjectStudy.setSubject(existingSubject);
 					subjectStudy.setStudy(study);
@@ -148,21 +149,18 @@ public class RabbitMQSubjectService {
 				}
 				subject = existingSubject;
 			} else {
-				if(subject.getSubjectStudyList() == null) {
-					subject.setSubjectStudyList(new ArrayList<>());
+				for (SubjectStudy sustu : subject.getSubjectStudyList()) {
+					sustu.setSubject(subject);
 				}
-				SubjectStudy subjectStudy = new SubjectStudy();
-				subjectStudy.setSubject(existingSubject);
-				subjectStudy.setStudy(study);
-				subject.getSubjectStudyList().add(subjectStudy);
 			}
-			
+
 			// Then create/update the subject
-			subjectService.create(subject);
+			subject = subjectService.create(subject);
 
 			// Return subject ID
 			return subject.getId();
 		} catch (Exception e) {
+			LOG.error("Error while creating the new subject: ", e);
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
 	}

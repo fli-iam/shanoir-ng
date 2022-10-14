@@ -891,20 +891,20 @@ public class ImporterApiController implements ImporterApi {
 					}
 				}
 
-				if ("MR".equals(patient.getStudies().get(0).getSeries().get(0).getModality())) {
-					job.setStudyCardId(studyCardId);
-				}
+				job.setStudyCardId(studyCardId);
 
 				// STEP 4.2 Create examination
-				ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(), job.getPatients().get(0).getStudies().get(0).getStudyDate());
-
+				ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(), job.getPatients().get(0).getStudies().get(0).getStudyDate(), subject.getName());
+				
+				LOG.error(objectMapper.writeValueAsString(examination));
+				
 				// Create multiple examinations for every session folder
 				Long examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 
 				if (examId == null) {
 					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while creating examination", null));
 				}
-				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubjectId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
+				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
 				// STEP 4.3 Complete importJob with subject / study /examination
 				job.setSubjectName(subjectName);
