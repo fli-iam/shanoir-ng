@@ -21,7 +21,6 @@ import { StudyCardDTOService } from './study-card.dto';
 import { StudyCardDTO } from './study-card.dto.model';
 import { StudyCard } from './study-card.model';
 
-
 @Injectable()
 export class StudyCardService extends EntityService<StudyCard> {
 
@@ -63,4 +62,11 @@ export class StudyCardService extends EntityService<StudyCard> {
             .toPromise()
             .then();
     }
+    
+    applyStudyCardOnStudy(studyCardId: number) {
+        return this.http.post<any[]>(this.API_URL + '/apply_on_study/' + studyCardId))
+            .toPromise()
+            .then();
+    }
+
 }
