@@ -34,6 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" skipLocationChange replaceUrl="true">Centers</li>
 				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" skipLocationChange replaceUrl="true">Members</li>
 				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" skipLocationChange replaceUrl="true">Tags</li>
+				<li [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" skipLocationChange replaceUrl="true">Quality</li>				
 				<ng-container *ngIf="mode == 'view'">
 					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" skipLocationChange replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" skipLocationChange replaceUrl="true">BIDS</li>
@@ -42,7 +43,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li [class.active]="activeTab == 'tree'" class="disabled" skipLocationChange replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" class="disabled" skipLocationChange replaceUrl="true">BIDS</li>
 				</ng-container>
-				
 			</ul>
 
 			<fieldset [class.hidden]="activeTab != 'general'">
@@ -140,7 +140,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'files'">
 				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
-					Data User Agreement (DUA)
+					Data user agreement (DUA)
 					<tool-tip class="larger">
 						Adding a data user agreement (DUA) to a study changes the study member experience, for all members.
 						If a DUA is present all members of the study will have to accept the DUA after signing in the next time to Shanoir.
@@ -313,6 +313,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[mode]="mode">					
 				</studyuser-list>
 			</fieldset>
+			<fieldset [class.hidden]="activeTab != 'quality'">
+				<legend>Quality control</legend>
+				<button type="button" class="dl-button"></button>			
+			</fieldset>
 			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">
 				<legend>Tree</legend>
 				<study-node [input]="studyNode" 
@@ -321,14 +325,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[hasBox]="true">
 				</study-node>
 			</fieldset>
-            <fieldset [class.hidden]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
-                <legend>Study tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
-            </fieldset>
-            <fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'bids'">
-				        <legend>BIDS tree</legend>
-                <bids-tree [studyId]="id"></bids-tree>
-            </fieldset>
+			<fieldset [class.hidden]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
+				<legend>Study tags</legend>
+				<tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+			</fieldset>
+			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'bids'">
+				<legend>BIDS tree</legend>
+				<bids-tree [studyId]="id"></bids-tree>
+			</fieldset>
 			<form-footer
 					[state]="footerState"
 					(save)="save()"
