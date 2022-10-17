@@ -20,6 +20,7 @@ import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.DicomTag;
+import org.shanoir.ng.studycard.dto.StudyCardOnStudyResult;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
 import org.springframework.http.ResponseEntity;
@@ -171,7 +172,7 @@ public interface StudyCardApi {
 	})
 	@RequestMapping(value = "/apply_on_study/{studyCardId}", method = RequestMethod.GET)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudyCard(#studyCardId, 'CAN_ADMINISTRATE'))")
-	ResponseEntity<Void> applyStudyCardOnStudy(
+	ResponseEntity<List<StudyCardOnStudyResult>> applyStudyCardOnStudy(
 		@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException, MicroServiceCommunicationException;
 	
 }

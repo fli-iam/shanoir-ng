@@ -42,8 +42,10 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
+import org.shanoir.ng.studycard.dto.StudyCardOnStudyResult;
 import org.shanoir.ng.studycard.dto.SubjectStudyStudyCardTag;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.Field;
@@ -138,18 +140,24 @@ public class StudyCardProcessingService {
 
 	/**
 	 * Study cards for quality control: apply on entire study.
+	 * 
 	 * @param studyCard
 	 * @throws MicroServiceCommunicationException 
 	 */
-	public void applyStudyCardOnStudy(StudyCard studyCard) throws MicroServiceCommunicationException {
+	public List<StudyCardOnStudyResult> applyStudyCardOnStudy(StudyCard studyCard) throws MicroServiceCommunicationException {
 		final List<StudyCardRule> rules = studyCard.getRules();
 		if (CollectionUtils.isNotEmpty(rules)) {
+			final List<StudyCardOnStudyResult> studyCardOnStudyResultList = new ArrayList<StudyCardOnStudyResult>();
 			final List<SubjectStudyStudyCardTag> subjectStudyStudyCardTagList = new ArrayList<SubjectStudyStudyCardTag>();
 			final List<SubjectStudy> subjectStudyList = subjectStudyRepository.findByStudyId(studyCard.getStudyId());
 			for (SubjectStudy subjectStudy : subjectStudyList) {
 				final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectStudy.getSubject().getId(), studyCard.getStudyId());
 				LOG.info(examinations.size() + " examinations found for subject: " + subjectStudy.getSubject().getName());
 				for (Examination examination : examinations) {
+					StudyCardOnStudyResult result = new StudyCardOnStudyResult();
+					result.setSubjectName(subjectStudy.getSubject().getName());
+					result.setExaminationDate(examination.getExaminationDate().toString());
+					result.setExaminationDate(examination.getComment());
 					List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 					// today study cards are only used for MR modality
 					acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
@@ -161,15 +169,15 @@ public class StudyCardProcessingService {
 						subjectStudyStudyCardTag.setId(subjectStudy.getId());
 						for (StudyCardRule rule : rules) {
 							if (rule.getType() == StudyCardRuleType.EXAMINATION.getId()) {
-								if (!conditionsFulfilledOnAtLeastOneAcquisition(rule.getConditions(), acquisitions)) {
+								if (!conditionsFulfilledOnAtLeastOneAcquisition(rule.getConditions(), acquisitions, result)) {
 									allRulesFulFilled = false;
 								}
 							} else if (rule.getType() == StudyCardRuleType.ACQUISITION.getId()) {
-								if (!conditionsFulfilledOnAllAcquisitions(rule.getConditions(), acquisitions)) {
+								if (!conditionsFulfilledOnAllAcquisitions(rule.getConditions(), acquisitions, result)) {
 									allRulesFulFilled = false;
 								}								
 							} else if (rule.getType() == StudyCardRuleType.DATASET.getId()) {
-								if (!conditionsFulfilledOnAllDatasets(rule.getConditions(), acquisitions)) {
+								if (!conditionsFulfilledOnAllDatasets(rule.getConditions(), acquisitions, result)) {
 									allRulesFulFilled = false;
 								}							
 							}
@@ -179,6 +187,7 @@ public class StudyCardProcessingService {
 						} else {
 							subjectStudyStudyCardTag.setType(3);
 						}
+						studyCardOnStudyResultList.add(result);
 						subjectStudyStudyCardTagList.add(subjectStudyStudyCardTag);
 					}				
 				}
@@ -189,6 +198,9 @@ public class StudyCardProcessingService {
 			} catch (AmqpException | JsonProcessingException e) {
 				throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.");
 			}
+			return studyCardOnStudyResultList;
+		} else {
+			throw new ShanoirException("Study card used with emtpy rules.");
 		}
 	}
 	
@@ -205,7 +217,7 @@ public class StudyCardProcessingService {
 		return true;
 	}
 
-	private boolean conditionsFulfilledOnAtLeastOneAcquisition(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions) {
+	private boolean conditionsFulfilledOnAtLeastOneAcquisition(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions, StudyCardOnStudyResult result) {
 		for (StudyCardCondition condition : conditions) {
 			boolean conditionVerifiedOnAtLeastOneAcquisition = false;
 			for (DatasetAcquisition acquisition: acquisitions) {
@@ -226,12 +238,15 @@ public class StudyCardProcessingService {
 					}
 				}
 			}	
-			if (!conditionVerifiedOnAtLeastOneAcquisition) return false;
+			if (!conditionVerifiedOnAtLeastOneAcquisition) {
+				result.setResultExaminationLevel("Error with condition: " + condition.getDicomTagOrField() + ", " + condition.getOperation() + ", " + condition.getValues().toString());
+				return false;
+			}
 		}
 		return true;
 	}
 	
-	private boolean conditionsFulfilledOnAllAcquisitions(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions) {
+	private boolean conditionsFulfilledOnAllAcquisitions(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions, StudyCardOnStudyResult result) {
 		for (StudyCardCondition condition : conditions) {
 			for (DatasetAcquisition acquisition: acquisitions) {
 				int getDicomTagOrField = condition.getDicomTagOrField();
@@ -240,18 +255,24 @@ public class StudyCardProcessingService {
 					if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
 						Dataset refDataset = acquisition.getDatasets().get(0);
 						Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
-						if (!dicomConditionFulfilled(condition, dicomAttributes)) return false;
+						if (!dicomConditionFulfilled(condition, dicomAttributes)) {
+							result.setResultAcquisitionLevel("Error with condition: " + condition.getDicomTagOrField() + ", " + condition.getOperation() + ", " + condition.getValues().toString());
+							return false;
+						}
 					}
 				// B) check for a field in the database, using entity model
 				} else {
-					if (!entityConditionFulfilled(condition, acquisition)) return false;
+					if (!entityConditionFulfilled(condition, acquisition)) {
+						result.setResultAcquisitionLevel("Error with condition: " + condition.getDicomTagOrField() + ", " + condition.getOperation() + ", " + condition.getValues().toString());						
+						return false;
+					}
 				}
 			}	
 		}
 		return true;
 	}
 	
-	private boolean conditionsFulfilledOnAllDatasets(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions) {
+	private boolean conditionsFulfilledOnAllDatasets(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions, StudyCardOnStudyResult result) {
 		for (StudyCardCondition condition : conditions) {
 			for (DatasetAcquisition acquisition: acquisitions) {
 				if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
@@ -260,10 +281,16 @@ public class StudyCardProcessingService {
 						// A) check for a dicom tag using a metadata call to the pacs
 						if (Field.getEnum(getDicomTagOrField) == null) {
 							Attributes dicomAttributes = getDicomAttributesForDataset(dataset);
-							if (!dicomConditionFulfilled(condition, dicomAttributes)) return false;
+							if (!dicomConditionFulfilled(condition, dicomAttributes)) {
+								result.setResultDatasetLevel("Error with condition: " + condition.getDicomTagOrField() + ", " + condition.getOperation() + ", " + condition.getValues().toString());														
+								return false;
+							}
 						// B) check for a field in the database, using entity model
 						} else {
-							if (!entityConditionFulfilled(condition, acquisition)) return false;
+							if (!entityConditionFulfilled(condition, acquisition)) {
+								result.setResultDatasetLevel("Error with condition: " + condition.getDicomTagOrField() + ", " + condition.getOperation() + ", " + condition.getValues().toString());														
+								return false;
+							}
 						}					
 					}
 				}
