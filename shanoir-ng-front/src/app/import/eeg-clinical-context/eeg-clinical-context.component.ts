@@ -22,7 +22,7 @@ import { Examination } from '../../examinations/shared/examination.model';
 import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
-import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
@@ -44,7 +44,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
     
     @ViewChild('eventsTable', { static: false }) table: TableComponent;
     
-    columnDefs: any[];
+    columnDefs: ColumnDefition[];
     hasPosition: boolean;    
     coordSystemOptions: Option<CoordSystems>[];
     coordsystem : string;

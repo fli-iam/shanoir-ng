@@ -18,7 +18,7 @@ import { ContrastAgentService } from '../shared/contrastAgent.service';
 import { InjectionInterval } from "../../shared/enum/injectionInterval";
 import { InjectionSite } from "../../shared/enum/injectionSite";
 import { InjectionType } from "../../shared/enum/injectionType";
-import { TableComponent } from '../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -47,7 +47,7 @@ export class ContrastAgentsListComponent extends BrowserPaginEntityListComponent
         return this.contrastAgentsService.getContrastAgents(this.protocol_id);
     }
 
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function checkNullValue(value: any) {
             if(value){
                 return value;
@@ -60,8 +60,8 @@ export class ContrastAgentsListComponent extends BrowserPaginEntityListComponent
             }
             return '';
         };
-        let colDef: any[] = [
-            {headerName: "Name", field: "name", type: "reference", cellRenderer: function (params: any) {
+        let colDef: ColumnDefition[] = [
+            {headerName: "Name", field: "name", cellRenderer: function (params: any) {
                 return checkNullValueReference(params.data.name);
             }},
             {headerName: "Manufactured Name", field: "manufactured_name", type: "string", cellRenderer: function (params: any) {
@@ -72,13 +72,13 @@ export class ContrastAgentsListComponent extends BrowserPaginEntityListComponent
                     return checkNullValue(params.data.concentration);
                 }
             },
-            {headerName: "Concentration Unit", field: "concentration_unit", type: "reference", cellRenderer: function (params: any) {
+            {headerName: "Concentration Unit", field: "concentration_unit", cellRenderer: function (params: any) {
                 return checkNullValueReference(params.data.concentration_unit);
             }},
-            {headerName: "Dose", field: "dose", type: "dose", cellRenderer: function (params: any) {
+            {headerName: "Dose", field: "dose", type: "number", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.dose);
             }},
-            {headerName: "Dose Unit", field: "dose_unit", type: "reference", cellRenderer: function (params: any) {
+            {headerName: "Dose Unit", field: "dose_unit", cellRenderer: function (params: any) {
                 return checkNullValueReference(params.data.dose_unit);
             }},
             {headerName: "Injection interval", field: "injection_interval", type: "string", cellRenderer: function (params: any) {

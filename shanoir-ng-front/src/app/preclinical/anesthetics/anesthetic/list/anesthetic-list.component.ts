@@ -16,7 +16,7 @@ import { Component, ViewChild } from '@angular/core';
 import {
     BrowserPaginEntityListComponent,
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../../shared/components/table/table.component';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -61,18 +61,18 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
         return this.anestheticsService.getAll();
     }
     
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function checkNullValue(value: any) {
             if(value){
                 return value;
             }
             return '';
         };
-        let colDef: any[] = [
+        let colDef: ColumnDefition[] = [
             {headerName: "Name", field: "name", type: "string", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.name);
             }},
-            {headerName: "Type", field: "anestheticType", type: "Enum", cellRenderer: function (params: any) {
+            {headerName: "Type", field: "anestheticType", cellRenderer: function (params: any) {
                 return AnestheticType[params.data.anestheticType];
             }},
             {headerName: "Comment", field: "comment", type: "string", cellRenderer: function (params: any) {

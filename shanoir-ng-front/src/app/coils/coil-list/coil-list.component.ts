@@ -15,7 +15,7 @@
 import { Component, ViewChild } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
 import { Coil } from '../shared/coil.model';
 import { CoilService } from '../shared/coil.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -52,8 +52,8 @@ export class CoilListComponent extends BrowserPaginEntityListComponent<Coil> {
         return this.coilService.getAll();
     }
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefition[] {
+        let colDef: ColumnDefition[] = [
             { headerName: "Name", field: "name" },
             
             { headerName: "Acquisition Equipment Model", field: "manufacturerModel.name",

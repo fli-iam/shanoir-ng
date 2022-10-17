@@ -76,6 +76,7 @@ input:focus:hover { cursor: initial; }
 .top-scroll-button, .bottom-scroll-button { background-color: var(--color-c); color: transparent; height: 10px; width: 2px; position: absolute; right: 0; overflow: hidden; font-size: 11px; cursor: pointer; }
 .top-scroll-button { top: 0; }
 .bottom-scroll-button { bottom: 0; }
+.top-scroll-button i, .bottom-scroll-button i { vertical-align: super; }
 
 .scrollbar:hover .top-scroll-button, .scrollbar:hover .bottom-scroll-button  { width: 10px; background-color: transparent; color: var(--color-c); }
 

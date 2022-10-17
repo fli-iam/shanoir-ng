@@ -14,7 +14,7 @@
 
 import { Component, ViewChild } from '@angular/core';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -69,14 +69,14 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
     }
 
     // Grid columns definition
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
             }
             return null;
         };
-        let columnDefs = [
+        let columnDefs: ColumnDefition[] = [
             {headerName: "Username", field: "username" },
             {headerName: "First Name", field: "firstName" },
             {headerName: "Last Name", field: "lastName" },

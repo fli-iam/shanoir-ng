@@ -14,7 +14,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
-import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
 import { StudyService } from '../../studies/shared/study.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
@@ -51,14 +51,14 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
         });
     }
 
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
             }
             return null;
         };
-        let colDef: any[] = [
+        let colDef: ColumnDefition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {
                 headerName: "Subject", field: "subject.name", orderBy: ['subjectId'], cellRenderer: function (params: any) {

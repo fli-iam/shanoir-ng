@@ -16,7 +16,7 @@ import {Component,ViewChild} from '@angular/core';
 
 import { PathologyModel } from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
-import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
@@ -49,14 +49,14 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
         return this.modelService.getAll();
     }
 
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function checkNullValue(value: any) {
             if(value){
                 return value;
             }
             return '';
         };
-        let colDef: any[] = [
+        let colDef: ColumnDefition[] = [
             {headerName: "Name", field: "name"},
             {headerName: "Pathology", field: "pathology.name"},
             {headerName: "Comment", field: "comment"},

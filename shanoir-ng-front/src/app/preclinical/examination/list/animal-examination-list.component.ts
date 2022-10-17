@@ -19,7 +19,7 @@ import { ExaminationAnestheticService } from '../../anesthetics/examination_anes
 import { ExtraDataService } from '../../extraData/extraData/shared/extradata.service';
 
 import {  Page, Pageable } from '../../../shared/components/table/pageable.model';
-import { TableComponent } from '../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../shared/components/table/table.component';
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
 import { ShanoirError } from '../../../shared/models/error.model';
 import { ServiceLocator } from '../../../utils/locator.service';
@@ -54,14 +54,14 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
         return this.examinationService.getPage(pageable, true);
     }
 
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
             }
             return null;
         };
-        let colDef: any[] = [
+        let colDef: ColumnDefition[] = [
             { headerName: "Examination id", field: "id" },
             {headerName: "Subject", field: "subjectId", cellRenderer: (params: any) => (params.data.subject) ? params.data.subject.name : ""},
             {

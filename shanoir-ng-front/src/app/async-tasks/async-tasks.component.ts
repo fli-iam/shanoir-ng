@@ -13,7 +13,7 @@
  */
 
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
-import { TableComponent } from '../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../shared/components/table/table.component';
 import { Task } from './task.model';
 import { TaskService } from './task.service';
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
@@ -72,7 +72,7 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     //     });
     // }
 
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleString();
@@ -95,7 +95,7 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
                 }
             },
             { headerName: 'Progress', field: 'progress', width: '110px', type: 'progress' },
-            { headerName: 'Status', field: 'status', width: '70px', type: 'Status', cellRenderer: function (params: any) {
+            { headerName: 'Status', field: 'status', width: '70px', cellRenderer: function (params: any) {
                     if (params.data.status == 2) {
                         return "In progress"
                     }

@@ -16,7 +16,7 @@ import { Component, EventEmitter, Input, Output, ViewChild } from '@angular/core
 import {
     BrowserPaginEntityListComponent,
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../../shared/components/table/table.component';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { ConsoleService } from '../../../../shared/console/console.service';
@@ -70,7 +70,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
         }
     }
     
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function checkNullValue(value: any) {
             if(value){
                 return value;
@@ -83,14 +83,14 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
             }
             return '';
         };
-        let colDef: any[] = [
-            {headerName: "Name", field: "name.value", type: "reference", cellRenderer: function (params: any) {
+        let colDef: ColumnDefition[] = [
+            {headerName: "Name", field: "name.value", cellRenderer: function (params: any) {
                 return checkNullValueReference(params.data.name);
             }},
             {headerName: "Concentration", field: "concentration", type: "number", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.concentration);
             }},
-            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "reference", cellRenderer: function (params: any) {
+            {headerName: "Concentration Unit", field: "concentration_unit.value", cellRenderer: function (params: any) {
                 return checkNullValueReference(params.data.concentration_unit);
             }}    
         ];

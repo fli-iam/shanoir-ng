@@ -19,7 +19,7 @@ import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-cat
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
-import { TableComponent } from '../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { ShanoirError } from '../../../shared/models/error.model';
@@ -81,8 +81,8 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
     }
     
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefition[] {
+        let colDef: ColumnDefition[] = [
             {headerName: "Common name", field: "subject.name"},
             {headerName: "Imaged object category", field: "subject.imagedObjectCategory", cellRenderer: function (params: any) {
                     let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory>params.data.subject.imagedObjectCategory;

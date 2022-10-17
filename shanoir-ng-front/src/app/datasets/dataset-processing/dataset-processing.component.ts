@@ -28,7 +28,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
-import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
 import { CarminDatasetProcessingService } from 'src/app/carmin/shared/carmin-dataset-processing.service';
 import { CarminDatasetProcessing } from 'src/app/carmin/models/CarminDatasetProcessing';
 
@@ -55,8 +55,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     private inputDatasetsToRemove: Dataset[] = [];
     private inputDatasetsToAdd: Dataset[] = [];
     private outputDatasetsToRemove: Dataset[] = [];
-    public inputDatasetsColumnDefs: any[];
-    public outputDatasetsColumnDefs: any[];
+    public inputDatasetsColumnDefs: ColumnDefition[];
+    public outputDatasetsColumnDefs: ColumnDefition[];
     public isCarminDatasetProcessingEntity: boolean = false;
     public carminDatasetProcessing: CarminDatasetProcessing;
 
@@ -177,7 +177,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             'study': [this.study ? this.study.name : '', Validators.required],
             'processingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
             'processingDate': [this.datasetProcessing.processingDate, Validators.required],
-            'inputDatasetList': [this.datasetProcessing.inputDatasets],
+            'inputDatasetList': [this.datasetProcessing.inputDatasets, Validators.minLength(1)],
             'outputDatasetList': [this.datasetProcessing.outputDatasets],
             'comment': [this.datasetProcessing.comment]
         });
@@ -204,79 +204,22 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     private createColumnDefs() {
-        function checkNullValue(value: any) {
-            if(value){
-                return value;
-            }
-            return '';
-        };
-
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
-
         this.inputDatasetsColumnDefs = [
-            {headerName: "ID", field: "id", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.id);
-            }},
-            {headerName: "Name", field: "name", type: "string", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.name);
-            },route: (dataset : Dataset)=>{
+            {headerName: "ID", field: "id", type: "number"},
+            {headerName: "Name", field: "name", route: (dataset : Dataset)=>{
                 return `/dataset/details/${dataset.id}`
             }},
-            {headerName: "Dataset type", field: "type", type: "string", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.type);
-            }},
-            {headerName: "Study", field: "study", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.study?.name);
-            }},
-            {headerName: "Subject", field: "subject", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.subject?.name);
-            }},
-            {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.creationDate);
-            }}
+            {headerName: "Dataset type", field: "type"},
+            {headerName: "Study", field: "study.name"},
+            {headerName: "Subject", field: "subject.name"},
+            {headerName: "Creation date", field: "creationDate", type: "date"}
         ];
 
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            this.inputDatasetsColumnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeInputDataset(item) });
+            this.inputDatasetsColumnDefs.push({ tip: "Delete", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeInputDataset(item) });
         }
 
-        this.outputDatasetsColumnDefs = [
-            {headerName: "ID", field: "id", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.id);
-            }},
-            {headerName: "Name", field: "name", type: "link", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.name);
-            }, route: (dataset : Dataset)=>{
-                return `/dataset/details/${dataset.id}`
-            }},
-            {headerName: "Dataset type", field: "type", type: "string", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.type);
-            }},
-            {headerName: "Study", field: "study", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.study?.name);
-            }},
-            {headerName: "Subject", field: "subject", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.subject?.name);
-            }},
-            {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: function (params: any) {
-                return dateRenderer(params.data.creationDate);
-            }}
-        ];
-        
-        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            this.outputDatasetsColumnDefs.push({
-                title: "Add", awesome: "fa-solid fa-plus", action: item => this.router.navigate(['dataset-processing/edit-input-datasets/' + this.id])
-            });
-        }
-
-        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            this.outputDatasetsColumnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeOutputDataset(item) });
-        }
+        this.outputDatasetsColumnDefs = this.inputDatasetsColumnDefs;
     }
 
     public onAddInputDataset(selectedDataset: Dataset) {

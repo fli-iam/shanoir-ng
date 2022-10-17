@@ -24,7 +24,7 @@ import { ConsoleService } from '../../console/console.service';
 import { WindowService } from '../../services/window.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
-import { TableComponent } from '../table/table.component';
+import { ColumnDefition, TableComponent } from '../table/table.component';
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
 
@@ -32,7 +32,7 @@ import { EntityService } from './entity.abstract.service';
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
 
     abstract table: TableComponent;  
-    columnDefs: any[];
+    columnDefs: ColumnDefition[];
     customActionDefs: any[];
     protected router: Router;
     protected confirmDialogService: ConfirmDialogService;
@@ -107,7 +107,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     }
 
     abstract getPage(pageable: Pageable): Promise<Page<T>>;
-    abstract getColumnDefs(): any[];
+    abstract getColumnDefs(): ColumnDefition[];
     abstract getCustomActionsDefs(): any[];
 
     public onRowClick(entity: T) {

@@ -15,7 +15,7 @@ import { Component, ViewChild } from '@angular/core';
 
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
@@ -53,7 +53,7 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
     }
 
     // Grid columns definition
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();

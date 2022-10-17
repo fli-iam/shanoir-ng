@@ -15,7 +15,7 @@
 import { Component, ViewChild } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
@@ -58,8 +58,8 @@ export class StudyCardListComponent extends BrowserPaginEntityListComponent<Stud
         return this.studyCardService.getAllAdvanced().quick;
     }
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefition[] {
+        let colDef: ColumnDefition[] = [
             { headerName: "Name", field: "name" },
             { headerName: "Study", field: 'study.name', defaultField: 'study.id',
 			 	route: (studyCard: StudyCard) => '/study/details/' + studyCard.study.id

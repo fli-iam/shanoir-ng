@@ -23,6 +23,31 @@ import { SolrResultPage } from '../../../solr/solr.document.model';
 import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 
+export type ColumnDefition = {
+    headerName?: string, /* the header for that column */
+    field?: string, /* the row item's field displayed in this column, ie if the item is 'car' you can set 'owner' or 'owner.name' as field */
+    defaultField?: string, /* used if field gives nothing */
+    type?: 'string' | 'number' | 'boolean' | 'button' | 'link' | 'date' | 'progress', /* default is string, progress should be included in [0, 1] */
+    defaultSortCol?: boolean, /* tells if the table is sorted by this column by default */
+    defaultAsc?: boolean, /* tells if the default sorting (the first click) for this column is ascending */
+    orderBy?: string[], /* when ordering by this columns has to be based on another field(s), ie: {field: 'equipment', orderBy: ['equipment.id']} */
+    disableSorting?: boolean, /* disable the possibility of sorting the table based on that column */
+    width?: string, /* default width of the column as a css representation (20px, 15%, ...) */
+    hidden?: boolean,
+    possibleValues?: any[] | ((item: any) => any[]), /* a list or a function that return a list of possible values for using a select box as an input for ths column in edit mode */
+    multi?: boolean, /* tells if this field is an array */
+    route?: (item: any) => string, /* builds the route string that will be used when clicking a cell from this column */
+    cellRenderer?: ((params?: {data?: any}) => any), /* custom function that should return the displayed value of data (= the item) for this column */
+    action?: (item: any) => void, /* perform an action when clicking a button type cell */
+    condition?: (item: any) => boolean, /* condition for displaying a button */ 
+    awesome?: `fa${string} fa${string}`, /* boolean true value icon representation or button icon. See https://fontawesome.com/icons/ */
+    color?: string, /* css color the the awesome icon */ 
+    awesomeFalse?: `fa${string} fa${string}`, /* boolean false value icon */
+    colorFalse?: string, /* css color the the awesome icon */ 
+    tip?: string, /* add a descrption when cursor stands still a few second over the column */
+    editable?: boolean | ((item: any) => boolean), /* is this field editable in edit mode ? */
+    onEdit?: (item: any, fieldValue: any) => void, /* field edition callback */
+}
 
 @Component({
     selector: 'shanoir-table',
@@ -33,8 +58,8 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<SolrResultPage>;
-    @Input() columnDefs: any[];
-    @Input() subRowsDefs: any[];
+    @Input() columnDefs: ColumnDefition[];
+    @Input() subRowsDefs: ColumnDefition[];
     @Input() customActionDefs: any[];
     @Input() selectionAllowed: boolean = false;
     @Input() selection: Set<number> = new Set();
@@ -114,7 +139,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                     if (!this.page._savedContentRendering) this.page._savedContentRendering = [];
                     if (!this.page._savedContentRendering[itemIndex]) this.page._savedContentRendering[itemIndex] = [];
                     if (!this.page._savedContentRendering[itemIndex][colIndex]) this.page._savedContentRendering[itemIndex][colIndex] = {};
-                    this.page._savedContentRendering[itemIndex][colIndex].possibleValues = this.isFunction(col.possibleValues) ? col.possibleValues(item) : col.possibleValues;
+                    this.page._savedContentRendering[itemIndex][colIndex].possibleValues = this.isFunction(col.possibleValues) ? (col.possibleValues as ((item: any) => any[]))(item) : col.possibleValues;
                 }
             });
         });
@@ -153,7 +178,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     
 
     sortBy(col: Object): void {
-        if (col['suppressSorting'] || col["type"] == "button") return;
+        if (col['disableSorting'] || col["type"] == "button") return;
         let defaultAsc: boolean = col["defaultAsc"] != undefined ? col["defaultAsc"] : true;
         let asc: boolean = col == this.lastSortedCol ? !this.lastSortedAsc : defaultAsc;
         this.lastSortedCol = col;
@@ -175,7 +200,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
 
-    public static getCellValue(item: Object, col: any): any {
+    public static getCellValue(item: Object, col: ColumnDefition): any {
         if (col.hasOwnProperty("cellRenderer")) {
             let params = new Object();
             params["data"] = item;
@@ -201,7 +226,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Get a cell content, resolving a renderer if necessary
      */
-    getCellValue(item: Object, col: any): any {
+    getCellValue(item: Object, col: ColumnDefition): any {
         return TableComponent.getCellValue(item, col);
     }
 
@@ -237,7 +262,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Convert a cell content to a displayable string
      */
-    renderCell(item: Object, col: any): any {
+    renderCell(item: Object, col: ColumnDefition): any {
         let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
@@ -251,13 +276,13 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Test if a cell content is a boolean
      */
-    isFieldBoolean(col: any): boolean {
+    isFieldBoolean(col: ColumnDefition): boolean {
         if (!this.items || this.items.length == 0) throw new Error('Cannot determine type of a column if there is no data');
         let val = this.getCellValue(this.items[0], col);
         return col.type == 'boolean' || this.isValueBoolean(val);
     }
 
-    isColumnText(col: any): boolean {
+    isColumnText(col: ColumnDefition): boolean {
         return !this.isFieldBoolean(col)
             && col.type != 'link'
             && col.type != 'button'
@@ -265,7 +290,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             && col.type != 'number';
     }
 
-    isColumnNumber(col: any): boolean {
+    isColumnNumber(col: ColumnDefition): boolean {
         return col.type == 'number';
     }
 
@@ -281,7 +306,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Get a column type attribute
      */
-    getColType(col: any): string {
+    getColType(col: ColumnDefition): string {
         if (col.type != undefined) {
             return col.type;
         } else {
@@ -292,7 +317,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /**
      * Get a column type and format it to be used a dom element class
      */
-    getColTypeStr(col: any): string {
+    getColTypeStr(col: ColumnDefition): string {
         let type: string = this.getColType(col);
         return type != null ? "col-" + type : "";
     }
@@ -300,7 +325,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     /** 
      * Get a cell type and format it to be used a dom element class
      */
-    getCellTypeStr(col: any): string {
+    getCellTypeStr(col: ColumnDefition): string {
         let type: string = this.getColType(col);
         return type != null ? "cell-" + type : "";
     }
@@ -507,7 +532,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
-    startDrag(leftColIndex: number, thRef: HTMLElement, event: MouseEvent, columnDefs: any) {
+    startDrag(leftColIndex: number, thRef: HTMLElement, event: MouseEvent, columnDefs: ColumnDefition) {
         this.currentDrag = {
             columns: columnDefs,
             leftOrigin: event.pageX - thRef.offsetWidth + 10, 
@@ -576,6 +601,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
 export class TablePreferences {
 
-    colWidths: {width: number, hidden: boolean}[];
+    colWidths: {width: string, hidden: boolean}[];
     pageSize: number;
 }

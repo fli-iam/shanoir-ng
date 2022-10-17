@@ -22,6 +22,7 @@ import { Frequency } from "../../../shared/enum/frequency";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { ColumnDefition } from '../../../../shared/components/table/table.component';
 
 @Component({
     selector: 'subject-therapy-list',
@@ -87,7 +88,7 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
         return Promise.resolve(subjectTherapies);
     }
 
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function dateRenderer(date) {
             if (date) {
                 return new Date(date).toLocaleDateString();
@@ -109,15 +110,15 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
             }
             return '';
         };
-        let colDef: any[] = [  
+        let colDef: ColumnDefition[] = [  
             { headerName: "Therapy", field: "therapy.name" },
             {
-                headerName: "Type", field: "therapy.therapyType", type: "Enum", cellRenderer: function(params: any) {
+                headerName: "Type", field: "therapy.therapyType", cellRenderer: function(params: any) {
                     return TherapyType[params.data.therapy.therapyType];
                 }
             },
             {
-                headerName: "Dose", field: "dose", type: "dose", cellRenderer: function(params: any) {
+                headerName: "Dose", field: "dose", type: "number", cellRenderer: function(params: any) {
                     return checkNullValue(params.data.dose);
                 }
             },
@@ -127,12 +128,12 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
                 }
             },
             {
-                headerName: "Dose Unit", field: "dose_unit.value", type: "reference", cellRenderer: function(params: any) {
+                headerName: "Dose Unit", field: "dose_unit.value", cellRenderer: function(params: any) {
                     return checkNullValueReference(params.data.dose_unit);
                 }
             },
             {
-                headerName: "Type", field: "frequency", type: "Enum", cellRenderer: function (params: any) {
+                headerName: "Type", field: "frequency", cellRenderer: function (params: any) {
                     return Frequency[params.data.frequency];
                 }
             },

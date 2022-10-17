@@ -28,6 +28,7 @@ import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { ColumnDefition } from '../../shared/components/table/table.component';
 
 export type Status = 'default' | 'loading' | 'done' | 'error';
 @Component({
@@ -155,9 +156,9 @@ export class ApplyStudyCardOnComponent implements OnInit {
         });
     }
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
-            { headerName: "Compatible", type: "boolean", cellRenderer: row => this.isCompatible(row.data.acquisitionEquipment?.id), awesome: "fa-solid fa-circle", awesomeFalse: "fa-solid fa-triangle-exclamation", color: "green", colorFalse: "orangered", suppressSorting: true },
+    getColumnDefs(): ColumnDefition[] {
+        let colDef: ColumnDefition[] = [
+            { headerName: "Compatible", type: "boolean", cellRenderer: row => this.isCompatible(row.data.acquisitionEquipment?.id), awesome: "fa-solid fa-circle", awesomeFalse: "fa-solid fa-triangle-exclamation", color: "green", colorFalse: "orangered", disableSorting: true },
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
             { headerName: 'Type', field: 'type', width: '22px'},
             { headerName: "Acquisition Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
@@ -169,7 +170,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
             { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
                 return this.dateRenderer(params.data.examination.examinationDate);
             }},    
-            { headerName: "Center", field: "acquisitionEquipment.center.name", suppressSorting: true,
+            { headerName: "Center", field: "acquisitionEquipment.center.name", disableSorting: true,
 				route: (dsAcq: DatasetAcquisition) => dsAcq.acquisitionEquipment.center? '/center/details/' + dsAcq.acquisitionEquipment.center.id : null
 			},
             { headerName: "Last StudyCard", field: "studyCard.name"},

@@ -4,7 +4,7 @@ import { EntityListComponent } from 'src/app/shared/components/entity/entity-lis
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
 import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
-import { TableComponent } from 'src/app/shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from 'src/app/shared/components/table/table.component';
 import { CarminDatasetProcessing } from '../models/CarminDatasetProcessing';
 import { CarminDatasetProcessingService } from '../shared/carmin-dataset-processing.service';
 
@@ -49,7 +49,7 @@ export class CarminDatasetProcessingsComponent extends EntityListComponent<Carmi
     return Promise.resolve(new BrowserPaging(this.caminDatasetProcessings, this.columnDefs).getPage(pageable));
   }
 
-  getColumnDefs(): any[] {
+  getColumnDefs(): ColumnDefition[] {
     function dateRenderer(date: number) {
       if (date) {
         return new Date(date).toLocaleString();
@@ -65,7 +65,7 @@ export class CarminDatasetProcessingsComponent extends EntityListComponent<Carmi
           return `/dataset-processing/details/${carminDatasetProcessing.id}`;
         }
       },
-      { headerName: 'Status', field: 'status', width: '70px', type: 'Status' },
+      { headerName: 'Status', field: 'status', width: '70px' },
       {
         headerName: "Creation", field: "startDate", width: '130px', cellRenderer: function (params: any) {
           return dateRenderer(params.data.startDate);

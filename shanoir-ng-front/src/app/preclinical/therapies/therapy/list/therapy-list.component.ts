@@ -18,7 +18,7 @@ import { Therapy } from '../shared/therapy.model';
 import { TherapyService } from '../shared/therapy.service';
 import { TherapyType } from "../../../shared/enum/therapyType";
 import { SubjectTherapyService } from '../../subjectTherapy/shared/subjectTherapy.service';
-import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
@@ -59,10 +59,10 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
         return this.therapyService.getAll();
     }
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefition[] {
+        let colDef: ColumnDefition[] = [
             {headerName: "Name", field: "name"},
-            {headerName: "Type", field: "therapyType", type: "Enum", cellRenderer: function (params: any) {
+            {headerName: "Type", field: "therapyType", cellRenderer: function (params: any) {
                 return TherapyType[params.data.therapyType];
             }},
             {headerName: "Comment", field: "comment"}   

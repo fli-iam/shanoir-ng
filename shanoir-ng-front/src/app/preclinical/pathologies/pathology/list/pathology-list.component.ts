@@ -24,7 +24,7 @@ import { PathologyService } from '../shared/pathology.service';
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
-import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -59,12 +59,12 @@ export class PathologiesListComponent extends BrowserPaginEntityListComponent<Pa
         return this.pathologyService.getAll();
     }
     
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefition[] {
         function castToString(id: number) {
             return String(id);
         };
-        let colDef: any[] = [
-            {headerName: "ID", field: "id", type: "id", cellRenderer: function (params: any) {
+        let colDef: ColumnDefition[] = [
+            {headerName: "ID", field: "id", type: "number", cellRenderer: function (params: any) {
                 return castToString(params.data.id);
             }},
             {headerName: "Name", field: "name"}

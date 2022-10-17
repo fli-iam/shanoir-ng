@@ -30,7 +30,7 @@ import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { slideDown } from '../../../../shared/animations/animations';
-import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../../shared/components/table/table.component';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -56,7 +56,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     units: Reference[];
 
     private browserPaging: BrowserPaging<AnestheticIngredient>;
-    public columnDefs: any[];
+    public columnDefs: ColumnDefition[];
     private ingredientsPromise: Promise<any>;
 
     public toggleFormAI: boolean = false;
@@ -173,13 +173,13 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             return '';
         };
         this.columnDefs = [
-            {headerName: "Name", field: "name.value", type: "reference", cellRenderer: function (params: any) {
+            {headerName: "Name", field: "name.value", cellRenderer: function (params: any) {
                 return checkNullValueReference(params.data.name);
             }},
             {headerName: "Concentration", field: "concentration", type: "number", cellRenderer: function (params: any) {
                 return checkNullValue(params.data.concentration);
             }},
-            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "reference", cellRenderer: function (params: any) {
+            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "number", cellRenderer: function (params: any) {
                 return checkNullValueReference(params.data.concentration_unit);
             }}
         ];

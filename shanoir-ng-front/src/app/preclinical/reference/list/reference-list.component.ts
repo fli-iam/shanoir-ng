@@ -16,7 +16,7 @@ import {Component,ViewChild} from '@angular/core';
 
 import { Reference } from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
-import { TableComponent } from '../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../shared/components/table/table.component';
 import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -52,8 +52,8 @@ export class ReferencesListComponent  extends BrowserPaginEntityListComponent<Re
         return this.referenceService.getAll();
     }
     
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefition[] {
+        let colDef: ColumnDefition[] = [
             {headerName: "Category", field: "category"},
             {headerName: "Type", field: "reftype"},
             {headerName: "Value", field: "value"}     

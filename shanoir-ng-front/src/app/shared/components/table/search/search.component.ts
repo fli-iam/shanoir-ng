@@ -14,6 +14,7 @@
 
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { Filter } from '../pageable.model';
+import { ColumnDefition } from '../table.component';
 
 @Component({
     selector: 'shanoir-table-search',
@@ -23,7 +24,7 @@ import { Filter } from '../pageable.model';
 
 export class TableSearchComponent implements OnChanges {
 
-    @Input() columnDefs: any[];
+    @Input() columnDefs: ColumnDefition[];
     @Input() filter: Filter; 
     @Output() filterChange: EventEmitter<Filter> = new EventEmitter<Filter>();
     searchableColumns: any[] = [];

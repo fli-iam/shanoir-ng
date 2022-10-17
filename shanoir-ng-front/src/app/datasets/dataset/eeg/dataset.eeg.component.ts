@@ -15,7 +15,7 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { EegDataset } from './dataset.eeg.model';
-import { TableComponent } from '../../../shared/components/table/table.component';
+import { ColumnDefition, TableComponent } from '../../../shared/components/table/table.component';
 import { BrowserPaging } from '../../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../../shared/components/table/pageable.model';
 import{ Channel }from '../eeg/dataset.eeg.model';
@@ -31,33 +31,18 @@ export class EegDatasetComponent implements OnInit  {
     @Input() public dataset: EegDataset;
     @ViewChild('channelsTable') table: TableComponent;
 
-    public columnDefs: any[];
+    public columnDefs: ColumnDefition[];
 
     private browserPaging: BrowserPaging<Channel>;
     private channelPromise: Promise<any>;
 
     ngOnInit(): void {
 
-        function checkNullValue(value: any) {
-            if (value) {
-                return value;
-            }
-            return '';
-        };
-
         this.columnDefs = [
-           {headerName: 'Name', field: 'name', type: 'string', cellRenderer: (params: any) => {
-                    return checkNullValue(params.data.name);
-            }},
-            {headerName: 'Resolution', field: 'resolution', type: 'string', cellRenderer: (params: any) => {
-                    return checkNullValue(params.data.resolution);
-            }},
-            {headerName: 'Units', field: 'referenceUnits', type: 'string', cellRenderer: (params: any) => {
-                    return checkNullValue(params.data.referenceUnits);
-            }},
-            {headerName: 'Type', field: 'referenceType', type: 'string', cellRenderer: (params: any) => {
-                    return checkNullValue(params.data.referenceType);
-            }},
+           {headerName: 'Name', field: 'name', type: 'string'},
+            {headerName: 'Resolution', field: 'resolution', type: 'string'},
+            {headerName: 'Units', field: 'referenceUnits', type: 'string'},
+            {headerName: 'Type', field: 'referenceType', type: 'string'},
             {headerName: 'Position', field: 'position', type: 'string', cellRenderer: (params: any) => {
                     if (params.data.x == null && params.data.z == null && params.data.y == null) {
                         return 'N/A'
@@ -65,15 +50,9 @@ export class EegDatasetComponent implements OnInit  {
                         return params.data.x + ' ' + params.data.y + ' ' + params.data.z;
                     }
             }},
-            {headerName: 'low cutoff', field: 'lowCutoff', type: 'number', cellRenderer: (params: any) => {
-                    return checkNullValue(params.data.lowCutoff);
-            }},
-            {headerName: 'High cutoff', field: 'highCutoff', type: 'number', cellRenderer: (params: any) => {
-                    return checkNullValue(params.data.highCutoff);
-            }},
-            {headerName: 'Notch', field: 'notch', type: 'number', cellRenderer: (params: any) => {
-                    return checkNullValue(params.data.notch);
-            }}
+            {headerName: 'low cutoff', field: 'lowCutoff', type: 'number'},
+            {headerName: 'High cutoff', field: 'highCutoff', type: 'number'},
+            {headerName: 'Notch', field: 'notch', type: 'number'}
         ];
 
         this.channelPromise = Promise.resolve().then(() => {

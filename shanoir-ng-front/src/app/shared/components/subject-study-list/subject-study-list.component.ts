@@ -23,7 +23,7 @@ import { Option } from '../../select/select.component';
 import { Mode } from '../entity/entity.component.abstract';
 import { BrowserPaging } from '../table/browser-paging.model';
 import { FilterablePageable, Page } from '../table/pageable.model';
-import { TableComponent } from '../table/table.component';
+import { ColumnDefition, TableComponent } from '../table/table.component';
 import { combineLatest, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { Subject as RxjsSubject} from 'rxjs';
@@ -51,7 +51,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
     hasTags: boolean;
-    columnDefs: any[];
+    columnDefs: ColumnDefition[];
     @ViewChild('table') table: TableComponent;
     private subjectOrStudyObs: RxjsSubject <Subject | Study> = new RxjsSubject();
     private subjectStudyListObs: RxjsSubject<SubjectStudy[]> = new RxjsSubject();
@@ -129,7 +129,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         } 
         this.columnDefs.push(
             { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
-            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', suppressSorting: true }
+            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', disableSorting: true }
         );
         if (this.displaySubjectType) {
             this.columnDefs.push(
