@@ -42,7 +42,6 @@ import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.studycard.dto.StudyCardOnStudyResult;
@@ -200,7 +199,7 @@ public class StudyCardProcessingService {
 			}
 			return studyCardOnStudyResultList;
 		} else {
-			throw new ShanoirException("Study card used with emtpy rules.");
+			throw new RestClientException("Study card used with emtpy rules.");
 		}
 	}
 	
