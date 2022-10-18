@@ -137,7 +137,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
             );
         }
         this.columnDefs.push(
-            { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item.subject.id) }
+            { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item.subject?.id) }
         );
         if (this.mode != 'view') {
             this.columnDefs.push(
