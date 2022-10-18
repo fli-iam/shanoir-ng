@@ -46,9 +46,9 @@ import org.springframework.stereotype.Component;
  *
  */
 @Component
-public class DICOMWebClientService {
+public class DICOMWebService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebClientService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DICOMWebService.class);
 
 	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
 	
@@ -136,30 +136,6 @@ public class DICOMWebClientService {
 				} else {
 					LOG.error("DICOMWeb: findSerieMetadataOfStudy: empty response entity.");				
 				}
-			}
-		} catch (Exception e) {
-			LOG.error(e.getMessage(), e);
-		}
-		return null;
-	}
-	
-	/**
-	 * QIDO call to DICOM server: QIDO-RS Search For Series.
-	 * Use with &includefield={attributeID} to query for desired attribute.
-	 * 
-	 * @param studyInstanceUID
-	 * @param serieInstanceUID
-	 * @param query
-	 * @return
-	 */
-	public String searchForSerieOfStudy(String studyInstanceUID, String serieInstanceUID, String query) {
-		try {
-			String url = this.serverURL + "/" + studyInstanceUID + "/series?SeriesInstanceUID=" + serieInstanceUID + query;
-			HttpGet httpGet = new HttpGet(url);
-			CloseableHttpResponse response = httpClient.execute(httpGet);
-			HttpEntity entity = response.getEntity();
-			if (entity != null) {
-				return EntityUtils.toString(entity);
 			}
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
