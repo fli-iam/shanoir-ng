@@ -16,7 +16,8 @@ import { Component, ViewChild } from '@angular/core';
 import {
     BrowserPaginEntityListComponent,
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
-import { ColumnDefition, TableComponent } from '../../../../shared/components/table/table.component';
+import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefition } from '../../../../shared/components/table/column.definition.type';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -62,24 +63,11 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
     }
     
     getColumnDefs(): ColumnDefition[] {
-        function checkNullValue(value: any) {
-            if(value){
-                return value;
-            }
-            return '';
-        };
-        let colDef: ColumnDefition[] = [
-            {headerName: "Name", field: "name", type: "string", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.name);
-            }},
-            {headerName: "Type", field: "anestheticType", cellRenderer: function (params: any) {
-                return AnestheticType[params.data.anestheticType];
-            }},
-            {headerName: "Comment", field: "comment", type: "string", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.comment);
-            }}    
-        ];
-        return colDef;       
+        return [
+            {headerName: "Name", field: "name", type: "string"},
+            {headerName: "Type", field: "anestheticType"},
+            {headerName: "Comment", field: "comment", type: "string"}    
+        ];     
     }
 
     getCustomActionsDefs(): any[] {

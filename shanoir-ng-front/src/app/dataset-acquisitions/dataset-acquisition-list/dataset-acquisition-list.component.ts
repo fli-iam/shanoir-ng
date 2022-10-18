@@ -13,7 +13,8 @@
  */
 
 import { Component, ViewChild } from '@angular/core';
-import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';

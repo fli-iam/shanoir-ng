@@ -24,7 +24,8 @@ import { ConsoleService } from '../../console/console.service';
 import { WindowService } from '../../services/window.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
-import { ColumnDefition, TableComponent } from '../table/table.component';
+import { TableComponent } from '../table/table.component';
+import { ColumnDefition } from '..//table/column.definition.type';
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
 

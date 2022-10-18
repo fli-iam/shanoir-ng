@@ -19,7 +19,7 @@ import { StudyCardListComponent } from './study-card-list.component';
 import { StudyCardService } from '../shared/study-card.service';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { ActivatedRoute } from '@angular/router';
-import { ColumnDefition } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 
 
 

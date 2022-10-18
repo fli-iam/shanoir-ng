@@ -28,7 +28,8 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
-import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 import { CarminDatasetProcessingService } from 'src/app/carmin/shared/carmin-dataset-processing.service';
 import { CarminDatasetProcessing } from 'src/app/carmin/models/CarminDatasetProcessing';
 

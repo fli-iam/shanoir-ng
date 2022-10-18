@@ -19,7 +19,8 @@ import { preventInitialChildAnimations, slideDown } from '../../shared/animation
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
-import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { Option } from '../../shared/select/select.component';
 import { User } from '../../users/shared/user.model';

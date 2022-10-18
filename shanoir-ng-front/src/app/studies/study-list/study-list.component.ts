@@ -14,7 +14,8 @@
 import { Component, ViewChild } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';

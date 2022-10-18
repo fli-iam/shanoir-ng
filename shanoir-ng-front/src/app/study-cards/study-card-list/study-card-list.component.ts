@@ -15,7 +15,8 @@
 import { Component, ViewChild } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';

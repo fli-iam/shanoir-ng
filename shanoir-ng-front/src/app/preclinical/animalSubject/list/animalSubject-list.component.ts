@@ -19,7 +19,8 @@ import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-cat
 import { AnimalSubject } from '../shared/animalSubject.model';
 import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../shared/animalSubject.service';
-import { ColumnDefition, TableComponent } from '../../../shared/components/table/table.component';
+import { TableComponent } from '../../../shared/components/table/table.component';
+import { ColumnDefition } from '../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ServiceLocator } from '../../../utils/locator.service';
 import { ShanoirError } from '../../../shared/models/error.model';

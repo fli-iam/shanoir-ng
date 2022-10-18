@@ -13,7 +13,8 @@
  */
 
 import { Pageable, Page, Sort, FilterablePageable, Filter } from './pageable.model';
-import { ColumnDefition, TableComponent } from './table.component';
+import { TableComponent } from './table.component';
+import { ColumnDefition } from './column.definition.type';
 
 export class BrowserPaging<T> {
 

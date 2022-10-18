@@ -16,7 +16,8 @@ import { Component, ViewChild } from '@angular/core';
 
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
-import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
@@ -76,7 +77,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
                 disableSorting: true
 			},
             {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
-            {headerName: "Comment", field: "originMetadata.comment"},
+            {headerName: "Comment", field: "originMetadata.comment", },
         ];
     }
 

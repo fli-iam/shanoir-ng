@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { ApplicationRef, ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
 import { fromEvent, Subscription } from 'rxjs';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
@@ -22,32 +22,7 @@ import * as shajs from 'sha.js';
 import { SolrResultPage } from '../../../solr/solr.document.model';
 import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
-
-export type ColumnDefition = {
-    headerName?: string, /* the header for that column */
-    field?: string, /* the row item's field displayed in this column, ie if the item is 'car' you can set 'owner' or 'owner.name' as field */
-    defaultField?: string, /* used if field gives nothing */
-    type?: 'string' | 'number' | 'boolean' | 'button' | 'link' | 'date' | 'progress', /* default is string, progress should be included in [0, 1] */
-    defaultSortCol?: boolean, /* tells if the table is sorted by this column by default */
-    defaultAsc?: boolean, /* tells if the default sorting (the first click) for this column is ascending */
-    orderBy?: string[], /* when ordering by this columns has to be based on another field(s), ie: {field: 'equipment', orderBy: ['equipment.id']} */
-    disableSorting?: boolean, /* disable the possibility of sorting the table based on that column */
-    width?: string, /* default width of the column as a css representation (20px, 15%, ...) */
-    hidden?: boolean,
-    possibleValues?: any[] | ((item: any) => any[]), /* a list or a function that return a list of possible values for using a select box as an input for ths column in edit mode */
-    multi?: boolean, /* tells if this field is an array */
-    route?: (item: any) => string, /* builds the route string that will be used when clicking a cell from this column */
-    cellRenderer?: ((params?: {data?: any}) => any), /* custom function that should return the displayed value of data (= the item) for this column */
-    action?: (item: any) => void, /* perform an action when clicking a button type cell */
-    condition?: (item: any) => boolean, /* condition for displaying a button */ 
-    awesome?: `fa${string} fa${string}`, /* boolean true value icon representation or button icon. See https://fontawesome.com/icons/ */
-    color?: string, /* css color the the awesome icon */ 
-    awesomeFalse?: `fa${string} fa${string}`, /* boolean false value icon */
-    colorFalse?: string, /* css color the the awesome icon */ 
-    tip?: string, /* add a descrption when cursor stands still a few second over the column */
-    editable?: boolean | ((item: any) => boolean), /* is this field editable in edit mode ? */
-    onEdit?: (item: any, fieldValue: any) => void, /* field edition callback */
-}
+import { ColumnDefition } from './column.definition.type';
 
 @Component({
     selector: 'shanoir-table',

@@ -23,7 +23,8 @@ import { ConfirmDialogService } from '../shared/components/confirm-dialog/confir
 
 import { AfterViewChecked } from "@angular/core";
 import { Pageable } from "../shared/components/table/pageable.model";
-import { ColumnDefition, TableComponent } from "../shared/components/table/table.component";
+import { TableComponent } from "../shared/components/table/table.component";
+import { ColumnDefition } from '../shared/components/table/column.definition.type';
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
 import { SolrService } from "./solr.service";
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';

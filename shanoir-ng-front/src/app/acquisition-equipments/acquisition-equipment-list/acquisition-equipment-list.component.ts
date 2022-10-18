@@ -17,7 +17,8 @@ import { Step } from '../../breadcrumbs/breadcrumbs.service';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
-import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';

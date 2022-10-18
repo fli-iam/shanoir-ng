@@ -16,7 +16,8 @@ import {Component,ViewChild} from '@angular/core';
 
 import { Reference } from '../shared/reference.model';
 import { ReferenceService } from '../shared/reference.service';
-import { ColumnDefition, TableComponent } from '../../../shared/components/table/table.component';
+import { TableComponent } from '../../../shared/components/table/table.component';
+import { ColumnDefition } from '../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 

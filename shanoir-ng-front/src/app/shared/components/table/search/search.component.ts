@@ -13,8 +13,8 @@
  */
 
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { ColumnDefition } from '../column.definition.type';
 import { Filter } from '../pageable.model';
-import { ColumnDefition } from '../table.component';
 
 @Component({
     selector: 'shanoir-table-search',

@@ -22,7 +22,7 @@ import { Frequency } from "../../../shared/enum/frequency";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { ColumnDefition } from '../../../../shared/components/table/table.component';
+import { ColumnDefition } from '../../../../shared/components/table/column.definition.type';
 
 @Component({
     selector: 'subject-therapy-list',
@@ -98,18 +98,6 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
         function castToString(id: number) {
             return String(id);
         };
-        function checkNullValue(value: any) {
-            if (value) {
-                return value;
-            }
-            return '';
-        };
-        function checkNullValueReference(reference: any) {
-            if (reference) {
-                return reference.value;
-            }
-            return '';
-        };
         let colDef: ColumnDefition[] = [  
             { headerName: "Therapy", field: "therapy.name" },
             {
@@ -117,21 +105,9 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
                     return TherapyType[params.data.therapy.therapyType];
                 }
             },
-            {
-                headerName: "Dose", field: "dose", type: "number", cellRenderer: function(params: any) {
-                    return checkNullValue(params.data.dose);
-                }
-            },
-            {
-                headerName: "Molecule", field: "molecule", type: "string", cellRenderer: function(params: any) {
-                    return checkNullValue(params.data.molecule);
-                }
-            },
-            {
-                headerName: "Dose Unit", field: "dose_unit.value", cellRenderer: function(params: any) {
-                    return checkNullValueReference(params.data.dose_unit);
-                }
-            },
+            { headerName: "Dose", field: "dose", type: "number" },
+            { headerName: "Molecule", field: "molecule", type: "string" },
+            { headerName: "Dose Unit", field: "dose_unit.value" },
             {
                 headerName: "Type", field: "frequency", cellRenderer: function (params: any) {
                     return Frequency[params.data.frequency];

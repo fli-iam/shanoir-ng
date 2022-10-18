@@ -15,7 +15,8 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { EegDataset } from './dataset.eeg.model';
-import { ColumnDefition, TableComponent } from '../../../shared/components/table/table.component';
+import { TableComponent } from '../../../shared/components/table/table.component';
+import { ColumnDefition } from '../../../shared/components/table/column.definition.type';
 import { BrowserPaging } from '../../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../../shared/components/table/pageable.model';
 import{ Channel }from '../eeg/dataset.eeg.model';

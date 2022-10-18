@@ -4,7 +4,8 @@ import { EntityListComponent } from 'src/app/shared/components/entity/entity-lis
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
 import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
-import { ColumnDefition, TableComponent } from 'src/app/shared/components/table/table.component';
+import { TableComponent } from 'src/app/shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 import { CarminDatasetProcessing } from '../models/CarminDatasetProcessing';
 import { CarminDatasetProcessingService } from '../shared/carmin-dataset-processing.service';
 

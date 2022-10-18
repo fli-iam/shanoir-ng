@@ -28,7 +28,7 @@ import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
-import { ColumnDefition } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 
 export type Status = 'default' | 'loading' | 'done' | 'error';
 @Component({

@@ -15,7 +15,8 @@ import { Component, ViewChild } from '@angular/core';
 
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';

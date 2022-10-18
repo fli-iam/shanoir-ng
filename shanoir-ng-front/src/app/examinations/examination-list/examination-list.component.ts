@@ -14,7 +14,8 @@
 import { Component, ViewChild } from '@angular/core';
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
-import { ColumnDefition, TableComponent } from '../../shared/components/table/table.component';
+import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefition } from '../../shared/components/table/column.definition.type';
 import { StudyService } from '../../studies/shared/study.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';

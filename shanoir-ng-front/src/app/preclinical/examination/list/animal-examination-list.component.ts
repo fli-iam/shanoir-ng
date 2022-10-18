@@ -19,7 +19,8 @@ import { ExaminationAnestheticService } from '../../anesthetics/examination_anes
 import { ExtraDataService } from '../../extraData/extraData/shared/extradata.service';
 
 import {  Page, Pageable } from '../../../shared/components/table/pageable.model';
-import { ColumnDefition, TableComponent } from '../../../shared/components/table/table.component';
+import { TableComponent } from '../../../shared/components/table/table.component';
+import { ColumnDefition } from '../../../shared/components/table/column.definition.type';
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
 import { ShanoirError } from '../../../shared/models/error.model';
 import { ServiceLocator } from '../../../utils/locator.service';

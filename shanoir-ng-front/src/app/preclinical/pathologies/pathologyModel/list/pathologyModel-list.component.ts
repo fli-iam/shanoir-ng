@@ -16,7 +16,8 @@ import {Component,ViewChild} from '@angular/core';
 
 import { PathologyModel } from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
-import { ColumnDefition, TableComponent } from '../../../../shared/components/table/table.component';
+import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
@@ -50,19 +51,11 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
     }
 
     getColumnDefs(): ColumnDefition[] {
-        function checkNullValue(value: any) {
-            if(value){
-                return value;
-            }
-            return '';
-        };
         let colDef: ColumnDefition[] = [
             {headerName: "Name", field: "name"},
             {headerName: "Pathology", field: "pathology.name"},
             {headerName: "Comment", field: "comment"},
-            {headerName: "Specifications file", field: "filename", type: "string", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.filename);
-            }} 
+            {headerName: "Specifications file", field: "filename", type: "string"} 
             
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {

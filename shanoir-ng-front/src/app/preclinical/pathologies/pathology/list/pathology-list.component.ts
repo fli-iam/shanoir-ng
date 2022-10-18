@@ -24,7 +24,8 @@ import { PathologyService } from '../shared/pathology.service';
 import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
-import { ColumnDefition, TableComponent } from '../../../../shared/components/table/table.component';
+import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
