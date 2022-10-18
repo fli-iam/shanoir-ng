@@ -60,7 +60,7 @@ VALUES
 	(2,2,2,4);
 
 INSERT INTO study_card_condition_value
-	(id, study_card_condition_id, value)
+	(id, condition_id, value)
 VALUES
 	(1,1,'tof'),
 	(2,1,'flight'),

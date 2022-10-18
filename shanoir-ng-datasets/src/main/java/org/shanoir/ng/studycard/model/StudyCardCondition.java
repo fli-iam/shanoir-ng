@@ -39,7 +39,7 @@ public class StudyCardCondition extends AbstractEntity {
 	private int dicomTagOrField;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name="study_card_condition_id")
+	@JoinColumn(name="condition_id")
 	private List<StudyCardConditionValue> values;
 	
 	@NotNull
