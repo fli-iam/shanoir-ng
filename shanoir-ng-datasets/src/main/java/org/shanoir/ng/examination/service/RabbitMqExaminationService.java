@@ -14,12 +14,16 @@
 package org.shanoir.ng.examination.service;
 
 import java.io.File;
+import java.util.Optional;
 
+import org.hibernate.SessionFactory;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -49,13 +53,22 @@ public class RabbitMqExaminationService {
 	
 	@Autowired
 	ShanoirEventService eventService;
-	
+
+	@Autowired
+	SubjectRepository subjectRepository;
+
 	@RabbitListener(queues = RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE)
 	@RabbitHandler
-	@Transactional
+	@Transactional()
 	public Long createExamination(Message message) {
 		try {
 			Examination exam = mapper.readValue(message.getBody(), Examination.class);
+			
+			Subject subj = exam.getSubject();
+			Optional<Subject> dbSubject = subjectRepository.findById(subj.getId());
+			if (!dbSubject.isPresent()) {
+				subjectRepository.save(subj);
+			}
 
 			exam = examRepo.save(exam);
 			return exam.getId();

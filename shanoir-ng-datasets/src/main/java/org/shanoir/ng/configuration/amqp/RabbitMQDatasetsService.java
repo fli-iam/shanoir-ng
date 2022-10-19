@@ -176,7 +176,7 @@ public class RabbitMQDatasetsService {
 	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE)
 	@RabbitHandler
-	public void receiveSubjectNameUpdate(final String subjectStr) {		
+	public boolean receiveSubjectNameUpdate(final String subjectStr) {		
 		Subject su = receiveAndUpdateIdNameEntity(subjectStr, Subject.class, subjectRepository);
 		try {
 			if (su != null && su.getId() == null) throw new IllegalStateException("The subject should must have an id !");
@@ -211,7 +211,7 @@ public class RabbitMQDatasetsService {
 			for (Study stud : studyRepository.findAllById(studyIds)) {
 				bidsService.deleteBidsFolder(stud.getId(), stud.getName());
 			}
-			
+			return true;
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
 		}
