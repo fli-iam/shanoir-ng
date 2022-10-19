@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
@@ -610,11 +611,13 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
-	public void applyStudyCardOnStudy(Long studyCardId) throws Exception {
+	public List<StudyCardOnStudyResultDTO> applyStudyCardOnStudy(Long studyCardId) throws Exception {
+		logger.info("Apply studycard on study, started on server.");
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLStudyCardsApplyOnStudy + studyCardId)) {
 			int code = response.getCode();
 			if (code == HttpStatus.SC_OK) {
-				logger.info("Apply studycard on study, started on server.");
+				List<StudyCardOnStudyResultDTO> results = Util.getMappedList(response, StudyCardOnStudyResultDTO.class);
+				return results;
 			} else {
 				logger.error("Error in applyStudyCardOnStudy: (status code: " + code
 						+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
