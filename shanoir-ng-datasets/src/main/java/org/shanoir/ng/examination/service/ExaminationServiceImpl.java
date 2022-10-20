@@ -238,6 +238,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 				}
 			}
 		}
+		examinationDb.setSubject(examination.getSubject());
 		examinationDb.setCenterId(examination.getCenterId());
 		examinationDb.setComment(examination.getComment());
 		examinationDb.setExaminationDate(examination.getExaminationDate());
