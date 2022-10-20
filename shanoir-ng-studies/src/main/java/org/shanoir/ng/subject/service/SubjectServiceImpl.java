@@ -238,9 +238,11 @@ public class SubjectServiceImpl implements SubjectService {
 	
 	public boolean updateSubjectName(SubjectDTO subject) throws MicroServiceCommunicationException{
 		try {
-			boolean result = (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE,
+			rabbitTemplate.
+					convertSendAndReceive(RabbitMQConfiguration.SUBJECT_NAME_UPDATE_QUEUE,
 					objectMapper.writeValueAsString(subject));
-			return result;
+			// If an error happens, an exception will be thrown
+			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update subject name.");
 		}
