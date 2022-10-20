@@ -912,7 +912,9 @@ public class ImporterApiController implements ImporterApi {
 				job.setStudyId(studyId);
 				job.setCenterId(centerId);
 				job.setStudyName(studyName);
-				job.getPatients().get(0).setSubject(subject);
+				for (Patient pat : job.getPatients()) {
+					pat.setSubject(subject);
+				}
 				job.setConverterId(converterId);
 
 				// STEP 4.4 Select all series

@@ -113,7 +113,7 @@ public class Examination extends HalEntity {
 	private Long studyId;
 
 	/** Subject. Can be null only if experimentalGroupOfSubjects is not null. */
-	@ManyToOne(cascade = {CascadeType.MERGE})
+	@ManyToOne
 	@JoinColumn(name = "subject_id")
 	private Subject subject;
 
