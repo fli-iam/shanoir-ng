@@ -88,6 +88,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
                     this.datasetProcessing = entity;
+                    this.onContextChange();
                     this.importDataService.contextBackup(this.stepTs).datasetProcessing = entity;
                 })
             );

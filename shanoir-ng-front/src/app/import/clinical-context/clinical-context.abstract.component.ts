@@ -132,45 +132,45 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public postConstructor() {};
 
     protected reloadSavedData(): Promise<void> {
-            this.reloading = true;
-            let promises: Promise<any>[] = [];
-            let study = this.importDataService.contextBackup(this.stepTs).study;
-            let studyCard = this.importDataService.contextBackup(this.stepTs).studyCard;
-            let useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
-            let center = this.importDataService.contextBackup(this.stepTs).center;
-            let acquisitionEquipment = this.importDataService.contextBackup(this.stepTs).acquisitionEquipment;
-            let subject = this.importDataService.contextBackup(this.stepTs).subject;
-            let examination = this.importDataService.contextBackup(this.stepTs).examination;
-            let niftiConverter = this.importDataService.contextBackup(this.stepTs).niftiConverter;
-            this.study = study;
-            let studyOption = this.studyOptions.find(s => s.value.id == study.id);
-            if (studyOption) {
-                this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
+        this.reloading = true;
+        let promises: Promise<any>[] = [];
+        let study = this.importDataService.contextBackup(this.stepTs).study;
+        let studyCard = this.importDataService.contextBackup(this.stepTs).studyCard;
+        let useStudyCard = this.importDataService.contextBackup(this.stepTs).useStudyCard;
+        let center = this.importDataService.contextBackup(this.stepTs).center;
+        let acquisitionEquipment = this.importDataService.contextBackup(this.stepTs).acquisitionEquipment;
+        let subject = this.importDataService.contextBackup(this.stepTs).subject;
+        let examination = this.importDataService.contextBackup(this.stepTs).examination;
+        let niftiConverter = this.importDataService.contextBackup(this.stepTs).niftiConverter;
+        this.study = study;
+        let studyOption = this.studyOptions.find(s => s.value.id == study.id);
+        if (studyOption) {
+            this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
+        }
+        promises.push(this.onSelectStudy().then(() => {
+            if (this.useStudyCard != useStudyCard) { 
+                this.useStudyCard = useStudyCard;
+                this.onToggleUseStudyCard();
+            } else if (useStudyCard && studyCard){
+                this.studycard = studyCard;
+                promises.push(this.onSelectStudyCard().then(() => this.restoreCenter(center, acquisitionEquipment)));
+            } else {
+                this.restoreCenter(center, acquisitionEquipment);
             }
-            promises.push(this.onSelectStudy().then(() => {
-                if (this.useStudyCard != useStudyCard) { 
-                    this.useStudyCard = useStudyCard;
-                    this.onToggleUseStudyCard();
-                } else if (useStudyCard && studyCard){
-                    this.studycard = studyCard;
-                    promises.push(this.onSelectStudyCard().then(() => this.restoreCenter(center, acquisitionEquipment)));
-                } else {
-                    this.restoreCenter(center, acquisitionEquipment);
-                }
-                if (subject) {
-                    this.subject = subject;
-                    promises.push(this.onSelectSubject().then(() => {
-                        if (examination) {
-                            this.examination = examination;
-                            return this.onSelectExam();
-                        }
-                    }));
-                }
-                if (niftiConverter) {
-                    this.niftiConverter = niftiConverter;
-                }
-            }));
-            return Promise.all(promises).then();
+            if (subject) {
+                this.subject = subject;
+                promises.push(this.onSelectSubject().then(() => {
+                    if (examination) {
+                        this.examination = examination;
+                        return this.onSelectExam();
+                    }
+                }));
+            }
+            if (niftiConverter) {
+                this.niftiConverter = niftiConverter;
+            }
+        }));
+        return Promise.all(promises).then();
     }
 
     private restoreEquipment(acquisitionEquipment: AcquisitionEquipment) {
@@ -605,7 +605,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             && (!context.useStudyCard || context.studyCard)
             && !!context.center
             && !!context.acquisitionEquipment
-            && !!context.subject
             && !!context.subject?.subjectStudy?.subjectType 
             && !!context.examination
             && !!context.niftiConverter

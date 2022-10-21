@@ -120,7 +120,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         Promise.all([this.fetchStudies(), processingPromise]).then(() => {
             this.study = this.studyOptions?.find(opt => opt.value.id == this.datasetProcessing.studyId)?.value;
             let subjectId = this.datasetProcessing.inputDatasets?.[0]?.subject?.id;
-            console.log(subjectId);
             this.fetchSubjects().then(() => {
                 this.subject = this.subjectOptions?.find(opt => opt.value.id == subjectId)?.value;
             });
