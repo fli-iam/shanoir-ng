@@ -17,7 +17,7 @@ import {
     BrowserPaginEntityListComponent,
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../../../shared/components/table/table.component';
-import { ColumnDefition } from '../../../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { ConsoleService } from '../../../../shared/console/console.service';
@@ -71,7 +71,7 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
         }
     }
     
-    getColumnDefs(): ColumnDefition[] {
+    getColumnDefs(): ColumnDefinition[] {
         return [
             {headerName: "Name", field: "name.value"},
             {headerName: "Concentration", field: "concentration", type: "number"},

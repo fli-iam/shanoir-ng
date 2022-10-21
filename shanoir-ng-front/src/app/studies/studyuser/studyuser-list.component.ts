@@ -20,7 +20,7 @@ import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { ColumnDefition } from '../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { Option } from '../../shared/select/select.component';
 import { User } from '../../users/shared/user.model';
@@ -53,7 +53,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     centers: Center[] = [];
     studyOptions: Option<Study>[];
     private browserPaging: BrowserPaging<StudyUser>;
-    columnDefs: ColumnDefition[];
+    columnDefs: ColumnDefinition[];
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];

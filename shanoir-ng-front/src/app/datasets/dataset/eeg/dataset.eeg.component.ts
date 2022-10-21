@@ -16,7 +16,7 @@ import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { EegDataset } from './dataset.eeg.model';
 import { TableComponent } from '../../../shared/components/table/table.component';
-import { ColumnDefition } from '../../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
 import { BrowserPaging } from '../../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../../shared/components/table/pageable.model';
 import{ Channel }from '../eeg/dataset.eeg.model';
@@ -32,7 +32,7 @@ export class EegDatasetComponent implements OnInit  {
     @Input() public dataset: EegDataset;
     @ViewChild('channelsTable') table: TableComponent;
 
-    public columnDefs: ColumnDefition[];
+    public columnDefs: ColumnDefinition[];
 
     private browserPaging: BrowserPaging<Channel>;
     private channelPromise: Promise<any>;

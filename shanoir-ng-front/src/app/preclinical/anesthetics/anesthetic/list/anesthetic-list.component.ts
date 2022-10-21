@@ -17,7 +17,7 @@ import {
     BrowserPaginEntityListComponent,
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../../../shared/components/table/table.component';
-import { ColumnDefition } from '../../../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -62,7 +62,7 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
         return this.anestheticsService.getAll();
     }
     
-    getColumnDefs(): ColumnDefition[] {
+    getColumnDefs(): ColumnDefinition[] {
         return [
             {headerName: "Name", field: "name", type: "string"},
             {headerName: "Type", field: "anestheticType"},

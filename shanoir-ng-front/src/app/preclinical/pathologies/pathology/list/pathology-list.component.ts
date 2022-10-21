@@ -25,7 +25,7 @@ import { ImagesUrlUtil } from '../../../../shared/utils/images-url.util';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { TableComponent } from '../../../../shared/components/table/table.component';
-import { ColumnDefition } from '../../../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -60,11 +60,11 @@ export class PathologiesListComponent extends BrowserPaginEntityListComponent<Pa
         return this.pathologyService.getAll();
     }
     
-    getColumnDefs(): ColumnDefition[] {
+    getColumnDefs(): ColumnDefinition[] {
         function castToString(id: number) {
             return String(id);
         };
-        let colDef: ColumnDefition[] = [
+        let colDef: ColumnDefinition[] = [
             {headerName: "ID", field: "id", type: "number", cellRenderer: function (params: any) {
                 return castToString(params.data.id);
             }},

@@ -19,7 +19,7 @@ import { InjectionInterval } from "../../shared/enum/injectionInterval";
 import { InjectionSite } from "../../shared/enum/injectionSite";
 import { InjectionType } from "../../shared/enum/injectionType";
 import { TableComponent } from '../../../shared/components/table/table.component';
-import { ColumnDefition } from '../../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -48,7 +48,7 @@ export class ContrastAgentsListComponent extends BrowserPaginEntityListComponent
         return this.contrastAgentsService.getContrastAgents(this.protocol_id);
     }
 
-    getColumnDefs(): ColumnDefition[] {
+    getColumnDefs(): ColumnDefinition[] {
         return [
             {headerName: "Name", field: "name.value"},
             {headerName: "Manufactured Name", field: "manufactured_name", type: "string"},

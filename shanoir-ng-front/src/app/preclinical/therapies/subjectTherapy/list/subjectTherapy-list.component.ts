@@ -22,7 +22,7 @@ import { Frequency } from "../../../shared/enum/frequency";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { ColumnDefition } from '../../../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 
 @Component({
     selector: 'subject-therapy-list',
@@ -88,7 +88,7 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
         return Promise.resolve(subjectTherapies);
     }
 
-    getColumnDefs(): ColumnDefition[] {
+    getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date) {
             if (date) {
                 return new Date(date).toLocaleDateString();
@@ -98,7 +98,7 @@ export class SubjectTherapiesListComponent extends SubjectAbstractListInput<Subj
         function castToString(id: number) {
             return String(id);
         };
-        let colDef: ColumnDefition[] = [  
+        let colDef: ColumnDefinition[] = [  
             { headerName: "Therapy", field: "therapy.name" },
             {
                 headerName: "Type", field: "therapy.therapyType", cellRenderer: function(params: any) {

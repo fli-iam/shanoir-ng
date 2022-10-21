@@ -15,7 +15,7 @@ import { Component, ViewChild } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { ColumnDefition } from '../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
@@ -47,8 +47,8 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         return this.studyService.getAll();
     }
 
-    getColumnDefs(): ColumnDefition[] {
-        let colDef: ColumnDefition[] = [
+    getColumnDefs(): ColumnDefinition[] {
+        let colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
             {
                 headerName: "Status", field: "studyStatus", width: '70px', cellRenderer: function (params: any) {

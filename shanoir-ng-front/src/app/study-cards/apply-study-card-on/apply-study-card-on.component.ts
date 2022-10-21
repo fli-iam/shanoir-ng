@@ -28,7 +28,7 @@ import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
-import { ColumnDefition } from '../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 
 export type Status = 'default' | 'loading' | 'done' | 'error';
 @Component({
@@ -156,8 +156,8 @@ export class ApplyStudyCardOnComponent implements OnInit {
         });
     }
 
-    getColumnDefs(): ColumnDefition[] {
-        let colDef: ColumnDefition[] = [
+    getColumnDefs(): ColumnDefinition[] {
+        let colDef: ColumnDefinition[] = [
             { headerName: "Compatible", type: "boolean", cellRenderer: row => this.isCompatible(row.data.acquisitionEquipment?.id), awesome: "fa-solid fa-circle", awesomeFalse: "fa-solid fa-triangle-exclamation", color: "green", colorFalse: "orangered", disableSorting: true },
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
             { headerName: 'Type', field: 'type', width: '22px'},

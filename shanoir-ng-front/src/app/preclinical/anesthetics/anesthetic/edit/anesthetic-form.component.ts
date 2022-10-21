@@ -31,7 +31,7 @@ import { EntityComponent } from '../../../../shared/components/entity/entity.com
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { slideDown } from '../../../../shared/animations/animations';
 import { TableComponent } from '../../../../shared/components/table/table.component';
-import { ColumnDefition } from '../../../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -57,7 +57,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     units: Reference[];
 
     private browserPaging: BrowserPaging<AnestheticIngredient>;
-    public columnDefs: ColumnDefition[];
+    public columnDefs: ColumnDefinition[];
     private ingredientsPromise: Promise<any>;
 
     public toggleFormAI: boolean = false;

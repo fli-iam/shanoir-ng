@@ -29,7 +29,7 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
-import { ColumnDefition } from '../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { CarminDatasetProcessingService } from 'src/app/carmin/shared/carmin-dataset-processing.service';
 import { CarminDatasetProcessing } from 'src/app/carmin/models/CarminDatasetProcessing';
 
@@ -48,6 +48,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public study: Study;
     public subject: Subject;
     public studyOptions: Option<Study>[] = [];
+    public subjectOptions: Option<Subject>[] = [];
     public inputDatasetOptions: Option<Dataset>[] = [];
     private inputDatasetsPromise: Promise<any>;
     private outputDatasetsPromise: Promise<any>;
@@ -56,10 +57,12 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     private inputDatasetsToRemove: Dataset[] = [];
     private inputDatasetsToAdd: Dataset[] = [];
     private outputDatasetsToRemove: Dataset[] = [];
-    public inputDatasetsColumnDefs: ColumnDefition[];
-    public outputDatasetsColumnDefs: ColumnDefition[];
+    public inputDatasetsColumnDefs: ColumnDefinition[];
+    public outputDatasetsColumnDefs: ColumnDefinition[];
     public isCarminDatasetProcessingEntity: boolean = false;
     public carminDatasetProcessing: CarminDatasetProcessing;
+    prefilledStudy: Study;
+    prefilledSubject: Subject;
 
     constructor(
             private route: ActivatedRoute,
@@ -97,91 +100,135 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             this.carminDatasetProcessingService.getCarminDatasetProcessing(entity.id).subscribe(
                 (carminDatasetProcessing: CarminDatasetProcessing) => {
                     this.setCarminDatasetProcessing(carminDatasetProcessing);
-                },
-                (error)=>{
+                }, (error) => {
                     // 404 : if it's not found then it's not carmin type !
                     this.resetCarminDatasetProcessing();
                 }
             )
-            
-            this.setDatasetProcessing(entity);
+
+            this.datasetProcessing = entity;
+            this.fetchOneStudy(this.datasetProcessing?.id).then(() => {
+                this.study = this.studyOptions?.[0]?.value;
+            });
         })
     }
 
     initEdit(): Promise<void> {
-        return this.datasetProcessingService.get(this.id).then((entity)=> {
-            this.setDatasetProcessing(entity);
+        this.fetchStudies();
+        return this.datasetProcessingService.get(this.id).then(entity => {
+            this.datasetProcessing = entity;
         });
     }
 
     initCreate(): Promise<void> {
         this.datasetProcessing = new DatasetProcessing();
-        return Promise.resolve();
+        this.prefilledStudy = this.breadcrumbsService.currentStep.getPrefilledValue('study');
+        this.prefilledSubject = this.breadcrumbsService.currentStep.getPrefilledValue('subject');
+        return Promise.resolve().then(() => {
+            if (!!this.prefilledStudy) {
+                this.studyOptions = [new Option(this.prefilledStudy, this.prefilledStudy.name)];
+                this.study = this.prefilledStudy;
+                this.datasetProcessing.studyId = this.study?.id;
+            } else {
+                return this.fetchStudies();
+            }
+        }).then(() => {
+            if (!!this.prefilledSubject) {
+                this.subjectOptions = [new Option(this.prefilledSubject, this.prefilledSubject.name)];
+                this.subject = this.prefilledSubject;
+                return this.fetchDatasets();
+            }
+        })
+    }
+
+    onStudyChange() {
+        this.datasetProcessing.studyId = this.study?.id;
+        this.subjectOptions = [];
+        this.subject = null;
+        if (this.study) {
+            this.fetchSubjects();
+        }
+    }
+
+    onSubjectChange() {
+        this.inputDatasetOptions = [];  
+        if (this.datasetProcessing.inputDatasets?.length > 0 || this.datasetProcessing.outputDatasets?.length > 0) {
+            this.confirmDialogService.confirm('Change Subject', 'Are you sure you want to change the subject for this processing ? Every dataset input and output will be removed from the current lists.')
+            .then(response => {
+                if (response) {
+                    this.datasetProcessing.inputDatasets = [];
+                    this.datasetProcessing.outputDatasets = [];
+                    this.fetchDatasets();
+                }
+            });
+        } else {
+            this.fetchDatasets();
+        }
     }
 
     setCarminDatasetProcessing(carminDatasetProcessing: CarminDatasetProcessing){
         this.isCarminDatasetProcessingEntity = true;
         this.carminDatasetProcessing = carminDatasetProcessing;
     }
+
     resetCarminDatasetProcessing(){
         this.isCarminDatasetProcessingEntity = false;
     }
 
-    setDatasetProcessing(datasetProcessing: DatasetProcessing): Promise<void> {
-        this.datasetProcessing = datasetProcessing;
-        return this.studyService.get(this.datasetProcessing.studyId).then((study)=> {
-            this.studyOptions = [new Option<Study>(study, study.name)];
-            this.study = study;
-            return this.datasetService.getByStudyId(this.datasetProcessing.studyId);
-        }).then(datasets=> {
-            for(let dataset of datasets) {
-                this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
-                this.subject = dataset.subject;
-            }
-        }).then(() => {
-            datasetProcessing.outputDatasets.forEach((dataset, index) => {
-                datasetProcessing.outputDatasets[index].subject = this.subject;
-                datasetProcessing.outputDatasets[index].study = this.study;
-            });
-            datasetProcessing.inputDatasets.forEach((dataset, index) => {
-                datasetProcessing.inputDatasets[index].subject = this.subject;
-                datasetProcessing.inputDatasets[index].study = this.study;
-            });
-            this.outputDatasetsBrowserPaging.setItems(datasetProcessing.outputDatasets);
-            this.outputDatasetsTable.refresh();
-            this.inputDatasetsBrowserPaging.setItems(datasetProcessing.inputDatasets);
-            this.inputDatasetsTable.refresh();
-        })
+    fetchStudies(): Promise<void> {
+        return this.studyService.getAll().then(studies => {
+            this.studyOptions = studies?.map(study => new Option<Study>(study, study.name));
+        });
     }
 
-    private prefill() {
-        if (this.breadcrumbsService.currentStep.isPrefilled('subject')) {
-            let contextSubject = this.breadcrumbsService.currentStep.getPrefilledValue('subject');
-            this.subject = contextSubject;
-        }
-        if (this.breadcrumbsService.currentStep.isPrefilled('study')) {
-            let study = this.breadcrumbsService.currentStep.getPrefilledValue('study');
+    fetchOneStudy(studyId: number): Promise<void> {
+        return this.studyService.get(studyId).then(study=> {
             this.studyOptions = [new Option<Study>(study, study.name)];
-            this.study = study;
-            this.datasetProcessing.studyId = this.study.id;
-            this.datasetService.getByStudyIdAndSubjectId(this.study.id, this.subject.id).then(datasets=> {
-                for(let dataset of datasets) {
-                    this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
-                }   
-            })
-        }
+        });
+    }
+
+    fetchSubjects(): Promise<void> {
+        if (!this.study?.id) return Promise.resolve();
+        return this.studyService.findSubjectsByStudyId(this.study.id).then(subjects => {
+            this.subjectOptions = subjects?.map(sub => {
+                let subject: Subject = new Subject();
+                subject.id = sub.id;
+                subject.name = sub.name;
+                subject.identifier = sub.identifier;
+                return new Option<Subject>(subject, sub.name);
+            });
+        }).then();
+    }
+
+    fetchDatasets(): Promise<void> {
+        if (!this.study?.id || !this.subject?.id) return Promise.resolve();
+        return this.datasetService.getByStudyIdAndSubjectId(this.study.id, this.subject.id).then(datasets => {
+            for (let dataset of datasets) {
+                this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
+            }
+        });
     }
 
     buildForm(): FormGroup {
-        this.prefill();
-        return this.formBuilder.group({
-            'study': [this.study ? this.study.name : '', Validators.required],
+        let formGroup: FormGroup = this.formBuilder.group({
+            'study': [{value: this.study?.id, disabled: !!this.prefilledStudy}, Validators.required],
+            'subject': [{value: this.subject, disabled: (!!this.prefilledSubject || !this.study)}, Validators.required],
             'processingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
             'processingDate': [this.datasetProcessing.processingDate, Validators.required],
-            'inputDatasetList': [this.datasetProcessing.inputDatasets, Validators.minLength(1)],
+            'inputDatasetList': [{value: this.datasetProcessing.inputDatasets, disabled: !this.subject}, [Validators.required, Validators.minLength(1)]],
             'outputDatasetList': [this.datasetProcessing.outputDatasets],
             'comment': [this.datasetProcessing.comment]
         });
+        this.subscribtions.push(
+            formGroup.get('study').valueChanges.subscribe(studyVal => {
+                if (!!this.prefilledSubject || !studyVal) formGroup.get('subject').disable();
+                else formGroup.get('subject').enable();    
+            }), formGroup.get('subject').valueChanges.subscribe(subjectVal => {
+                if (!subjectVal) formGroup.get('inputDatasetList').disable();
+                else formGroup.get('inputDatasetList').enable();    
+            })
+        );
+        return formGroup;
     }
 
     public async hasEditRight(): Promise<boolean> {
@@ -215,11 +262,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             {headerName: "Subject", field: "subject.name"},
             {headerName: "Creation date", field: "creationDate", type: "date"}
         ];
-
-        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            this.inputDatasetsColumnDefs.push({ tip: "Delete", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeInputDataset(item) });
-        }
-
         this.outputDatasetsColumnDefs = this.inputDatasetsColumnDefs;
     }
 

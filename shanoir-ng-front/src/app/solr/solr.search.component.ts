@@ -24,7 +24,7 @@ import { ConfirmDialogService } from '../shared/components/confirm-dialog/confir
 import { AfterViewChecked } from "@angular/core";
 import { Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
-import { ColumnDefition } from '../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
 import { SolrService } from "./solr.service";
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
@@ -56,8 +56,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
     @ViewChildren(SolrPagingCriterionComponent) pagingCriterion: QueryList<SolrPagingCriterionComponent>;
     selections: SelectionBlock[] = [];
-    columnDefs: ColumnDefition[];
-    selectionColumnDefs: ColumnDefition[];
+    columnDefs: ColumnDefinition[];
+    selectionColumnDefs: ColumnDefinition[];
     customActionDefs: any[];
     selectionCustomActionDefs: any[];
     form: FormGroup;
@@ -397,7 +397,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             return null;
         };
 
-        let columnDefs: ColumnDefition[] = [
+        let columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
             {headerName: "Name", field: "datasetName"},
@@ -419,8 +419,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     // Grid columns definition
-    getColumnDefs(): ColumnDefition[] {
-        let columnDefs: ColumnDefition[] = this.getCommonColumnDefs();
+    getColumnDefs(): ColumnDefinition[] {
+        let columnDefs: ColumnDefinition[] = this.getCommonColumnDefs();
         if (this.role == 'admin') {
             columnDefs.push({headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: this.openDeleteConfirmDialog});
         } else if (this.role == 'expert') {
@@ -429,8 +429,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         return columnDefs;
     }
 
-    getSelectionColumnDefs(): ColumnDefition[] {
-        let columnDefs: ColumnDefition[] = this.getCommonColumnDefs();
+    getSelectionColumnDefs(): ColumnDefinition[] {
+        let columnDefs: ColumnDefinition[] = this.getCommonColumnDefs();
         columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-solid fa-ban", action: item => {
             this.selectedDatasetIds.delete(item.id);
             this.selectionTable.refresh();

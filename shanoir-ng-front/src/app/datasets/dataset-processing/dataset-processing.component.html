@@ -37,14 +37,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<label class="required-label">Research study</label>
 					<span class="right-col">
 						<select-box 
-								formControlName="study" [(ngModel)]="study" [options]="studyOptions" [disabled]="study">
+								formControlName="study" [(ngModel)]="study" [options]="studyOptions" (userChange)="onStudyChange()">
+						</select-box>
+					</span>
+				</li>
+				<li>
+					<label class="required-label">Subject</label>
+					<span class="right-col">
+						<select-box 
+								formControlName="subject" [(ngModel)]="subject" [options]="subjectOptions" (userChange)="onSubjectChange()">
 						</select-box>
 					</span>
 				</li>
 				<li>
 					<label i18n="Processing detail|Processing type label@@processingDetailProcessingType">Processing type</label> 
 					<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'"> 
+						<ng-template [ngSwitchCase]="'view'">
 							{{datasetProcessing.datasetProcessingType}}
 						</ng-template>
 						<ng-template ngSwitchDefault> 
@@ -112,21 +120,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					Input datasets
 					<tool-tip>Datasets given as input of this dataset processing.</tool-tip>
 				</legend>
-				<li *ngIf="mode!='view'">
-					<span class="right-col">
-						<select-box placeholder="Add a dataset..." (onAddClick)="onAddInputDataset($event)" [options]="inputDatasetOptions">
-						</select-box>
-					</span>
-				</li>
-				<li>
-					<shanoir-table #inputDatasetsTable
-						[getPage]="getInputDatasetsPage.bind(this)" 
-						[editMode]="mode != 'view'"
+				<multi-select-table
+						formControlName="inputDatasetList"
+						[(ngModel)]="datasetProcessing.inputDatasets"
+						[options]="inputDatasetOptions"
 						[columnDefs]="inputDatasetsColumnDefs"
-						[browserSearch]="false">
-					</shanoir-table>
-				</li>
-
+						[editMode]="mode != 'view'">
+				</multi-select-table>
 			<li>
 				<legend>
 					Output datasets

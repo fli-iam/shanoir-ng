@@ -363,9 +363,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     private subscribeToGlobalClick() {
         this.globalClickSubscription = this.globalService.onGlobalClick.subscribe((clickEvent: Event) => {
-            console.log('global click')
             if (!this.element.nativeElement.contains(clickEvent.target)) {
-                console.log('close')
                 this.close();
             }
         });
@@ -574,9 +572,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     @HostListener('focusout', ['$event']) 
     onFocusOut(event: FocusEvent) {
-        console.log('focusout', this.element.nativeElement, event.relatedTarget);
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
-            console.log('do close')
             this.close();
             this.onTouchedCallback();
             this.onTouch.emit();
@@ -597,7 +593,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     clickAdd(): void {
-        if(!this.addDisabled && this.selectedOption) this.onAddClick.emit(this.selectedOption.value);
+        if(!this.addDisabled && this.selectedOption && !this.selectedOption.disabled) this.onAddClick.emit(this.selectedOption.value);
     }
 
     setDisabledState(isDisabled: boolean) {

@@ -14,7 +14,7 @@
 
 import { Pageable, Page, Sort, FilterablePageable, Filter } from './pageable.model';
 import { TableComponent } from './table.component';
-import { ColumnDefition } from './column.definition.type';
+import { ColumnDefinition } from './column.definition.type';
 
 export class BrowserPaging<T> {
 
@@ -22,7 +22,7 @@ export class BrowserPaging<T> {
 
     constructor(
             private items: T[],
-            private columnDefs: ColumnDefition[]) {
+            private columnDefs: ColumnDefinition[]) {
         if (!this.items) throw Error('items cannot be null !');
     }
 
@@ -30,7 +30,7 @@ export class BrowserPaging<T> {
         this.items = items;
     }
     
-    public setColumnDefs(columnDefs: ColumnDefition[]) {
+    public setColumnDefs(columnDefs: ColumnDefinition[]) {
         this.columnDefs = columnDefs;
     }
 

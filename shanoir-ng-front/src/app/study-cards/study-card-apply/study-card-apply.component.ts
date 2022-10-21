@@ -19,7 +19,7 @@ import { DatasetService } from '../../datasets/shared/dataset.service';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
-import { ColumnDefition } from '../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 
@@ -74,7 +74,7 @@ export class StudyCardApplyComponent {
         });
     }
 
-    getColumnDefs(): ColumnDefition[] {
+    getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();

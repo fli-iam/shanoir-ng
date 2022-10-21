@@ -14,7 +14,7 @@
 
 import { AfterViewInit, Component, ViewChild } from '@angular/core';
 import { TableComponent } from '../shared/components/table/table.component';
-import { ColumnDefition } from '../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Task } from './task.model';
 import { TaskService } from './task.service';
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
@@ -73,7 +73,7 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     //     });
     // }
 
-    getColumnDefs(): ColumnDefition[] {
+    getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleString();

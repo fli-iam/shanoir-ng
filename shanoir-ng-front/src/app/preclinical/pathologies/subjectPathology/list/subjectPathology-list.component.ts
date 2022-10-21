@@ -20,7 +20,7 @@ import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSub
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { ColumnDefition } from '../../../../shared/components/table/column.definition.type';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 
 
 @Component({
@@ -87,14 +87,14 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
         return Promise.resolve(subjectPathologies);
     }
 
-     getColumnDefs(): ColumnDefition[] {
+     getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date) {
             if (date) {
                 return new Date(date).toLocaleDateString();
             }
             return null;
         };
-        let columnDefs: ColumnDefition[] = [
+        let columnDefs: ColumnDefinition[] = [
             { headerName: "Pathology", field: "pathology.name" },
             { headerName: "PathologyModel", field: "pathologyModel.name" },
             { headerName: "Location", field: "location.value" },
