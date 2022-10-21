@@ -111,6 +111,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     ngOnInit(): void {
+        this.stepTs = this.breadcrumbsService.currentStep.timestamp;
         this.reloading = !!this.importDataService.contextBackup(this.stepTs);
         if (this.reloading) {
             this.fetchStudies(false).then(() => {
