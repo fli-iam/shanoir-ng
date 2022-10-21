@@ -21,6 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </span> -->
 
 <select-box
+    *ngIf="!readOnly"
     [options]="options"
     [pipe]="pipe"
     [disabled]="disabled"
@@ -32,5 +33,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [getPage]="getPage.bind(this)" 
         [columnDefs]="columnDefs"
         [browserSearch]="false"
-        [editMode]="editMode">
+        [editMode]="!readOnly">
 </shanoir-table>

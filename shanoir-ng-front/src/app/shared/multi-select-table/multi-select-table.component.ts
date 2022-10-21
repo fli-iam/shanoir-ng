@@ -50,7 +50,6 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
     selectedOptions: Option<any>[] = [];
     @Input() columnDefs: ColumnDefinition[] = [];
     private browserPaging: BrowserPaging<any>;
-    @Input() editMode: boolean = false;
     @ViewChild('table', { static: false }) table: TableComponent;
 
 
@@ -83,7 +82,7 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
                 });
             }
             this.updateData();
-        } else if (changes.columnDefs && this.editMode) {
+        } else if (changes.columnDefs && !this.readOnly) {
             this.columnDefs?.push({tip: "Delete", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.onRemoveItem(item)})
         }
     }

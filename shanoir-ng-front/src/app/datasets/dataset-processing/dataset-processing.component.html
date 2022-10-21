@@ -35,18 +35,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</legend>
 				<li>
 					<label class="required-label">Research study</label>
-					<span class="right-col">
-						<select-box 
-								formControlName="study" [(ngModel)]="study" [options]="studyOptions" (userChange)="onStudyChange()">
-						</select-box>
+					<span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{study?.name}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<select-box formControlName="study" [(ngModel)]="study" [options]="studyOptions" (userChange)="onStudyChange()"></select-box>
+						</ng-template>
 					</span>
 				</li>
-				<li>
+				<li *ngIf="mode != 'view'">
 					<label class="required-label">Subject</label>
 					<span class="right-col">
-						<select-box 
-								formControlName="subject" [(ngModel)]="subject" [options]="subjectOptions" (userChange)="onSubjectChange()">
-						</select-box>
+						<select-box formControlName="subject" [(ngModel)]="subject" [options]="subjectOptions" (userChange)="onSubjectChange()"></select-box>
 					</span>
 				</li>
 				<li>
@@ -125,7 +126,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[(ngModel)]="datasetProcessing.inputDatasets"
 						[options]="inputDatasetOptions"
 						[columnDefs]="inputDatasetsColumnDefs"
-						[editMode]="mode != 'view'">
+						[readOnly]="mode == 'view'">
 				</multi-select-table>
 			<li>
 				<legend>

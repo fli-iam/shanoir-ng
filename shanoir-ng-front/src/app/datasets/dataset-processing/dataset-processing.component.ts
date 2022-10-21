@@ -107,17 +107,25 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             )
 
             this.datasetProcessing = entity;
-            this.fetchOneStudy(this.datasetProcessing?.id).then(() => {
+            this.fetchOneStudy(this.datasetProcessing?.studyId).then(() => {
                 this.study = this.studyOptions?.[0]?.value;
             });
         })
     }
 
     initEdit(): Promise<void> {
-        this.fetchStudies();
-        return this.datasetProcessingService.get(this.id).then(entity => {
+        let processingPromise: Promise<void> = this.datasetProcessingService.get(this.id).then(entity => {
             this.datasetProcessing = entity;
         });
+        Promise.all([this.fetchStudies(), processingPromise]).then(() => {
+            this.study = this.studyOptions?.find(opt => opt.value.id == this.datasetProcessing.studyId)?.value;
+            let subjectId = this.datasetProcessing.inputDatasets?.[0]?.subject?.id;
+            console.log(subjectId);
+            this.fetchSubjects().then(() => {
+                this.subject = this.subjectOptions?.find(opt => opt.value.id == subjectId)?.value;
+            });
+        });
+        return processingPromise;
     }
 
     initCreate(): Promise<void> {
