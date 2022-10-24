@@ -232,11 +232,22 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 					// Select the first study (comparing dates)
 					Study study = (Study) studiesIt.next();
-					// get study date
-					SimpleDateFormat format1 = new SimpleDateFormat("yyyyMMddHHMMSS.FFFFFF");
+					// get study date time
+					String[] acceptedFormats = {
+							"yyyyMMddHHMMSS.FFFFFF",
+							"yyyyMMddHHMMSS.FFFFF",
+							"yyyyMMddHHMMSS.FFFF",
+							"yyyyMMddHHMMSS.FFF",
+							"yyyyMMddHHMMSS.FF",
+							"yyyyMMddHHMMSS.F",
+							"yyyyMMddHHMMSS",
+							"yyyyMMddHHMMS",
+							"yyyyMMddHHMM",
+							"yyyyMMddHHM",
+							"yyyyMMddHH"};
 					Date studyDate = new Date();
 					try {
-						studyDate = format1.parse(study.getDescriptionMap().get("date") + study.getDescriptionMap().get("time"));
+						studyDate = DateUtils.parseDate(study.getDescriptionMap().get("date") + study.getDescriptionMap().get("time"), acceptedFormats);
 					} catch (ParseException e) {
 						// Could not get date => skip the study
 						continue;
