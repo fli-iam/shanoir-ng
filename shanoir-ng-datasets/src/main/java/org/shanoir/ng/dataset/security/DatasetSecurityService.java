@@ -398,7 +398,9 @@ public class DatasetSecurityService {
         if (dataset == null) {
 			throw new IllegalArgumentException("Dataset cannot be null here.");
 		}
-        if (dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
+        if (dataset.getDatasetAcquisition() == null 
+                || dataset.getDatasetAcquisition().getExamination() == null
+                || dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
 			return false;
 		}
         Set<Long> studies = new HashSet<>();
