@@ -36,6 +36,8 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -74,6 +76,9 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private SubjectRepository subjectService;
 
 	@Autowired
 	private DatasetService datasetService;
@@ -188,6 +193,8 @@ public class ExaminationServiceImpl implements ExaminationService {
 	@Override
 	public Examination save(final Examination examination) {
 		Examination savedExamination = null;
+		Subject subToSet = this.subjectService.findById(examination.getSubject().getId()).get();
+		examination.setSubject(subToSet);
 		savedExamination = examinationRepository.save(examination);
 		return savedExamination;
 	}
@@ -231,6 +238,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 				}
 			}
 		}
+		examinationDb.setSubject(examination.getSubject());
 		examinationDb.setCenterId(examination.getCenterId());
 		examinationDb.setComment(examination.getComment());
 		examinationDb.setExaminationDate(examination.getExaminationDate());

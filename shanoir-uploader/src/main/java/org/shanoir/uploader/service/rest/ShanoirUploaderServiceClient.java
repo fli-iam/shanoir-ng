@@ -61,6 +61,8 @@ public class ShanoirUploaderServiceClient {
 
 	private static final String SERVICE_DATASETS = "service.datasets";
 	
+	private static final String SERVICE_DATASETS_DICOM_WEB_STUDIES = "service.datasets.dicom.web.studies";
+	
 	private static final String SERVICE_SUBJECTS_CREATE = "service.subjects.create";
 	
 	private static final String SERVICE_EXAMINATIONS_CREATE = "service.examinations.create";
@@ -89,6 +91,8 @@ public class ShanoirUploaderServiceClient {
 	
 	private String serviceURLDatasets;
 	
+	private String serviceURLDatasetsDicomWebStudies;
+	
 	private String serviceURLSubjectsCreate;
 	
 	private String serviceURLExaminationsCreate;
@@ -110,40 +114,42 @@ public class ShanoirUploaderServiceClient {
 	 * HttpService with the final server's URL.
 	 */
 	public ShanoirUploaderServiceClient() {
-		
+
 		apiResponseMessages = new HashMap<Integer, String>();
 		apiResponseMessages.put(200, "ok");
 		apiResponseMessages.put(204, "no item found");
 		apiResponseMessages.put(401, "unauthorized");
 		apiResponseMessages.put(403, "forbidden");
 		apiResponseMessages.put(500, "unexpected error");
-		
+
 		this.serverURL = ShUpConfig.profileProperties.getProperty(SHANOIR_SERVER_URL);
-			this.serviceURLStudiesNamesAndCenters = this.serverURL
-				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
+
+		this.serviceURLStudiesNamesAndCenters = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
 		this.serviceURLStudyCardsByStudyIds = this.serverURL
-				+ ShUpConfig.profileProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
 		this.serviceURLAcquisitionEquipments = this.serverURL
-				+ ShUpConfig.profileProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
-			+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
-		this.serviceURLDatasets = this.serverURL
-			+ ShUpConfig.profileProperties.getProperty(SERVICE_DATASETS);
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
+		this.serviceURLDatasets = this.serverURL + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS);
+		this.serviceURLDatasetsDicomWebStudies = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS_DICOM_WEB_STUDIES);
 		this.serviceURLSubjectsCreate = this.serverURL
-				+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_CREATE);
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_CREATE);
 		this.serviceURLExaminationsCreate = this.serverURL
-				+ ShUpConfig.profileProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_CREATE);
 		this.serviceURLImporterCreateTempDir = this.serverURL
-				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_CREATE_TEMP_DIR);
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_CREATE_TEMP_DIR);
 		this.serviceURLImporterStartImportJob = this.serverURL
-				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_JOB);
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_START_IMPORT_JOB);
 		this.serviceURLImporterUploadDicom = this.serverURL
-				+ ShUpConfig.profileProperties.getProperty(SERVICE_IMPORTER_UPLOAD_DICOM);
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_IMPORTER_UPLOAD_DICOM);
 		this.serviceURLExaminationsBySubjectId = this.serverURL
-		+ ShUpConfig.profileProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_EXAMINATIONS_BY_SUBJECT_ID);
 		this.serviceURLSubjectsByStudyId = this.serverURL
-		+ ShUpConfig.profileProperties.getProperty(SERVICE_SUBJECTS_BY_STUDY_ID);
-		
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_BY_STUDY_ID);
+
 		this.httpService = new HttpService(this.serverURL);
 
 		logger.info("ShanoirUploaderService successfully initialized.");
@@ -598,4 +604,17 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
+	public void postDicomSR(File file) throws Exception {
+		try (CloseableHttpResponse response = httpService.postFileMultipartRelated(this.serviceURLDatasetsDicomWebStudies, file)) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+			} else {
+				logger.error("Error in postDicomSR: with file (path: "
+						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
+						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
+				throw new Exception("Error in postDicomSR");
+			}
+		}		
+	}
+	
 }

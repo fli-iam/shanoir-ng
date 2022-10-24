@@ -17,10 +17,10 @@ import { ControlValueAccessor } from '@angular/forms';
 import { Mode } from '../components/entity/entity.component.abstract';
 
 @Directive()
-export abstract class AbstractInput implements ControlValueAccessor {
+export abstract class AbstractInput<T> implements ControlValueAccessor {
 
     @Input() mode: Mode;
-    model: any;
+    model: T;
     disabled: boolean = false;
     propagateChange = (_: any) => {};
     protected propagateTouched = () => {};

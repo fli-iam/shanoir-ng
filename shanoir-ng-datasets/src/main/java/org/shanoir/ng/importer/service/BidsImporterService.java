@@ -86,7 +86,6 @@ public class BidsImporterService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BidsImporterService.class);
 
-
 	/**
 	 * Create BIDS dataset.
 	 * @param importJob the import job
@@ -149,7 +148,6 @@ public class BidsImporterService {
 			default:
 				if (event != null) {
 					LOG.error("The data type folder is not recognized. Please update your BIDS archive following the rules.");
-
 					event.setStatus(ShanoirEvent.ERROR);
 					event.setMessage("The data type folder is not recognized. Please update your BIDS archive following the rules.");
 					event.setProgress(1f);

@@ -246,7 +246,7 @@ export function isFunction(obj) {
     return !!(obj && obj.constructor && obj.call && obj.apply);
 }
 
-export function deepEquals(x, y) {
+function deepEquals(x, y) {
     if (x === y) {
       return true; // if both x and y are null or undefined and exactly the same
     } else if (!(x instanceof Object) || !(y instanceof Object)) {
@@ -281,3 +281,22 @@ export function deepEquals(x, y) {
       return true;
     }
 };
+
+export function objectsEqual(value1, value2) {
+        if (value1 == value2) return true;
+        else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
+        else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
+        else return deepEquals(value1, value2);
+    }
+
+export function arraysEqual(array1: any[], array2: any[]) {
+    return array1?.length === array2?.length && array1?.every((value, index) => array2 && objectsEqual(value, array2[index]));
+}
+
+export function isDarkColor(colorInp: string): boolean {
+  var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
+  var r = parseInt(color.substring(0, 2), 16); // hexToR
+  var g = parseInt(color.substring(2, 4), 16); // hexToG
+  var b = parseInt(color.substring(4, 6), 16); // hexToB
+  return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
+}
