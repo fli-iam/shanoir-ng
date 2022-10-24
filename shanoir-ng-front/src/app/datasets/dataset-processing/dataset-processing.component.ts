@@ -32,6 +32,7 @@ import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { CarminDatasetProcessingService } from 'src/app/carmin/shared/carmin-dataset-processing.service';
 import { CarminDatasetProcessing } from 'src/app/carmin/models/CarminDatasetProcessing';
+import { SuperPromise } from '../../utils/super-promise';
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -50,13 +51,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public studyOptions: Option<Study>[] = [];
     public subjectOptions: Option<Subject>[] = [];
     public inputDatasetOptions: Option<Dataset>[] = [];
-    private inputDatasetsPromise: Promise<any>;
-    private outputDatasetsPromise: Promise<any>;
-    private inputDatasetsBrowserPaging: BrowserPaging<Dataset>;
-    private outputDatasetsBrowserPaging: BrowserPaging<Dataset>;
-    private inputDatasetsToRemove: Dataset[] = [];
-    private inputDatasetsToAdd: Dataset[] = [];
-    private outputDatasetsToRemove: Dataset[] = [];
+    private outputDatasetsBrowserPaging: SuperPromise<BrowserPaging<Dataset>> = new SuperPromise();
     public inputDatasetsColumnDefs: ColumnDefinition[];
     public outputDatasetsColumnDefs: ColumnDefinition[];
     public isCarminDatasetProcessingEntity: boolean = false;
@@ -78,12 +73,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     ngOnInit(): void {
         super.ngOnInit();
         this.createColumnDefs();
-        this.outputDatasetsPromise = Promise.resolve().then(() => {
-            this.outputDatasetsBrowserPaging = new BrowserPaging([], this.outputDatasetsColumnDefs);
-        });
-        this.inputDatasetsPromise = Promise.resolve().then(() => {
-            this.inputDatasetsBrowserPaging = new BrowserPaging([], this.inputDatasetsColumnDefs);
-        });
+        this.outputDatasetsBrowserPaging.resolve(new BrowserPaging([], this.outputDatasetsColumnDefs));
     }
 
     get datasetProcessing(): DatasetProcessing { return this.entity; }
@@ -242,20 +232,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         return false;
     }
 
-    getInputDatasetsPage(pageable: FilterablePageable): Promise<Page<Dataset>> {
-        return new Promise((resolve) => {
-            this.inputDatasetsPromise.then(() => {
-                resolve(this.inputDatasetsBrowserPaging.getPage(pageable));
-            });
-        });
-    }
-
     getOutputDatasetsPage(pageable: FilterablePageable): Promise<Page<Dataset>> {
-        return new Promise((resolve) => {
-            this.outputDatasetsPromise.then(() => {
-                resolve(this.outputDatasetsBrowserPaging.getPage(pageable));
-            });
-        });
+        return this.outputDatasetsBrowserPaging.then(browserPaging => browserPaging.getPage(pageable));
     }
 
     private createColumnDefs() {
@@ -270,41 +248,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             {headerName: "Creation date", field: "creationDate", type: "date"}
         ];
         this.outputDatasetsColumnDefs = this.inputDatasetsColumnDefs;
-    }
-
-    public onAddInputDataset(selectedDataset: Dataset) {
-        if (!selectedDataset) {
-            return;
-        }
-        if (this.datasetProcessing.inputDatasets.filter(dataset => dataset.id == selectedDataset.id).length > 0){
-            return;   
-        }
-        this.inputDatasetsToAdd.push(selectedDataset);
-        this.datasetProcessing.inputDatasets.push(selectedDataset);
-        this.inputDatasetsBrowserPaging.setItems(this.datasetProcessing.inputDatasets);
-        this.inputDatasetsTable.refresh();
-        this.form.markAsDirty();
-        this.form.updateValueAndValidity();
-    }
-
-    removeInputDataset(item: Dataset) {
-        const index: number = this.datasetProcessing.inputDatasets.indexOf(item);
-        if (index !== -1) {
-            this.datasetProcessing.inputDatasets.splice(index, 1);
-        }
-        this.inputDatasetsToRemove.push(item);
-        this.inputDatasetsBrowserPaging.setItems(this.datasetProcessing.inputDatasets);
-        this.inputDatasetsTable.refresh();
-    }
-
-    removeOutputDataset(item: Dataset) {
-        const index: number = this.datasetProcessing.outputDatasets.indexOf(item);
-        if (index !== -1) {
-            this.datasetProcessing.outputDatasets.splice(index, 1);
-        }
-        this.outputDatasetsToRemove.push(item);
-        this.outputDatasetsBrowserPaging.setItems(this.datasetProcessing.outputDatasets);
-        this.outputDatasetsTable.refresh();
     }
 
     private isCarminDatasetProcessing(datasetProcessing: DatasetProcessing){

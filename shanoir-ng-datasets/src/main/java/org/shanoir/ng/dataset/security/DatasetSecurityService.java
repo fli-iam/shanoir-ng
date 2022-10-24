@@ -401,16 +401,27 @@ public class DatasetSecurityService {
         if (dataset.getDatasetAcquisition() == null 
                 || dataset.getDatasetAcquisition().getExamination() == null
                 || dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
-			return false;
+            
+            if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null) {
+                for (Dataset inputDs : dataset.getDatasetProcessing().getInputDatasets()) {
+                    if (hasRightOnTrustedDataset(inputDs, rightStr)) {
+                        return true;
+                    }
+                }
+                return false;
+            } else {
+                throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");                
+            }
+		} else {
+		    Long studyId = dataset.getDatasetAcquisition().getExamination().getStudyId();
+		    Set<Long> studies = new HashSet<>();
+		    studies.add(studyId);
+		    List<Long> studiesRelated = studyRepository.findByDatasetId(studyId).stream().map(BigInteger::longValue).collect(Collectors.toList());
+		    if (studiesRelated != null && !studiesRelated.isEmpty()) {
+		        studies.addAll(studiesRelated);
+		    }
+		    return hasRightOnStudiesCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), studies, rightStr);
 		}
-        Set<Long> studies = new HashSet<>();
-        studies.add(dataset.getStudyId());
-        List<Long> studiesRelated = studyRepository.findByDatasetId(dataset.getId()).stream().map(BigInteger::longValue).collect(Collectors.toList());
-
-        if (studiesRelated != null && !studiesRelated.isEmpty()) {
-        	studies.addAll(studiesRelated);
-        }
-        return hasRightOnStudiesCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), studies, rightStr);
     }
 
     public boolean hasRightOnStudyCenter(Long centerId, Long studyId, String rightStr) {
