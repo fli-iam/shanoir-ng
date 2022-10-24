@@ -202,12 +202,14 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Study selectedStudy = null;
 
 		Date minDate;
+		Date selectedStudyDate = new Date();
 		if (!StringUtils.isBlank(csvImport.getMinDateFilter())) {
 			
-			String[] acceptedFormats = {"yyyy","yyyy-MM-dd"};
+			String[] acceptedFormats = {"yyyy","yyyy-MM-dd","yyyy-MM-dd-HH"};
 			try {
 				minDate = DateUtils.parseDate(csvImport.getMinDateFilter(), acceptedFormats);
-			} catch (ParseException e) {
+				selectedStudyDate = minDate;
+			} catch (Exception e) {
 				csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.date.format"));
 				return false;
 			}
@@ -231,10 +233,10 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 					// Select the first study (comparing dates)
 					Study study = (Study) studiesIt.next();
 					// get study date
-					SimpleDateFormat format1 = new SimpleDateFormat("yyyyMMdd");
+					SimpleDateFormat format1 = new SimpleDateFormat("yyyyMMddHHMMSS.FFFFFF");
 					Date studyDate = new Date();
 					try {
-						studyDate = format1.parse(study.getDescriptionMap().get("date"));
+						studyDate = format1.parse(study.getDescriptionMap().get("date") + study.getDescriptionMap().get("time"));
 					} catch (ParseException e) {
 						// Could not get date => skip the study
 						continue;
@@ -259,6 +261,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 							modelName = serie.getMriInformation().getManufacturersModelName();
 							foundPatient = true;
 							currentDate = studyDate;
+							selectedStudyDate = studyDate;
 						}
 					}
 				}
@@ -427,7 +430,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Examination examDTO = new Examination();
 		examDTO.setCenterId(centerId);
 		examDTO.setComment(csvImport.getComment());
-		examDTO.setExaminationDate(new Date());
+		examDTO.setExaminationDate(selectedStudyDate);
 		examDTO.setPreclinical(false);
 		examDTO.setStudyId(Long.valueOf(csvImport.getStudyId()));
 		examDTO.setSubjectId(subject.getId());

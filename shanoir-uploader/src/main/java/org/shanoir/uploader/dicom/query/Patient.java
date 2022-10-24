@@ -243,6 +243,7 @@ public class Patient implements DicomTreeNode {
 		final Study study = new Study(
 				dicomObject.dataset().getString(Tag.StudyInstanceUID),
 				dicomObject.dataset().getString(Tag.StudyDate),
+				dicomObject.dataset().getString(Tag.StudyTime),
 				studyDescriptionFromDicomTags);
 		study.setStudyDescriptionOverwrite(studyDescriptionFromDicomTags);
 		return study;
