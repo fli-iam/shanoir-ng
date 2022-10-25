@@ -448,7 +448,7 @@ public class StudyCardProcessingService {
 		} else { // Field case
 			dicomTagDescriptionOrFieldName = field.name();
 		}
-		String values = condition.getValues().stream().map(Object::toString).collect(Collectors.joining(","));
+		String values = condition.getValues().stream().map(v -> v.getValue()).collect(Collectors.joining(","));
 		return "Error with condition: " + dicomTagDescriptionOrFieldName + ", "
 			+ condition.getOperation().name() + ", with values: " + values;
 	}
