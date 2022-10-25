@@ -133,11 +133,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					Output datasets
 					<tool-tip>Datasets resulting from this dataset processing.</tool-tip>
 				</legend>
-				<shanoir-table #outputDatasetsTable
-					[getPage]="getOutputDatasetsPage.bind(this)" 
-					[columnDefs]="outputDatasetsColumnDefs"
-					[browserSearch]="false">
-				</shanoir-table>
+				<multi-select-table
+						formControlName="outputDatasetList"
+						[(ngModel)]="datasetProcessing.outputDatasets"
+						[options]="outputDatasetOptions"
+						[columnDefs]="outputDatasetsColumnDefs"
+						[readOnly]="mode == 'view'">
+				</multi-select-table>
 			</li>
 			</ol>
 

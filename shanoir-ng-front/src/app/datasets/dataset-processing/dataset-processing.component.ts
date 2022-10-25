@@ -51,7 +51,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     public studyOptions: Option<Study>[] = [];
     public subjectOptions: Option<Subject>[] = [];
     public inputDatasetOptions: Option<Dataset>[] = [];
-    private outputDatasetsBrowserPaging: SuperPromise<BrowserPaging<Dataset>> = new SuperPromise();
+    public outputDatasetOptions: Option<Dataset>[] = [];
     public inputDatasetsColumnDefs: ColumnDefinition[];
     public outputDatasetsColumnDefs: ColumnDefinition[];
     public isCarminDatasetProcessingEntity: boolean = false;
@@ -73,7 +73,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     ngOnInit(): void {
         super.ngOnInit();
         this.createColumnDefs();
-        this.outputDatasetsBrowserPaging.resolve(new BrowserPaging([], this.outputDatasetsColumnDefs));
     }
 
     get datasetProcessing(): DatasetProcessing { return this.entity; }
@@ -112,6 +111,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             let subjectId = this.datasetProcessing.inputDatasets?.[0]?.subject?.id;
             this.fetchSubjects().then(() => {
                 this.subject = this.subjectOptions?.find(opt => opt.value.id == subjectId)?.value;
+            }).then(() => {
+                return this.fetchDatasets();
             });
         });
         return processingPromise;
@@ -148,7 +149,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
     }
 
     onSubjectChange() {
-        this.inputDatasetOptions = [];  
+        this.inputDatasetOptions = [];
+        this.outputDatasetOptions = [];
         if (this.datasetProcessing.inputDatasets?.length > 0 || this.datasetProcessing.outputDatasets?.length > 0) {
             this.confirmDialogService.confirm('Change Subject', 'Are you sure you want to change the subject for this processing ? Every dataset input and output will be removed from the current lists.')
             .then(response => {
@@ -202,6 +204,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         return this.datasetService.getByStudyIdAndSubjectId(this.study.id, this.subject.id).then(datasets => {
             for (let dataset of datasets) {
                 this.inputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
+                this.outputDatasetOptions.push(new Option<Dataset>(dataset, dataset.name));
             }
         });
     }
@@ -213,7 +216,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             'processingType': [this.datasetProcessing.datasetProcessingType, Validators.required],
             'processingDate': [this.datasetProcessing.processingDate, Validators.required],
             'inputDatasetList': [{value: this.datasetProcessing.inputDatasets, disabled: !this.subject}, [Validators.required, Validators.minLength(1)]],
-            'outputDatasetList': [this.datasetProcessing.outputDatasets],
+            'outputDatasetList': [{value: this.datasetProcessing.outputDatasets, disabled: !this.subject}],
             'comment': [this.datasetProcessing.comment]
         });
         this.subscribtions.push(
@@ -221,8 +224,13 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
                 if (!!this.prefilledSubject || !studyVal) formGroup.get('subject').disable();
                 else formGroup.get('subject').enable();    
             }), formGroup.get('subject').valueChanges.subscribe(subjectVal => {
-                if (!subjectVal) formGroup.get('inputDatasetList').disable();
-                else formGroup.get('inputDatasetList').enable();    
+                if (!subjectVal) {
+                    formGroup.get('inputDatasetList').disable();
+                    formGroup.get('outputDatasetList').disable();
+                } else {
+                    formGroup.get('inputDatasetList').enable();
+                    formGroup.get('outputDatasetList').enable();
+                }
             })
         );
         return formGroup;
@@ -230,10 +238,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
 
     public async hasEditRight(): Promise<boolean> {
         return false;
-    }
-
-    getOutputDatasetsPage(pageable: FilterablePageable): Promise<Page<Dataset>> {
-        return this.outputDatasetsBrowserPaging.then(browserPaging => browserPaging.getPage(pageable));
     }
 
     private createColumnDefs() {
