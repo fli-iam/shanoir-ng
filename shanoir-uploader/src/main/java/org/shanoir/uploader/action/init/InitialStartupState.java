@@ -223,6 +223,10 @@ public class InitialStartupState implements State {
 		initProperties(ShUpConfig.DICOM_SERVER_PROPERTIES,
 				ShUpConfig.dicomServerProperties);
 		logger.info("dicom_server.properties successfully initialized.");
+		
+		initProperties(ShUpConfig.ENDPOINT_PROPERTIES,
+				ShUpConfig.endpointProperties);
+		logger.info("endpoint.properties successfully initialized.");
 	}
 
 	private String generateRandomSeed() throws FileNotFoundException, IOException {

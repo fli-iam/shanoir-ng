@@ -19,6 +19,7 @@ import { DatasetService } from '../../datasets/shared/dataset.service';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
 
@@ -73,7 +74,7 @@ export class StudyCardApplyComponent {
         });
     }
 
-    getColumnDefs() {
+    getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
@@ -83,7 +84,7 @@ export class StudyCardApplyComponent {
         return [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Name", field: "name", orderBy: ["updatedMetadata.name", "originMetadata.name", "id"]},
-            {headerName: "Type", field: "type", width: "50px", suppressSorting: true},
+            {headerName: "Type", field: "type", width: "50px", disableSorting: true},
             {headerName: "Subject", field: "subject.name"},
             {headerName: "Study", field: "study.name"},
             {headerName: "Creation", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},

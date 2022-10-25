@@ -49,6 +49,8 @@ public class ShUpConfig {
 	public static final String LANGUAGE_PROPERTIES = "language.properties";
 
 	public static final String PROXY_PROPERTIES = "proxy.properties";
+	
+	public static final String ENDPOINT_PROPERTIES = "endpoint.properties";
 
 	public static final String DICOM_SERVER_PROPERTIES = "dicom_server.properties";
 	
@@ -88,6 +90,8 @@ public class ShUpConfig {
 	public static File profileDirectory;
 	
 	public static Properties profileProperties = new Properties();
+	
+	public static Properties endpointProperties = new Properties();
 	
 	public static File keycloakJson;
 	

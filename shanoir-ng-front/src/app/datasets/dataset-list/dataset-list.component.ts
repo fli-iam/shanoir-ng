@@ -17,6 +17,7 @@ import { Component, ViewChild } from '@angular/core';
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
@@ -56,7 +57,7 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
     }
 
     // Grid columns definition
-    getColumnDefs() {
+    getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
@@ -66,17 +67,17 @@ export class DatasetListComponent extends EntityListComponent<Dataset>{
         return [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Name", field: "name", orderBy: ["updatedMetadata.name", "originMetadata.name", "id"]},
-            {headerName: "Type", field: "type", width: "50px", suppressSorting: true},
+            {headerName: "Type", field: "type", width: "50px", disableSorting: true},
             {headerName: "Subject", field: "subject.name",
 				route: (ds: Dataset) =>  '/subject/details/' + ds.subject.id,
-                suppressSorting: true
+                disableSorting: true
 			},
             {headerName: "Study", field: "study.name",
 				route: (ds: Dataset) => '/study/details/' + ds.study.id,
-                suppressSorting: true
+                disableSorting: true
 			},
             {headerName: "Creation date", field: "creationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.creationDate)},
-            {headerName: "Comment", field: "originMetadata.comment"},
+            {headerName: "Comment", field: "originMetadata.comment", },
         ];
     }
 

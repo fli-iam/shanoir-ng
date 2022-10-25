@@ -81,12 +81,13 @@ export class DicomUploadComponent implements OnDestroy {
                 if (event.type === HttpEventType.Sent) {
                     this.progressBar.progress = -1;
                 } else if (event.type === HttpEventType.UploadProgress) {
-                    this.progressBar.progress = (event.loaded / event.total);
+                    this.progressBar.progress = (event.loaded / (event.total + 0.05));
                 } else if (event instanceof HttpResponse) {
                     let patientDicomList =  event.body;
-                    this.modality = patientDicomList.patients[0].studies[0].series[0].modality.toString();
+                    this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
                     this.importDataService.patientList = patientDicomList;
                     this.setArchiveStatus('uploaded');
+                    this.progressBar.progress = 1;
                 }
             }, error => {
                 this.setArchiveStatus('error');
