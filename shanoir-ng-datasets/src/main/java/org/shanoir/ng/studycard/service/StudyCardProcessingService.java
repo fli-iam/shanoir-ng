@@ -28,6 +28,7 @@ import javax.mail.MessagingException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Keyword;
 import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.json.JSONReader;
@@ -238,7 +239,7 @@ public class StudyCardProcessingService {
 				}
 			}	
 			if (!conditionVerifiedOnAtLeastOneAcquisition) {
-				result.setResultExaminationLevel("Error with condition: " + condition.getDicomTagOrField() + ", " + condition.getOperation() + ", " + condition.getValues().toString());
+				result.setResultExaminationLevel(logConditionError(condition));
 				return false;
 			}
 		}
@@ -255,14 +256,14 @@ public class StudyCardProcessingService {
 						Dataset refDataset = acquisition.getDatasets().get(0);
 						Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
 						if (!dicomConditionFulfilled(condition, dicomAttributes)) {
-							result.setResultAcquisitionLevel("Error with condition: " + condition.getDicomTagOrField() + ", " + condition.getOperation() + ", " + condition.getValues().toString());
+							result.setResultAcquisitionLevel(logConditionError(condition));
 							return false;
 						}
 					}
 				// B) check for a field in the database, using entity model
 				} else {
 					if (!entityConditionFulfilled(condition, acquisition)) {
-						result.setResultAcquisitionLevel("Error with condition: " + condition.getDicomTagOrField() + ", " + condition.getOperation() + ", " + condition.getValues().toString());						
+						result.setResultAcquisitionLevel(logConditionError(condition));						
 						return false;
 					}
 				}
@@ -281,13 +282,13 @@ public class StudyCardProcessingService {
 						if (Field.getEnum(getDicomTagOrField) == null) {
 							Attributes dicomAttributes = getDicomAttributesForDataset(dataset);
 							if (!dicomConditionFulfilled(condition, dicomAttributes)) {
-								result.setResultDatasetLevel("Error with condition: " + condition.getDicomTagOrField() + ", " + condition.getOperation() + ", " + condition.getValues().toString());														
+								result.setResultDatasetLevel(logConditionError(condition));														
 								return false;
 							}
 						// B) check for a field in the database, using entity model
 						} else {
 							if (!entityConditionFulfilled(condition, acquisition)) {
-								result.setResultDatasetLevel("Error with condition: " + condition.getDicomTagOrField() + ", " + condition.getOperation() + ", " + condition.getValues().toString());														
+								result.setResultDatasetLevel(logConditionError(condition));														
 								return false;
 							}
 						}					
@@ -437,6 +438,19 @@ public class StudyCardProcessingService {
 		} catch (IllegalArgumentException e) {
 			LOG.error("Error in studycard processing: ", e);
 		}
+	}
+	
+	private String logConditionError(StudyCardCondition condition) {
+		String dicomTagDescriptionOrFieldName = "unknownDicomTagDescriptionOrFieldName";
+		Field field = Field.getEnum(condition.getDicomTagOrField());
+		if (field == null) { // DICOM tag case
+			dicomTagDescriptionOrFieldName = Keyword.valueOf(condition.getDicomTagOrField());
+		} else { // Field case
+			dicomTagDescriptionOrFieldName = field.name();
+		}
+		String values = condition.getValues().stream().map(Object::toString).collect(Collectors.joining(","));
+		return "Error with condition: " + dicomTagDescriptionOrFieldName + ", "
+			+ condition.getOperation().name() + ", with values: " + values;
 	}
 
 }
