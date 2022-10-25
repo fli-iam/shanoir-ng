@@ -98,13 +98,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <th 
             *ngIf="!col.hidden"
             class="{{getColTypeStr(col)}}"
-            [class.sortable]="!col.suppressSorting && col.type!='button'"
+            [class.sortable]="!col.disableSorting && col.type!='button'"
             [class.active]="lastSortedCol==col"
             [attr.title]="col.tip != undefined ? col.tip : col.headerName"
             [style.width]="col.width"
             [class.sub-header]="sub"
             #refTh>
-        <span class="triangle" [class.down]="lastSortedAsc" [class.up]="!lastSortedAsc" *ngIf="!sub && $any(lastSortedCol)?.field==$any(col).field && !col.suppressSorting && col.type!='button'">
+        <span class="triangle" [class.down]="lastSortedAsc" [class.up]="!lastSortedAsc" *ngIf="!sub && $any(lastSortedCol)?.field==$any(col).field && !col.disableSorting && col.type!='button'">
             <svg viewBox="0 0 100 100" preserveAspectRatio="none">
                 <polygon *ngIf="lastSortedAsc" points="0,0 100,0 50,100" />
                 <polygon *ngIf="!lastSortedAsc" points="0,100 100,100 50,0" />

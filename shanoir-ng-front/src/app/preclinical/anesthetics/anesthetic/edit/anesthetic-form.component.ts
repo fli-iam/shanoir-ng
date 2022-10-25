@@ -31,6 +31,7 @@ import { EntityComponent } from '../../../../shared/components/entity/entity.com
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { slideDown } from '../../../../shared/animations/animations';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -56,7 +57,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     units: Reference[];
 
     private browserPaging: BrowserPaging<AnestheticIngredient>;
-    public columnDefs: any[];
+    public columnDefs: ColumnDefinition[];
     private ingredientsPromise: Promise<any>;
 
     public toggleFormAI: boolean = false;
@@ -160,28 +161,10 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     }
 
     private createColumnDefs() {
-        function checkNullValueReference(reference: any) {
-            if(reference){
-                return reference.value;
-            }
-            return '';
-        };
-        function checkNullValue(value: any) {
-            if(value){
-                return value;
-            }
-            return '';
-        };
         this.columnDefs = [
-            {headerName: "Name", field: "name.value", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.name);
-            }},
-            {headerName: "Concentration", field: "concentration", type: "number", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.concentration);
-            }},
-            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.concentration_unit);
-            }}
+            {headerName: "Name", field: "name.value"},
+            {headerName: "Concentration", field: "concentration", type: "number"},
+            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "number"}
         ];
 
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {

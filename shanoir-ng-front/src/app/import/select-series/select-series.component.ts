@@ -143,7 +143,11 @@ export class SelectSeriesComponent {
     }
 
     next() {
-        this.router.navigate(['imports/context']);
+        if (this.breadcrumbsService.findImportMode() == 'PACS') {
+            this.router.navigate(['imports/pacs-context']);
+        } else {
+            this.router.navigate(['imports/context']);
+        }
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {

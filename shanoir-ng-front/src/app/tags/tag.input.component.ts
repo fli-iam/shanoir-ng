@@ -82,7 +82,7 @@ export class TagInputComponent implements ControlValueAccessor, OnChanges {
     }
 
     private updateOptions() {
-        this.tagOptions = this.availableTags.reduce((options, tag) => {
+        this.tagOptions = this.availableTags?.reduce((options, tag) => {
             if (!this.tags.find(ssTag => ssTag.equals(tag))) {
                 let option: Option<Tag> = new Option(tag, tag.name);
                 option.color = tag.color;

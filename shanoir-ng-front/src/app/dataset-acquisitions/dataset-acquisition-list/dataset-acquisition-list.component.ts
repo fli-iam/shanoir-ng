@@ -14,6 +14,7 @@
 
 import { Component, ViewChild } from '@angular/core';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
@@ -55,8 +56,8 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
         return this.datasetAcquisitionService.getPage(pageable);
     }
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefinition[] {
+        let colDef: ColumnDefinition[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
             { headerName: 'Type', field: 'type', width: '22px'},
             { headerName: "Acquisition Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
@@ -68,7 +69,7 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
             { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
                 return this.dateRenderer(params.data.examination.examinationDate);
             }},    
-            { headerName: "Center", field: "acquisitionEquipment.center.name", suppressSorting: true,
+            { headerName: "Center", field: "acquisitionEquipment.center.name", disableSorting: true,
 				route: (dsAcq: DatasetAcquisition) => (dsAcq.acquisitionEquipment && dsAcq.acquisitionEquipment.center) ? '/center/details/' + dsAcq.acquisitionEquipment?.center.id : null
 			},
             { headerName: "StudyCard", field: "studyCard.name",

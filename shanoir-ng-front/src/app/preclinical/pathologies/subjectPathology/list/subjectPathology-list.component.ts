@@ -20,10 +20,11 @@ import { PreclinicalSubject } from '../../../animalSubject/shared/preclinicalSub
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { SubjectAbstractListInput } from '../../../shared/subjectEntity-list-input.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 
 
 @Component({
-    selector: 'subject-pathology-list',
+    selector: 'subject-pathology-list', 
     templateUrl: 'subjectPathology-list.component.html',
     providers: [
         SubjectPathologyService
@@ -86,28 +87,17 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
         return Promise.resolve(subjectPathologies);
     }
 
-     getColumnDefs(): any[] {
+     getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date) {
             if (date) {
                 return new Date(date).toLocaleDateString();
             }
             return null;
         };
-        function checkNullValueReference(reference: any) {
-            if (reference) {
-                return reference.value;
-            }
-            return '';
-        };
-
-        let columnDefs: any[] = [
+        let columnDefs: ColumnDefinition[] = [
             { headerName: "Pathology", field: "pathology.name" },
             { headerName: "PathologyModel", field: "pathologyModel.name" },
-            {
-                headerName: "Location", field: "location.value", type: "reference", cellRenderer: function(params: any) {
-                    return checkNullValueReference(params.data.location);
-                }
-            },
+            { headerName: "Location", field: "location.value" },
             {
                 headerName: "Start Date", field: "startDate", type: "date", cellRenderer: function(params: any) {
                     return dateRenderer(params.data.startDate);
@@ -119,14 +109,12 @@ export class SubjectPathologiesListComponent extends SubjectAbstractListInput<Su
                 }
             },
         ];
-        setTimeout(() => {
-            if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-                this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.editSubjectEntity(item) });
-            }
-            if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-                this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectEntity(item) });
-            }
-        }, 100)
+        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+            columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.editSubjectEntity(item) });
+        }
+        if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
+            columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectEntity(item) });
+        }
         return columnDefs;
     }
 }
