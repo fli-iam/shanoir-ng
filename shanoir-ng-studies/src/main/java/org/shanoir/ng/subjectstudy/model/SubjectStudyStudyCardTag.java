@@ -38,13 +38,13 @@ public class SubjectStudyStudyCardTag implements Serializable {
 	public Tag getTag() {
 		Tag tag = new Tag();
 		if (type == 1) {
-			tag.setName("VALID");
+			tag.setName("QC-VALID");
 			tag.setColor("#26a269");
 		} else if (type == 2) {
-			tag.setName("WARNING");
+			tag.setName("QC-WARNING");
 			tag.setColor("#ff7800");
 		} else {
-			tag.setName("ERROR");
+			tag.setName("QC-ERROR");
 			tag.setColor("#f11722");		
 		}
 		return tag;

@@ -121,9 +121,9 @@ public class StudyCardProcessingService {
 		boolean changeInAtLeastOneAcquisition = false;
 		for (DatasetAcquisition acquisition : acquisitions) {
 			if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
-				Dataset refDataset = acquisition.getDatasets().get(0);
-				Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
 				if (studyCard.getRules() != null) {
+					Dataset refDataset = acquisition.getDatasets().get(0);
+					Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
 					for (StudyCardRule rule : studyCard.getRules()) {
 						applyStudyCardRule(acquisition, rule, dicomAttributes);
 					}
@@ -229,12 +229,14 @@ public class StudyCardProcessingService {
 						Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
 						if (dicomConditionFulfilled(condition, dicomAttributes)) {
 							conditionVerifiedOnAtLeastOneAcquisition = true;
+							break;
 						}
 					}
 				// B) check for a field in the database, using entity model
 				} else {
 					if (entityConditionFulfilled(condition, acquisition)) {
 						conditionVerifiedOnAtLeastOneAcquisition = true;
+						break;
 					}
 				}
 			}	
