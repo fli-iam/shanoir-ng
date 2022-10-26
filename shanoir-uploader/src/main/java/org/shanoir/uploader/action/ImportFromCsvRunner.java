@@ -234,21 +234,22 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 					Study study = (Study) studiesIt.next();
 					// get study date time
 					String[] acceptedFormats = {
-							"yyyyMMddHHMMSS.FFFFFF",
-							"yyyyMMddHHMMSS.FFFFF",
-							"yyyyMMddHHMMSS.FFFF",
-							"yyyyMMddHHMMSS.FFF",
-							"yyyyMMddHHMMSS.FF",
-							"yyyyMMddHHMMSS.F",
-							"yyyyMMddHHMMSS",
-							"yyyyMMddHHMMS",
-							"yyyyMMddHHMM",
-							"yyyyMMddHHM",
+							"yyyyMMddHHmmSS.FFFFFF",
+							"yyyyMMddHHmmSS.FFFFF",
+							"yyyyMMddHHmmSS.FFFF",
+							"yyyyMMddHHmmSS.FFF",
+							"yyyyMMddHHmmSS.FF",
+							"yyyyMMddHHmmSS.F",
+							"yyyyMMddHHmmSS",
+							"yyyyMMddHHmmS",
+							"yyyyMMddHHmm",
+							"yyyyMMddHHm",
 							"yyyyMMddHH"};
 					Date studyDate = new Date();
 					try {
 						studyDate = DateUtils.parseDate(study.getDescriptionMap().get("date") + study.getDescriptionMap().get("time"), acceptedFormats);
 					} catch (ParseException e) {
+						logger.error("could not consider this study:", e);
 						// Could not get date => skip the study
 						continue;
 					}
@@ -343,7 +344,14 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 
 		File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
-		List<String> allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeries, uploadFolder, this.dicomServerClient, null);
+		List<String> allFileNames = null;
+		try {
+			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeries, uploadFolder, this.dicomServerClient, null);
+		} catch (Exception e) {
+			logger.error("Could not copy data from PACS !");
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
+			return false;
+		}
 
 		/**
 		 * 5. Fill MRI information into serie from first DICOM file of each serie
