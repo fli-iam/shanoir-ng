@@ -48,12 +48,16 @@ export class DatasetProcessingService extends EntityService<DatasetProcessing> {
             .toPromise().then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
+    get(id: number): Promise<DatasetProcessing> {
+        return this.http.get<any>(this.API_URL + '/' + id)
+            .toPromise()
+            .then(this.mapEntity);
+    }
+
     getEntityInstance() { return new DatasetProcessing(); }
 
-    protected mapEntity = (dto: DatasetProcessingDTO): Promise<DatasetProcessing> => {
-        let result: DatasetProcessing = new DatasetProcessing();
-        this.datasetProcessingDTOService.toEntity(dto, result);
-        return Promise.resolve(result);
+    protected mapEntity = (dto: DatasetProcessingDTO, quickResult?: DatasetProcessing): Promise<DatasetProcessing> => {
+        return this.datasetProcessingDTOService.toEntity(dto, quickResult);
     }
 
     protected mapEntityList = (dtos: DatasetProcessingDTO[], result?: DatasetProcessing[]): Promise<DatasetProcessing[]> => {

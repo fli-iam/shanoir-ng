@@ -38,6 +38,26 @@ export class ContextData {
         public subject: SubjectWithSubjectStudy,
         public examination: SubjectExamination,
         public niftiConverter: NiftiConverter,
+        public datasetType: DatasetType,
+        public processedDatasetFilePath: string,
+        public processedDatasetType: ProcessedDatasetType,
+        public processedDatasetName: string,
+        public processedDatasetComment: string,
+        public datasetProcessing: DatasetProcessing,
+    ) {}
+}
+
+export class EegContextData  {
+    
+    constructor (
+        public study: Study,
+        public studyCard: StudyCard,
+        public useStudyCard: boolean,
+        public center: Center, 
+        public acquisitionEquipment: AcquisitionEquipment,
+        public subject: SubjectWithSubjectStudy,
+        public examination: SubjectExamination,
+        public niftiConverter: NiftiConverter,
         public coordinatesSystem: string,
         public datasetType: DatasetType,
         public processedDatasetFilePath: string,
@@ -48,6 +68,22 @@ export class ContextData {
     ) {}
 }
 
+export class ProcessedContextData {
+    constructor (
+        public study: Study,
+        public subject: SubjectWithSubjectStudy,
+        public datasetType: DatasetType,
+        public processedDatasetFilePath: string,
+        public processedDatasetType: ProcessedDatasetType,
+        public processedDatasetName: string,
+        public processedDatasetComment: string,
+        public datasetProcessing: DatasetProcessing,
+    ) {}
+}
+
+
+
+
 @Injectable()
 export class ImportDataService {
 
@@ -56,8 +92,8 @@ export class ImportDataService {
     private _eegImportJob: EegImportJob;   // 1. upload
     private _processedDatasetImportJob: ProcessedDatasetImportJob;   // 1. upload
     private _patients: PatientDicom[];    // 2. series
-    private _contextData: ContextData;    // 3. context
-    public contextBackup: ContextData;
+    private _contextData: any;    // 3. context
+    public _contextBackup: any = {};
 
 
     public reset() {
@@ -67,7 +103,17 @@ export class ImportDataService {
         this._eegImportJob = undefined;
         this._processedDatasetImportJob = undefined;
         this._contextData = undefined;
-        this.contextBackup = undefined;
+        this._contextBackup = {};
+    }
+
+    public setContextBackup(stepId, value): void {
+        if (!this._contextBackup) this._contextBackup = {};
+        return this._contextBackup[stepId] = value;
+    }
+
+    public contextBackup(stepId): any {
+        if (!this._contextBackup) this._contextBackup = {};
+        return this._contextBackup[stepId];
     }
     
     public get archiveUploaded(): ImportJob {
@@ -110,7 +156,7 @@ export class ImportDataService {
     public set patients(patients: PatientDicom[]) {
         this._patients = patients;
         this.contextData = undefined;
-        this.contextBackup = undefined;
+        this._contextBackup = {};
     }
 
     public get contextData(): ContextData {

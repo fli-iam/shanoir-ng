@@ -19,7 +19,7 @@ export class ShanoirError {
     public details: any;
     public message: string;
     
-    constructor(reason: any) {
+    constructor(reason: {error: {code?: any, details?: any, message?: any}}) {
         this.code = reason.error.code;
         this.details = reason.error.details;
         this.message = reason.error.message;

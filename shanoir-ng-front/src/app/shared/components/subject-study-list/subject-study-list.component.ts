@@ -24,9 +24,10 @@ import { Mode } from '../entity/entity.component.abstract';
 import { BrowserPaging } from '../table/browser-paging.model';
 import { FilterablePageable, Page } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
-import { SuperObservable } from '../../../utils/super-observable'
+import { ColumnDefinition } from '../table/column.definition.type';
 import { combineLatest, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
+import { Subject as RxjsSubject} from 'rxjs';
 
 @Component({
   selector: 'subject-study-list',
@@ -51,16 +52,16 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
     hasTags: boolean;
-    columnDefs: any[];
+    columnDefs: ColumnDefinition[];
     @ViewChild('table') table: TableComponent;
-    private subjectOrStudyObs: SuperObservable<Subject | Study> = new SuperObservable();
-    private subjectStudyListObs: SuperObservable<SubjectStudy[]> = new SuperObservable();
+    private subjectOrStudyObs: RxjsSubject <Subject | Study> = new RxjsSubject();
+    private subjectStudyListObs: RxjsSubject<SubjectStudy[]> = new RxjsSubject();
     private subscriptions: Subscription[] = [];
     
     constructor(private router: Router) {
         super();
         this.subscriptions.push(
-            combineLatest([this.subjectOrStudyObs._observable, this.subjectStudyListObs._observable]).subscribe(() => {
+            combineLatest([this.subjectOrStudyObs, this.subjectStudyListObs]).subscribe(() => {
                 this.processHasTags();
                 this.createColumnDefs();
             })
@@ -129,7 +130,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         } 
         this.columnDefs.push(
             { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
-            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', suppressSorting: true }
+            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', disableSorting: true }
         );
         if (this.displaySubjectType) {
             this.columnDefs.push(
@@ -137,7 +138,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
             );
         }
         this.columnDefs.push(
-            { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item.id) }
+            { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item.subject?.id) }
         );
         if (this.mode != 'view') {
             this.columnDefs.push(

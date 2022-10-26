@@ -27,7 +27,7 @@
 	<description>Dataset project for Shanoir NG</description>
 
 	<properties>
-		<dcm4che.version>5.24.0</dcm4che.version>
+		<dcm4che.version>5.27.0</dcm4che.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<solr-spring.version>4.3.8</solr-spring.version>
 	</properties>
@@ -94,10 +94,9 @@
 		    <version>${dcm4che.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
 		</dependency>
-		<!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>

@@ -68,6 +68,11 @@ button { background-color: var(--color-b); border: 0px; border-radius: 2px; colo
   button:active, 
   button:enabled:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
 button + button { margin-left: 5px; }
+button.alt { background-color: var(--color-c); }
+  button.alt:disabled { background-color: var(--grey); } 
+  button.alt:active, 
+  button.alt:enabled:hover { background-color: var(--color-c-light); }
+
 
 input[type='date'] { width: 140px; }
 .hidden { display: none !important; }

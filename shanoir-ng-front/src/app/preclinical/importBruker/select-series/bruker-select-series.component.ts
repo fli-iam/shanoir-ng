@@ -115,6 +115,6 @@ export class BrukerSelectSeriesComponent {
     }
 
     public next() {
-        this.router.navigate(['imports/context']);
+        this.router.navigate(['imports/preclinical-context']);
     }
 }

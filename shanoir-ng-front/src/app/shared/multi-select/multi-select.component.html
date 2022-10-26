@@ -21,10 +21,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </span>
 
 <select-box
+    *ngIf="!readOnly"
     [options]="options"
     [pipe]="pipe"
     [disabled]="disabled"
     [placeholder]="placeholder"
-    [compactMode]="true"
     (selectOption)="onSelectOption($event?.value?.id)">
 </select-box>
