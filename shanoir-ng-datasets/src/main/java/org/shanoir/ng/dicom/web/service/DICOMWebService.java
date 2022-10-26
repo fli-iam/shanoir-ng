@@ -21,6 +21,7 @@ import org.apache.hc.client5.http.entity.mime.MultipartPartBuilder;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
@@ -79,12 +80,17 @@ public class DICOMWebService {
 	
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
+	
+	@Value("${dcm4chee-arc.dicom.web.http.client.max.total}")
+	private int dicomWebHttpClientMaxTotal;
 
 	@PostConstruct
 	public void init() {
 		this.serverURL = dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRS;
 		try {
-			httpClient = HttpClients.createDefault();
+			final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+	        cm.setMaxTotal(dicomWebHttpClientMaxTotal);
+			httpClient = HttpClients.custom().setConnectionManager(cm).build();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 		}
