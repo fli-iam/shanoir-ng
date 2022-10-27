@@ -60,8 +60,8 @@ export class StudyCardAssignment {
 export class StudyCardCondition {
 
     dicomTag: DicomTag;
-	dicomValue: string;
-	operation: Operation;
+    operation: Operation;
+    dicomValue: string;
 }
 
 export class DicomTag {

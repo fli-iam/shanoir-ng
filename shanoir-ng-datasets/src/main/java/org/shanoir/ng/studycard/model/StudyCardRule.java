@@ -21,10 +21,10 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
@@ -36,9 +36,12 @@ public class StudyCardRule extends AbstractEntity {
 	@JoinColumn(name="rule_id")
 	private List<StudyCardAssignment> assignments;
 	
-@	OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name="rule_id")
 	private List<StudyCardCondition> conditions;
+
+	@NotNull
+	private int type; // examination, acquisition, dataset
 	
 	public List<StudyCardAssignment> getAssignments() {
 		return assignments;
@@ -55,4 +58,13 @@ public class StudyCardRule extends AbstractEntity {
 	public void setConditions(List<StudyCardCondition> conditions) {
 		this.conditions = conditions;
 	}
+
+	public int getType() {
+		return type;
+	}
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
 }

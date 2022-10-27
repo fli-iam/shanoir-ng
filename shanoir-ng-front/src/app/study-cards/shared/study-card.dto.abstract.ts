@@ -15,7 +15,7 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { Coil } from '../../coils/shared/coil.model';
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Study } from '../../studies/shared/study.model';
-import { StudyCardDTO } from './study-card.dto.model';
+import { StudyCardDTO, StudyCardConditionDTO, StudyCardConditionValueDTO } from './study-card.dto.model';
 import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
 
 
@@ -66,8 +66,8 @@ export abstract class StudyCardDTOServiceAbstract {
                     rule.conditions = [];
                     for (let conditionDTO of ruleDTO.conditions) {
                         let condition: StudyCardCondition = new StudyCardCondition();
-                        if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null);
-                        condition.dicomValue = conditionDTO.dicomValue;
+                        if (conditionDTO.dicomTagOrField) condition.dicomTag = new DicomTag(+conditionDTO.dicomTagOrField, null);
+                        condition.dicomValue = conditionDTO.values[0].value;
                         condition.operation = conditionDTO.operation as Operation;
                         rule.conditions.push(condition);
                     }

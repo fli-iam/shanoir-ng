@@ -24,6 +24,8 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -34,6 +36,7 @@ import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.SubjectType;
 import org.shanoir.ng.tag.model.Tag;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Relation between the subjects and the studies.
@@ -75,18 +78,35 @@ public class SubjectStudy extends AbstractEntity {
 	/** Tags associated to the subject. */
 	@OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudyTag> subjectStudyTags;
+	
+	/** StudyCard tags associated to the subject. */
+	@OneToOne(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	@PrimaryKeyJoinColumn
+	private SubjectStudyStudyCardTag subjectStudyStudyCardTag;
 
 	/**
 	 * @return the tags
 	 */
 	public List<Tag> getTags() {
-		if (getSubjectStudyTags() == null) return null;
-		return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
+		if (CollectionUtils.isEmpty(subjectStudyTags) && subjectStudyStudyCardTag == null) {
+			return null;
+		} else if (CollectionUtils.isEmpty(subjectStudyTags)) {
+			ArrayList<Tag> tags = new ArrayList<Tag>();
+			tags.add(subjectStudyStudyCardTag.getTag());
+			return tags;
+		} else {
+			List<Tag> tags = subjectStudyTags.stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
+			tags.add(0, subjectStudyStudyCardTag.getTag());
+			return tags;
+		}
 	}
 	
-
 	public List<SubjectStudyTag> getSubjectStudyTags() {
 		return subjectStudyTags;
+	}
+	
+	public SubjectStudyStudyCardTag getSubjectStudyStudyCardTag() {
+		return subjectStudyStudyCardTag;
 	}
 
 	public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {

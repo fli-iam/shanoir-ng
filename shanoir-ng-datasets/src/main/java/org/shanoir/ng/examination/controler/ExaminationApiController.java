@@ -186,7 +186,7 @@ public class ExaminationApiController implements ExaminationApi {
 			Set<Examination> examsToKeep = new HashSet<>();
 			Set<DatasetAcquisition> acqToKeep = new HashSet<>();
 			
-			// Clean these examinations / dataset Acquisition from unecessary datasets
+			// Clean these examinations / dataset Acquisition from unnecessary datasets
 			for (Examination exam :relatedExams) {
 				for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
 					List<Dataset> current = new ArrayList<>();

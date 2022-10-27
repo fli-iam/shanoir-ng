@@ -14,43 +14,40 @@
 
 package org.shanoir.ng.studycard.model;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class StudyCardCondition extends AbstractEntity {
 
 	/** UID */
-	private static final long serialVersionUID = 6708188853533591193L;
+	private static final long serialVersionUID = 6708177853555591193L;
 	
-	@NotNull
-	private int dicomTag;
+	private int dicomTagOrField;
 	
-	private String dicomValue;
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@JoinColumn(name="condition_id")
+	private List<StudyCardConditionValue> values;
 	
 	@NotNull
 	private int operation;
-
-
-	public int getDicomTag() {
-		return dicomTag;
+	
+	public int getDicomTagOrField() {
+		return dicomTagOrField;
 	}
 
-	public void setDicomTag(int dicomTag) {
-		this.dicomTag = dicomTag;
-	}
-
-	public String getDicomValue() {
-		return dicomValue;
-	}
-
-	public void setDicomValue(String dicomValue) {
-		this.dicomValue = dicomValue;
+	public void setDicomTagOrField(int dicomTagOrField) {
+		this.dicomTagOrField = dicomTagOrField;
 	}
 
 	public Operation getOperation() {
@@ -60,4 +57,13 @@ public class StudyCardCondition extends AbstractEntity {
 	public void setOperation(Operation operation) {
 		this.operation = operation.getId();
 	}
+
+	public List<StudyCardConditionValue> getValues() {
+		return values;
+	}
+
+	public void setValues(List<StudyCardConditionValue> values) {
+		this.values = values;
+	}
+
 }

@@ -16,8 +16,10 @@ package org.shanoir.ng.studycard.model;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 
-public interface DatasetFieldUpdater {
+public interface DatasetFieldInterface {
 	
 	void update(DatasetAcquisition datasetAcquisition, String updatedValue);
+
+	String get(DatasetAcquisition datasetAcquisition);
 	
 }

@@ -40,3 +40,32 @@ INSERT INTO subject_study
     (id, study_id, subject_id)
 VALUES
     (1, 1, 1);
+
+INSERT INTO study_cards
+	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)
+VALUES 
+	(1,1,false,0,'StudyCard1',1,1),
+	(2,null,false,0,'QualityCard_UCAN',null,1);
+
+INSERT INTO study_card_rule
+	(id, study_card_id, type)
+VALUES
+	(1,2,1),
+	(2,2,1);
+
+INSERT INTO study_card_condition
+	(id, rule_id, dicom_tag_or_field, operation)
+VALUES 
+	(1,1,2,4),
+	(2,2,2,4);
+
+INSERT INTO study_card_condition_value
+	(id, condition_id, value)
+VALUES
+	(1,1,'tof'),
+	(2,1,'flight'),
+	(3,2,'gado'),
+	(4,2,'gd'),
+	(5,2,'gadolinium'),
+	(6,2,'contrast'),
+	(7,2,'enhanced');

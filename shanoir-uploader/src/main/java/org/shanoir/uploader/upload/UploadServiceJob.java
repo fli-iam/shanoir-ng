@@ -27,7 +27,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
  * The UploadServiceJob.
@@ -160,10 +159,10 @@ public class UploadServiceJob implements Job {
 			 * Explicitly upload the upload-job.xml as the last file to avoid sync problems on server in case of
 			 * many files have to be uploaded.
 			 */
-			File exchangeJsonFile = new File(folder.getAbsolutePath() + File.separator + ImportJob.IMPORT_JOB_JSON);
+			File importJobJsonFile = new File(folder.getAbsolutePath() + File.separator + ImportJob.IMPORT_JOB_JSON);
 			ImportJob importJob;
-			if (exchangeJsonFile.exists()) {
-				importJob = objectMapper.readValue(exchangeJsonFile, ImportJob.class);
+			if (importJobJsonFile.exists()) {
+				importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
 				setTempDirIdAndStartImport(tempDirId, importJob);	
 			} else {
 				throw new Exception(ImportJob.IMPORT_JOB_JSON + " missing in folder.");
@@ -181,6 +180,7 @@ public class UploadServiceJob implements Job {
 					FileUtils.deleteQuietly(file);
 				}
 			}
+
 		} catch (Exception e) {
 			currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.ERROR.toString());
 			uploadJob.setUploadState(UploadState.ERROR);
@@ -202,8 +202,7 @@ public class UploadServiceJob implements Job {
 	private void setTempDirIdAndStartImport(String tempDirId, ImportJob importJob)
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
 		importJob.setWorkFolder(tempDirId);
-		ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
-		String importJobJson = ow.writeValueAsString(importJob);
+		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		uploadServiceClient.startImportJob(importJobJson);
 	}
 	

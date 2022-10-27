@@ -18,10 +18,12 @@ VALUES
 	(1,1,false,0,'StudyCard1',1,1),
 	(2,1,false,0,'StudyCard2',1,1),
 	(3,3,false,0,'StudyCard3',1,2),
-	(4,4,false,0,'StudyCard4',1,3);
+	(4,4,false,0,'StudyCard4',1,3),
+	(5,null,false,0,'QualityCard1',null,1);
 	
-INSERT INTO study_card_rule 
-VALUES (3,1),(4,1),(5,1),(6,1);
+INSERT INTO study_card_rule
+	(id, type, study_card_id)
+VALUES (3,2,1),(4,2,1),(5,2,1),(6,2,1),(7,1,5),(8,1,5);
 
 INSERT INTO study_card_assignment 
 VALUES 
@@ -32,20 +34,34 @@ VALUES
 	(7,11,'OVERRIDEN',6),
 	(8,4,'4',6);
 
-INSERT INTO study_card_condition 
+INSERT INTO study_card_condition
+	(id, dicom_tag_or_field, operation, rule_id)
 VALUES 
-	(2,528446,'tse_vfl_WIP607',2,3),
-	(3,1573009,'200',6,5),
-	(4,1573009,'150',5,5),
-	(5,1573009,'150',5,6),
-	(6,1573013,'781.00',2,6);
+	(1,2,4,7),
+	(2,2,4,7),
+	(3,1573009,5,8),
+	(4,1573009,6,8),
+	(5,1573013,6,8);
+
+INSERT INTO study_card_condition_value
+	(id, value, condition_id)
+VALUES 
+	(1,'TOF',1),
+	(2,'flight',1),
+	(3,'gadolinium',2),
+	(4,'contrast',2),
+	(5,'enhanced',2),
+	(6,'Gd',2),
+	(7,'150',3),
+	(8,'150',4),
+	(9,'781.00',5);
 	
 INSERT INTO subject
 	(id, name)
 VALUES
 	(1, 'Subject One'),
 	(2, 'Subject Two'),
-	(3, 'Subject three');
+	(3, 'Subject Three');
 
 INSERT INTO examination
 	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id)

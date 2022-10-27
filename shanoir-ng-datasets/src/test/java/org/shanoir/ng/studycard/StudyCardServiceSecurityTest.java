@@ -124,7 +124,7 @@ public class StudyCardServiceSecurityTest {
 		assertEquals(0, service.findStudyCardsByAcqEq(4L).size());
 		
 		assertAccessAuthorized(service::findStudyCardsOfStudy, 1L);
-		assertEquals(2, service.findStudyCardsOfStudy(1L).size());
+		assertEquals(3, service.findStudyCardsOfStudy(1L).size());
 		assertEquals(0, service.findStudyCardsOfStudy(2L).size());
 		assertEquals(0, service.findStudyCardsOfStudy(3L).size());
 		
@@ -167,7 +167,7 @@ public class StudyCardServiceSecurityTest {
 		assertEquals(0, service.findStudyCardsByAcqEq(4L).size());
 		
 		assertAccessAuthorized(service::findStudyCardsOfStudy, 1L);
-		assertEquals(2, service.findStudyCardsOfStudy(1L).size());
+		assertEquals(3, service.findStudyCardsOfStudy(1L).size());
 		assertEquals(0, service.findStudyCardsOfStudy(2L).size());
 		assertEquals(0, service.findStudyCardsOfStudy(3L).size());
 		

@@ -36,13 +36,13 @@ public class StudyCardAssignment extends AbstractEntity {
 	@NotNull
 	private String value;
 
-	public AssignmentField getField() {
+	public Field getField() {
 		if (field == null) return null;
-		else return AssignmentField.getEnum(field);
+		else return Field.getEnum(field.intValue());
 	}
 
-	public void setField(AssignmentField field) {
-		this.field = field.getId();
+	public void setField(Field field) {
+		this.field = Long.valueOf(field.getId());
 	}
 
 	public String getValue() {

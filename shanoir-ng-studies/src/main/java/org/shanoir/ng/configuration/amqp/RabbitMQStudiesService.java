@@ -1,24 +1,9 @@
-/**
- * Shanoir NG - Import, manage and share neuroimaging data
- * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
- * Contact us on https://project.inria.fr/shanoir/
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
- */
-
-package org.shanoir.ng.study.service;
+package org.shanoir.ng.configuration.amqp;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import javax.transaction.Transactional;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -29,6 +14,9 @@ import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
+import org.shanoir.ng.study.service.StudyService;
+import org.shanoir.ng.subjectstudy.model.SubjectStudyStudyCardTag;
+import org.shanoir.ng.subjectstudy.repository.SubjectStudyStudyCardTagRepository;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,20 +28,27 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Service
+@Component
 public class RabbitMQStudiesService {
-
+	
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQStudiesService.class);
+
+	private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the object.";
 
 	@Autowired
 	private StudyRepository studyRepo;
 
 	@Autowired
 	private StudyService studyService;
+	
+	@Autowired
+	private SubjectStudyStudyCardTagRepository subjectStudyStudyCardTagRepository;
 	
 	@Autowired
 	private DataUserAgreementService dataUserAgreementService;
@@ -167,4 +162,19 @@ public class RabbitMQStudiesService {
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage(), e);
 		}
 	}
+	
+	@Transactional
+	@RabbitListener(queues = RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG)
+	@RabbitHandler
+	public void receiveSubjectStudyStudyCardTagUpdate(final String messageStr) {
+		try {
+			List<SubjectStudyStudyCardTag> subjectStudyStudyCardTagList =
+					objectMapper.readValue(messageStr, new TypeReference<List<SubjectStudyStudyCardTag>>(){});
+			subjectStudyStudyCardTagRepository.saveAll(subjectStudyStudyCardTagList);
+			LOG.info(messageStr);
+		} catch (Exception e) {
+			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR, e);
+		}
+	}
+
 }
