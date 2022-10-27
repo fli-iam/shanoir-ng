@@ -25,7 +25,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -836,11 +838,17 @@ public class ImporterApiController implements ImporterApi {
 			String subjectName = studyName + "_" + subjectFolder.getName();
 			Subject subject = null;
 			
-			// Check is subject actually already exists
-
-
+			// Sort examination folders by alphabetical order
+			List<File> sortedExamFolders = Arrays.asList(examinationsFolders);
+			sortedExamFolders.sort(new Comparator<File>() {
+				@Override
+				public int compare(File f1, File f2) {
+					return f1.getName().compareTo(f2.getName());
+				}
+			});
+			
 			// STEP 4: Iterate over examination folders
-			for (File examFolder : examinationsFolders) {
+			for (File examFolder : sortedExamFolders) {
 				job = null;
 				// Check of it's a folder
 				if (!examFolder.isDirectory()) {
