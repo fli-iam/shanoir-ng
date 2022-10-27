@@ -251,7 +251,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             {headerName: "Subject", field: "subject.name"},
             {headerName: "Creation date", field: "creationDate", type: "date"}
         ];
-        this.outputDatasetsColumnDefs = this.inputDatasetsColumnDefs;
+        this.outputDatasetsColumnDefs = [...this.inputDatasetsColumnDefs];
     }
 
     private isCarminDatasetProcessing(datasetProcessing: DatasetProcessing){

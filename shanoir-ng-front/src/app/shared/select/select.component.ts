@@ -572,7 +572,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     @HostListener('focusout', ['$event']) 
     onFocusOut(event: FocusEvent) {
-        if (!this.element.nativeElement.contains(event.relatedTarget)) {
+        if (!this.element.nativeElement.contains(event.relatedTarget) && !this.dragging) {
             this.close();
             this.onTouchedCallback();
             this.onTouch.emit();
