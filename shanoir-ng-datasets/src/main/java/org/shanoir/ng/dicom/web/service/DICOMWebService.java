@@ -84,12 +84,16 @@ public class DICOMWebService {
 	@Value("${dcm4chee-arc.dicom.web.http.client.max.total}")
 	private int dicomWebHttpClientMaxTotal;
 
+	@Value("${dcm4chee-arc.dicom.web.http.client.max.per.route}")
+	private int dicomWebHttpClientMaxPerRoute;
+
 	@PostConstruct
 	public void init() {
 		this.serverURL = dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRS;
 		try {
 			final PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 	        cm.setMaxTotal(dicomWebHttpClientMaxTotal);
+	        cm.setDefaultMaxPerRoute(dicomWebHttpClientMaxPerRoute);
 			httpClient = HttpClients.custom().setConnectionManager(cm).build();
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
