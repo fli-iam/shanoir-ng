@@ -119,15 +119,6 @@ public class RabbitMQSubjectService {
 		}
 	}
 
-	/**
-	 * This methods allows to get the particpants.tsv file from BIDS/SEF import and deserialize it into subjects
-	 * Then the non existing ones are created
-	 * We finally return the full list of subjects
-	 * @param participantsFilePath the partcipants.tsv file given
-	 * @return A list of subjects updated with their IDs.
-	 * If an error occurs, a list of a single subject with no ID and only a name is sent back
-	 * @throws JsonProcessingException
-	 */
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE)
 	@RabbitHandler
 	@Transactional
@@ -138,10 +129,9 @@ public class RabbitMQSubjectService {
 
 			Subject subject = mapper.readValue(subjectAsString, Subject.class);
 
-			// Be carefull, ID field is used to carry the study ID here.
-			Long studyId = subject.getId();
+			Long studyId = subject.getSubjectStudyList().get(0).getStudy().getId();
+			
 			Study study = studyRepository.findById(studyId).get();
-			subject.setId(null);
 
 			// Check subject existence by name
 			Subject existingSubject = this.subjectRepository.findByName(subject.getName());
@@ -150,7 +140,8 @@ public class RabbitMQSubjectService {
 			if (existingSubject != null) {
 				if(existingSubject.getSubjectStudyList() == null) {
 					existingSubject.setSubjectStudyList(new ArrayList<>());
-				} else if (!studyListContains(existingSubject.getSubjectStudyList(), studyId)) {
+				}
+				if (!studyListContains(existingSubject.getSubjectStudyList(), studyId)) {
 					SubjectStudy subjectStudy = new SubjectStudy();
 					subjectStudy.setSubject(existingSubject);
 					subjectStudy.setStudy(study);
@@ -158,21 +149,18 @@ public class RabbitMQSubjectService {
 				}
 				subject = existingSubject;
 			} else {
-				if(subject.getSubjectStudyList() == null) {
-					subject.setSubjectStudyList(new ArrayList<>());
+				for (SubjectStudy sustu : subject.getSubjectStudyList()) {
+					sustu.setSubject(subject);
 				}
-				SubjectStudy subjectStudy = new SubjectStudy();
-				subjectStudy.setSubject(existingSubject);
-				subjectStudy.setStudy(study);
-				subject.getSubjectStudyList().add(subjectStudy);
 			}
-			
+
 			// Then create/update the subject
-			subjectService.create(subject);
+			subject = subjectService.create(subject);
 
 			// Return subject ID
 			return subject.getId();
 		} catch (Exception e) {
+			LOG.error("Error while creating the new subject: ", e);
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
 	}
