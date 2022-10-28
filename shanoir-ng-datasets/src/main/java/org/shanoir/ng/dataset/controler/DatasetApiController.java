@@ -82,6 +82,7 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -427,7 +428,7 @@ public class DatasetApiController implements DatasetApi {
 		File zipFile = new File(tmpFilePath + ZIP);
 		zipFile.createNewFile();
 
-		DatasetFileUtils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+		Utils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
@@ -622,7 +623,7 @@ public class DatasetApiController implements DatasetApi {
 		// Zip it
 		File zipFile = new File(tmpFile.getAbsolutePath() + ZIP);
 		zipFile.createNewFile();
-		DatasetFileUtils.zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
+		Utils.zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
 
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());

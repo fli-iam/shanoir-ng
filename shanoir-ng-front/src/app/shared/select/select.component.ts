@@ -101,12 +101,14 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.options && this.options && !arraysEqual(changes.options?.currentValue, changes.options?.previousValue)) {
+        if (changes.options && !arraysEqual(changes.options?.currentValue, changes.options?.previousValue)) {
+            if (!this.options) this.options = [];
             this.searchText = null;
             this.computeDisplayedOptions();
             this.initSelectedOption();
             this.computeMinWidth();
-        } else if (changes.optionArr && this.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
+        } else if (changes.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
+            if (!this.optionArr) this.optionArr = [];
             this.searchText = null;
             this.options = [];
             this.optionArr.forEach(item => {
@@ -570,7 +572,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     @HostListener('focusout', ['$event']) 
     onFocusOut(event: FocusEvent) {
-        if (!this.element.nativeElement.contains(event.relatedTarget)) {
+        if (!this.element.nativeElement.contains(event.relatedTarget) && !this.dragging) {
             this.close();
             this.onTouchedCallback();
             this.onTouch.emit();
@@ -591,7 +593,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     clickAdd(): void {
-        if(!this.addDisabled && this.selectedOption) this.onAddClick.emit(this.selectedOption.value);
+        if(!this.addDisabled && this.selectedOption && !this.selectedOption.disabled) this.onAddClick.emit(this.selectedOption.value);
     }
 
     setDisabledState(isDisabled: boolean) {

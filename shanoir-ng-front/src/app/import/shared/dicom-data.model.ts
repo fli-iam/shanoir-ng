@@ -31,6 +31,7 @@ export class ImportJob {
     subjectName: String;
     studyName: String;
     userId: number;
+    centerId: number;
 }
 
 export class PatientDicom {
