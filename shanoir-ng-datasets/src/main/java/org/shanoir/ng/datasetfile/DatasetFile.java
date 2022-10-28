@@ -47,9 +47,6 @@ public class DatasetFile extends AbstractEntity {
 	@Column(columnDefinition = "TEXT")
 	private String path;
 
-	/** The size of the file, dicom or nifti. */
-	private Long size;
-
 	/**
 	 * @return the datasetExpression
 	 */
