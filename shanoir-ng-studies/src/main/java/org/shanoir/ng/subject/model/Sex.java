@@ -23,6 +23,11 @@ package org.shanoir.ng.subject.model;
 public enum Sex {
 
 	/**
+	 * Other.
+	 */
+	O(0),
+	
+	/**
 	 * Male.
 	 */
 	M(1),

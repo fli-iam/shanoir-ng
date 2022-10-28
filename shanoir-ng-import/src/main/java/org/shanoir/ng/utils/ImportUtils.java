@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -36,7 +37,11 @@ import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.shanoir.ng.importer.dto.ExaminationDTO;
+import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.importer.model.SubjectStudy;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
@@ -63,8 +68,6 @@ public class ImportUtils {
 	private static final String ZIP_FILE_SUFFIX = ".zip";
 
 	private static final String FILE_POINT = ".";
-
-	private static final String DICOMDIR = "DICOMDIR";
 
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
 
@@ -583,6 +586,44 @@ public class ImportUtils {
 			LOG.error("IO errors %s", e);
 		}
 		return size;
+	}
+
+	/**
+	 * Create an exam from fiew attributes
+	 * @return the created exam
+	 */
+	public static ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, String comment, LocalDate examDate, String subjectName) {
+		// Create one examination
+		ExaminationDTO examination = new ExaminationDTO();
+		IdName study = new IdName();
+		study.setId(studyId);
+		examination.setStudy(study);
+
+		IdName subj = new IdName();
+		subj.setId(subjectId);
+		subj.setName(subjectName);
+		examination.setSubject(subj);
+
+		IdName center = new IdName();
+		center.setId(centerId);
+		examination.setCenter(center);
+
+		examination.setComment(comment);
+
+		examination.setExaminationDate(examDate);
+		
+		return examination;
+	}
+
+	public static Subject createSubject(String name, LocalDate birthDate, String sex, Integer imagedObjectCategory,
+			List<SubjectStudy> subjectStudyList) {
+		Subject subject = new Subject();
+		subject.setName(name);
+		subject.setBirthDate(birthDate);
+		subject.setSex(sex);
+		subject.setImagedObjectCategory(imagedObjectCategory);
+		subject.setSubjectStudyList(subjectStudyList);
+		return subject;
 	}
 
 }
