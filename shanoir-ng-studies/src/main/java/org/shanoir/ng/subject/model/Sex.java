@@ -23,7 +23,7 @@ package org.shanoir.ng.subject.model;
 public enum Sex {
 
 	/**
-	 * Other.
+	 * Other, e.g. phantom.
 	 */
 	O(0),
 	
@@ -35,12 +35,7 @@ public enum Sex {
 	/**
 	 * Female.
 	 */
-	F(2),
-	
-	/**
-	 * Other, e.g. phantom.
-	 */
-	O(3);
+	F(2);
 
 	private int id;
 
