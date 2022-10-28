@@ -139,7 +139,7 @@ public class RabbitMQStudiesService {
 			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 			)
 	@Transactional
-	public void challengeSubscription(final String studyStr) {
+	public void studySubscription(final String studyStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);

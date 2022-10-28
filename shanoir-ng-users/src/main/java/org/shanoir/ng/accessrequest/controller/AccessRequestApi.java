@@ -3,18 +3,16 @@ package org.shanoir.ng.accessrequest.controller;
 import java.util.List;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
+import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.user.model.User;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,7 +54,7 @@ public interface AccessRequestApi {
 	ResponseEntity<Void> resolveNewAccessRequest(
 			@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
 			@ApiParam(value = "Accept or refuse the request", required = true) @RequestBody boolean validation,
-			BindingResult result) throws RestServiceException;
+			BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException;
 
 	@ApiOperation(value = "byUser", notes = "Find all the access request for the given user", response = AccessRequest.class, tags = {})
 	@ApiResponses(value = {

@@ -16,6 +16,7 @@ package org.shanoir.ng.study.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -85,6 +86,9 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 	@ManyToMany
 	@JoinTable(name = "study_user_center", joinColumns = @JoinColumn(name = "study_user_id"), inverseJoinColumns = @JoinColumn(name = "center_id"))
 	private List<Center> centers;
+
+	// expiration date of the user.
+	private Date expirationDate;
 
 	/**
 	 * @return the receiveStudyUserReport
@@ -221,6 +225,14 @@ public class StudyUser extends AbstractEntity implements StudyUserInterface {
 			center.setId(id);
 			return center;
 		}).collect(Collectors.toList());
+	}
+
+	public Date getExpirationDate() {
+		return expirationDate;
+	}
+
+	public void setExpirationDate(Date expirationDate) {
+		this.expirationDate = expirationDate;
 	}
 
 }

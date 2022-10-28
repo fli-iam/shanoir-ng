@@ -18,7 +18,6 @@ export class AccountRequestInfo {
     function: string;
     institution: string;
     service: string;
-    study: string;
     work: string;
-    challenge: number;
+    study: number;
 }

@@ -21,14 +21,10 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.ForbiddenException;
@@ -58,37 +54,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	RabbitTemplate rabbitTemplate;
 
 	@Override
-	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
-			@RequestBody final User user, final BindingResult result) throws RestServiceException {
-		
-		try {
-			validate(user, result);
-
-			User userSaved = getUserService().confirmAccountRequest(user);
-
-			if (userSaved.getAccountRequestInfo() != null && 
-					(userSaved.getAccountRequestInfo().getStudyId() != null)) {
-				
-				if (userSaved.getAccountRequestInfo().getStudyId() != null) {
-					// Directly create an access request for the given study
-					AccessRequest request = new AccessRequest();
-					request.setUser(userSaved);
-					request.setStudyId(userSaved.getAccountRequestInfo().getStudyId());
-					request.setMotivation(userSaved.getAccountRequestInfo().getMessage());
-					// So that when the user account request is accepted, it directly has access to the data
-					
-					accessRequestService.create(request);						
-				}
-			}
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (AccountNotOnDemandException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
-		}
-	}
-
-	@Override
 	public ResponseEntity<Void> deleteUser(@PathVariable("userId") final Long userId) throws ForbiddenException {
 		try {
 			getUserService().deleteById(userId);
@@ -100,20 +65,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	}
 
 	@Override
-	public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
-		try {
-			getUserService().denyAccountRequest(userId);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (AccountNotOnDemandException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
-		}
-	}
-
-	
-	@Override
 	public ResponseEntity<User> findUserById(@PathVariable("userId") final Long userId) {
 		final User user = getUserService().findById(userId);
 		if (user == null) {
@@ -122,7 +73,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 
-	
 	@Override
 	public ResponseEntity<List<User>> findUsers() {
 		final List<User> users = getUserService().findAll();
@@ -152,6 +102,21 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		
 		user.setCreationDate(LocalDate.now()); // Set creation date on creation, which is now
 		validateIgnoreBlankUsername(user, result);
+		
+		if (user.getAccountRequestInfo() != null && 
+				(user.getAccountRequestInfo().getStudy() != null)) {
+			
+			if (user.getAccountRequestInfo().getStudy() != null) {
+				// Directly create an access request for the given study
+				AccessRequest request = new AccessRequest();
+				request.setUser(user);
+				request.setStudyId(user.getAccountRequestInfo().getStudy());
+				request.setMotivation(user.getAccountRequestInfo().getMessage());
+				// So that when the user account request is accepted, it directly has access to the data
+				
+				accessRequestService.create(request);						
+			}
+		}
 
 		/* Save user in db. */
 		try {

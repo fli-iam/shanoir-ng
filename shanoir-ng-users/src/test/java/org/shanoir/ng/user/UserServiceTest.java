@@ -280,7 +280,7 @@ public class UserServiceTest {
 		accountRequestInfo.setFunction("function");
 		accountRequestInfo.setInstitution("institution");
 		accountRequestInfo.setService("service");
-		accountRequestInfo.setStudy("study");
+		accountRequestInfo.setStudy(1L);
 		accountRequestInfo.setWork("work");
 		user.setAccountRequestDemand(true);
 		user.setAccountRequestInfo(accountRequestInfo);
