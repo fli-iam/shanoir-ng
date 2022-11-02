@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.model.DatasetDetail;
@@ -29,7 +28,6 @@ import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
-import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.slf4j.Logger;
@@ -69,6 +67,8 @@ public class EmailServiceImpl implements EmailService {
 
 	private static final String SERVER_ADDRESS = "serverAddress";
 	
+	private static final String SERVER_ADDRESS_PUBLIC = "serverAddressPublic";
+
 	private static final String STUDY_NAME = "studyName";
 	
 	private static final String SUBJECT = "subject";
@@ -121,7 +121,6 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setText(content, true);
 		};
 		mailSender.send(messagePreparator);
-
 	}
 
 	@Override
@@ -531,10 +530,7 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void notifyStudyManagerAccessRequest(AccessRequest createdRequest) {
         // Find requester users
-		throw new NotImplementedException("To be done");
-		/*
         User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
-		Study study = studyRepository.findByid(createdRequest.getStudyId());
 
         // get study admin
         List<User> studyAdmins = this.userRepository.findByIdIn(null);
@@ -545,38 +541,65 @@ public class EmailServiceImpl implements EmailService {
 					final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
 					messageHelper.setFrom(administratorEmail);
 					messageHelper.setTo(studyAdmin.getEmail());
-					messageHelper.setSubject("[Shanoir] Member(s) access request to " + email.getStudyName());
+					messageHelper.setSubject("[Shanoir] Member(s) access request to " + createdRequest.getStudy().getName());
 					final Map<String, Object> variables = new HashMap<>();
 					variables.put(FIRSTNAME, studyAdmin.getFirstName());
 					variables.put(LASTNAME, studyAdmin.getLastName());
 					variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
-					variables.put(STUDY_NAME, email.getStudyName());
-					variables.put(STUDY_USERS, newStudyUsers);
-					variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
+					variables.put(STUDY_NAME, createdRequest.getStudy().getName());
+					variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + createdRequest.getStudy().getId());
 					final String content = build("notifyStudyAdminStudyUsersAdded", variables);
 					LOG.info(content);
 					messageHelper.setText(content, true);
 				};
 				// Send the message
-				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
+				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), createdRequest.getStudy().getId());
 				mailSender.send(messagePreparator);
 			}
         }
-        */
+	}
+
+	/** Invites a user that is not in shanoir yet. */
+	@Override
+	public void inviteToStudy(StudyInvitationEmail email) {
+		
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(email.getInvitedMail());
+			messageHelper.setSubject("[Shanoir] Access to study " + email.getStudyName());
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(STUDY_NAME, email.getStudyName());
+			variables.put(SERVER_ADDRESS, shanoirServerAddress + "/access-request/" + email.getStudyId());
+			variables.put(SERVER_ADDRESS_PUBLIC, shanoirServerAddress + "/account-request/" + email.getStudyId());
+			final String content = build("notifyAnonymousInvitation", variables);
+			messageHelper.setText(content, true);
+		};
+		// Send the message
+		LOG.info("User with mail {} invited in study {}", email.getInvitedMail(), email.getStudyId());
+		mailSender.send(messagePreparator);
 	}
 
 	@Override
-	public void inviteToStudy(StudyInvitationEmail mail) {
-		// Check if user with this mail exists.
+	public void notifyUserAddedToStudy(StudyInvitationEmail email) {
 		
-		// If yes, send a mail with a direct link to access request.
+		User user = userRepository.findById(email.getUserId()).get();
 		
-		// Otherwise, send a link with a link to subscription (with invitation key hidden bonus)
-		
-	}
-
-	@Override
-	public void notifyUserAddedToStudy(AccessRequestService accessRequestService) {
-		// TODO Auto-generated method stub
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(email.getInvitedMail());
+			messageHelper.setSubject("[Shanoir] Access to study " + email.getStudyName());
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(FIRSTNAME, user.getFirstName());
+			variables.put(LASTNAME, user.getLastName());
+			variables.put(STUDY_NAME, email.getStudyName());
+			final String content = build("notifyUserAddedToStudy", variables);
+			LOG.info(content);
+			messageHelper.setText(content, true);
+		};
+		// Send the message
+		LOG.info("Sending study-users-added mail to {} for study {}", user.getUsername(), email.getStudyId());
+		mailSender.send(messagePreparator);
 	}
 }

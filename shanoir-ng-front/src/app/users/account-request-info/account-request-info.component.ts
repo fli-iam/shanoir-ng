@@ -20,7 +20,6 @@ import { Option } from '../../shared/select/select.component';
 import { ConsoleService } from '../../shared/console/console.service';
 
 import { AccountRequestInfo } from './account-request-info.model';
-import { Study } from '../../studies/shared/study.model';
 
 @Component ({
     selector: 'account-request-info',
@@ -52,8 +51,9 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
 
     writeValue(obj: any): void {
         this.studyName = null;
-        if (obj.challenge && obj.challenge != this.info.study) {
+        if (obj.challenge && obj.challenge != this.info.studyId) {
             this.getStudyName(obj.challenge).then(name => this.studyName = name);
+            this.info.studyName = this.studyName;
         }
         this.info = obj;
     }
@@ -69,9 +69,9 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     ngOnInit() {
         if (this.activatedRoute.snapshot.params['id'] && this.activatedRoute.snapshot.params['id'] != 0) {
             this.presetId = true;
-            this.info.study = +this.activatedRoute.snapshot.params['id'];
+            this.info.studyId = this.activatedRoute.snapshot.params['id'];
         }
-        this.studyService.getChallenges().then(result => {
+        this.studyService.getPublicStudies().then(result => {
             if (result) {
                 this.studyOptions = result.map(element => new Option(element.id, element.name));
             } else {
@@ -85,7 +85,8 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
             'function': [this.info.function, [Validators.required, Validators.maxLength(200)]],
             'contact': [this.info.contact, [Validators.required, Validators.maxLength(200)]],
             'work': [this.info.work, [Validators.required, Validators.maxLength(200)]],
-            'study': [this.info.study, [Validators.required]]
+            'studyId': [this.info.studyId, [Validators.required]],
+            'studyName': [this.info.studyName, [Validators.required]]
         });
         this.form.valueChanges.subscribe(() => {
             this.valid.emit(this.form.valid);

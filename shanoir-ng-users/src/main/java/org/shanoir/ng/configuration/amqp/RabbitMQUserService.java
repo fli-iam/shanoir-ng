@@ -126,21 +126,4 @@ public class RabbitMQUserService {
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
 		}
 	}
-	
-	/**
-	 * Receives an import end event as a json object, thus send a mail to study manager to notice him
-	 * @param commandArrStr the task as a json string.
-	 */
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_INVITATION_QUEUE)
-	@RabbitHandler
-	public void inviteToStudyMail(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-		try {
-			StudyInvitationEmail mail = mapper.readValue(generatedMailAsString, StudyInvitationEmail.class);
-			this.emailService.inviteToStudy(mail);
-		} catch (Exception e) {
-			LOG.error("Something went wrong deserializing the invitation mail.", e);
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
-		}
-	}
 }

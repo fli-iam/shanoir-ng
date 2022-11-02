@@ -144,9 +144,9 @@ public interface EmailService {
 
 	/**
 	 * Notify a user its study request was accepted / refused
-	 * @param accessRequestService the access request
+	 * @param accessRequest the access request
 	 */
-	void notifyUserAddedToStudy(AccessRequestService accessRequestService);
+	void notifyUserAddedToStudy(StudyInvitationEmail email);
 
 	/** Invites an user to join a study. */
 	void inviteToStudy(StudyInvitationEmail mail);

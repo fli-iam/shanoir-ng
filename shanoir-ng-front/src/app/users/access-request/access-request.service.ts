@@ -11,18 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { ErrorHandler, Injectable, OnDestroy } from '@angular/core';
-import { saveAs } from 'file-saver';
-import { Subscription } from 'rxjs';
-import { Observable } from 'rxjs/Observable';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, OnDestroy } from '@angular/core';
+import { Observable, Subscription } from 'rxjs';
+import { IdName } from 'src/app/shared/models/id-name.model';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { AccessRequest } from './access-request.model';
-import { ServiceLocator } from '../../utils/locator.service';
 
 @Injectable()
 export class AccessRequestService extends EntityService<AccessRequest> implements OnDestroy {
@@ -37,6 +33,14 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
     
     constructor(protected http: HttpClient) {
         super(http);
+    }
+
+    public inviteUser(mail: string, study: IdName): Promise<Object> {
+        const formData: FormData = new FormData();
+        formData.set("email", mail);
+        formData.set("studyId", "" + study.id);
+        formData.set("studyName", study.name);
+        return this.http.post(this.API_URL + "/invitation/", formData, {responseType:"text"}).toPromise();
     }
 
     ngOnDestroy() {

@@ -94,7 +94,7 @@ public class EmailServiceTest {
 		info.setFunction("function");
 		info.setInstitution("institution");
 		info.setService("service");
-		info.setStudy(1l);
+		info.setStudyId(1l);
 		info.setWork("work");
 		user.setAccountRequestInfo(info);
 		

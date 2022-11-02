@@ -92,7 +92,7 @@ public interface UserService {
 	 * @param email email.
 	 * @return optionally a user.
 	 */
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') || hasRole('EXPERT')")
 	Optional<User> findByEmail(String email);
 
 	/**

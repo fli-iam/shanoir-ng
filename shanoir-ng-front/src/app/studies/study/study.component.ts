@@ -40,6 +40,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
+import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 
 @Component({
     selector: 'study-detail',

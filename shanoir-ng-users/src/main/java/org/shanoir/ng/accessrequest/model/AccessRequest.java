@@ -1,7 +1,9 @@
 package org.shanoir.ng.accessrequest.model;
 
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.user.model.User;
 
@@ -16,6 +18,9 @@ public class AccessRequest extends HalEntity {
 
 	private static final long serialVersionUID = 4662874539537675259L;
 
+	@Transient
+	private IdName study;
+	
 	private Long studyId;
 	
 	private User user;
@@ -23,20 +28,6 @@ public class AccessRequest extends HalEntity {
 	private String motivation;
 
 	private Boolean status;
-
-	/**
-	 * @return the studyId
-	 */
-	public Long getStudyId() {
-		return studyId;
-	}
-
-	/**
-	 * @param studyId the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
 
 	/**
 	 * @return the motivation
@@ -66,5 +57,22 @@ public class AccessRequest extends HalEntity {
 
 	public void setStatus(Boolean status) {
 		this.status = status;
+	}
+
+	public IdName getStudy() {
+		return study;
+	}
+
+	public void setStudy(IdName study) {
+		this.study = study;
+		this.studyId = this.study.getId();
+	}
+
+	public Long getStudyId() {
+		return studyId;
+	}
+
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 }

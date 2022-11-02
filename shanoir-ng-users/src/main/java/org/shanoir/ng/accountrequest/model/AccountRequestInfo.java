@@ -48,8 +48,10 @@ public class AccountRequestInfo extends AbstractEntity {
 	@NotNull
 	private String work;
 
-	private Long study;
+	private Long studyId;
 
+	private String studyName;
+	
 	private String message;
 
 	/**
@@ -130,12 +132,20 @@ public class AccountRequestInfo extends AbstractEntity {
 		this.message = message;
 	}
 
-	public Long getStudy() {
-		return study;
+	public Long getStudyId() {
+		return studyId;
 	}
 
-	public void setStudy(Long study) {
-		this.study = study;
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
+	}
+
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
 	}
 
 }

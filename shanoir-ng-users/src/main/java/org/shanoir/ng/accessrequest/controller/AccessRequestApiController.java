@@ -1,10 +1,16 @@
 package org.shanoir.ng.accessrequest.controller;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
+import javax.validation.Valid;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -26,6 +32,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.ApiParam;
 
@@ -63,7 +70,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 		AccessRequest createdRequest = accessRequestService.create(request);
 		
 		// Send event
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.ACCESS_REQUEST_EVENT, "" + createdRequest.getId(), KeycloakUtil.getTokenUserId(), "", 1, createdRequest.getStudyId()));
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.ACCESS_REQUEST_EVENT, "" + createdRequest.getId(), KeycloakUtil.getTokenUserId(), "", 1, createdRequest.getStudy().getId()));
 		
 		// Send notification to study admin
 		// TODO:
@@ -115,11 +122,12 @@ public class AccessRequestApiController implements AccessRequestApi {
 			// Update study to add a new user
 			ShanoirEvent subscription = new ShanoirEvent(
 					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
-					resolvedRequest.getStudyId().toString(),
+					resolvedRequest.getStudy().getId().toString(),
 					resolvedRequest.getUser().getId(),
 					resolvedRequest.getUser().getUsername(),
 					ShanoirEvent.SUCCESS);
-			eventService.publishEvent(subscription);
+			
+			String subResult = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, subscription);
 			
 			// If the user is not currently enabled, enable it.
 			if(resolvedRequest.getUser().isAccountRequestDemand()) {
@@ -140,5 +148,51 @@ public class AccessRequestApiController implements AccessRequestApi {
 	public ResponseEntity<AccessRequest> getByid(@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException {
 		AccessRequest acceReq = this.accessRequestService.findById(accessRequestId).get();
 		return new ResponseEntity<AccessRequest>(acceReq, HttpStatus.OK);
+	}
+
+	public 	ResponseEntity<String> inviteUserToStudy(
+			@ApiParam(value = "Study the user is invited in", required = true) 
+			@RequestParam(value = "studyId", required = true) Long studyId,
+			@ApiParam(value = "Study name the user is invited in", required = true) 
+			@RequestParam(value = "studyName", required = true) String studyName,
+			@ApiParam(value = "The email of the invited user.") 
+    		@RequestParam(value = "email", required = true) String email) throws RestServiceException {
+		
+		// Check if user with such email exists
+		Optional<User> user = this.userService.findByEmail(email);
+		
+		// User exists => directly add it to the study
+		if (user.isPresent()) {
+			// Direct call to study MS to add the user
+			
+			ShanoirEvent subscription = new ShanoirEvent(
+					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
+					studyId.toString(),
+					user.get().getId(),
+					user.get().getUsername(),
+					ShanoirEvent.SUCCESS);
+			
+			boolean subResult = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, subscription);
+			
+			if (subResult) {
+				StudyInvitationEmail mail = new StudyInvitationEmail();
+				mail.setInvitedMail(email);
+				mail.setStudyId("" + studyId);
+				mail.setStudyName(studyName);
+				this.emailService.notifyUserAddedToStudy(mail);
+			}
+			
+			return new ResponseEntity<String>("User " + user.get().getUsername() + " was added to the study with success", HttpStatus.OK);
+		}
+
+		StudyInvitationEmail mail = new StudyInvitationEmail();
+		mail.setInvitedMail(email);
+		mail.setStudyId(studyId.toString());
+		mail.setStudyName(studyName);
+		
+		// User does not exists, just send an email
+		this.emailService.inviteToStudy(mail);
+		
+		return new ResponseEntity<String>("No existing user with this email, an invitation to join Shanoir was sent.", HttpStatus.OK);
 	}
 }

@@ -53,13 +53,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <ng-container *ngIf="editMode">
                     <select-box 
                         formControlName="studyId"
-                        [(ngModel)]="info.study" 
+                        [(ngModel)]="info.studyId" 
                         [options]="studyOptions"
                         (change)="onInfoChange()">
                     </select-box>
                     <label *ngIf="hasError('studyId', ['required'])" class="form-validation-alert" i18n="Edit user|Study required error@@editUserStudyRequiredError">Study is required!</label>
                 </ng-container>
-                <span *ngIf="!editMode">{{studyName}}</span>
+                <span *ngIf="!editMode">{{info.studyName}}</span>
             </span>
         </li>
         <li>

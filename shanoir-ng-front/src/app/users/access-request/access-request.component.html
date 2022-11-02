@@ -20,8 +20,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	            <label i18n="access request|study label@@study" class="required-label">Study</label>
 	            <span class="right-col">
 	            <select-box
-	                    formControlName="studyId"
-	                    [(ngModel)]="accessRequest.studyId" 
+	                    formControlName="study"
+	                    [(ngModel)]="accessRequest.study" 
 	                    [options]="studyOptions">
 	            </select-box>
 	            </span>
@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	        <li *ngIf="mode == 'view'">
 	            <label i18n="access request|study label@@study" class="required-label">Study</label>
                 <span class="right-col">
-                    {{getStudyName(accessRequest.studyId)}}
+                    {{accessRequest.study.name}}
                 </span>
 	        </li>
 	        <li *ngIf="mode == 'create'">

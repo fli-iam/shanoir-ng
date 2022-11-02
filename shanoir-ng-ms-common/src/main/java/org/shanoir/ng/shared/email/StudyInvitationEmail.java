@@ -1,19 +1,11 @@
 package org.shanoir.ng.shared.email;
 
+import org.shanoir.ng.shared.core.model.IdName;
+
 public class StudyInvitationEmail extends EmailBase {
 	
-	private String invitationKey;
-	
 	private String invitedMail;
-
-	public String getInvitationKey() {
-		return invitationKey;
-	}
-
-	public void setInvitationKey(String invitationKey) {
-		this.invitationKey = invitationKey;
-	}
-
+	
 	public String getInvitedMail() {
 		return invitedMail;
 	}
@@ -21,5 +13,4 @@ public class StudyInvitationEmail extends EmailBase {
 	public void setInvitedMail(String invitedMail) {
 		this.invitedMail = invitedMail;
 	}
-
 }

@@ -104,13 +104,13 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		validateIgnoreBlankUsername(user, result);
 		
 		if (user.getAccountRequestInfo() != null && 
-				(user.getAccountRequestInfo().getStudy() != null)) {
+				(user.getAccountRequestInfo().getStudyId() != null)) {
 			
-			if (user.getAccountRequestInfo().getStudy() != null) {
+			if (user.getAccountRequestInfo().getStudyId() != null) {
 				// Directly create an access request for the given study
 				AccessRequest request = new AccessRequest();
 				request.setUser(user);
-				request.setStudyId(user.getAccountRequestInfo().getStudy());
+				request.setStudy(new IdName(user.getAccountRequestInfo().getStudyId(), user.getAccountRequestInfo().getStudyName()));
 				request.setMotivation(user.getAccountRequestInfo().getMessage());
 				// So that when the user account request is accepted, it directly has access to the data
 				

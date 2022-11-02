@@ -88,7 +88,7 @@ public class AccountRequestApiControllerTest {
 		info.setFunction("function");
 		info.setInstitution("institution");
 		info.setService("service");
-		info.setStudy(1L);
+		info.setStudyId(1L);
 		info.setWork("work");
 		user.setAccountRequestInfo(info);
 		
@@ -109,7 +109,7 @@ public class AccountRequestApiControllerTest {
 		info.setContact("contact");
 		info.setFunction("function");
 		info.setInstitution("institution");
-		info.setStudy(1L);
+		info.setStudyId(1L);
 		info.setService("service");
 		info.setWork("work");
 		user.setAccountRequestInfo(info);

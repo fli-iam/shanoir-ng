@@ -43,7 +43,6 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     public studyOptions:  Option<number>[];
     studies: IdName[];
 
-
     public get accessRequest(): AccessRequest { return this.entity; }
     public set accessRequest(accreq: AccessRequest) { 
         this.entity = accreq;
@@ -67,7 +66,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     buildForm(): FormGroup {
         return this.formBuilder.group({
             'motivation': [this.accessRequest.motivation, []],
-            'studyId': [this.accessRequest.studyId, []]
+            'study': [this.accessRequest.study, []]
         });
     }
 
@@ -89,10 +88,4 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     public async hasEditRight(): Promise<boolean> {
         return false;
     }
-
-    public getStudyName(studyId: number): String {
-        return this.studies.find(study => study.id == studyId).name;
-    }
-
-
 }

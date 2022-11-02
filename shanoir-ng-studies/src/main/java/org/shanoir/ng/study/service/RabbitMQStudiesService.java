@@ -129,17 +129,12 @@ public class RabbitMQStudiesService {
 	}
 
 	/**
-	 * Receives a shanoirEvent as a json object, concerning a challenge subscription
-	 * @param commandArrStr the task as a json string.
+	 * Receives a json object, concerning a study subscription
+	 * @param commandArrStr the studyUser as a json string.
 	 */
-	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
-			)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE)
 	@Transactional
-	public void studySubscription(final String studyStr) {
+	public boolean studySubscription(final String studyStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
@@ -162,9 +157,10 @@ public class RabbitMQStudiesService {
 				subscription.setConfirmed(true);
 			}
 			studyService.addStudyUserToStudy(subscription, studyToUpdate);
+			return true;
 		} catch (Exception e) {
 			LOG.error("Could not directly subscribe a user to the study: ", e);
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage(), e);
+			return false;
 		}
 	}
 }
