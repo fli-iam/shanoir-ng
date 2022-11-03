@@ -276,19 +276,4 @@ public interface StudyApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws IOException;
 
-	@ApiOperation(value = "", notes = "Invite by mail a user in a study", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "user invited", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no study found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@PostMapping(value = "invite/{studyId}", produces = {
-			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
-	ResponseEntity<Void> inviteToStudy(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "invited email", required = true) @RequestBody String email)
-			throws IOException;
-
-
 }

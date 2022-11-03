@@ -398,29 +398,5 @@ public class StudyApiController implements StudyApi {
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
-	
-	public ResponseEntity<Void> inviteToStudy(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "invited email", required = true) @RequestBody String email)
-			throws IOException {
-		// Get study
-		Study study = this.studyService.findById(studyId);
-
-		// Generate invitation key
-		String invitationKey = this.studyService.generateInvitationKey(study);
-		
-		//Create email
-		StudyInvitationEmail mail = new StudyInvitationEmail();
-		mail.setUserId(KeycloakUtil.getTokenUserId());
-		mail.setInvitationKey(invitationKey);
-		mail.setStudyId("" + study.getId());
-		mail.setStudyName(study.getName());
-		mail.setInvitedMail(email);
-
-		// Send an email to the user
-		
-		
-		return new ResponseEntity<Void>(HttpStatus.OK);
-	}
 
 }

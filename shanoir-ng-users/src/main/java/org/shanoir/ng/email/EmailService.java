@@ -39,14 +39,6 @@ public interface EmailService {
 	void notifyAccountWillExpire(User user);
 
 	/**
-	 * Send an email to administrators to indicate an account request.
-	 * 
-	 * @param user
-	 *            created user.
-	 */
-	void notifyAdminAccountRequest(User user);
-
-	/**
 	 * Send an email to administrators to indicate an account extension request.
 	 * 
 	 * @param user

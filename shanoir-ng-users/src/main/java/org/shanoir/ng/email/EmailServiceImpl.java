@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.model.DatasetDetail;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
@@ -39,10 +38,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
-import io.jsonwebtoken.lang.Collections;
 
 /**
  * Implementation of email service.
@@ -121,25 +119,7 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setText(content, true);
 		};
 		mailSender.send(messagePreparator);
-	}
 
-	@Override
-	public void notifyAdminAccountRequest(final User user) {
-		// Get admins emails
-		final List<String> adminEmails = userRepository.findAdminEmails();
-
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(adminEmails.toArray(new String[0]));
-			messageHelper.setSubject("New user account request from " + shanoirServerAddress);
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put("user", user);
-			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			final String content = build("notifyAdminAccountRequest", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
 	}
 
 	@Override
@@ -478,7 +458,7 @@ public class EmailServiceImpl implements EmailService {
 
         List<User> newStudyUsers = this.userRepository.findByIdIn(email.getStudyUsers());
 
-        if (!Collections.isEmpty(email.getRecipients())) {
+        if (!CollectionUtils.isEmpty(email.getRecipients())) {
 	        // Get the list of recipients
 			List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
 					
@@ -535,7 +515,7 @@ public class EmailServiceImpl implements EmailService {
         // get study admin
         List<User> studyAdmins = this.userRepository.findByIdIn(null);
 
-        if (!Collections.isEmpty(studyAdmins)) {
+        if (!CollectionUtils.isEmpty(studyAdmins)) {
 			for (User studyAdmin : studyAdmins) {
 				MimeMessagePreparator messagePreparator = mimeMessage -> {
 					final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);

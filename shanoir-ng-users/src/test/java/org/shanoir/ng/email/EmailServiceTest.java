@@ -87,23 +87,6 @@ public class EmailServiceTest {
 	}
 
 	@Test
-	public void notifyAdminAccountRequestTest() throws Exception {
-		final User user = ModelsUtil.createUser(null);
-		final AccountRequestInfo info = new AccountRequestInfo();
-		info.setContact("contact");
-		info.setFunction("function");
-		info.setInstitution("institution");
-		info.setService("service");
-		info.setStudyId(1l);
-		info.setWork("work");
-		user.setAccountRequestInfo(info);
-		
-		emailService.notifyAdminAccountRequest(user);
-
-		assertReceivedMessageContains("New user account request from", "is requesting an account on");
-	}
-
-	@Test
 	public void notifyNewUserTest() throws Exception {
 		emailService.notifyCreateUser(ModelsUtil.createUser(), "password");
 		assertReceivedMessageContains("Shanoir Account Creation", "Your account has been created");

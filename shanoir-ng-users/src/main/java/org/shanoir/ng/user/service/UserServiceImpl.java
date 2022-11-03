@@ -261,7 +261,6 @@ public class UserServiceImpl implements UserService {
 
 		accountRequestInfoRepository.save(user.getAccountRequestInfo()); // Save account request info
 		User savedUser = userRepository.save(user);
-		emailService.notifyAdminAccountRequest(savedUser); // Send email to administrators
 
 		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
 		savedUser.setKeycloakId(keycloakUserId); // Save keycloak id

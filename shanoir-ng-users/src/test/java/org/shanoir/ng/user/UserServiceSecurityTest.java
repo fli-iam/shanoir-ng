@@ -188,7 +188,7 @@ public class UserServiceSecurityTest {
 			assertNull(user.getLastLogin());
 			assertNull(user.getCreationDate());
 		}
-		assertAccessDenied(userService::findByEmail, USER_EMAIL);
+		assertAccessAuthorized(userService::findByEmail, USER_EMAIL);
 		assertAccessDenied(userService::findById, USER_ID);
 		assertAccessAuthorized(userService::findById, LOGGED_USER_ID);
 		assertAccessDenied(userService::findByUsername, USER_USERNAME);
