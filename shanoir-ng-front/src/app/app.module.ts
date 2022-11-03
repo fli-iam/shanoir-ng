@@ -78,7 +78,9 @@ import { ExaminationService } from './examinations/shared/examination.service';
 import { SubjectExaminationPipe } from './examinations/shared/subject-examination.pipe';
 import { HomeComponent } from './home/home.component';
 import { BidsUploadComponent } from './import/bids/bids-upload.component';
-import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { BasicClinicalContextComponent } from './import/basic-clinical-context/basic-clinical-context.component';
+import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
+import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
@@ -250,6 +252,7 @@ import { StudyUserListComponent } from './studies/studyuser/studyuser-list.compo
 import { VarDirective } from './utils/ng-var.directive';
 import { AccessRequestComponent } from './users/access-request/access-request.component';
 import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
+import { MultiSelectTableComponent } from './shared/multi-select-table/multi-select-table.component';
 import { ProcessingComponent } from './processing/processing.component';
 import { PipelinesComponent } from './processing/pipelines/pipelines.component';
 import { CarminClientService } from './carmin/shared/carmin-client.service';
@@ -337,9 +340,11 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         BidsUploadComponent,
         QueryPacsComponent,
         ImportProcessedDatasetComponent,
-        ClinicalContextComponent,
+        BasicClinicalContextComponent,
+        PreClinicalContextComponent,
         EegClinicalContextComponent,
         ProcessedDatasetClinicalContextComponent,
+        PacsClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,
@@ -433,6 +438,7 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         VarDirective,
         AccessRequestComponent,
         MultiSelectComponent,
+        MultiSelectTableComponent,
         ProcessingComponent,
         PipelinesComponent,
         PipelineComponent,

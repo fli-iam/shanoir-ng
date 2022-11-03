@@ -61,6 +61,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     genderOptions: Option<string>[] = [
         new Option<string>('F', 'Female'),
         new Option<string>('M', 'Male'),
+        new Option<string>('O', 'Other'),
     ];
 
     constructor(private route: ActivatedRoute,

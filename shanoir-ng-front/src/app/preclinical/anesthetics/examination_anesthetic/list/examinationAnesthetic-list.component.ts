@@ -17,6 +17,7 @@ import {Component, Input, ViewChild, ViewContainerRef} from '@angular/core'
 import { ExaminationAnesthetic } from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -42,7 +43,7 @@ export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityList
         return this.examAnestheticsService.getAll();
     }
     
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date) {
             if (date) {
                 return new Date(date).toLocaleDateString();
@@ -52,26 +53,10 @@ export class ExaminationAnestheticsListComponent  extends BrowserPaginEntityList
         function castToString(id: number) {
             return String(id);
         };
-        function checkNullValue(value: any) {
-            if(value){
-                return value;
-            }
-            return '';
-        };
-        function checkNullValueReference(reference: any) {
-            if(reference){
-                return reference.value;
-            }
-            return '';
-        };
-        let colDef: any[] = [
+        let colDef: ColumnDefinition[] = [
             {headerName: "Anesthetic", field: "anesthetic.name"},
-            {headerName: "Dose", field: "dose", type: "dose", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.dose);
-            }},
-            {headerName: "Dose Unit", field: "dose_unit.value", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.dose_unit.value);
-            }},
+            {headerName: "Dose", field: "dose", type: "number"},
+            {headerName: "Dose Unit", field: "dose_unit.value"},
             {headerName: "Injection interval", field: "injectionInterval"},
             {headerName: "Injection site", field: "injectionSite"},
             {headerName: "Injection type", field: "injectionType"},

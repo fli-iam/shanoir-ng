@@ -123,6 +123,12 @@ public class RabbitMQConfiguration {
 
 	/** Queue to create get equipment ID from code. */
 	public static final String ACQUISITION_EQUIPEMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
+	
+	/** Queue to get the study card from a equipment code. */
+	public static final String IMPORT_STUDY_CARD_QUEUE="import-study-card-queue";
+
+	/** Queue to get an equipment id from a code. */
+	public static final String EQUIPMENT_FROM_CODE_QUEUE="equipment-from-code-queue";
 
 	/** Queue to create a study_user when subscribing to a study */
 	public static final String STUDY_SUBSCRIPTION_QUEUE = "study-subscription-queue";
@@ -169,6 +175,7 @@ public class RabbitMQConfiguration {
 
 	/** Exchange to notify when a user / study is update / deleted. */
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
+
 
 
     @Bean
@@ -411,5 +418,14 @@ public class RabbitMQConfiguration {
 	public static Queue studyInvitationQueue() {
 		return new Queue(STUDY_INVITATION_QUEUE, true);
 	}
-	
+
+	@Bean
+	public static Queue importStudyCardQueue() {
+		return new Queue(IMPORT_STUDY_CARD_QUEUE, true);
+	}
+	@Bean
+	public static Queue equipmentFromCodeQueue() {
+		return new Queue(EQUIPMENT_FROM_CODE_QUEUE, true);
+	}
+
 }

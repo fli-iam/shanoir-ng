@@ -18,6 +18,7 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { ShanoirError } from '../../shared/models/error.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
@@ -57,8 +58,8 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
         return this.centerService.getAll(); 
     }
 
-    getColumnDefs() {
-        let columnDefs: any[] = [
+    getColumnDefs(): ColumnDefinition[] {
+        let columnDefs: ColumnDefinition[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true},
             { headerName: "Name", field: "name" },
             { headerName: "Town", field: "city" },

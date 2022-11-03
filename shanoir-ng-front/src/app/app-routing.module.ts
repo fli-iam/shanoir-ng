@@ -30,7 +30,7 @@ import { DatasetProcessingListComponent } from './datasets/dataset-processing-li
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { HomeComponent } from './home/home.component';
-import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { BasicClinicalContextComponent } from './import/basic-clinical-context/basic-clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
@@ -90,6 +90,8 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
+import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
+import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
 
 let routes: Routes = [
     {
@@ -172,7 +174,13 @@ let routes: Routes = [
                 component: EegSelectSeriesComponent
             }, {
                 path: 'context',
-                component: ClinicalContextComponent
+                component: BasicClinicalContextComponent
+            }, {
+                path: 'pacs-context',
+                component: PacsClinicalContextComponent
+            }, {
+                path: 'preclinical-context',
+                component: PreClinicalContextComponent
             }, {
                 path: 'eegcontext',
                 component: EegClinicalContextComponent

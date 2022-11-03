@@ -19,6 +19,7 @@ import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { Option } from '../../shared/select/select.component';
 import { User } from '../../users/shared/user.model';
@@ -53,7 +54,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     centers: Center[] = [];
     studyOptions: Option<Study>[];
     private browserPaging: BrowserPaging<StudyUser>;
-    columnDefs: any[];
+    columnDefs: ColumnDefinition[];
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     private freshlyAddedMe: boolean = false;
     private studyUserBackup: StudyUser[] = [];
@@ -124,19 +125,19 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
             // { headerName: 'Last Name', field: 'user.lastName' },
             // { headerName: 'Email', field: 'user.email', width: '200%' },
             { headerName: 'Role', field: 'user.role.displayName', width: '80px', defaultSortCol: true },
-            { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', suppressSorting: true},
-            // { headerName: 'Centers', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
+            { headerName: 'Confirmed', field: 'confirmed', type: 'boolean', editable: false, width: '54px', disableSorting: true},
+            // { headerName: 'Centers', type: 'boolean', editable: false, width: '54px', disableSorting: true,
             //     cellRenderer: (params: any) => !params.data.centers || params.data.centers.length == 0},
-            { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', suppressSorting: true,
+            { headerName: 'Can see all', type: 'boolean', editable: false, width: '54px', disableSorting: true,
                 //onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_SEE_ALL, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_SEE_ALL)},
-            { headerName: 'Can download', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', suppressSorting: true, 
+            { headerName: 'Can download', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true, 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_DOWNLOAD, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_DOWNLOAD)},
-            { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', suppressSorting: true, 
+            { headerName: 'Can import', type: 'boolean', editable: (su: StudyUser) => !this.disableEdit(su), width: '54px', disableSorting: true, 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_IMPORT, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_IMPORT)},
-            { headerName: 'Can admin', type: 'boolean',  suppressSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px', 
+            { headerName: 'Can admin', type: 'boolean',  disableSorting: true, editable: (su: StudyUser) => su.user && su.user.role.displayName != 'User' && !this.disableEdit(su), width: '54px', 
                 onEdit: (su: StudyUser, value: boolean) => this.onEditRight(StudyUserRight.CAN_ADMINISTRATE, su, value),
                 cellRenderer: (params: any) => params.data.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE), },
             // { headerName: 'Receive Import Mail', type: 'boolean', field: 'receiveNewImportReport', editable: true, width: '54px' },
