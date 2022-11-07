@@ -23,10 +23,16 @@ public class StudyCardOnStudyResult {
 	
 	private String examinationComment;
 	
+	private Long resultExaminationId;
+	
 	private String resultExaminationLevel;
 	
+	private Long resultAcquisitionId;
+
 	private String resultAcquisitionLevel;
 	
+	private Long resultDatasetId;
+
 	private String resultDatasetLevel;
 
 	public String getSubjectName() {
@@ -75,6 +81,30 @@ public class StudyCardOnStudyResult {
 
 	public void setResultDatasetLevel(String resultDatasetLevel) {
 		this.resultDatasetLevel = resultDatasetLevel;
+	}
+
+	public Long getResultExaminationId() {
+		return resultExaminationId;
+	}
+
+	public void setResultExaminationId(Long resultExaminationId) {
+		this.resultExaminationId = resultExaminationId;
+	}
+
+	public Long getResultAcquisitionId() {
+		return resultAcquisitionId;
+	}
+
+	public void setResultAcquisitionId(Long resultAcquisitionId) {
+		this.resultAcquisitionId = resultAcquisitionId;
+	}
+
+	public Long getResultDatasetId() {
+		return resultDatasetId;
+	}
+
+	public void setResultDatasetId(Long resultDatasetId) {
+		this.resultDatasetId = resultDatasetId;
 	}
 	
 }
