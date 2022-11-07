@@ -2,6 +2,7 @@ package org.shanoir.ng.dicom.web;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,11 +73,11 @@ public class StudyInstanceUIDHandler {
 	@Autowired
 	private ExaminationService examinationService;
 	
-	private HashMap<String, String> examinationUIDToStudyInstanceUIDCache;
+	private ConcurrentHashMap<String, String> examinationUIDToStudyInstanceUIDCache;
 	
 	@PostConstruct
 	public void init() {
-		examinationUIDToStudyInstanceUIDCache = new HashMap<String, String>(1000);
+		examinationUIDToStudyInstanceUIDCache = new ConcurrentHashMap<String, String>(1000);
 		LOG.info("DICOMWeb cache created: examinationUIDToStudyInstanceUIDCache");
 	}
 	
