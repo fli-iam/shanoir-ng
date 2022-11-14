@@ -40,14 +40,22 @@ export class HandleErrorService implements ErrorHandler {
 
     private handleHttpError(error: HttpErrorResponse) {
         try {
-            let msg: string = 'Error from ' + this.extractServerNameFromUrl(error.url) + ' server';
             let details: string[] = [
-                    formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss', 'en'),
-                    '[' + error.status + '] ' + this.getStatus(error.status),
-                    error.url,
-                    ((error.error?.message && error.error.message != '') ? 'message : ' + error.error.message : 'unknown cause')
+                formatDate(new Date(), 'yyyy-MM-dd HH:mm:ss', 'en'),
+                '[' + error.status + '] ' + this.getStatus(error.status),
+                error.url,
+                ((error.error?.message && error.error.message != '') ? 'message : ' + error.error.message : 'unknown cause')
             ];
-            this.consoleService.log('error', msg, details);
+            if(error.error instanceof Blob) {
+                error.error.text().then(text => {
+                    let msg = (JSON.parse(text).message);
+                    this.consoleService.log('error', msg, details);
+                });
+            } else {
+                //handle regular json error - useful if you are offline
+                let msg: string = 'Error from ' + this.extractServerNameFromUrl(error.url) + ' server';
+                this.consoleService.log('error', msg, details);
+            }
         } catch (error) {
             console.error(error);
             throw new Error('Error handler failed, cause above');
