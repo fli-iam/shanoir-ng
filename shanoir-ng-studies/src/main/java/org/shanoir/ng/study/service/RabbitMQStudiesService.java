@@ -142,6 +142,14 @@ public class RabbitMQStudiesService {
 			Long studyId = Long.valueOf(event.getObjectId());
 			// Get the study
 			Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
+			
+			for (StudyUser su : studyToUpdate.getStudyUserList()) {
+				if (su.getUserId().equals(userId)) {
+					// user already exists on study
+					return true;
+				}
+			}
+			
 			// Create a new StudyUser
 			StudyUser subscription = new StudyUser();
 			subscription.setStudy(studyToUpdate);

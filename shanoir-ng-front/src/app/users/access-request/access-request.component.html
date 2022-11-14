@@ -20,16 +20,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	            <label i18n="access request|study label@@study" class="required-label">Study</label>
 	            <span class="right-col">
 	            <select-box
-	                    formControlName="study"
-	                    [(ngModel)]="accessRequest.study" 
-	                    [options]="studyOptions">
+	                    formControlName="studyId"
+	                    [(ngModel)]="accessRequest.studyId" 
+	                    [options]="studyOptions"
+	                    (userChange)="changeStudy($event)">
 	            </select-box>
 	            </span>
+	            <input type="hidden"
+                 formControlName="studyName"
+                 [(ngModel)]="accessRequest.studyName"
+                >
 	        </li>
 	        <li *ngIf="mode == 'view'">
-	            <label i18n="access request|study label@@study" class="required-label">Study</label>
+                <label i18n="access request|user label@@user">User</label>
                 <span class="right-col">
-                    {{accessRequest.study.name}}
+                    {{accessRequest.user.username}}
+                </span>
+            </li>
+	        <li *ngIf="mode == 'view'">
+	            <label i18n="access request|study label@@study">Study</label>
+                <span class="right-col">
+                    {{accessRequest.studyName}}
                 </span>
 	        </li>
 	        <li *ngIf="mode == 'create'">
@@ -46,10 +57,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
 	    </ol>
-    </form>
+	<button *ngIf="mode == 'view'" (click)="acceptRequest()">Accept</button>
+    <button *ngIf="mode == 'view'" (click)="refuseRequest()">Refuse</button>
     <form-footer
     [state]="footerState"
     (save)="save()"
     (back)="goBack()"
     ></form-footer>
+    </form>
 </div>

@@ -190,6 +190,7 @@ public class KeycloakClient {
 					userResource.roles().realmLevel().remove(Arrays.asList(roleRepresentation));
 				}
 			}
+			
 			// Get user role
 			final String userRoleName = roleRepository.findById(user.getRole().getId()).orElse(null).getName();
 			// Add realm role

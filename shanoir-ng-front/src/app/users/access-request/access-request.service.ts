@@ -40,7 +40,11 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
         formData.set("email", mail);
         formData.set("studyId", "" + study.id);
         formData.set("studyName", study.name);
-        return this.http.post(this.API_URL + "/invitation/", formData, {responseType:"text"}).toPromise();
+        return this.http.put(this.API_URL + "/invitation/", formData, {responseType:"text"}).toPromise();
+    }
+
+    public resolveRequest(id: number, value:boolean): Promise<Object> {
+        return this.http.put(AppUtils.BACKEND_API_ACCESS_REQUEST_RESOLVE + id, "" + value).toPromise();
     }
 
     ngOnDestroy() {

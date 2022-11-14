@@ -14,8 +14,9 @@ public interface AccessRequestService extends BasicEntityService<AccessRequest>{
 	List<AccessRequest> findByStudyId(List<Long> studiesId);
 
 	@Override
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#entity.studyId, 'CAN_ADMINISTRATE')")
 	AccessRequest update(AccessRequest entity) throws EntityNotFoundException;
+
+	AccessRequest createAllowed(AccessRequest entity);
 
 	@Override
 	Optional<AccessRequest> findById(Long id);

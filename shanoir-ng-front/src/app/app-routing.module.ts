@@ -106,10 +106,6 @@ let routes: Routes = [
         component: AccountRequestComponent,
         data: {isChallenge: false},
     }, {
-        path: 'challenge-request',
-        component: AccountRequestComponent,
-        data: {isChallenge: true},
-    }, {
         path: 'extension-request',
         component: ExtensionRequestComponent,
     }, {
@@ -787,15 +783,13 @@ let routes: Routes = [
     {
         path: 'access-request',
         component: AccessRequestComponent,
-        data: { mode: 'create' }
+        data: { mode: 'create' },
     },
     {
         path: 'access-request/details/:id',
         component: AccessRequestComponent,
-        data: { mode: 'view' }
+        data: { mode: 'view' },
     },
-
-
 ];
 
 @NgModule({

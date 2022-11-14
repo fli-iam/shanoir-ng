@@ -14,12 +14,12 @@
 
 package org.shanoir.ng.email;
 
-import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 
 /**
@@ -128,19 +128,26 @@ public interface EmailService {
 	 */
 	void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail);
 
+	/** Invites an user to join a study. */
+	void inviteToStudy(StudyInvitationEmail mail);
+	
 	/**
 	 * This method notifies a study manager that a user asked an access to a study.
 	 * @param createdRequest the access request object
+	 * @throws ShanoirException 
 	 */
-	void notifyStudyManagerAccessRequest(AccessRequest createdRequest);
+	void notifyStudyManagerAccessRequest(AccessRequest createdRequest) throws ShanoirException;
 
 	/**
-	 * Notify a user its study request was accepted / refused
+	 * Notify a user its study request was accepted
 	 * @param accessRequest the access request
 	 */
-	void notifyUserAddedToStudy(StudyInvitationEmail email);
+	void notifyUserAddedToStudy(AccessRequest acceptedRequest);
 
-	/** Invites an user to join a study. */
-	void inviteToStudy(StudyInvitationEmail mail);
+	/**
+	 * Notify a user its study request was refused
+	 * @param accessRequest the access request
+	 */
+	void notifyUserRefusedFromStudy(AccessRequest refusedRequest);
 
 }

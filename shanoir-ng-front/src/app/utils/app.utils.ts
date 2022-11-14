@@ -37,6 +37,8 @@ export const BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL: string = '/denyaccountre
 export const BACKEND_API_USER_EXTENSION_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/extensionrequest';
 export const BACKEND_API_USER_ACCESS_REQUEST: string = BACKEND_API_USERS_MS_URL + '/accessrequest';
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_USER: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byUser';
+export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
+
 
 
 
@@ -56,6 +58,8 @@ export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_S
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
 export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_URL + '/public';
+export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_URL + '/public/connected';
+
 
 // Challenge API
 export const BACKEND_API_STUDY_CHALLENGES_URL: string = BACKEND_API_STUDIES_MS_URL + '/challenges';

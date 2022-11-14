@@ -19,13 +19,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserInterface;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
-import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +37,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 @Service
 public class RabbitMqStudyUserService {
@@ -74,13 +71,26 @@ public class RabbitMqStudyUserService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE)
 	@RabbitHandler
 	@Transactional    
-	public List<Long> getStudiesICanAmdin(Long userId) {
+	public List<Long> getStudiesICanAdmin(Long userId) {
     	List<StudyUser> sus = Utils.toList(this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
     	if (CollectionUtils.isEmpty(sus)) {
     		return null;
     	}
     	return sus.stream().map(studyUser ->
     		studyUser.getStudyId()
+    	).collect(Collectors.toList());
+    }
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE)
+	@RabbitHandler
+	@Transactional    
+	public List<Long> getStudyAdmins(Long studyId) {
+    	List<StudyUser> admins = Utils.toList(this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+    	if (CollectionUtils.isEmpty(admins)) {
+    		return null;
+    	}
+    	return admins.stream().map(studyUser ->
+    		studyUser.getUserId()
     	).collect(Collectors.toList());
     }
 }

@@ -1,33 +1,43 @@
 package org.shanoir.ng.accessrequest.model;
 
 import javax.persistence.Entity;
-import javax.persistence.Transient;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
-import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.hateoas.HalEntity;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.user.model.User;
 
 /**
  * This class is used by a user to ask an access to a given study.
- * There are two possibilities, directly using a study id if "visible publicly" or using a study key / "invitation".
  * @author jcome
  *
  */
 @Entity
-public class AccessRequest extends HalEntity {
+public class AccessRequest extends AbstractEntity {
 
 	private static final long serialVersionUID = 4662874539537675259L;
-
-	@Transient
-	private IdName study;
 	
+	public static final int APPROVED = 1;
+	
+	public static final int REFUSED = -1;
+
+	public static final int ON_DEMAND = 0;
+
+	private String studyName;
+
 	private Long studyId;
 	
+	@ManyToOne
+	@JoinColumn(name = "user_id")
 	private User user;
 	
 	private String motivation;
 
-	private Boolean status;
+	/** 0: unresolved
+	 *  1: accepted
+	 * -1:  refused
+	 */
+	private int status;
 
 	/**
 	 * @return the motivation
@@ -51,21 +61,12 @@ public class AccessRequest extends HalEntity {
 		this.user = user;
 	}
 
-	public Boolean getStatus() {
+	public int getStatus() {
 		return status;
 	}
 
-	public void setStatus(Boolean status) {
+	public void setStatus(int status) {
 		this.status = status;
-	}
-
-	public IdName getStudy() {
-		return study;
-	}
-
-	public void setStudy(IdName study) {
-		this.study = study;
-		this.studyId = this.study.getId();
 	}
 
 	public Long getStudyId() {
@@ -74,5 +75,13 @@ public class AccessRequest extends HalEntity {
 
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
+	}
+
+	public String getStudyName() {
+		return studyName;
+	}
+
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
 	}
 }

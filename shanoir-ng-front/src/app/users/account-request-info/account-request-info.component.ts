@@ -15,11 +15,11 @@ import { Component, EventEmitter, forwardRef, Input, Output, OnInit } from '@ang
 import { ControlValueAccessor, FormBuilder, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StudyService } from '../../studies/shared/study.service';
-import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { ConsoleService } from '../../shared/console/console.service';
-
+import { Location } from '@angular/common';
 import { AccountRequestInfo } from './account-request-info.model';
+import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 
 @Component ({
     selector: 'account-request-info',
@@ -46,7 +46,9 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     constructor(private formBuilder: FormBuilder,
                 private studyService: StudyService,
                 private consoleService: ConsoleService,
-                private activatedRoute: ActivatedRoute) {
+                private activatedRoute: ActivatedRoute,
+                private location: Location,
+                private confirmDialogService: ConfirmDialogService) {
     }
 
     writeValue(obj: any): void {
@@ -72,11 +74,12 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
             this.info.studyId = this.activatedRoute.snapshot.params['id'];
         }
         this.studyService.getPublicStudies().then(result => {
-            if (result) {
+            if (result && result.length > 0) {
                 this.studyOptions = result.map(element => new Option(element.id, element.name));
             } else {
                 this.studyOptions = [];
-                this.consoleService.log('warn', 'No public studies available for the moment. Please ask a direct link to the study manager to create your account.');
+                this.confirmDialogService.error("ERROR","No public studies available for the moment. Please ask a direct link to a study manager to create your account.")
+                .then(result => this.location.back());
             }
         });
         this.form = this.formBuilder.group({
@@ -86,7 +89,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
             'contact': [this.info.contact, [Validators.required, Validators.maxLength(200)]],
             'work': [this.info.work, [Validators.required, Validators.maxLength(200)]],
             'studyId': [this.info.studyId, [Validators.required]],
-            'studyName': [this.info.studyName, [Validators.required]]
+            'studyName': [this.info.studyName]
         });
         this.form.valueChanges.subscribe(() => {
             this.valid.emit(this.form.valid);
@@ -98,6 +101,12 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     }
 
     onInfoChange() {
+        if (this.info.studyId){
+            this.getStudyName(this.info.studyId).then(name => {
+                this.studyName = name;
+                this.info.studyName = name;
+            });
+        }
         this.onChange(this.info);
     }
 

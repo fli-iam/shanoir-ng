@@ -2,10 +2,7 @@ package org.shanoir.ng.accessrequest.controller;
 
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.shanoir.ng.accessrequest.model.AccessRequest;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -14,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -54,8 +52,8 @@ public interface AccessRequestApi {
 			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
-	@RequestMapping(value = "resolve/{accessRequestId}", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.PUT)
+	@PutMapping(value = "resolve/{accessRequestId}", produces = { "application/json" }, consumes = {
+			"application/json" })
 	ResponseEntity<Void> resolveNewAccessRequest(
 			@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
 			@ApiParam(value = "Accept or refuse the request", required = true) @RequestBody boolean validation,

@@ -48,17 +48,25 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
         this.entity = accreq;
     }
 
+    public changeStudy(studyId: number) {
+        this.accessRequest.studyName = this.studies[this.studies.findIndex(study => study.id = studyId)].name;
+    }
+
     getService(): EntityService<AccessRequest> {
         return this.accessRequestService;
     }
 
     initCreate(): Promise<void> {
         this.accessRequest = new AccessRequest();
-        return this.studyService.getPublicStudies().then(result => {
-            if (result) {
+        return this.studyService.getPublicStudiesConnected().then(result => {
+            if (result && result.length > 0) {
+                this.studies = result;
                 this.studyOptions = result.map(element => new Option(element.id, element.name));
             } else {
+                this.studies = [];
                 this.studyOptions = [];
+                this.confirmDialogService.error("No public study","No public studies available for the moment. If you want to join a private study, please ask the study manager to add you directly.")
+                .then(value => this.goBack());
             }
         });
     }
@@ -66,7 +74,8 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     buildForm(): FormGroup {
         return this.formBuilder.group({
             'motivation': [this.accessRequest.motivation, []],
-            'study': [this.accessRequest.study, []]
+            'studyId': [this.accessRequest.studyId, []],
+            'studyName': [this.accessRequest.studyName, []]
         });
     }
 
@@ -75,17 +84,29 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     initView(): Promise<void> {
-        this.studyService.getPublicStudies().then(studies =>
+        this.studyService.getPublicStudiesConnected().then(studies =>
             {this.studies = studies;}
         );
         return this.accessRequestService.get(this.id).then(accessRequest => { this.accessRequest = accessRequest; });
     }
+
+    acceptRequest() {
+        this.accessRequestService.resolveRequest(this.accessRequest.id, true).then(value => this.goBack());
+    }
     
+    refuseRequest() {
+        this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(value => this.goBack());
+    }
+
     public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
     
     public async hasEditRight(): Promise<boolean> {
         return false;
+    }
+
+    protected chooseRouteAfterSave() {
+        this.goBack();
     }
 }

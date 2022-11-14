@@ -276,4 +276,13 @@ public interface StudyApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws IOException;
 
+	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available for a given user", response = Study.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Study.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Study.class),
+			@ApiResponse(code = 404, message = "no study found", response = Study.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
+	@RequestMapping(value = "/public/connected", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<IdName>> findPublicStudiesConnected();
+
 }

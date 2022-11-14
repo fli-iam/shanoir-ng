@@ -110,11 +110,12 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 				// Directly create an access request for the given study
 				AccessRequest request = new AccessRequest();
 				request.setUser(user);
-				request.setStudy(new IdName(user.getAccountRequestInfo().getStudyId(), user.getAccountRequestInfo().getStudyName()));
+				request.setStudyId(user.getAccountRequestInfo().getStudyId());
+				request.setStudyName(user.getAccountRequestInfo().getStudyName());
 				request.setMotivation(user.getAccountRequestInfo().getMessage());
 				// So that when the user account request is accepted, it directly has access to the data
 				
-				accessRequestService.create(request);						
+				accessRequestService.createAllowed(request);						
 			}
 		}
 

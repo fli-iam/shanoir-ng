@@ -89,8 +89,10 @@ export class HomeComponent {
         }).then(() =>{
             // Load access requests
             this.userService.getAccessRequests().then(acs => {
-                this.accessRequests = acs;
-                this.nbAccessRequest = acs.length;
+                if (acs) {
+                    this.accessRequests = acs;
+                    this.nbAccessRequest = acs.length;
+                }
             });
         });
     }
@@ -127,7 +129,9 @@ export class HomeComponent {
     }
 
     public getStudyName(studyId: number): String {
-        return this.allStudies.find(study => study.id == studyId).name;
+        if (this.allStudies) {
+            return this.allStudies.find(study => study.id == studyId).name;
+        }
     }
 
     fetchAccountRequests() {
