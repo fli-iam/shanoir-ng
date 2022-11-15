@@ -37,7 +37,7 @@ import { ConfirmDialogService } from '../../shared/components/confirm-dialog/con
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { StudyCardRule } from '../shared/study-card.model';
-import { AssignmentField } from './action/action.component';
+import { ShanoirMetadataField } from './action/action.component';
 import { StudyCardRuleComponent } from './study-card-rule.component';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { MrDatasetNature } from '../../datasets/dataset/mr/dataset.mr.model';
@@ -66,7 +66,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     onChangeCallback = (_: any) => {};
     @Input() manufModelId: number;
     @Input() allCoils: Coil[];
-    fields: AssignmentField[];
+    fields: ShanoirMetadataField[];
     private coilOptionsSubject: Subject<Option<Coil>[]> = new BehaviorSubject<Option<Coil>[]>(null);
     private coilOptions: Observable<Option<Coil>[]> = this.coilOptionsSubject.asObservable();
     private allCoilsPromise: SuperPromise<Coil[]> = new SuperPromise();
@@ -83,21 +83,21 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             private breadcrumbService: BreadcrumbsService) {
      
         this.fields = [
-            new AssignmentField('Dataset modality type', 'MODALITY_TYPE', DatasetModalityType.options),
-            new AssignmentField('Protocol name', 'PROTOCOL_NAME'),
-            new AssignmentField('Protocol comment', 'PROTOCOL_COMMENT'),
-            new AssignmentField('Transmitting coil', 'TRANSMITTING_COIL', this.coilOptions),
-            new AssignmentField('Receiving coil', 'RECEIVING_COIL', this.coilOptions),
-            new AssignmentField('Explored entity', 'EXPLORED_ENTITY', ExploredEntity.options),
-            new AssignmentField('Acquisition contrast', 'ACQUISITION_CONTRAST', AcquisitionContrast.options),
-            new AssignmentField('MR sequence application', 'MR_SEQUENCE_APPLICATION', MrSequenceApplication.options),
-            new AssignmentField('MR sequence physics', 'MR_SEQUENCE_PHYSICS', MrSequencePhysics.options),
-            new AssignmentField('New name for the dataset', 'NAME'),
-            new AssignmentField('Dataset comment', 'COMMENT'),
-            new AssignmentField('MR sequence name', 'MR_SEQUENCE_NAME'),
-            new AssignmentField('Contrast agent used', 'CONTRAST_AGENT_USED', ContrastAgent.options),
-            new AssignmentField('Mr Dataset Nature', 'MR_DATASET_NATURE', MrDatasetNature.options),
-			new AssignmentField('BIDS data type', 'BIDS_DATA_TYPE', BidsDataType.options)
+            new ShanoirMetadataField('Dataset modality type', 'MODALITY_TYPE', DatasetModalityType.options),
+            new ShanoirMetadataField('Protocol name', 'PROTOCOL_NAME'),
+            new ShanoirMetadataField('Protocol comment', 'PROTOCOL_COMMENT'),
+            new ShanoirMetadataField('Transmitting coil', 'TRANSMITTING_COIL', this.coilOptions),
+            new ShanoirMetadataField('Receiving coil', 'RECEIVING_COIL', this.coilOptions),
+            new ShanoirMetadataField('Explored entity', 'EXPLORED_ENTITY', ExploredEntity.options),
+            new ShanoirMetadataField('Acquisition contrast', 'ACQUISITION_CONTRAST', AcquisitionContrast.options),
+            new ShanoirMetadataField('MR sequence application', 'MR_SEQUENCE_APPLICATION', MrSequenceApplication.options),
+            new ShanoirMetadataField('MR sequence physics', 'MR_SEQUENCE_PHYSICS', MrSequencePhysics.options),
+            new ShanoirMetadataField('New name for the dataset', 'NAME'),
+            new ShanoirMetadataField('Dataset comment', 'COMMENT'),
+            new ShanoirMetadataField('MR sequence name', 'MR_SEQUENCE_NAME'),
+            new ShanoirMetadataField('Contrast agent used', 'CONTRAST_AGENT_USED', ContrastAgent.options),
+            new ShanoirMetadataField('Mr Dataset Nature', 'MR_DATASET_NATURE', MrDatasetNature.options),
+			new ShanoirMetadataField('BIDS data type', 'BIDS_DATA_TYPE', BidsDataType.options)
         ];
 
         if (this.breadcrumbService.currentStep.data.rulesToAnimate) 

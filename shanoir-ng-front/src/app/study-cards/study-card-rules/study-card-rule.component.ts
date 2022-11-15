@@ -27,7 +27,7 @@ import {
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
 import { StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
-import { AssignmentField, StudyCardActionComponent } from './action/action.component';
+import { ShanoirMetadataField, StudyCardActionComponent } from './action/action.component';
 
 
 @Component({
@@ -39,7 +39,7 @@ export class StudyCardRuleComponent implements OnChanges {
 
     @Input() mode: Mode;
     @Input() rule: StudyCardRule;
-    @Input() fields: AssignmentField[];
+    @Input() fields: ShanoirMetadataField[];
     @Output() change: EventEmitter<StudyCardRule> = new EventEmitter();
     @Output() moveUp: EventEmitter<void> = new EventEmitter();
     @Output() moveDown: EventEmitter<void> = new EventEmitter();

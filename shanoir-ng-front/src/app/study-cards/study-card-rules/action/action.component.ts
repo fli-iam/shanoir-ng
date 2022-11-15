@@ -30,7 +30,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
     @Output() actionChange: EventEmitter<StudyCardAssignment> = new EventEmitter();
     @Input() mode: Mode = 'view';
     @Input() fieldOptions: Option<string>[];
-    @Input() fields: AssignmentField[];
+    @Input() fields: ShanoirMetadataField[];
     assigmentOptions: Option<any>[];
     @Output() delete: EventEmitter<void> = new EventEmitter();
     fieldLabel: string;
@@ -62,11 +62,11 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                 this.assignmentChangeSubscription.unsubscribe();
                 this.assignmentChangeSubscription = null;
             }
-            let assignmentField: AssignmentField = this.fields.find(assF => assF.field == this.assignment.field);
+            let metadataField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
             if (this.mode == 'view') {
-                this.fieldLabel = assignmentField.label;
-                if (assignmentField && assignmentField.options) {
-                    this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
+                this.fieldLabel = metadataField.label;
+                if (metadataField && metadataField.options) {
+                    this.assignmentChangeSubscription = metadataField.options.subscribe(opts => {
                         if (opts && opts.length > 0) {
                             let valueOption: Option<any> = opts.find(opt => {
                                 return opt.value == this.assignment.value 
@@ -85,8 +85,8 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                     this.valueIsString = true;
                 } 
             } else {
-                if (assignmentField && assignmentField.options) {
-                    this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
+                if (metadataField && metadataField.options) {
+                    this.assignmentChangeSubscription = metadataField.options.subscribe(opts => {
                         this.assigmentOptions = opts;
                         if (opts && opts.length > 0) {
                             let valueOption: Option<any> = opts.find(opt => {
@@ -114,9 +114,9 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
             this.computeAssignmentOptionsSubscription.unsubscribe();
             this.computeAssignmentOptionsSubscription = null;
         }
-        let assignmentField: AssignmentField = this.fields.find(assF => assF.field == this.assignment.field);
-            if (assignmentField && assignmentField.options) {
-                this.computeAssignmentOptionsSubscription = assignmentField.options.subscribe(opts => {
+        let metadataField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
+            if (metadataField && metadataField.options) {
+                this.computeAssignmentOptionsSubscription = metadataField.options.subscribe(opts => {
                     this.assigmentOptions = opts;
                 });
             } else {
@@ -151,7 +151,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
     }
 }
 
-export class AssignmentField {
+export class ShanoirMetadataField {
 
     public options?: Observable<any[]>;
 
