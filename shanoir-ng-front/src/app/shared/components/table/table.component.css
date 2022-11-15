@@ -38,6 +38,8 @@ th { width: 100%; white-space: normal; position: relative; height: 1px; min-widt
 		th.status-bar .options { border-right: 0; }
 			th.status-bar .options span { padding: 0 10px; white-space: nowrap; }
 				th.status-bar .options span + span { border: 0; border-left: 1px solid var(--grey); }
+	.collapsable { opacity: 0; }
+	.collapsable:hover { opacity: 1; }
 tr { height: 21px; }
 	/* tr.even { background-color: var(--light-grey); }
 	tr.odd { background-color: var(--lighter-grey); } */

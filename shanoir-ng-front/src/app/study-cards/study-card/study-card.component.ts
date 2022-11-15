@@ -21,6 +21,8 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
+import { Coil } from '../../coils/shared/coil.model';
+import { CoilService } from '../../coils/shared/coil.service';
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
 import { slideDown } from '../../shared/animations/animations';
@@ -55,6 +57,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     lockStudy: boolean = false;
     @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
     isAdminOrExpert: boolean;
+    allCoils: Coil[];
 
     constructor(
             private route: ActivatedRoute,
@@ -65,12 +68,14 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private studyRightsService: StudyRightsService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe,
             keycloakService: KeycloakService,
-            private centerService: CenterService) {
+            private centerService: CenterService,
+            coilService: CoilService) {
         super(route, 'study-card');
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
         this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
+        coilService.getAll().then(coils => this.allCoils = coils);
      }
 
     getService(): EntityService<StudyCard> {

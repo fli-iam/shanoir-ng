@@ -35,6 +35,7 @@ export class BrowserPaging<T> {
     }
 
     public getPage(pageable: FilterablePageable): Page<T> {
+        console.log(this);
         if ((!this.lastSort || !this.lastSort.equals(pageable.sort)) 
                 && pageable.sort && pageable.sort.orders && pageable.sort.orders.length > 0 ) {
             this.lastSort = pageable.sort;

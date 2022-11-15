@@ -33,6 +33,24 @@ export class StudyCardRule {
 
     assignments: StudyCardAssignment[];
     conditions: StudyCardCondition[];
+
+    static copy(rule: StudyCardRule): StudyCardRule {
+        let copy: StudyCardRule = new StudyCardRule();
+        copy.assignments = rule.assignments.map(ass => {
+            let assCopy: StudyCardAssignment = new StudyCardAssignment();
+            assCopy.field = ass.field;
+            assCopy.value = ass.value;
+            return assCopy;
+        });
+        copy.conditions = rule.conditions.map(con => {
+            let conCopy: StudyCardCondition = new StudyCardCondition();
+            conCopy.dicomTag = con.dicomTag;
+            conCopy.dicomValue = con.dicomValue;
+            conCopy.operation = con.operation;
+            return conCopy;
+        });
+        return copy;
+    }
 }
 
 export class StudyCardAssignment {

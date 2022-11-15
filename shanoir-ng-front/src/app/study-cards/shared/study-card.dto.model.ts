@@ -29,7 +29,7 @@ export class StudyCardDTO {
             this.id = studyCard.id;
             this.name = studyCard.name;
             this.studyId = studyCard.study ? studyCard.study.id : null;
-            this.acquisitionEquipmentId = studyCard.acquisitionEquipment.id;
+            this.acquisitionEquipmentId = studyCard.acquisitionEquipment?.id;
             this.niftiConverterId = studyCard.niftiConverter.id;
             this.rules = studyCard.rules.map(rule => {
                 let ruleDTO: StudyCardRuleDTO = new StudyCardRuleDTO();

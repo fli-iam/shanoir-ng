@@ -18,7 +18,6 @@ import {
     forwardRef,
     HostListener,
     Input,
-    IterableDiffer,
     OnChanges,
     Output,
     QueryList,
@@ -29,7 +28,6 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 import { Coil } from '../../coils/shared/coil.model';
-import { CoilService } from '../../coils/shared/coil.service';
 import { AcquisitionContrast } from '../../enum/acquisition-contrast.enum';
 import { ContrastAgent } from '../../enum/contrast-agent.enum';
 import { ExploredEntity } from '../../enum/explored-entity.enum';
@@ -45,6 +43,7 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { MrDatasetNature } from '../../datasets/dataset/mr/dataset.mr.model';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { BidsDataType } from '../../enum/bids-data-type.enum';
+import { SuperPromise } from '../../utils/super-promise';
 
 @Component({
     selector: 'study-card-rules',
@@ -66,10 +65,11 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     private onTouchedCallback = () => {};
     onChangeCallback = (_: any) => {};
     @Input() manufModelId: number;
+    @Input() allCoils: Coil[];
     fields: AssignmentField[];
     private coilOptionsSubject: Subject<Option<Coil>[]> = new BehaviorSubject<Option<Coil>[]>(null);
     private coilOptions: Observable<Option<Coil>[]> = this.coilOptionsSubject.asObservable();
-    private allCoilsPromise: Promise<Coil[]>;
+    private allCoilsPromise: SuperPromise<Coil[]> = new SuperPromise();
     @Input() showErrors: boolean = false;
     @Output() importRules: EventEmitter<void> = new EventEmitter();
     @Output() selectedRulesChange: EventEmitter<StudyCardRule[]> = new EventEmitter();
@@ -78,13 +78,10 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
 
     
     constructor(
-            private coilService: CoilService, 
             private element: ElementRef,
             private confirmDialogService: ConfirmDialogService,
             private breadcrumbService: BreadcrumbsService) {
      
-        this.allCoilsPromise = this.coilService.getAll();
-
         this.fields = [
             new AssignmentField('Dataset modality type', 'MODALITY_TYPE', DatasetModalityType.options),
             new AssignmentField('Protocol name', 'PROTOCOL_NAME'),
@@ -112,19 +109,19 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.manufModelId) {
             if (this.manufModelId) {
-                this.allCoilsPromise.then(() => {
+                this.allCoilsPromise.then(allCoils => {
                     let optionArr: Option<Coil>[] = [];
-                    this.allCoilsPromise.then(allCoils => {
-                        allCoils
-                            .filter(coil => coil.manufacturerModel.id == this.manufModelId)
-                            .forEach(coil => optionArr.push(new Option<Coil>(coil, coil.name)));
-                        this.coilOptionsSubject.next(optionArr);
-                    });
+                    allCoils
+                        .filter(coil => coil.manufacturerModel.id == this.manufModelId)
+                        .forEach(coil => optionArr.push(new Option<Coil>(coil, coil.name)));
+                    this.coilOptionsSubject.next(optionArr);
                 });
             } else if (this.coilOptionsSubject) {
                 this.coilOptionsSubject.next([]);
 
             }
+        } else if (changes.allCoils && this.allCoils) {
+            this.allCoilsPromise.resolve(this.allCoils);
         }
     }
 
@@ -206,7 +203,8 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     };
 
     copy(index: number) {
-        let copy = this.rules.slice(index, index + 1)[0];
+        let original: StudyCardRule = this.rules.slice(index, index + 1)[0];
+        let copy = StudyCardRule.copy(original);
         this.rules.push(copy);
         this.animateRule(this.rules.length - 1);
         this.onChangeCallback(this.rules);

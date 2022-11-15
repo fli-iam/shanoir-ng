@@ -259,6 +259,7 @@ import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.comp
 import { ExecutionComponent } from './processing/execution/execution.component';
 import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
 import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { QualityControlComponent } from './quality-control/quality-control.component'
 
 @NgModule({
     imports: [
@@ -439,7 +440,8 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         PipelinesComponent,
         PipelineComponent,
         ExecutionComponent,
-        CarminDatasetProcessingsComponent
+        CarminDatasetProcessingsComponent,
+        QualityControlComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

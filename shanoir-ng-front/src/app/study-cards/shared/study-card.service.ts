@@ -57,16 +57,15 @@ export class StudyCardService extends EntityService<StudyCard> {
         });
     }
 
-    applyStudyCardOn(studyCardId: number, datasetAcquisitionIds: number[]) {
+    applyStudyCardOn(studyCardId: number, datasetAcquisitionIds: number[]): Promise<any> {
         return this.http.post<any[]>(this.API_URL + '/apply', JSON.stringify({studyCardId: studyCardId, datasetAcquisitionIds: datasetAcquisitionIds}))
             .toPromise()
             .then();
     }
     
-    applyStudyCardOnStudy(studyCardId: number) {
+    applyStudyCardOnStudy(studyCardId: number): Promise<any> {
         return this.http.get<any[]>(this.API_URL + '/apply_on_study/' + studyCardId)
-            .toPromise()
-            .then(this.mapEntityList);
+            .toPromise();
     }
 
 }

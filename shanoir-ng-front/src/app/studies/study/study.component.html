@@ -315,7 +315,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'quality'">
 				<legend>Quality control</legend>
-				<button type="button" class="dl-button"></button>			
+				<quality-control [studyId]="study.id"></quality-control>		
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">
 				<legend>Tree</legend>

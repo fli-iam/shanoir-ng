@@ -106,6 +106,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[(ngModel)]="studyCard.rules" 
 					[mode]="selectMode ? 'select' : mode" 
 					[manufModelId]="studyCard.acquisitionEquipment?.manufacturerModel?.id"
+					[allCoils]="allCoils"
 					[showErrors]="showRulesErrors"
 					(selectedRulesChange)="selectedRules = $event"
 					(importRules)="importRules()">
