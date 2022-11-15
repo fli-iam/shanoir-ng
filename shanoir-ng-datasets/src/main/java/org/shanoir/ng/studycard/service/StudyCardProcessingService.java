@@ -156,7 +156,7 @@ public class StudyCardProcessingService {
 				for (Examination examination : examinations) {
 					StudyCardOnStudyResult result = new StudyCardOnStudyResult();
 					result.setSubjectName(subjectStudy.getSubject().getName());
-					result.setExaminationDate(examination.getExaminationDate().toString());
+					result.setExaminationComment(examination.getExaminationDate().toString());
 					result.setExaminationDate(examination.getComment());
 					List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 					// today study cards are only used for MR modality
