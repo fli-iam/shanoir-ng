@@ -118,7 +118,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                                         carminDatasetProcessing.getResultsLocation());
 
                         final PathMatcher matcher = userImportDir.toPath().getFileSystem()
-                                .getPathMatcher("glob:**/*.tgz");
+                                .getPathMatcher("glob:**/*.{tgz,tar.gz}");
                         final Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath());
 
                         stream.filter(matcher::matches)
@@ -177,19 +177,34 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
         try (TarArchiveInputStream fin = new TarArchiveInputStream(
                 new GzipCompressorInputStream(new FileInputStream(in)))) {
             TarArchiveEntry entry;
+
+            File cacheFolder = new File(out.getAbsolutePath() + File.separator + "cache");
+
+            if (!cacheFolder.exists()) {
+                cacheFolder.mkdirs();
+            }
+           
             while ((entry = fin.getNextTarEntry()) != null) {
+                                
+                String parsedEntry = entry.getName();
+                LOG.info("tar entry :" + parsedEntry);
+
                 if (entry.isDirectory()) {
                     continue;
                 }
 
-                File cacheFolder = new File(out.getAbsolutePath() + File.separator + "cache");
-                if (!cacheFolder.exists()) {
-                    cacheFolder.mkdirs();
+                if (parsedEntry.contains("/")) {
+                    parsedEntry = parsedEntry.substring(parsedEntry.lastIndexOf("/") + 1);
                 }
 
-                File currentFile = new File(cacheFolder, entry.getName());
+                File currentFile = new File(cacheFolder, parsedEntry);
+                File parent = currentFile.getParentFile();
+                
+                if (!parent.exists()) {
+                    parent.mkdirs();
+                }
 
-                IOUtils.copy(fin, new FileOutputStream(currentFile));
+                IOUtils.copy(fin, Files.newOutputStream(currentFile.toPath()));
 
                 // check all nifti formats
                 for (int i = 0; i < listOfNiftiExt.length; i++) {
