@@ -41,7 +41,11 @@ export class QualityControlComponent implements OnChanges {
     loading: Map<number, boolean> = new Map();
     columnDefs: ColumnDefinition[] = [
         {headerName: 'Subject Name', field: 'subjectName'},
-        {headerName: 'Examination Comment', field: 'examinationComment'}
+        {headerName: 'Examination Comment', field: 'examinationComment'},
+        {headerName: 'Examination Date', field: 'examinationDate', type: 'date'},
+        {headerName: 'Acquisition Level', field: 'resultAcquisitionLevel'},
+        {headerName: 'Dataset Level', field: 'resultDatasetLevel'},
+        {headerName: 'Examination Level', field: 'resultExaminationLevel'}
     ];
     
     constructor(
