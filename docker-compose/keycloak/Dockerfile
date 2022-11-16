@@ -10,13 +10,31 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM jboss/keycloak:16.1.1
+#
+# Use builder to integrate custom provider
+#
+FROM quay.io/keycloak/keycloak:20.0.0 as builder
 
+COPY shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
+
+# Configure a database vendor
+ENV KC_DB=mysql
+
+# Enable health and metrics support
+ENV KC_HEALTH_ENABLED=true
+ENV KC_METRICS_ENABLED=true
+
+WORKDIR /opt/keycloak
+RUN /opt/keycloak/bin/kc.sh build
+
+#
+# Create actual image, based on builder before
+#
+FROM quay.io/keycloak/keycloak:20.0.0
+
+COPY --from=builder /opt/keycloak/ /opt/keycloak/
 COPY themes/. /opt/jboss/keycloak/themes
-
-COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/standalone/deployments/
-
-COPY cfg/. /opt/jboss/keycloak/
+COPY cfg/. /opt/keycloak/
 
 COPY entrypoint entrypoint_common oneshot /bin/
 
@@ -24,5 +42,4 @@ COPY entrypoint entrypoint_common oneshot /bin/
 # (like all other env vars)
 ENV PROXY_ADDRESS_FORWARDING ""
 
-ENTRYPOINT ["/bin/entrypoint", "/opt/jboss/tools/docker-entrypoint.sh", "-b", "0.0.0.0", \
-	"-bmanagement", "0.0.0.0", "-Dkeycloak.profile.feature.scripts=enabled"]
+ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh", "start-dev", "--import-realm"]

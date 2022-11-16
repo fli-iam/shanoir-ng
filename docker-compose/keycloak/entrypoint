@@ -13,7 +13,7 @@ require  SHANOIR_URL_HOST
 require  SHANOIR_VIEWER_OHIF_URL_SCHEME
 require  SHANOIR_VIEWER_OHIF_URL_HOST
 
-mkdir -p /tmp/import
+mkdir -p /opt/keycloak/data/import
 sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
 		s/SHANOIR_ADMIN_EMAIL/$SHANOIR_ADMIN_EMAIL/g
 		s/SHANOIR_SMTP_HOST/$SHANOIR_SMTP_HOST/g
@@ -21,21 +21,17 @@ sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
 		s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
 		s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
 		s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
-"		/opt/jboss/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json
+"		/opt/keycloak/shanoir-ng-realm.json > /opt/keycloak/data/import/shanoir-ng-realm.json
 
 sed -i -E "s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g" /opt/jboss/keycloak/themes/shanoir-theme/login/template.ftl 
 sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/jboss/keycloak/themes/shanoir-theme/login/template.ftl 
 
-export DB_VENDOR="${DB_VENDOR:-mysql}"
-export DB_ADDR="${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}"
-export DB_PORT="${DB_PORT:-3306}"
-export DB_DATABASE="${DB_DATABASE:-keycloak}"
-export DB_USER="${DB_USER:-keycloak}"
-export DB_PASSWORD="${DB_PASSWORD:-password}"
+export KC_DB="${DB_VENDOR:-mysql}"
+export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
+echo $KC_DB_URL
+export KC_DB_USERNAME="${DB_USER:-keycloak}"
+export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 export PROXY_ADDRESS_FORWARDING="${PROXY_ADDRESS_FORWARDING:-true}"
-# FIXME: how about these ones:
-#	DB_PORT_3306_TCP_ADDR=keycloak-database
-#	DB_PORT_3306_TCP_PORT=3306
 
 
 require  SHANOIR_MIGRATION
@@ -46,18 +42,18 @@ extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
 case "$SHANOIR_MIGRATION" in
 auto|dev)
 	# create the shanoir-ng realm if it does not exist yet
-	extra+=("-Dkeycloak.import=/tmp/import/shanoir-ng-realm.json"
+	extra+=("-Dkeycloak.import=/opt/keycloak/data/import/shanoir-ng-realm.json"
 		"-Dkeycloak.migration.strategy=IGNORE_EXISTING")
 	;;
 init)
 	# create the admin account
-	export KEYCLOAK_USER="$SHANOIR_KEYCLOAK_USER"
-	export KEYCLOAK_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
+	export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
+	export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
 
 	# wipe out the shanoir-ng realm and recreate it
 	extra+=("-Dkeycloak.migration.action=import"
 		"-Dkeycloak.migration.provider=singleFile"
-		"-Dkeycloak.migration.file=/tmp/import/shanoir-ng-realm.json"
+		"-Dkeycloak.migration.file=/opt/keycloak/data/import/shanoir-ng-realm.json"
 		"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING")
 
         # FIXME: should check additional messages:
