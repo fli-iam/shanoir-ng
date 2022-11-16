@@ -20,6 +20,10 @@ services:
     build: ./docker-compose/keycloak-database
     environment:
       - MYSQL_DATABASE=keycloak
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
     volumes:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
@@ -38,6 +42,7 @@ services:
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ALLOWED_ADMIN_IPS
+      - KC_HTTP_RELATIVE_PATH=/auth
     build: ./docker-compose/keycloak
     networks:
       - shanoir_ng_network
@@ -50,7 +55,7 @@ services:
   #  
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
-    image: rabbitmq:3.7.7-management-alpine
+    image: rabbitmq:3.10.7
     volumes:
       - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
     ports:
@@ -69,6 +74,10 @@ services:
       - ./docker-compose/database/variables.env
     environment:
       - SHANOIR_MIGRATION
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
