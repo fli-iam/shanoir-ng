@@ -32,6 +32,15 @@ import { IdName } from 'src/app/shared/models/id-name.model';
 
 export class AccessRequestComponent extends EntityComponent<AccessRequest> {
 
+    public studyOptions:  Option<number>[];
+    studies: IdName[];
+    fromStudy: boolean = false;
+
+    public get accessRequest(): AccessRequest { return this.entity; }
+    public set accessRequest(accreq: AccessRequest) {
+        this.entity = accreq;
+    }
+
     constructor(
             protected activatedRoute: ActivatedRoute,
             public userService: UserService,
@@ -39,14 +48,6 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
             public accessRequestService: AccessRequestService) {
                 super(activatedRoute, 'access-request');
             }
-
-    public studyOptions:  Option<number>[];
-    studies: IdName[];
-
-    public get accessRequest(): AccessRequest { return this.entity; }
-    public set accessRequest(accreq: AccessRequest) { 
-        this.entity = accreq;
-    }
 
     public changeStudy(studyId: number) {
         this.accessRequest.studyName = this.studies[this.studies.findIndex(study => study.id = studyId)].name;
@@ -58,6 +59,11 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
 
     initCreate(): Promise<void> {
         this.accessRequest = new AccessRequest();
+        if (this.activatedRoute.snapshot.params['id']) {
+            this.accessRequest.studyId = this.activatedRoute.snapshot.params['id'];
+            this.fromStudy = true;
+            return Promise.resolve();
+        }
         return this.studyService.getPublicStudiesConnected().then(result => {
             if (result && result.length > 0) {
                 this.studies = result;

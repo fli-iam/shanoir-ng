@@ -89,7 +89,7 @@ public interface AccessRequestApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@PostMapping(value = "/invitation/")
+	@PutMapping(value = "/invitation/")
 	ResponseEntity<String> inviteUserToStudy(
 			@ApiParam(value = "Study the user is invited in", required = true) 
 			@RequestParam(value = "studyId", required = true) Long studyId,

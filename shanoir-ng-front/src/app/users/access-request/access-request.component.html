@@ -12,11 +12,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2 class="header command-zone"i18n="Account request|Title@@accountRequestTitle">Request an access to a new study.</h2>
+<h2 *ngIf="mode == 'create'" class="header command-zone"i18n="Account request|Title@@accountRequestTitle">Request an access to a new study.</h2>
+<h2 *ngIf="mode == 'edit'" class="header command-zone"i18n="Account request|Title@@accountRequestTitle">Resolve an access request.</h2>
 <div #formContainer class="content-component">
     <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
 	    <ol>
-	        <li *ngIf="mode == 'create'">
+	        <li *ngIf="mode == 'create' && !fromStudy">
 	            <label i18n="access request|study label@@study" class="required-label">Study</label>
 	            <span class="right-col">
 	            <select-box
@@ -31,6 +32,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                  [(ngModel)]="accessRequest.studyName"
                 >
 	        </li>
+	       <li *ngIf="mode == 'create' && fromStudy">
+	            <span> You have been invited to join a new study on shanoir, please confirm you access request.</span>
+	            <br/>
+	            <br/>
+                <input type = hidden
+                        formControlName="studyId"
+                        [(ngModel)]="accessRequest.studyId"/>
+                <input type="hidden"
+                 formControlName="studyName"
+                 [(ngModel)]="accessRequest.studyName"
+                >
+            </li>
 	        <li *ngIf="mode == 'view'">
                 <label i18n="access request|user label@@user">User</label>
                 <span class="right-col">

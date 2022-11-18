@@ -75,6 +75,12 @@ public class AccessRequestApiController implements AccessRequestApi {
 		User user = userService.findById(KeycloakUtil.getTokenUserId());
 		request.setUser(user);
 		request.setStatus(AccessRequest.ON_DEMAND);
+		
+		if (request.getStudyName() == null) {
+			String studyName = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, request.getStudyId());
+			request.setStudyName(studyName);
+		}
+
 		AccessRequest createdRequest = accessRequestService.createAllowed(request);
 		createdRequest.setUser(user);
 		
@@ -142,6 +148,10 @@ public class AccessRequestApiController implements AccessRequestApi {
 		}
 
 		if (validation) {
+			// if there is an account request, accept it.
+			if (resolvedRequest.getUser().isAccountRequestDemand()) {
+				this.userService.confirmAccountRequest(resolvedRequest.getUser());
+			}
 			// Update study to add a new user
 			ShanoirEvent subscription = new ShanoirEvent(
 					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
@@ -149,17 +159,12 @@ public class AccessRequestApiController implements AccessRequestApi {
 					resolvedRequest.getUser().getId(),
 					resolvedRequest.getUser().getUsername(),
 					ShanoirEvent.SUCCESS);
-			
 			try {
 				this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
 			} catch (JsonProcessingException | AmqpException e) {
 				LOG.error("Could not subscribe user to study.", e);
 			}
 
-			// If the user is not currently enabled, enable it.
-			if(resolvedRequest.getUser().isAccountRequestDemand()) {
-				userService.confirmAccountRequest(resolvedRequest.getUser());
-			}
 			StudyInvitationEmail email = new StudyInvitationEmail();
 			email.setInvitedMail(resolvedRequest.getUser().getEmail());
 			email.setStudyId(resolvedRequest.getStudyId().toString());
@@ -185,46 +190,51 @@ public class AccessRequestApiController implements AccessRequestApi {
 			@ApiParam(value = "The email of the invited user.") 
     		@RequestParam(value = "email", required = true) String email) throws RestServiceException {
 		
-		// Check if user with such email exists
-		Optional<User> user = this.userService.findByEmail(email);
-		
-		// User exists => directly add it to the study
-		if (user.isPresent()) {
-			// Direct call to study MS to add the user
+		try {
+			// Check if user with such email exists
+			Optional<User> user = this.userService.findByEmail(email);
 			
-			ShanoirEvent subscription = new ShanoirEvent(
-					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
-					studyId.toString(),
-					user.get().getId(),
-					user.get().getUsername(),
-					ShanoirEvent.SUCCESS);
-			
-			boolean subResult = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, subscription);
-			
-			if (subResult) {
-				// create a new access request for history / logging purpose
-				AccessRequest request = new AccessRequest();
-				request.setUser(user.get());
-				request.setStudyId(studyId);
-				request.setStudyName(studyName);
-				request.setStudyId(studyId);
-				request.setMotivation("From study manager");
-				request.setStatus(AccessRequest.APPROVED);
-				this.accessRequestService.createAllowed(request);
-				this.emailService.notifyUserAddedToStudy(request);
+			// User exists => directly add it to the study
+			if (user.isPresent()) {
+				// Direct call to study MS to add the user
+				
+				ShanoirEvent subscription = new ShanoirEvent(
+						ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
+						studyId.toString(),
+						user.get().getId(),
+						user.get().getUsername(),
+						ShanoirEvent.SUCCESS);
+				
+				boolean subResult = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
+				
+				if (subResult) {
+					// create a new access request for history / logging purpose
+					AccessRequest request = new AccessRequest();
+					request.setUser(user.get());
+					request.setStudyId(studyId);
+					request.setStudyName(studyName);
+					request.setStudyId(studyId);
+					request.setMotivation("From study manager");
+					request.setStatus(AccessRequest.APPROVED);
+					this.accessRequestService.createAllowed(request);
+					this.emailService.notifyUserAddedToStudy(request);
+				}
+				
+				return new ResponseEntity<String>("User " + user.get().getUsername() + " was added to the study with success", HttpStatus.OK);
 			}
+	
+			StudyInvitationEmail mail = new StudyInvitationEmail();
+			mail.setInvitedMail(email);
+			mail.setStudyId(studyId.toString());
+			mail.setStudyName(studyName);
 			
-			return new ResponseEntity<String>("User " + user.get().getUsername() + " was added to the study with success", HttpStatus.OK);
+			// User does not exists, just send an email
+			this.emailService.inviteToStudy(mail);
+			
+			return new ResponseEntity<String>("No existing user with this email, an invitation to join Shanoir was sent.", HttpStatus.OK);
+		} catch (Exception e) {
+			LOG.error("Error while inviting user", e);
+			return new ResponseEntity<String>("Could not invite this user, please retry later.", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
-		StudyInvitationEmail mail = new StudyInvitationEmail();
-		mail.setInvitedMail(email);
-		mail.setStudyId(studyId.toString());
-		mail.setStudyName(studyName);
-		
-		// User does not exists, just send an email
-		this.emailService.inviteToStudy(mail);
-		
-		return new ResponseEntity<String>("No existing user with this email, an invitation to join Shanoir was sent.", HttpStatus.OK);
 	}
 }

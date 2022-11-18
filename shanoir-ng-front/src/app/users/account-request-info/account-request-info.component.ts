@@ -31,7 +31,7 @@ import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/c
           multi: true,
         }]  
 })
-export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit {
+export class AccountRequestInfoComponent implements OnInit {
 
     @Input() editMode: boolean = false;
     @Output() valid: EventEmitter<boolean> = new EventEmitter();
@@ -41,7 +41,7 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     onTouch = () => {};
     public studyOptions:  Option<number>[];
     studyName: string;
-    presetId: boolean
+    presetStudyId: boolean
 
     constructor(private formBuilder: FormBuilder,
                 private studyService: StudyService,
@@ -51,37 +51,22 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
                 private confirmDialogService: ConfirmDialogService) {
     }
 
-    writeValue(obj: any): void {
-        this.studyName = null;
-        if (obj.challenge && obj.challenge != this.info.studyId) {
-            this.getStudyName(obj.challenge).then(name => this.studyName = name);
-            this.info.studyName = this.studyName;
-        }
-        this.info = obj;
-    }
-
-    registerOnChange(fn: any): void {
-        this.onChange = fn;
-    }
-
-    registerOnTouched(fn: any): void {
-        this.onTouch = fn;
-    }
-
     ngOnInit() {
+        // If study is preselected (from invitation), do not load available studies
         if (this.activatedRoute.snapshot.params['id'] && this.activatedRoute.snapshot.params['id'] != 0) {
-            this.presetId = true;
+            this.presetStudyId = true;
             this.info.studyId = this.activatedRoute.snapshot.params['id'];
+        } else {     
+            this.studyService.getPublicStudies().then(result => {
+                if (result && result.length > 0) {
+                    this.studyOptions = result.map(element => new Option(element.id, element.name));
+                } else {
+                    this.studyOptions = [];
+                    this.confirmDialogService.error("ERROR","No public studies available for the moment. Please ask a direct link to a study manager to create your account.")
+                    .then(result => this.location.back());
+                }
+            });
         }
-        this.studyService.getPublicStudies().then(result => {
-            if (result && result.length > 0) {
-                this.studyOptions = result.map(element => new Option(element.id, element.name));
-            } else {
-                this.studyOptions = [];
-                this.confirmDialogService.error("ERROR","No public studies available for the moment. Please ask a direct link to a study manager to create your account.")
-                .then(result => this.location.back());
-            }
-        });
         this.form = this.formBuilder.group({
             'institution': [this.info.institution, [Validators.required, Validators.maxLength(200)]],
             'service': [this.info.service, [Validators.required, Validators.maxLength(200)]],
@@ -96,18 +81,12 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
         });
     }
 
-    getStudyName(id: number): Promise<string> {
-        return this.studyService.get(id).then(study => study ? study.name : null);
+    onInfoChange() {
+        this.onChange(this.info);
     }
 
-    onInfoChange() {
-        if (this.info.studyId){
-            this.getStudyName(this.info.studyId).then(name => {
-                this.studyName = name;
-                this.info.studyName = name;
-            });
-        }
-        this.onChange(this.info);
+    onStudyIdChange(event) {
+        this.info.studyName = event.name;
     }
 
     formErrors(field: string): any {

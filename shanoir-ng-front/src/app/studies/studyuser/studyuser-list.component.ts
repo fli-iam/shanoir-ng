@@ -30,6 +30,8 @@ import { StudyUser } from '../shared/study-user.model';
 import { Study } from '../shared/study.model';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import { IdName } from 'src/app/shared/models/id-name.model';
+import { ConsoleService } from 'src/app/shared/console/console.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
 
 @Component({
     selector: 'studyuser-list',
@@ -51,6 +53,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     @Input() studies: Study[] = [];
     @Input() study: Study;
     @Input() studyCenters: StudyCenter[] = [];
+    protected consoleService: ConsoleService; 
     centers: Center[] = [];
     studyOptions: Option<Study>[];
     private browserPaging: BrowserPaging<StudyUser>;
@@ -69,6 +72,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     constructor(private keycloakService: KeycloakService,
                 private accessRequestService: AccessRequestService) {
         this.isAdmin = keycloakService.isUserAdmin();
+        this.consoleService = ServiceLocator.injector.get(ConsoleService);
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -259,8 +263,9 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     }
 
     public inviteUser() {
-        console.log("coucou");
         let stud = new IdName(this.study.id, this.study.name);
-        this.accessRequestService.inviteUser(this.invitationMail, stud).then(message => console.log(message));
+        this.accessRequestService.inviteUser(this.invitationMail, stud).then(message => {
+            this.consoleService.log('info', "" + message);
+        });
     }
 }

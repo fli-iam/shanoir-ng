@@ -20,6 +20,8 @@ import { User } from '../shared/user.model';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { UserService } from '../shared/user.service'
 import { FormGroup, Validators, FormBuilder, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ConsoleService } from 'src/app/shared/console/console.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
 
 @Component({
     selector: 'accountRequest',
@@ -41,7 +43,8 @@ export class AccountRequestComponent {
     constructor(
             private fb: FormBuilder, 
             public userService: UserService,
-            private location: Location) {}
+            private location: Location,
+            private consoleService: ConsoleService) {}
 
     ngOnInit(): void {
         this.user = new User();
@@ -75,9 +78,9 @@ export class AccountRequestComponent {
         this.userService.requestAccount(this.user)
             .then((res) => {
                  this.requestSent = true;
-            }, (err: String) => {
-                if (err.indexOf("email should be unique") != -1) {
-                    console.log('email error')
+            }, (err) => {
+                if (err?.error?.details?.fieldErrors?.email != null) {
+                    this.consoleService.log("error", "An user with this email already exists, please connect with it or use another one.")
                 } else {
                     throw err;
                 }

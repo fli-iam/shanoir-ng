@@ -128,6 +128,17 @@ public class RabbitMQStudiesService {
 		}
 	}
 
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE)
+	@Transactional
+	public String getStudyName(final long studyId) {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		Study study = this.studyRepo.findById(studyId).get();
+		if (study != null) {
+			return study.getName();
+		}
+		return null;
+	}
+
 	/**
 	 * Receives a json object, concerning a study subscription
 	 * @param commandArrStr the studyUser as a json string.

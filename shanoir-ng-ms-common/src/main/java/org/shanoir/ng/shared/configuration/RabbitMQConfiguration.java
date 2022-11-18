@@ -142,6 +142,9 @@ public class RabbitMQConfiguration {
 	/** Queue used to get the list of study admins. */
 	public static final String STUDY_ADMINS_QUEUE = "study-admin-queue";
 
+	/** Queue used to get the name of a study from ID */
+	public static final String STUDY_NAME_QUEUE = "study-name-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -430,10 +433,15 @@ public class RabbitMQConfiguration {
 	public static Queue equipmentFromCodeQueue() {
 		return new Queue(EQUIPMENT_FROM_CODE_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue studyAdminQueue() {
 		return new Queue(STUDY_ADMINS_QUEUE, true);
 	}
 
+	@Bean
+	public static Queue studyNameQueue() {
+		return new Queue(STUDY_NAME_QUEUE, true);
+	}
+	
 }

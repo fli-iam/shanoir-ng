@@ -83,9 +83,10 @@ public class RabbitMqStudyUserService {
 
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE)
 	@RabbitHandler
-	@Transactional    
+	@Transactional
 	public List<Long> getStudyAdmins(Long studyId) {
     	List<StudyUser> admins = Utils.toList(this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+    	System.err.println(admins);
     	if (CollectionUtils.isEmpty(admins)) {
     		return null;
     	}
