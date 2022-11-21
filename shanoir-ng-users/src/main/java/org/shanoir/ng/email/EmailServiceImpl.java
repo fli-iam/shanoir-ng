@@ -205,7 +205,7 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setText(content, true);
 		};
 		LOG.error("User asked for an account" + user.getUsername());
-		//mailSender.send(messagePreparator);
+		mailSender.send(messagePreparator);
 
 	}
 
@@ -481,12 +481,12 @@ public class EmailServiceImpl implements EmailService {
 					variables.put(STUDY_USERS, newStudyUsers);
 					variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + email.getStudyId());
 					final String content = build("notifyStudyAdminStudyUsersAdded", variables);
-					LOG.error(content);
+					LOG.info(content);
 					messageHelper.setText(content, true);
 				};
 				// Send the message
 				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
-				//mailSender.send(messagePreparator);
+				mailSender.send(messagePreparator);
 			}
         }
 
@@ -502,12 +502,12 @@ public class EmailServiceImpl implements EmailService {
 				variables.put(LASTNAME, studyUser.getLastName());
 				variables.put(STUDY_NAME, email.getStudyName());
 				final String content = build("notifyUserAddedToStudy", variables);
-				LOG.error(content);
+				LOG.info(content);
 				messageHelper.setText(content, true);
 			};
 			// Send the message
 			LOG.info("Sending user-added mail to {} for study {}", studyUser.getUsername(), email.getStudyId());
-			//mailSender.send(messagePreparator);
+			mailSender.send(messagePreparator);
 		}
 	}
 
@@ -533,12 +533,12 @@ public class EmailServiceImpl implements EmailService {
 					variables.put(STUDY_NAME, createdRequest.getStudyName());
 					variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + createdRequest.getStudyId());
 					final String content = build("notifyStudyAdminStudyUsersAdded", variables);
-					LOG.error(content);
+					LOG.info(content);
 					messageHelper.setText(content, true);
 				};
 				// Send the message
 				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), createdRequest.getStudyId());
-				//mailSender.send(messagePreparator);
+				mailSender.send(messagePreparator);
 			}
         } else {
         	LOG.error("No admins for this study. This should not happen.");
@@ -577,7 +577,7 @@ public class EmailServiceImpl implements EmailService {
 		};
 		// Send the message
 		LOG.error("User with mail {} invited in study {}", email.getInvitedMail(), email.getStudyId());
-		//mailSender.send(messagePreparator);
+		mailSender.send(messagePreparator);
 	}
 
 	/**
@@ -619,11 +619,11 @@ public class EmailServiceImpl implements EmailService {
 			variables.put(LASTNAME, user.getLastName());
 			variables.put(STUDY_NAME, acceptedRequest.getStudyName());
 			final String content = build("notifyUserAddedToStudy", variables);
-			LOG.error(content);
+			LOG.info(content);
 			messageHelper.setText(content, true);
 		};
 		// Send the message
 		LOG.info("Sending study-users-added mail to {} for study {}", user.getUsername(), acceptedRequest.getStudyId());
-		//mailSender.send(messagePreparator);
+		mailSender.send(messagePreparator);
 	}
 }
