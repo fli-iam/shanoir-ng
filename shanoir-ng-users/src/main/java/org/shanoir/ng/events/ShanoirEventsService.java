@@ -24,6 +24,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
  *
  */
 @Service
+@Transactional
 public class ShanoirEventsService {
 
 	@Autowired
@@ -50,7 +51,6 @@ public class ShanoirEventsService {
 	 * Deletes everyday events older than 1 year.
 	 */
 	@Scheduled(fixedDelay = DateUtils.MILLIS_PER_DAY)
-	@Transactional
 	private void deletePeriodically( ) {
 		Date now = new Date();
 		Long nowMinusOneYear = now.getTime() - DateUtils.MILLIS_PER_DAY * 361;
