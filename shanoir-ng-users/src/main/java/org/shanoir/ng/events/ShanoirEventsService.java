@@ -24,7 +24,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
  *
  */
 @Service
-@Transactional
 public class ShanoirEventsService {
 
 	@Autowired
