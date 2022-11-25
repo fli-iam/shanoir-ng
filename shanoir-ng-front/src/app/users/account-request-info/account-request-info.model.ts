@@ -12,15 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { IdName } from "src/app/shared/models/id-name.model";
-
 export class AccountRequestInfo {
     id: number;
     contact: string;
     function: string;
     institution: string;
-    service: string;
-    work: string;
     studyId: number;
     studyName: string;
 }

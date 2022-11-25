@@ -283,9 +283,7 @@ public class UserServiceTest {
 		accountRequestInfo.setContact("contact");
 		accountRequestInfo.setFunction("function");
 		accountRequestInfo.setInstitution("institution");
-		accountRequestInfo.setService("service");
 		accountRequestInfo.setStudyId(1L);
-		accountRequestInfo.setWork("work");
 		user.setAccountRequestDemand(true);
 		user.setAccountRequestInfo(accountRequestInfo);
 		user.setId(null);

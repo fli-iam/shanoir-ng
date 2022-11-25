@@ -87,9 +87,7 @@ public class AccountRequestApiControllerTest {
 		info.setContact("contact");
 		info.setFunction("function");
 		info.setInstitution("institution");
-		info.setService("service");
 		info.setStudyId(1L);
-		info.setWork("work");
 		user.setAccountRequestInfo(info);
 		
 		given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
@@ -110,8 +108,6 @@ public class AccountRequestApiControllerTest {
 		info.setFunction("function");
 		info.setInstitution("institution");
 		info.setStudyId(1L);
-		info.setService("service");
-		info.setWork("work");
 		user.setAccountRequestInfo(info);
 
 		given(userServiceMock.createAccountRequest(Mockito.any(User.class))).willReturn(user);

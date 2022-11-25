@@ -12,11 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, forwardRef, Input, Output, OnInit } from '@angular/core';
-import { ControlValueAccessor, FormBuilder, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StudyService } from '../../studies/shared/study.service';
 import { Option } from '../../shared/select/select.component';
-import { ConsoleService } from '../../shared/console/console.service';
 import { Location } from '@angular/common';
 import { AccountRequestInfo } from './account-request-info.model';
 import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
@@ -45,7 +44,6 @@ export class AccountRequestInfoComponent implements OnInit {
 
     constructor(private formBuilder: FormBuilder,
                 private studyService: StudyService,
-                private consoleService: ConsoleService,
                 private activatedRoute: ActivatedRoute,
                 private location: Location,
                 private confirmDialogService: ConfirmDialogService) {
@@ -69,10 +67,8 @@ export class AccountRequestInfoComponent implements OnInit {
         }
         this.form = this.formBuilder.group({
             'institution': [this.info.institution, [Validators.required, Validators.maxLength(200)]],
-            'service': [this.info.service, [Validators.required, Validators.maxLength(200)]],
             'function': [this.info.function, [Validators.required, Validators.maxLength(200)]],
             'contact': [this.info.contact, [Validators.required, Validators.maxLength(200)]],
-            'work': [this.info.work, [Validators.required, Validators.maxLength(200)]],
             'studyId': [this.info.studyId, [Validators.required]],
             'studyName': [this.info.studyName]
         });

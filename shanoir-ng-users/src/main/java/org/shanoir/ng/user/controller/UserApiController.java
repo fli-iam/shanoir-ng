@@ -112,9 +112,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 				request.setUser(user);
 				request.setStudyId(user.getAccountRequestInfo().getStudyId());
 				request.setStudyName(user.getAccountRequestInfo().getStudyName());
-				request.setMotivation(user.getAccountRequestInfo().getMessage());
 				// So that when the user account request is accepted, it directly has access to the data
-				
 				accessRequestService.createAllowed(request);						
 			}
 		}

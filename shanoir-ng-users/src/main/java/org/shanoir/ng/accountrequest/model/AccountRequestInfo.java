@@ -43,16 +43,9 @@ public class AccountRequestInfo extends AbstractEntity {
 	private String institution;
 
 	@NotNull
-	private String service;
-
-	@NotNull
-	private String work;
-
 	private Long studyId;
 
 	private String studyName;
-	
-	private String message;
 
 	/**
 	 * @return the contact
@@ -94,42 +87,6 @@ public class AccountRequestInfo extends AbstractEntity {
 	 */
 	public void setInstitution(String institution) {
 		this.institution = institution;
-	}
-
-	/**
-	 * @return the service
-	 */
-	public String getService() {
-		return service;
-	}
-
-	/**
-	 * @param service the service to set
-	 */
-	public void setService(String service) {
-		this.service = service;
-	}
-
-	/**
-	 * @return the work
-	 */
-	public String getWork() {
-		return work;
-	}
-
-	/**
-	 * @param work the work to set
-	 */
-	public void setWork(String work) {
-		this.work = work;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
 	}
 
 	public Long getStudyId() {
