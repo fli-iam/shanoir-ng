@@ -14,11 +14,11 @@ INSERT INTO role VALUES (1,'Administrator','ROLE_ADMIN');
 INSERT INTO role VALUES (2,'User','ROLE_USER');
 INSERT INTO role VALUES (3,'Expert','ROLE_EXPERT');
 
-INSERT INTO account_request_info (id, contact, function, institution, service, study_id, study_name) 
+INSERT INTO account_request_info (id, contact, function, institution, study_id, study_name) 
 VALUES (1, 'contact1', 'function1', 'institution1', 1, 'study1');
-INSERT INTO account_request_info (id, contact, function, institution, service, study_id, study_name) 
+INSERT INTO account_request_info (id, contact, function, institution, study_id, study_name) 
 VALUES (2, 'contact2', 'function2', 'institution2', 2, 'study2');
-INSERT INTO account_request_info (id, contact, function, institution, service, study_id, study_name) 
+INSERT INTO account_request_info (id, contact, function, institution, study_id, study_name) 
 VALUES (3, 'contact3', 'function3', 'institution3', 3, 'study3');
 
 INSERT INTO users (id, account_request_demand, account_request_info_id, can_access_to_dicom_association, creation_date, email, expiration_date, extension_date, extension_motivation, extension_request_demand, first_name, first_expiration_notification_sent, second_expiration_notification_sent, last_name, username, role_id)
