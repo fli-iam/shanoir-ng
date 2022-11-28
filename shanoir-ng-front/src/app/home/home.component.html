@@ -27,34 +27,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
    
     <challenge-block *ngFor="let challengeStudy of challengeStudies" [challengeStudy]="challengeStudy">
     </challenge-block>
-
-    <div class="block account-requests" *ngIf="admin">
-        <table><tr>
-            <td class="icon link" routerLink="/user/list">
-                <i class="fas fa-users"></i>
-                <div class="block-title">Manage Users</div>
-            </td>
-            <td *ngIf="accountRequests && accountRequests.length > 0">
-                <div class="pannel">
-                    <div class="pending link" routerLink="/user/list"><em>{{nbAccountRequests}}</em> account requests</div>
-                    <div class="pending link" routerLink="/user/list"><em>{{nbExtensionRequests}}</em> extension requests</div>
-                    <table>
-                        <tr *ngFor="let ar of accountRequests"  [routerLink]="'/user/details/' + ar.id" class="account-request-list link">
-                            <td class="name">{{ar.firstName}} {{ar.lastName}}</td>
-                            <ng-container *ngIf="ar.accountRequestDemand">
-                                <td class="narrow"><i class="fas fa-plus"></i></td>
-                                <td class="narrow">{{ar.creationDate | date: 'dd/MM'}}</td>
-                            </ng-container>
-                            <ng-container *ngIf="ar.extensionRequestDemand">
-                                <td class="narrow"><i class="fas fa-clock"></i></td>
-                                <td class="narrow"></td>
-                            </ng-container>
-                        </tr>
-                    </table>
-                </div>
-            </td>
-        </tr></table>
-    </div>
     <div class="block solr">
         <table><tr>
             <td class="icon link" routerLink="/solr-search">
