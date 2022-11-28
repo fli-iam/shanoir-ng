@@ -67,7 +67,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	       formControlName="studyName">
         </li>
         <li>
-            <label i18n="Edit user|Contact label@@editUserContact" [class.required-label]="editMode">Study manager contact</label> 
+            <label i18n="Edit user|Contact label@@editUserContact" [class.required-label]="editMode">Shanoir study manager</label> 
             <span class="right-col">
                 <ng-container *ngIf="editMode">
                     <input type="text" formControlName="contact" [(ngModel)]="info.contact"  (change)="onInfoChange()"/>
