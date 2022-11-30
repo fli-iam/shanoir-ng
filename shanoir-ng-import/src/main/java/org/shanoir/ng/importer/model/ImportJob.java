@@ -65,6 +65,8 @@ public class ImportJob implements Serializable {
 	private Long userId;
 
 	private Long centerId;
+
+	private String profile;
     
 	public String getArchive() {
 		return archive;
@@ -201,6 +203,14 @@ public class ImportJob implements Serializable {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public String getProfile() {
+		return profile;
+	}
+
+	public void setProfile(String profile) {
+		this.profile = profile;
 	}
 
 	@Override

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -27,6 +27,7 @@ import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser, StudyUserDTO } from './study-user.model';
 import { Study } from './study.model';
+import {Profile} from '../../shared/models/profile.model';
 
 @Injectable()
 export class StudyDTOService {
@@ -39,7 +40,7 @@ export class StudyDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntity(dto: StudyDTO, result?: Study): Promise<Study> {        
+    public toEntity(dto: StudyDTO, result?: Study): Promise<Study> {
         if (!result) result = new Study();
         StudyDTOService.mapSyncFields(dto, result);
         return Promise.resolve(result);
@@ -89,6 +90,7 @@ export class StudyDTOService {
         entity.nbExaminations = dto.nbExaminations;
         entity.nbSujects = dto.nbSujects;
         entity.protocolFilePaths = dto.protocolFilePaths;
+        entity.profile = dto.profile;
         entity.dataUserAgreementPaths = dto.dataUserAgreementPaths;
         entity.startDate = dto.startDate ? new Date(dto.startDate) : null;
         if (dto.studyCenterList) {
@@ -145,7 +147,7 @@ export class StudyDTOService {
         }
         return entity;
     }
-    
+
     static tagDTOToTag(tagDTO: any): Tag {
         let tag: Tag = new Tag();
         tag.id = tagDTO.id;
@@ -203,6 +205,7 @@ export class StudyDTOService {
         let study: Study = new Study();
         study.id = dto.id;
         study.name = dto.name;
+        study.profile = dto.profile;
         if (dto.studyCenterList) {
             study.studyCenterList = (dto.studyCenterList as StudyCenterDTO[]).map(dtoStudyCenter => {
                 return this.dtoToStudyCenter(dtoStudyCenter);
@@ -233,6 +236,7 @@ export class StudyDTO {
     nbSujects: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
+    profile: Profile;
     startDate: Date;
     studyCenterList: StudyCenterDTO[];
     studyStatus: 'IN_PROGRESS' | 'FINISHED';
@@ -253,6 +257,7 @@ export class StudyDTO {
         this.experimentalGroupsOfSubjects = study.experimentalGroupsOfSubjects ? study.experimentalGroupsOfSubjects.map(egos => new Id(egos.id)) : null;
         this.monoCenter = study.monoCenter;
         this.name = study.name;
+        this.profile = study.profile;
         this.challenge = study.challenge;
         this.protocolFilePaths = study.protocolFilePaths;
         this.dataUserAgreementPaths = study.dataUserAgreementPaths;
@@ -268,7 +273,7 @@ export class StudyDTO {
             let dto = new StudyUserDTO(su);
             dto.study = null;
             return dto;
-        }) : null; 
+        }) : null;
         this.subjectStudyList = study.subjectStudyList ? study.subjectStudyList.map(ss => {
             let dto = new SubjectStudyDTO(ss);
             dto.study = null;
@@ -299,9 +304,10 @@ export class SubjectWithSubjectStudyDTO {
 }
 
 export class CenterStudyDTO {
-	
+
     id: number;
     name: string;
-	studyCenterList: StudyCenterDTO[];
-	tags: Tag[];
+    studyCenterList: StudyCenterDTO[];
+    profile: Profile;
+    tags: Tag[];
 }
