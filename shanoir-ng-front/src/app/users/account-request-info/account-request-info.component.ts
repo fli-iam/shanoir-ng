@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, forwardRef, Input, Output, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { ControlValueAccessor, FormBuilder, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StudyService } from '../../studies/shared/study.service';
 import { Option } from '../../shared/select/select.component';
@@ -30,11 +30,11 @@ import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/c
           multi: true,
         }]  
 })
-export class AccountRequestInfoComponent implements OnInit {
+export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit {
 
     @Input() editMode: boolean = false;
     @Output() valid: EventEmitter<boolean> = new EventEmitter();
-    info: AccountRequestInfo = new AccountRequestInfo;
+    info: AccountRequestInfo = new AccountRequestInfo();
     form: FormGroup;
     onChange = (_: any) => {};
     onTouch = () => {};
@@ -49,12 +49,30 @@ export class AccountRequestInfoComponent implements OnInit {
                 private confirmDialogService: ConfirmDialogService) {
     }
 
+    setDisabledState?(isDisabled: boolean): void {
+    }
+    writeValue(obj: any): void {
+        this.info = obj;
+        if (this.activatedRoute.snapshot.params['id'] && this.activatedRoute.snapshot.params['id'] != 0) {
+            this.presetStudyId = true;
+            this.info.studyId = this.activatedRoute.snapshot.params['id'];
+        }
+    }
+
+    registerOnChange(fn: any): void {
+        this.onChange = fn;
+    }
+
+    registerOnTouched(fn: any): void {
+        this.onTouch = fn;
+    }
+
     ngOnInit() {
         // If study is preselected (from invitation), do not load available studies
         if (this.activatedRoute.snapshot.params['id'] && this.activatedRoute.snapshot.params['id'] != 0) {
             this.presetStudyId = true;
             this.info.studyId = this.activatedRoute.snapshot.params['id'];
-        } else {     
+        } else {
             this.studyService.getPublicStudies().then(result => {
                 if (result && result.length > 0) {
                     this.studyOptions = result.map(element => new Option(element.id, element.name));
