@@ -570,8 +570,10 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setSubject("[Shanoir] Access to study " + email.getStudyName());
 			final Map<String, Object> variables = new HashMap<>();
 			variables.put(STUDY_NAME, email.getStudyName());
-			variables.put(SERVER_ADDRESS, shanoirServerAddress + "/access-request/" + email.getStudyId());
-			variables.put(SERVER_ADDRESS_PUBLIC, shanoirServerAddress + "/account-request/" + email.getStudyId());
+			// access-request/study/1
+			variables.put(SERVER_ADDRESS, shanoirServerAddress + "/access-request/study/" + email.getStudyId());
+			// account/study/1/account-request
+			variables.put(SERVER_ADDRESS_PUBLIC, shanoirServerAddress + "/account/study/" + email.getStudyId() + "/account-request");
 			final String content = build("notifyAnonymousInvitation", variables);
 			messageHelper.setText(content, true);
 		};
