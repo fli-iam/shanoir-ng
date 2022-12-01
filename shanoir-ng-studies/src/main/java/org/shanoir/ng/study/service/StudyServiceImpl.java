@@ -111,8 +111,6 @@ public class StudyServiceImpl implements StudyService {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	private Map<String, Study> studyKeymap;
-
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findById(id).orElse(null);
@@ -585,18 +583,6 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public List<Study> findPublicStudies() {
 		return this.studyRepository.findByVisibleByDefaultTrue();
-	}
-
-	@Override
-	public String generateInvitationKey(Study study) {
-		String key = UUID.randomUUID().toString();
-		this.studyKeymap.put(key, study);
-		return key;
-	}
-
-	@Override
-	public Study getStudyFromKey(String key) {
-		return this.studyKeymap.get(key);
 	}
 
 }

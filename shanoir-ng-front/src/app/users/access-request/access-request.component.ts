@@ -25,7 +25,7 @@ import { AccessRequestService } from './access-request.service';
 import { IdName } from 'src/app/shared/models/id-name.model';
 
 @Component({
-    selector: 'accountRequest',
+    selector: 'accessRequest',
     templateUrl: 'access-request.component.html',
     styleUrls: ['access-request.component.css']
 })
