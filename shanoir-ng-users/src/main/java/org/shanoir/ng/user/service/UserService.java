@@ -46,7 +46,7 @@ public interface UserService {
 	 * @throws EntityNotFoundException if this user id doesn't exist in the database.
 	 * @throws AccountNotOnDemandException if this account is not currently on demand.
 	 */
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	User confirmAccountRequest(User user) throws EntityNotFoundException, AccountNotOnDemandException;
 
 	/**
