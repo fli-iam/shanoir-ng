@@ -180,8 +180,8 @@ public class UserServiceSecurityTest {
 	public void testAsExpert() throws ShanoirException {
 
 		assertAccessAuthorized(userService::confirmAccountRequest, mockUser);
+		assertAccessAuthorized(userService::denyAccountRequest, USER_ID);
 		assertAccessDenied(userService::deleteById, USER_ID);
-		assertAccessDenied(userService::denyAccountRequest, USER_ID);
 		assertAccessAuthorized(userService::findAll);
 		for (User user : userService.findAll()) {
 			assertNull(user.getEmail());

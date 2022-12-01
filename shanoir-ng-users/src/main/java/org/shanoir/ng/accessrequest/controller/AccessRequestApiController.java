@@ -171,7 +171,11 @@ public class AccessRequestApiController implements AccessRequestApi {
 			email.setStudyName(resolvedRequest.getStudyName());
 			emailService.notifyUserAddedToStudy(resolvedRequest);
 		} else {
-			emailService.notifyUserRefusedFromStudy(resolvedRequest);	
+			emailService.notifyUserRefusedFromStudy(resolvedRequest);
+			// Deny account request creation
+			if (resolvedRequest.getUser().isAccountRequestDemand()) {
+				userService.denyAccountRequest(resolvedRequest.getId());
+			}
 		}
 
 		return new ResponseEntity<Void>(HttpStatus.OK);
