@@ -531,8 +531,7 @@ public class EmailServiceImpl implements EmailService {
 					variables.put(LASTNAME, studyAdmin.getLastName());
 					variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
 					variables.put(STUDY_NAME, createdRequest.getStudyName());
-					variables.put(SERVER_ADDRESS, shanoirServerAddress + "study/edit/" + createdRequest.getStudyId());
-					final String content = build("notifyStudyAdminStudyUsersAdded", variables);
+					final String content = build("notifyStudyAdminAccessRequest", variables);
 					LOG.info(content);
 					messageHelper.setText(content, true);
 				};
