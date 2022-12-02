@@ -33,7 +33,7 @@ export class ImportJob {
     studyName: String;
     userId: number;
     centerId: number;
-    profile: Profile;
+    anonymisationProfileToUse: string;
 }
 
 export class PatientDicom {

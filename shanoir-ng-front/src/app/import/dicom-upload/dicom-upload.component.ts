@@ -129,7 +129,7 @@ export class DicomUploadComponent implements OnDestroy {
             job.studyName = this.study.name;
             job.studyCardId = this.studyCard.id;
             job.centerId = this.studyCard.acquisitionEquipment.center.id;
-            job.profile = this.study.profile;
+            job.anonymisationProfileToUse = this.study.profile.profileName;
 
             this.subscriptions.push(
             this.importService.uploadFileMultiple(formData, job)
