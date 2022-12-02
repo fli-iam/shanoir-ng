@@ -16,6 +16,8 @@ package org.shanoir.ng.study.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.study.model.StudyStatus;
@@ -48,6 +50,8 @@ public class StudyDTO {
 	private boolean monoCenter;
 
 	private String name;
+
+	private Profile profile;
 
 	private int nbExaminations;
 
@@ -192,6 +196,21 @@ public class StudyDTO {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the profileName
+	 */
+	public Profile getProfile() {
+		return profile;
+	}
+
+	/**
+	 * @param profile
+	 *            the profileName to set
+	 */
+	public void setProfile(Profile profile) {
+		this.profile = profile;
 	}
 
 	/**

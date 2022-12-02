@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -46,7 +46,7 @@ import { ImportService } from '../shared/import.service';
 
 @Directive()
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
-    
+
     public studyOptions: Option<Study>[] = [];
     public studycardOptions: Option<StudyCard>[] = [];
     public centerOptions: Option<Center>[] = [];
@@ -80,7 +80,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     reloading: boolean = false;
     editSubjectStudy: boolean = true;
     protected stepTs: number;
-    
+
     constructor(
             public studyService: StudyService,
             public centerService: CenterService,
@@ -103,7 +103,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             return;
         }
         breadcrumbsService.nameStep('3. Context');
-        
+
         this.preConstructor();
         this.niftiConverters = [];
         this.niftiConverterService.getAll().then(niftiConverters => this.niftiConverters = niftiConverters);
@@ -149,7 +149,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.study = studyOption.value; // in case it has been modified by an on-the-fly equipment creation
         }
         promises.push(this.onSelectStudy().then(() => {
-            if (this.useStudyCard != useStudyCard) { 
+            if (this.useStudyCard != useStudyCard) {
                 this.useStudyCard = useStudyCard;
                 this.onToggleUseStudyCard();
             } else if (useStudyCard && studyCard){
@@ -185,7 +185,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.center = center;
             let centerOption = this.centerOptions.find(c => c.value.id == center.id);
             if (centerOption) {
-                this.center = centerOption.value; 
+                this.center = centerOption.value;
             }
             return this.onSelectCenter().then(() => this.restoreEquipment(acquisitionEquipment));
         } else {
@@ -195,7 +195,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     fetchStudies(selectDefault: boolean = true): Promise<void> {
         return this.completeStudyCenters()
-            /* For the moment, we import only zip files with the same equipment, 
+            /* For the moment, we import only zip files with the same equipment,
             That's why the calculation is only based on the equipment of the first series of the first study */
             .then(() => {
                 if (selectDefault) {
@@ -222,12 +222,12 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                             if (center) {
                                 studyCenter.center = center;
                                 studyOption.compatible = true;
-                            } 
+                            }
                         }
                         this.studyOptions.push(studyOption);
                         // update the selected study as well
                         if (this.study && this.study.id == study.id) {
-                            this.study.studyCenterList = study.studyCenterList; 
+                            this.study.studyCenterList = study.studyCenterList;
                         }
                     }
                 }
@@ -238,7 +238,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     acqEqCompatible(acquisitionEquipment: AcquisitionEquipment): boolean | undefined {
         return undefined;
     }
-    
+
     centerCompatible(center: Center): boolean | undefined {
         return undefined;
     }
@@ -315,7 +315,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     protected getSubjectList(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         this.openSubjectStudy = false;
         if (!studyId) {
-            return Promise.resolve([]); 
+            return Promise.resolve([]);
         } else {
             return this.studyService.findSubjectsByStudyId(studyId);
         }
@@ -331,7 +331,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             let scFound: StudyCenter = studyCenterList?.find(sc => {
                 eqFound = sc.center.acquisitionEquipments.find(eq => eq.id == this.studycard.acquisitionEquipment.id);
                 return (!!eqFound);
-            })   
+            })
             this.center = scFound ? scFound.center : this.studycard?.acquisitionEquipment?.center;
             this.niftiConverter = this.studycard.niftiConverter;
             return this.onSelectCenter().then(() => {
@@ -352,7 +352,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         let founded = options?.find(option => option.compatible)?.value;
         if (founded) {
             this.acquisitionEquipment = founded;
-        } 
+        }
     }
 
     public onSelectStudy(): Promise<void> {
@@ -371,7 +371,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                 this.centerOptions = options;
                 return this.selectDefaultCenter(options);
             });
-        } 
+        }
 
         let subjectsPromise: Promise<void> = this.getSubjectList(this.study?.id).then(subjects => {
             this.subjects = subjects ? subjects : [];
@@ -452,7 +452,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.importDataService.contextData = this.getContext();
         }
     }
-    
+
     protected getContext(): any {
         return new ContextData(this.study, this.studycard, this.useStudyCard, this.center, this.acquisitionEquipment,
             this.subject, this.examination, this.niftiConverter, null, null, null, null, null, null);
@@ -547,8 +547,8 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         });
     }
 
-    
-    
+
+
     private examToSubjectExam(examination: Examination): SubjectExamination {
         if (!examination) return;
         // Add the new created exam to the select box and select it
@@ -562,7 +562,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public get hasCompatibleCenters(): boolean {
         return this.centerOptions?.find(center => center.compatible) != undefined;
     }
-    
+
     public get hasCompatibleEquipments(): boolean {
         return this.acquisitionEquipmentOptions?.find(ae => ae.compatible) != undefined;
     }
@@ -606,7 +606,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             && (!context.useStudyCard || context.studyCard)
             && !!context.center
             && !!context.acquisitionEquipment
-            && !!context.subject?.subjectStudy?.subjectType 
+            && !!context.subject?.subjectStudy?.subjectType
             && !!context.examination
             && !!context.niftiConverter
         );
@@ -657,7 +657,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (!studycard) return false;
         for (let rule of studycard.rules) {
             for (let ass of rule.assignments) {
-                if (ass.field == 'MODALITY_TYPE' 
+                if (ass.field == 'MODALITY_TYPE'
                         && this.modality && typeof ass.value == 'string' && ass.value
                         && (ass.value as string).split('_')[0] != this.modality.toUpperCase()) {
                     return (ass.value as string).split('_')[0];
@@ -666,7 +666,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         }
         return false;
     }
-    
+
     protected hasAdminRightOn(study: Study): Promise<boolean> {
         if (!study) return Promise.resolve(false);
         else if (this.keycloakService.isUserAdmin()) return Promise.resolve(true);

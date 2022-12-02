@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -61,14 +61,14 @@ export class DicomUploadComponent implements OnDestroy {
             private router: Router,
             private breadcrumbsService: BreadcrumbsService,
             private importDataService: ImportDataService) {
-        
+
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
             breadcrumbsService.currentStep.label = '1. Upload';
             breadcrumbsService.currentStep.importStart = true;
             breadcrumbsService.currentStep.importMode = 'DICOM';
         });
-        
+
         this.studyService.getStudyNamesAndCenters().then(allStudies => {
             for (let study of allStudies) {
                     let studyOption: Option<Study> = new Option(study, study.name);
@@ -76,7 +76,7 @@ export class DicomUploadComponent implements OnDestroy {
                 }
         });
     }
-    
+
     public uploadArchive(fileEvent: any): void {
         if (fileEvent.target.files.length > 0) {
             this.setArchiveStatus('uploading');
@@ -129,7 +129,8 @@ export class DicomUploadComponent implements OnDestroy {
             job.studyName = this.study.name;
             job.studyCardId = this.studyCard.id;
             job.centerId = this.studyCard.acquisitionEquipment.center.id;
-            
+            job.anonymisationProfileToUse = this.study.profile.profileName;
+
             this.subscriptions.push(
             this.importService.uploadFileMultiple(formData, job)
                 .subscribe(
@@ -170,7 +171,7 @@ export class DicomUploadComponent implements OnDestroy {
     get valid(): boolean {
         return this.archiveStatus == 'uploaded';
     }
-    
+
     progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
        switch (event.type) {
             case HttpEventType.Sent:
@@ -182,7 +183,7 @@ export class DicomUploadComponent implements OnDestroy {
                 progressBar.progress = 0;
         }
     }
-    
+
     onSelectStudy() {
         this.studyCardService.getAllForStudy(this.study.id).then(studycards => {
             if (!studycards) studycards = [];
@@ -192,7 +193,7 @@ export class DicomUploadComponent implements OnDestroy {
             });
         });
     }
-    
+
     onSelectStudyCard(){
         this.center = this.studyCard.acquisitionEquipment.center;
     }
@@ -200,12 +201,12 @@ export class DicomUploadComponent implements OnDestroy {
     next() {
         this.router.navigate(['imports/series']);
     }
-    
+
     ngOnDestroy() {
         for(let subscription of this.subscriptions) {
             subscription.unsubscribe();
         }
     }
-    
+
 
 }

@@ -65,7 +65,7 @@ public class ImportJob implements Serializable {
 	private Long userId;
 
 	private Long centerId;
-    
+
 	public String getArchive() {
 		return archive;
 	}
