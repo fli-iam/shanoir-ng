@@ -37,7 +37,7 @@ public class AccessRequestServiceImpl implements AccessRequestService {
 	}
 
 	@Override
-	public AccessRequest update(AccessRequest entity) throws EntityNotFoundException {
+	public AccessRequest update(AccessRequest entity) {
 		return this.accessRequestRepository.save(entity);
 	}
 

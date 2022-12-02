@@ -67,15 +67,15 @@ public class AccessRequestApiController implements AccessRequestApi {
 	ObjectMapper mapper;
 
 	private static final Logger LOG = LoggerFactory.getLogger(AccessRequestApiController.class);
-	
+
 	public ResponseEntity<AccessRequest> saveNewAccessRequest(
-			@ApiParam(value = "uaccess request to create", required = true) @RequestBody AccessRequest request,
+			@ApiParam(value = "access request to create", required = true) @RequestBody AccessRequest request,
 			BindingResult result) throws RestServiceException {
 		// Create a new access request
 		User user = userService.findById(KeycloakUtil.getTokenUserId());
 		request.setUser(user);
 		request.setStatus(AccessRequest.ON_DEMAND);
-		
+
 		if (request.getStudyName() == null) {
 			String studyName = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, request.getStudyId());
 			request.setStudyName(studyName);
@@ -83,10 +83,10 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 		AccessRequest createdRequest = accessRequestService.createAllowed(request);
 		createdRequest.setUser(user);
-		
+
 		// Send event
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.ACCESS_REQUEST_EVENT, "" + createdRequest.getId(), KeycloakUtil.getTokenUserId(), "", 1, createdRequest.getStudyId()));
-		
+
 		// Send notification to study admin
 		try {
 			emailService.notifyStudyManagerAccessRequest(createdRequest);
@@ -100,18 +100,15 @@ public class AccessRequestApiController implements AccessRequestApi {
 	@Override
 	public ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException {
 		// Get all studies I administrate
-		List<Long> studiesId;
-		try {
-			studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, KeycloakUtil.getTokenUserId());
-		} catch (Exception e) {
-			throw new AmqpRejectAndDontRequeueException("Error while retrieving studies I can admin. Please contact an admin.", e);			
-		}
+		List<Long> studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, KeycloakUtil.getTokenUserId());
+
 		if (CollectionUtils.isEmpty(studiesId)) {
 			return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
 		}
+
 		// Get all access requests
 		List<AccessRequest> accessRequests = this.accessRequestService.findByStudyId(studiesId);
-		
+
 		List<AccessRequest> unresolvedRequests = new ArrayList<AccessRequest>();
 		// Filter by status
 		for (AccessRequest request : accessRequests) {
@@ -130,8 +127,8 @@ public class AccessRequestApiController implements AccessRequestApi {
 	public ResponseEntity<Void> resolveNewAccessRequest(
 			@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
 			@ApiParam(value = "Accept or refuse the request", required = true) @RequestBody boolean validation,
-			BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException {
-		AccessRequest resolvedRequest = accessRequestService.findById(accessRequestId).get();
+			BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException {
+		AccessRequest resolvedRequest = accessRequestService.findById(accessRequestId).orElse(null);
 		if (resolvedRequest == null) {
 			return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
 		}
@@ -140,12 +137,8 @@ public class AccessRequestApiController implements AccessRequestApi {
 		} else {
 			resolvedRequest.setStatus(AccessRequest.REFUSED);
 		}
-		try {
-			accessRequestService.update(resolvedRequest);
-		} catch (EntityNotFoundException e) {
-			LOG.error("Could not resolve access request, please try later.", e);
-			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
-		}
+
+		accessRequestService.update(resolvedRequest);
 
 		if (validation) {
 			// if there is an account request, accept it.
@@ -159,11 +152,8 @@ public class AccessRequestApiController implements AccessRequestApi {
 					resolvedRequest.getUser().getId(),
 					resolvedRequest.getUser().getUsername(),
 					ShanoirEvent.SUCCESS);
-			try {
-				this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
-			} catch (JsonProcessingException | AmqpException e) {
-				LOG.error("Could not subscribe user to study.", e);
-			}
+
+			this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
 
 			StudyInvitationEmail email = new StudyInvitationEmail();
 			email.setInvitedMail(resolvedRequest.getUser().getEmail());
@@ -174,7 +164,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 			emailService.notifyUserRefusedFromStudy(resolvedRequest);
 			// Deny account request creation
 			if (resolvedRequest.getUser().isAccountRequestDemand()) {
-				userService.denyAccountRequest(resolvedRequest.getId());
+				userService.denyAccountRequest(resolvedRequest.getUser().getId());
 			}
 		}
 
@@ -192,53 +182,48 @@ public class AccessRequestApiController implements AccessRequestApi {
 			@ApiParam(value = "Study name the user is invited in", required = true) 
 			@RequestParam(value = "studyName", required = true) String studyName,
 			@ApiParam(value = "The email of the invited user.") 
-    		@RequestParam(value = "email", required = true) String email) throws RestServiceException {
-		
-		try {
-			// Check if user with such email exists
-			Optional<User> user = this.userService.findByEmail(email);
-			
-			// User exists => directly add it to the study
-			if (user.isPresent()) {
-				// Direct call to study MS to add the user
-				
-				ShanoirEvent subscription = new ShanoirEvent(
-						ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
-						studyId.toString(),
-						user.get().getId(),
-						user.get().getUsername(),
-						ShanoirEvent.SUCCESS);
-				
-				boolean subResult = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
-				
-				if (subResult) {
-					// create a new access request for history / logging purpose
-					AccessRequest request = new AccessRequest();
-					request.setUser(user.get());
-					request.setStudyId(studyId);
-					request.setStudyName(studyName);
-					request.setStudyId(studyId);
-					request.setMotivation("From study manager");
-					request.setStatus(AccessRequest.APPROVED);
-					this.accessRequestService.createAllowed(request);
-					this.emailService.notifyUserAddedToStudy(request);
-				}
-				
+			@RequestParam(value = "email", required = true) String email) throws RestServiceException, JsonProcessingException, AmqpException {
+
+		// Check if user with such email exists
+		Optional<User> user = this.userService.findByEmail(email);
+
+		// User exists => directly add it to the study
+		if (user.isPresent()) {
+			// Direct call to study MS to add the user
+
+			ShanoirEvent subscription = new ShanoirEvent(
+					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
+					studyId.toString(),
+					user.get().getId(),
+					user.get().getUsername(),
+					ShanoirEvent.SUCCESS);
+
+			boolean subResult = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
+
+			if (subResult) {
+				// create a new access request for history / logging purpose
+				AccessRequest request = new AccessRequest();
+				request.setUser(user.get());
+				request.setStudyId(studyId);
+				request.setStudyName(studyName);
+				request.setMotivation("From study manager");
+				request.setStatus(AccessRequest.APPROVED);
+				this.accessRequestService.createAllowed(request);
+				this.emailService.notifyUserAddedToStudy(request);
 				return new ResponseEntity<String>("User " + user.get().getUsername() + " was added to the study with success", HttpStatus.OK);
+			} else {
+				return new ResponseEntity<String>("User " + user.get().getUsername() + " exists but could not be added to this study. Please contact an administrator", HttpStatus.OK);
 			}
-	
-			StudyInvitationEmail mail = new StudyInvitationEmail();
-			mail.setInvitedMail(email);
-			mail.setStudyId(studyId.toString());
-			mail.setStudyName(studyName);
-			
-			// User does not exists, just send an email
-			this.emailService.inviteToStudy(mail);
-			
-			return new ResponseEntity<String>("No existing user with this email, an invitation to join Shanoir was sent.", HttpStatus.OK);
-		} catch (Exception e) {
-			LOG.error("Error while inviting user", e);
-			return new ResponseEntity<String>("Could not invite this user, please retry later.", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+
+		StudyInvitationEmail mail = new StudyInvitationEmail();
+		mail.setInvitedMail(email);
+		mail.setStudyId(studyId.toString());
+		mail.setStudyName(studyName);
+
+		// User does not exists, just send an email
+		this.emailService.inviteToStudy(mail);
+
+		return new ResponseEntity<String>("No existing user with this email, an invitation to join Shanoir was sent.", HttpStatus.OK);
 	}
 }

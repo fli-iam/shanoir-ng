@@ -14,7 +14,7 @@ public interface AccessRequestService extends BasicEntityService<AccessRequest>{
 	List<AccessRequest> findByStudyId(List<Long> studiesId);
 
 	@Override
-	AccessRequest update(AccessRequest entity) throws EntityNotFoundException;
+	AccessRequest update(AccessRequest entity);
 
 	AccessRequest createAllowed(AccessRequest entity);
 

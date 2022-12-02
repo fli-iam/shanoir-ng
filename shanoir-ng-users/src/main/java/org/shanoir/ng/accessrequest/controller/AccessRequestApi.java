@@ -6,6 +6,7 @@ import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.springframework.amqp.AmqpException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -57,7 +60,7 @@ public interface AccessRequestApi {
 	ResponseEntity<Void> resolveNewAccessRequest(
 			@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
 			@ApiParam(value = "Accept or refuse the request", required = true) @RequestBody boolean validation,
-			BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException;
+			BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException;
 
 	@ApiOperation(value = "byUser", notes = "Find all the access request for the given user", response = AccessRequest.class, tags = {})
 	@ApiResponses(value = {
@@ -77,7 +80,6 @@ public interface AccessRequestApi {
 			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
-	//TODO: @PostAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_ADMINISTRATE')")
 	@GetMapping(value = "/{accessRequestId}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<AccessRequest> getByid(@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException;
@@ -96,5 +98,5 @@ public interface AccessRequestApi {
 			@ApiParam(value = "Study name the user is invited in", required = true) 
 			@RequestParam(value = "studyName", required = true) String studyName,
 			@ApiParam(value = "The email of the invited user.") 
-    		@RequestParam(value = "email", required = true) String email) throws RestServiceException;
+    		@RequestParam(value = "email", required = true) String email) throws RestServiceException, JsonProcessingException, AmqpException;
 }
