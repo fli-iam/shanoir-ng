@@ -47,12 +47,14 @@ export const BACKEND_API_CENTER_STUDY_URL: string = BACKEND_API_CENTER_URL + '/s
 
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
-export const BACKEND_API_PROFILE_URL: string = BACKEND_API_STUDIES_MS_URL + '/profiles';
 export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/names';
-export const BACKEND_API_STUDY_ALL_PROFILES_URL: string = BACKEND_API_PROFILE_URL + '/all';
 export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
+
+// Profile API
+export const BACKEND_API_PROFILE_URL: string = BACKEND_API_STUDIES_MS_URL + '/profiles';
+export const BACKEND_API_PROFILE_ALL_PROFILES_URL: string = BACKEND_API_PROFILE_URL + '/all';
 
 // Challenge API
 export const BACKEND_API_STUDY_CHALLENGES_URL: string = BACKEND_API_STUDIES_MS_URL + '/challenges';

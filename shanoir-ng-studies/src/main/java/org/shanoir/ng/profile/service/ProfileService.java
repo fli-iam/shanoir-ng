@@ -14,15 +14,8 @@
 
 package org.shanoir.ng.profile.service;
 
-import java.util.List;
-
 import org.shanoir.ng.profile.model.Profile;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.UndeletableDependenciesException;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Profile service.

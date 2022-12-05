@@ -14,31 +14,24 @@
 
 package org.shanoir.ng.profile.controler;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.profile.service.ProfileService;
-import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+
+import java.util.List;
 
 @Controller
 public class ProfileApiController implements ProfileApi {
 	@Autowired
 	private ProfileService profileService;
 
-	@Autowired
-	private ShanoirEventService eventService;
-
 	@Override
 	public ResponseEntity<List<Profile>> findProfiles() {
 		List<Profile> profiles = profileService.findAll();
 
-		// Remove "unknown" profile
-		profiles = profiles.stream().filter(profile -> profile.getId() != 0).collect(Collectors.toList());
 		if (profiles.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

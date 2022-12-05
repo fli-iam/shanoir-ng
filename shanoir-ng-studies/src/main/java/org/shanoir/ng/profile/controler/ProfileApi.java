@@ -40,7 +40,7 @@ public interface ProfileApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<List<Profile>> findProfiles();
 
 }

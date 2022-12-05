@@ -108,7 +108,7 @@ export class StudyComponent extends EntityComponent<Study> {
             this.study = study;
             if (this.study.profile == null) {
                 let pro = new Profile();
-                pro.profileName = "NEURINFO";
+                pro.profileName = "Profile Neurinfo";
                 this.study.profile = pro;
             }
             this.study.subjectStudyList = this.study.subjectStudyList.sort(
@@ -137,13 +137,12 @@ export class StudyComponent extends EntityComponent<Study> {
 
             if (this.study.profile == null) {
               let profile = new Profile();
-              profile.profileName = "NEURINFO";
+              profile.profileName = "Profile Neurinfo";
               this.study.profile = profile;
             }
             return study;
         });
         this.getSubjects();
-        this.getProfiles();
 
         this.protocolFiles = [];
 
@@ -372,10 +371,6 @@ export class StudyComponent extends EntityComponent<Study> {
 
     studyStatusStr(studyStatus: string) {
       return capitalsAndUnderscoresToDisplayable(studyStatus);
-    }
-
-    profileNameStr(profileName: Profile) {
-      return capitalsAndUnderscoresToDisplayable(profileName.profileName);
     }
 
     public click() {
