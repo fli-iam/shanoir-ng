@@ -5,6 +5,7 @@ CREATE TABLE `profile` (
 )
 
 ALTER TABLE study ADD profile_id bigint(20);
+ALTER TABLE study ADD CONSTRAINT `FK9o4lyhi0i6ocqf1mpd9yaeyij` FOREIGN KEY (`profile_id`) REFERENCES `profile` (`id`);
 
 INSERT INTO profile (id, profile_name) VALUES (1,'Profile Neurinfo');
 INSERT INTO profile (id, profile_name) VALUES (2,'Profile OFSEP');
