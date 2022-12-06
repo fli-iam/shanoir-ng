@@ -62,11 +62,11 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                 this.assignmentChangeSubscription.unsubscribe();
                 this.assignmentChangeSubscription = null;
             }
-            let metadataField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
+            let assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
             if (this.mode == 'view') {
-                this.fieldLabel = metadataField.label;
-                if (metadataField && metadataField.options) {
-                    this.assignmentChangeSubscription = metadataField.options.subscribe(opts => {
+                this.fieldLabel = assignmentField.label;
+                if (assignmentField && assignmentField.options) {
+                    this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         if (opts && opts.length > 0) {
                             let valueOption: Option<any> = opts.find(opt => {
                                 return opt.value == this.assignment.value 
@@ -85,8 +85,8 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                     this.valueIsString = true;
                 } 
             } else {
-                if (metadataField && metadataField.options) {
-                    this.assignmentChangeSubscription = metadataField.options.subscribe(opts => {
+                if (assignmentField && assignmentField.options) {
+                    this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         this.assigmentOptions = opts;
                         if (opts && opts.length > 0) {
                             let valueOption: Option<any> = opts.find(opt => {
@@ -114,14 +114,14 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
             this.computeAssignmentOptionsSubscription.unsubscribe();
             this.computeAssignmentOptionsSubscription = null;
         }
-        let metadataField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
-            if (metadataField && metadataField.options) {
-                this.computeAssignmentOptionsSubscription = metadataField.options.subscribe(opts => {
-                    this.assigmentOptions = opts;
-                });
-            } else {
-                this.assigmentOptions = null;
-            }    
+        let assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
+        if (assignmentField && assignmentField.options) {
+            this.computeAssignmentOptionsSubscription = assignmentField.options.subscribe(opts => {
+                this.assigmentOptions = opts;
+            });
+        } else {
+            this.assigmentOptions = null;
+        }    
     }
 
     onSelectFieldOption(option: Option<any>) {
@@ -153,12 +153,12 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
 
 export class ShanoirMetadataField {
 
-    public options?: Observable<any[]>;
+    public options?: Observable<Option<any>[]>;
 
     constructor(
             public label: string, 
             public field: string,
-            options?: Observable<any[]> | any[]) {
+            options?: Observable<Option<any>[]> | Option<any>[]) {
 
         if (options instanceof Observable) {
             this.options = options;
@@ -167,5 +167,4 @@ export class ShanoirMetadataField {
         }
     }
 }
-
 

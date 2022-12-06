@@ -39,7 +39,8 @@ export class StudyCardRuleComponent implements OnChanges {
 
     @Input() mode: Mode;
     @Input() rule: StudyCardRule;
-    @Input() fields: ShanoirMetadataField[];
+    @Input() assignmentFields: ShanoirMetadataField[];
+    @Input() conditionFields: ShanoirMetadataField[];
     @Output() change: EventEmitter<StudyCardRule> = new EventEmitter();
     @Output() moveUp: EventEmitter<void> = new EventEmitter();
     @Output() moveDown: EventEmitter<void> = new EventEmitter();
@@ -49,23 +50,32 @@ export class StudyCardRuleComponent implements OnChanges {
     @ViewChildren(StudyCardActionComponent) assignmentChildren: QueryList<StudyCardActionComponent>;
     touched: boolean = false;
 
-    fieldOptions: Option<string>[];
-    assigmentOptions: Option<any>[];
+    assignmentFieldOptions: Option<string>[];
+    conditionFieldOptions: Option<string>[];
 
     constructor(public elementRef: ElementRef) { }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.fields) {
-            if (this.fields) {
-                this.fieldOptions = this.fields.map(field => new Option<string>(field.field, field.label));
+        if (changes.assignmentFields) {
+            if (this.assignmentFields) {
+                this.assignmentFieldOptions = this.assignmentFields.map(field => new Option<string>(field.field, field.label));
             } else {
-                this.fieldOptions = [];
+                this.assignmentFieldOptions = [];
+            }
+        }
+        if (changes.conditionFields) {
+            if (this.conditionFields) {
+                this.conditionFieldOptions = this.conditionFields.map(field => new Option<string>(field.field, field.label));
+            } else {
+                this.conditionFieldOptions = [];
             }
         }
     }
 
     addNewCondition() {
-        this.rule.conditions.push(new StudyCardCondition());
+        let cond = new StudyCardCondition();
+        cond.values = [null];
+        this.rule.conditions.push(cond);
         this.change.emit(this.rule);
     }
 
@@ -80,7 +90,7 @@ export class StudyCardRuleComponent implements OnChanges {
     }
     
     deleteAction(index: number) {
-        let fieldOption: Option<string> = this.fieldOptions.find(opt => opt.value === this.rule.assignments[index].field);
+        let fieldOption: Option<string> = this.assignmentFieldOptions.find(opt => opt.value === this.rule.assignments[index].field);
         if (fieldOption) fieldOption.disabled = false;
         this.rule.assignments.splice(index, 1);
         this.change.emit(this.rule);

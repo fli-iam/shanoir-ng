@@ -25,7 +25,7 @@
         min-width: 23px;
         position: relative;
     }
-    :host().auto-width .commands > .button { min-width: 0; font-size: 6px; height: 22px; }
+    :host().auto-width .commands > .button { min-width: 0; font-size: 6px; height: 22px; order: 1; }
         .button i { margin: 4px 2px; height: 100%; }
     .commands > .button.disabled { opacity: 0.7; }
     .commands > .button:hover:not(.disabled),
@@ -86,7 +86,7 @@ input:focus:hover { cursor: initial; }
 .commands > .clear { color: var(--grey); display: none; }
 .clear i { vertical-align: 2px; }
 .frame:hover .commands > .clear { display: inline-block; } 
-:host().auto-width .clear { display: none !important; }
+:host().auto-width .clear { display: inline-block; font-size: 10px !important; order: 2 !important; }
 
 :host().error .empty { color: var(--color-light-error); }
 

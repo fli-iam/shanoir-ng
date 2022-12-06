@@ -45,7 +45,7 @@ export class StudyCardRule {
         copy.conditions = rule.conditions.map(con => {
             let conCopy: StudyCardCondition = new StudyCardCondition();
             conCopy.dicomTag = con.dicomTag;
-            conCopy.dicomValue = con.dicomValue;
+            conCopy.values = [...con.values];
             conCopy.operation = con.operation;
             return conCopy;
         });
@@ -76,10 +76,11 @@ export class StudyCardAssignment {
 }
 
 export class StudyCardCondition {
-
+    type: 'dicom' | 'shanoir' = 'dicom';
+    shanoirField: string;
     dicomTag: DicomTag;
     operation: Operation;
-    dicomValue: string;
+    values: string[] = [];
 }
 
 export class DicomTag {

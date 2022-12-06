@@ -16,7 +16,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<div *ngFor="let condition of rule.conditions; let i = index" class="condition">	
 		<condition 
 				[(condition)]="rule.conditions[i]" 
-				[mode]="mode" 
+				[mode]="mode"
+				[fieldOptions]="conditionFieldOptions" 
+				[fields]="conditionFields" 
 				[class.edit]="mode != 'view'" 
 				(conditionChange)="change.emit(rule)"
 				(delete)="deleteCondition(i)"
@@ -48,8 +50,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<action 
 				[(assignment)]="rule.assignments[i]" 
 				[mode]="mode" 
-				[fieldOptions]="fieldOptions" 
-				[fields]="fields" 
+				[fieldOptions]="assignmentFieldOptions" 
+				[fields]="assignmentFields" 
 				[class.edit]="mode != 'view'"
 				(actionChange)="change.emit(rule)"
 				(delete)="deleteAction(i)"

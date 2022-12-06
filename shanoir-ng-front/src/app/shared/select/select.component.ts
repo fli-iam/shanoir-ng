@@ -50,6 +50,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() userChange = new EventEmitter();
     @Output() selectOption = new EventEmitter();
     @Output() deSelectOption = new EventEmitter();
+    @Output() onUserClear = new EventEmitter();
     @Input() options: Option<any>[];
     @Input() optionArr: any[];
     @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
@@ -57,8 +58,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public displayedOptions: Option<any>[] = [];
     @ViewChild('input', { static: false }) textInput: ElementRef;
     @ViewChild('hiddenOption', { static: false }) hiddenOption: ElementRef;
-    private inputValue: any;
-    private _selectedOptionIndex: number;
+    inputValue: any;
+    private _selectedOptionIndex: number = null;
     public focusedOptionIndex: number;
     private _firstScrollOptionIndex: number;
     private filteredOptions: FilteredOptions;
@@ -76,6 +77,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() placeholder: string;
     public maxWidth: number;
     public noResult: boolean;
+    @Input() clear: boolean = true;
+
 
     @Input() viewDisabled: boolean;
     @Input() viewHidden: boolean;
@@ -204,12 +207,12 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this._selectedOptionIndex = index;
             if (this.selectedOption) {
                 this.inputText = this.selectedOption.label;
-                //this.onChangeCallback(this.selectedOption.value);
-                //this.selectOption.emit(this.selectedOption);
+                this.onChangeCallback(this.selectedOption.value);
+                this.selectOption.emit(this.selectedOption);
             } else {
                 this.inputText = null;
-                //this.onChangeCallback(null);
-                //this.selectOption.emit(null);
+                this.onChangeCallback(null);
+                this.selectOption.emit(null);
             }
             if (previousOption) {
                 this.deSelectOption.emit(previousOption);
@@ -549,6 +552,11 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
     }
 
+    onClear() {
+        this.onUserClear.emit(this.selectedOption);
+        this.onTypeText(null);
+    }
+
     public onTypeText(text: string) {
         this.unSelectOption();
         this.onChangeCallback(null);
@@ -632,6 +640,15 @@ export class Option<T> {
         public value: T,
         public label: string,
         public section?: string) {}
+
+    clone(): Option<T> {
+        let option: Option<T> = new Option(this.value, this.label, this.section);
+        option.disabled = this.disabled;
+        option.compatible = this.compatible;
+        option.color = this.color;
+        option.backgroundColor = this.backgroundColor;
+        return option;
+    }
 }
 
 export class FilteredOptions {

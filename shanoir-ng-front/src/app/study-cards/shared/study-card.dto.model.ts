@@ -36,10 +36,7 @@ export class StudyCardDTO {
                 ruleDTO.conditions = rule.conditions.map(cond => {
                     let condDTO: StudyCardConditionDTO = new StudyCardConditionDTO();
                     condDTO.dicomTagOrField = cond.dicomTag ? cond.dicomTag.code : null;
-                    let condValueDTO: StudyCardConditionValueDTO = new StudyCardConditionValueDTO();
-                    condValueDTO.value = cond.dicomValue;
-                    condDTO.values = [];
-                    condDTO.values.push(condValueDTO);
+                    condDTO.values = Array.from(cond.values);
                     condDTO.operation = cond.operation;
                     return condDTO;
                 });
@@ -67,13 +64,8 @@ export class StudyCardRuleDTO {
 export class StudyCardConditionDTO {
     dicomTagOrField: number;
     operation: Operation;
-    values: StudyCardConditionValueDTO[];
+    values: string[];
 }
-
-export class StudyCardConditionValueDTO {
-    value: string;
-}
-
 export class StudyCardAssignmentDTO {
     field: string;
     value: string;

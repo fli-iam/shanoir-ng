@@ -66,7 +66,8 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     onChangeCallback = (_: any) => {};
     @Input() manufModelId: number;
     @Input() allCoils: Coil[];
-    fields: ShanoirMetadataField[];
+    assignmentFields: ShanoirMetadataField[];
+    conditionFields: ShanoirMetadataField[];
     private coilOptionsSubject: Subject<Option<Coil>[]> = new BehaviorSubject<Option<Coil>[]>(null);
     private coilOptions: Observable<Option<Coil>[]> = this.coilOptionsSubject.asObservable();
     private allCoilsPromise: SuperPromise<Coil[]> = new SuperPromise();
@@ -82,7 +83,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             private confirmDialogService: ConfirmDialogService,
             private breadcrumbService: BreadcrumbsService) {
      
-        this.fields = [
+        this.assignmentFields = [
             new ShanoirMetadataField('Dataset modality type', 'MODALITY_TYPE', DatasetModalityType.options),
             new ShanoirMetadataField('Protocol name', 'PROTOCOL_NAME'),
             new ShanoirMetadataField('Protocol comment', 'PROTOCOL_COMMENT'),
@@ -99,6 +100,9 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             new ShanoirMetadataField('Mr Dataset Nature', 'MR_DATASET_NATURE', MrDatasetNature.options),
 			new ShanoirMetadataField('BIDS data type', 'BIDS_DATA_TYPE', BidsDataType.options)
         ];
+
+        // here we reference assignment fields but conditions could be different
+        this.conditionFields = this.assignmentFields;
 
         if (this.breadcrumbService.currentStep.data.rulesToAnimate) 
             this.rulesToAnimate = this.breadcrumbService.currentStep.data.rulesToAnimate;
@@ -222,15 +226,33 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         let errors: any = {};
         if (rules) {
             rules.forEach(rule => {
-                if ((rule.conditions && rule.conditions.find(cond => !cond.dicomTag || !cond.operation || !cond.dicomValue))
-                        || (rule.assignments && rule.assignments.find(ass => !ass.field || !ass.value))) {
-                    errors.missingField = true;
+                if (rule.conditions?.find(cond => cond.type != 'dicom' && cond.type != 'shanoir')) {
+                    errors.noType = true; 
+                }
+                if (rule.conditions?.find(cond => cond.type == 'dicom' && !cond.dicomTag)) {
+                    errors.missingField = 'condition dicomTag';
+                }
+                if (rule.conditions?.find(cond => cond.type == 'shanoir' && !cond.shanoirField)) {
+                    errors.missingField = 'condition shanoirField';
+                }
+                if (rule.conditions?.find(cond => !cond.operation)) {
+                    errors.missingField = 'condition operation';
+                }      
+                if (rule.conditions?.find(cond => cond.values?.length <= 0)) {
+                    errors.missingField = 'condition values';
+                }                     
+                if (rule.assignments?.find(ass => !ass.field)) {
+                    errors.missingField = 'assignment field';
+                }
+                if (rule.assignments?.find(ass => !ass.value)) {
+                    errors.missingField = 'assignment value';
                 }
                 if (!rule.assignments || rule.assignments.length == 0) {
                     errors.noAssignment = true;
                 }
             });
         }
+
         return errors;
     }
 

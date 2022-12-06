@@ -12,38 +12,90 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span>if</span>
+<span>if &nbsp;</span>
 <ng-container *ngIf="mode == 'view'">
-    <span class="var" title="{{condition.dicomTag | dicomTagLabel}}">{{condition.dicomTag.label ? condition.dicomTag.label : condition.dicomTag.code}}</span>
+    <span class="var" title="{{condition.dicomTag | dicomTagLabel}}">{{condition.dicomTag?.label ? condition.dicomTag.label : condition.dicomTag?.code}}</span>
     <span class="method">{{condition.operation}}</span>
-    <span class="value">"{{condition.dicomValue}}"</span>
+    <span class="value">
+        <div *ngFor="let value of condition.values">"{{value}}"</div>
+    </span>
 </ng-container>
 <ng-container *ngIf="mode != 'view'">
     <select-box 
+        class="type auto-width"
+        [ngModel]="condition.type" 
+        (ngModelChange)="onConditionTypeChange($event)" 
+        [options]="[{label: 'the DICOM field', value: 'dicom'}, {label: 'the Shanoir field', value: 'shanoir'}]"
+        [clear]="false">
+    </select-box>
+    <select-box 
+            *ngIf="condition.type == 'dicom'"
             class="var auto-width" 
             [class.error]="tagError"
             [(ngModel)]="condition.dicomTag" 
             (ngModelChange)="onConditionChange()" 
             [options]="tagOptions" 
             placeholder="select dicom tag" 
-            (focusout)="tagTouched = true">
+            (focusout)="tagTouched = true"
+            [clear]="false">
     </select-box>
     <select-box 
+            *ngIf="condition.type == 'shanoir'"
+            class="var auto-width" 
+            [class.error]="shanoirFieldError"
+            [(ngModel)]="condition.shanoirField" 
+            (userChange)="onFieldChange($event)" 
+            [options]="fieldOptions" 
+            placeholder="select shanoir metadata field" 
+            (focusout)="shanoirFieldTouched = true"
+            [clear]="false">
+    </select-box>
+    <select-box 
+            [readOnly]="!!shanoirFieldOptions"
             class="method auto-width"
             [class.error]="operationError"
             [(ngModel)]="condition.operation" 
             (ngModelChange)="onConditionChange()" 
             [optionArr]="operations" 
             placeholder="select operation" 
-            (focusout)="operationTouched = true">
+            (focusout)="operationTouched = true"
+            [clear]="false">
     </select-box>
-    <auto-ajust-input 
-            class="value"
-            [class.error]="valueError"
-            [(ngModel)]="condition.dicomValue" 
-            (ngModelChange)="onConditionChange()" 
-            placeholder="enter value" 
-            (focusout)="valueTouched = true">
-    </auto-ajust-input>
+    <span *ngIf="condition.type == 'dicom' || !(shanoirFieldOptions?.length > 0)" class="multi-value">
+        <span *ngFor="let value of condition.values; let i  = index; trackBy: trackByFn" class="one-value">
+            <auto-ajust-input 
+                    class="value"
+                    [class.error]="valueError"
+                    [(ngModel)]="condition.values[i]" 
+                    (ngModelChange)="onConditionChange()" 
+                    placeholder="enter value" 
+                    (focusout)="valueTouched = true">
+            </auto-ajust-input>
+            <span *ngIf="condition.values.length > 1" class="delete-value" (click)="onTextValueRemove(i)"><i class="far fa-times-circle"></i></span>
+        </span>
+        <div *ngIf="condition.values[condition.values.length - 1]" class="add-cond-value-frame">
+            <span class="add-cond-value" (click)="condition.values?.push(null)">
+                <i class="fa-solid fa-circle-plus"></i>Add a possible value
+            </span>
+        </div>
+    </span>
+    <span *ngIf="condition.type == 'shanoir' && (shanoirFieldOptions?.length > 0)" class="multi-value">
+        <select-box 
+                *ngFor="let value of condition.values; let i  = index"
+                class="value auto-width one-value" 
+                [(ngModel)]="condition.values[i]" 
+                (ngModelChange)="onConditionValueChange($event, i)" 
+                (selectOption)="onConditionOptionSelect($event)" 
+                (onUserClear)="onConditionOptionUnselect($event)" 
+                [options]="shanoirFieldOptions" 
+                placeholder="select value" 
+                (focusout)="valueTouched = true">
+        </select-box>
+        <div *ngIf="condition.values[condition.values.length - 1] && condition.values.length < shanoirFieldOptions.length" class="add-cond-value-frame">
+            <span class="add-cond-value" (click)="condition.values?.push(null)">
+                <i class="fa-solid fa-plus"></i>Add a possible value
+            </span>
+        </div>
+    </span>
 </ng-container>
 <span *ngIf="mode != 'view'" class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>
