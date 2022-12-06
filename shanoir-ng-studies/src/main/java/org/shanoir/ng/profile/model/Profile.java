@@ -15,14 +15,13 @@
 package org.shanoir.ng.profile.model;
 
 
-import javax.persistence.*;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.hateoas.HalEntity;
-
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.validation.Unique;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
 
 /**
  * Profile

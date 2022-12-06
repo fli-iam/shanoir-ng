@@ -14,13 +14,8 @@
 
 package org.shanoir.ng.profile.repository;
 
-import java.util.List;
-
 import org.shanoir.ng.profile.model.Profile;
-import org.shanoir.ng.shared.core.model.IdName;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for profiles.
