@@ -221,9 +221,8 @@ public class StudyCardProcessingService {
 		for (StudyCardCondition condition : conditions) {
 			boolean conditionVerifiedOnAtLeastOneAcquisition = false;
 			for (DatasetAcquisition acquisition: acquisitions) {
-				int getDicomTagOrField = condition.getDicomTagOrField();
 				// A) check for a dicom tag using a metadata call to the pacs
-				if (Field.getEnum(getDicomTagOrField) == null) {
+				if (condition.getDicomTag() != null) {
 					if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
 						Dataset refDataset = acquisition.getDatasets().get(0);
 						Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
@@ -251,9 +250,8 @@ public class StudyCardProcessingService {
 	private boolean conditionsFulfilledOnAllAcquisitions(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions, StudyCardOnStudyResult result) {
 		for (StudyCardCondition condition : conditions) {
 			for (DatasetAcquisition acquisition: acquisitions) {
-				int getDicomTagOrField = condition.getDicomTagOrField();
 				// A) check for a dicom tag using a metadata call to the pacs
-				if (Field.getEnum(getDicomTagOrField) == null) {
+				if (condition.getDicomTag() != null) {
 					if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
 						Dataset refDataset = acquisition.getDatasets().get(0);
 						Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
@@ -279,9 +277,8 @@ public class StudyCardProcessingService {
 			for (DatasetAcquisition acquisition: acquisitions) {
 				if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
 					for (Dataset dataset : acquisition.getDatasets()) {
-						int getDicomTagOrField = condition.getDicomTagOrField();
 						// A) check for a dicom tag using a metadata call to the pacs
-						if (Field.getEnum(getDicomTagOrField) == null) {
+						if (condition.getDicomTag() != null) {
 							Attributes dicomAttributes = getDicomAttributesForDataset(dataset);
 							if (!dicomConditionFulfilled(condition, dicomAttributes)) {
 								result.setResultDatasetLevel(logConditionError(condition));														
@@ -325,8 +322,7 @@ public class StudyCardProcessingService {
 	}
 	
 	private boolean entityConditionFulfilled(StudyCardCondition condition, DatasetAcquisition acquisition) {
-		int fieldId = condition.getDicomTagOrField();
-		Field field = Field.getEnum(fieldId);
+		Field field = condition.getShanoirField();
 		if (field != null) {
 			String valueFromDb = field.get(acquisition);
 			if (valueFromDb != null) {
@@ -348,7 +344,7 @@ public class StudyCardProcessingService {
 	private boolean dicomConditionFulfilled(StudyCardCondition condition, Attributes dicomAttributes) {
 		LOG.info("conditionFulfilled: " + condition.getId() + " processing one condition with all its values: ");
 		condition.getValues().stream().forEach(s -> LOG.info(s.getValue()));
-		VR tagVr = StandardElementDictionary.INSTANCE.vrOf(condition.getDicomTagOrField());
+		VR tagVr = StandardElementDictionary.INSTANCE.vrOf(condition.getDicomTag());
 		DicomTagType tagType = DicomTagType.valueOf(tagVr);
 		// get all possible values, that can fulfill the condition
 		for (StudyCardConditionValue value : condition.getValues()) {
@@ -356,19 +352,19 @@ public class StudyCardProcessingService {
 			if (tagType.isNumerical()) {
 				if (!condition.getOperation().isNumerical()) {
 					throw new IllegalArgumentException("Study card processing : operation " + condition.getOperation() + " is not compatible with dicom tag " 
-							+ condition.getDicomTagOrField() + " of type " + tagType + "(condition id : " + condition.getId() + ")");
+							+ condition.getDicomTag() + " of type " + tagType + "(condition id : " + condition.getId() + ")");
 				}
 				BigDecimal scValue = new BigDecimal(value.getValue());
 				Integer comparison = null;
 				if (DicomTagType.Float.equals(tagType)) {
-					Float floatValue = dicomAttributes.getFloat(condition.getDicomTagOrField(), Float.MIN_VALUE);			
+					Float floatValue = dicomAttributes.getFloat(condition.getDicomTag(), Float.MIN_VALUE);			
 					comparison = BigDecimal.valueOf(floatValue).compareTo(scValue);
 				// There is no dicomAttributes.getLong() !
 				}	else if (DicomTagType.Double.equals(tagType) || DicomTagType.Long.equals(tagType)) {
-					Double doubleValue = dicomAttributes.getDouble(condition.getDicomTagOrField(), Double.MIN_VALUE);			
+					Double doubleValue = dicomAttributes.getDouble(condition.getDicomTag(), Double.MIN_VALUE);			
 					comparison = BigDecimal.valueOf(doubleValue).compareTo(scValue);
 				} else if (DicomTagType.Integer.equals(tagType)) {
-					Integer integerValue = dicomAttributes.getInt(condition.getDicomTagOrField(), Integer.MIN_VALUE);
+					Integer integerValue = dicomAttributes.getInt(condition.getDicomTag(), Integer.MIN_VALUE);
 					comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
 				}
 				if (comparison != null && numericalCompare(condition.getOperation(), comparison)) {
@@ -377,11 +373,11 @@ public class StudyCardProcessingService {
 			} else if (tagType.isTextual()) {
 				if (!condition.getOperation().isTextual()) {
 					throw new IllegalArgumentException("Study card processing : operation " + condition.getOperation() + " is not compatible with dicom tag " 
-							+ condition.getDicomTagOrField() + " of type " + tagType + "(condition id : " + condition.getId() + ")");
+							+ condition.getDicomTag() + " of type " + tagType + "(condition id : " + condition.getId() + ")");
 				}	
-				String stringValue = dicomAttributes.getString(condition.getDicomTagOrField());
+				String stringValue = dicomAttributes.getString(condition.getDicomTag());
 				if (stringValue == null) {
-					LOG.warn("Could not find a value in the dicom for the tag " + condition.getDicomTagOrField());
+					LOG.warn("Could not find a value in the dicom for the tag " + condition.getDicomTag());
 					return false;
 				}				
 				if (textualCompare(condition.getOperation(), stringValue, value.getValue())) {
@@ -444,11 +440,10 @@ public class StudyCardProcessingService {
 	
 	private String logConditionError(StudyCardCondition condition) {
 		String dicomTagDescriptionOrFieldName = "unknownDicomTagDescriptionOrFieldName";
-		Field field = Field.getEnum(condition.getDicomTagOrField());
-		if (field == null) { // DICOM tag case
-			dicomTagDescriptionOrFieldName = Keyword.valueOf(condition.getDicomTagOrField());
+		if (condition.getDicomTag() != null) { // DICOM tag case
+			dicomTagDescriptionOrFieldName = Keyword.valueOf(condition.getDicomTag());
 		} else { // Field case
-			dicomTagDescriptionOrFieldName = field.name();
+			dicomTagDescriptionOrFieldName = condition.getShanoirField().name();
 		}
 		String values = condition.getValues().stream().map(v -> v.getValue()).collect(Collectors.joining(","));
 		return "Error with condition: " + dicomTagDescriptionOrFieldName + ", "

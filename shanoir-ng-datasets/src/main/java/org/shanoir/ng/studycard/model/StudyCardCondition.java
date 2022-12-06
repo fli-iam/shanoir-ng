@@ -23,17 +23,21 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.Check;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 @Entity
+@Check(constraints = "(dicomTag IS NOT NULL AND shanoirField IS NULL) OR (dicomTag IS NULL AND shanoirField IS NOT NULL)") 
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class StudyCardCondition extends AbstractEntity {
 
 	/** UID */
 	private static final long serialVersionUID = 6708177853555591193L;
 	
-	private int dicomTagOrField;
+	private Integer dicomTag;
+	
+    private Integer shanoirField;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="condition_id")
@@ -42,13 +46,22 @@ public class StudyCardCondition extends AbstractEntity {
 	@NotNull
 	private int operation;
 	
-	public int getDicomTagOrField() {
-		return dicomTagOrField;
+	public Integer getDicomTag() {
+		return dicomTag;
 	}
 
-	public void setDicomTagOrField(int dicomTagOrField) {
-		this.dicomTagOrField = dicomTagOrField;
+	public void setDicomTag(Integer dicomTag) {
+		this.dicomTag = dicomTag;
 	}
+	
+	public Field getShanoirField() {
+        if (shanoirField == null) return null;
+        else return Field.getEnum(shanoirField.intValue());
+    }
+
+    public void setShanoirField(Field field) {
+        this.shanoirField = Integer.valueOf(field.getId());
+    }
 
 	public Operation getOperation() {
 		return Operation.getType(operation);
