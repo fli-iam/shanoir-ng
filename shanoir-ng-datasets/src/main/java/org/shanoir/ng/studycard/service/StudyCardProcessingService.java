@@ -44,9 +44,10 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.quality.QualityTag;
+import org.shanoir.ng.shared.quality.SubjectStudyQualityTagDTO;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.studycard.dto.StudyCardOnStudyResult;
-import org.shanoir.ng.studycard.dto.SubjectStudyStudyCardTag;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.shanoir.ng.studycard.model.Field;
 import org.shanoir.ng.studycard.model.Operation;
@@ -148,7 +149,7 @@ public class StudyCardProcessingService {
 		final List<StudyCardRule> rules = studyCard.getRules();
 		if (CollectionUtils.isNotEmpty(rules)) {
 			final List<StudyCardOnStudyResult> studyCardOnStudyResultList = new ArrayList<StudyCardOnStudyResult>();
-			final List<SubjectStudyStudyCardTag> subjectStudyStudyCardTagList = new ArrayList<SubjectStudyStudyCardTag>();
+			final List<SubjectStudyQualityTagDTO> subjectStudyQualityTagList = new ArrayList<SubjectStudyQualityTagDTO>();
 			final List<SubjectStudy> subjectStudyList = subjectStudyRepository.findByStudyId(studyCard.getStudyId());
 			for (SubjectStudy subjectStudy : subjectStudyList) {
 				final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectStudy.getSubject().getId(), studyCard.getStudyId());
@@ -165,8 +166,8 @@ public class StudyCardProcessingService {
 						LOG.info(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
 						LOG.info(rules.size() + " rules found for study card with id: " + studyCard.getId() + " and name: " + studyCard.getName());
 						boolean allRulesFulFilled = true;
-						SubjectStudyStudyCardTag subjectStudyStudyCardTag = new SubjectStudyStudyCardTag();
-						subjectStudyStudyCardTag.setId(subjectStudy.getId());
+						SubjectStudyQualityTagDTO subjectStudyQualityTag = new SubjectStudyQualityTagDTO();
+						subjectStudyQualityTag.setSubjectStudyId(subjectStudy.getId());
 						for (StudyCardRule rule : rules) {
 							if (rule.getType() == StudyCardRuleType.EXAMINATION.getId()) {
 								if (!conditionsFulfilledOnAtLeastOneAcquisition(rule.getConditions(), acquisitions, result)) {
@@ -183,18 +184,18 @@ public class StudyCardProcessingService {
 							}
 						}
 						if (allRulesFulFilled) {
-							subjectStudyStudyCardTag.setType(1);
+						    subjectStudyQualityTag.setTag(QualityTag.VALID);
 						} else {
-							subjectStudyStudyCardTag.setType(3);
+						    subjectStudyQualityTag.setTag(QualityTag.ERROR);
 						}
 						studyCardOnStudyResultList.add(result);
-						subjectStudyStudyCardTagList.add(subjectStudyStudyCardTag);
+						subjectStudyQualityTagList.add(subjectStudyQualityTag);
 					}				
 				}
 			}
 			try {
 				rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG,
-						objectMapper.writeValueAsString(subjectStudyStudyCardTagList));
+						objectMapper.writeValueAsString(subjectStudyQualityTagList));
 			} catch (AmqpException | JsonProcessingException e) {
 				throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.");
 			}
