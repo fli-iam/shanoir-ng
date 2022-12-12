@@ -33,7 +33,6 @@ public class AccountRequestInfo extends AbstractEntity {
 	 */
 	private static final long serialVersionUID = -1062233564645766489L;
 
-	@NotNull
 	private String contact;
 
 	@NotNull
