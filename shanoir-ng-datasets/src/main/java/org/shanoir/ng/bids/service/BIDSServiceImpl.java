@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -203,8 +204,8 @@ public class BIDSServiceImpl implements BIDSService {
 	@Override
 	public File exportAsBids(final Long studyId, String studyName) throws IOException {
 		// Get folder
-		studyName = studyName.replaceAll(" ", "-");
-		studyName = studyName.replaceAll("_", "-");
+		studyName = studyName.replaceAll(" ", "");
+		studyName = studyName.replaceAll("_", "");
 		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
 		File workFolder = new File(tmpFilePath);
 		if (workFolder.exists()) {
@@ -317,8 +318,8 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private File createSubjectFolder(String subjectName, final int index, final File baseDir) throws IOException {
 		// Generate another ID here ?
-		subjectName = subjectName.replaceAll(" ", "-");
-		subjectName = subjectName.replaceAll("_", "-");
+		subjectName = subjectName.replaceAll(" ", "");
+		subjectName = subjectName.replaceAll("_", "");
 
 		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + "-" + subjectName);
 		if (!subjectFolder.exists()) {
@@ -372,8 +373,8 @@ public class BIDSServiceImpl implements BIDSService {
 		String sessionLabel = "" + examination.getId();
 		sessionLabel += (examination.getComment() != null ? "-" + examination.getComment() : "");
 		
-		sessionLabel = sessionLabel.replaceAll(" ", "-");
-		sessionLabel = sessionLabel.replaceAll("_", "-");
+		sessionLabel = sessionLabel.replaceAll(" ", "");
+		sessionLabel = sessionLabel.replaceAll("_", "");
 		
 		// Write the session file
 		StringBuilder buffer = new StringBuilder();
@@ -454,6 +455,8 @@ public class BIDSServiceImpl implements BIDSService {
 		// Copy dataset files in the directory AS hard link to avoid duplicating files
 		List<URL> pathURLs = new ArrayList<>();
 		getDatasetFilePathURLs(dataset, pathURLs, null);
+		
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss");
 
 		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
@@ -468,8 +471,8 @@ public class BIDSServiceImpl implements BIDSService {
 				// Add the file to the scans.tsv reference
 				File scansTsvFile = getScansFile(workDir, subjectName);
 				StringBuilder buffer = new StringBuilder();
-				buffer.append(pathToGo.getFileName()).append(TABULATION)
-				.append(dataset.getDatasetAcquisition().getExamination().getExaminationDate()).append(TABULATION)
+				buffer.append(pathToGo.getParent().getFileName() + File.separator + pathToGo.getFileName()).append(TABULATION)
+				.append(format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate())).append(TABULATION)
 				.append(dataset.getDatasetAcquisition().getExamination().getId())
 				.append(NEW_LINE);
 
@@ -490,6 +493,8 @@ public class BIDSServiceImpl implements BIDSService {
 
 	private File getScansFile(File parentFile, String subjectName) throws IOException {
 		String fileName = parentFile.getName() + SCANS_FILE_EXTENSION;
+		subjectName = subjectName.replaceAll(" ", "");
+		subjectName = subjectName.replaceAll("_", "");
 		if (!parentFile.getName().contains(subjectName)) {
 			fileName = SUBJECT_PREFIX + subjectName + "_" + parentFile.getName() + SCANS_FILE_EXTENSION;
 		}
@@ -689,8 +694,8 @@ public class BIDSServiceImpl implements BIDSService {
 
 		for (Subject subject : subjs) {
 			String subjectName = subject.getName();
-			subjectName = subjectName.replaceAll(" ", "-");
-			subjectName = subjectName.replaceAll("_", "-");
+			subjectName = subjectName.replaceAll(" ", "");
+			subjectName = subjectName.replaceAll("_", "");
 			// Write in the file the values
 			buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
 			.append(subject.getId()).append(CSV_SEPARATOR)
