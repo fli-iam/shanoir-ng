@@ -201,8 +201,10 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @throws IOException
 	 */
 	@Override
-	public File exportAsBids(final Long studyId, final String studyName) throws IOException {
+	public File exportAsBids(final Long studyId, String studyName) throws IOException {
 		// Get folder
+		studyName = studyName.replaceAll(" ", "-");
+		studyName = studyName.replaceAll("_", "-");
 		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
 		File workFolder = new File(tmpFilePath);
 		if (workFolder.exists()) {
@@ -313,10 +315,12 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @return the newly created folder
 	 * @throws IOException
 	 */
-	private File createSubjectFolder(final String subjectName, final int index, final File baseDir) throws IOException {
+	private File createSubjectFolder(String subjectName, final int index, final File baseDir) throws IOException {
 		// Generate another ID here ?
-		
-		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + "_" + subjectName);
+		subjectName = subjectName.replaceAll(" ", "-");
+		subjectName = subjectName.replaceAll("_", "-");
+
+		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + "-" + subjectName);
 		if (!subjectFolder.exists()) {
 			subjectFolder.mkdirs();
 		}
@@ -367,6 +371,9 @@ public class BIDSServiceImpl implements BIDSService {
 	private File createExaminationFolder(final Examination examination, final File subjectDir, File sessionFile) throws IOException {
 		String sessionLabel = "" + examination.getId();
 		sessionLabel += (examination.getComment() != null ? "-" + examination.getComment() : "");
+		
+		sessionLabel = sessionLabel.replaceAll(" ", "-");
+		sessionLabel = sessionLabel.replaceAll("_", "-");
 		
 		// Write the session file
 		StringBuilder buffer = new StringBuilder();
@@ -681,8 +688,11 @@ public class BIDSServiceImpl implements BIDSService {
 		buffer.append(CSV_SPLITTER);
 
 		for (Subject subject : subjs) {
+			String subjectName = subject.getName();
+			subjectName = subjectName.replaceAll(" ", "-");
+			subjectName = subjectName.replaceAll("_", "-");
 			// Write in the file the values
-			buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subject.getName()).append(CSV_SEPARATOR)
+			buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
 			.append(subject.getId()).append(CSV_SEPARATOR)
 			.append(CSV_SPLITTER);
 		}
