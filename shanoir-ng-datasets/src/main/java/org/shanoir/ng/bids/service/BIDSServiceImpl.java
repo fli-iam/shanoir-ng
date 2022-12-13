@@ -443,7 +443,7 @@ public class BIDSServiceImpl implements BIDSService {
 						}
 					}
 				}
-			}			
+			}
 			// default case, dataFolder is still null => undefined folder
 			if (dataFolder == null) {
 				dataFolder = createDataFolder("undefined", workDir);
@@ -451,7 +451,10 @@ public class BIDSServiceImpl implements BIDSService {
 		} else if (dataset instanceof BidsDataset) {
 			BidsDataset bidsdataset = (BidsDataset) dataset;
 			dataFolder = createDataFolder(bidsdataset.getBidsDataType(), workDir);
+		} else {
+			dataFolder = createDataFolder("undefined", workDir);
 		}
+
 		// Copy dataset files in the directory AS hard link to avoid duplicating files
 		List<URL> pathURLs = new ArrayList<>();
 		getDatasetFilePathURLs(dataset, pathURLs, null);
