@@ -10,9 +10,12 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -22,6 +25,7 @@ import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataSetDescription;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.dataset.modality.MrDatasetNature;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -107,6 +111,18 @@ public class BIDSServiceImpl implements BIDSService {
 			PARTICIPANT_ID,
 			SUBJECT_IDENTIFIER
 	};
+
+    private static final Map<String, String> natureMap;
+    static {
+        Map<String, String> aMap = new HashMap<>();
+        aMap.put(MrDatasetNature.T1_WEIGHTED_MR_DATASET.name(), "T1w");
+        aMap.put(MrDatasetNature.T2_WEIGHTED_MR_DATASET.name(), "T2w");
+        aMap.put(MrDatasetNature.T2_STAR_WEIGHTED_MR_DATASET.name(), "T2starw");
+        aMap.put(MrDatasetNature.PROTON_DENSITY_WEIGHTED_MR_DATASET.name(), "PDw");
+        aMap.put(MrDatasetNature.H1_SPECTROSCOPIC_IMAGING_DATASET.name(), "UNIT1");
+        aMap.put(MrDatasetNature.VELOCITY_ENCODED_ANGIO_MR_DATASET.name(), "angio");
+        natureMap = Collections.unmodifiableMap(aMap);
+    }
 
 	@Value("${bids-data-folder}")
 	private String bidsStorageDir;
@@ -400,9 +416,14 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @return A list of newly created specific BIDS files associated to the dataset in entry
 	 * @throws IOException when we fail to create a file
 	 */
-	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
+	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, String subjectName) throws IOException {
 		File dataFolder = null;
-
+		
+		String nature = null;
+		subjectName = subjectName.replaceAll(" ", "");
+		subjectName = subjectName.replaceAll("_", "");
+		String datasetFilePrefix = workDir.getName();
+		
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
 			dataFolder = createDataFolder("eeg", workDir);
@@ -412,6 +433,8 @@ public class BIDSServiceImpl implements BIDSService {
 		} else if (dataset instanceof PetDataset) {
 			dataFolder = createDataFolder("pet", workDir);
 		} else if (dataset instanceof MrDataset) {
+			MrDataset mrDataset = (MrDataset) dataset;
+			nature = mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();
 			// Here we want to know whether we have anat/func/dwi/fmap
 			// We base ourselves on SeriesDescription here
 			MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
@@ -464,8 +487,12 @@ public class BIDSServiceImpl implements BIDSService {
 		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
 			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
+			String fileName = datasetFilePrefix + "_";
+			if (nature != null) {
+				fileName += natureMap.get(nature);
+			}
 
-			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + srcFile.getName());
+			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + fileName);
 			try {
 				// Use link to avoid file duplication
 				deleteIfExists(pathToGo.toAbsolutePath().toString());
