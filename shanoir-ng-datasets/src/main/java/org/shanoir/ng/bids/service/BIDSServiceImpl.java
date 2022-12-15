@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -434,7 +434,11 @@ public class BIDSServiceImpl implements BIDSService {
 			dataFolder = createDataFolder("pet", workDir);
 		} else if (dataset instanceof MrDataset) {
 			MrDataset mrDataset = (MrDataset) dataset;
-			nature = mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();
+			if (mrDataset.getUpdatedMrMetadata() != null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
+				nature = mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();
+			} else if (mrDataset.getOriginMrMetadata() != null && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
+				nature = mrDataset.getOriginMrMetadata().getMrDatasetNature().name();
+			}
 			// Here we want to know whether we have anat/func/dwi/fmap
 			// We base ourselves on SeriesDescription here
 			MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
@@ -482,7 +486,7 @@ public class BIDSServiceImpl implements BIDSService {
 		List<URL> pathURLs = new ArrayList<>();
 		getDatasetFilePathURLs(dataset, pathURLs, null);
 		
-		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-ddTHH:mm:ss");
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
 
 		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
@@ -490,7 +494,10 @@ public class BIDSServiceImpl implements BIDSService {
 			String fileName = datasetFilePrefix + "_";
 			if (nature != null) {
 				fileName += natureMap.get(nature);
+				fileName += "_";
 			}
+
+			fileName += srcFile.getName();
 
 			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + fileName);
 			try {
@@ -502,7 +509,7 @@ public class BIDSServiceImpl implements BIDSService {
 				File scansTsvFile = getScansFile(workDir, subjectName);
 				StringBuilder buffer = new StringBuilder();
 				buffer.append(pathToGo.getParent().getFileName() + File.separator + pathToGo.getFileName()).append(TABULATION)
-				.append(format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate())).append(TABULATION)
+				.append(format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate().atStartOfDay())).append(TABULATION)
 				.append(dataset.getDatasetAcquisition().getExamination().getId())
 				.append(NEW_LINE);
 
