@@ -605,26 +605,5 @@ public class EmailServiceImpl implements EmailService {
 		LOG.info("Sending study-users REFUSED mail to {} for study {}", user.getUsername(), refusedRequest.getStudyId());
 		mailSender.send(messagePreparator);
 	}
-	
-	@Override
-	public void notifyUserAddedToStudy(AccessRequest acceptedRequest) {
-		User user = acceptedRequest.getUser();
-		
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(user.getEmail());
-			messageHelper.setSubject("[Shanoir] Access to study " + acceptedRequest.getStudyName());
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put(FIRSTNAME, user.getFirstName());
-			variables.put(LASTNAME, user.getLastName());
-			variables.put(STUDY_NAME, acceptedRequest.getStudyName());
-			final String content = build("notifyUserAddedToStudy", variables);
-			LOG.info(content);
-			messageHelper.setText(content, true);
-		};
-		// Send the message
-		LOG.info("Sending study-users-added mail to {} for study {}", user.getUsername(), acceptedRequest.getStudyId());
-		mailSender.send(messagePreparator);
-	}
+
 }

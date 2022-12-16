@@ -154,12 +154,6 @@ public class AccessRequestApiController implements AccessRequestApi {
 					ShanoirEvent.SUCCESS);
 
 			this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
-
-			StudyInvitationEmail email = new StudyInvitationEmail();
-			email.setInvitedMail(resolvedRequest.getUser().getEmail());
-			email.setStudyId(resolvedRequest.getStudyId().toString());
-			email.setStudyName(resolvedRequest.getStudyName());
-			emailService.notifyUserAddedToStudy(resolvedRequest);
 		} else {
 			emailService.notifyUserRefusedFromStudy(resolvedRequest);
 			// Deny account request creation
@@ -209,7 +203,6 @@ public class AccessRequestApiController implements AccessRequestApi {
 				request.setMotivation("From study manager");
 				request.setStatus(AccessRequest.APPROVED);
 				this.accessRequestService.createAllowed(request);
-				this.emailService.notifyUserAddedToStudy(request);
 				return new ResponseEntity<String>("User " + user.get().getUsername() + " was added to the study with success", HttpStatus.OK);
 			} else {
 				return new ResponseEntity<String>("User " + user.get().getUsername() + " exists but could not be added to this study. Please contact an administrator", HttpStatus.OK);

@@ -222,7 +222,6 @@ public class AccessRequestApiControllerTest {
 		Mockito.verify(this.userService).confirmAccountRequest(user);
 		Mockito.verify(this.rabbitTemplate).convertSendAndReceive(
 				Mockito.eq(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE), Mockito.anyString());
-		Mockito.verify(emailService).notifyUserAddedToStudy(request);
 	}
 
 	@Test
@@ -243,7 +242,6 @@ public class AccessRequestApiControllerTest {
 		Mockito.verifyNoInteractions(this.userService);
 		Mockito.verify(this.rabbitTemplate).convertSendAndReceive(
 				Mockito.eq(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE), Mockito.anyString());
-		Mockito.verify(emailService).notifyUserAddedToStudy(request);
 	}
 
 	@Test
@@ -324,7 +322,6 @@ public class AccessRequestApiControllerTest {
 		ArgumentCaptor<AccessRequest> requestCaptor = ArgumentCaptor.forClass(AccessRequest.class);
 		
 		Mockito.verify(this.accessRequestService).createAllowed(requestCaptor.capture());
-		Mockito.verify(this.emailService).notifyUserAddedToStudy(Mockito.any(AccessRequest.class));
 		
 		AccessRequest request = requestCaptor.getValue();
 		

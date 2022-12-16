@@ -139,12 +139,6 @@ public interface EmailService {
 	void notifyStudyManagerAccessRequest(AccessRequest createdRequest) throws ShanoirException;
 
 	/**
-	 * Notify a user its study request was accepted
-	 * @param accessRequest the access request
-	 */
-	void notifyUserAddedToStudy(AccessRequest acceptedRequest);
-
-	/**
 	 * Notify a user its study request was refused
 	 * @param accessRequest the access request
 	 */
