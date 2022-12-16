@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -41,6 +41,7 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
+import {Profile} from "../../shared/models/profile.model";
 
 @Component({
     selector: 'study-detail',
@@ -61,27 +62,28 @@ export class StudyComponent extends EntityComponent<Study> {
     selectedCenter: IdName;
     users: User[] = [];
     studyNode: Study | StudyNode;
-    
+
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
-    
+
     public openPrefix: boolean = false;
 
     centerOptions: Option<IdName>[];
+    profileOptions: Option<Profile>[];
     studyStatusOptions: Option<string>[] = [
         new Option<string>('IN_PROGRESS', 'In Progress'),
         new Option<string>('FINISHED', 'Finished')
     ];
 
     constructor(
-            private route: ActivatedRoute, 
-            private centerService: CenterService, 
-            private studyService: StudyService, 
+            private route: ActivatedRoute,
+            private centerService: CenterService,
+            private studyService: StudyService,
             private subjectService: SubjectService,
-            private userService: UserService,  
+            private userService: UserService,
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService) {
 
@@ -92,7 +94,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public get study(): Study { return this.entity; }
     public set study(study: Study) {
         this.studyNode = this.breadcrumbsService.currentStep.data.studyNode ? this.breadcrumbsService.currentStep.data.studyNode : study;
-        this.entity = study; 
+        this.entity = study;
     }
 
     getService(): EntityService<Study> {
@@ -105,6 +107,11 @@ export class StudyComponent extends EntityComponent<Study> {
         })
         let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => {
             this.study = study;
+            if (this.study.profile == null) {
+                let pro = new Profile();
+                pro.profileName = "Profile Neurinfo";
+                this.study.profile = pro;
+            }
             this.study.subjectStudyList = this.study.subjectStudyList.sort(
                 function(a: SubjectStudy, b:SubjectStudy) {
                     let aname = a.subjectStudyIdentifier ? a.subjectStudyIdentifier : a.subject.name;
@@ -126,9 +133,18 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
-        let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => this.study = study);
+        let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => {
+            this.study = study;
+
+            if (this.study.profile == null) {
+              let profile = new Profile();
+              profile.profileName = "Profile Neurinfo";
+              this.study.profile = profile;
+            }
+            return study;
+        });
         this.getSubjects();
-        
+
         this.protocolFiles = [];
 
         Promise.all([
@@ -137,7 +153,7 @@ export class StudyComponent extends EntityComponent<Study> {
         ]).then(([study, users]) => {
             Study.completeMembers(study, users);
         });
-        
+
         Promise.all([
             studyPromise,
             this.getCenters()
@@ -150,6 +166,7 @@ export class StudyComponent extends EntityComponent<Study> {
     async initCreate(): Promise<void> {
         this.study = this.newStudy();
         this.getCenters();
+        this.getProfiles();
         this.selectedCenter = null;
         this.protocolFiles = [];
         this.dataUserAgreement = null;
@@ -176,6 +193,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'startDate': [this.study.startDate, [DatepickerComponent.validator]],
             'endDate': [this.study.endDate, [DatepickerComponent.validator, this.dateOrdervalidator]],
             'studyStatus': [this.study.studyStatus, [Validators.required]],
+            'profile': [this.study.profile, [Validators.required]],
             'withExamination': [this.study.withExamination],
             'clinical': [this.study.clinical],
             'visibleByDefault': [this.study.visibleByDefault],
@@ -238,7 +256,20 @@ export class StudyComponent extends EntityComponent<Study> {
                 }
             });
     }
-        
+
+    private getProfiles() {
+      return this.studyService
+        .getStudiesProfiles()
+        .then(profiles => {
+          this.profileOptions = [];
+          if (profiles) {
+            profiles.forEach(profile => {
+              this.profileOptions.push(new Option<Profile>(profile, profile.profileName));
+            });
+          }
+        });
+    }
+
     private getSubjects(): void {
         this.subjectService
             .getSubjectsNames()
@@ -248,13 +279,13 @@ export class StudyComponent extends EntityComponent<Study> {
                 });
         });
     }
-    
+
     /** Center section management  **/
     onMonoMultiChange() {
         if (this.study.monoCenter && this.study.studyCenterList.length >= 1) {
             this.study.studyCenterList = [this.study.studyCenterList[0]];
             let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
-            if (option) this.selectedCenter = option.value; 
+            if (option) this.selectedCenter = option.value;
         }
     }
 
@@ -270,7 +301,6 @@ export class StudyComponent extends EntityComponent<Study> {
             studyCenter.center.name = this.selectedCenter.name;
             this.study.studyCenterList.push(studyCenter);
             this.study.studyCenterList = [...this.study.studyCenterList];
-
             this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         }
         this.form.get('studyCenterList').markAsDirty();
@@ -278,11 +308,11 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     onCenterChange(center: IdName): void {
-        this.selectedCenter = center;
-        if (this.study.monoCenter) {
-            this.study.studyCenterList = []
-            this.onCenterAdd();
-        }
+      this.selectedCenter = center;
+      if (this.study.monoCenter) {
+        this.study.studyCenterList = []
+        this.onCenterAdd();
+      }
     }
 
     onPrefixChange() {
@@ -308,11 +338,11 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
     }
-    
+
     enableAddIcon(): boolean {
         return this.selectedCenter && !this.isCenterAlreadyLinked(this.selectedCenter.id)
             && (!this.study.monoCenter || !this.study.studyCenterList || this.study.studyCenterList.length == 0);
-    }    
+    }
 
     isCenterAlreadyLinked(centerId: number): boolean {
         if (!this.study.studyCenterList) return false;
@@ -341,13 +371,13 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     studyStatusStr(studyStatus: string) {
-        return capitalsAndUnderscoresToDisplayable(studyStatus);
+      return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
     public click() {
         this.fileInput.nativeElement.click();
     }
-    
+
     public duaClick() {
         this.duaFileInput.nativeElement.click();
     }
@@ -358,7 +388,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
-    
+
     deleteFile(file: any): void {
         this.openDeleteConfirmDialogFile(file)
     }
@@ -366,7 +396,7 @@ export class StudyComponent extends EntityComponent<Study> {
     openDeleteConfirmDialogFile = (file: string) => {
         this.confirmDialogService
             .confirm(
-                'Deleting ' + file, 
+                'Deleting ' + file,
                 'Are you sure you want to delete the file ' + file + ' ?'
             ).then(res => {
                 if (res) {
@@ -374,11 +404,11 @@ export class StudyComponent extends EntityComponent<Study> {
                 }
             })
     }
-    
+
     public setFile() {
         this.fileInput.nativeElement.click();
     }
-    
+
     public setDuaFile() {
         this.duaFileInput.nativeElement.click();
     }
@@ -394,15 +424,15 @@ export class StudyComponent extends EntityComponent<Study> {
         this.form.markAsDirty();
         this.form.updateValueAndValidity();
     }
-    
+
     public deleteDataUserAgreement() {
-        if (this.mode == 'create') { 
+        if (this.mode == 'create') {
             this.study.dataUserAgreementPaths = [];
             this.dataUserAgreement = null;
         } else if (this.mode == 'edit') {
             this.studyService.deleteFile(this.study.id, 'dua');
             this.study.dataUserAgreementPaths = [];
-            this.dataUserAgreement = null;           
+            this.dataUserAgreement = null;
         }
 
     }
@@ -444,7 +474,7 @@ export class StudyComponent extends EntityComponent<Study> {
         }).then(study => {
             this.studyCardService.getAllForStudy(study.id).then(studyCards => {
                 if (!studyCards || studyCards.length == 0) {
-                    this.confirmDialogService.confirm('Create a Study Card', 
+                    this.confirmDialogService.confirm('Create a Study Card',
                         'A study card is necessary in order to import datasets in this new study. Do you want to create a study card now ?')
                         .then(userChoice => {
                             if (userChoice) {
@@ -502,15 +532,15 @@ export class StudyComponent extends EntityComponent<Study> {
         studyNode.open = true;
         this.breadcrumbsService.currentStep.data.studyNode = studyNode;
     }
-   
+
     public hasDownloadRights(): boolean {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
 
     onTagListChange() {
         // hack : force change detection
-        this.study.tags = [].concat(this.study.tags); 
-        
+        this.study.tags = [].concat(this.study.tags);
+
         // hack : force change detection for the subject-study tag list
         this.study.subjectStudyList.forEach(subjStu => {
             subjStu.study.tags = this.study.tags;

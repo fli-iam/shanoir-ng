@@ -145,7 +145,7 @@ public class StudyServiceImpl implements StudyService {
 				studyCenter.setStudy(study);
 			}
 		}
-		
+
 		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 			subjectStudy.setStudy(study);
 		}
@@ -241,6 +241,7 @@ public class StudyServiceImpl implements StudyService {
 			studyDb.setChallenge(study.isChallenge());
 		}
 		studyDb.setName(study.getName());
+		studyDb.setProfile(study.getProfile());
 		studyDb.setStudyStatus(study.getStudyStatus());
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setWithExamination(study.isWithExamination());
