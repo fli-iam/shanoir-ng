@@ -50,7 +50,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
             }
 
     public changeStudy(studyId: number) {
-        this.accessRequest.studyName = this.studies[this.studies.findIndex(study => study.id = studyId)].name;
+        this.accessRequest.studyName = this.studies[this.studies.findIndex(study => study.id == studyId)].name;
     }
 
     getService(): EntityService<AccessRequest> {
