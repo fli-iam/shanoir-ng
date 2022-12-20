@@ -264,8 +264,36 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
 
     public inviteUser() {
         let stud = new IdName(this.study.id, this.study.name);
-        this.accessRequestService.inviteUser(this.invitationMail, stud).then(message => {
-            this.consoleService.log('info', "" + message);
+        this.accessRequestService.inviteUser(this.invitationMail, stud).then(request => {
+            if (!request) {
+                this.consoleService.log('info', "No user found with such email, an invitation was sent.");
+            } else {
+                this.addUser(request.user);
+            }
+        }).catch(exception =>  {
+            this.consoleService.log('error', "An internal error occured while adding the user. Please try again later or contact an administrator.");
         });
+    }
+
+    public addUser(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
+        let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
+        if (backedUpStudyUser) {
+            this.studyUserList.unshift(backedUpStudyUser);
+            this.pannelStudyUser = backedUpStudyUser;
+        } else {
+            let studyUser: StudyUser = new StudyUser();
+            studyUser.userId = selectedUser.id;
+            studyUser.userName = selectedUser.username;
+            studyUser.receiveStudyUserReport = false;
+            studyUser.receiveNewImportReport = false;
+            studyUser.studyUserRights = rights;
+            studyUser.completeMember(this.users);
+            this.studyUserList.unshift(studyUser);
+            this.pannelStudyUser = studyUser;
+        }
+        this.browserPaging.setItems(this.studyUserList);
+        this.table.refresh();
+        this.onChangeCallback(this.studyUserList);
+        this.onTouchedCallback();
     }
 }
