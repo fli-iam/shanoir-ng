@@ -18,6 +18,7 @@ import { IdName } from 'src/app/shared/models/id-name.model';
 
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
+import { UserService } from '../shared/user.service';
 import { AccessRequest } from './access-request.model';
 
 @Injectable()
@@ -35,12 +36,24 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
         super(http);
     }
 
-    public inviteUser(mail: string, study: IdName): Promise<Object> {
+    public inviteUser(mail: string, study: IdName): Promise<AccessRequest> {
         const formData: FormData = new FormData();
         formData.set("email", mail);
         formData.set("studyId", "" + study.id);
         formData.set("studyName", study.name);
-        return this.http.put(this.API_URL + "/invitation/", formData, {responseType:"text"}).toPromise();
+        return this.http.put(this.API_URL + "/invitation/", formData).toPromise()
+            .then(response =>
+            {
+                if (response){
+                    return this.mapEntity(response);
+                }
+                return null;
+            });
+
+    }
+
+    public findByStudy(studyId: number): Promise<AccessRequest[]> {
+        return this.http.get<AccessRequest[]>(this.API_URL+"/byStudy/" + studyId).toPromise();
     }
 
     public resolveRequest(id: number, value:boolean): Promise<Object> {

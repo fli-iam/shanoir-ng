@@ -24,7 +24,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
            <span>Invite a new user using its email.</span>
            <tool-tip>If an user with such email already exists, he will be directly added to the study, otherwise an email with an invitation will be sent.</tool-tip><br/>
            <input type="text" [(ngModel)]="invitationMail">
-           <button (click)="inviteUser()">Invite</button><br/>
+           <button type="button" (click)="inviteUser()">Invite</button><br/>
     </li>
 	<li>
 		<shanoir-table #memberTable

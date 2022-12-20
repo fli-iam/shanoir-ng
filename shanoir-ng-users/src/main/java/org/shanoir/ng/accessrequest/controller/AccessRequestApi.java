@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,6 +72,19 @@ public interface AccessRequestApi {
 			"application/json" })
 	ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException;
 
+	@ApiOperation(value = "byStudy", notes = "Find all the access request for the given study", response = AccessRequest.class, tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
+			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
+	@GetMapping(value = "byStudy/{studyId}", produces = { "application/json" }, consumes = {
+			"application/json" })
+	ResponseEntity<List<AccessRequest>> findAllByStudyId(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId
+			) throws RestServiceException;
+
 	@ApiOperation(value = "get by id", notes = "Find the access request for the given id", response = AccessRequest.class, tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
@@ -92,7 +104,7 @@ public interface AccessRequestApi {
 			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@PutMapping(value = "/invitation/")
-	ResponseEntity<String> inviteUserToStudy(
+	ResponseEntity<AccessRequest> inviteUserToStudy(
 			@ApiParam(value = "Study the user is invited in", required = true) 
 			@RequestParam(value = "studyId", required = true) Long studyId,
 			@ApiParam(value = "Study name the user is invited in", required = true) 

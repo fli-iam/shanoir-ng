@@ -42,6 +42,7 @@ import { LoadingBarComponent } from '../../shared/components/loading-bar/loading
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import {Profile} from "../../shared/models/profile.model";
+import { AccessRequest } from 'src/app/users/access-request/access-request.model';
 
 @Component({
     selector: 'study-detail',
@@ -68,6 +69,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
+    accessRequests: AccessRequest[];
 
     public openPrefix: boolean = false;
 
@@ -85,7 +87,8 @@ export class StudyComponent extends EntityComponent<Study> {
             private subjectService: SubjectService,
             private userService: UserService,
             private studyRightsService: StudyRightsService,
-            private studyCardService: StudyCardService) {
+            private studyCardService: StudyCardService,
+            private accessRequestService: AccessRequestService) {
 
         super(route, 'study');
         this.activeTab = 'general';
@@ -149,9 +152,11 @@ export class StudyComponent extends EntityComponent<Study> {
 
         Promise.all([
             studyPromise,
-            this.fetchUsers()
-        ]).then(([study, users]) => {
+            this.fetchUsers(),
+            this.accessRequestService.findByStudy(this.id)
+        ]).then(([study, users, accessReqs]) => {
             Study.completeMembers(study, users);
+            this.accessRequests = accessReqs;
         });
 
         Promise.all([
@@ -546,5 +551,9 @@ export class StudyComponent extends EntityComponent<Study> {
             subjStu.study.tags = this.study.tags;
         });
         this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
+    }
+
+    goToAccessRequest(accessRequest : AccessRequest) {
+        this.router.navigate(["/access-request/details/" + accessRequest.id]);
     }
 }

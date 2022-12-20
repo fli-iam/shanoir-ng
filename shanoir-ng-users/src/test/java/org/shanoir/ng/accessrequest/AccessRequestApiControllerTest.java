@@ -41,6 +41,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -301,61 +302,29 @@ public class AccessRequestApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 1)
 	public void inviteExistingUserTest() throws Exception {
-		// We invite an user that does not exists
+		// We invite an user that exists
 		Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.of(user));
 		
 		Map<String, Object> theMap = new LinkedHashMap<>();
 		theMap.put("studyId", 1l);
 		theMap.put("studyName", "name");
 		theMap.put("email", "mail");
-	
-		Mockito.when(rabbitTemplate.convertSendAndReceive(
-				Mockito.eq(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE), Mockito.anyString())).thenReturn(true);
-		
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
+
+		MvcResult result = mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.param("studyId", "" + 1l)
 				.param("studyName", "name")
 				.param("email", "mail"))
-				.andExpect(status().isOk()).andExpect(content().string("User " + user.getUsername() + " was added to the study with success"));
+				.andExpect(status().isOk())
+				.andReturn();
 		
-		ArgumentCaptor<AccessRequest> requestCaptor = ArgumentCaptor.forClass(AccessRequest.class);
+		AccessRequest request = mapper.readValue(result.getResponse().getContentAsString(), AccessRequest.class);
 		
-		Mockito.verify(this.accessRequestService).createAllowed(requestCaptor.capture());
-		
-		AccessRequest request = requestCaptor.getValue();
-		
-		assertEquals(user, request.getUser());
+		assertEquals(user.getId(), request.getUser().getId());
 		assertEquals("1", ""+request.getStudyId());
 		assertEquals("name", request.getStudyName());
 		assertEquals("From study manager", request.getMotivation());
 		assertEquals(AccessRequest.APPROVED, request.getStatus());
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 1)
-	public void inviteExistingUserButFailedTest() throws Exception {
-		// We invite an user that does not exists
-		Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.of(user));
-		
-		Map<String, Object> theMap = new LinkedHashMap<>();
-		theMap.put("studyId", 1l);
-		theMap.put("studyName", "name");
-		theMap.put("email", "mail");
-	
-		// ATTENTION: the subscription failed
-		Mockito.when(rabbitTemplate.convertSendAndReceive(
-				Mockito.eq(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE), Mockito.anyString())).thenReturn(false);
-		
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.param("studyId", "" + 1l)
-				.param("studyName", "name")
-				.param("email", "mail"))
-				.andExpect(status().isOk()).andExpect(content().string("User " + user.getUsername() + " exists but could not be added to this study. Please contact an administrator"));
-		
-		Mockito.verifyNoInteractions(this.accessRequestService);
-		Mockito.verifyNoInteractions(this.emailService);
 	}
 
 	@Test
@@ -374,7 +343,7 @@ public class AccessRequestApiControllerTest {
 				.param("studyId", "" + 1l)
 				.param("studyName", "name")
 				.param("email", "mail"))
-				.andExpect(status().isOk());
+				.andExpect(status().isNoContent());
 		
 		ArgumentCaptor<StudyInvitationEmail> emailCaptor = ArgumentCaptor.forClass(StudyInvitationEmail.class);
 		Mockito.verify(this.emailService).inviteToStudy(emailCaptor.capture());

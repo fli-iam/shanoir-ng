@@ -13,6 +13,8 @@ public interface AccessRequestService extends BasicEntityService<AccessRequest>{
 
 	List<AccessRequest> findByStudyId(List<Long> studiesId);
 
+	List<AccessRequest> findByUserIdAndStudyId(Long userId, Long studyId);
+	
 	@Override
 	AccessRequest update(AccessRequest entity);
 

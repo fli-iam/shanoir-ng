@@ -22,6 +22,7 @@ import { UserService } from '../shared/user.service'
 import { FormGroup, Validators, FormBuilder, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ConsoleService } from 'src/app/shared/console/console.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'accountRequest',
@@ -37,6 +38,7 @@ export class AccountRequestComponent {
     public requestSent: boolean = false;
     public errorOnRequest: boolean = false;
     infoValid: boolean = false;
+    protected router: Router;
 
     language: 'english' | 'french' = 'english';
     
@@ -44,7 +46,9 @@ export class AccountRequestComponent {
             private fb: FormBuilder, 
             public userService: UserService,
             private location: Location,
-            private consoleService: ConsoleService) {}
+            private consoleService: ConsoleService,) {
+                this.router = ServiceLocator.injector.get(Router)
+            }
 
     ngOnInit(): void {
         this.user = new User();
@@ -88,7 +92,8 @@ export class AccountRequestComponent {
     }
 
     getOut(): void {
-        this.location.back();
+        // Return to main page
+        this.router.navigate(["/"]);
     }
 
     cancelAccountRequest(): void {

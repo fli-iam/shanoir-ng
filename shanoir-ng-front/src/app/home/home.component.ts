@@ -88,12 +88,14 @@ export class HomeComponent {
             }
         }).then(() =>{
             // Load access requests
-            this.userService.getAccessRequests().then(acs => {
-                if (acs) {
-                    this.accessRequests = acs;
-                    this.nbAccessRequest = acs.length;
-                }
-            });
+            if (this.isUserAtLeastExpert()) {
+                this.userService.getAccessRequests().then(acs => {
+                    if (acs) {
+                        this.accessRequests = acs;
+                        this.nbAccessRequest = acs.length;
+                    }
+                });
+            }
         });
     }
 
@@ -126,6 +128,10 @@ export class HomeComponent {
 
     get admin(): boolean {
         return this.keycloakService.isUserAdmin();
+    }
+    
+    private isUserAtLeastExpert() {
+        return this.keycloakService.isUserAdminOrExpert();
     }
 
     public getStudyName(studyId: number): String {

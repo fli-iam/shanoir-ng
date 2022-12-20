@@ -97,7 +97,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     acceptRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, true).then(value => this.goBack());
+        this.accessRequestService.resolveRequest(this.accessRequest.id, true).then(value => this.router.navigate(['/study/details/' + this.accessRequest.studyId + '#members']));
     }
     
     refuseRequest() {
@@ -113,6 +113,10 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     protected chooseRouteAfterSave() {
-        this.goBack();
+        if (this.fromStudy) {
+            this.router.navigate(["/home"]);
+        } else {
+            this.goBack();
+        }
     }
 }

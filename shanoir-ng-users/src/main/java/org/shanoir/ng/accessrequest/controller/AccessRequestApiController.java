@@ -1,6 +1,7 @@
 package org.shanoir.ng.accessrequest.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +24,6 @@ import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -75,6 +75,12 @@ public class AccessRequestApiController implements AccessRequestApi {
 		User user = userService.findById(KeycloakUtil.getTokenUserId());
 		request.setUser(user);
 		request.setStatus(AccessRequest.ON_DEMAND);
+		
+		// Sanity check: user already has a pending access request
+		List<AccessRequest> accessRequests = this.accessRequestService.findByUserIdAndStudyId(user.getId(), request.getStudyId());
+		if (!CollectionUtils.isEmpty(accessRequests)) {
+			throw new RestServiceException(new ErrorModel(ErrorModelCode.BAD_REQUEST, "You already have a pending access request on this study."));
+		}
 
 		if (request.getStudyName() == null) {
 			String studyName = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, request.getStudyId());
@@ -170,7 +176,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 		return new ResponseEntity<AccessRequest>(acceReq, HttpStatus.OK);
 	}
 
-	public 	ResponseEntity<String> inviteUserToStudy(
+	public 	ResponseEntity<AccessRequest> inviteUserToStudy(
 			@ApiParam(value = "Study the user is invited in", required = true) 
 			@RequestParam(value = "studyId", required = true) Long studyId,
 			@ApiParam(value = "Study name the user is invited in", required = true) 
@@ -181,34 +187,19 @@ public class AccessRequestApiController implements AccessRequestApi {
 		// Check if user with such email exists
 		Optional<User> user = this.userService.findByEmail(email);
 
-		// User exists => directly add it to the study
+		// User exists => return an access request to be added
 		if (user.isPresent()) {
-			// Direct call to study MS to add the user
-
-			ShanoirEvent subscription = new ShanoirEvent(
-					ShanoirEventType.USER_ADD_TO_STUDY_EVENT,
-					studyId.toString(),
-					user.get().getId(),
-					user.get().getUsername(),
-					ShanoirEvent.SUCCESS);
-
-			boolean subResult = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE, mapper.writeValueAsString(subscription));
-
-			if (subResult) {
-				// create a new access request for history / logging purpose
-				AccessRequest request = new AccessRequest();
-				request.setUser(user.get());
-				request.setStudyId(studyId);
-				request.setStudyName(studyName);
-				request.setMotivation("From study manager");
-				request.setStatus(AccessRequest.APPROVED);
-				this.accessRequestService.createAllowed(request);
-				return new ResponseEntity<String>("User " + user.get().getUsername() + " was added to the study with success", HttpStatus.OK);
-			} else {
-				return new ResponseEntity<String>("User " + user.get().getUsername() + " exists but could not be added to this study. Please contact an administrator", HttpStatus.OK);
-			}
+			// create a new access request to return
+			AccessRequest request = new AccessRequest();
+			request.setUser(user.get());
+			request.setStudyId(studyId);
+			request.setStudyName(studyName);
+			request.setMotivation("From study manager");
+			request.setStatus(AccessRequest.APPROVED);
+			return new ResponseEntity<AccessRequest>(request, HttpStatus.OK);
 		}
 
+		// Otherwise, send a mail to the new user
 		StudyInvitationEmail mail = new StudyInvitationEmail();
 		mail.setInvitedMail(email);
 		mail.setStudyId(studyId.toString());
@@ -217,6 +208,13 @@ public class AccessRequestApiController implements AccessRequestApi {
 		// User does not exists, just send an email
 		this.emailService.inviteToStudy(mail);
 
-		return new ResponseEntity<String>("No existing user with this email, an invitation to join Shanoir was sent.", HttpStatus.OK);
+		return new ResponseEntity<AccessRequest>(HttpStatus.NO_CONTENT);
+	}
+
+	public ResponseEntity<List<AccessRequest>> findAllByStudyId(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId
+			) throws RestServiceException {
+		
+		return new ResponseEntity<List<AccessRequest>>(this.accessRequestService.findByStudyId(Collections.singletonList(studyId)), HttpStatus.OK);
 	}
 }
