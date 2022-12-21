@@ -101,7 +101,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
-	public List<StudyCard> findStudyCardsOfStudy(Long studyId) {
+	public List<StudyCard> findByStudy(Long studyId) {
 		return this.studyCardRepository.findByStudyId(studyId);
 	}
 

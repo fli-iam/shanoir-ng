@@ -1,4 +1,4 @@
-package org.shanoir.ng.studycard.model;
+package org.shanoir.ng.studycard.model.condition;
 
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;

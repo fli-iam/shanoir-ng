@@ -20,7 +20,7 @@ import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.DicomTag;
-import org.shanoir.ng.studycard.dto.StudyCardOnStudyResult;
+import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
 import org.springframework.http.ResponseEntity;
@@ -162,17 +162,17 @@ public interface StudyCardApi {
 	ResponseEntity<Void> applyStudyCard(
 			@ApiParam(value = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Apply a study card on a study for quality control", response = Void.class, tags = {})
+	@ApiOperation(value = "", notes = "Apply a quality card on a study for quality control", response = Void.class, tags = {})
 	@ApiResponses(value = {
-		@ApiResponse(code = 200, message = "applied a study card on its study for quality control", response = Void.class),
+		@ApiResponse(code = 200, message = "applied a quality card on its study for quality control", response = Void.class),
 		@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
 		@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 		@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
 		@ApiResponse(code = 500, message = "unexpected error", response = Void.class)
 	})
-	@RequestMapping(value = "/apply_on_study/{studyCardId}", method = RequestMethod.GET)
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudyCard(#studyCardId, 'CAN_ADMINISTRATE'))")
-	ResponseEntity<List<StudyCardOnStudyResult>> applyStudyCardOnStudy(
-		@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException, MicroServiceCommunicationException;
+	@RequestMapping(value = "/apply-quality-card/{qualityCardId}", method = RequestMethod.GET)
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
+	ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
+		@ApiParam(value = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
 	
 }

@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -27,10 +29,12 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.DicomTag;
-import org.shanoir.ng.studycard.dto.StudyCardOnStudyResult;
+import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
-import org.shanoir.ng.studycard.service.StudyCardProcessingService;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
+import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
 import org.slf4j.Logger;
@@ -55,11 +59,17 @@ public class StudyCardApiController implements StudyCardApi {
 	@Autowired
 	private StudyCardService studyCardService;
 	
+    @Autowired
+    private QualityCardService qualityCardService;
+	
 	@Autowired
 	private StudyCardUniqueConstraintManager uniqueConstraintManager;
 	
 	@Autowired
-	private StudyCardProcessingService studyCardProcessingService;
+	private DatasetAcquisitionService datasetAcquisitionService;
+
+	@Autowired
+	private CardsProcessingService cardProcessingService;
 
 	@Override
 	public ResponseEntity<Void> deleteStudyCard(
@@ -89,7 +99,7 @@ public class StudyCardApiController implements StudyCardApi {
 	@Override
 	public ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		final List<StudyCard> studyCards = studyCardService.findStudyCardsOfStudy(studyId);
+		final List<StudyCard> studyCards = studyCardService.findByStudy(studyId);
 		if (studyCards.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -210,19 +220,24 @@ public class StudyCardApiController implements StudyCardApi {
 				|| studyCardApplyObject.getStudyCardId() == null) {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		studyCardProcessingService.applyStudyCard(studyCardApplyObject);
+		
+		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
+        LOG.debug("re-apply studycard n° " + studyCard.getId());
+        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
+        cardProcessingService.applyStudyCard(studyCard, acquisitions);
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
 	@Override
-	public ResponseEntity<List<StudyCardOnStudyResult>> applyStudyCardOnStudy(
-		@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException, MicroServiceCommunicationException {
-		final StudyCard studyCard = studyCardService.findById(studyCardId);
-		if (studyCard == null) {
+    public ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
+	        @ApiParam(value = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
+		
+	    final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
+	    if (qualityCard == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		LOG.info("applyStudyCardOnStudy: name:" + studyCard.getName() + ", studyId: " + studyCard.getStudyId());
-		List<StudyCardOnStudyResult> results = studyCardProcessingService.applyStudyCardOnStudy(studyCard);
+		LOG.info("apply quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+		QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard);
 		return new ResponseEntity<>(results, HttpStatus.OK);
 	}
 

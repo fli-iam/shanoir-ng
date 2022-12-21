@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.studycard.model;
+package org.shanoir.ng.studycard.model.field;
 
 import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -31,28 +31,8 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequencePhysics;
 
-public enum Field implements DatasetFieldInterface {
+public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<DatasetAcquisition> {
 
-	MODALITY_TYPE(1) {
-		@Override
-		public String get(DatasetAcquisition datasetAcquisition) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null && dataset.getUpdatedMetadata().getDatasetModalityType() != null) {
-					return dataset.getUpdatedMetadata().getDatasetModalityType().name();
-				}
-			}
-			return null;
-		}
-		
-		@Override
-		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			DatasetModalityType type = DatasetModalityType.valueOf(updatedValue);
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-				dataset.getUpdatedMetadata().setDatasetModalityType(type);
-			}
-		}
-	},
 	PROTOCOL_NAME(2) {
 		@Override
 		public String get(DatasetAcquisition datasetAcquisition) {
@@ -151,26 +131,6 @@ public enum Field implements DatasetFieldInterface {
 			}
 		}
 	},
-	EXPLORED_ENTITY(6) {
-		@Override
-		public String get(DatasetAcquisition datasetAcquisition) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null && dataset.getUpdatedMetadata().getExploredEntity() != null) {
-					return dataset.getUpdatedMetadata().getExploredEntity().name();
-				}
-			}
-			return null;
-		}
-		
-		@Override
-		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			ExploredEntity exploredEntity = ExploredEntity.valueOf(updatedValue);
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-				dataset.getUpdatedMetadata().setExploredEntity(exploredEntity);			
-			}
-		}
-	},
 	ACQUISITION_CONTRAST(7) {
 		@Override
 		public String get(DatasetAcquisition datasetAcquisition) {
@@ -243,44 +203,6 @@ public enum Field implements DatasetFieldInterface {
 			}
 		}
 	},
-	NAME(10) {
-		@Override
-		public String get(DatasetAcquisition datasetAcquisition) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null && dataset.getUpdatedMetadata().getExploredEntity() != null) {
-					return dataset.getUpdatedMetadata().getName();
-				}
-			}
-			return null;
-		}
-		
-		@Override
-		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-				dataset.getUpdatedMetadata().setName(updatedValue);			
-			}
-		}
-	},
-	COMMENT(11) {
-		@Override
-		public String get(DatasetAcquisition datasetAcquisition) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null && dataset.getUpdatedMetadata().getExploredEntity() != null) {
-					return dataset.getUpdatedMetadata().getComment();
-				}
-			}
-			return null;
-		}
-		
-		@Override
-		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-				dataset.getUpdatedMetadata().setComment(updatedValue);			
-			}
-		}
-	},
 	MR_SEQUENCE_NAME(12) {
 		@Override
 		public String get(DatasetAcquisition datasetAcquisition) {
@@ -328,36 +250,6 @@ public enum Field implements DatasetFieldInterface {
 			}
 		}
 	},
-	MR_DATASET_NATURE(14) {
-		@Override
-		public String get(DatasetAcquisition datasetAcquisition) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset instanceof MrDataset) {
-					MrDataset mrDataset = (MrDataset) dataset;
-					if (mrDataset.getUpdatedMrMetadata() == null && mrDataset.getUpdatedMrMetadata() != null) {
-						mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();	
-					}		
-				} else {
-					throw new IllegalArgumentException("dataset should be of type MrDataset");
-				}
-			}
-			return null;
-		}
-		
-		@Override
-		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			MrDatasetNature nature = MrDatasetNature.valueOf(updatedValue);
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset instanceof MrDataset) {
-					MrDataset mrDataset = (MrDataset) dataset;
-					if (mrDataset.getUpdatedMrMetadata() == null) mrDataset.setUpdatedMrMetadata(new MrDatasetMetadata());
-					mrDataset.getUpdatedMrMetadata().setMrDatasetNature(nature);			
-				} else {
-					throw new IllegalArgumentException("dataset should be of type MrDataset");
-				}
-			}
-		}
-	},
 	BIDS_DATA_TYPE(15) {
 		@Override
 		public String get(DatasetAcquisition datasetAcquisition) {
@@ -385,17 +277,18 @@ public enum Field implements DatasetFieldInterface {
 	
 	private int id;
 	
-	private Field(int id) {
+	private DatasetAcquisitionMetadataField(int id) {
 		this.id = id;
 	}
 	
-	public static Field getEnum(int id) {
-		for (Field field : Field.values()) {
+	public static DatasetAcquisitionMetadataField getEnum(int id) {
+		for (DatasetAcquisitionMetadataField field : DatasetAcquisitionMetadataField.values()) {
 			if (field.getId() == id) return field;
 		}
 		return null;
 	}
 	
+	@Override
 	public int getId() {
 		return id;
 	}

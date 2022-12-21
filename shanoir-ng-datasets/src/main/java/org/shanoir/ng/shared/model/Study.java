@@ -26,6 +26,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.IdName;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -57,6 +58,11 @@ public class Study extends IdName {
 	/** Relations between the subjects and the studies. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
+	
+	/** Relations between the subjects and the studies. */
+    @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Examination> examinations;
+	
 
 	/**
 	 * @return the tags
@@ -130,5 +136,13 @@ public class Study extends IdName {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+    public List<Examination> getExaminations() {
+        return examinations;
+    }
+
+    public void setExaminations(List<Examination> examinations) {
+        this.examinations = examinations;
+    }
 	
 }

@@ -49,7 +49,7 @@ import org.shanoir.ng.shared.quality.SubjectStudyQualityTagDTO;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.studycard.dto.StudyCardOnStudyResult;
 import org.shanoir.ng.studycard.model.DicomTagType;
-import org.shanoir.ng.studycard.model.Field;
+import org.shanoir.ng.studycard.model.MetadataField;
 import org.shanoir.ng.studycard.model.Operation;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
@@ -72,44 +72,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class StudyCardProcessingService {
 	
-	private static final Logger LOG = LoggerFactory.getLogger(StudyCardProcessingService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(StudyCardProcessingServiceOLD.class);
 	
-	@Autowired
-	private StudyCardService studyCardService;
-	
-	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
-	
-	@Autowired
-	private ExaminationService examinationService;
-	
-	@Autowired
-	private DatasetAcquisitionService datasetAcquisitionService;
-	
-	@Autowired
-	private WADODownloaderService downloader;
-	
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
-	
-	@Autowired
-	private ObjectMapper objectMapper;
 
-	/**
-	 * Application during import, when dicoms are present in tmp directory.
-	 * @param acquisition
-	 * @param studyCard
-	 * @param dicomAttributes
-	 */
-	public void applyStudyCard(DatasetAcquisition acquisition, StudyCard studyCard, Attributes dicomAttributes) {
-		if (studyCard.getRules() != null) {
-			for (StudyCardRule rule : studyCard.getRules()) {
-				applyStudyCardRule(acquisition, rule, dicomAttributes);
-			}
-		}
-		acquisition.setStudyCard(studyCard);
-		acquisition.setStudyCardTimestamp(studyCard.getLastEditTimestamp());
-	}	
 
 	/**
 	 * Re-application on using web GUI and list of dataset acquisitions.
@@ -139,165 +104,7 @@ public class StudyCardProcessingService {
 		}
 	}
 
-	/**
-	 * Study cards for quality control: apply on entire study.
-	 * 
-	 * @param studyCard
-	 * @throws MicroServiceCommunicationException 
-	 */
-	public List<StudyCardOnStudyResult> applyStudyCardOnStudy(StudyCard studyCard) throws MicroServiceCommunicationException {
-		final List<StudyCardRule> rules = studyCard.getRules();
-		if (CollectionUtils.isNotEmpty(rules)) {
-			final List<StudyCardOnStudyResult> studyCardOnStudyResultList = new ArrayList<StudyCardOnStudyResult>();
-			final List<SubjectStudyQualityTagDTO> subjectStudyQualityTagList = new ArrayList<SubjectStudyQualityTagDTO>();
-			final List<SubjectStudy> subjectStudyList = subjectStudyRepository.findByStudyId(studyCard.getStudyId());
-			for (SubjectStudy subjectStudy : subjectStudyList) {
-				final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectStudy.getSubject().getId(), studyCard.getStudyId());
-				LOG.info(examinations.size() + " examinations found for subject: " + subjectStudy.getSubject().getName());
-				for (Examination examination : examinations) {
-					StudyCardOnStudyResult result = new StudyCardOnStudyResult();
-					result.setSubjectName(subjectStudy.getSubject().getName());
-					result.setExaminationComment(examination.getExaminationDate().toString());
-					result.setExaminationDate(examination.getComment());
-					List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
-					// today study cards are only used for MR modality
-					acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
-					if (CollectionUtils.isNotEmpty(acquisitions)) {
-						LOG.info(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
-						LOG.info(rules.size() + " rules found for study card with id: " + studyCard.getId() + " and name: " + studyCard.getName());
-						boolean allRulesFulFilled = true;
-						SubjectStudyQualityTagDTO subjectStudyQualityTag = new SubjectStudyQualityTagDTO();
-						subjectStudyQualityTag.setSubjectStudyId(subjectStudy.getId());
-						for (StudyCardRule rule : rules) {
-							if (rule.getType() == StudyCardRuleType.EXAMINATION.getId()) {
-								if (!conditionsFulfilledOnAtLeastOneAcquisition(rule.getConditions(), acquisitions, result)) {
-									allRulesFulFilled = false;
-								}
-							} else if (rule.getType() == StudyCardRuleType.ACQUISITION.getId()) {
-								if (!conditionsFulfilledOnAllAcquisitions(rule.getConditions(), acquisitions, result)) {
-									allRulesFulFilled = false;
-								}								
-							} else if (rule.getType() == StudyCardRuleType.DATASET.getId()) {
-								if (!conditionsFulfilledOnAllDatasets(rule.getConditions(), acquisitions, result)) {
-									allRulesFulFilled = false;
-								}							
-							}
-						}
-						if (allRulesFulFilled) {
-						    subjectStudyQualityTag.setTag(QualityTag.VALID);
-						} else {
-						    subjectStudyQualityTag.setTag(QualityTag.ERROR);
-						}
-						studyCardOnStudyResultList.add(result);
-						subjectStudyQualityTagList.add(subjectStudyQualityTag);
-					}				
-				}
-			}
-			try {
-				rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG,
-						objectMapper.writeValueAsString(subjectStudyQualityTagList));
-			} catch (AmqpException | JsonProcessingException e) {
-				throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.");
-			}
-			return studyCardOnStudyResultList;
-		} else {
-			throw new RestClientException("Study card used with emtpy rules.");
-		}
-	}
 	
-	private void applyStudyCardRule(DatasetAcquisition acquisition, StudyCardRule rule, Attributes dicomAttributes) {
-		if (rule.getConditions() == null || rule.getConditions().isEmpty() || conditionsFulfilled(rule.getConditions(), dicomAttributes, acquisition)) {
-			if (rule.getAssignments() != null) applyAssignments(acquisition, rule.getAssignments());
-		}
-	}
-
-	private boolean conditionsFulfilled(List<StudyCardCondition> conditions, Attributes dicomAttributes, DatasetAcquisition acquisition) {
-		for (StudyCardCondition condition : conditions) {
-			if (!dicomConditionFulfilled(condition, dicomAttributes)) return false;
-		}
-		return true;
-	}
-
-	private boolean conditionsFulfilledOnAtLeastOneAcquisition(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions, StudyCardOnStudyResult result) {
-		for (StudyCardCondition condition : conditions) {
-			boolean conditionVerifiedOnAtLeastOneAcquisition = false;
-			for (DatasetAcquisition acquisition: acquisitions) {
-				// A) check for a dicom tag using a metadata call to the pacs
-				if (condition.getDicomTag() != null) {
-					if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
-						Dataset refDataset = acquisition.getDatasets().get(0);
-						Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
-						if (dicomConditionFulfilled(condition, dicomAttributes)) {
-							conditionVerifiedOnAtLeastOneAcquisition = true;
-							break;
-						}
-					}
-				// B) check for a field in the database, using entity model
-				} else {
-					if (entityConditionFulfilled(condition, acquisition)) {
-						conditionVerifiedOnAtLeastOneAcquisition = true;
-						break;
-					}
-				}
-			}	
-			if (!conditionVerifiedOnAtLeastOneAcquisition) {
-				result.setResultExaminationLevel(logConditionError(condition));
-				return false;
-			}
-		}
-		return true;
-	}
-	
-	private boolean conditionsFulfilledOnAllAcquisitions(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions, StudyCardOnStudyResult result) {
-		for (StudyCardCondition condition : conditions) {
-			for (DatasetAcquisition acquisition: acquisitions) {
-				// A) check for a dicom tag using a metadata call to the pacs
-				if (condition.getDicomTag() != null) {
-					if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
-						Dataset refDataset = acquisition.getDatasets().get(0);
-						Attributes dicomAttributes = getDicomAttributesForDataset(refDataset);
-						if (!dicomConditionFulfilled(condition, dicomAttributes)) {
-							result.setResultAcquisitionLevel(logConditionError(condition));
-							return false;
-						}
-					}
-				// B) check for a field in the database, using entity model
-				} else {
-					if (!entityConditionFulfilled(condition, acquisition)) {
-						result.setResultAcquisitionLevel(logConditionError(condition));						
-						return false;
-					}
-				}
-			}	
-		}
-		return true;
-	}
-	
-	private boolean conditionsFulfilledOnAllDatasets(List<StudyCardCondition> conditions, List<DatasetAcquisition> acquisitions, StudyCardOnStudyResult result) {
-		for (StudyCardCondition condition : conditions) {
-			for (DatasetAcquisition acquisition: acquisitions) {
-				if (CollectionUtils.isNotEmpty(acquisition.getDatasets())) {
-					for (Dataset dataset : acquisition.getDatasets()) {
-						// A) check for a dicom tag using a metadata call to the pacs
-						if (condition.getDicomTag() != null) {
-							Attributes dicomAttributes = getDicomAttributesForDataset(dataset);
-							if (!dicomConditionFulfilled(condition, dicomAttributes)) {
-								result.setResultDatasetLevel(logConditionError(condition));														
-								return false;
-							}
-						// B) check for a field in the database, using entity model
-						} else {
-							if (!entityConditionFulfilled(condition, acquisition)) {
-								result.setResultDatasetLevel(logConditionError(condition));														
-								return false;
-							}
-						}					
-					}
-				}
-			}	
-		}
-		return true;
-	}
 
 	private Attributes getDicomAttributesForDataset(Dataset dataset) {
 		List<URL> urls = new ArrayList<>();
@@ -323,7 +130,7 @@ public class StudyCardProcessingService {
 	}
 	
 	private boolean entityConditionFulfilled(StudyCardCondition condition, DatasetAcquisition acquisition) {
-		Field field = condition.getShanoirField();
+		DatasetAcquisitionMetadataField field = condition.getShanoirField();
 		if (field != null) {
 			String valueFromDb = field.get(acquisition);
 			if (valueFromDb != null) {
@@ -428,7 +235,7 @@ public class StudyCardProcessingService {
 		try {
 			LOG.debug("apply assignment : " + assignment);
 			LOG.debug("on acquisition : " + acquisition);
-			Field field = assignment.getField();
+			DatasetAcquisitionMetadataField field = assignment.getField();
 			if (field != null) {
 				field.update(acquisition, assignment.getValue());
 			} else {

@@ -35,6 +35,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -109,8 +110,10 @@ public class Examination extends HalEntity {
 	private String note;
 
 	/** Study. */
-	@NotNull
-	private Long studyId;
+    @ManyToOne
+    @JoinColumn(name = "study_id")
+    @NotNull
+    private Study study;
 
 	/** Subject. Can be null only if experimentalGroupOfSubjects is not null. */
 	@ManyToOne
@@ -307,21 +310,21 @@ public class Examination extends HalEntity {
 	}
 
 	/**
-	 * @return the studyId
-	 */
-	public Long getStudyId() {
-		return studyId;
-	}
+     * @return the studyId
+     */
+    public Long getStudyId() {
+        return getStudy() != null ? getStudyId() : null;
+    }
+	
+	public Study getStudy() {
+        return study;
+    }
 
-	/**
-	 * @param studyId
-	 *            the studyId to set
-	 */
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setStudy(Study study) {
+        this.study = study;
+    }
 
-	public Subject getSubject() {
+    public Subject getSubject() {
 		return subject;
 	}
 

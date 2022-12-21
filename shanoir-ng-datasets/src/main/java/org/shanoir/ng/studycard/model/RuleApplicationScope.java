@@ -1,6 +1,6 @@
 package org.shanoir.ng.studycard.model;
 
-public enum StudyCardRuleType {
+public enum RuleApplicationScope {
 
     EXAMINATION(1),
 
@@ -10,12 +10,12 @@ public enum StudyCardRuleType {
 
     private int id;
 	
-	private StudyCardRuleType(int id) {
+	private RuleApplicationScope(int id) {
 		this.id = id;
 	}
 	
-	public static StudyCardRuleType getEnum(int id) {
-		for (StudyCardRuleType type : StudyCardRuleType.values()) {
+	public static RuleApplicationScope getEnum(int id) {
+		for (RuleApplicationScope type : RuleApplicationScope.values()) {
 			if (type.getId() == id) return type;
 		}
 		throw new IllegalArgumentException(id + " is not a valid study card rule type id");

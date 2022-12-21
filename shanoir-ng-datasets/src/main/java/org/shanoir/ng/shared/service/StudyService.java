@@ -12,20 +12,27 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.studycard.service;
+package org.shanoir.ng.shared.service;
 
-import java.util.List;
-
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.studycard.model.StudyCard;
-import org.springframework.security.access.prepost.PostAuthorize;
+import org.shanoir.ng.shared.exception.AccessDeniedException;
+import org.shanoir.ng.shared.model.Study;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
-public interface StudyCardService extends CardService<StudyCard> {
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
-	List<StudyCard> findStudyCardsByAcqEq (Long acqEqId);
+/**
+ * Study service.
+ *
+ */
+@Service
+public interface StudyService {
 
+	/**
+	 * Find study by its id. Check if current user can see study.
+	 *
+	 * @param id study id.
+	 * @return a study or null.
+	 * @throws AccessDeniedException
+	 */
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT') and (@datasetSecurityService.hasRightOnStudy(#id, 'CAN_SEE_ALL') or @@datasetSecurityService.hasRightOnStudy(#id, 'CAN_ADMINISTRATE'))")
+	Study findById(Long id);
 }

@@ -42,7 +42,9 @@ import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -63,6 +65,9 @@ public class DatasetSecurityService {
 	
 	@Autowired
 	StudyCardRepository studyCardRepository;
+	
+	@Autowired
+    QualityCardRepository qualityCardRepository;
 	
 	@Autowired
 	ExaminationRepository examinationRepository;
@@ -97,7 +102,7 @@ public class DatasetSecurityService {
     }
     
     /**
-	 * Check that the connected user has the given right for the given subject.
+     * Check that the connected user has the given right for the given subject.
 	 * 
 	 * @param studyId the study id
 	 * @param rightStr the right
@@ -164,6 +169,28 @@ public class DatasetSecurityService {
 			throw new EntityNotFoundException("Cannot find study card with id " + studyCardId);
 		}
         return commService.hasRightOnStudy(sc.getStudyId(), rightStr);
+    }
+    
+    /**
+     * Check that the connected user has the given right for the given quality card.
+     * 
+     * @param qualityCardId the study card id
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasRightOnQualityCard(Long qualityCardId, String rightStr) throws EntityNotFoundException {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
+        if (qualityCardId == null) {
+            return false;
+        }
+        QualityCard qc = qualityCardRepository.findById(qualityCardId).orElse(null);
+        if (qc == null) {
+            throw new EntityNotFoundException("Cannot find quality card with id " + qualityCardId);
+        }
+        return commService.hasRightOnStudy(qc.getStudyId(), rightStr);
     }
     
     /**

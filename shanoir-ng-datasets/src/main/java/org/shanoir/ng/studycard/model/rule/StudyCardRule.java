@@ -12,42 +12,45 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.studycard.model;
+package org.shanoir.ng.studycard.model.rule;
 
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.validation.constraints.NotNull;
 
+import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
+import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 
 @Entity
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class StudyCardRule extends AbstractEntity {
-
-	private static final long serialVersionUID = 6708188853533591193L;
+@DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
+public abstract class StudyCardRule<T> extends AbstractEntity {
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name="rule_id")
-	private List<StudyCardAssignment> assignments;
+	private List<StudyCardAssignment<T>> assignments;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name="rule_id")
 	private List<StudyCardCondition> conditions;
-
-	@NotNull
-	private int type; // examination, acquisition, dataset
 	
-	public List<StudyCardAssignment> getAssignments() {
+	public List<StudyCardAssignment<T>> getAssignments() {
 		return assignments;
 	}
 
-	public void setAssignments(List<StudyCardAssignment> assignments) {
+	public void setAssignments(List<StudyCardAssignment<T>> assignments) {
 		this.assignments = assignments;
 	}
 
@@ -58,13 +61,6 @@ public class StudyCardRule extends AbstractEntity {
 	public void setConditions(List<StudyCardCondition> conditions) {
 		this.conditions = conditions;
 	}
-
-	public int getType() {
-		return type;
-	}
-
-	public void setType(int type) {
-		this.type = type;
-	}
-
+	
+	abstract void apply(T object, Attributes dicomAttributes);
 }

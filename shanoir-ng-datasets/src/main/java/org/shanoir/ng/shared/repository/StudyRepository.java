@@ -15,10 +15,12 @@ package org.shanoir.ng.shared.repository;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.shared.model.Study;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * @author yyao
@@ -29,4 +31,7 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	@Query(value="select rd.study_id from related_datasets rd where dataset_id = ?1",
 			nativeQuery = true)
 	List<BigInteger> findByDatasetId(Long datasetId);
+	
+	@Query("select s from Study s join fetch s.examinations join fetch s.subjectStudyList WHERE p.id = (:id)")
+    Optional<Study> findByIdAndFetchExaminationsAndSubjectStudiesEagerly(@Param("id") Long id);
 }

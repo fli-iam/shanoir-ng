@@ -12,8 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.studycard.model;
+package org.shanoir.ng.studycard.model.assignment;
 
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 
@@ -23,27 +25,19 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class StudyCardAssignment extends AbstractEntity {
+@DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
+public abstract class StudyCardAssignment<T> extends AbstractEntity implements StudyCardAssignmentInterface<T> {
 
 	/** UID */
 	private static final long serialVersionUID = 6708188853533591193L;
 
 	/** The dataset field to update. */
 	@NotNull
-	private Long field;
+    protected Long field;
 	
 	/** The value to set. */
 	@NotNull
 	private String value;
-
-	public Field getField() {
-		if (field == null) return null;
-		else return Field.getEnum(field.intValue());
-	}
-
-	public void setField(Field field) {
-		this.field = Long.valueOf(field.getId());
-	}
 
 	public String getValue() {
 		return value;
@@ -52,5 +46,4 @@ public class StudyCardAssignment extends AbstractEntity {
 	public void setValue(String value) {
 		this.value = value;
 	}
-
 }

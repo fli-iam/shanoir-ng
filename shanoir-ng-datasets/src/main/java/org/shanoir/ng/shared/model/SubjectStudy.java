@@ -12,6 +12,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import org.shanoir.ng.shared.quality.QualityTag;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
@@ -39,7 +41,10 @@ public class SubjectStudy {
     @JoinTable( name = "subject_study_tag",
                 joinColumns = @JoinColumn( name = "subject_study_id" ))
 	private List<Tag> tags;
+    
+    private Integer tag;
 
+    
 	/**
 	 * @return the study
 	 */
@@ -97,5 +102,13 @@ public class SubjectStudy {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	public QualityTag getQualityTag() {
+        return QualityTag.get(tag);
+    }
+    
+    public void setQualityTag(QualityTag tag) {
+        this.tag = tag != null ? tag.getId() : null;
+    }
 
 }
