@@ -90,6 +90,7 @@ public class AccessRequestApiControllerTest {
 		AccessRequest request = createAccessRequest();
 		
 		// Access request is saved
+		Mockito.when(accessRequestService.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(Collections.emptyList());
 		Mockito.when(accessRequestService.createAllowed(Mockito.any(AccessRequest.class))).thenReturn(request);
 		
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
@@ -112,6 +113,8 @@ public class AccessRequestApiControllerTest {
 		AccessRequest request = createAccessRequest();
 		// Only change: the study name is null, we have to load it.
 		request.setStudyName(null);
+		
+		Mockito.when(accessRequestService.findByUserIdAndStudyId(Mockito.anyLong(), Mockito.anyLong())).thenReturn(Collections.emptyList());
 
 		// Call to get the study name
 		Mockito.when(this.rabbitTemplate.convertSendAndReceive(
