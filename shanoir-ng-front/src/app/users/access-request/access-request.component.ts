@@ -111,6 +111,15 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     public async hasEditRight(): Promise<boolean> {
         return false;
     }
+    
+    save(): Promise<AccessRequest> {
+        return super.save().catch(exception => {
+            if (exception?.error?.message) {
+                this.consoleService.log('error', exception.error.message);
+                return null;
+            }
+        });
+    }
 
     protected chooseRouteAfterSave() {
         if (this.fromStudy) {

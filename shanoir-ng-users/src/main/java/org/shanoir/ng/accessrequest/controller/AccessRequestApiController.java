@@ -79,7 +79,15 @@ public class AccessRequestApiController implements AccessRequestApi {
 		// Sanity check: user already has a pending access request
 		List<AccessRequest> accessRequests = this.accessRequestService.findByUserIdAndStudyId(user.getId(), request.getStudyId());
 		if (!CollectionUtils.isEmpty(accessRequests)) {
-			throw new RestServiceException(new ErrorModel(ErrorModelCode.BAD_REQUEST, "You already have a pending access request on this study."));
+			boolean alreadyExists = false;
+			for (AccessRequest req : accessRequests) {
+				if (AccessRequest.ON_DEMAND == req.getStatus()) {
+					alreadyExists = true;
+				}
+			}
+			if (alreadyExists) {
+				throw new RestServiceException(new ErrorModel(HttpStatus.BAD_REQUEST.value(), "You already have a pending access request on this study."));
+			}
 		}
 
 		if (request.getStudyName() == null) {
@@ -94,11 +102,13 @@ public class AccessRequestApiController implements AccessRequestApi {
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.ACCESS_REQUEST_EVENT, "" + createdRequest.getId(), KeycloakUtil.getTokenUserId(), "", 1, createdRequest.getStudyId()));
 
 		// Send notification to study admin
+		/*
 		try {
 			emailService.notifyStudyManagerAccessRequest(createdRequest);
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e, new ErrorModel(ErrorModelCode.BAD_REQUEST));
 		}
+		*/
 
 		return new ResponseEntity<AccessRequest>(createdRequest, HttpStatus.OK);
 	}
