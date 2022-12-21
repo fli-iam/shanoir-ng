@@ -97,7 +97,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     acceptRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, true).then(value => this.router.navigate(['/study/details/' + this.accessRequest.studyId + '#members']));
+        this.accessRequestService.resolveRequest(this.accessRequest.id, true).then(value => this.router.navigate(['/study/details/' + this.accessRequest.studyId]));
     }
     
     refuseRequest() {
