@@ -17,15 +17,27 @@ package org.shanoir.ng.studycard.model.assignment;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = DatasetAssignment.class, name = "Dataset"),
+        @JsonSubTypes.Type(value = DatasetAcquisitionAssignment.class, name = "DatasetAcquisition") })
 public abstract class StudyCardAssignment<T> extends AbstractEntity implements StudyCardAssignmentInterface<T> {
 
 	/** UID */

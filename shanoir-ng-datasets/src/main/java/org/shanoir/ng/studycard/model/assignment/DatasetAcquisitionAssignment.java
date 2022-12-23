@@ -23,9 +23,12 @@ import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 
 @Entity
 @DiscriminatorValue("DatasetAcquisition")
+@JsonTypeName("DatasetAcquisition")
 public class DatasetAcquisitionAssignment extends StudyCardAssignment<DatasetAcquisition> {
 
     private static Logger LOG = LoggerFactory.getLogger(DatasetAcquisitionAssignment.class);
