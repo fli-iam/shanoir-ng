@@ -121,37 +121,4 @@ public class DatasetFileUtils {
         }
     }
 
-    /**
-     * Zip
-     *
-     * @param sourceDirPath
-     * @param zipFilePath
-     * @throws IOException
-     */
-    public static void zip(final String sourceDirPath, final String zipFilePath) throws IOException {
-        Path p = Paths.get(zipFilePath);
-        // 1. Create an outputstream (zip) on the destination
-        try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
-
-            // 2. "Walk" => iterate over the source file
-            Path pp = Paths.get(sourceDirPath);
-            try(Stream<Path> walker = Files.walk(pp)) {
-
-                // 3. We only consider directories, and we copyt them directly by "relativising" them then copying them to the output
-                walker.filter(path -> !path.toFile().isDirectory())
-                        .forEach(path -> {
-                            ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
-                            try {
-                                zos.putNextEntry(zipEntry);
-                                Files.copy(path, zos);
-                                zos.closeEntry();
-                            } catch (IOException e) {
-                                LOG.error(e.getMessage(), e);
-                            }
-                        });
-            }
-            zos.finish();
-        }
-    }
-
 }

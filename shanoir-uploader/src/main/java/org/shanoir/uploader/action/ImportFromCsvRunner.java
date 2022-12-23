@@ -202,12 +202,14 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Study selectedStudy = null;
 
 		Date minDate;
+		Date selectedStudyDate = new Date();
 		if (!StringUtils.isBlank(csvImport.getMinDateFilter())) {
 			
-			String[] acceptedFormats = {"yyyy","yyyy-MM-dd"};
+			String[] acceptedFormats = {"yyyy","yyyy-MM-dd","yyyy-MM-dd-HH"};
 			try {
 				minDate = DateUtils.parseDate(csvImport.getMinDateFilter(), acceptedFormats);
-			} catch (ParseException e) {
+				selectedStudyDate = minDate;
+			} catch (Exception e) {
 				csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.date.format"));
 				return false;
 			}
@@ -230,12 +232,24 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 					// Select the first study (comparing dates)
 					Study study = (Study) studiesIt.next();
-					// get study date
-					SimpleDateFormat format1 = new SimpleDateFormat("yyyyMMdd");
+					// get study date time
+					String[] acceptedFormats = {
+							"yyyyMMddHHmmSS.FFFFFF",
+							"yyyyMMddHHmmSS.FFFFF",
+							"yyyyMMddHHmmSS.FFFF",
+							"yyyyMMddHHmmSS.FFF",
+							"yyyyMMddHHmmSS.FF",
+							"yyyyMMddHHmmSS.F",
+							"yyyyMMddHHmmSS",
+							"yyyyMMddHHmmS",
+							"yyyyMMddHHmm",
+							"yyyyMMddHHm",
+							"yyyyMMddHH"};
 					Date studyDate = new Date();
 					try {
-						studyDate = format1.parse(study.getDescriptionMap().get("date"));
+						studyDate = DateUtils.parseDate(study.getDescriptionMap().get("date") + study.getDescriptionMap().get("time"), acceptedFormats);
 					} catch (ParseException e) {
+						logger.error("could not consider this study:", e);
 						// Could not get date => skip the study
 						continue;
 					}
@@ -259,6 +273,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 							modelName = serie.getMriInformation().getManufacturersModelName();
 							foundPatient = true;
 							currentDate = studyDate;
+							selectedStudyDate = studyDate;
 						}
 					}
 				}
@@ -329,7 +344,14 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 
 		File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
-		List<String> allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeries, uploadFolder, this.dicomServerClient, null);
+		List<String> allFileNames = null;
+		try {
+			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeries, uploadFolder, this.dicomServerClient, null);
+		} catch (Exception e) {
+			logger.error("Could not copy data from PACS !");
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
+			return false;
+		}
 
 		/**
 		 * 5. Fill MRI information into serie from first DICOM file of each serie
@@ -427,7 +449,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Examination examDTO = new Examination();
 		examDTO.setCenterId(centerId);
 		examDTO.setComment(csvImport.getComment());
-		examDTO.setExaminationDate(new Date());
+		examDTO.setExaminationDate(selectedStudyDate);
 		examDTO.setPreclinical(false);
 		examDTO.setStudyId(Long.valueOf(csvImport.getStudyId()));
 		examDTO.setSubjectId(subject.getId());

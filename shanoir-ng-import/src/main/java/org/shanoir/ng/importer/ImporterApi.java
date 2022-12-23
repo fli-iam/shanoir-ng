@@ -90,6 +90,23 @@ public interface ImporterApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<ImportJob> uploadDicomZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException;
     
+    @ApiOperation(value = "Upload multiple examinations DICOM .zip file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file", })
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
+        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
+        @ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
+        @ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
+    @PostMapping(value = "/upload_multiple_dicom/study/{studyId}/studyName/{studyName}/studyCard/{studyCardId}/center/{centerId}/converter/{converterId}/",
+        produces = { "application/json" },
+        consumes = { "multipart/form-data" })
+    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
+    ResponseEntity<ImportJob> uploadMultipleDicom(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
+    		@ApiParam(value = "studyId", required = true) @PathVariable("studyId") Long studyId,
+    		@ApiParam(value = "studyName", required = true) @PathVariable("studyName") String studyName,
+    		@ApiParam(value = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
+    		@ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId,
+    		@ApiParam(value = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException;
+
     @ApiOperation(value = "Upload one EEG file", notes = "Upload channel and metadata from EEG file", response = Void.class, tags = {"Import one EEG file", })
     @ApiResponses(value = {
     	@ApiResponse(code = 200, message = "success returns file path", response = Void.class),

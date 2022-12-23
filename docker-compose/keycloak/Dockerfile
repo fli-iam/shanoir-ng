@@ -12,7 +12,7 @@
 
 FROM jboss/keycloak:16.1.1
 
-COPY themes/. /opt/jboss/keycloak/themes
+COPY --chown=jboss themes/. /opt/jboss/keycloak/themes
 
 COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/standalone/deployments/
 

@@ -53,10 +53,11 @@ public class Study implements DicomTreeNode {
 	 * @param description
 	 *            the description
 	 */
-	public Study(final String id, final String date, final String description) {
+	public Study(final String id, final String date, final String time, final String description) {
 		descriptionMap = new HashMap<String, String>();
 		descriptionMap.put("id", id);
 		descriptionMap.put("date", date);
+		descriptionMap.put("time", time);
 		studyDescriptionOverwrite = description;
 		this.relatedSeries = new HashMap<String, DicomTreeNode>();
 	}

@@ -12,5 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export type SubjectType = 'HEALTHY_VOLUNTEER' | 'PATIENT' | 'PHANTOM';
-export type Sex = 'M' | 'F' | 'O';
+package org.shanoir.ng.profile.repository;
+
+import org.shanoir.ng.profile.model.Profile;
+import org.springframework.data.repository.CrudRepository;
+
+/**
+ * Repository for profiles.
+ *
+ * @author msimon
+ */
+public interface ProfileRepository extends CrudRepository<Profile, Long> {
+
+}

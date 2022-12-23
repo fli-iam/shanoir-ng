@@ -12,5 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export type SubjectType = 'HEALTHY_VOLUNTEER' | 'PATIENT' | 'PHANTOM';
-export type Sex = 'M' | 'F' | 'O';
+package org.shanoir.ng.profile.service;
+
+import org.shanoir.ng.profile.model.Profile;
+import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
+import org.springframework.stereotype.Service;
+
+/**
+ * profile service implementation.
+ * 
+ * @author msimon
+ *
+ */
+@Service
+public class ProfileServiceImpl extends BasicEntityServiceImpl<Profile> implements ProfileService {
+
+	@Override
+	protected Profile updateValues(Profile from, Profile to) {
+		to.setProfileName(from.getProfileName());
+		return to;
+	}
+}

@@ -15,10 +15,17 @@
 package org.shanoir.ng.utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.slf4j.Logger;
@@ -145,4 +152,37 @@ public class Utils {
 		}
 		return res;
 	}
+
+    /**
+     * Zip
+     *
+     * @param sourceDirPath
+     * @param zipFilePath
+     * @throws IOException
+     */
+    public static void zip(final String sourceDirPath, final String zipFilePath) throws IOException {
+        Path p = Paths.get(zipFilePath);
+        // 1. Create an outputstream (zip) on the destination
+        try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(p))) {
+
+            // 2. "Walk" => iterate over the source file
+            Path pp = Paths.get(sourceDirPath);
+            try(Stream<Path> walker = Files.walk(pp)) {
+
+                // 3. We only consider directories, and we copyt them directly by "relativising" them then copying them to the output
+                walker.filter(path -> !path.toFile().isDirectory())
+                        .forEach(path -> {
+                            ZipEntry zipEntry = new ZipEntry(pp.relativize(path).toString());
+                            try {
+                                zos.putNextEntry(zipEntry);
+                                Files.copy(path, zos);
+                                zos.closeEntry();
+                            } catch (IOException e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+                        });
+            }
+            zos.finish();
+        }
+    }
 }

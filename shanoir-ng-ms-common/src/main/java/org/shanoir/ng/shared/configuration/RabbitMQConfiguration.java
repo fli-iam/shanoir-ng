@@ -129,6 +129,41 @@ public class RabbitMQConfiguration {
 
 	/** Queue to create get equipment ID from code. */
 	public static final String ACQUISITION_EQUIPEMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
+
+	/** Queue to get the study card from a equipment code. */
+	public static final String IMPORT_STUDY_CARD_QUEUE="import-study-card-queue";
+
+	/** Queue to get an equipment id from a code. */
+	public static final String EQUIPMENT_FROM_CODE_QUEUE="equipment-from-code-queue";
+
+	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
+	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
+	
+	private static final String CENTER_QUEUE_NAME_OUT = "center_queue_from_ng";
+
+	private static final String COIL_QUEUE_NAME_OUT = "coil_queue_from_ng";
+	
+	private static final String DELETE_ACQ_EQPT_QUEUE_NAME_OUT = "delete_acq_eqpt_queue_from_ng";
+
+	private static final String DELETE_CENTER_QUEUE_NAME_OUT = "delete_center_queue_from_ng";
+
+	private static final String DELETE_COIL_QUEUE_NAME_OUT = "delete_coil_queue_from_ng";
+	
+	private static final String MANUFACTURER_MODEL_QUEUE_NAME_OUT = "manufacturer_model_queue_from_ng";
+
+	private static final String MANUFACTURER_QUEUE_NAME_OUT = "manufacturer_queue_from_ng";
+
+	private static final String STUDY_QUEUE_NAME_IN = "study_queue_to_ng";
+
+	private static final String STUDY_DELETE_QUEUE_NAME_IN = "study_delete_queue_to_ng";
+
+	private static final String STUDY_QUEUE_NAME_OUT = "study_queue_from_ng";
+
+	private static final String SUBJECT_RPC_QUEUE_OUT = "subject_queue_with_RPC_from_ng";
+
+	private static final String SUBJECT_RPC_QUEUE_IN = "subject_queue_with_RPC_to_ng";
+
+	private static final String SUBJECT_QUEUE_OUT = "subject_queue_from_ng";
 	
 	////////////////// EXCHANGES //////////////////
 
@@ -302,5 +337,13 @@ public class RabbitMQConfiguration {
 	public static Queue deleteUserQueue() {
 		return new Queue(DELETE_USER_QUEUE, true);
 	}
-
+	
+	@Bean
+	public static Queue importStudyCardQueue() {
+		return new Queue(IMPORT_STUDY_CARD_QUEUE, true);
+	}
+	@Bean
+	public static Queue equipmentFromCodeQueue() {
+		return new Queue(EQUIPMENT_FROM_CODE_QUEUE, true);
+	}
 }

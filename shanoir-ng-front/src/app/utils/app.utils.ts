@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -51,6 +51,10 @@ export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '
 export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
+
+// Profile API
+export const BACKEND_API_PROFILE_URL: string = BACKEND_API_STUDIES_MS_URL + '/profiles';
+export const BACKEND_API_PROFILE_ALL_PROFILES_URL: string = BACKEND_API_PROFILE_URL + '/all';
 
 // Challenge API
 export const BACKEND_API_STUDY_CHALLENGES_URL: string = BACKEND_API_STUDIES_MS_URL + '/challenges';
@@ -109,6 +113,7 @@ export const BACKEND_API_MANUF_URL: string = BACKEND_API_STUDIES_MS_URL + '/manu
 // Import http api
 const BACKEND_API_IMPORT_MS_URL: string = BACKEND_API_URL + '/import';
 export const BACKEND_API_UPLOAD_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_dicom/';
+export const BACKEND_API_UPLOAD_MUTIPLE_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_multiple_dicom/';
 export const BACKEND_API_UPLOAD_PROCESSED_DATASET_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_processed_dataset/';
 export const BACKEND_API_IMPORT_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/import_dicom/';
 export const BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/start_import_job/';
@@ -147,13 +152,13 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
 }
 
 export function browserDownloadFile(blob: Blob, filename: string){
-    if (navigator.msSaveBlob) { 
+    if (navigator.msSaveBlob) {
         // IE 10+
         navigator.msSaveBlob(blob, filename);
     } else {
         var link = document.createElement('a');
         // Browsers that support HTML5 download attribute
-        if (link.download !== undefined) 
+        if (link.download !== undefined)
         {
             var url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
