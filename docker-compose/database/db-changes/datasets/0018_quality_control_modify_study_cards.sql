@@ -48,3 +48,6 @@ ALTER TABLE study_card_condition_value ADD CONSTRAINT FKnmg0gxqrew2nqktd0mm5hvi6
 INSERT INTO study_card_condition_value (condition_id, value) select id, dicom_value FROM study_card_condition;
 -- delete old column
 ALTER TABLE study_card_condition DROP dicom_value;
+
+-- add quality_tag in subject_study
+ALTER TABLE subject_study ADD COLUMN quality_tag int(11) NULL;

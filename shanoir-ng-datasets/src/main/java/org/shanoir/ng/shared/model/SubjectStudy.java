@@ -43,7 +43,7 @@ public class SubjectStudy {
                 joinColumns = @JoinColumn( name = "subject_study_id" ))
 	private List<Tag> tags;
     
-    private Integer tag;
+    private Integer qualityTag;
 
     
 	/**
@@ -105,11 +105,11 @@ public class SubjectStudy {
 	}
 	
 	public QualityTag getQualityTag() {
-        return QualityTag.get(tag);
+        return QualityTag.get(qualityTag);
     }
     
     public void setQualityTag(QualityTag tag) {
-        this.tag = tag != null ? tag.getId() : null;
+        this.qualityTag = tag != null ? tag.getId() : null;
     }
 
 }
