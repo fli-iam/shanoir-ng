@@ -16,18 +16,18 @@ package org.shanoir.ng.studycard.model.condition;
 
 import java.math.BigDecimal;
 
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Entity
-@GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
+@DiscriminatorValue("StudyCardDICOMCondition")
 public class StudyCardDICOMCondition extends StudyCardCondition {
 	
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardDICOMCondition.class);

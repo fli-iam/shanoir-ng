@@ -25,7 +25,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
-import javax.validation.constraints.NotNull;
 
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
@@ -53,9 +52,6 @@ public class QualityExaminationRule extends AbstractEntity {
 	@JoinColumn(name="rule_id")
 	private List<StudyCardCondition> conditions;
 
-	@NotNull
-	private int type; // examination, acquisition, dataset
-	
 	public QualityTag getQualityTag() {
         return QualityTag.get(tag);
     }
@@ -70,14 +66,6 @@ public class QualityExaminationRule extends AbstractEntity {
 
 	public void setConditions(List<StudyCardCondition> conditions) {
 		this.conditions = conditions;
-	}
-
-	public int getType() {
-		return type;
-	}
-
-	public void setType(int type) {
-		this.type = type;
 	}
 	
 	public void apply(Examination examination, Attributes examinationDicomAttributes, QualityCardResult result) {
