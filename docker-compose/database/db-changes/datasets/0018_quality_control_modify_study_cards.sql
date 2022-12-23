@@ -40,7 +40,8 @@ UPDATE study_card_rule SET scope = 'DatasetAcquisition' WHERE id IN (
 CREATE TABLE study_card_condition_value (
   id bigint(20) NOT NULL AUTO_INCREMENT,
   condition_id bigint(20) NOT NULL,
-  value varchar(255) DEFAULT NULL
+  value varchar(255) DEFAULT NULL,
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ALTER TABLE study_card_condition_value ADD CONSTRAINT FKnmg0gxqrew2nqktd0mm5hvi64 FOREIGN KEY (condition_id) REFERENCES study_card_condition(id);
 -- copy values afterwards
