@@ -12,7 +12,7 @@ CREATE TABLE quality_examination_rule (
   id bigint(20) NOT NULL AUTO_INCREMENT,
   tag int(11) DEFAULT NULL,
   quality_card_id bigint(20) DEFAULT NULL,
-  PRIMARY KEY (id),
+  PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ALTER TABLE quality_examination_rule ADD CONSTRAINT FK8bavfrsgqwil7aei15l00dg6g FOREIGN KEY (quality_card_id) REFERENCES quality_card (id);
 
