@@ -48,10 +48,10 @@ VALUES
 	(2,null,false,0,'QualityCard_UCAN',null,1);
 
 INSERT INTO study_card_rule
-	(id, study_card_id, type)
+	(id, study_card_id, scope)
 VALUES
-	(1,2,1),
-	(2,2,1);
+	(1,2,'DatasetAcquisition'),
+	(2,2,'Dataset');
 
 INSERT INTO study_card_condition
 	(id, rule_id, dicom_tag_or_field, operation)

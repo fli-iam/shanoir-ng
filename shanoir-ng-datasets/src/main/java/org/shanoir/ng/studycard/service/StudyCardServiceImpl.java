@@ -20,7 +20,7 @@ import java.util.List;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.model.StudyCardRule;
+import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +94,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 		studyCardDb.setId(studyCard.getId());
 		studyCardDb.setNiftiConverterId(studyCard.getNiftiConverterId());
 		studyCardDb.setStudyId(studyCard.getStudyId());
-		if (studyCardDb.getRules() == null) studyCardDb.setRules(new ArrayList<StudyCardRule>());
+		if (studyCardDb.getRules() == null) studyCardDb.setRules(new ArrayList<StudyCardRule<?>>());
 		else studyCardDb.getRules().clear();
 		if (studyCard.getRules() != null) studyCardDb.getRules().addAll(studyCard.getRules());
 		return studyCardDb;

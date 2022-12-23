@@ -20,7 +20,7 @@ import java.util.List;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.shanoir.ng.studycard.model.QualityCardRule;
+import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +33,7 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class QualityCardServicelmpl implements QualityCardService {
+public class QualityCardServiceImpl implements QualityCardService {
 
     @Autowired
     private QualityCardRepository qualityCardRepository;
@@ -89,7 +89,7 @@ public class QualityCardServicelmpl implements QualityCardService {
         qualityCardDb.setName(qualityCard.getName());
         qualityCardDb.setId(qualityCard.getId());
         qualityCardDb.setStudyId(qualityCard.getStudyId());
-        if (qualityCardDb.getRules() == null) qualityCardDb.setRules(new ArrayList<QualityCardRule>());
+        if (qualityCardDb.getRules() == null) qualityCardDb.setRules(new ArrayList<QualityExaminationRule>());
         else qualityCardDb.getRules().clear();
         if (qualityCard.getRules() != null) qualityCardDb.getRules().addAll(qualityCard.getRules());
         return qualityCardDb;

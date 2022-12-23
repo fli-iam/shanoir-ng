@@ -327,7 +327,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	private Page<FacetFieldEntry> buildFacetResultPage(FacetField facetField, FacetPageable facetPageable) {
 		List<FacetFieldEntry> content = new ArrayList<>();
 		for (FacetField.Count facetFieldCount : facetField.getValues()) {
-			MetadataField field = new SimpleField(facetField.getName());
+			Field field = new SimpleField(facetField.getName());
 			FacetFieldEntry facetFieldEntry = new SimpleFacetFieldEntry(
 					field, 
 					facetFieldCount.getName(), 

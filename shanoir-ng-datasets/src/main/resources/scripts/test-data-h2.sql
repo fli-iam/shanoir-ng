@@ -12,6 +12,13 @@
 
 -- Populates database for test
 
+INSERT INTO study
+	(id, name)
+VALUES
+	(1, 'DemoStudy1'),
+	(2, 'DemoStudy2'),
+	(3, 'DemoStudy3');
+
 INSERT INTO study_cards
 	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)
 VALUES 
@@ -22,26 +29,39 @@ VALUES
 	(5,null,false,0,'QualityCard1',null,1);
 	
 INSERT INTO study_card_rule
-	(id, type, study_card_id)
-VALUES (3,2,1),(4,2,1),(5,2,1),(6,2,1),(7,1,5),(8,1,5);
+	(id, scope, study_card_id)
+VALUES (3,'DatasetAcquisition',1),(4,'DatasetAcquisition',1),(5,'DatasetAcquisition',1),(6,'DatasetAcquisition',1),(7,'Dataset',5),(8,'Dataset',5);
 
 INSERT INTO study_card_assignment 
+    (id, field, value, scope)
 VALUES 
-	(3,11,'WORKED !!!!!',3),
-	(4,14,'TIME_OF_FLIGHT_MR_DATASET',4),
-	(5,5,'5',4),
-	(6,11,'ERROR',5),
-	(7,11,'OVERRIDEN',6),
-	(8,4,'4',6);
+	(3,11,'WORKED !!!!!','DatasetAcquisition'),
+	(4,14,'TIME_OF_FLIGHT_MR_DATASET','DatasetAcquisition'),
+	(5,5,'5','DatasetAcquisition'),
+	(6,11,'ERROR','DatasetAcquisition'),
+	(7,11,'OVERRIDEN','Dataset'),
+	(8,4,'4','Dataset');
+
+
+CREATE TABLE study_card_condition (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    dicom_tag int(11) DEFAULT NULL,
+    operation int(11) NOT NULL,
+    rule_id bigint(20) DEFAULT NULL,
+    shanoir_field int(11) DEFAULT NULL,
+    scope varchar(65) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT FKpi8v33fmd0wn64e06q8it8pkv FOREIGN KEY (rule_id) REFERENCES study_card_rule (id)
+);
 
 INSERT INTO study_card_condition
-	(id, dicom_tag_or_field, operation, rule_id)
+	(id, shanoir_field, operation, rule_id, scope, dicom_tag)
 VALUES 
-	(1,2,4,7),
-	(2,2,4,7),
-	(3,1573009,5,8),
-	(4,1573009,6,8),
-	(5,1573013,6,8);
+	(1,2,4,7,'AcquisitionMetadataConditionOnAcquisition', null),
+	(2,2,4,7,'AcquisitionMetadataConditionOnAcquisition', null),
+	(3,1573009,5,8,'AcquisitionMetadataConditionOnAcquisition', null),
+	(4,1573009,6,8,'AcquisitionMetadataConditionOnAcquisition', null),
+	(5,1573013,6,8,'AcquisitionMetadataConditionOnAcquisition', null);
 
 INSERT INTO study_card_condition_value
 	(id, value, condition_id)

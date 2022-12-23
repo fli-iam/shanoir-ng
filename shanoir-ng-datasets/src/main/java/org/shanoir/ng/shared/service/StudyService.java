@@ -33,6 +33,6 @@ public interface StudyService {
 	 * @return a study or null.
 	 * @throws AccessDeniedException
 	 */
-	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT') and (@datasetSecurityService.hasRightOnStudy(#id, 'CAN_SEE_ALL') or @@datasetSecurityService.hasRightOnStudy(#id, 'CAN_ADMINISTRATE'))")
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT') and (@datasetSecurityService.hasRightOnStudy(#id, 'CAN_SEE_ALL') or @datasetSecurityService.hasRightOnStudy(#id, 'CAN_ADMINISTRATE'))")
 	Study findById(Long id);
 }

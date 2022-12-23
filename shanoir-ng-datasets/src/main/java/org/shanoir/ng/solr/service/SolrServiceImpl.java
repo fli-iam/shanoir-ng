@@ -139,7 +139,7 @@ public class SolrServiceImpl implements SolrService {
 		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
 
 		// Get tags
-		List<SubjectStudy> list = subjectStudyRepo.findByStudyIdInAndSubjectIdIn(Collections.singletonList(shanoirMetadata.getStudyId()), Collections.singletonList(shanoirMetadata.getSubjectId()));
+		List<SubjectStudy> list = subjectStudyRepo.findByStudy_IdInAndSubjectIdIn(Collections.singletonList(shanoirMetadata.getStudyId()), Collections.singletonList(shanoirMetadata.getSubjectId()));
 
 		List<String> tags = new ArrayList<>();
 		if (list != null) {

@@ -15,6 +15,7 @@
 package org.shanoir.ng.studycard.service;
 
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.springframework.stereotype.Service;
 
 public interface QualityCardService extends CardService<QualityCard> {
 

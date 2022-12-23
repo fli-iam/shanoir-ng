@@ -3,6 +3,7 @@ package org.shanoir.ng.shared.model;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -25,7 +26,7 @@ public class SubjectStudy {
 	private Long id;
 
 	/** Study. */
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "study_id")
 	@NotNull
 	private Study study;

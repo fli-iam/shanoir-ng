@@ -168,7 +168,8 @@ public class DatasetApiControllerTest {
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
 		exam.setId(1L);
-		exam.setStudyId(1L);
+		exam.setStudy(new Study());
+		exam.getStudy().setId(1L);
 		dsAcq.setExamination(exam);
 		updatedMetadata.setComment("comment");
 		updatedMetadata.setName("test 1");

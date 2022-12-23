@@ -34,7 +34,8 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.validation.FindByRepository;
 import org.shanoir.ng.studycard.controler.StudyCardApiController;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.service.StudyCardProcessingService;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
+import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -76,7 +77,10 @@ public class StudyCardApiControllerTest {
 	private StudyCardService studyCardServiceMock;
 	
 	@MockBean
-	private StudyCardProcessingService studyCardProcessingServiceMock;
+    private QualityCardService qualityCardServiceMock;
+	
+	@MockBean
+	private CardsProcessingService studyCardProcessingServiceMock;
 	
 	@MockBean
 	private DatasetAcquisitionService datasetAcquisitionServiceMock;

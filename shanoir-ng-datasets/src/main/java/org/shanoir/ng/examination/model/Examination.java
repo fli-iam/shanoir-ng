@@ -313,7 +313,7 @@ public class Examination extends HalEntity {
      * @return the studyId
      */
     public Long getStudyId() {
-        return getStudy() != null ? getStudyId() : null;
+        return getStudy() != null ? getStudy().getId() : null;
     }
 	
 	public Study getStudy() {
