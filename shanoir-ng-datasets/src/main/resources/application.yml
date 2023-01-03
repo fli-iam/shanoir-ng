@@ -76,7 +76,6 @@ keycloak:
   # attention: this config for the token issuer needs to match the domain of the frontend
   # used for token creation AND the server url needs to be known from inside the docker network:
   auth-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth
-  token-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/token
   cors: true
   realm: shanoir-ng
   resource: shanoir-ng-datasets
@@ -140,6 +139,7 @@ vip:
   sleep-time: 20000
   file-formats: .nii.gz, .nii
   keycloak:
+    token-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/token
     resource: vip
     credentials:
       secret: <credential-secret>

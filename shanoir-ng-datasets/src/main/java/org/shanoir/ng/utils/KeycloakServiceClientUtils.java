@@ -23,7 +23,7 @@ public class KeycloakServiceClientUtils {
     private final String GRANT_TYPE="client_credentials";
     @Autowired
     private RestTemplate restTemplate;
-    @Value("${keycloak.token-server-url}")
+    @Value("${vip.keycloak.token-server-url}")
     private String serverUrl;
 
     /**
