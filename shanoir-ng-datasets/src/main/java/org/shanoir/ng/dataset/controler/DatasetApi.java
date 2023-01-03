@@ -277,9 +277,8 @@ public interface DatasetApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "no study found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/allById", produces = { "application/json" })
+	@PostMapping(value = "/allById", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetDTO>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
-		
 }

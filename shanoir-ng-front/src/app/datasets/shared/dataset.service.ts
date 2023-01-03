@@ -91,7 +91,10 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
     }
 
     getByIds(ids: Set<number>): Promise<Dataset[]> {
-        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById')
+        const formData: FormData = new FormData();
+        formData.set('datasetIds', Array.from(ids).join(","));
+        
+        return this.http.post<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData)
             .toPromise()
             .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
     }
