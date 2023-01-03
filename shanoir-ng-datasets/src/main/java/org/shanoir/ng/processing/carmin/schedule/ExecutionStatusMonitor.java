@@ -19,6 +19,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
+import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
@@ -34,11 +35,15 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.utils.KeycloakServiceClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,9 +67,17 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     @Value("${vip.file-formats}")
     private String[] listOfNiftiExt;
 
+    @Value("${vip.keycloak.resource}")
+    private String vipClientId;
+
+    @Value("${vip.keycloak.credentials.secret}")
+    private String vipCredentialsSecret;
+
     private boolean stop;
 
     private String identifier;
+
+    private String accessToken = "";
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionStatusMonitor.class);
 
@@ -83,10 +96,13 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     @Autowired
     private SubjectRepository subjectRepository;
 
+    @Autowired
+    private KeycloakServiceClientUtils keycloakServiceClientUtils;
+
     @Async
     @Override
     @Transactional
-    public void startJob(String identifier) {
+    public void startJob(String identifier) throws EntityNotFoundException {
 
         this.identifier = identifier;
         this.stop = false;
@@ -94,13 +110,28 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
         String uri = VIP_URI + identifier + "/summary";
         RestTemplate restTemplate = new RestTemplate();
 
+        // check if the token is initialized
+        if (this.accessToken.isEmpty()) {
+            // stop the thread if the token is not refreshed
+            if (!this.refreshServiceClientAccessToken()) {
+                return;
+            }
+        }
+
+        CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
+                .findByIdentifier(this.identifier)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "entity not found with identifier :" + this.identifier));
+
         while (!stop) {
-            Execution execution = restTemplate.getForObject(uri, Execution.class);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + this.accessToken);
+            HttpEntity entity = new HttpEntity(headers);
+
             try {
-                CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
-                        .findByIdentifier(this.identifier)
-                        .orElseThrow(() -> new EntityNotFoundException(
-                                "entity not found with identifier :" + this.identifier));
+                ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
+                Execution execution = executionResponseEntity.getBody();
 
                 switch (execution.getStatus()) {
                     case FINISHED:
@@ -129,7 +160,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                         LOG.info("execution status updated stopping job...");
 
                         stop = true;
-
                         break;
 
                     case UNKOWN:
@@ -150,20 +180,33 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                     default:
                         this.stop = true;
                         break;
-
                 }
-
+            } catch (HttpStatusCodeException e) {
+                if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                    LOG.warn("Unauthorized");
+                    LOG.info("Getting new token...");
+                    if (!this.refreshServiceClientAccessToken()) {
+                        this.stop = true;
+                        break;
+                    }
+                } else {
+                    LOG.error("error while getting execution info with status : {} ,and message :", e.getStatusCode(), e.getMessage());
+                    this.stop = true;
+                    break;
+                }
+            } catch (RestClientException e) {
+                LOG.error("there is no response payload while getting execution info");
+                this.stop = true;
+                break;
             } catch (InterruptedException e) {
                 LOG.error("sleep thread exception :", e);
-                e.getMessage();
-            } catch (EntityNotFoundException e) {
-                LOG.error("entity not found :", e);
-                e.getMessage();
+                this.stop = true;
+                break;
             } catch (IOException e) {
                 LOG.error("file exception :", e);
-                e.getMessage();
+                this.stop = true;
+                break;
             }
-
         }
     }
 
@@ -296,4 +339,14 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
         return (dotIndex == -1) ? file : file.substring(0, dotIndex);
     }
 
+    private boolean refreshServiceClientAccessToken(){
+        AccessTokenResponse accessTokenResponse = keycloakServiceClientUtils.getServiceAccountAccessToken(vipClientId, vipCredentialsSecret);
+        if(accessTokenResponse == null){
+            LOG.error("error while getting the service client token");
+            return false;
+        }
+        this.accessToken = accessTokenResponse.getToken();
+        LOG.info("new Token : {}", this.accessToken);
+        return true;
+    }
 }

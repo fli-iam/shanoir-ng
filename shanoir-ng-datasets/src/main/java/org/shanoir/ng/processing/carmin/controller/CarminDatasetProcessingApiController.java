@@ -40,7 +40,7 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
     @Override
     public ResponseEntity<CarminDatasetProcessing> saveNewCarminDatasetProcessing(
             @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing, BindingResult result)
-            throws RestServiceException {
+            throws RestServiceException, EntityNotFoundException {
 
         /* Validation */
         validate(result);
