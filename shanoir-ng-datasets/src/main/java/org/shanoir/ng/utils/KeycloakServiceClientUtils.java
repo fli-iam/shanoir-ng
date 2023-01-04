@@ -21,23 +21,30 @@ public class KeycloakServiceClientUtils {
      */
     private static final Logger LOG = LoggerFactory.getLogger(KeycloakServiceClientUtils.class);
     private final String GRANT_TYPE="client_credentials";
+
+    @Value("${service-account.token.uri}")
+    private String serverUrl;
+    @Value("${service-account.client.id}")
+    private String clientId;
+    @Value("${service-account.client.credential-secret}")
+    private String clientSecret;
+
     @Autowired
     private RestTemplate restTemplate;
-    @Value("${vip.keycloak.token-server-url}")
-    private String serverUrl;
+
 
     /**
      * Get an access token using a service account
      * @return AccessTokenResponse
      */
-    public AccessTokenResponse getServiceAccountAccessToken(String clientId, String clientSecret){
+    public AccessTokenResponse getServiceAccountAccessToken(){
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
         MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
-        map.add("client_secret", clientSecret);
-        map.add("client_id", clientId);
+        map.add("client_id", this.clientId);
+        map.add("client_secret", this.clientSecret);
         map.add("grant_type", this.GRANT_TYPE);
 
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);

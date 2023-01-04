@@ -67,12 +67,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     @Value("${vip.file-formats}")
     private String[] listOfNiftiExt;
 
-    @Value("${vip.keycloak.resource}")
-    private String vipClientId;
-
-    @Value("${vip.keycloak.credentials.secret}")
-    private String vipCredentialsSecret;
-
     private boolean stop;
 
     private String identifier;
@@ -103,7 +97,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     @Override
     @Transactional
     public void startJob(String identifier) throws EntityNotFoundException {
-
+        int attempts = 1;
         this.identifier = identifier;
         this.stop = false;
 
@@ -112,7 +106,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
         // check if the token is initialized
         if (this.accessToken.isEmpty()) {
-            // stop the thread if the token is not refreshed
+            // refresh the token and stop the thread if it's not refreshed
             if (!this.refreshServiceClientAccessToken()) {
                 return;
             }
@@ -125,14 +119,24 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
         while (!stop) {
 
+            // init headers with the active access token
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + this.accessToken);
             HttpEntity entity = new HttpEntity(headers);
 
+            // check how many times the loop tried to get the execution's info without success
+            if(attempts >= 3){
+                LOG.error("failed to get execution details in {} attempts.", attempts);
+                LOG.error("Stopping the thread...");
+                this.stop = true;
+                break;
+            }
+
             try {
                 ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
                 Execution execution = executionResponseEntity.getBody();
-
+                // init attempts
+                attempts = 1;
                 switch (execution.getStatus()) {
                     case FINISHED:
                         /**
@@ -157,7 +161,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                                         userImportDir.getAbsoluteFile(),
                                         carminDatasetProcessing));
 
-                        LOG.info("execution status updated stopping job...");
+                        LOG.info("execution status updated, stopping job...");
 
                         stop = true;
                         break;
@@ -168,7 +172,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
                         carminDatasetProcessing.setStatus(execution.getStatus());
                         this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
-                        LOG.info("execution status updated stopping job...");
+                        LOG.info("execution status updated, stopping job...");
 
                         stop = true;
                         break;
@@ -189,23 +193,21 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                         this.stop = true;
                         break;
                     }
+                    // inc attempts.
+                    attempts++;
                 } else {
                     LOG.error("error while getting execution info with status : {} ,and message :", e.getStatusCode(), e.getMessage());
                     this.stop = true;
-                    break;
                 }
             } catch (RestClientException e) {
                 LOG.error("there is no response payload while getting execution info");
                 this.stop = true;
-                break;
             } catch (InterruptedException e) {
                 LOG.error("sleep thread exception :", e);
                 this.stop = true;
-                break;
             } catch (IOException e) {
                 LOG.error("file exception :", e);
                 this.stop = true;
-                break;
             }
         }
     }
@@ -340,7 +342,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     }
 
     private boolean refreshServiceClientAccessToken(){
-        AccessTokenResponse accessTokenResponse = keycloakServiceClientUtils.getServiceAccountAccessToken(vipClientId, vipCredentialsSecret);
+        AccessTokenResponse accessTokenResponse = keycloakServiceClientUtils.getServiceAccountAccessToken();
         if(accessTokenResponse == null){
             LOG.error("error while getting the service client token");
             return false;
