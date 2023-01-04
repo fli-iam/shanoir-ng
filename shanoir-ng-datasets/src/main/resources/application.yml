@@ -142,7 +142,7 @@ vip:
 # Service account
 service-account:
   token:
-    uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/realms/<insert-realm>/protocol/openid-connect/token
+    uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng/protocol/openid-connect/token
   client:
     id: service-account
     credential-secret: <credential-secret>
