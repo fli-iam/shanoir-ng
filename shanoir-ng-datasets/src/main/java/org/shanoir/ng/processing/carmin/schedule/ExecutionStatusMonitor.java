@@ -67,7 +67,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     @Value("${vip.file-formats}")
     private String[] listOfNiftiExt;
 
-    private boolean stop;
+    private ThreadLocal<Boolean> stop = new ThreadLocal<>();
 
     private String identifier;
 
@@ -99,7 +99,8 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     public void startJob(String identifier) throws EntityNotFoundException {
         int attempts = 1;
         this.identifier = identifier;
-        this.stop = false;
+
+        stop.set(false);
 
         String uri = VIP_URI + identifier + "/summary";
         RestTemplate restTemplate = new RestTemplate();
@@ -117,7 +118,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                 .orElseThrow(() -> new EntityNotFoundException(
                         "entity not found with identifier :" + this.identifier));
 
-        while (!stop) {
+        while (!stop.get()) {
 
             // init headers with the active access token
             HttpHeaders headers = new HttpHeaders();
@@ -128,7 +129,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
             if(attempts >= 3){
                 LOG.error("failed to get execution details in {} attempts.", attempts);
                 LOG.error("Stopping the thread...");
-                this.stop = true;
+                stop.set(true);
                 break;
             }
 
@@ -163,7 +164,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
                         LOG.info("execution status updated, stopping job...");
 
-                        stop = true;
+                        stop.set(true);
                         break;
 
                     case UNKOWN:
@@ -174,7 +175,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                         this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
                         LOG.info("execution status updated, stopping job...");
 
-                        stop = true;
+                        stop.set(true);
                         break;
 
                     case RUNNING:
@@ -182,7 +183,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                         break;
 
                     default:
-                        this.stop = true;
+                        stop.set(true);
                         break;
                 }
             } catch (HttpStatusCodeException e) {
@@ -190,24 +191,24 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                     LOG.warn("Unauthorized");
                     LOG.info("Getting new token...");
                     if (!this.refreshServiceClientAccessToken()) {
-                        this.stop = true;
+                        stop.set(true);
                         break;
                     }
                     // inc attempts.
                     attempts++;
                 } else {
                     LOG.error("error while getting execution info with status : {} ,and message :", e.getStatusCode(), e.getMessage());
-                    this.stop = true;
+                    stop.set(true);
                 }
             } catch (RestClientException e) {
                 LOG.error("there is no response payload while getting execution info");
-                this.stop = true;
+                stop.set(true);
             } catch (InterruptedException e) {
                 LOG.error("sleep thread exception :", e);
-                this.stop = true;
+                stop.set(true);
             } catch (IOException e) {
                 LOG.error("file exception :", e);
-                this.stop = true;
+                stop.set(true);
             }
         }
     }
