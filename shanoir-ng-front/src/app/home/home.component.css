@@ -25,11 +25,11 @@
 .access-requests { border-color: blueviolet; }
 .access-requests .icon { background-color: blueviolet; }
 .access-requests .pannel table { margin-top: 8px; }
-access-requests-list:hover { color: blueviolet; }
-access-requests-list td {  overflow: hidden; }
-access-requests-list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; }
-access-requests-list .narrow { max-width: 30px; }
-access-requests-list i { color: var(--color-a-light); }
+.access-requests-list:hover { color: blueviolet; }
+.access-requests-list td {  overflow: hidden; }
+.access-requests-list .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 80px; }
+.access-requests-list .narrow { max-width: 30px; }
+.access-requests-list i { color: var(--color-a-light); }
 .pending { font-size: 16px; }
 .pending em { font-style: normal; font-size: 20px; color: var(--color-a); font-weight: bold; }
 .solr { border-color: darkorange; }
