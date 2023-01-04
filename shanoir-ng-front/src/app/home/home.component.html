@@ -70,9 +70,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <td>
                 <div class="pannel">
                     <table>
+                        <tr>
+                        <td>
+                        <b>UserName</b>
+                        </td>
+                        <td>
+                        <b>Study</b>
+                        </td>
+                        </tr>
                         <tr *ngFor="let notif of accessRequests" [routerLink]="'/access-request/details/' + notif.id" class="notification-list link">
-                            <td>Access request from : </td> <td>{{notif.user.username}}</td>
-                            <td>On study: </td> <td> {{getStudyName(notif.studyId)}}</td>
+                            <td>{{notif.user.username}}</td>
+                            <td>{{getStudyName(notif.studyId)}}</td>
                         </tr>
                     </table>
                 </div>
