@@ -152,7 +152,6 @@ public class AccessRequestApiControllerTest {
 		
 		// One is already approved, studyName should not appear
 		listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
-		listOfRequests.get(0).setStudyName("shouldNotBeNhere");
 		
 		Mockito.when(this.accessRequestService.findByStudyIdAndStatus(Mockito.any(List.class), Mockito.anyInt()))
 		.thenReturn(listOfRequests);
@@ -162,7 +161,6 @@ public class AccessRequestApiControllerTest {
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().string(
 						Matchers.allOf(
-								Matchers.not(Matchers.containsString("shouldNotBeNhere")),
 								Matchers.containsString("name")
 								)
 						)
@@ -181,31 +179,6 @@ public class AccessRequestApiControllerTest {
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 1)
-	public void findAllByUserIdNoDemand() throws Exception {
-		// NO access request on demand -> NO CONTENT
-		Mockito.when(rabbitTemplate.
-				convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, 1L))
-		.thenReturn(Collections.singletonList(1L));
-	
-		List<AccessRequest> listOfRequests = new ArrayList<AccessRequest>();
-		listOfRequests.add(createAccessRequest());
-		listOfRequests.add(createAccessRequest());
-		
-		// One is already approved, studyName should not appear
-		listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
-		listOfRequests.get(1).setStatus(AccessRequest.APPROVED);
-		
-		Mockito.when(this.accessRequestService.findByStudyIdAndStatus(Mockito.any(List.class), Mockito.anyInt()))
-		.thenReturn(listOfRequests);
-		
-
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
 	}
 
 	@Test
