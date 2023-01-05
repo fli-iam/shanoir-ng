@@ -24,7 +24,8 @@ import { process } from '../process';
 let url = window.location;
 const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
 export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
-export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
+export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/welcome";
+export const LOGIN_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
 export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/assets/silent-check-sso.html";
 
 
@@ -51,6 +52,8 @@ export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '
 export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
+export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_URL + '/public';
+export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_URL + '/public/data';
 
 // Profile API
 export const BACKEND_API_PROFILE_URL: string = BACKEND_API_STUDIES_MS_URL + '/profiles';

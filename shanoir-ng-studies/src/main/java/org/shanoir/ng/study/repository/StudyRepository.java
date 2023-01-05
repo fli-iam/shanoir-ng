@@ -56,4 +56,9 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 */
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUseRightId, boolean confirmed);
 
+	/**
+	 * Lists all the publicly available studies.
+	 * @return all the publicly available studies.
+	 */
+	List<Study> findByVisibleByDefaultTrue();
 }

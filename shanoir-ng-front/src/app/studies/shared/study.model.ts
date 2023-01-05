@@ -48,6 +48,7 @@ export class Study extends Entity {
     withExamination: boolean;
     studyCardList: StudyCard[];
     tags: Tag[];
+    publicDescription: string;
 
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);

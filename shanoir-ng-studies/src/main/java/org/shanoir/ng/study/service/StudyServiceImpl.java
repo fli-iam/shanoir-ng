@@ -240,6 +240,7 @@ public class StudyServiceImpl implements StudyService {
 		}
 		studyDb.setName(study.getName());
 		studyDb.setProfile(study.getProfile());
+		studyDb.setPublicDescription(study.getPublicDescription());
 		studyDb.setStudyStatus(study.getStudyStatus());
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setWithExamination(study.isWithExamination());
@@ -577,6 +578,11 @@ public class StudyServiceImpl implements StudyService {
 	public List<Study> findChallenges() {
 		// Utils.copyList is used to prevent a bug with @PostFilter
 		return Utils.copyList(studyRepository.findByChallengeTrue());
+	}
+
+	@Override
+	public List<Study> findPublicStudies() {
+		return this.studyRepository.findByVisibleByDefaultTrue();
 	}
 
 }

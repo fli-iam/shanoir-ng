@@ -41,6 +41,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
+import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
@@ -384,4 +385,33 @@ public class StudyApiController implements StudyApi {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
+	@Override
+	public ResponseEntity<List<IdName>> findPublicStudies() {
+		List<IdName> studiesDTO = new ArrayList<>();
+
+		List<Study> studies = studyService.findPublicStudies();
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+
+		for (Study study : studies) {
+			studiesDTO.add(studyMapper.studyToIdNameDTO(study));
+		}
+		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData() {
+		List<PublicStudyDTO> studiesDTO = new ArrayList<>();
+
+		List<Study> studies = studyService.findPublicStudies();
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+
+		for (Study study : studies) {
+			studiesDTO.add(studyMapper.studyToPublicStudyDTO(study));
+		}
+		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
+	}
 }

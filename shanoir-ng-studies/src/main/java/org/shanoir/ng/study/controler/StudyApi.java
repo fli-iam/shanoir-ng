@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
+import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
@@ -77,6 +78,24 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyDTO>> findStudies();
+
+	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available", response = Study.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Study.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Study.class),
+			@ApiResponse(code = 404, message = "no study found", response = Study.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
+	@RequestMapping(value = "/public", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<IdName>> findPublicStudies();
+
+	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available", response = Study.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Study.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Study.class),
+			@ApiResponse(code = 404, message = "no study found", response = Study.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
+	@RequestMapping(value = "/public/data", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData();
 
 	@ApiOperation(value = "", notes = "Returns id and name for all the studies", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {

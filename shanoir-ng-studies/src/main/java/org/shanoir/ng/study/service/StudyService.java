@@ -131,4 +131,8 @@ public interface StudyService {
 	 */
 	String getStudyFilePath(Long studyId, String fileName);
 
+	/**
+		* Returns all public available studies;
+	 */
+	List<Study> findPublicStudies();
 }
