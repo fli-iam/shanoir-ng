@@ -276,6 +276,16 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
     }
 
     public addUser(selectedUser: User, rights: StudyUserRight[] = [StudyUserRight.CAN_SEE_ALL]) {
+        if (!selectedUser) {
+            return;
+        }
+        if (this.studyUserList.filter(user => user.userId == selectedUser.id).length > 0){
+            this.consoleService.log('warn', "User already in the list.");
+            return;   
+        }
+        if (this.isMe(selectedUser)) {
+            this.freshlyAddedMe = true;
+        }
         let backedUpStudyUser: StudyUser = this.studyUserBackup.filter(su => su.userId == selectedUser.id)[0];
         if (backedUpStudyUser) {
             this.studyUserList.unshift(backedUpStudyUser);

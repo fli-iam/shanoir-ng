@@ -1,6 +1,5 @@
 package org.shanoir.ng.accessrequest;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -155,7 +154,7 @@ public class AccessRequestApiControllerTest {
 		listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
 		listOfRequests.get(0).setStudyName("shouldNotBeNhere");
 		
-		Mockito.when(this.accessRequestService.findByStudyId(Mockito.any(List.class)))
+		Mockito.when(this.accessRequestService.findByStudyIdAndStatus(Mockito.any(List.class), Mockito.anyInt()))
 		.thenReturn(listOfRequests);
 		
 
@@ -200,7 +199,7 @@ public class AccessRequestApiControllerTest {
 		listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
 		listOfRequests.get(1).setStatus(AccessRequest.APPROVED);
 		
-		Mockito.when(this.accessRequestService.findByStudyId(Mockito.any(List.class)))
+		Mockito.when(this.accessRequestService.findByStudyIdAndStatus(Mockito.any(List.class), Mockito.anyInt()))
 		.thenReturn(listOfRequests);
 		
 

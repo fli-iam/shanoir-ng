@@ -92,8 +92,8 @@ export class AccountRequestComponent {
     }
 
     getOut(): void {
-        // Return to main page
-        this.router.navigate(["/"]);
+        // Return to login
+        window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
 
     cancelAccountRequest(): void {

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccessRequestRepository  extends CrudRepository<AccessRequest, Long> {
 
-	List<AccessRequest> findByStudyIdIn(List<Long> studiesId);
+	List<AccessRequest> findByStudyIdInAndStatus(List<Long> studiesId, int status);
 
 	List<AccessRequest> findByUserIdAndStudyId(Long userId, Long studyId);
 

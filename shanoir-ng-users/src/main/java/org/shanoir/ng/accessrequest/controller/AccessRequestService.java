@@ -11,8 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface AccessRequestService extends BasicEntityService<AccessRequest>{
 
-	List<AccessRequest> findByStudyId(List<Long> studiesId);
-
 	List<AccessRequest> findByUserIdAndStudyId(Long userId, Long studyId);
 	
 	@Override
@@ -22,4 +20,6 @@ public interface AccessRequestService extends BasicEntityService<AccessRequest>{
 
 	@Override
 	Optional<AccessRequest> findById(Long id);
+
+	List<AccessRequest> findByStudyIdAndStatus(List<Long> studiesId, int status);
 }

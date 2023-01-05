@@ -1,10 +1,10 @@
 package org.shanoir.ng.accessrequest.controller;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -90,7 +90,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 			}
 		}
 
-		if (request.getStudyName() == null) {
+		if (StringUtils.isEmpty(request.getStudyName())) {
 			String studyName = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_NAME_QUEUE, request.getStudyId());
 			request.setStudyName(studyName);
 		}
@@ -121,21 +121,13 @@ public class AccessRequestApiController implements AccessRequestApi {
 		}
 
 		// Get all access requests
-		List<AccessRequest> accessRequests = this.accessRequestService.findByStudyId(studiesId);
+		List<AccessRequest> accessRequests = this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_DEMAND);
 
-		List<AccessRequest> unresolvedRequests = new ArrayList<AccessRequest>();
-		// Filter by status
-		for (AccessRequest request : accessRequests) {
-			if (AccessRequest.ON_DEMAND == request.getStatus()) {
-				unresolvedRequests.add(request);
-			}
-		}
-
-		if (CollectionUtils.isEmpty(unresolvedRequests)) {
+		if (CollectionUtils.isEmpty(accessRequests)) {
 			return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
 		}
 
-		return new ResponseEntity<List<AccessRequest>>(unresolvedRequests, HttpStatus.OK);
+		return new ResponseEntity<List<AccessRequest>>(accessRequests, HttpStatus.OK);
 	}
 
 	public ResponseEntity<Void> resolveNewAccessRequest(
@@ -223,6 +215,6 @@ public class AccessRequestApiController implements AccessRequestApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId
 			) throws RestServiceException {
 		
-		return new ResponseEntity<List<AccessRequest>>(this.accessRequestService.findByStudyId(Collections.singletonList(studyId)), HttpStatus.OK);
+		return new ResponseEntity<List<AccessRequest>>(this.accessRequestService.findByStudyIdAndStatus(Collections.singletonList(studyId), AccessRequest.ON_DEMAND), HttpStatus.OK);
 	}
 }

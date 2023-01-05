@@ -90,14 +90,19 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     initView(): Promise<void> {
-        this.studyService.getPublicStudiesConnected().then(studies =>
-            {this.studies = studies;}
-        );
-        return this.accessRequestService.get(this.id).then(accessRequest => { this.accessRequest = accessRequest; });
+        let studies = this.studyService.getPublicStudiesConnected();
+        let access = this.accessRequestService.get(this.id);
+        
+        return Promise.all([studies, access]).then(([studiesRes, accessRequestRes]) => {
+            this.studies = studiesRes;
+            this.accessRequest = accessRequestRes;
+        });
     }
 
     acceptRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, true).then(value => this.router.navigate(['/study/details/' + this.accessRequest.studyId]));
+        this.accessRequestService.resolveRequest(this.accessRequest.id, true).then(value => this.router.navigate(['/study/details/' + this.accessRequest.studyId])).then(() => {
+            window.location.hash="members";
+        });
     }
     
     refuseRequest() {
