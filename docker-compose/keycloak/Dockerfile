@@ -42,4 +42,4 @@ COPY entrypoint entrypoint_common oneshot /bin/
 # (like all other env vars)
 ENV PROXY_ADDRESS_FORWARDING ""
 
-ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh", "start-dev", "--import-realm", "--hostname-path=/auth"]
+ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh", "start-dev", "--import-realm", "--hostname-path=/auth", "--proxy=edge"]
