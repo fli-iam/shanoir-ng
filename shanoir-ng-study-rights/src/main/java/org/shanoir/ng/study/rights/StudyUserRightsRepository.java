@@ -37,11 +37,14 @@ public interface StudyUserRightsRepository extends CrudRepository<StudyUser, Lon
 	Iterable<StudyUser> findByUserId(Long userId);
 	
 	Iterable<StudyUser> findByStudyId(Long studyId);
-
+	
 	@Query("select su.studyId from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
 	List<Long> findDistinctStudyIdByUserId(Long userId, int right);
 
 	@Query("select su from StudyUser su where su.userId = :userId and :right in elements(su.studyUserRights)")
 	Iterable<StudyUser> findByUserIdAndRight(Long userId, int right);
+	
+	@Query("select su from StudyUser su where su.studyId = :studyId and :right in elements(su.studyUserRights)")
+	Iterable<StudyUser> findByStudyIdAndRight(Long studyId, int right);
 	
 }

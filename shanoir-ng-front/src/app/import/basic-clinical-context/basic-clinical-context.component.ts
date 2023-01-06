@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,15 +33,15 @@ import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from 
     animations: [slideDown, preventInitialChildAnimations]
 })
 export class BasicClinicalContextComponent extends AbstractClinicalContextComponent implements OnDestroy {
-    
+
     patient: PatientDicom;
-    
+
     postConstructor() {
         this.patient = this.importDataService.patients[0];
         this.modality = this.getFirstSelectedSerie().modality.toString();
         this.useStudyCard = this.modality.toUpperCase() == "MR";
     }
-    
+
     protected exitCondition(): boolean {
         return !this.importDataService.patients || !this.importDataService.patients[0];
     }
@@ -49,7 +49,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     getNextUrl(): string {
         return '/imports/upload';
     }
-    
+
     importData(): Promise<any> {
         let importJob = this.buildImportJob();
         return this.importService.startImportJob(importJob);
@@ -62,7 +62,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         let simpleSubject: SimpleSubject = {
             id: context.subject.id,
             name: context.subject.name,
-            identifier: context.subject.identifier, 
+            identifier: context.subject.identifier,
             subjectStudyList: [context.subject.subjectStudy]
         };
         this.patient.subject = simpleSubject;
@@ -81,6 +81,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         importJob.converterId = context.niftiConverter.id;
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
+        importJob.anonymisationProfileToUse = context.study.profile.profileName;
         return importJob;
     }
 
@@ -95,7 +96,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     private equipmentsEquals(eq1: AcquisitionEquipment, eq2: EquipmentDicom): boolean {
         return eq1 && eq2 && eq2?.deviceSerialNumber && (eq1?.serialNumber == eq2?.deviceSerialNumber);
     }
-    
+
     protected fillCreateSubjectStep(step: Step) {
         step.entity = this.getPrefilledSubject();
         step.data.firstName = this.computeNameFromDicomTag(this.patient.patientName)[1];
@@ -144,17 +145,17 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
 
     protected fillCreateAcqEqStep(step: Step) {
         step.entity = this.getPrefilledAcqEqt();
-    }    
-    
+    }
+
     private getPrefilledAcqEqt(): AcquisitionEquipment {
         let acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
         acqEpt.serialNumber = this.getFirstSelectedSerie().equipment.deviceSerialNumber;
         return acqEpt;
     }
-    
+
     /**
-     * Try to compute patient first name and last name from dicom tags. 
+     * Try to compute patient first name and last name from dicom tags.
      * eg. TOM^HANKS -> return TOM as first name and HANKS as last name
      */
      private computeNameFromDicomTag (patientName: string): string[] {
@@ -190,7 +191,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     }
 
     get importedCenterDataStr(): string {
-        return this.patient?.studies[0]?.series[0]?.institution?.institutionName + " - " 
+        return this.patient?.studies[0]?.series[0]?.institution?.institutionName + " - "
                 + this.patient?.studies[0]?.series[0]?.institution?.institutionAddress;
     }
 
@@ -199,5 +200,5 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
                 + '-' + this. patient?.studies[0]?.series[0]?.equipment?.manufacturerModelName
                 + '-' + this.patient?.studies[0]?.series[0]?.equipment?.deviceSerialNumber;
     }
-    
+
 }
