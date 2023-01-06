@@ -70,6 +70,13 @@ public class BidsApiController implements BidsApi {
 		return ResponseEntity.ok().build();
 	}
 
+    public ResponseEntity<BidsElement> refreshBIDSByStudyId(
+    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    	this.bidsService.deleteBidsFolder(studyId, studyName);
+    	return this.getBIDSStructureByStudyId(studyId);
+    }
+
 	@Override
     public void exportBIDSFile(
     		@ApiParam(value = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
