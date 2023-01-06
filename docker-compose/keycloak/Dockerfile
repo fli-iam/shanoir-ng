@@ -13,7 +13,7 @@
 #
 # Use builder to integrate custom provider
 #
-FROM quay.io/keycloak/keycloak:20.0.2 as builder
+FROM quay.io/keycloak/keycloak:20.0.0 as builder
 
 COPY shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
 
