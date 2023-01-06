@@ -2,7 +2,6 @@ package org.shanoir.ng.processing.carmin.schedule;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -35,7 +34,7 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.utils.KeycloakServiceClientUtils;
+import org.shanoir.ng.utils.KeycloakServiceAccountUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +90,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     private SubjectRepository subjectRepository;
 
     @Autowired
-    private KeycloakServiceClientUtils keycloakServiceClientUtils;
+    private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
     @Async
     @Override
@@ -108,7 +107,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
         // check if the token is initialized
         if (this.accessToken.isEmpty()) {
             // refresh the token and stop the thread if it's not refreshed
-            if (!this.refreshServiceClientAccessToken()) {
+            if (!this.refreshServiceAccountAccessToken()) {
                 return;
             }
         }
@@ -136,7 +135,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
             try {
                 ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
                 Execution execution = executionResponseEntity.getBody();
-                // init attempts
+                // init attempts due to successful response
                 attempts = 1;
                 switch (execution.getStatus()) {
                     case FINISHED:
@@ -187,10 +186,11 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                         break;
                 }
             } catch (HttpStatusCodeException e) {
+                // in case of an error with response payload
                 if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                     LOG.warn("Unauthorized");
                     LOG.info("Getting new token...");
-                    if (!this.refreshServiceClientAccessToken()) {
+                    if (!this.refreshServiceAccountAccessToken()) {
                         stop.set(true);
                         break;
                     }
@@ -201,6 +201,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                     stop.set(true);
                 }
             } catch (RestClientException e) {
+                // in case of an error with no response payload
                 LOG.error("there is no response payload while getting execution info");
                 stop.set(true);
             } catch (InterruptedException e) {
@@ -342,14 +343,18 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
         return (dotIndex == -1) ? file : file.substring(0, dotIndex);
     }
 
-    private boolean refreshServiceClientAccessToken(){
-        AccessTokenResponse accessTokenResponse = keycloakServiceClientUtils.getServiceAccountAccessToken();
+    /**
+     * Get token from keycloak service account
+     * @return
+     */
+    private boolean refreshServiceAccountAccessToken(){
+        AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
         if(accessTokenResponse == null){
-            LOG.error("error while getting the service client token");
+            LOG.error("error while getting service account token");
             return false;
         }
         this.accessToken = accessTokenResponse.getToken();
-        LOG.info("new Token : {}", this.accessToken);
+        LOG.info("new Token retrieved !");
         return true;
     }
 }

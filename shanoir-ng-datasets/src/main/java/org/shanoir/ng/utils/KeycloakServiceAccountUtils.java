@@ -13,13 +13,18 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Keycloak Service account utility class
+ *
+ * @author Alae Es-saki
+ */
 @Component
-public class KeycloakServiceClientUtils {
+public class KeycloakServiceAccountUtils {
 
     /**
      * Logger
      */
-    private static final Logger LOG = LoggerFactory.getLogger(KeycloakServiceClientUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KeycloakServiceAccountUtils.class);
     private final String GRANT_TYPE="client_credentials";
 
     @Value("${service-account.token.uri}")
@@ -34,7 +39,8 @@ public class KeycloakServiceClientUtils {
 
 
     /**
-     * Get an access token using a service account
+     * Get an access token using service account
+     *
      * @return AccessTokenResponse
      */
     public AccessTokenResponse getServiceAccountAccessToken(){
@@ -51,7 +57,7 @@ public class KeycloakServiceClientUtils {
 
         try{
             ResponseEntity<AccessTokenResponse> response = this.restTemplate.exchange(this.serverUrl, HttpMethod.POST, entity, AccessTokenResponse.class);
-            LOG.info("token retrieved from client : {}", clientId);
+            LOG.info("token retrieved !");
 
             return response.getBody();
         }catch(HttpStatusCodeException e){
