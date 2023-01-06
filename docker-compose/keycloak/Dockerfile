@@ -33,7 +33,7 @@ RUN /opt/keycloak/bin/kc.sh build
 FROM quay.io/keycloak/keycloak:20.0.0
 
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
-COPY themes/. /opt/jboss/keycloak/themes
+COPY themes/. /opt/keycloak/themes
 COPY cfg/. /opt/keycloak/
 
 COPY entrypoint entrypoint_common oneshot /bin/
@@ -42,4 +42,4 @@ COPY entrypoint entrypoint_common oneshot /bin/
 # (like all other env vars)
 ENV PROXY_ADDRESS_FORWARDING ""
 
-ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh", "start-dev", "--import-realm", "--hostname-path=/auth", "--proxy=edge"]
+ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh", "start-dev", "--import-realm", "--hostname-path=/auth", "--proxy=edge", "--spi-theme-welcome-theme=shanoir-theme"]
