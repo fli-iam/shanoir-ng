@@ -32,7 +32,6 @@ export KC_DB_USERNAME="${DB_USER:-keycloak}"
 export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 export PROXY_ADDRESS_FORWARDING="${PROXY_ADDRESS_FORWARDING:-true}"
 
-
 require  SHANOIR_MIGRATION
 oneshot=
 extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
@@ -135,17 +134,14 @@ if [ -n "$oneshot" ] ; then
 	# filter the output to keep only the interesting messages
 	# (i.e: startup, import/export, warning, errors, ...)
 	sed '	/[0-9] INFO /{
-			/\[org\.jboss\.as\]/p;
-			/\[org\.keycloak\.connections/p
-			/\[org\.keycloak\.exportimport/p
-			/\[org\.keycloak\.services/p
+			/\[org\.keycloak\./p
 			d
 		}' <"$fifo" &
-	
-	exec oneshot							\
-		'^ *JBoss Bootstrap Environment'			\
-		' INFO .*org\.jboss\.as.*Keycloak .* started in [0-9]'	\
+			
+	exec oneshot						\
+		' .*org\.keycloak\.quarkus\.runtime\.KeycloakMain.*Running the server'	\
 		-- env "$@" "${extra[@]}" > "$fifo"
+			
 else
 	# 'normal' run
 	exec env "$@" "${extra[@]}"
