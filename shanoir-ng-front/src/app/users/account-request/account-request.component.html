@@ -83,7 +83,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <form class="EditUserContent max-content content" novalidate *ngIf="requestSent" class="EditUserComponent">
     <fieldset>
         <label *ngIf="!errorOnRequest" i18n="Account request|Request sent@@accountRequestRequestSent">An email has been sent to the administrator who will validate your request.<br/>You will receive an email once your account activated.</label>
-        <label *ngIf="errorOnRequest" i18n="Account request|Error on request@@accountRequestErrorOnRequest">An error occurs.<br/>Please try again later.</label>
+        <label *ngIf="errorOnRequest" i18n="Account request|Error on request@@accountRequestErrorOnRequest">An error occured.<br/>Please try again later.</label>
     </fieldset>
     <div class="footer command-zone">
         <button i18n="Account request|Ok button label@@okButton" class="Button" (click)="getOut()">OK</button>
