@@ -20,6 +20,9 @@ import { User } from '../shared/user.model';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { UserService } from '../shared/user.service'
 import { FormGroup, Validators, FormBuilder, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ConsoleService } from 'src/app/shared/console/console.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'accountRequest',
@@ -35,13 +38,17 @@ export class AccountRequestComponent {
     public requestSent: boolean = false;
     public errorOnRequest: boolean = false;
     infoValid: boolean = false;
+    protected router: Router;
 
     language: 'english' | 'french' = 'english';
     
     constructor(
             private fb: FormBuilder, 
             public userService: UserService,
-            private location: Location) {}
+            private location: Location,
+            private consoleService: ConsoleService,) {
+                this.router = ServiceLocator.injector.get(Router)
+            }
 
     ngOnInit(): void {
         this.user = new User();
@@ -72,20 +79,12 @@ export class AccountRequestComponent {
     }
 
     accountRequest(): void {
-        if (this.user.accountRequestInfo.challenge != null) {
-            // These fields are allowed to be null in case of challenge
-            this.user.accountRequestInfo.contact="";
-            this.user.accountRequestInfo.function="";
-            this.user.accountRequestInfo.work="";
-            this.user.accountRequestInfo.study="";
-        }
-
         this.userService.requestAccount(this.user)
             .then((res) => {
                  this.requestSent = true;
-            }, (err: String) => {
-                if (err.indexOf("email should be unique") != -1) {
-                    console.log('email error')
+            }, (err) => {
+                if (err?.error?.details?.fieldErrors?.email != null) {
+                    this.consoleService.log("error", "An user with this email already exists, please connect with it or use another one.")
                 } else {
                     throw err;
                 }
@@ -93,7 +92,8 @@ export class AccountRequestComponent {
     }
 
     getOut(): void {
-        this.location.back();
+        // Return to login
+        window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
 
     cancelAccountRequest(): void {

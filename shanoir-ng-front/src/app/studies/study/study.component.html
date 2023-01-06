@@ -42,7 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li [class.active]="activeTab == 'tree'" class="disabled" skipLocationChange replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" class="disabled" skipLocationChange replaceUrl="true">BIDS</li>
 				</ng-container>
-				
+
 			</ul>
 
 			<fieldset [class.hidden]="activeTab != 'general'">
@@ -87,9 +87,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-					<li>
-						<label i18n="Study detail|Status label@@studyDetailStatus">Status</label>
-						<span class="right-col" [ngSwitch]="mode">
+          <li>
+            <label i18n="Study detail|Status label@@studyDetailStatus">Status</label>
+            <span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{studyStatusStr(study.studyStatus)}}
 							</ng-template>
@@ -99,7 +99,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<label *ngIf="hasError('studyStatus', ['required'])" class="form-validation-alert" i18n="Study detail|Status required error@@studyDetailStatusRequiredError">Status is required!</label>
 							</ng-template>
 						</span>
-					</li>
+          </li>
+          <li>
+            <label i18n="Study detail|Status label@@studyDetailStatus">Pseudonymization profile</label>
+            <span class="right-col" [ngSwitch]="mode">
+							<ng-container *ngIf="mode == 'view' || mode == 'edit'">
+								{{ (study.profile.profileName) }}
+							</ng-container>
+							<ng-container *ngIf="mode == 'create'">
+								<select-box formControlName="profile" [(ngModel)]="study.profile" [options]="profileOptions">
+								</select-box>
+								<label *ngIf="hasError('profile', ['required'])" class="form-validation-alert" i18n="Study detail|Profile required error@@studyDetailStatusRequiredError">Profile is required!</label>
+							</ng-container>
+						</span>
+          </li>
 					<li>
 						<label i18n="Study detail|Clinical label@@studyDetailClinical">Is clinical</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -229,7 +242,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<span *ngIf="mode == 'view'" class="left-col">
 						    <p><b>Centers</b></p>
 						    <ol *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
-                                <li class="center-list">- {{studyCenter.center.name}}<span *ngIf="studyCenter.subjectNamePrefix">: {{studyCenter.subjectNamePrefix}}</span></li>    
+                                <li class="center-list">- {{studyCenter.center.name}}<span *ngIf="studyCenter.subjectNamePrefix">: {{studyCenter.subjectNamePrefix}}</span></li>
                             </ol>
 						</span>
 					</li>
@@ -304,20 +317,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'members'">
+			    <span *ngIf="mode == 'edit'">
+			    List of current access requests
+			    </span>
+			    <ul *ngIf="mode == 'edit'">
+			         <li *ngFor="let a of accessRequests">
+                    Request from {{ a.user.username }}: {{a.motivation}}
+                    <span class="link" (click)="goToAccessRequest(a)"><i class="fas fa-external-link-alt"></i></span>
+                    </li>
+			    </ul>
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 				<studyuser-list
 				    formControlName="studyUserList"
 					[(ngModel)]="study.studyUserList"
 					[users]="users"
 					[studyCenters]="study.studyCenterList"
+					[study] = "study"
 					[mode]="mode">					
 				</studyuser-list>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">
 				<legend>Tree</legend>
-				<study-node [input]="studyNode" 
-						(selectedChange)="onTreeSelectedChange($event)" 
-						(nodeInit)="onStudyNodeInit($event)" 
+				<study-node [input]="studyNode"
+						(selectedChange)="onTreeSelectedChange($event)"
+						(nodeInit)="onStudyNodeInit($event)"
 						[hasBox]="true">
 				</study-node>
 			</fieldset>

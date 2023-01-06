@@ -82,6 +82,7 @@ import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { DUAComponent } from './dua/dua.component';
+import { AccessRequestComponent } from './users/access-request/access-request.component';
 import { ProcessingComponent } from './processing/processing.component';
 import { PipelinesComponent } from './processing/pipelines/pipelines.component';
 import { ExecutionComponent } from './processing/execution/execution.component';
@@ -103,11 +104,9 @@ let routes: Routes = [
     }, {
         path: 'account-request',
         component: AccountRequestComponent,
-        data: {isChallenge: false},
     }, {
-        path: 'challenge-request',
+        path: 'account/study/:id/account-request',
         component: AccountRequestComponent,
-        data: {isChallenge: true},
     }, {
         path: 'extension-request',
         component: ExtensionRequestComponent,
@@ -783,8 +782,21 @@ let routes: Routes = [
 		component: AnimalSubjectFormComponent,
 		data: { mode: 'create' }
 	},
-
-
+    {
+        path: 'access-request',
+        component: AccessRequestComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'access-request/details/:id',
+        component: AccessRequestComponent,
+        data: { mode: 'view' },
+    },
+    {
+        path: 'access-request/study/:id',
+        component: AccessRequestComponent,
+        data: { mode: 'create' },
+    }
 ];
 
 @NgModule({

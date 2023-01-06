@@ -75,6 +75,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
 		simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 		simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
+		simpleStudyDTO.setProfile(study.getProfile());
 		return simpleStudyDTO;
 	}
 	
