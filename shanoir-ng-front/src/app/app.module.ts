@@ -250,6 +250,7 @@ import { StudyDTOService } from './studies/shared/study.dto';
 import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
+import { AccessRequestComponent } from './users/access-request/access-request.component';
 import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
 import { MultiSelectTableComponent } from './shared/multi-select-table/multi-select-table.component';
 import { ProcessingComponent } from './processing/processing.component';
@@ -261,6 +262,8 @@ import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-p
 import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import {LoginGuard} from "./shared/roles/login-guard";
+import { AccessRequestService } from './users/access-request/access-request.service';
+
 
 @NgModule({
     imports: [
@@ -435,6 +438,7 @@ import {LoginGuard} from "./shared/roles/login-guard";
         TagInputComponent,
         StudyUserListComponent,
         VarDirective,
+        AccessRequestComponent,
         MultiSelectComponent,
         MultiSelectTableComponent,
         ProcessingComponent,
@@ -481,6 +485,7 @@ import {LoginGuard} from "./shared/roles/login-guard";
         RoleService,
         StudyService,
         CoilService,
+        AccessRequestService,
         // ToolService,
         SubjectService,
         UserService,

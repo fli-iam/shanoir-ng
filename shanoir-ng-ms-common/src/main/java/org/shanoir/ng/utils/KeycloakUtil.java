@@ -163,4 +163,8 @@ public final class KeycloakUtil {
 		return principal.getKeycloakSecurityContext();
 	}
 
+	public static boolean isUserAnonymous() {
+		return (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken);
+	}
+
 }

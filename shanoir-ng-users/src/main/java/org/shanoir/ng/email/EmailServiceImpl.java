@@ -16,15 +16,20 @@ package org.shanoir.ng.email;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.email.model.DatasetDetail;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.email.StudyInvitationEmail;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.slf4j.Logger;
@@ -36,10 +41,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
-import io.jsonwebtoken.lang.Collections;
 
 /**
  * Implementation of email service.
@@ -64,6 +68,8 @@ public class EmailServiceImpl implements EmailService {
 
 	private static final String SERVER_ADDRESS = "serverAddress";
 	
+	private static final String SERVER_ADDRESS_PUBLIC = "serverAddressPublic";
+
 	private static final String STUDY_NAME = "studyName";
 	
 	private static final String SUBJECT = "subject";
@@ -117,25 +123,6 @@ public class EmailServiceImpl implements EmailService {
 		};
 		mailSender.send(messagePreparator);
 
-	}
-
-	@Override
-	public void notifyAdminAccountRequest(final User user) {
-		// Get admins emails
-		final List<String> adminEmails = userRepository.findAdminEmails();
-
-		MimeMessagePreparator messagePreparator = mimeMessage -> {
-			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
-			messageHelper.setFrom(administratorEmail);
-			messageHelper.setTo(adminEmails.toArray(new String[0]));
-			messageHelper.setSubject("New user account request from " + shanoirServerAddress);
-			final Map<String, Object> variables = new HashMap<>();
-			variables.put("user", user);
-			variables.put(SERVER_ADDRESS, shanoirServerAddress);
-			final String content = build("notifyAdminAccountRequest", variables);
-			messageHelper.setText(content, true);
-		};
-		mailSender.send(messagePreparator);
 	}
 
 	@Override
@@ -217,6 +204,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyCreateAccountRequest", variables);
 			messageHelper.setText(content, true);
 		};
+		LOG.error("User asked for an account" + user.getUsername());
 		mailSender.send(messagePreparator);
 
 	}
@@ -474,7 +462,7 @@ public class EmailServiceImpl implements EmailService {
 
         List<User> newStudyUsers = this.userRepository.findByIdIn(email.getStudyUsers());
 
-        if (!Collections.isEmpty(email.getRecipients())) {
+        if (!CollectionUtils.isEmpty(email.getRecipients())) {
 	        // Get the list of recipients
 			List<User> studyAdmins = (List<User>) this.userRepository.findAllById(email.getRecipients());
 					
@@ -523,5 +511,99 @@ public class EmailServiceImpl implements EmailService {
 		}
 	}
 
+	@Override
+	public void notifyStudyManagerAccessRequest(AccessRequest createdRequest) throws ShanoirException {
+        // Find requester users
+        User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
+
+        // get study admin
+        List<User> studyAdmins = this.findStudyAdmin(createdRequest.getStudyId());
+
+        if (!CollectionUtils.isEmpty(studyAdmins)) {
+			for (User studyAdmin : studyAdmins) {
+				MimeMessagePreparator messagePreparator = mimeMessage -> {
+					final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+					messageHelper.setFrom(administratorEmail);
+					messageHelper.setTo(studyAdmin.getEmail());
+					messageHelper.setSubject("[Shanoir] Member(s) access request to " + createdRequest.getStudyName());
+					final Map<String, Object> variables = new HashMap<>();
+					variables.put(FIRSTNAME, studyAdmin.getFirstName());
+					variables.put(LASTNAME, studyAdmin.getLastName());
+					variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
+					variables.put(STUDY_NAME, createdRequest.getStudyName());
+					final String content = build("notifyStudyAdminAccessRequest", variables);
+					LOG.info(content);
+					messageHelper.setText(content, true);
+				};
+				// Send the message
+				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), createdRequest.getStudyId());
+				mailSender.send(messagePreparator);
+			}
+        } else {
+        	LOG.error("No admins for this study. This should not happen.");
+        	throw new ShanoirException("No admin could be found fot this study.");
+        }
+	}
+	
+	/**
+	 * This method allows to get all study admins for a given study
+	 * @param studyId the study id we want the admins of
+	 * @return the list of admins
+	 */
+	private List<User> findStudyAdmin(Long studyId) {
+		List<Long> adminsId =  (List<Long>) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ADMINS_QUEUE, studyId);
+		if (adminsId == null || adminsId.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return this.userRepository.findByIdIn(adminsId);
+	}
+
+	/** Invites a user that is not in shanoir yet. */
+	@Override
+	public void inviteToStudy(StudyInvitationEmail email) {
+		
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(email.getInvitedMail());
+			messageHelper.setSubject("[Shanoir] Access to study " + email.getStudyName());
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(STUDY_NAME, email.getStudyName());
+			// access-request/study/1
+			variables.put(SERVER_ADDRESS, shanoirServerAddress + "access-request/study/" + email.getStudyId());
+			// account/study/1/account-request
+			variables.put(SERVER_ADDRESS_PUBLIC, shanoirServerAddress + "account/study/" + email.getStudyId() + "/account-request");
+			final String content = build("notifyAnonymousInvitation", variables);
+			messageHelper.setText(content, true);
+		};
+		// Send the message
+		LOG.error("User with mail {} invited in study {}", email.getInvitedMail(), email.getStudyId());
+		mailSender.send(messagePreparator);
+	}
+
+	/**
+	 * Notify a user its study request was refused
+	 * @param accessRequest the access request
+	 */
+	public void notifyUserRefusedFromStudy(AccessRequest refusedRequest) {
+		User user = refusedRequest.getUser();
+		
+		MimeMessagePreparator messagePreparator = mimeMessage -> {
+			final MimeMessageHelper messageHelper = new MimeMessageHelper(mimeMessage);
+			messageHelper.setFrom(administratorEmail);
+			messageHelper.setTo(user.getEmail());
+			messageHelper.setSubject("[Shanoir] Access to study " + refusedRequest.getStudyName());
+			final Map<String, Object> variables = new HashMap<>();
+			variables.put(FIRSTNAME, user.getFirstName());
+			variables.put(LASTNAME, user.getLastName());
+			variables.put(STUDY_NAME, refusedRequest.getStudyName());
+			final String content = build("notifyUserRefusedToStudy", variables);
+			LOG.info(content);
+			messageHelper.setText(content, true);
+		};
+		// Send the message
+		LOG.info("Sending study-users REFUSED mail to {} for study {}", user.getUsername(), refusedRequest.getStudyId());
+		mailSender.send(messagePreparator);
+	}
 
 }

@@ -67,9 +67,6 @@
                         <div>
                             <a href="${properties.requestAccount!}">Create an account</a>
                         </div>
-                        <div>
-                            <a href="${properties.requestChallenge}">Subscribe to a challenge</a>
-                        </div>
                   </div>
             </form>
         </#if>

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
@@ -66,6 +67,8 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.BiMap;
+import com.google.common.math.DoubleMath;
 
 /**
  * Implementation of study service.
@@ -142,7 +145,6 @@ public class StudyServiceImpl implements StudyService {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 				studyCenter.setStudy(study);
 			}
-
 		}
 
 		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {

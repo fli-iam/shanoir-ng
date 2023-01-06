@@ -128,18 +128,24 @@ public class RabbitMQStudiesService {
 		}
 	}
 
-	/**
-	 * Receives a shanoirEvent as a json object, concerning a challenge subscription
-	 * @param commandArrStr the task as a json string.
-	 */
-	@RabbitListener(bindings = @QueueBinding(
-			key = ShanoirEventType.CHALLENGE_SUBSCRIPTION_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.CHALLENGE_SUBSCRIPTION_QUEUE, durable = "true"),
-			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
-			autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
-			)
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE)
 	@Transactional
-	public void challengeSubscription(final String studyStr) {
+	public String getStudyName(final long studyId) {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		Study study = this.studyRepo.findById(studyId).get();
+		if (study != null) {
+			return study.getName();
+		}
+		return null;
+	}
+
+	/**
+	 * Receives a json object, concerning a study subscription
+	 * @param commandArrStr the studyUser as a json string.
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE)
+	@Transactional
+	public boolean studySubscription(final String studyStr) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
@@ -147,6 +153,14 @@ public class RabbitMQStudiesService {
 			Long studyId = Long.valueOf(event.getObjectId());
 			// Get the study
 			Study studyToUpdate = studyRepo.findById(studyId).orElseThrow();
+			
+			for (StudyUser su : studyToUpdate.getStudyUserList()) {
+				if (su.getUserId().equals(userId)) {
+					// user already exists on study
+					return true;
+				}
+			}
+			
 			// Create a new StudyUser
 			StudyUser subscription = new StudyUser();
 			subscription.setStudy(studyToUpdate);
@@ -162,9 +176,10 @@ public class RabbitMQStudiesService {
 				subscription.setConfirmed(true);
 			}
 			studyService.addStudyUserToStudy(subscription, studyToUpdate);
+			return true;
 		} catch (Exception e) {
-			LOG.error("Could not directly subscribe a user to the challenge: ", e);
-			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event." + e.getMessage(), e);
+			LOG.error("Could not directly subscribe a user to the study: ", e);
+			return false;
 		}
 	}
 }

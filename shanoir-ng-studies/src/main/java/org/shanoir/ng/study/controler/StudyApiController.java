@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -47,6 +48,7 @@ import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
@@ -386,9 +388,26 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
+	public ResponseEntity<List<IdName>> findPublicStudiesConnected() {
+		List<IdName> studiesDTO = new ArrayList<>();
+		
+		List<Study> studies = studyService.findPublicStudies();
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		
+		studies = filterStudies(studies, KeycloakUtil.getTokenUserId());
+
+		for (Study study : studies) {
+			studiesDTO.add(studyMapper.studyToIdNameDTO(study));
+		}
+		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
+	}
+	
+	@Override
 	public ResponseEntity<List<IdName>> findPublicStudies() {
 		List<IdName> studiesDTO = new ArrayList<>();
-
+		
 		List<Study> studies = studyService.findPublicStudies();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -400,18 +419,26 @@ public class StudyApiController implements StudyApi {
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
 
-	@Override
-	public ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData() {
-		List<PublicStudyDTO> studiesDTO = new ArrayList<>();
-
-		List<Study> studies = studyService.findPublicStudies();
-		if (studies.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-
+	/**
+	 * This method allows to filter studies by ont the one the given user is not part in
+	 * @param studies the list of studies to filter
+	 * @param tokenUserId the user to filter with
+	 * @return the list fo filtered studies
+	 */
+	private List<Study> filterStudies(List<Study> studies, Long tokenUserId) {
+		List<Study> filteredStudies = new ArrayList<Study>();
 		for (Study study : studies) {
-			studiesDTO.add(studyMapper.studyToPublicStudyDTO(study));
+			boolean toFilter = false;
+			for (StudyUser su : study.getStudyUserList()) {
+				if (tokenUserId.equals(su.getUserId())) {
+					toFilter = true;
+				}
+			}
+			if (!toFilter) {
+				filteredStudies.add(study);
+			}
 		}
-		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
+		return filteredStudies;
 	}
+
 }
