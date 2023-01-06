@@ -36,6 +36,7 @@ import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -582,7 +583,15 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public List<Study> findPublicStudies() {
-		return this.studyRepository.findByVisibleByDefaultTrue();
+		List<Study> studyList = this.studyRepository.findByVisibleByDefaultTrue();
+		for (Study study : studyList) {
+			List<String> studyFlagList = new ArrayList<>();
+			String datasetType = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASET_TYPE, study.getId());
+			if (datasetType != null) {
+				studyFlagList.add(datasetType);
+				study.setStudyFlag(studyFlagList);
+			}
+		}
+		return studyList;
 	}
-
 }

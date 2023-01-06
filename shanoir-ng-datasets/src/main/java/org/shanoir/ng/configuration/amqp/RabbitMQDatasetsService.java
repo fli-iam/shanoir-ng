@@ -370,4 +370,17 @@ public class RabbitMQDatasetsService {
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
 		}
 	}
+
+
+	@Transactional
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASET_TYPE)
+	@RabbitHandler
+	public String getDatasetAcquisitionType(Long studyId) {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		DatasetAcquisition datasetAcquisition = this.datasetAcquisitionService.findById(studyId);
+		if (datasetAcquisition != null) {
+			return datasetAcquisition.getType();
+		}
+		return null;
+	}
 }

@@ -153,7 +153,10 @@ public class Study extends HalEntity {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Tag> tags;
 
-	public String publicDescription;
+	private String publicDescription;
+
+	@ElementCollection
+	private List<String> studyFlag;
 
 	/**
 	 * Init HATEOAS links
@@ -510,4 +513,11 @@ public class Study extends HalEntity {
 		this.publicDescription = publicDescription;
 	}
 
+	public List<String> getStudyFlag() {
+		return studyFlag;
+	}
+
+	public void setStudyFlag(List<String> studyFlag) {
+		this.studyFlag = studyFlag;
+	}
 }

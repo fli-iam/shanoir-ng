@@ -326,10 +326,5 @@ export class PublicStudyDataDTO {
   studyStatus: string;
   studyType: StudyType;
   publicDescription: string;
-  isIRM: boolean = false;
-  isEEG: boolean = false;
-  isPT: boolean = false;
-  isCT: boolean = false;
-  isBrucker: boolean = false;
-
+  studyFlag: string[];
 }
