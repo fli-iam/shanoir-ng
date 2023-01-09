@@ -419,6 +419,21 @@ public class StudyApiController implements StudyApi {
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
 
+	@Override
+	public ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData() {
+		List<PublicStudyDTO> studiesDTO = new ArrayList<>();
+
+		List<Study> studies = studyService.findPublicStudies();
+		if (studies.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+
+		for (Study study : studies) {
+			studiesDTO.add(studyMapper.studyToPublicStudyDTO(study));
+		}
+		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
+	}
+
 	/**
 	 * This method allows to filter studies by ont the one the given user is not part in
 	 * @param studies the list of studies to filter

@@ -111,7 +111,6 @@ let routes: Routes = [
         component: WelcomeComponent,
         canActivate: [LoginGuard]
     }, {
-        path: 'challenge-request',
         path: 'account/study/:id/account-request',
         component: AccountRequestComponent,
     }, {
