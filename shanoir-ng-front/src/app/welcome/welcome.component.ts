@@ -58,6 +58,6 @@ export class WelcomeComponent implements OnInit {
   }
 
   accessRequest(study: any): void {
-    console.log("Access request to study : " + study.name);
+    window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/account/study/" + study.id + "/account-request";
   }
 }

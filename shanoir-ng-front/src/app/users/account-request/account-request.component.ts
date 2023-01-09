@@ -92,12 +92,13 @@ export class AccountRequestComponent {
     }
 
     getOut(): void {
-        // Return to login
+        // Return to welcome page
         window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
 
     cancelAccountRequest(): void {
-        window.location.href = AppUtils.LOGIN_REDIRECT_URL;
+        // Return to welcome page
+        window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
 
     formErrors(field: string): any {
