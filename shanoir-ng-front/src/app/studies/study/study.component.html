@@ -317,13 +317,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'members'">
+			    <span *ngIf="mode == 'edit'">
+			    List of current access requests
+			    </span>
+			    <ul *ngIf="mode == 'edit'">
+			         <li *ngFor="let a of accessRequests">
+                    Request from {{ a.user.username }}: {{a.motivation}}
+                    <span class="link" (click)="goToAccessRequest(a)"><i class="fas fa-external-link-alt"></i></span>
+                    </li>
+			    </ul>
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 				<studyuser-list
 				    formControlName="studyUserList"
 					[(ngModel)]="study.studyUserList"
 					[users]="users"
 					[studyCenters]="study.studyCenterList"
-					[mode]="mode">
+					[study] = "study"
+					[mode]="mode">					
 				</studyuser-list>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">

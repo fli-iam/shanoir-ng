@@ -29,7 +29,6 @@ import {CenterStudyDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} f
 import {Study} from './study.model';
 import {Profile} from "../../shared/models/profile.model";
 
-
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
 
@@ -51,6 +50,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .then(entities => entities?.map((entity) => Object.assign(new Study(), entity)) || []);
     }
 
+
     getStudiesNames(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_URL)
             .toPromise();
@@ -63,6 +63,20 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     getChallenges(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_CHALLENGES_URL)
+            .toPromise().then((typeResult: IdName[]) => {
+                return typeResult;
+            });
+    }
+
+    getPublicStudies(): Promise<IdName[]> {
+        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_URL)
+            .toPromise().then((typeResult: IdName[]) => {
+                return typeResult;
+            });
+    }
+
+    getPublicStudiesConnected(): Promise<IdName[]> {
+        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL)
             .toPromise().then((typeResult: IdName[]) => {
                 return typeResult;
             });
