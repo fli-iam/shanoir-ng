@@ -31,7 +31,7 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 * @return list of studies.
 	 */
 	@Override
-	@EntityGraph(attributePaths="examinations")
+	@EntityGraph(attributePaths={"examinations", "subjectStudyList"})
 	List<Study> findAll();
 
 	/**
@@ -56,7 +56,7 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 *            user id.
 	 * @return list of studies.
 	 */
-	@EntityGraph(attributePaths="examinations")
+	@EntityGraph(attributePaths={"examinations", "subjectStudyList"})
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUseRightId, boolean confirmed);
 
 	/**

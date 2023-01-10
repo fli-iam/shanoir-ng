@@ -52,6 +52,7 @@ import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.timepoint.Timepoint;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
@@ -132,6 +133,7 @@ public class Study extends HalEntity {
 
 	@ManyToOne()
 	@JoinColumn(name = "profile_id")
+    @JsonIgnoreProperties(value = {"applications", "hibernateLazyInitializer"})
 	private Profile profile;
 
 	private Integer studyType;
