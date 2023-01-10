@@ -133,7 +133,6 @@ public class Study extends HalEntity {
 
 	@ManyToOne()
 	@JoinColumn(name = "profile_id")
-    @JsonIgnoreProperties(value = {"applications", "hibernateLazyInitializer"})
 	private Profile profile;
 
 	private Integer studyType;
@@ -143,7 +142,7 @@ public class Study extends HalEntity {
 	private List<StudyUser> studyUserList;
 
 	/** Relations between the subjects and the studies. */
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
 
 	/** List of Timepoints dividing the study **/
