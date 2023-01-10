@@ -53,11 +53,14 @@ public abstract class StudyDecorator implements StudyMapper {
 	public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
 		final List<StudyDTO> studyDTOs = new ArrayList<>();
 		for (Study study : studies) {
-			System.err.println("Before subjects");
 			final StudyDTO studyDTO = convertStudyToStudyDTO(study, false);
+			System.err.println("Before subjects");
+			/*
 			if (study.getSubjectStudyList() != null) {
 				studyDTO.setNbSujects(study.getSubjectStudyList().size());
 			}
+			*/
+			studyDTO.setNbSujects(0);
 			System.err.println("Before examinations");
 			if (study.getExaminations() != null) {
 				studyDTO.setNbExaminations(study.getExaminations().size());
