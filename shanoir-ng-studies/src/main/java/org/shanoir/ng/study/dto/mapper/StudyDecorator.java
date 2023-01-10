@@ -99,7 +99,10 @@ public abstract class StudyDecorator implements StudyMapper {
 	 * @return study DTO.
 	 */
 	private StudyDTO convertStudyToStudyDTO(final Study study, final boolean withData) {
+		System.err.println("Before study" + study.getName());
 		final StudyDTO studyDTO = delegate.studyToStudyDTO(study);
+		System.err.println("After study" + study.getName());
+
 		if (withData) {
 			studyDTO.setStudyCenterList(
 					studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
