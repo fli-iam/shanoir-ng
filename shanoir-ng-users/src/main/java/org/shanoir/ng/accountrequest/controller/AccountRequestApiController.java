@@ -17,9 +17,7 @@ package org.shanoir.ng.accountrequest.controller;
 import java.time.LocalDate;
 
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.PasswordPolicyException;
-import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
 import org.springframework.http.HttpStatus;
@@ -53,12 +51,19 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 		/* Save user in db. */
 		try {
 			getUserService().createAccountRequest(user);
+			getVipUserService().createVIPAccountRequest(user);
 		} catch (PasswordPolicyException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while generating the new password"));
 		} catch (SecurityException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
+		} catch (EntityNotFoundException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in VIP"));
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while communicating with VIP"));
 		}
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}

@@ -25,6 +25,7 @@ import org.shanoir.ng.user.repository.UserRepository;
 import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.service.UserUniqueConstraintManager;
+import org.shanoir.ng.user.service.VIPUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -39,6 +40,9 @@ public abstract class AbstractUserRequestApiController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private VIPUserService vipUserService;
 	
 	@Autowired
 	private UserRepository userRepository;
@@ -54,6 +58,13 @@ public abstract class AbstractUserRequestApiController {
 	 */
 	protected UserService getUserService() {
 		return userService;
+	}
+
+	/**
+	 * @return the VIPUserService
+	 */
+	protected VIPUserService getVipUserService(){
+		return getVipUserService();
 	}
 
 	/*
