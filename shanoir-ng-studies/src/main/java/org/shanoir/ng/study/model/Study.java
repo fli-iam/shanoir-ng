@@ -89,7 +89,7 @@ public class Study extends HalEntity {
 	private LocalDate endDate;
 
 	/** List of the examinations related to this study. */
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<StudyExamination> examinations;
 
 	/** Associated experimental groups of subjects. */

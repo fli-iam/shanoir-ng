@@ -17,6 +17,7 @@ package org.shanoir.ng.study.repository;
 import java.util.List;
 
 import org.shanoir.ng.study.model.Study;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -30,6 +31,7 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 * @return list of studies.
 	 */
 	@Override
+	@EntityGraph(attributePaths="examinations")
 	List<Study> findAll();
 
 	/**
@@ -54,6 +56,7 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 *            user id.
 	 * @return list of studies.
 	 */
+	@EntityGraph(attributePaths="examinations")
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUseRightId, boolean confirmed);
 
 	/**
