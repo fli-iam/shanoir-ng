@@ -28,7 +28,6 @@ import {StudyUserRight} from './study-user-right.enum';
 import {CenterStudyDTO, PublicStudyDataDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
 import {Study} from './study.model';
 import {Profile} from "../../shared/models/profile.model";
-import {BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL} from "../../utils/app.utils";
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -71,13 +70,6 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     getChallenges(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_CHALLENGES_URL)
-            .toPromise().then((typeResult: IdName[]) => {
-                return typeResult;
-            });
-    }
-
-    getPublicStudies(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_URL)
             .toPromise().then((typeResult: IdName[]) => {
                 return typeResult;
             });

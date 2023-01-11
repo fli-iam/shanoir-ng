@@ -86,7 +86,7 @@ public class StudyDTO {
 
 	private boolean challenge;
 
-	private String publicDescription;
+	private String description;
 
 	/**
 	 * Default constructor.
@@ -446,11 +446,11 @@ public class StudyDTO {
 	}
 
 
-	public String getPublicDescription() {
-		return publicDescription;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setPublicDescription(String publicDescription) {
-		this.publicDescription = publicDescription;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }

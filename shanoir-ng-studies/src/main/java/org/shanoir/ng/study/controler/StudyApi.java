@@ -85,15 +85,6 @@ public interface StudyApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Study.class),
 			@ApiResponse(code = 404, message = "no study found", response = Study.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
-	@RequestMapping(value = "/public", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<IdName>> findPublicStudies();
-
-	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available", response = Study.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Study.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Study.class),
-			@ApiResponse(code = 404, message = "no study found", response = Study.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
 	@RequestMapping(value = "/public/data", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData();
 
