@@ -80,9 +80,7 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 				.disable()
 			.authorizeRequests()
 				.antMatchers("/studies/public").permitAll()
-				.antMatchers("/studies/public").permitAll()
 				.antMatchers("/studies/public/data").permitAll()
-				.antMatchers("/datasets/datasetacquisition").permitAll()
 				.antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
 				.anyRequest().authenticated();
 	}

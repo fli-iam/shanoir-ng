@@ -23,7 +23,7 @@
   <div *ngIf="studies.length > 0" class="studyTab">
     <div class="studyItem" *ngFor="let study of studies | slice:0:show">
       <span class="studyTitle"><b>{{study.name}}</b></span>
-      <span *ngIf="study.publicDescription" class="studyDescription"> | {{ study.publicDescription }}</span>
+      <span *ngIf="study.description" class="studyDescription"> | {{ study.description }}</span>
       <br/>
       <span *ngIf="study.startDate" class="studyStartDate">Start date: {{ study.startDate }}</span>
       <span *ngIf="study.startDate && study.endDate" class="studyStartDate"> | </span>

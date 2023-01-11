@@ -22,13 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
-import org.assertj.core.util.Arrays;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
@@ -37,7 +35,6 @@ import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
-import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -67,8 +64,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.BiMap;
-import com.google.common.math.DoubleMath;
 
 /**
  * Implementation of study service.
@@ -243,7 +238,7 @@ public class StudyServiceImpl implements StudyService {
 		}
 		studyDb.setName(study.getName());
 		studyDb.setProfile(study.getProfile());
-		studyDb.setPublicDescription(study.getPublicDescription());
+		studyDb.setDescription(study.getDescription());
 		studyDb.setStudyStatus(study.getStudyStatus());
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setWithExamination(study.isWithExamination());
@@ -585,15 +580,6 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public List<Study> findPublicStudies() {
-		List<Study> studyList = this.studyRepository.findByVisibleByDefaultTrue();
-		for (Study study : studyList) {
-			List<String> studyFlagList = new ArrayList<>();
-			String datasetType = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASET_TYPE, study.getId());
-			if (datasetType != null) {
-				studyFlagList.add(datasetType);
-				study.setStudyFlag(studyFlagList);
-			}
-		}
-		return studyList;
+		return this.studyRepository.findByVisibleByDefaultTrue();
 	}
 }

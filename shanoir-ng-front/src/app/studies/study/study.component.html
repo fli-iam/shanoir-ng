@@ -66,10 +66,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label i18n="Study detail|Name label@@studyDetailPublicDescription">Public description</label>
             <span class="right-col" [ngSwitch]="mode">
               <ng-template [ngSwitchCase]="'view'">
-                {{study.publicDescription}}
+                {{study.description}}
               </ng-template>
               <ng-template ngSwitchDefault>
-                <input type="text" formControlName="publicDescription" [(ngModel)]="study.publicDescription" />
+                <textarea type="text" formControlName="description" [(ngModel)]="study.description"></textarea>
               </ng-template>
             </span>
           </li>
@@ -344,7 +344,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[users]="users"
 					[studyCenters]="study.studyCenterList"
 					[study] = "study"
-					[mode]="mode">					
+					[mode]="mode">
 				</studyuser-list>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">

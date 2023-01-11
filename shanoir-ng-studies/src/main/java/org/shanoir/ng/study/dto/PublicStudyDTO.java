@@ -56,7 +56,7 @@ public class PublicStudyDTO {
 
 	private StudyType studyType;
 
-	private String publicDescription;
+	private String description;
 
 	private List<String> studyFlag;
 
@@ -202,12 +202,12 @@ public class PublicStudyDTO {
 		this.studyType = studyType;
 	}
 
-	public String getPublicDescription() {
-		return publicDescription;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setPublicDescription(String publicDescription) {
-		this.publicDescription = publicDescription;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public List<String> getStudyFlag() {
