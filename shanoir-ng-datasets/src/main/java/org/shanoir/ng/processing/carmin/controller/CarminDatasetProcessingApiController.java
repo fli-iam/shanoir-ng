@@ -40,7 +40,7 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
     @Override
     public ResponseEntity<CarminDatasetProcessing> saveNewCarminDatasetProcessing(
             @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing, BindingResult result)
-            throws RestServiceException {
+            throws RestServiceException, EntityNotFoundException {
 
         /* Validation */
         validate(result);
@@ -49,11 +49,11 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
          * run monitoring job
          */
 
-        executionStatusMonitorService.startJob(carminDatasetProcessing.getIdentifier());
-
         /* Save dataset processing in db. */
         final CarminDatasetProcessing createdDatasetProcessing = carminDatasetProcessingService
                 .createCarminDatasetProcessing(carminDatasetProcessing);
+
+        executionStatusMonitorService.startJob(carminDatasetProcessing.getIdentifier());
 
         return new ResponseEntity<>(createdDatasetProcessing, HttpStatus.OK);
     }
