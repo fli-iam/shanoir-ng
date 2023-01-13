@@ -24,8 +24,14 @@ import org.shanoir.ng.studycard.model.condition.DatasetMetadataConditionOnDatase
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+/**
+ * A rule that applies to a {@link Dataset}
+ */
 @Entity
 @DiscriminatorValue("Dataset")
+@JsonTypeName("Dataset")
 public class DatasetRule extends StudyCardRule<Dataset> {
 
     @Override

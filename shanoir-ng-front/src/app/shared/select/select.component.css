@@ -63,6 +63,9 @@ input:focus:hover { cursor: initial; }
 .option.focused { background-color: var(--grey) !important; }
 .option.disabled { opacity: 0.5; cursor: default !important; }
 .inner-option { vertical-align: middle; padding: 0 4px; border-radius: 3px; }
+.section { height: 20px; display:block; border: none; white-space: nowrap; color: var(--color-a); cursor: initial; padding: 0 5px; text-align: center; position: relative; }
+.section::before { z-index: -1; display: block; position: absolute; content: ""; top: 0; left: 0; right: 0; height: 50%; border-bottom: 1px solid var(--grey); }
+.section .inner-option { background-color: var(--very-light-grey); }
 
 .list.scrollable { padding-right: 0px; }
 .scrollbar { position: absolute; top: 0; bottom: 0; right: 0; width: 10px; background-color: transparent; }

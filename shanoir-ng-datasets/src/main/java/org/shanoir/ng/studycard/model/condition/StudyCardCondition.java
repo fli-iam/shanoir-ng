@@ -16,15 +16,13 @@ package org.shanoir.ng.studycard.model.condition;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Check;
@@ -34,18 +32,31 @@ import org.shanoir.ng.studycard.model.Operation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 @Entity
 @Check(constraints = "(dicomTag IS NOT NULL AND shanoirField IS NULL) OR (dicomTag IS NULL AND shanoirField IS NOT NULL)") 
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = StudyCardDICOMCondition.class, name = "StudyCardDICOMCondition"),
+    @JsonSubTypes.Type(value = ExaminationMetadataConditionOnDatasets.class, name = "ExaminationMetadataConditionOnDatasets"),
+    @JsonSubTypes.Type(value = ExaminationMetadataConditionOnAcquisitions.class, name = "ExaminationMetadataConditionOnAcquisitions"),
+    @JsonSubTypes.Type(value = DatasetMetadataConditionOnDataset.class, name = "DatasetMetadataConditionOnDataset"),
+    @JsonSubTypes.Type(value = AcquisitionMetadataConditionOnDatasets.class, name = "AcquisitionMetadataConditionOnDatasets"),
+    @JsonSubTypes.Type(value = AcquisitionMetadataConditionOnAcquisition.class, name = "AcquisitionMetadataConditionOnAcquisition")})
 public abstract class StudyCardCondition extends AbstractEntity {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);
 	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name="condition_id")
-	private List<StudyCardConditionValue> values;
+	@ElementCollection 
+	@Column(name = "value")
+	private List<String> values;
 	
 	@NotNull
 	private int operation;
@@ -58,14 +69,14 @@ public abstract class StudyCardCondition extends AbstractEntity {
 		this.operation = operation.getId();
 	}
 
-	public List<StudyCardConditionValue> getValues() {
-		return values;
-	}
+    public List<String> getValues() {
+        return values;
+    }
 
-	public void setValues(List<StudyCardConditionValue> values) {
-		this.values = values;
-	}
-    
+    public void setValues(List<String> values) {
+        this.values = values;
+    }
+
     protected boolean numericalCompare(Operation operation, int comparison) {
         if (Operation.BIGGER_THAN.equals(operation)) {
             return comparison > 0;

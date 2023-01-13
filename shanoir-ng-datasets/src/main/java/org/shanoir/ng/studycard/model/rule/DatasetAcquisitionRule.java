@@ -25,8 +25,14 @@ import org.shanoir.ng.studycard.model.condition.AcquisitionMetadataConditionOnDa
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+/**
+ * A rule that applies to a {@link DatasetAcquisition}
+ */
 @Entity
 @DiscriminatorValue("DatasetAcquisition")
+@JsonTypeName("DatasetAcquisition")
 public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
 
     @Override

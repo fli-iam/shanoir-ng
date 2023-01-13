@@ -22,6 +22,9 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.ExploredEntity;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("DatasetMetadataField")
 public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 
 	MODALITY_TYPE(1) {
@@ -130,5 +133,22 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 	public int getId() {
 		return id;
 	}
+	
+	public static boolean has(int id) {
+        return getEnum(id) != null;
+    }
+	
+	public static boolean has(String name) {
+	    return getEnum(name) != null;
+	}
+
+    public static DatasetMetadataField getEnum(String name) {
+        for (DatasetMetadataField f : DatasetMetadataField.values()) {
+            if (f.name().equalsIgnoreCase(name)) {
+                return f;
+            }
+        }
+        return null;
+    }
 
 }

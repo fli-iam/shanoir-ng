@@ -81,7 +81,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         importJob.converterId = context.niftiConverter.id;
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
-        importJob.anonymisationProfileToUse = context.study.profile.profileName;
+        importJob.anonymisationProfileToUse = context.study.profile?.profileName;
         return importJob;
     }
 

@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
+import javax.persistence.Entity;
+
+@Entity
 public abstract class StudyCardMetadataConditionWithCardinality<T> extends StudyCardMetadataCondition<T> {
 	
 private int cardinality;

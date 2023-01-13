@@ -17,20 +17,20 @@ package org.shanoir.ng.studycard.model.condition;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
-import org.dcm4che3.data.Attributes;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
-import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Condition valid for the given DatasetAcquisition if the acquisition metadata fulfill the condition
  */
 @Entity
 @DiscriminatorValue("AcquisitionMetadataConditionOnAcquisition")
+@JsonTypeName("AcquisitionMetadataConditionOnAcquisition")
 public class AcquisitionMetadataConditionOnAcquisition extends StudyCardMetadataCondition<DatasetAcquisition> {
 	
     private static final Logger LOG = LoggerFactory.getLogger(AcquisitionMetadataConditionOnAcquisition.class);
@@ -51,14 +51,9 @@ public class AcquisitionMetadataConditionOnAcquisition extends StudyCardMetadata
             String valueFromDb = field.get(acquisition);
             if (valueFromDb != null) {
                 // get all possible values, that can fulfill the condition
-                for (StudyCardConditionValue value : this.getValues()) {
-                    if (value.getValue() == null) throw new IllegalArgumentException("A condition value cannot be null.");
-                    LOG.info("operation: " + this.getOperation().name()
-                        + ", valueFromDb: " + valueFromDb + ", valueFromSC: " + value.getValue());
-                    if (textualCompare(this.getOperation(), valueFromDb, value.getValue())) {
-                        LOG.info("condition fulfilled: acq.name=" + valueFromDb + ", value=" + value.getValue());
-                        return true; // as condition values are combined by OR: return if one is true
-                    }   
+                for (String value : this.getValues()) {
+                    LOG.info("condition fulfilled: acq.name=" + valueFromDb + ", value=" + value);
+                    return true; // as condition values are combined by OR: return if one is true
                 }
             }
         }

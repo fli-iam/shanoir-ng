@@ -12,9 +12,10 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="conditions">
+<div class="conditions" [class.dataset]="rule.scope == 'Dataset'" [class.acquisition]="rule.scope == 'DatasetAcquisition'">
 	<div *ngFor="let condition of rule.conditions; let i = index" class="condition">	
 		<condition 
+				[ruleScope]="rule.scope"
 				[(condition)]="rule.conditions[i]" 
 				[mode]="mode"
 				[fieldOptions]="conditionFieldOptions" 
@@ -45,7 +46,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</span>
 </div>
 
-<div class="actions">
+<div class="actions" [class.dataset]="rule.scope == 'Dataset'" [class.acquisition]="rule.scope == 'DatasetAcquisition'">
 	<div *ngFor="let action of rule.assignments; let i = index" class="action">
 		<action 
 				[(assignment)]="rule.assignments[i]" 

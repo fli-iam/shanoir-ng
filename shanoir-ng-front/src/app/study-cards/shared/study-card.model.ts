@@ -31,20 +31,23 @@ export class StudyCard extends Entity {
 
 export class StudyCardRule {
 
+    constructor(public scope: MetadataFieldScope) {}
+
     assignments: StudyCardAssignment[];
     conditions: StudyCardCondition[];
 
     static copy(rule: StudyCardRule): StudyCardRule {
-        let copy: StudyCardRule = new StudyCardRule();
+        let copy: StudyCardRule = new StudyCardRule(rule.scope);
         copy.assignments = rule.assignments.map(ass => {
-            let assCopy: StudyCardAssignment = new StudyCardAssignment();
+            let assCopy: StudyCardAssignment = new StudyCardAssignment(ass.scope);
             assCopy.field = ass.field;
             assCopy.value = ass.value;
             return assCopy;
         });
         copy.conditions = rule.conditions.map(con => {
-            let conCopy: StudyCardCondition = new StudyCardCondition();
+            let conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
             conCopy.dicomTag = con.dicomTag;
+            conCopy.shanoirField = con.shanoirField;
             conCopy.values = [...con.values];
             conCopy.operation = con.operation;
             return conCopy;
@@ -57,6 +60,8 @@ export class StudyCardAssignment {
     
     field: string;
     value: string | Coil;
+    
+    constructor(public scope: MetadataFieldScope) {}
     
     get label(): string {
         if (this.value instanceof Coil) {
@@ -76,11 +81,13 @@ export class StudyCardAssignment {
 }
 
 export class StudyCardCondition {
-    type: 'dicom' | 'shanoir' = 'dicom';
     shanoirField: string;
     dicomTag: DicomTag;
     operation: Operation;
     values: string[] = [];
+    cardinality: number;
+
+    constructor(public scope: ConditionScope) {}
 }
 
 export class DicomTag {
@@ -95,3 +102,8 @@ export class DicomTag {
 }
 
 export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'SMALLER_THAN' | 'BIGGER_THAN';
+
+export type ConditionScope = 'StudyCardDICOMCondition' | 'AcquisitionMetadataConditionOnAcquisition' | 'AcquisitionMetadataConditionOnDatasets' | 
+    'DatasetMetadataConditionOnDataset' | 'ExaminationMetadataConditionOnAcquisitions' | 'ExaminationMetadataConditionOnDatasets';
+
+export type MetadataFieldScope = 'Dataset' | 'DatasetAcquisition';

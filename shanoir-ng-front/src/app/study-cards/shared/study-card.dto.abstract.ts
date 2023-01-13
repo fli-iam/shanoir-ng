@@ -26,7 +26,7 @@ export abstract class StudyCardDTOServiceAbstract {
 
     
     static isCoil(assigmentField: string): boolean {
-        return assigmentField.toLowerCase().includes('coil');
+        return assigmentField?.toLowerCase().includes('coil');
     }
 
     static mapSyncFields(dto: StudyCardDTO, entity: StudyCard): StudyCard {
@@ -47,11 +47,11 @@ export abstract class StudyCardDTOServiceAbstract {
         entity.rules = [];
         if (dto.rules) {
             for (let ruleDTO of dto.rules) {
-                let rule: StudyCardRule = new StudyCardRule();
+                let rule: StudyCardRule = new StudyCardRule(ruleDTO.scope);
                 if (ruleDTO.assignments) {
                     rule.assignments = [];
                     for (let assigmentDTO of ruleDTO.assignments) {
-                        let assigment: StudyCardAssignment = new StudyCardAssignment();
+                        let assigment: StudyCardAssignment = new StudyCardAssignment('Dataset');
                         assigment.field = assigmentDTO.field;
                         if (this.isCoil(assigment.field) && !Number.isNaN(Number(assigmentDTO.value))) {
                             assigment.value = new Coil();
@@ -65,10 +65,12 @@ export abstract class StudyCardDTOServiceAbstract {
                 if (ruleDTO.conditions) {
                     rule.conditions = [];
                     for (let conditionDTO of ruleDTO.conditions) {
-                        let condition: StudyCardCondition = new StudyCardCondition();
-                        if (conditionDTO.dicomTagOrField) condition.dicomTag = new DicomTag(+conditionDTO.dicomTagOrField, null);
+                        let condition: StudyCardCondition = new StudyCardCondition(conditionDTO.scope);
+                        if (conditionDTO.dicomTag) condition.dicomTag = new DicomTag(+conditionDTO.dicomTag, null);
+                        condition.shanoirField = conditionDTO.shanoirField;
                         condition.values = conditionDTO.values;
                         condition.operation = conditionDTO.operation as Operation;
+                        condition.cardinality = conditionDTO.cardinality;
                         rule.conditions.push(condition);
                     }
                 }

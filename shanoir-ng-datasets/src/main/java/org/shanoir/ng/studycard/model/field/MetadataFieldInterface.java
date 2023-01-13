@@ -14,6 +14,9 @@
 
 package org.shanoir.ng.studycard.model.field;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(using = MetadataFieldDeserializer.class)
 public interface MetadataFieldInterface<T> {
 	
     /**

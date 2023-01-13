@@ -260,6 +260,9 @@ import { ExecutionComponent } from './processing/execution/execution.component';
 import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
 import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
 import { QualityControlComponent } from './quality-control/quality-control.component'
+import { QualityCardService } from './study-cards/shared/quality-card.service';
+import { QualityCardDTOService } from './study-cards/shared/quality-card.dto';
+import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
 
 @NgModule({
     imports: [
@@ -441,7 +444,8 @@ import { QualityControlComponent } from './quality-control/quality-control.compo
         PipelineComponent,
         ExecutionComponent,
         CarminDatasetProcessingsComponent,
-        QualityControlComponent
+        QualityControlComponent,
+        QualityCardListComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -536,6 +540,8 @@ import { QualityControlComponent } from './quality-control/quality-control.compo
 		ExtraDataService,
         StudyDTOService,
         SubjectDTOService,
+        QualityCardService,
+        QualityCardDTOService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

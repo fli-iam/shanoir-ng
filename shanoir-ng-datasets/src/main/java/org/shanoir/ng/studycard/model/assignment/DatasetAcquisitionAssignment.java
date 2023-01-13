@@ -19,11 +19,13 @@ import javax.persistence.Entity;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
+import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 
 @Entity
@@ -39,6 +41,7 @@ public class DatasetAcquisitionAssignment extends StudyCardAssignment<DatasetAcq
         else return DatasetAcquisitionMetadataField.getEnum(field.intValue());
     }
 
+    @JsonDeserialize(as=DatasetAcquisitionMetadataField.class)
     @Override // Don't know why eclipse can't take DatasetAcquisitionMetadataField as input type
     public void setField(MetadataFieldInterface<DatasetAcquisition> field) {
         this.field = Long.valueOf(field.getId());

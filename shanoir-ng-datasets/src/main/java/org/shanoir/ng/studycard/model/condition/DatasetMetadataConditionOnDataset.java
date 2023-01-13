@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import java.util.List;
-
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
@@ -25,11 +23,14 @@ import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 /**
  * Condition valid for the given DatasetAcquisition if every of it's Datasets metadata fulfill the condition
  */
 @Entity
 @DiscriminatorValue("DatasetMetadataConditionOnDataset")
+@JsonTypeName("DatasetMetadataConditionOnDataset")
 public class DatasetMetadataConditionOnDataset extends StudyCardMetadataCondition<Dataset>{
 	
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetMetadataConditionOnDataset.class);
@@ -51,12 +52,9 @@ public class DatasetMetadataConditionOnDataset extends StudyCardMetadataConditio
         String valueFromDb = field.get(dataset);
         if (valueFromDb != null) {
             // get all possible values, that can fulfill the condition
-            for (StudyCardConditionValue value : this.getValues()) {
-                if (value.getValue() == null) throw new IllegalArgumentException("A condition value cannot be null.");
-                LOG.info("operation: " + this.getOperation().name()
-                        + ", valueFromDb: " + valueFromDb + ", valueFromSC: " + value.getValue());
-                if (textualCompare(this.getOperation(), valueFromDb, value.getValue())) {
-                    LOG.info("condition fulfilled: ds.name=" + valueFromDb + ", value=" + value.getValue());
+            for (String value : this.getValues()) {
+                if (textualCompare(this.getOperation(), valueFromDb, value)) {
+                    LOG.info("condition fulfilled: ds.name=" + valueFromDb + ", value=" + value);
                     return true;
                 } 
             }

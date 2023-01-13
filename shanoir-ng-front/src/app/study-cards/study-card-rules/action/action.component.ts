@@ -16,7 +16,7 @@ import { Observable, Subscription } from 'rxjs';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../../shared/select/select.component';
-import { StudyCardAssignment } from '../../shared/study-card.model';
+import { MetadataFieldScope, StudyCardAssignment } from '../../shared/study-card.model';
 import { of } from 'rxjs';
 
 
@@ -64,7 +64,7 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
             }
             let assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
             if (this.mode == 'view') {
-                this.fieldLabel = assignmentField.label;
+                this.fieldLabel = assignmentField?.label;
                 if (assignmentField && assignmentField.options) {
                     this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         if (opts && opts.length > 0) {
@@ -158,6 +158,7 @@ export class ShanoirMetadataField {
     constructor(
             public label: string, 
             public field: string,
+            public scope: MetadataFieldScope, 
             options?: Observable<Option<any>[]> | Option<any>[]) {
 
         if (options instanceof Observable) {

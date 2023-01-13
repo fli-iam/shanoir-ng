@@ -30,12 +30,27 @@ import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
+import org.shanoir.ng.studycard.model.condition.AcquisitionMetadataConditionOnAcquisition;
+import org.shanoir.ng.studycard.model.condition.AcquisitionMetadataConditionOnDatasets;
+import org.shanoir.ng.studycard.model.condition.DatasetMetadataConditionOnDataset;
+import org.shanoir.ng.studycard.model.condition.ExaminationMetadataConditionOnAcquisitions;
+import org.shanoir.ng.studycard.model.condition.ExaminationMetadataConditionOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
+import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 @DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = DatasetRule.class, name = "Dataset"),
+    @JsonSubTypes.Type(value = DatasetAcquisitionRule.class, name = "DatasetAcquisition") })
 public abstract class StudyCardRule<T> extends AbstractEntity {
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

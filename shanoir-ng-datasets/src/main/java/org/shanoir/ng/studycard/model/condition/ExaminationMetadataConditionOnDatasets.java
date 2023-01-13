@@ -15,25 +15,25 @@
 package org.shanoir.ng.studycard.model.condition;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.studycard.dto.QualityCardResult;
-import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Condition valid for the given DatasetAcquisition if every of it's Datasets metadata fulfill the condition
  */
 @Entity
 @DiscriminatorValue("ExaminationMetadataConditionOnDatasets")
+@JsonTypeName("ExaminationMetadataConditionOnDatasets")
 public class ExaminationMetadataConditionOnDatasets extends StudyCardMetadataConditionWithCardinality<Dataset>{
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ExaminationMetadataConditionOnDatasets.class);
@@ -65,12 +65,9 @@ public class ExaminationMetadataConditionOnDatasets extends StudyCardMetadataCon
                     String valueFromDb = field.get(dataset);
                     if (valueFromDb != null) {
                         // get all possible values, that can fulfill the condition
-                        for (StudyCardConditionValue value : this.getValues()) {
-                            if (value.getValue() == null) throw new IllegalArgumentException("A condition value cannot be null.");
-                            LOG.info("operation: " + this.getOperation().name()
-                                    + ", valueFromDb: " + valueFromDb + ", valueFromSC: " + value.getValue());
-                            if (textualCompare(this.getOperation(), valueFromDb, value.getValue())) {
-                                LOG.info("condition fulfilled: ds.name=" + valueFromDb + ", value=" + value.getValue());
+                        for (String value : this.getValues()) {
+                            if (textualCompare(this.getOperation(), valueFromDb, value)) {
+                                LOG.info("condition fulfilled: ds.name=" + valueFromDb + ", value=" + value);
                                 nbOk++;
                                 break;
                             } 
@@ -85,7 +82,7 @@ public class ExaminationMetadataConditionOnDatasets extends StudyCardMetadataCon
     } 
     
     private String getErrorMsg(int nbOk, int total) {
-        String values = getValues().stream().map(v -> v.getValue()).collect(Collectors.joining(","));
+        String values = String.join(", ", getValues());
         String msg = "Error with condition: " + getShanoirField() + ", " + getOperation().name() + ", with values: " + values
                 + ". " + nbOk + "/" + total + " datasets complied when " + getCardinality() + " were needed.";
         return msg;

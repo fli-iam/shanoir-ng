@@ -13,7 +13,7 @@
  */
 import { Component, Input, OnInit, Output, EventEmitter, OnDestroy, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 
-import { StudyCardCondition, DicomTag, Operation } from '../../shared/study-card.model';
+import { StudyCardCondition, DicomTag, Operation, ConditionScope, MetadataFieldScope } from '../../shared/study-card.model';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { DicomService } from '../../shared/dicom.service';
 import { Option } from '../../../shared/select/select.component';
@@ -29,6 +29,7 @@ import { Subscription } from 'rxjs';
 })
 export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges {
     
+    @Input() ruleScope: MetadataFieldScope;
     @Input() condition: StudyCardCondition;
     @Output() conditionChange: EventEmitter<StudyCardCondition> = new EventEmitter();
     @Input() mode: Mode = 'view';
@@ -38,6 +39,10 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     shanoirFieldOptions: Option<any>[];
     operations: Operation[] = ['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'SMALLER_THAN', 'BIGGER_THAN'];
     @Output() delete: EventEmitter<void> = new EventEmitter();
+    init: boolean = false;
+    conditionTypeOptions: Option<ConditionScope>[];
+    fieldLabel: string;
+    cardinalityType: 'NONE' | 'ALL' | 'AT_LEAST' = 'ALL';
 
     @Input() showErrors: boolean;
     tagTouched: boolean = false;
@@ -63,6 +68,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                 }
             });
         }
+        setTimeout(() => this.init = true);
     }
             
     ngOnDestroy(): void {
@@ -71,14 +77,31 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     }
 
     ngOnChanges(changes: SimpleChanges): void {
+        if (changes.ruleScope && this.ruleScope) {
+            if (this.ruleScope == 'Dataset') {
+                this.conditionTypeOptions = [
+                    new Option('StudyCardDICOMCondition', 'the DICOM field'),
+                    new Option('DatasetMetadataConditionOnDataset', 'the dataset field'),
+                ];
+            } else if (this.ruleScope == 'DatasetAcquisition') {
+                this.conditionTypeOptions = [
+                    new Option('StudyCardDICOMCondition', 'the DICOM field'),
+                    new Option('AcquisitionMetadataConditionOnAcquisition', 'the acquisition field'),
+                    new Option('AcquisitionMetadataConditionOnDatasets', 'the dataset field'),
+                ];
+            }
+        }
         if (changes.condition && this.condition && this.fields) {
+            if (this.condition.cardinality == -1) this.cardinalityType = 'ALL';
+            if (this.condition.cardinality == 0) this.cardinalityType = 'NONE';
+            if (this.condition.cardinality > 0) this.cardinalityType = 'AT_LEAST';
             if (this.conditionChangeSubscription) {
                 this.conditionChangeSubscription.unsubscribe();
                 this.conditionChangeSubscription = null;
             }
-            let conditionField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.condition.shanoirField );
+            let conditionField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.condition.shanoirField);
             if (this.mode == 'view') {
-                //this.fieldLabel = conditionField.label;
+                this.fieldLabel = conditionField?.label;
                 if (conditionField && conditionField.options) {
                     this.conditionChangeSubscription = conditionField.options.subscribe(opts => {
                         if (opts && opts.length > 0) {
@@ -150,20 +173,31 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     }
 
     onFieldChange(field: string) {
-        this.computeConditionOptions();
-        if (this.shanoirFieldOptions?.length > 0) this.condition.operation = 'EQUALS';
-        else this.condition.operation = null;
-        this.condition.values = [null];
-        this.valueTouched = false;
-        this.conditionChange.emit(this.condition);
+        if (!(this.condition.scope == 'StudyCardDICOMCondition' && this.condition.dicomTag.code+"" == field)) {
+            this.computeConditionOptions();
+            if (this.shanoirFieldOptions?.length > 0) this.condition.operation = 'EQUALS';
+            else this.condition.operation = null;
+            this.condition.values = [null];
+            this.valueTouched = false;
+            this.conditionChange.emit(this.condition);
+        }
     }
 
-    onConditionTypeChange(value: 'dicom' | 'shanoir') {
-        this.condition.type = value;
-        this.condition.shanoirField = null;
-        this.condition.dicomTag = null;
-        this.condition.operation = null;
-        this.condition.values = [null];
+    onConditionTypeChange(value: ConditionScope) {
+        if (value != this.condition.scope) {
+            this.condition.scope = value;
+            this.condition.shanoirField = null;
+            this.condition.dicomTag = null;
+            this.condition.operation = null;
+            this.condition.values = [null];
+            if (value.endsWith('OnDataset') || value.endsWith('OnDatasets')) {
+                this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'Dataset');
+            } else if (value.endsWith('OnAcquisition') || value.endsWith('OnAcquisitions')) {
+                this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'DatasetAcquisition');
+            } else {
+                this.fieldOptions.forEach(opt => opt.disabled = false);
+            }
+        }
     }
 
     private computeConditionOptions() {
@@ -171,7 +205,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.computeConditionOptionsSubscription.unsubscribe();
             this.computeConditionOptionsSubscription = null;
         }
-        if (this.condition.type == 'shanoir') {
+        if (this.condition.scope != 'StudyCardDICOMCondition') {
             let conditionField: ShanoirMetadataField = this.fields.find(metadataField => metadataField.field == this.condition.shanoirField);
             if (conditionField && conditionField.options) {
                 this.computeConditionOptionsSubscription = conditionField.options.subscribe(opts => {
@@ -180,6 +214,16 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             } else {
                 this.shanoirFieldOptions = null;
             }    
+        }
+    }
+
+    onCardinalityTypeChange() {
+        if (this.cardinalityType == 'ALL') {
+            this.condition.cardinality = -1;
+        } else if (this.cardinalityType == 'NONE') {
+            this.condition.cardinality = 0;
+        } else if (this.cardinalityType == 'AT_LEAST' && this.condition.cardinality <= 1) {
+            this.condition.cardinality = 1;
         }
     }
 
@@ -197,6 +241,10 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
 
     get shanoirFieldError(): boolean {
         return !this.condition.shanoirField && (this.shanoirFieldTouched || this.showErrors)
+    }
+
+    get cardinalityError(): boolean {
+        return !(this.condition.cardinality && this.condition.cardinality > -1) && this.showErrors;
     }
 
     trackByFn(index, item) {

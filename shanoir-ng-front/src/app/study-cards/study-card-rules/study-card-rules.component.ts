@@ -36,7 +36,7 @@ import { MrSequencePhysics } from '../../enum/mr-sequence-physics.enum';
 import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
-import { StudyCardRule } from '../shared/study-card.model';
+import { MetadataFieldScope, StudyCardRule } from '../shared/study-card.model';
 import { ShanoirMetadataField } from './action/action.component';
 import { StudyCardRuleComponent } from './study-card-rule.component';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
@@ -84,21 +84,21 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
             private breadcrumbService: BreadcrumbsService) {
      
         this.assignmentFields = [
-            new ShanoirMetadataField('Dataset modality type', 'MODALITY_TYPE', DatasetModalityType.options),
-            new ShanoirMetadataField('Protocol name', 'PROTOCOL_NAME'),
-            new ShanoirMetadataField('Protocol comment', 'PROTOCOL_COMMENT'),
-            new ShanoirMetadataField('Transmitting coil', 'TRANSMITTING_COIL', this.coilOptions),
-            new ShanoirMetadataField('Receiving coil', 'RECEIVING_COIL', this.coilOptions),
-            new ShanoirMetadataField('Explored entity', 'EXPLORED_ENTITY', ExploredEntity.options),
-            new ShanoirMetadataField('Acquisition contrast', 'ACQUISITION_CONTRAST', AcquisitionContrast.options),
-            new ShanoirMetadataField('MR sequence application', 'MR_SEQUENCE_APPLICATION', MrSequenceApplication.options),
-            new ShanoirMetadataField('MR sequence physics', 'MR_SEQUENCE_PHYSICS', MrSequencePhysics.options),
-            new ShanoirMetadataField('New name for the dataset', 'NAME'),
-            new ShanoirMetadataField('Dataset comment', 'COMMENT'),
-            new ShanoirMetadataField('MR sequence name', 'MR_SEQUENCE_NAME'),
-            new ShanoirMetadataField('Contrast agent used', 'CONTRAST_AGENT_USED', ContrastAgent.options),
-            new ShanoirMetadataField('Mr Dataset Nature', 'MR_DATASET_NATURE', MrDatasetNature.options),
-			new ShanoirMetadataField('BIDS data type', 'BIDS_DATA_TYPE', BidsDataType.options)
+            new ShanoirMetadataField('Dataset modality type', 'MODALITY_TYPE', 'Dataset', DatasetModalityType.options),
+            new ShanoirMetadataField('Protocol name', 'PROTOCOL_NAME', 'DatasetAcquisition'),
+            new ShanoirMetadataField('Protocol comment', 'PROTOCOL_COMMENT', 'DatasetAcquisition'),
+            new ShanoirMetadataField('Transmitting coil', 'TRANSMITTING_COIL', 'DatasetAcquisition', this.coilOptions),
+            new ShanoirMetadataField('Receiving coil', 'RECEIVING_COIL', 'DatasetAcquisition', this.coilOptions),
+            new ShanoirMetadataField('Explored entity', 'EXPLORED_ENTITY', 'Dataset', ExploredEntity.options),
+            new ShanoirMetadataField('Acquisition contrast', 'ACQUISITION_CONTRAST', 'DatasetAcquisition', AcquisitionContrast.options),
+            new ShanoirMetadataField('MR sequence application', 'MR_SEQUENCE_APPLICATION', 'DatasetAcquisition', MrSequenceApplication.options),
+            new ShanoirMetadataField('MR sequence physics', 'MR_SEQUENCE_PHYSICS', 'DatasetAcquisition', MrSequencePhysics.options),
+            new ShanoirMetadataField('New name for the dataset', 'NAME', 'Dataset'),
+            new ShanoirMetadataField('Dataset comment', 'COMMENT', 'Dataset'),
+            new ShanoirMetadataField('MR sequence name', 'MR_SEQUENCE_NAME', 'DatasetAcquisition'),
+            new ShanoirMetadataField('Contrast agent used', 'CONTRAST_AGENT_USED', 'DatasetAcquisition', ContrastAgent.options),
+            new ShanoirMetadataField('Mr Dataset Nature', 'MR_DATASET_NATURE', 'Dataset', MrDatasetNature.options),
+			new ShanoirMetadataField('BIDS data type', 'BIDS_DATA_TYPE', 'DatasetAcquisition', BidsDataType.options)
         ];
 
         // here we reference assignment fields but conditions could be different
@@ -129,8 +129,8 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         }
     }
 
-    addNewRule() {
-        let rule: StudyCardRule = new StudyCardRule();
+    addNewRule(scope: MetadataFieldScope) {
+        let rule: StudyCardRule = new StudyCardRule(scope);
         rule.conditions = [];
         rule.assignments = []; 
         this.rules.push(rule);
@@ -226,13 +226,13 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         let errors: any = {};
         if (rules) {
             rules.forEach(rule => {
-                if (rule.conditions?.find(cond => cond.type != 'dicom' && cond.type != 'shanoir')) {
+                if (rule.conditions?.find(cond => cond.scope == null)) {
                     errors.noType = true; 
                 }
-                if (rule.conditions?.find(cond => cond.type == 'dicom' && !cond.dicomTag)) {
+                if (rule.conditions?.find(cond => cond.scope == 'StudyCardDICOMCondition' && !cond.dicomTag)) {
                     errors.missingField = 'condition dicomTag';
                 }
-                if (rule.conditions?.find(cond => cond.type == 'shanoir' && !cond.shanoirField)) {
+                if (rule.conditions?.find(cond => cond.scope != 'StudyCardDICOMCondition' && !cond.shanoirField)) {
                     errors.missingField = 'condition shanoirField';
                 }
                 if (rule.conditions?.find(cond => !cond.operation)) {

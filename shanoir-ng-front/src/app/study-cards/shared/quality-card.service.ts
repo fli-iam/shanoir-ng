@@ -17,54 +17,48 @@ import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
-import { StudyCardDTOService } from './study-card.dto';
-import { StudyCardDTO } from './study-card.dto.model';
-import { StudyCard } from './study-card.model';
+import { QualityCardDTOService } from './quality-card.dto';
+import { QualityCardDTO } from './quality-card.dto.model';
+import { QualityCard } from './quality-card.model';
 
 @Injectable()
-export class StudyCardService extends EntityService<StudyCard> {
+export class QualityCardService extends EntityService<QualityCard> {
 
-    API_URL = AppUtils.BACKEND_API_STUDY_CARD_URL;
+    API_URL = AppUtils.BACKEND_API_QUALITY_CARD_URL;
 
-    private studyCardDTOService: StudyCardDTOService = ServiceLocator.injector.get(StudyCardDTOService);
+    private qualityCardDTOService: QualityCardDTOService = ServiceLocator.injector.get(QualityCardDTOService);
     
     constructor(protected http: HttpClient) {
         super(http)
     }
 
-    getEntityInstance() { return new StudyCard(); }
+    getEntityInstance() { return new QualityCard(); }
 
-    getAllForStudy(studyId: number): Promise<StudyCard[]> {
+    getAllForStudy(studyId: number): Promise<QualityCard[]> {
         return this.http.get<any[]>(this.API_URL + '/byStudy/' + studyId)
             .toPromise()
             .then(this.mapEntityList);
     }
 
-    protected mapEntity = (dto: StudyCardDTO, result?: StudyCard): Promise<StudyCard> => {
+    protected mapEntity = (dto: QualityCardDTO, result?: QualityCard): Promise<QualityCard> => {
         if (result == undefined) result = this.getEntityInstance();
-        return this.studyCardDTOService.toEntity(dto, result);
+        return this.qualityCardDTOService.toEntity(dto, result);
     }
 
-    protected mapEntityList = (dtos: StudyCardDTO[], result?: StudyCard[]): Promise<StudyCard[]> => {
+    protected mapEntityList = (dtos: QualityCardDTO[], result?: QualityCard[]): Promise<QualityCard[]> => {
         if (result == undefined) result = [];
-        if (dtos) return this.studyCardDTOService.toEntityList(dtos, result);
+        if (dtos) return this.qualityCardDTOService.toEntityList(dtos, result);
     }
 
-    public stringify(entity: StudyCard) {
-        let dto = new StudyCardDTO(entity);
+    public stringify(entity: QualityCard) {
+        let dto = new QualityCardDTO(entity);
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });
     }
 
-    applyStudyCardOn(studyCardId: number, datasetAcquisitionIds: number[]): Promise<any> {
-        return this.http.post<any[]>(this.API_URL + '/apply', JSON.stringify({studyCardId: studyCardId, datasetAcquisitionIds: datasetAcquisitionIds}))
-            .toPromise()
-            .then();
-    }
-    
-    applyStudyCardOnStudy(studyCardId: number): Promise<any> {
-        return this.http.get<any[]>(this.API_URL + '/apply-quality-card/' + studyCardId)
+    applyOnStudy(qualityCardId: number): Promise<any> {
+        return this.http.get<any[]>(this.API_URL + '/apply-quality-card/' + qualityCardId)
             .toPromise();
     }
 

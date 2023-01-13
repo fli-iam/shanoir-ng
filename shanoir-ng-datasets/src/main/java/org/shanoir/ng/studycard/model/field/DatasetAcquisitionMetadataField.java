@@ -31,6 +31,9 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequencePhysics;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@JsonTypeName("DatasetAcquisitionMetadataField")
 public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<DatasetAcquisition> {
 
 	PROTOCOL_NAME(2) {
@@ -293,4 +296,20 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		return id;
 	}
 
+	public static boolean has(int id) {
+        return getEnum(id) != null;
+    }
+
+	public static boolean has(String name) {
+        return getEnum(name) != null;
+    }
+
+    public static DatasetAcquisitionMetadataField getEnum(String name) {
+        for (DatasetAcquisitionMetadataField f : DatasetAcquisitionMetadataField.values()) {
+            if (f.name().equalsIgnoreCase(name)) {
+                return f;
+            }
+        }
+        return null;
+    }
 }

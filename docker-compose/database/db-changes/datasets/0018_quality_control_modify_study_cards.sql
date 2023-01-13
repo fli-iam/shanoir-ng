@@ -19,7 +19,8 @@ ALTER TABLE quality_examination_rule ADD CONSTRAINT FK8bavfrsgqwil7aei15l00dg6g 
 -- study_card_condition
 ALTER TABLE study_card_condition MODIFY dicom_tag int(11) NULL;
 ALTER TABLE study_card_condition ADD COLUMN shanoir_field int(11) NULL;
-ALTER TABLE study_card_condition ADD COLUMN scope varchar(31) NOT NULL;
+ALTER TABLE study_card_condition ADD COLUMN scope varchar(63) NOT NULL;
+ALTER TABLE study_card_condition ADD COLUMN cardinality bigint(20) NOT NULL;
 UPDATE study_card_condition SET scope = 'StudyCardDICOMCondition';
 
 -- study_card_assignment, add scope and set its value
@@ -37,15 +38,14 @@ UPDATE study_card_rule SET scope = 'DatasetAcquisition' WHERE id IN (
 );
 
 -- create new table for values
-CREATE TABLE study_card_condition_value (
-  id bigint(20) NOT NULL AUTO_INCREMENT,
-  condition_id bigint(20) NOT NULL,
-  value varchar(255) DEFAULT NULL,
-  PRIMARY KEY (id)
+CREATE TABLE study_card_condition_values (
+  study_card_condition_id bigint(20) NOT NULL,
+  value varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-ALTER TABLE study_card_condition_value ADD CONSTRAINT FKnmg0gxqrew2nqktd0mm5hvi64 FOREIGN KEY (condition_id) REFERENCES study_card_condition(id);
+ALTER TABLE study_card_condition_values ADD CONSTRAINT FKnmg0gxqrew2nqktd0mm5hvi64 FOREIGN KEY (study_card_condition_id) REFERENCES study_card_condition(id);
+
 -- copy values afterwards
-INSERT INTO study_card_condition_value (condition_id, value) select id, dicom_value FROM study_card_condition;
+INSERT INTO study_card_condition_values (condition_id, value) select id, dicom_value FROM study_card_condition;
 -- delete old column
 ALTER TABLE study_card_condition DROP dicom_value;
 

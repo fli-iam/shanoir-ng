@@ -26,8 +26,11 @@ import org.shanoir.ng.studycard.model.DicomTagType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 @Entity
 @DiscriminatorValue("StudyCardDICOMCondition")
+@JsonTypeName("StudyCardDICOMCondition")
 public class StudyCardDICOMCondition extends StudyCardCondition {
 	
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardDICOMCondition.class);
@@ -48,18 +51,17 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
         
     public boolean fulfilled(Attributes dicomAttributes, String errorMsg) {
         LOG.info("conditionFulfilled: " + this.getId() + " processing one condition with all its values: ");
-        this.getValues().stream().forEach(s -> LOG.info(s.getValue()));
+        this.getValues().stream().forEach(s -> LOG.info(s));
         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(this.getDicomTag());
         DicomTagType tagType = DicomTagType.valueOf(tagVr);
         // get all possible values, that can fulfill the condition
-        for (StudyCardConditionValue value : this.getValues()) {
-            if (value.getValue() == null) throw new IllegalArgumentException("A condition value cannot be null.");
+        for (String value : this.getValues()) {
             if (tagType.isNumerical()) {
                 if (!this.getOperation().isNumerical()) {
                     throw new IllegalArgumentException("Study card processing : operation " + this.getOperation() + " is not compatible with dicom tag " 
                             + this.getDicomTag() + " of type " + tagType + "(condition id : " + this.getId() + ")");
                 }
-                BigDecimal scValue = new BigDecimal(value.getValue());
+                BigDecimal scValue = new BigDecimal(value);
                 Integer comparison = null;
                 if (DicomTagType.Float.equals(tagType)) {
                     Float floatValue = dicomAttributes.getFloat(this.getDicomTag(), Float.MIN_VALUE);          
@@ -85,7 +87,7 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
                     LOG.warn("Could not find a value in the dicom for the tag " + this.getDicomTag());
                     return false;
                 }               
-                if (textualCompare(this.getOperation(), stringValue, value.getValue())) {
+                if (textualCompare(this.getOperation(), stringValue, value)) {
                     return true; // as condition values are combined by OR: return if one is true
                 }
             }

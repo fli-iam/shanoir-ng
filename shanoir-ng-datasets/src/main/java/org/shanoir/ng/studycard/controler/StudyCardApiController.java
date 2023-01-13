@@ -33,6 +33,8 @@ import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
+import org.shanoir.ng.studycard.model.condition.AcquisitionMetadataConditionOnDatasets;
+import org.shanoir.ng.studycard.model.condition.DatasetMetadataConditionOnDataset;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.studycard.service.StudyCardService;

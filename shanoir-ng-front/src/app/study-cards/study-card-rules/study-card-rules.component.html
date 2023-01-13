@@ -11,7 +11,6 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
 <ng-container *ngFor="let rule of rules; let i = index;">
 	<study-card-rule
 		[class.appear]="canAnimateEnter(i)"
@@ -31,9 +30,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</study-card-rule>
 </ng-container>
 <div *ngIf="mode == 'edit' || mode == 'create'" class="add-container">
-	<span (click)="addNewRule()">
-		<i class="fas fa-plus"></i>
-		<div>Add a rule</div>
+	<span (click)="addNewRule('DatasetAcquisition')" class="acquisition">
+		<i class="fa-solid fa-bed-pulse"></i>
+		<div>Add a rule on <span class="entity">acquisition</span></div>
+	</span>
+	<span (click)="addNewRule('Dataset')" class="dataset">
+		<i class="fa-solid fa-brain"></i>
+		<div>Add a rule on <span class="entity">dataset</span></div>
 	</span>
 	<span (click)="importRules.emit()">
 		<i class="fas fa-file-import"></i>

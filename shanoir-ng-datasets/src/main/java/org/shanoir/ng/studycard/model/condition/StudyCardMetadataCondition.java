@@ -14,8 +14,11 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
+import javax.persistence.Entity;
+
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 
+@Entity
 public abstract class StudyCardMetadataCondition<T> extends StudyCardCondition {
 	
 	protected int shanoirField;

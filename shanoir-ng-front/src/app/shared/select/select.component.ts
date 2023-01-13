@@ -78,6 +78,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public maxWidth: number;
     public noResult: boolean;
     @Input() clear: boolean = true;
+    @Input() search: boolean = true;
 
 
     @Input() viewDisabled: boolean;
@@ -284,6 +285,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             return;
         }
         this.displayedOptions = this.displayableOptions.slice(this.firstScrollOptionIndex, this.firstScrollOptionIndex + this.LIST_LENGTH);
+        this.displayedOptions = this.displayedOptions.sort((a, b) => (a.section > b.section) ? -1 : 1);
         this.noResult = this.displayedOptions.length == 0;
     }
     
@@ -410,7 +412,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             event.preventDefault();
         } else if (' ' == event.key) {
             if (!this.isOpen()) this.open();
-        }  else if (event.keyCode >= 65 && event.keyCode <= 90) {
+        }  else if (this.search && event.keyCode >= 65 && event.keyCode <= 90) {
             if (this.textInput.nativeElement != document.activeElement) {
                 this.inputText = null;
                 this.textInput.nativeElement.focus();
