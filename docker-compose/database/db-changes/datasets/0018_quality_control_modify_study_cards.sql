@@ -20,7 +20,7 @@ ALTER TABLE quality_examination_rule ADD CONSTRAINT FK8bavfrsgqwil7aei15l00dg6g 
 ALTER TABLE study_card_condition MODIFY dicom_tag int(11) NULL;
 ALTER TABLE study_card_condition ADD COLUMN shanoir_field int(11) NULL;
 ALTER TABLE study_card_condition ADD COLUMN scope varchar(63) NOT NULL;
-ALTER TABLE study_card_condition ADD COLUMN cardinality int(11) NOT NULL;
+ALTER TABLE study_card_condition ADD COLUMN cardinality int(11) NULL;
 UPDATE study_card_condition SET scope = 'StudyCardDICOMCondition';
 
 -- study_card_assignment, add scope and set its value
@@ -30,6 +30,7 @@ UPDATE study_card_assignment SET scope = 'DatasetAcquisition' WHERE field IN (2,
 
 -- study_card_rule, add scope and set its value
 ALTER TABLE study_card_rule ADD COLUMN scope varchar(31) NOT NULL;
+UPDATE study_card_rule SET scope = 'DatasetAcquisition';
 UPDATE study_card_rule SET scope = 'Dataset' WHERE id IN (
   SELECT rule_id FROM study_card_assignment WHERE scope LIKE 'Dataset'
 );
