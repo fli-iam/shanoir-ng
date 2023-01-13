@@ -33,9 +33,8 @@ RUN /opt/keycloak/bin/kc.sh build
 FROM quay.io/keycloak/keycloak:20.0.0
 
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
-COPY themes/. /opt/keycloak/themes
 USER root
-RUN chmod 666 /opt/keycloak/themes/shanoir-theme/login/template.ftl
+COPY themes/. /opt/keycloak/themes
 USER 1000
 COPY cfg/. /opt/keycloak/
 
