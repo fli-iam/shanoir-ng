@@ -13,16 +13,15 @@
  */
 import { Component, ViewChild } from '@angular/core';
 
-import { DatasetService } from '../../datasets/shared/dataset.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
+import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
 
 
 @Component({
@@ -31,14 +30,17 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     styleUrls: ['subject-list.component.css']
 })
 
-export class SubjectListComponent extends BrowserPaginEntityListComponent<Subject> {
+export class SubjectListComponent extends EntityListComponent<Subject> {
+
+    getPage(pageable: Pageable): Promise<Page<Subject>> {
+        return this.subjectService.getPage(pageable,"");
+    }
     
     @ViewChild('table', { static: false }) table: TableComponent;
     private studiesICanAdmin: number[];
 
     constructor(
             private subjectService: SubjectService, 
-            private datasetService: DatasetService,
             private studyService: StudyService) {       
                 
         super('subject');

@@ -14,7 +14,9 @@
 
 package org.shanoir.ng.subject.repository;
 
+import org.shanoir.ng.shared.paging.Page;
 import org.shanoir.ng.subject.model.Subject;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -55,6 +57,8 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	
 	@Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' ORDER BY name DESC LIMIT 1", nativeQuery = true)
 	Subject findSubjectFromCenterCode(@Param("centerCode") String centerCode);
+	
+	Page<Subject> findByNameContaining(String name, Pageable pageable);
 	
 	/**
 	 * Returns all instances of the type.

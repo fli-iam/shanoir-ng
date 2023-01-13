@@ -135,16 +135,11 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<List<StudyDTO>> findStudies() {
-		System.err.println("Before loading");
 		List<Study> studies = studyService.findAll();
-		System.err.println("After loading");
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			System.err.println("before mapping");
 			List<StudyDTO> studs = studyMapper.studiesToStudyDTOs(studies);
-			System.err.println("after mapping");
-
 			return new ResponseEntity<>(studs, HttpStatus.OK);
 		}
 	}
