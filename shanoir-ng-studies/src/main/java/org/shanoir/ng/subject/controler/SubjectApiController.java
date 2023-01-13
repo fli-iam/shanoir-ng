@@ -28,7 +28,6 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.paging.Page;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
@@ -37,6 +36,7 @@ import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -187,6 +187,10 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	public ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name) {
-		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(this.subjectService.getFilteredPage(page, name)), HttpStatus.OK);
+		Page<Subject> subjects = this.subjectService.getFilteredPage(page, name);
+		if (subjects.getContent().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 }

@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.subject.repository;
 
-import org.shanoir.ng.shared.paging.Page;
 import org.shanoir.ng.subject.model.Subject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
