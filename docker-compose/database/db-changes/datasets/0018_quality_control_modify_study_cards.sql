@@ -45,7 +45,7 @@ CREATE TABLE study_card_condition_values (
 ALTER TABLE study_card_condition_values ADD CONSTRAINT FKnmg0gxqrew2nqktd0mm5hvi64 FOREIGN KEY (study_card_condition_id) REFERENCES study_card_condition(id);
 
 -- copy values afterwards
-INSERT INTO study_card_condition_values (condition_id, value) select id, dicom_value FROM study_card_condition;
+INSERT INTO study_card_condition_values (study_card_condition_id, value) select id, dicom_value FROM study_card_condition;
 -- delete old column
 ALTER TABLE study_card_condition DROP dicom_value;
 
