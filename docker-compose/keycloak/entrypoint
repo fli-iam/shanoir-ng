@@ -23,8 +23,12 @@ sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
 		s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 "		/opt/keycloak/shanoir-ng-realm.json > /opt/keycloak/data/import/shanoir-ng-realm.json
 
-sed -i -E "s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
-sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
+sed -E "s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl > /opt/keycloak/themes/shanoir-theme/login/template.ftl.tmp
+cat /opt/keycloak/themes/shanoir-theme/login/template.ftl.tmp > /opt/keycloak/themes/shanoir-theme/login/template.ftl
+rm /opt/keycloak/themes/shanoir-theme/login/template.ftl.tmp
+sed -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl > /opt/keycloak/themes/shanoir-theme/login/template.ftl.tmp
+cat /opt/keycloak/themes/shanoir-theme/login/template.ftl.tmp > /opt/keycloak/themes/shanoir-theme/login/template.ftl
+rm /opt/keycloak/themes/shanoir-theme/login/template.ftl.tmp
 
 export KC_DB="${DB_VENDOR:-mysql}"
 export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
