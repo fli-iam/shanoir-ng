@@ -64,7 +64,7 @@ public abstract class AbstractUserRequestApiController {
 	 * @return the VIPUserService
 	 */
 	protected VIPUserService getVipUserService(){
-		return getVipUserService();
+		return vipUserService;
 	}
 
 	/*
