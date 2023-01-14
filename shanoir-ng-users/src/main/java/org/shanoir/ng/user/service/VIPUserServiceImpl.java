@@ -6,6 +6,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
+import org.shanoir.ng.user.model.vip.CountryCode;
 import org.shanoir.ng.user.model.vip.VIPUser;
 import org.shanoir.ng.user.model.vip.VIPUserLevel;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -69,8 +70,9 @@ public class VIPUserServiceImpl implements VIPUserService{
         String[] accountType = new String[] {"Support"};
         String comments = "";
         VIPUserLevel userLevel = VIPUserLevel.Beginner;
+        CountryCode countryCode = CountryCode.fr;
 
-        VIPUser vipUser = new VIPUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getAccountRequestInfo().getInstitution(), newPassword, userLevel, comments, accountType);
+        VIPUser vipUser = new VIPUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getAccountRequestInfo().getInstitution(), newPassword, userLevel, countryCode, comments, accountType);
 
         // prepare entity.
         HttpHeaders headers = new HttpHeaders();

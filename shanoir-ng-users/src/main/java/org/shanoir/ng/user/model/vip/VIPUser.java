@@ -13,20 +13,22 @@ public class VIPUser {
     private String institution;
     private String password;
     private VIPUserLevel level;
-    //private CountryCode countryCode;
+
+    private CountryCode countryCode;
     private String comments;
     private String[] accountTypes;
 
     public VIPUser() {
     }
 
-    public VIPUser(String firstName, String lastName, String email, String institution, String password, VIPUserLevel level, String comments, String[] accountTypes) {
+    public VIPUser(String firstName, String lastName, String email, String institution, String password, VIPUserLevel level, CountryCode countryCode, String comments, String[] accountTypes) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.institution = institution;
         this.password = password;
         this.level = level;
+        this.countryCode = countryCode;
         this.comments = comments;
         this.accountTypes = accountTypes;
     }
@@ -93,5 +95,13 @@ public class VIPUser {
 
     public void setAccountTypes(String[] accountTypes) {
         this.accountTypes = accountTypes;
+    }
+
+    public CountryCode getCountryCode() {
+        return countryCode;
+    }
+
+    public void setCountryCode(CountryCode countryCode) {
+        this.countryCode = countryCode;
     }
 }
