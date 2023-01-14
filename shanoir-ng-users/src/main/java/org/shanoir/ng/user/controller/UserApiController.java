@@ -142,7 +142,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		/* Save user in db. */
 		try {
 			User createdUser = getUserService().create(user);
-			getVipUserService().createVIPAccountRequest(user);
+			getVipUserService().createVIPAccountRequest(createdUser);
 			return new ResponseEntity<>(createdUser, HttpStatus.OK);
 		} catch (PasswordPolicyException e) {
 			throw new RestServiceException(

@@ -66,13 +66,14 @@ public class VIPUserServiceImpl implements VIPUserService{
             throw new PasswordPolicyException();
         }
 
-        // vip info;
+        // vip user info;
         String[] accountType = new String[] {"Support"};
         String comments = "";
         VIPUserLevel userLevel = VIPUserLevel.Beginner;
         CountryCode countryCode = CountryCode.fr;
+        String institution = user.getAccountRequestInfo() == null ? "inria_admin_generated" : user.getAccountRequestInfo().getInstitution();
 
-        VIPUser vipUser = new VIPUser(user.getFirstName(), user.getLastName(), user.getEmail(), user.getAccountRequestInfo().getInstitution(), newPassword, userLevel, countryCode, comments, accountType);
+        VIPUser vipUser = new VIPUser(user.getFirstName(), user.getLastName(), user.getEmail(), institution, newPassword, userLevel, countryCode, comments, accountType);
 
         // prepare entity.
         HttpHeaders headers = new HttpHeaders();
