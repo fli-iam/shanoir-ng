@@ -35,6 +35,8 @@ import javax.persistence.SqlResultSetMapping;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
@@ -138,10 +140,12 @@ public class Study extends HalEntity {
 
 	/** List of the examinations related to this study. */
 	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	@LazyCollection(LazyCollectionOption.EXTRA)
 	private Set<StudyExamination> examinations;
 
 	/** Relations between the subjects and the studies. */
 	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	@LazyCollection(LazyCollectionOption.EXTRA)
 	private List<SubjectStudy> subjectStudyList;
 
 	/** List of Timepoints dividing the study **/
