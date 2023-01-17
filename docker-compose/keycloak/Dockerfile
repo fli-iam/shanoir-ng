@@ -33,7 +33,7 @@ RUN /opt/keycloak/bin/kc.sh build
 FROM quay.io/keycloak/keycloak:20.0.0
 
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
-COPY themes/. /opt/keycloak/themes
+COPY --chown=keycloak themes/. /opt/keycloak/themes
 COPY cfg/. /opt/keycloak/
 
 COPY entrypoint entrypoint_common oneshot /bin/
