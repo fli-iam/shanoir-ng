@@ -33,4 +33,5 @@ COPY cfg/. /opt/keycloak/
 
 COPY entrypoint entrypoint_common oneshot /bin/
 
-ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh", "start-dev"]
+ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh"]
+CMD ["start"]
