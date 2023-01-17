@@ -30,7 +30,6 @@ sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-
 # keycloak options
 # see: https://www.keycloak.org/server/all-config
 #
-export KC_HOSTNAME_PATH="/auth"
 export KC_HTTP_RELATIVE_PATH="/auth"
 export KC_PROXY="${KC_PROXY:-edge}"
 export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
