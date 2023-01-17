@@ -139,8 +139,7 @@ public class StudyApiController implements StudyApi {
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			List<StudyDTO> studs = studyMapper.studiesToStudyDTOs(studies);
-			return new ResponseEntity<>(studs, HttpStatus.OK);
+			return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
 		}
 	}
 
