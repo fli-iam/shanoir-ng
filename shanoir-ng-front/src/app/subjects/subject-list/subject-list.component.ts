@@ -79,6 +79,11 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
         ];
     }
 
+    completeColDefs() {
+        super.completeColDefs();
+        this.columnDefs[this.columnDefs.findIndex(col => col.headerName == "Id")].disableSearch = true;
+    }
+
     getCustomActionsDefs(): any[] {
         return [];
     }
