@@ -42,6 +42,7 @@ export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 
 require  SHANOIR_MIGRATION
 oneshot=
+patterns=(' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s')
 extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
        "-Dallowed.admin.ips=${SHANOIR_ALLOWED_ADMIN_IPS}")
 
@@ -55,6 +56,12 @@ init)
 	# create the admin account
 	export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
 	export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
+
+	# The admin account is created after server is started, thus to avoid a
+	# race condition we need to match a KC-SERVICES0009 (user added to
+	# realm) or a KC-SERVICES0010 (user already exists) before stopping the
+	# server
+	patterns+=('KC-SERVICES0009|KC-SERVICES0010')
 
 	# wipe out the shanoir-ng realm and recreate it
 	extra+=("-Dkeycloak.migration.action=import"
@@ -143,13 +150,13 @@ if [ -n "$oneshot" ] ; then
 	# (i.e: startup, import/export, warning, errors, ...)
 	sed '	/[0-9] INFO /{
 			/\[org\.keycloak\./p
+			/\[io\.quarkus\]/p
 			d
 		}' <"$fifo" &
-			
-	exec oneshot						\
-		' .*org\.keycloak\.quarkus\.runtime\.KeycloakMain.*Running the server'	\
-		-- env "$@" "${extra[@]}" > "$fifo"
-			
+
+	# run until the server is fully started
+	exec oneshot "${patterns[@]}" -- env "$@" "${extra[@]}" > "$fifo"
+
 else
 	# 'normal' run
 	exec env "$@" "${extra[@]}"
