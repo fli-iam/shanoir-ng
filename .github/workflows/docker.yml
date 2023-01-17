@@ -24,7 +24,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.SHANOIR_CONTAINER_REGISTRY }}
       
       - name: Extract metadata (tags, labels) for Docker
         id: meta
