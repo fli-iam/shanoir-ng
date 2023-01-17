@@ -1,5 +1,5 @@
 # Create a Docker image for each microservice in Shanoir
-name: Publish Docker images of Shanoir
+name: Publish Docker images
 
 #on:
 #  release:
