@@ -33,9 +33,9 @@ import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
 export class SubjectListComponent extends EntityListComponent<Subject> {
 
     getPage(pageable: Pageable): Promise<Page<Subject>> {
-        return this.subjectService.getPage(pageable,"");
+        return this.subjectService.getPage(pageable, this.table.filter.searchStr ? this.table.filter.searchStr : "");
     }
-    
+
     @ViewChild('table', { static: false }) table: TableComponent;
     private studiesICanAdmin: number[];
 
@@ -65,17 +65,17 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
         };
         return [
             { headerName: "Common Name", field: "name", defaultSortCol: true, defaultAsc: true },
-            { headerName: "Sex", field: "sex" },
+            { headerName: "Sex", field: "sex", disableSearch: true },
 
             {
-                headerName: "Birth Date", field: "birthDate", type: "date", cellRenderer: function (params: any) {
+                headerName: "Birth Date", field: "birthDate", type: "date", disableSearch: true, cellRenderer: function (params: any) {
                     return dateRenderer(params.data.birthDate);
                 }
             },
-            { headerName: "Manual HD", field: "manualHemisphericDominance"},
-            { headerName: "Language HD", field: "languageHemisphericDominance"},
-            { headerName: "Imaged object category", field: "imagedObjectCategory"},
-            { headerName: "Personal Comments", field: ""}
+            { headerName: "Manual HD", field: "manualHemisphericDominance", disableSearch: true},
+            { headerName: "Language HD", field: "languageHemisphericDominance", disableSearch: true},
+            { headerName: "Imaged object category", field: "imagedObjectCategory", disableSearch: true},
+            { headerName: "Personal Comments", field: "", disableSearch: true}
         ];
     }
 
