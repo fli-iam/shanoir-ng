@@ -19,13 +19,6 @@ FROM $BASE_IMAGE as builder
 
 COPY shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
 
-# Configure a database vendor
-ENV KC_DB=mysql
-
-# Enable health and metrics support
-ENV KC_HEALTH_ENABLED=true
-ENV KC_METRICS_ENABLED=true
-
 WORKDIR /opt/keycloak
 RUN /opt/keycloak/bin/kc.sh build
 
@@ -40,8 +33,4 @@ COPY cfg/. /opt/keycloak/
 
 COPY entrypoint entrypoint_common oneshot /bin/
 
-# unset the env var, so that the default value is set by the entrypoint script
-# (like all other env vars)
-ENV PROXY_ADDRESS_FORWARDING ""
-
-ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh", "start-dev", "--import-realm"]
+ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh", "start-dev"]
