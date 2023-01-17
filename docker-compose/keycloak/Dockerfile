@@ -34,9 +34,6 @@ FROM quay.io/keycloak/keycloak:20.0.0
 
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 COPY themes/. /opt/keycloak/themes
-USER root
-RUN chmod 666 /opt/keycloak/themes/shanoir-theme/login/template.ftl
-USER keycloak
 COPY cfg/. /opt/keycloak/
 
 COPY entrypoint entrypoint_common oneshot /bin/
