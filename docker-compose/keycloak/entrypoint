@@ -34,6 +34,13 @@ export KC_HTTP_RELATIVE_PATH="/auth"
 export KC_PROXY="${KC_PROXY:-edge}"
 export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 
+# we disable strict hostname checking by default because:
+# - the reverse proxy in production implements this check
+# - since the 'nginx' container does not expose the master realm to the
+#   outside, disabling strict checking allows us to reach the admin console
+#   at http://localhost:8080/auth/admin/
+export KC_HOSTNAME_STRICT="${KC_HOSTNAME_STRICT:false}"
+
 export KC_DB="${DB_VENDOR:-mysql}"
 export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
