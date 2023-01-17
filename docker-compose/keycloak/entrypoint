@@ -26,11 +26,21 @@ sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
 sed -i -E "s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
 sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
 
+#
+# keycloak options
+# see: https://www.keycloak.org/server/all-config
+#
+export KC_HOSTNAME_PATH="/auth"
+export KC_HTTP_RELATIVE_PATH="/auth"
+export KC_PROXY="${KC_PROXY:-edge}"
+export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
+
 export KC_DB="${DB_VENDOR:-mysql}"
 export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
 export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 export PROXY_ADDRESS_FORWARDING="${PROXY_ADDRESS_FORWARDING:-true}"
+
 
 require  SHANOIR_MIGRATION
 oneshot=

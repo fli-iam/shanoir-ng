@@ -42,7 +42,6 @@ services:
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ALLOWED_ADMIN_IPS
-      - KC_HTTP_RELATIVE_PATH=/auth
     build: ./docker-compose/keycloak
     networks:
       - shanoir_ng_network
