@@ -2,21 +2,20 @@ package org.shanoir.ng.datasetfile;
 
 import java.io.File;
 import java.time.LocalDateTime;
+
 import javax.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.math3.analysis.function.Exp;
 import org.shanoir.ng.datasetfile.service.DatasetFileApi;
 import org.shanoir.ng.datasetfile.service.DatasetFileService;
-import org.shanoir.ng.migration.DatasetMigrationService;
+import org.shanoir.ng.dicom.DIMSEService;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.migration.MigrationConstants;
-import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,14 +32,12 @@ public class DatasetFileApiController implements DatasetFileApi {
 
 	@Autowired
 	private DatasetFileService datasetFileService;
+	
+	@Autowired
+	private DIMSEService dimseService;
 
 	@Autowired
-	@Qualifier("stowrs")
-	private DicomServiceApi stowRsService;
-
-	@Autowired
-	@Qualifier("cstore")
-	private DicomServiceApi cStoreService;
+	private DICOMWebService dicomWebService;
 
 	@Value("${dcm4chee-arc.protocol}")
 	private String dcm4cheeProtocol;
@@ -112,11 +109,9 @@ public class DatasetFileApiController implements DatasetFileApi {
 		LOG.error("Adding files to pacs" + expressionFolder.getAbsolutePath());
 		try {
 			if (dicomWeb) {
-				LOG.error("using stowrs");
-				stowRsService.sendDicomFilesToPacs(expressionFolder);
+				dicomWebService.sendDicomFilesToPacs(expressionFolder);
 			} else {
-				LOG.error("using cstore");
-				cStoreService.sendDicomFilesToPacs(expressionFolder);
+				dimseService.sendDicomFilesToPacs(expressionFolder);
 			}
 		}
 		catch (Exception e) {
