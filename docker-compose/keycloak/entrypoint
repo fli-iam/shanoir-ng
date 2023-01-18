@@ -48,8 +48,8 @@ export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 
 
 require  SHANOIR_MIGRATION
-oneshot=
-patterns=(' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s')
+patterns=()
+STARTED_PATTERN=' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s'
 extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
        "-Dallowed.admin.ips=${SHANOIR_ALLOWED_ADMIN_IPS}")
 
@@ -64,25 +64,24 @@ init)
 	export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
 	export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
 
-	# The admin account is created after server is started, thus to avoid a
-	# race condition we need to match a KC-SERVICES0009 (user added to
-	# realm) or a KC-SERVICES0010 (user already exists) before stopping the
-	# server
-	patterns+=('KC-SERVICES0009|KC-SERVICES0010')
-
 	# wipe out the shanoir-ng realm and recreate it
 	extra+=("-Dkeycloak.migration.action=import"
 		"-Dkeycloak.migration.provider=singleFile"
 		"-Dkeycloak.migration.file=/tmp/import/shanoir-ng-realm.json"
 		"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING")
 
-        # FIXME: should check additional messages:
-        #   "The batch executed successfully",
-        #   "Initializing master realm",
-        #   "Imported realm shanoir-ng",
-        #   "Added user 'admin' to realm 'master'",
-        #   r" INFO  \[org.jboss.as\] .* Keycloak .* started in \d+ms"
-	oneshot=1
+	patterns+=(
+		"KC-SERVICES0030: Full model import requested. Strategy: OVERWRITE_EXISTING"
+		"Full importing from file /tmp/import/shanoir-ng-realm.json"
+		"Realm 'shanoir-ng' imported"
+		"KC-SERVICES0032: Import finished successfully"
+		"$STARTED_PATTERN"
+		# The admin account is created after server is started, thus to avoid a
+		# race condition we need to match a KC-SERVICES0009 (user added to
+		# realm) or a KC-SERVICES0010 (user already exists) before stopping the
+		# server
+		"KC-SERVICES0009|KC-SERVICES0010"
+	)
 	;;
 never)
 	# FIXME: should we provide a facade for these too
@@ -112,7 +111,13 @@ import)
 			"-Dkeycloak.migration.dir='/tmp/import'"
 			"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
 		)
-		oneshot=1
+		patterns=(
+			"Importing from directory /tmp/import"
+			"KC-SERVICES0030: Full model import requested. Strategy: OVERWRITE_EXISTING"
+			"Realm 'shanoir-ng' imported"
+			"KC-SERVICES0032: Import finished successfully"
+			"$STARTED_PATTERN"
+		)
 	fi
 	;;
 
@@ -137,7 +142,12 @@ export)
 			"-Dkeycloak.migration.usersExportStrategy=SAME_FILE"
 			"-Dkeycloak.migration.dir='$EXPORT_DIR'"
 		)
-		oneshot=1
+		patterns=(
+			"Exporting into directory /export"
+			"KC-SERVICES0034: Export of realm 'shanoir-ng' requested"
+			"KC-SERVICES0035: Export finished successfully"
+			"$STARTED_PATTERN"
+		)
 	fi
 	;;
 esac
@@ -148,7 +158,7 @@ abort_if_error
 
 
 # run keycloak
-if [ -n "$oneshot" ] ; then
+if [ ${#patterns[@]} -ne 0 ] ; then
 	# oneshot run (launch the server and kill it after startup)
 
 	fifo="`tmp_fifo`"
