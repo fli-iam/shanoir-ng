@@ -23,8 +23,9 @@ PATTERNs are searched in the combined output (stdout+stderr) of the executed
 process . The ordering is strict: they must be matched in the same order as
 given in the command line.
 
-After the last PATTERN is matched, the oneshot script sends  SIGTERM to the
-process, then wait for its termination.
+As soon as the last PATTERN is matched (even if the other patterns were not
+matched), the oneshot script sends SIGTERM to the process, then wait for its
+termination.
 
 The exit code is the numeber of remaining PATTERNs to be matched (0 if all
 PATTERNs were matched successfully).
@@ -56,17 +57,20 @@ trap "kill $pid" INT TERM
 # read from the fifo and match each pattern in order
 IFS=
 current=0
+signaled=-1
 while read -r line ; do
 	echo "$line"
 	if [[ "$line" =~ ${patterns[$current]} ]] ; then
-		if [ $((++current)) -eq ${#patterns[@]} ] ; then
-			echo "  ------------------- sending SIGTERM -----------------------"
-			kill "$pid" || true
-			while read -r line ; do
-				echo "$line"
-			done
-			break
-		fi
+		((current++)) || true
+	fi
+	if [[ "$line" =~ ${patterns[-1]} ]] ; then
+		signaled="${#patterns[@]}"
+		echo "  ------------------- sending SIGTERM -----------------------"
+		kill "$pid" || true
+		while read -r line ; do
+			echo "$line"
+		done
+		break
 	fi
 done <"$fifo"
 
@@ -75,7 +79,11 @@ done <"$fifo"
 echo "  ------------------- match report --------------------------"
 i=0
 for pattern in "${patterns[@]}" ; do
-	[ $((i++)) -lt $current ] && status="\e[32m OK \e[39m" || status="\e[31mFAIL\e[39m"
+	if [ $((i++)) -lt $current ] || [ $i -eq $signaled ] ; then
+		status="\e[32m OK \e[39m"
+	else
+		status="\e[31mFAIL\e[39m"
+	fi
 	echo "  [ `echo -e "$status"` ]  $pattern"
 done
 
