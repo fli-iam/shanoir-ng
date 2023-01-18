@@ -30,6 +30,7 @@ services:
       - shanoir_ng_network
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
+    #command: ["start-dev"]   # default is "start" to run in production mode
     environment:
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_ADMIN_NAME
@@ -42,7 +43,6 @@ services:
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_ALLOWED_ADMIN_IPS
-      - KC_HTTP_RELATIVE_PATH=/auth
     build: ./docker-compose/keycloak
     networks:
       - shanoir_ng_network

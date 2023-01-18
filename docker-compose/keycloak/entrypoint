@@ -13,7 +13,7 @@ require  SHANOIR_URL_HOST
 require  SHANOIR_VIEWER_OHIF_URL_SCHEME
 require  SHANOIR_VIEWER_OHIF_URL_HOST
 
-mkdir -p /opt/keycloak/data/import
+mkdir -p /tmp/import
 sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
 		s/SHANOIR_ADMIN_EMAIL/$SHANOIR_ADMIN_EMAIL/g
 		s/SHANOIR_SMTP_HOST/$SHANOIR_SMTP_HOST/g
@@ -21,30 +21,42 @@ sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
 		s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
 		s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
 		s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
-"		/opt/keycloak/shanoir-ng-realm.json > /opt/keycloak/data/import/shanoir-ng-realm.json
+"		/opt/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json
 
-sed -E "s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl > /tmp/template.ftl
-cat /tmp/template.ftl > /opt/keycloak/themes/shanoir-theme/login/template.ftl
-rm /tmp/template.ftl
-sed -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl > /tmp/template.ftl
-cat /tmp/template.ftl > /opt/keycloak/themes/shanoir-theme/login/template.ftl
-rm /tmp/template.ftl
+sed -i -E "s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
+sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
+
+#
+# keycloak options
+# see: https://www.keycloak.org/server/all-config
+#
+export KC_HTTP_RELATIVE_PATH="/auth"
+export KC_PROXY="${KC_PROXY:-edge}"
+export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
+
+# we disable strict hostname checking by default because:
+# - the reverse proxy in production implements this check
+# - since the 'nginx' container does not expose the master realm to the
+#   outside, disabling strict checking allows us to reach the admin console
+#   at http://localhost:8080/auth/admin/
+export KC_HOSTNAME_STRICT="${KC_HOSTNAME_STRICT:false}"
 
 export KC_DB="${DB_VENDOR:-mysql}"
 export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
 export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
-export PROXY_ADDRESS_FORWARDING="${PROXY_ADDRESS_FORWARDING:-true}"
+
 
 require  SHANOIR_MIGRATION
 oneshot=
+patterns=(' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s')
 extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
        "-Dallowed.admin.ips=${SHANOIR_ALLOWED_ADMIN_IPS}")
 
 case "$SHANOIR_MIGRATION" in
 auto|dev)
 	# create the shanoir-ng realm if it does not exist yet
-	extra+=("-Dkeycloak.import=/opt/keycloak/data/import/shanoir-ng-realm.json"
+	extra+=("-Dkeycloak.import=/tmp/import/shanoir-ng-realm.json"
 		"-Dkeycloak.migration.strategy=IGNORE_EXISTING")
 	;;
 init)
@@ -52,10 +64,16 @@ init)
 	export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
 	export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
 
+	# The admin account is created after server is started, thus to avoid a
+	# race condition we need to match a KC-SERVICES0009 (user added to
+	# realm) or a KC-SERVICES0010 (user already exists) before stopping the
+	# server
+	patterns+=('KC-SERVICES0009|KC-SERVICES0010')
+
 	# wipe out the shanoir-ng realm and recreate it
 	extra+=("-Dkeycloak.migration.action=import"
 		"-Dkeycloak.migration.provider=singleFile"
-		"-Dkeycloak.migration.file=/opt/keycloak/data/import/shanoir-ng-realm.json"
+		"-Dkeycloak.migration.file=/tmp/import/shanoir-ng-realm.json"
 		"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING")
 
         # FIXME: should check additional messages:
@@ -139,13 +157,13 @@ if [ -n "$oneshot" ] ; then
 	# (i.e: startup, import/export, warning, errors, ...)
 	sed '	/[0-9] INFO /{
 			/\[org\.keycloak\./p
+			/\[io\.quarkus\]/p
 			d
 		}' <"$fifo" &
-			
-	exec oneshot						\
-		' .*org\.keycloak\.quarkus\.runtime\.KeycloakMain.*Running the server'	\
-		-- env "$@" "${extra[@]}" > "$fifo"
-			
+
+	# run until the server is fully started
+	exec oneshot "${patterns[@]}" -- env "$@" "${extra[@]}" > "$fifo"
+
 else
 	# 'normal' run
 	exec env "$@" "${extra[@]}"
