@@ -201,6 +201,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'profile': [this.study.profile, [Validators.required]],
             'withExamination': [this.study.withExamination],
             'clinical': [this.study.clinical],
+            'description': [this.study.description],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],

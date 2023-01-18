@@ -86,6 +86,8 @@ public class StudyDTO {
 
 	private boolean challenge;
 
+	private String description;
+
 	/**
 	 * Default constructor.
 	 */
@@ -443,4 +445,12 @@ public class StudyDTO {
 		this.tags = tags;
 	}
 
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 }

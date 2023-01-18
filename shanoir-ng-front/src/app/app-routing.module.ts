@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -92,11 +92,13 @@ import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-ca
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
 import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
+import {WelcomeComponent} from "./welcome/welcome.component";
+import {LoginGuard} from "./shared/roles/login-guard";
 
 let routes: Routes = [
     {
         path: '',
-        redirectTo: '/home',
+        redirectTo: '/welcome',
         pathMatch: 'full'
     }, {
         path: 'dua',
@@ -104,6 +106,10 @@ let routes: Routes = [
     }, {
         path: 'account-request',
         component: AccountRequestComponent,
+    }, {
+        path: 'welcome',
+        component: WelcomeComponent,
+        canActivate: [LoginGuard]
     }, {
         path: 'account/study/:id/account-request',
         component: AccountRequestComponent,
@@ -140,19 +146,19 @@ let routes: Routes = [
                 path: '',
                 pathMatch: 'full',
                 redirectTo: '/home'
-            }, {   
+            }, {
                 path: 'upload',
                 component: DicomUploadComponent,
                 data: {importMode: 'DICOM'}
-            }, {   
+            }, {
                 path: 'bruker',
                 component: BrukerUploadComponent,
                 data: {importMode: 'BRUKER'}
-            }, {   
+            }, {
                 path: 'eeg',
                 component: EegUploadComponent,
                 data: {importMode: 'EEG'}
-            }, {   
+            }, {
                 path: 'bids',
                 component: BidsUploadComponent,
                 data: {importMode: 'BIDS'}
@@ -209,14 +215,14 @@ let routes: Routes = [
             }
         ]
     },
-        { 
-        path: 'preclinical-contrastagents', 
+        {
+        path: 'preclinical-contrastagents',
         component: ContrastAgentsListComponent
-    },{ 
-        path: 'preclinical-contrastagent', 
+    },{
+        path: 'preclinical-contrastagent',
         component: ContrastAgentFormComponent
-    },{ 
-        path: 'download-statistics', 
+    },{
+        path: 'download-statistics',
         component: DownloadStatisticsComponent
     },
 
@@ -520,8 +526,8 @@ let routes: Routes = [
 		component: InstrumentAssessmentComponent,
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
-	},{ 
-        path: 'download-statistics', 
+	},{
+        path: 'download-statistics',
         component: DownloadStatisticsComponent
     },
 

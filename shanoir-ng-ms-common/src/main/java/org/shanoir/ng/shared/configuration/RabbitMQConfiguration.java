@@ -69,6 +69,9 @@ public class RabbitMQConfiguration {
 	
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
+
+	/** Get the type of dataset from a given study. */
+	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
 	
 	/** Create a subject study for a given subject and study. */
 	public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
@@ -288,11 +291,14 @@ public class RabbitMQConfiguration {
 	public static Queue subjectsQueue() {
 		return new Queue(SUBJECTS_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue datasetSubjectQueue() {
 		return new Queue(DATASET_SUBJECT_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue studyDatasetTypeQueue() { return new Queue(STUDY_DATASET_TYPE, true); }
 
 	@Bean
 	public static Queue datasetSubjectStudyQueue() {

@@ -1,0 +1,138 @@
+body {
+  background-color: #5f0f4e;
+}
+
+.header {
+  position: relative;
+  margin-top: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.github-logo {
+  max-height: 50px;
+  cursor: pointer;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.shanoir {
+  text-align:center;
+}
+
+.shanoir-logo {
+  padding-top: 100px;
+}
+
+.shanoir-text {
+  display: block;
+  color: white;
+}
+
+hr {
+    border-bottom: 1px solid black !important;
+  padding-top:15px;
+}
+
+.buttons {
+  position:absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.buttonItem {
+  width: 110px;
+  height: 30px;
+  margin-right: 10px;
+  margin-left: 0px;
+}
+
+.studyTab {
+  margin-top: 20px;
+  display: block;
+  background: lavender;
+  margin-right: 50px;
+  margin-left: 50px;
+  margin-bottom: 50px;
+  border:1px solid black;
+  border-radius: 10px;
+}
+
+.studyTitle {
+  font-size: 25px;
+  color: #29131e;
+}
+
+.studyDescription {
+  font-size: 25px;
+  padding-right: 20px;
+  color: black;
+}
+
+.studyStartDate {
+  font-size: 13px;
+}
+
+.studyValues {
+  font-size: 16px;
+}
+
+.accessRequest {
+  text-align: right;
+  position: absolute;
+  right: 70px;
+}
+
+.studyTagContainer {
+  text-align: right;
+}
+.studyTagIRM {
+  border:2px solid indianred;
+  border-radius: 5px;
+  padding: 5px;
+  margin-right: 5px;
+  background-color: antiquewhite;
+}
+.studyTagEEG {
+  border:2px solid darkgoldenrod;
+  border-radius: 5px;
+  padding: 5px;
+  margin-right: 5px;
+  background-color: antiquewhite;
+}
+.studyTagPT {
+  border:2px solid mediumvioletred;
+  border-radius: 5px;
+  padding: 5px;
+  margin-right: 5px;
+  background-color: antiquewhite;
+}
+.studyTagCT {
+  border:2px solid cadetblue;
+  border-radius: 5px;
+  padding: 5px;
+  margin-right: 5px;
+  background-color: antiquewhite;
+}
+.studyTagBIDS {
+  border:2px solid firebrick;
+  border-radius: 5px;
+  padding: 5px;
+  margin-right: 5px;
+  background-color: antiquewhite;
+}
+
+.studyItem {
+  color: black;
+  padding-left: 20px;
+  padding-top: 10px;
+  padding-right: 20px;
+  font-size: 16px;
+}
+
+.showMoreButton {
+  text-align:center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}

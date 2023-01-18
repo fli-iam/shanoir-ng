@@ -25,7 +25,7 @@ import {IdName} from '../../shared/models/id-name.model';
 import {SubjectWithSubjectStudy} from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import {StudyUserRight} from './study-user-right.enum';
-import {CenterStudyDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
+import {CenterStudyDTO, PublicStudyDataDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
 import {Study} from './study.model';
 import {Profile} from "../../shared/models/profile.model";
 
@@ -61,15 +61,15 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .toPromise();
     }
 
-    getChallenges(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_CHALLENGES_URL)
-            .toPromise().then((typeResult: IdName[]) => {
-                return typeResult;
-            });
+    getPublicStudiesData(): Promise<PublicStudyDataDTO[]> {
+      return this.http.get<PublicStudyDataDTO[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
+        .toPromise().then((typeResult: PublicStudyDataDTO[]) => {
+          return typeResult;
+        });
     }
 
-    getPublicStudies(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_URL)
+    getChallenges(): Promise<IdName[]> {
+        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_CHALLENGES_URL)
             .toPromise().then((typeResult: IdName[]) => {
                 return typeResult;
             });

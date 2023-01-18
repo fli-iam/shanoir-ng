@@ -37,7 +37,10 @@
 
                 <div id="kc-form-buttons" class="${properties.kcFormGroupClass!}">
                     <input type="hidden" id="id-hidden-input" name="credentialId" <#if auth.selectedCredential?has_content>value="${auth.selectedCredential}"</#if>/>
-                    <button tabindex="4" name="login" id="kc-login" type="submit">${msg("doLogIn")}</button>
+                    <a href="${properties.requestWelcome!}">
+						<button type="button">${msg("doCancel")}</button>
+					</a>
+					<button tabindex="4" name="login" id="kc-login" type="submit">${msg("doLogIn")}</button>
                 </div>
 
                 <div class="${properties.kcFormGroupClass!} ${properties.kcFormSettingClass!}">

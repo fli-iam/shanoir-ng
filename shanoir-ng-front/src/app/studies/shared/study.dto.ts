@@ -91,6 +91,7 @@ export class StudyDTOService {
         entity.nbSujects = dto.nbSujects;
         entity.protocolFilePaths = dto.protocolFilePaths;
         entity.profile = dto.profile;
+        entity.description = dto.description;
         entity.dataUserAgreementPaths = dto.dataUserAgreementPaths;
         entity.startDate = dto.startDate ? new Date(dto.startDate) : null;
         if (dto.studyCenterList) {
@@ -248,6 +249,7 @@ export class StudyDTO {
     withExamination: boolean;
     tags: Tag[];
     studyCards: StudyCardDTO[];
+    description: string;
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
@@ -282,6 +284,7 @@ export class StudyDTO {
         this.visibleByDefault = study.visibleByDefault;
         this.withExamination = study.withExamination;
         this.tags = study.tags;
+        this.description = study.description;
     }
 
 }
@@ -310,4 +313,18 @@ export class CenterStudyDTO {
     studyCenterList: StudyCenterDTO[];
     profile: Profile;
     tags: Tag[];
+}
+
+export class PublicStudyDataDTO {
+  downloadableByDefault: boolean;
+  endDate: Date;
+  id: number;
+  name: string;
+  nbExaminations: number;
+  nbSubjects: number;
+  startDate: Date;
+  studyStatus: string;
+  studyType: StudyType;
+  description: string;
+  studyFlag: string[];
 }

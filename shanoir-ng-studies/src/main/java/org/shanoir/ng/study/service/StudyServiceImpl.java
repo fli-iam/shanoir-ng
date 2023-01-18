@@ -22,13 +22,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
-import org.assertj.core.util.Arrays;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
@@ -66,8 +64,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.BiMap;
-import com.google.common.math.DoubleMath;
 
 /**
  * Implementation of study service.
@@ -242,6 +238,7 @@ public class StudyServiceImpl implements StudyService {
 		}
 		studyDb.setName(study.getName());
 		studyDb.setProfile(study.getProfile());
+		studyDb.setDescription(study.getDescription());
 		studyDb.setStudyStatus(study.getStudyStatus());
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setWithExamination(study.isWithExamination());
@@ -585,5 +582,4 @@ public class StudyServiceImpl implements StudyService {
 	public List<Study> findPublicStudies() {
 		return this.studyRepository.findByVisibleByDefaultTrue();
 	}
-
 }
