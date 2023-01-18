@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
+import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
@@ -75,6 +76,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
 		simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 		simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
+		simpleStudyDTO.setProfile(study.getProfile());
 		return simpleStudyDTO;
 	}
 	
@@ -110,6 +112,19 @@ public abstract class StudyDecorator implements StudyMapper {
 			}
 		}
 		return studyDTO;
+	}
+
+	@Override
+	public PublicStudyDTO studyToPublicStudyDTO (final Study study) {
+		final PublicStudyDTO publicStudyDTO = delegate.studyToPublicStudyDTO(study);
+
+		if (study.getSubjectStudyList() != null) {
+			publicStudyDTO.setNbSubjects(study.getSubjectStudyList().size());
+		}
+		if (study.getExaminations() != null) {
+			publicStudyDTO.setNbExaminations(study.getExaminations().size());
+		}
+		return publicStudyDTO;
 	}
 }
 

@@ -12,20 +12,16 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.service;
+package org.shanoir.ng.profile.repository;
 
-import java.io.File;
+import org.shanoir.ng.profile.model.Profile;
+import org.springframework.data.repository.CrudRepository;
 
-import org.shanoir.ng.shared.exception.ShanoirException;
+/**
+ * Repository for profiles.
+ *
+ * @author msimon
+ */
+public interface ProfileRepository extends CrudRepository<Profile, Long> {
 
-public interface DicomServiceApi {
-	
-	void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception;
-
-	/**
-	 * Delete associated files from the PACS
-	 * @param url the dataset file URL linked to the dataset
-	 * @throws Exception when the deletion fails
-	 */
-	void deleteDicomFilesFromPacs(String url) throws ShanoirException;
 }

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -24,7 +24,8 @@ import { process } from '../process';
 let url = window.location;
 const BACKEND_API_URL = url.protocol + "//" + url.hostname + "/shanoir-ng";
 export const KEYCLOAK_BASE_URL = url.protocol + "//" + url.hostname + "/auth";
-export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
+export const LOGOUT_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/welcome";
+export const LOGIN_REDIRECT_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/index.html";
 export const SILENT_CHECK_SSO_URL = url.protocol + "//" + url.hostname + "/shanoir-ng/assets/silent-check-sso.html";
 
 
@@ -35,6 +36,12 @@ export const BACKEND_API_USER_ACCOUNT_REQUEST_URL: string = BACKEND_API_USERS_MS
 export const BACKEND_API_USER_CONFIRM_ACCOUNT_REQUEST_URL: string = '/confirmaccountrequest';
 export const BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL: string = '/denyaccountrequest';
 export const BACKEND_API_USER_EXTENSION_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/extensionrequest';
+export const BACKEND_API_USER_ACCESS_REQUEST: string = BACKEND_API_USERS_MS_URL + '/accessrequest';
+export const BACKEND_API_USER_ACCESS_REQUEST_BY_USER: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byUser';
+export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
+
+
+
 
 export const BACKEND_API_ROLE_ALL_URL: string = BACKEND_API_USERS_MS_URL + '/roles';
 
@@ -51,6 +58,14 @@ export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '
 export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
+export const BACKEND_API_STUDY_PUBLIC_STUDIES_URL: string = BACKEND_API_STUDY_URL + '/public';
+export const BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL: string = BACKEND_API_STUDY_URL + '/public/data';
+export const BACKEND_API_STUDY_PUBLIC_STUDIES_CONNECTED_URL: string = BACKEND_API_STUDY_URL + '/public/connected';
+
+
+// Profile API
+export const BACKEND_API_PROFILE_URL: string = BACKEND_API_STUDIES_MS_URL + '/profiles';
+export const BACKEND_API_PROFILE_ALL_PROFILES_URL: string = BACKEND_API_PROFILE_URL + '/all';
 
 // Migration API
 export const BACKEND_API_MIGRATION_URL: string = BACKEND_API_STUDIES_MS_URL + '/migration';
@@ -113,6 +128,7 @@ export const BACKEND_API_MANUF_URL: string = BACKEND_API_STUDIES_MS_URL + '/manu
 // Import http api
 const BACKEND_API_IMPORT_MS_URL: string = BACKEND_API_URL + '/import';
 export const BACKEND_API_UPLOAD_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_dicom/';
+export const BACKEND_API_UPLOAD_MUTIPLE_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_multiple_dicom/';
 export const BACKEND_API_UPLOAD_PROCESSED_DATASET_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_processed_dataset/';
 export const BACKEND_API_IMPORT_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/import_dicom/';
 export const BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/start_import_job/';
@@ -151,13 +167,13 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
 }
 
 export function browserDownloadFile(blob: Blob, filename: string){
-    if (navigator.msSaveBlob) { 
+    if (navigator.msSaveBlob) {
         // IE 10+
         navigator.msSaveBlob(blob, filename);
     } else {
         var link = document.createElement('a');
         // Browsers that support HTML5 download attribute
-        if (link.download !== undefined) 
+        if (link.download !== undefined)
         {
             var url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
@@ -245,7 +261,7 @@ export function isFunction(obj) {
     return !!(obj && obj.constructor && obj.call && obj.apply);
 }
 
-export function deepEquals(x, y) {
+function deepEquals(x, y) {
     if (x === y) {
       return true; // if both x and y are null or undefined and exactly the same
     } else if (!(x instanceof Object) || !(y instanceof Object)) {
@@ -280,3 +296,22 @@ export function deepEquals(x, y) {
       return true;
     }
 };
+
+export function objectsEqual(value1, value2) {
+        if (value1 == value2) return true;
+        else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
+        else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
+        else return deepEquals(value1, value2);
+    }
+
+export function arraysEqual(array1: any[], array2: any[]) {
+    return array1?.length === array2?.length && array1?.every((value, index) => array2 && objectsEqual(value, array2[index]));
+}
+
+export function isDarkColor(colorInp: string): boolean {
+  var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
+  var r = parseInt(color.substring(0, 2), 16); // hexToR
+  var g = parseInt(color.substring(2, 4), 16); // hexToG
+  var b = parseInt(color.substring(4, 6), 16); // hexToB
+  return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
+}

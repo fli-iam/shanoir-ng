@@ -15,6 +15,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { DatasetProcessingService } from '../shared/dataset-processing.service';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
@@ -49,7 +50,7 @@ export class DatasetProcessingListComponent extends BrowserPaginEntityListCompon
         return this.datasetProcessingService.getAll(); 
     }
 
-    getColumnDefs() {
+    getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
@@ -57,7 +58,7 @@ export class DatasetProcessingListComponent extends BrowserPaginEntityListCompon
             return null;
         };
 
-        let columnDefs: any[] = [
+        let columnDefs: ColumnDefinition[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true},
             { headerName: "Processing", field: "datasetProcessingType" },
             { headerName: "Comment", field: "comment" },

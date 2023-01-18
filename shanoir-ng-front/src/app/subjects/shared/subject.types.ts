@@ -13,4 +13,4 @@
  */
 
 export type SubjectType = 'HEALTHY_VOLUNTEER' | 'PATIENT' | 'PHANTOM';
-export type Sex = 'M' | 'F';
+export type Sex = 'M' | 'F' | 'O';

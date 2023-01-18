@@ -30,6 +30,8 @@ import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationServiceImpl;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Subject;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -68,6 +70,10 @@ public class ExaminationServiceTest {
 
 	@Mock
 	private ShanoirEventService eventService;
+	
+	@Mock
+	private SubjectRepository subjectService;
+
 
 	@Before
 	public void setup() throws ShanoirException {
@@ -96,6 +102,7 @@ public class ExaminationServiceTest {
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void saveTest() throws ShanoirException {
+		Mockito.when(subjectService.findById(Mockito.anyLong())).thenReturn(Optional.of(new Subject(1L, "name")));
 		examinationService.save(createExamination());
 
 		Mockito.verify(examinationRepository, Mockito.times(1)).save(Mockito.any(Examination.class));

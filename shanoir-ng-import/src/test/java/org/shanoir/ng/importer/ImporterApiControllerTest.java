@@ -42,6 +42,7 @@ import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -109,6 +110,9 @@ public class ImporterApiControllerTest {
 	
 	@MockBean
 	private DicomDirGeneratorService dicomDirGeneratorService;
+	
+	@MockBean
+	private ShanoirEventService shanoirEventService;
 
 	@Before
 	public void setup() throws ShanoirException, IOException {

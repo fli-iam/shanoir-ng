@@ -24,8 +24,10 @@ process . The ordering is strict: they must be matched in the same order as
 given in the command line.
 
 After the last PATTERN is matched, the oneshot script sends  SIGTERM to the
-process, then wait for its termination and exit with code 0 if all PATTERNs
-have been matched successfully or code 1 otherwise.
+process, then wait for its termination.
+
+The exit code is the numeber of remaining PATTERNs to be matched (0 if all
+PATTERNs were matched successfully).
 EOF
 	exit 0
 fi
@@ -37,33 +39,49 @@ while [ "$1" != "--" ] ; do
 done
 shift
 
-fifo1="`tmp_fifo`"
-fifo2="`tmp_fifo`"
+if [ ${#patterns[@]} -eq 0 ] ; then
+	echo "oneshot: error: must provide at least one pattern" >&2
+	exit 100
+fi
 
-exec "$@" >"$fifo1" 2>&1 &
+# run the command with its outputs redirected to a fifo
+
+fifo="`tmp_fifo`"
+trap "rm $fifo" EXIT
+
+exec "$@" >"$fifo" 2>&1 &
 pid=$!
 trap "kill $pid" INT TERM
 
-tee "$fifo2" <"$fifo1" &
+# read from the fifo and match each pattern in order
+IFS=
+current=0
+while read -r line ; do
+	echo "$line"
+	if [[ "$line" =~ ${patterns[$current]} ]] ; then
+		if [ $((++current)) -eq ${#patterns[@]} ] ; then
+			echo "  ------------------- sending SIGTERM -----------------------"
+			kill "$pid" || true
+			while read -r line ; do
+				echo "$line"
+			done
+			break
+		fi
+	fi
+done <"$fifo"
 
-set +e
-(	set -e
-	trap 'cat >/dev/null &' EXIT
-	for pattern in "${patterns[@]}"
-	do
-		grep -E -q -m1 -- "$pattern"
-	done
-) <"$fifo2"
-result=$?
-rm "$fifo1" "$fifo2"
+# eof
 
-if [ "$result" -eq 0 ] ; then
-	# successful
-	echo "  ------------------- sending SIGTERM -------------------"
-	kill "$pid"
-fi
+echo "  ------------------- match report --------------------------"
+i=0
+for pattern in "${patterns[@]}" ; do
+	[ $((i++)) -lt $current ] && status="\e[32m OK \e[39m" || status="\e[31mFAIL\e[39m"
+	echo "  [ `echo -e "$status"` ]  $pattern"
+done
 
-wait "$pid"
+wait "$pid" || true
+
+result=$((${#patterns[@]} - current))
 echo "  ------------------- terminated (exit $result) -------------------"
 exit "$result"
 

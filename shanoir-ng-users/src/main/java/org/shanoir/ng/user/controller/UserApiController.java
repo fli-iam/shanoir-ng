@@ -19,13 +19,12 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.accessrequest.controller.AccessRequestService;
+import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.ForbiddenException;
@@ -33,6 +32,7 @@ import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,37 +47,12 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	@Autowired
 	ShanoirEventService eventService;
 
-	@Override
-	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
-			@RequestBody final User user, final BindingResult result) throws RestServiceException {
-		
-		try {
-			validate(user, result);
+	@Autowired
+	AccessRequestService accessRequestService;
 
-			User userSaved = getUserService().confirmAccountRequest(user);
-			
-			if (userSaved.getAccountRequestInfo() != null && userSaved.getAccountRequestInfo().getChallenge() != null) {
-				// I see that we have a challenger here
-				// Directly create a StudyUser linked to the given study
-				ShanoirEvent subscription = new ShanoirEvent(
-						ShanoirEventType.CHALLENGE_SUBSCRIPTION_EVENT,
-						userSaved.getAccountRequestInfo().getChallenge().toString(),
-						userSaved.getId(),
-						userSaved.getUsername(),
-						ShanoirEvent.IN_PROGRESS);
-				eventService.publishEvent(subscription);
-				// So that when the user account request is accepted, it directly has access to the data
-			}
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (AccountNotOnDemandException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
-		}
-	}
+	@Autowired
+	RabbitTemplate rabbitTemplate;
 
-	
 	@Override
 	public ResponseEntity<Void> deleteUser(@PathVariable("userId") final Long userId) throws ForbiddenException {
 		try {
@@ -89,21 +64,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 	}
 
-	
-	@Override
-	public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
-		try {
-			getUserService().denyAccountRequest(userId);
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
-		} catch (EntityNotFoundException e) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (AccountNotOnDemandException e) {
-			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
-		}
-	}
-
-	
 	@Override
 	public ResponseEntity<User> findUserById(@PathVariable("userId") final Long userId) {
 		final User user = getUserService().findById(userId);
@@ -113,7 +73,6 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		return new ResponseEntity<>(user, HttpStatus.OK);
 	}
 
-	
 	@Override
 	public ResponseEntity<List<User>> findUsers() {
 		final List<User> users = getUserService().findAll();
@@ -143,6 +102,22 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		
 		user.setCreationDate(LocalDate.now()); // Set creation date on creation, which is now
 		validateIgnoreBlankUsername(user, result);
+		
+		if (user.getAccountRequestInfo() != null && 
+				(user.getAccountRequestInfo().getStudyId() != null)) {
+			
+			if (user.getAccountRequestInfo().getStudyId() != null) {
+				// Directly create an access request for the given study
+				AccessRequest request = new AccessRequest();
+				request.setUser(user);
+				request.setStudyId(user.getAccountRequestInfo().getStudyId());
+				request.setStudyName(user.getAccountRequestInfo().getStudyName());
+				request.setStatus(AccessRequest.ON_DEMAND);
+				request.setMotivation("A study admin invited this user to your study, please confirm its access to the study: " + user.getUsername());
+				// So that when the user account request is accepted, it directly has access to the data
+				accessRequestService.createAllowed(request);						
+			}
+		}
 
 		/* Save user in db. */
 		try {

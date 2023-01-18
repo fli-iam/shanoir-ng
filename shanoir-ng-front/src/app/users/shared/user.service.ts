@@ -19,6 +19,8 @@ import * as AppUtils from '../../utils/app.utils';
 import { ExtensionRequestInfo } from '../extension-request/extension-request-info.model';
 import { User } from './user.model';
 import { HttpClient } from '@angular/common/http';
+import { AccessRequest } from '../../users/access-request/access-request.model'
+
 
 @Injectable()
 export class UserService extends EntityService<User>{
@@ -54,5 +56,12 @@ export class UserService extends EntityService<User>{
         return this.http.get<any[]>(this.API_URL + '/accountRequests')
             .toPromise()
             .then(this.mapEntityList);
+    }
+
+    getAccessRequests(): Promise<AccessRequest[]> {
+        return this.http.get<AccessRequest[]>(AppUtils.BACKEND_API_USER_ACCESS_REQUEST_BY_USER)
+            .toPromise().then((typeResult: AccessRequest[]) => {
+                return typeResult;
+            });
     }
 }

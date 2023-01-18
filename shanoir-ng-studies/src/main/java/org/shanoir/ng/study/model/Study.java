@@ -26,6 +26,8 @@ import javax.persistence.ConstructorResult;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.PostLoad;
@@ -36,6 +38,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
+import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
@@ -126,7 +129,11 @@ public class Study extends HalEntity {
 
 	@NotNull
 	private Integer studyStatus;
-	
+
+	@ManyToOne()
+	@JoinColumn(name = "profile_id")
+	private Profile profile;
+
 	private Integer studyType;
 
 	/** Users associated to the research study. */
@@ -152,6 +159,11 @@ public class Study extends HalEntity {
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Tag> tags;
+
+	private String description;
+
+	@ElementCollection
+	private List<String> studyFlag;
 
 	/**
 	 * Init HATEOAS links
@@ -229,7 +241,7 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @param examinationIds
+	 * @param examinations
 	 *            the examinationIds to set
 	 */
 	public void setExaminations(Set<StudyExamination> examinations) {
@@ -269,6 +281,21 @@ public class Study extends HalEntity {
 	 */
 	public void setMonoCenter(boolean monoCenter) {
 		this.monoCenter = monoCenter;
+	}
+
+	/**
+	 * @return the profile
+	 */
+	public Profile getProfile() {
+		return profile;
+	}
+
+	/**
+	 * @param profile
+	 *            the profile to set
+	 */
+	public void setProfile(Profile profile) {
+		this.profile = profile;
 	}
 
 	/**
@@ -483,5 +510,21 @@ public class Study extends HalEntity {
 	 */
 	public void setTags(List<Tag> tags) {
 		this.tags = tags;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String publicDescription) {
+		this.description = publicDescription;
+	}
+
+	public List<String> getStudyFlag() {
+		return studyFlag;
+	}
+
+	public void setStudyFlag(List<String> studyFlag) {
+		this.studyFlag = studyFlag;
 	}
 }

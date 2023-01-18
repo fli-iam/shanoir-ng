@@ -284,5 +284,15 @@ public interface DatasetApi {
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
 			@ApiParam(value = "Subject name excluding regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp) throws RestServiceException, IOException;
-		
+
+	@ApiOperation(value = "", notes = "If exists, returns the datasets corresponding to the given ids", response = List.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found dataset", response = Dataset.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@PostMapping(value = "/allById", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
+	ResponseEntity<List<DatasetDTO>> findDatasetsByIds(
+			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
 }

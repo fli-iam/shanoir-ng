@@ -63,7 +63,9 @@ public class ImportJob implements Serializable {
 	private ShanoirEvent shanoirEvent;
 
 	private Long userId;
-    
+
+	private Long centerId;
+
 	public String getArchive() {
 		return archive;
 	}
@@ -243,6 +245,14 @@ public class ImportJob implements Serializable {
 				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
 				",subjectName=" + subjectName + ",examId=" + examinationId  + ",converterId=" + converterId + ",numberOfSeries=" + numberOfSeries +
 				",seriesNames=" + seriesNames.toString();
+	}
+
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
 	}
 	
 }

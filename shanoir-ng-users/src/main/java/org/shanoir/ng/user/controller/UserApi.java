@@ -42,20 +42,6 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/users")
 public interface UserApi {
 
-	@ApiOperation(value = "", notes = "Confirms an account request", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "user confirmed", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no user found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/{userId}/confirmaccountrequest", produces = { "application/json" }, consumes = {
-			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasRole('ADMIN') and @controlerSecurityService.idMatches(#userId, #user)")
-	ResponseEntity<Void> confirmAccountRequest(
-			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId,
-			@ApiParam(value = "user to update", required = true) @RequestBody User user, BindingResult result)
-			throws RestServiceException;
-
 	@ApiOperation(value = "", notes = "Deletes a user", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "user deleted", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
@@ -66,18 +52,6 @@ public interface UserApi {
 	@PreAuthorize("hasRole('ADMIN') and !@isMeSecurityService.isMe(#userId)")
 	ResponseEntity<Void> deleteUser(
 			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) throws ForbiddenException;
-
-	@ApiOperation(value = "", notes = "Denies an account request", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "user deleted", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no user found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
-	@RequestMapping(value = "/{userId}/denyaccountrequest", produces = {
-			"application/json" }, method = RequestMethod.DELETE)
-	@PreAuthorize("hasRole('ADMIN')")
-	ResponseEntity<Void> denyAccountRequest(
-			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the user corresponding to the given id", response = User.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found user", response = User.class),

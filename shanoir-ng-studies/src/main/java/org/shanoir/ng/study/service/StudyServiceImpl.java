@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
-import org.assertj.core.util.Arrays;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
@@ -142,9 +141,8 @@ public class StudyServiceImpl implements StudyService {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 				studyCenter.setStudy(study);
 			}
-
 		}
-		
+
 		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 			subjectStudy.setStudy(study);
 		}
@@ -242,6 +240,8 @@ public class StudyServiceImpl implements StudyService {
 			studyDb.setChallenge(study.isChallenge());
 		}
 		studyDb.setName(study.getName());
+		studyDb.setProfile(study.getProfile());
+		studyDb.setDescription(study.getDescription());
 		studyDb.setStudyStatus(study.getStudyStatus());
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setWithExamination(study.isWithExamination());
@@ -581,4 +581,8 @@ public class StudyServiceImpl implements StudyService {
 		return Utils.copyList(studyRepository.findByChallengeTrue());
 	}
 
+	@Override
+	public List<Study> findPublicStudies() {
+		return this.studyRepository.findByVisibleByDefaultTrue();
+	}
 }

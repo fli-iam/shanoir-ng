@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -30,7 +30,7 @@ import { DatasetProcessingListComponent } from './datasets/dataset-processing-li
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { HomeComponent } from './home/home.component';
-import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { BasicClinicalContextComponent } from './import/basic-clinical-context/basic-clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
@@ -83,6 +83,7 @@ import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { DUAComponent } from './dua/dua.component';
+import { AccessRequestComponent } from './users/access-request/access-request.component';
 import { ProcessingComponent } from './processing/processing.component';
 import { PipelinesComponent } from './processing/pipelines/pipelines.component';
 import { ExecutionComponent } from './processing/execution/execution.component';
@@ -90,11 +91,15 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
+import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
+import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
+import {WelcomeComponent} from "./welcome/welcome.component";
+import {LoginGuard} from "./shared/roles/login-guard";
 
 let routes: Routes = [
     {
         path: '',
-        redirectTo: '/home',
+        redirectTo: '/welcome',
         pathMatch: 'full'
     }, {
         path: 'dua',
@@ -102,11 +107,13 @@ let routes: Routes = [
     }, {
         path: 'account-request',
         component: AccountRequestComponent,
-        data: {isChallenge: false},
     }, {
-        path: 'challenge-request',
+        path: 'welcome',
+        component: WelcomeComponent,
+        canActivate: [LoginGuard]
+    }, {
+        path: 'account/study/:id/account-request',
         component: AccountRequestComponent,
-        data: {isChallenge: true},
     }, {
         path: 'extension-request',
         component: ExtensionRequestComponent,
@@ -140,19 +147,19 @@ let routes: Routes = [
                 path: '',
                 pathMatch: 'full',
                 redirectTo: '/home'
-            }, {   
+            }, {
                 path: 'upload',
                 component: DicomUploadComponent,
                 data: {importMode: 'DICOM'}
-            }, {   
+            }, {
                 path: 'bruker',
                 component: BrukerUploadComponent,
                 data: {importMode: 'BRUKER'}
-            }, {   
+            }, {
                 path: 'eeg',
                 component: EegUploadComponent,
                 data: {importMode: 'EEG'}
-            }, {   
+            }, {
                 path: 'bids',
                 component: BidsUploadComponent,
                 data: {importMode: 'BIDS'}
@@ -172,7 +179,13 @@ let routes: Routes = [
                 component: EegSelectSeriesComponent
             }, {
                 path: 'context',
-                component: ClinicalContextComponent
+                component: BasicClinicalContextComponent
+            }, {
+                path: 'pacs-context',
+                component: PacsClinicalContextComponent
+            }, {
+                path: 'preclinical-context',
+                component: PreClinicalContextComponent
             }, {
                 path: 'eegcontext',
                 component: EegClinicalContextComponent
@@ -203,14 +216,14 @@ let routes: Routes = [
             }
         ]
     },
-        { 
-        path: 'preclinical-contrastagents', 
+        {
+        path: 'preclinical-contrastagents',
         component: ContrastAgentsListComponent
-    },{ 
-        path: 'preclinical-contrastagent', 
+    },{
+        path: 'preclinical-contrastagent',
         component: ContrastAgentFormComponent
-    },{ 
-        path: 'download-statistics', 
+    },{
+        path: 'download-statistics',
         component: DownloadStatisticsComponent
     },{ 
         path: 'migrate-study', 
@@ -517,8 +530,8 @@ let routes: Routes = [
 		component: InstrumentAssessmentComponent,
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
-	},{ 
-        path: 'download-statistics', 
+	},{
+        path: 'download-statistics',
         component: DownloadStatisticsComponent
     },{ 
         path: 'migrate-study',
@@ -782,8 +795,21 @@ let routes: Routes = [
 		component: AnimalSubjectFormComponent,
 		data: { mode: 'create' }
 	},
-
-
+    {
+        path: 'access-request',
+        component: AccessRequestComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'access-request/details/:id',
+        component: AccessRequestComponent,
+        data: { mode: 'view' },
+    },
+    {
+        path: 'access-request/study/:id',
+        component: AccessRequestComponent,
+        data: { mode: 'create' },
+    }
 ];
 
 @NgModule({

@@ -24,6 +24,7 @@ import { ConfirmDialogService } from '../shared/components/confirm-dialog/confir
 import { AfterViewChecked } from "@angular/core";
 import { Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
+import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
 import { SolrService } from "./solr.service";
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
@@ -36,6 +37,8 @@ import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, 
 import { Range } from '../shared/models/range.model';
 import { ProcessingService } from '../processing/processing.service';
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
+import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
+import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -53,8 +56,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
     @ViewChildren(SolrPagingCriterionComponent) pagingCriterion: QueryList<SolrPagingCriterionComponent>;
     selections: SelectionBlock[] = [];
-    columnDefs: any[];
-    selectionColumnDefs: any[];
+    columnDefs: ColumnDefinition[];
+    selectionColumnDefs: ColumnDefinition[];
     customActionDefs: any[];
     selectionCustomActionDefs: any[];
     form: FormGroup;
@@ -75,7 +78,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
-            private solrService: SolrService, private router: Router, private datasetService: DatasetService,
+            private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
             private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
 
@@ -360,10 +363,30 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             });
     }
 
-    protected openApplyStudyCard = () => {
-        this.router.navigate(['study-card/apply-on-datasets']).then(success => {
-            this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
+    protected openApplyStudyCard = () => { 
+        this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
+            if (this.role != 'admin') {
+                let nonAdminAcqs: DatasetAcquisition[] = acquisitions?.filter(acq => 
+                    !this.rights?.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
+                );
+                let studies: Set<string> = new Set();
+                nonAdminAcqs.forEach(acq => studies.add(acq.examination?.study?.name));
+                if (nonAdminAcqs.length > 0) {
+                    this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to apply studycards on data from studies you don\'t administrate. '
+                        + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...studies].join(', '));
+                } else {
+                    this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+                        this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
+                    });
+                }
+            } else {
+                this.router.navigate(['study-card/apply-on-datasets']).then(success => {
+                    this.breadcrumbsService.currentStep.data.datasetIds = this.selectedDatasetIds;
+                });
+            }
         });
+
+
     }
 
     private getCommonColumnDefs() {
@@ -374,9 +397,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             return null;
         };
 
-        let columnDefs: any = [
+        let columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
-            {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", suppressSorting: true},
+            {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
             {headerName: "Name", field: "datasetName"},
             {headerName: "Tags", field: "tags"},
             {headerName: "Type", field: "datasetType"},
@@ -396,8 +419,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     // Grid columns definition
-    getColumnDefs() {
-        let columnDefs: any[] = this.getCommonColumnDefs();
+    getColumnDefs(): ColumnDefinition[] {
+        let columnDefs: ColumnDefinition[] = this.getCommonColumnDefs();
         if (this.role == 'admin') {
             columnDefs.push({headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: this.openDeleteConfirmDialog});
         } else if (this.role == 'expert') {
@@ -406,8 +429,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         return columnDefs;
     }
 
-    getSelectionColumnDefs() {
-        let columnDefs: any[] = this.getCommonColumnDefs();
+    getSelectionColumnDefs(): ColumnDefinition[] {
+        let columnDefs: ColumnDefinition[] = this.getCommonColumnDefs();
         columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-solid fa-ban", action: item => {
             this.selectedDatasetIds.delete(item.id);
             this.selectionTable.refresh();

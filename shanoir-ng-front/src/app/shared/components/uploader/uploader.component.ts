@@ -26,6 +26,7 @@ export class UploaderComponent {
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @Output() fileChange = new EventEmitter<any>();
     @Input() loading: boolean = false;
+    @Input() disabled: boolean = false;
     @Input() error: boolean = false;
     readonly ImagesUrlUtil = ImagesUrlUtil;
     filename: string;

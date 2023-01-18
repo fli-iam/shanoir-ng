@@ -81,4 +81,10 @@ public class ShanoirEventType {
 	public static final String CHALLENGE_SUBSCRIPTION_EVENT = "challengeSubscription.event";
 
 	public static final String MIGRATE_STUDY_EVENT = "migrateStudy.event";
+	
+	/** User ask access to a study. */
+	public static final String ACCESS_REQUEST_EVENT = "accessRequest.event";
+
+	/** User added to a study. */
+	public static final String USER_ADD_TO_STUDY_EVENT = "userAddToStudy.event";
 }

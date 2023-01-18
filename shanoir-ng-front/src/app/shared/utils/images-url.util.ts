@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -32,7 +32,6 @@ export class ImagesUrlUtil {
     public static LIST_ICON_PATH = 'assets/images/icons/list.png';
     public static LOADER_IMAGE_PATH = 'assets/images/cat.64.gif';
     public static SOLR_IMAGE_PATH = 'assets/images/icons/solr.png';
-    public static SMALL_LOADER_IMAGE_PATH = 'assets/images/loader.gif';
     public static NEURINFO_ICON_PATH = 'assets/images/icons/medical/neurinfo-icon.png';
     public static NIFTI_ICON_PATH = 'assets/images/icons/medical/nifti.png';
     public static NOTEPAD_ICON_PATH = 'assets/images/icons/medical/notepad.png';
@@ -55,7 +54,7 @@ export class ImagesUrlUtil {
     public static X_RAY_2_ICON_PATH = 'assets/images/icons/medical/x-ray-2.png'
     public static ZOOM_IN_ICON_PATH = 'assets/images/icons/zoom-in.png';
     public static ZOOM_OUT_ICON_PATH = 'assets/images/icons/zoom-out.png';
-    
+
     public static DOWNLOAD_ICON_PATH = 'assets/images/icons/download.png';
     public static RAT_ICON_PATH = 'assets/images/icons/rat.png';
     public static AGENDA_ICON_PATH = 'assets/images/icons/agenda.png';
@@ -70,5 +69,6 @@ export class ImagesUrlUtil {
     public static EEG_ICON_PATH = 'assets/images/icons/eeg.png';
     public static BIDS_ICON_PATH = 'assets/images/icons/bids_icon.png';
     public static PIPELINE_IMAGE_ICON_PATH = 'assets/images/icons/pipeline-icon.png'
-    
+
+    public static GITHUB_WHITE_LOGO_PATH = 'assets/images/github.png';
 }

@@ -82,6 +82,7 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -256,6 +257,16 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByIds(
+			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
+		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+		if (datasets.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK); 
+	}
+
+	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
 		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
 		if (datasets.isEmpty()) {
@@ -427,7 +438,7 @@ public class DatasetApiController implements DatasetApi {
 		File zipFile = new File(tmpFilePath + ZIP);
 		zipFile.createNewFile();
 
-		DatasetFileUtils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+		Utils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());
@@ -622,7 +633,7 @@ public class DatasetApiController implements DatasetApi {
 		// Zip it
 		File zipFile = new File(tmpFile.getAbsolutePath() + ZIP);
 		zipFile.createNewFile();
-		DatasetFileUtils.zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
+		Utils.zip(tmpFile.getAbsolutePath(), zipFile.getAbsolutePath());
 
 		// Try to determine file's content type
 		String contentType = request.getServletContext().getMimeType(zipFile.getAbsolutePath());

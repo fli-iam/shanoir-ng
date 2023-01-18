@@ -76,9 +76,12 @@ export class SubjectNodeComponent implements OnChanges {
             this.loading = true;
             this.examinationService.findExaminationsBySubjectAndStudy(this.node.id, this.studyId)
             .then(examinations => {
+                let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                    return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
+                })
                 this.node.examinations = [];
-                if (examinations) {
-                    examinations.forEach(exam => {
+                if (sortedExaminations) {
+                    sortedExaminations.forEach(exam => {
                         (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
                     }); 
                 }
