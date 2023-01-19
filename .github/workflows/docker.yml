@@ -4,9 +4,11 @@ name: Publish Docker images
 #on:
 #  release:
 #    types: [published]
-on:
-  push:
-    branches: [ master ]
+#on:
+#  push:
+#    branches: [ master ]
+# use manual runs for testing purpose
+on: workflow_dispatch
 
 jobs:
   push_to_registries:
