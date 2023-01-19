@@ -59,4 +59,4 @@ jobs:
           context: /docker-compose/users/.
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-users
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-users
