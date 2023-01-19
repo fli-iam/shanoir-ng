@@ -35,12 +35,9 @@
       <p>id: {{ study.id }} | Status: {{study.studyStatus.replace('_', ' ') | titlecase }}</p>
       <span class="studyValues">Examinations: {{ study.nbExaminations }} | Subjects: {{ study.nbSubjects }}</span>
       <span *ngIf="study.studyType"> | Study type: {{ StudyType[study.studyType] }}</span>
-      <div class="studyTagContainer">
-        <span *ngIf="study.studyFlag.includes('Mr')" class="studyTagIRM">MR</span>
-        <span *ngIf="study.studyFlag.includes('Eeg')" class="studyTagEEG">EEG</span>
-        <span *ngIf="study.studyFlag.includes('Pet')" class="studyTagPT">PT</span>
-        <span *ngIf="study.studyFlag.includes('Ct')" class="studyTagCT">CT</span>
-        <span *ngIf="study.studyFlag.includes('BIDS')" class="studyTagBIDS">BIDS</span>
+
+      <div class="tags" *ngIf="study.studyTag">
+          <span class="tag" [style.background]="tag.color" *ngFor="let tag of study.studyTag"> {{ tag.name }}</span>
       </div>
       <hr>
     </div>

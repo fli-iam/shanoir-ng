@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -27,7 +27,7 @@ export type Mode =  "view" | "edit" | "create";
     templateUrl: 'tag.creator.component.html',
     styleUrls: ['tag.creator.component.css'],
     providers: [
-    { 
+    {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => TagCreatorComponent),
       multi: true
@@ -84,7 +84,7 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
 
     private tagUsed(tag: Tag) {
         for (let subjectStudy of this.study.subjectStudyList) {
-            if (subjectStudy.tags.findIndex(element => element.equals(tag)) != -1) {
+            if (subjectStudy.subjectStudyTags.findIndex(element => element.equals(tag)) != -1) {
                 return true;
             }
         }
@@ -95,7 +95,7 @@ export class TagCreatorComponent extends AbstractInput<Tag[]> {
         super.writeValue(obj);
         this.displayedTags = new Set();
         if (this.model) {
-            (this.model as Tag[]).forEach(tag => 
+            (this.model as Tag[]).forEach(tag =>
                 this.displayedTags.add({tag: tag, darkFont: isDarkColor(tag.color)})
             );
         }

@@ -136,6 +136,8 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
+      console.log("initEdit");
+      console.log("study : " + this.study);
         let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => {
             this.study = study;
 
@@ -207,7 +209,8 @@ export class StudyComponent extends EntityComponent<Study> {
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
-            'tags': [this.study.tags],
+            'subjectTag': [this.study.subjectTag],
+            'studyTag': [this.study.studyTag],
             'challenge': [this.study.challenge],
             'protocolFile': [],
             'dataUserAgreement': [],
@@ -244,7 +247,8 @@ export class StudyComponent extends EntityComponent<Study> {
         study.clinical = false;
         study.monoCenter = true;
         study.studyCenterList = [];
-        study.tags = [];
+        study.subjectTag = [];
+        study.studyTag = [];
         study.timepoints = [];
         study.withExamination = true;
         return study;
@@ -463,6 +467,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     save(): Promise<Study> {
+      console.log("study component save");
         return super.save().then(result => {
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
@@ -543,15 +548,19 @@ export class StudyComponent extends EntityComponent<Study> {
         return this.keycloakService.isUserAdmin() || this.hasDownloadRight;
     }
 
-    onTagListChange() {
-        // hack : force change detection
-        this.study.tags = [].concat(this.study.tags);
+    onSubjectTagListChange() {
+      // hack : force change detection
+      this.study.subjectTag = [].concat(this.study.subjectTag);
 
-        // hack : force change detection for the subject-study tag list
-        this.study.subjectStudyList.forEach(subjStu => {
-            subjStu.study.tags = this.study.tags;
-        });
-        this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
+      // hack : force change detection for the subject-study tag list
+      this.study.subjectStudyList.forEach(subjStu => {
+        subjStu.study.subjectTag = this.study.subjectTag;
+      });
+      this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
+    }
+
+    onStudyTagListChange() {
+      this.study.studyTag = [].concat(this.study.studyTag);
     }
 
     goToAccessRequest(accessRequest : AccessRequest) {

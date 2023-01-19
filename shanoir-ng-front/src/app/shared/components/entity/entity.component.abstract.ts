@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,7 +33,7 @@ import { EntityService } from './entity.abstract.service';
 export type Mode =  "view" | "edit" | "create";
 @Directive()
 export abstract class EntityComponent<T extends Entity> implements OnInit, OnDestroy, OnChanges {
-    
+
     private _entity: T;
     @Input() mode: Mode;
     @Input() id: number; // optional
@@ -54,7 +54,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private location: Location;
     protected formBuilder: FormBuilder;
     public keycloakService: KeycloakService;
-    protected consoleService: ConsoleService; 
+    protected consoleService: ConsoleService;
     public breadcrumbsService: BreadcrumbsService;
 
     /* abstract methods */
@@ -74,7 +74,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.formBuilder = ServiceLocator.injector.get(FormBuilder);
         this.consoleService = ServiceLocator.injector.get(ConsoleService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
-        
+
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.addBCStep();
     }
@@ -94,7 +94,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 const id = +params['id'];
                 this.id = id;
                 const choose = (): Promise<void> => {
-                    switch (this.mode) { 
+                    switch (this.mode) {
                         case 'create' : return this.initCreate();
                         case 'edit' : return this.initEdit();
                         case 'view' : return this.initView();
@@ -115,17 +115,17 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         ));
         // load called tab
         this.subscribtions.push(
-            this.activatedRoute.fragment.subscribe(fragment => { 
+            this.activatedRoute.fragment.subscribe(fragment => {
                 if (fragment) {
                     this.activeTab = fragment;
-                } 
+                }
             })
         );
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if ((changes['id'] && !changes['id'].isFirstChange())
-                || (changes['mode'] && !changes['mode'].isFirstChange())) 
+                || (changes['mode'] && !changes['mode'].isFirstChange()))
             this.ngOnInit();
     }
 
@@ -175,7 +175,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             this.formContainerElement.nativeElement.querySelectorAll('li > label')
             .forEach(label => {
                 label.classList.remove('required-label');
-            }); 
+            });
         }
     }
 
@@ -242,6 +242,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             });
         }
         else if (this.mode == 'edit') {
+          console.log("modeSpecificSave entity : " + this.entity.id);
             return this.getService().update(this.entity.id, this.entity).then(() => {
                 this.onSave.next(this.entity);
                 this.chooseRouteAfterSave(this.entity);
@@ -258,7 +259,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                 this.footerState.loading = false;
                 return study;
             })
-            /* manages "after submit" errors like a unique constraint */      
+            /* manages "after submit" errors like a unique constraint */
             .catch(reason => {
                 this.footerState.loading = false;
                 this.catchSavingErrors(reason);
@@ -283,13 +284,13 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     /**
-     * Get a validator to manage form errors catched after an entity submited, like a unique contrainte. 
+     * Get a validator to manage form errors catched after an entity submited, like a unique contrainte.
      * @param constraintName The code name of the contraint, received from the rest service (e.g. 'unique')
      * @param controlFieldName The field name specified in the FormGroup definition (in buildForm())
      * @param errorFieldName (optional) The field name of the error received from the rest service if different from controlFieldName
      */
     protected registerOnSubmitValidator(constraintName: string, controlFieldName: string, errorFieldName?: string): (control: AbstractControl) => ValidationErrors | null {
-        if (this.onSubmitValidatedFields.indexOf(controlFieldName) == -1) this.onSubmitValidatedFields.push(controlFieldName);        
+        if (this.onSubmitValidatedFields.indexOf(controlFieldName) == -1) this.onSubmitValidatedFields.push(controlFieldName);
         return (control: AbstractControl): ValidationErrors | null => {
             if (this.saveError && this.saveError.hasFieldError(errorFieldName ? errorFieldName : controlFieldName, constraintName, control.value)
                     //&& this.form.get(controlFieldName).pristine
@@ -319,8 +320,8 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     protected openDeleteConfirmDialog = (entity: T) => {
         this.confirmDialogService
             .confirm(
-                'Delete ' + this.ROUTING_NAME, 
-                'Are you sure you want to delete the ' + this.ROUTING_NAME 
+                'Delete ' + this.ROUTING_NAME,
+                'Are you sure you want to delete the ' + this.ROUTING_NAME
                 + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
             ).then(res => {
                 if (res) {
@@ -330,20 +331,20 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
                     }).catch(reason => {
                         if (reason && reason.error) {
                             if (reason.error.code != 422) {
-                               throw Error(reason); 
+                               throw Error(reason);
                             } else {
                                 this.consoleService.log('warn', 'The ' + this.ROUTING_NAME + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.');
                             }
                         } else if (reason && reason.status) {
                             if (reason.status != 422) {
-                               throw Error(reason); 
+                               throw Error(reason);
                             } else {
                                 this.consoleService.log('warn', 'The ' + this.ROUTING_NAME + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.');
                             }
                         } else {
                             console.error(reason);
                         }
-                    });                    
+                    });
                 }
             })
     }

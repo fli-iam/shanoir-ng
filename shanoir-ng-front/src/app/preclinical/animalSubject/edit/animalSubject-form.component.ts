@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -52,11 +52,11 @@ import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
     providers: [AnimalSubjectService, ReferenceService, PathologyService, SubjectPathologyService, SubjectTherapyService],
     animations: [slideDown, preventInitialChildAnimations]
 })
-    
+
 @ModesAware
 export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubject> {
 
-    @ViewChild('subjectPathologiesTable', { static: false }) tablePathology: TableComponent; 
+    @ViewChild('subjectPathologiesTable', { static: false }) tablePathology: TableComponent;
 
     public readonly ImagedObjectCategory = ImagedObjectCategory;
     private readonly HASH_LENGTH: number = 14;
@@ -77,7 +77,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     private therapies: SubjectTherapy[] = [];
     private pathologies: SubjectPathology[] = [];
     private selectedStudy : IdName;
-    private hasNameUniqueError: boolean = false; 
+    private hasNameUniqueError: boolean = false;
     differ: KeyValueDiffer<string, any>;
 
     catOptions: Option<ImagedObjectCategory>[] = [
@@ -95,7 +95,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     constructor(private route: ActivatedRoute,
             private animalSubjectService: AnimalSubjectService,
             private subjectService: SubjectService,
-            private studyService: StudyService, 
+            private studyService: StudyService,
             private referenceService: ReferenceService,
             private subjectPathologyService: SubjectPathologyService,
             private subjectTherapyService: SubjectTherapyService,
@@ -211,7 +211,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         });
         this.loadAllStudies();
     }
-    
+
     loadAllStudies(): void {
         this.studyService.getStudiesNames()
             .then(studies => {
@@ -223,7 +223,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 console.error("error getting study list!");
         });
     }
-    
+
     getSubjectStudy(subjectStudy: SubjectStudy): SubjectStudy{
     	let fixedSubjectStudy = new SubjectStudy();
     	fixedSubjectStudy.id = subjectStudy.id;
@@ -234,10 +234,10 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     	fixedSubjectStudy.study = subjectStudy.study;
     	fixedSubjectStudy.subjectId = this.preclinicalSubject.subject.id;
     	fixedSubjectStudy.studyId = subjectStudy.study.id;
-        fixedSubjectStudy.tags = subjectStudy.tags;
+      fixedSubjectStudy.subjectStudyTags = subjectStudy.subjectStudyTags;
     	return fixedSubjectStudy;
     }
-    
+
     getStudyById(id: number): Study{
     	if (this.studies && this.studies.length > 0){
     		for (let s of this.studies){
@@ -258,7 +258,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
 		subject.name = this.preclinicalSubject.subject.name;
 		return subject;
 	}
-    
+
     public animalSelected(): boolean {
         return this.preclinicalSubject && this.preclinicalSubject.subject && this.preclinicalSubject.subject.imagedObjectCategory != null
             && (this.preclinicalSubject.subject.imagedObjectCategory.toString() != "PHANTOM"
@@ -355,15 +355,15 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 this.footerState.loading = false;
                 this.catchSavingErrors(reason);
                 return null;
-            }); 
+            });
         }
     }
 
     addSubject(): Promise<PreclinicalSubject> {
-        if (!this.preclinicalSubject ) { 
+        if (!this.preclinicalSubject ) {
             return Promise.resolve(null);
         }
-        
+
         this.preclinicalSubject.subject.identifier = this.generateSubjectIdentifier();
         this.preclinicalSubject.subject.preclinical = true;
         return this.subjectService.create(this.preclinicalSubject.subject).then((subject) => {
@@ -399,7 +399,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     updateSubject(): Promise<AnimalSubject> {
-            if (this.preclinicalSubject && this.preclinicalSubject.subject){	
+            if (this.preclinicalSubject && this.preclinicalSubject.subject){
                 this.generateSubjectIdentifier();
                 this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
                 return this.subjectService.update(this.preclinicalSubject.subject.id, this.preclinicalSubject.subject)
@@ -490,7 +490,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         }
         return null;
     }
-       
+
     onStudySelect() {
         this.selectedStudy.selected = true;
         let newSubjectStudy: SubjectStudy = new SubjectStudy();
@@ -501,7 +501,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         this.subjectStudyList.push(newSubjectStudy);
         this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
     }
-        
+
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
         for (let study of this.studies) {
             if (subjectStudy.study.id == study.id) study.selected = false;
@@ -511,7 +511,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             this.subjectStudyList.splice(index, 1);
         }
     }
-        
+
     generateSubjectIdentifier(): string {
         let hash;
         if (this.preclinicalSubject && this.preclinicalSubject.subject) {
@@ -525,7 +525,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         let hex = hash.substring(0, this.HASH_LENGTH);
         return hex;
     }
-    
+
     ngDoCheck() {
         const change = this.differ.diff(this);
         if (change) {

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -26,7 +26,7 @@ import { Option } from '../select/select.component';
           provide: NG_VALUE_ACCESSOR,
           useExisting: forwardRef(() => MultiSelectComponent),
           multi: true,
-        }]   
+        }]
 })
 
 export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
@@ -42,9 +42,8 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     @Output() onTouch = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
-    modelArray: any[];
+    modelArray: any[] = [];
     selectedOptions: Option<any>[] = [];
-
 
     constructor(
         private element: ElementRef
@@ -70,7 +69,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
                         label = this.optionBuilder.getLabel(item);
                     } else if (this.optionBuilder.labelField) {
                         label = item[this.optionBuilder.labelField];
-                    } 
+                    }
                     this.options.push(new Option<any>(item, label));
                 });
             }
@@ -87,7 +86,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
         else if (item.value) label = item.value;
         return label;
     }
-    
+
     writeValue(obj: any): void {
         this.modelArray = obj;
         this.updateData();
@@ -116,6 +115,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     }
 
     onSelectOption(id: number) {
+        this.modelArray = [];
         let option: Option<{id: number}> = this.options?.find(opt => opt?.value?.id == id);
         this.modelArray.push(option.value);
         this.selectedOptions.push(option);
@@ -131,12 +131,12 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
         this.onChangeCallback(this.modelArray);
     }
 
-    @HostListener('focusout', ['$event']) 
+    @HostListener('focusout', ['$event'])
     onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.onTouchedCallback();
             this.onTouch.emit();
-        } 
+        }
     }
 
 }

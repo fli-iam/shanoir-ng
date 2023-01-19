@@ -141,10 +141,16 @@ export class StudyDTOService {
         } else {
             entity.studyCardList = [];
         }
-        if (dto.tags) {
-            entity.tags = dto.tags.map(this.tagDTOToTag);
+        if (dto.subjectTag) {
+            entity.subjectTag = dto.subjectTag.map(this.tagDTOToTag);
         } else {
-            entity.tags = [];
+            entity.subjectTag = [];
+        }
+
+        if (dto.studyTag) {
+          entity.studyTag = dto.studyTag.map(this.tagDTOToTag);
+        } else {
+          entity.studyTag = [];
         }
         return entity;
     }
@@ -164,12 +170,14 @@ export class StudyDTOService {
         if (study) {
             subjectStudy.study = study;
             subjectStudy.studyId = study.id;
-            subjectStudy.study.tags = study.tags;
+            subjectStudy.study.subjectTag = study.subjectTag;
+            subjectStudy.study.studyTag = study.studyTag;
         } else if (subjectStudyDto.study) {
             subjectStudy.study = new Study();
             subjectStudy.study.id = subjectStudyDto.study.id;
             subjectStudy.study.name = subjectStudyDto.study.name;
-            subjectStudy.study.tags = subjectStudyDto.study.tags ? subjectStudyDto.study.tags.map(this.tagDTOToTag) : [];
+            subjectStudy.study.subjectTag = subjectStudyDto.study.tag ? subjectStudyDto.study.tag.map(this.tagDTOToTag) : [];
+            subjectStudy.study.studyTag = subjectStudyDto.study.tag ? subjectStudyDto.study.tag.map(this.tagDTOToTag) : [];
         }
         subjectStudy.studyId = subjectStudy.study.id;
         if (subject) {
@@ -183,10 +191,10 @@ export class StudyDTOService {
         }
         subjectStudy.subjectStudyIdentifier = subjectStudyDto.subjectStudyIdentifier;
         subjectStudy.subjectType = subjectStudyDto.subjectType;
-        if (subjectStudyDto.tags) {
-            subjectStudy.tags = subjectStudyDto.tags.map(this.tagDTOToTag);
+        if (subjectStudyDto.subjectStudyTags) {
+          subjectStudy.subjectStudyTags = subjectStudyDto.subjectStudyTags.map(this.tagDTOToTag);
         } else {
-            subjectStudy.tags = [];
+          subjectStudy.subjectStudyTags = [];
         }
         return subjectStudy;
     }
@@ -214,10 +222,16 @@ export class StudyDTOService {
         } else {
             study.studyCenterList = [];
         }
-        if (dto.tags) {
-            study.tags = dto.tags.map(this.tagDTOToTag);
+        if (dto.subjectTag) {
+            study.subjectTag = dto.subjectTag.map(this.tagDTOToTag);
         } else {
-            study.tags = [];
+            study.subjectTag = [];
+        }
+
+        if (dto.studyTag) {
+          study.studyTag = dto.studyTag.map(this.tagDTOToTag);
+        } else {
+          study.studyTag = [];
         }
         return study;
     }
@@ -247,7 +261,8 @@ export class StudyDTO {
     //timepoints: Timepoint[];
     visibleByDefault: boolean;
     withExamination: boolean;
-    tags: Tag[];
+    subjectTag: Tag[];
+    studyTag: Tag[];
     studyCards: StudyCardDTO[];
     description: string;
 
@@ -283,7 +298,8 @@ export class StudyDTO {
         }) : null;
         this.visibleByDefault = study.visibleByDefault;
         this.withExamination = study.withExamination;
-        this.tags = study.tags;
+        this.subjectTag = study.subjectTag;
+        this.studyTag = study.studyTag;
         this.description = study.description;
     }
 
@@ -312,7 +328,8 @@ export class CenterStudyDTO {
     name: string;
     studyCenterList: StudyCenterDTO[];
     profile: Profile;
-    tags: Tag[];
+    subjectTag: Tag[];
+    studyTag: Tag[];
 }
 
 export class PublicStudyDataDTO {
@@ -326,5 +343,5 @@ export class PublicStudyDataDTO {
   studyStatus: string;
   studyType: StudyType;
   description: string;
-  studyFlag: string[];
+  studyTag: Tag[];
 }

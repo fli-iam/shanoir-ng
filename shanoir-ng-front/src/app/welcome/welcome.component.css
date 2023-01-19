@@ -122,6 +122,17 @@ hr {
   margin-right: 5px;
   background-color: antiquewhite;
 }
+.tags {
+  text-align: right;
+}
+
+.tag {
+  border: 1px solid var(--grey);
+  border-radius: 10px;
+  padding: 2px 8px;
+  display: inline-block;
+  margin: 2px 4px 2px 0;
+}
 
 .studyItem {
   color: black;
