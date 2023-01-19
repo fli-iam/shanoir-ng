@@ -1,6 +1,10 @@
 # Create a Docker image for each microservice in Shanoir
 name: Publish Docker images
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
 #on:
 #  release:
 #    types: [published]
@@ -39,7 +43,7 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
@@ -47,14 +51,12 @@ jobs:
         id: meta
         uses: docker/metadata-action@v1
         with:
-          images: |
-            shanoir-ng/shanoir-ng
-            ghcr.io/${{ github.repository }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
       
       - name: Build and push Docker images
         uses: docker/build-push-action@v1
         with:
-          context: ./docker-compose/users
+          context: /docker-compose/users/.
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
