@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.tag.model.TagMapper;
+import org.shanoir.ng.tag.model.SubjectTagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
@@ -35,7 +35,7 @@ public class SubjectStudyDecorator implements SubjectStudyMapper {
 	private SubjectStudyMapper delegate;
 	
 	@Autowired
-	private TagMapper tagMapper;
+	private SubjectTagMapper tagMapper;
 
 	@Override
 	public List<SubjectStudyDTO> subjectStudyListToSubjectStudyDTOList(List<SubjectStudy> subjectStudies) {
@@ -54,8 +54,8 @@ public class SubjectStudyDecorator implements SubjectStudyMapper {
 		if (!StringUtils.isEmpty(subjectStudy.getSubjectStudyIdentifier())) {
 			subjectStudyDTO.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
 		}
-		subjectStudyDTO.setTags(tagMapper.tagListToTagDTOList(subjectStudy.getTags()));
-		subjectStudyDTO.getStudy().setTags(tagMapper.tagListToTagDTOList(subjectStudy.getStudy().getTags()));
+		subjectStudyDTO.setSubjectTag(tagMapper.subjectTagListToSubjectTagDTOList(subjectStudy.getTag()));
+		subjectStudyDTO.getStudy().setTag(tagMapper.subjectTagListToSubjectTagDTOList(subjectStudy.getStudy().getSubjectTag()));
 
 		return subjectStudyDTO;
 	}

@@ -28,6 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysql.cj.log.Log;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -95,6 +98,9 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
 
@@ -201,6 +207,12 @@ public class StudyApiController implements StudyApi {
 	@Override
 	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
 			final BindingResult result) throws RestServiceException {
+
+		try {
+			LOG.error(objectMapper.writeValueAsString(study));
+		} catch (JsonProcessingException e) {
+			throw new RuntimeException(e);
+		}
 
 		validate(study, result);
 

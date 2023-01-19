@@ -25,7 +25,8 @@ import org.shanoir.ng.study.model.StudyType;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
-import org.shanoir.ng.tag.model.TagDTO;
+import org.shanoir.ng.tag.model.StudyTagDTO;
+import org.shanoir.ng.tag.model.SubjectTagDTO;
 import org.shanoir.ng.timepoint.TimepointDTO;
 
 /**
@@ -35,6 +36,12 @@ import org.shanoir.ng.timepoint.TimepointDTO;
  *
  */
 public class StudyDTO {
+
+	private List<SubjectTagDTO> subjectTag;
+
+	private List<StudyTagDTO> studyTag;
+
+	private List<SubjectStudyDTO> subjectStudyList;
 
 	private boolean clinical;
 
@@ -61,8 +68,6 @@ public class StudyDTO {
 	
 	private List<String> dataUserAgreementPaths;
 
-	private List<TagDTO> tags;
-
 	@LocalDateAnnotations
 	private LocalDate startDate;
 
@@ -74,7 +79,6 @@ public class StudyDTO {
 
 	private StudyType studyType;
 
-	private List<SubjectStudyDTO> subjectStudyList;
 
 	private List<TimepointDTO> timepoints;
 
@@ -432,17 +436,17 @@ public class StudyDTO {
 	}
 
 	/**
-	 * @return the tags
+	 * @return the subjectTag
 	 */
-	public List<TagDTO> getTags() {
-		return tags;
+	public List<SubjectTagDTO> getSubjectTag() {
+		return subjectTag;
 	}
 
 	/**
-	 * @param tags the tags to set
+	 * @param subjectTag the SubjectTag to set
 	 */
-	public void setTags(List<TagDTO> tags) {
-		this.tags = tags;
+	public void setSubjectTag(List<SubjectTagDTO> subjectTag) {
+		this.subjectTag = subjectTag;
 	}
 
 
@@ -452,5 +456,13 @@ public class StudyDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public List<StudyTagDTO> getStudyTag() {
+		return studyTag;
+	}
+
+	public void setStudyTag(List<StudyTagDTO> studyTag) {
+		this.studyTag = studyTag;
 	}
 }

@@ -48,7 +48,8 @@ import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.model.StudyTag;
+import org.shanoir.ng.tag.model.SubjectTag;
 import org.shanoir.ng.timepoint.Timepoint;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -156,14 +157,14 @@ public class Study extends HalEntity {
 	private boolean withExamination;
 
 	private boolean challenge;
-	
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Tag> tags;
+	private List<SubjectTag> subjectTag;
 
 	private String description;
 
-	@ElementCollection
-	private List<String> studyFlag;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<StudyTag> studyTag;
 
 	/**
 	 * Init HATEOAS links
@@ -499,17 +500,17 @@ public class Study extends HalEntity {
 	}
 
 	/**
-	 * @return the tags
+	 * @return the subjectTag
 	 */
-	public List<Tag> getTags() {
-		return tags;
+	public List<SubjectTag> getSubjectTag() {
+		return subjectTag;
 	}
 
 	/**
-	 * @param tags the tags to set
+	 * @param subjectTag the subjectTag to set
 	 */
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
+	public void setSubjectTag(List<SubjectTag> subjectTag) {
+		this.subjectTag = subjectTag;
 	}
 
 	public String getDescription() {
@@ -520,11 +521,11 @@ public class Study extends HalEntity {
 		this.description = publicDescription;
 	}
 
-	public List<String> getStudyFlag() {
-		return studyFlag;
+	public List<StudyTag> getStudyTag() {
+		return studyTag;
 	}
 
-	public void setStudyFlag(List<String> studyFlag) {
-		this.studyFlag = studyFlag;
+	public void setStudyTag(List<StudyTag> studyTag) {
+		this.studyTag = studyTag;
 	}
 }

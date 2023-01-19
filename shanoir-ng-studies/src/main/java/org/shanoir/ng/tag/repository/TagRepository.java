@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.tag.repository;
 
-import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.model.SubjectTag;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -22,6 +22,6 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author msimon
  */
-public interface TagRepository extends CrudRepository<Tag, Long> {
+public interface TagRepository extends CrudRepository<SubjectTag, Long> {
 	
 }

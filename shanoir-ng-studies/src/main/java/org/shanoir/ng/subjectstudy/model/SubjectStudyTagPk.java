@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.model.SubjectTag;
 
 
 public class SubjectStudyTagPk implements Serializable {
@@ -14,7 +14,7 @@ public class SubjectStudyTagPk implements Serializable {
 	
 	@ManyToOne
 	@JoinColumn(name = "tag_id", insertable = false, updatable = false, nullable = false)
-	private Tag tag;
+	private SubjectTag subjectTag;
 	
 	@ManyToOne
 	@JoinColumn(name = "subject_study_id", insertable = false, updatable = false, nullable = false)
@@ -22,9 +22,9 @@ public class SubjectStudyTagPk implements Serializable {
 
     public SubjectStudyTagPk() {} 
 
-    public SubjectStudyTagPk(Tag tag, SubjectStudy subjectStudy) {
+    public SubjectStudyTagPk(SubjectTag subjectTag, SubjectStudy subjectStudy) {
 		super();
-		this.tag = tag;
+		this.subjectTag = subjectTag;
 		this.subjectStudy = subjectStudy;
 	}
 
@@ -48,12 +48,12 @@ public class SubjectStudyTagPk implements Serializable {
     	return (int) getTag().hashCode() * (getSubjectStudy() != null ? getSubjectStudy().hashCode() : null);
     }
 
-	public Tag getTag() {
-		return tag;
+	public SubjectTag getTag() {
+		return subjectTag;
 	}
 
-	public void setTag(Tag tag) {
-		this.tag = tag;
+	public void setTag(SubjectTag subjectTag) {
+		this.subjectTag = subjectTag;
 	}
 
 	public SubjectStudy getSubjectStudy() {

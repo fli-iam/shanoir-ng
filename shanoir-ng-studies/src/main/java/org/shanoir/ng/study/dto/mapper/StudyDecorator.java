@@ -24,7 +24,8 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
-import org.shanoir.ng.tag.model.TagMapper;
+import org.shanoir.ng.tag.model.StudyTagMapper;
+import org.shanoir.ng.tag.model.SubjectTagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -48,7 +49,10 @@ public abstract class StudyDecorator implements StudyMapper {
 	private SubjectStudyMapper subjectStudyMapper;
 
 	@Autowired
-	private TagMapper tagMapper;
+	private SubjectTagMapper subjectTagMapper;
+
+	@Autowired
+	private StudyTagMapper studyTagMapper;
 
 	@Override
 	public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
@@ -75,7 +79,7 @@ public abstract class StudyDecorator implements StudyMapper {
 	public IdNameCenterStudyDTO studyToExtendedIdNameDTO (final Study study) {
 		final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
 		simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
-		simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
+		simpleStudyDTO.setTags(subjectTagMapper.subjectTagListToSubjectTagDTOList(study.getSubjectTag()));
 		simpleStudyDTO.setProfile(study.getProfile());
 		return simpleStudyDTO;
 	}
@@ -107,8 +111,8 @@ public abstract class StudyDecorator implements StudyMapper {
 			studyDTO.setSubjectStudyList(subjectStudyMapper.subjectStudyListToSubjectStudyDTOList(study.getSubjectStudyList()));
 			studyDTO.setExperimentalGroupsOfSubjects(experimentalGroupOfSubjectsMapper
 					.experimentalGroupOfSubjectsToIdNameDTOs(study.getExperimentalGroupsOfSubjects()));
-			if (study.getTags() != null) {
-				studyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));				
+			if (study.getSubjectTag() != null) {
+				studyDTO.setSubjectTag(subjectTagMapper.subjectTagListToSubjectTagDTOList(study.getSubjectTag()));
 			}
 		}
 		return studyDTO;
@@ -123,6 +127,9 @@ public abstract class StudyDecorator implements StudyMapper {
 		}
 		if (study.getExaminations() != null) {
 			publicStudyDTO.setNbExaminations(study.getExaminations().size());
+		}
+		if (study.getStudyTag() != null) {
+			publicStudyDTO.setStudyTag(studyTagMapper.studyTagListToStudyTagDTOList(study.getStudyTag()));
 		}
 		return publicStudyDTO;
 	}

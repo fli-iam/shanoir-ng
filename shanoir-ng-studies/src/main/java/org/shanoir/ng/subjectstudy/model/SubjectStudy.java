@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.subjectstudy.model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.SubjectType;
-import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.model.SubjectTag;
 
 /**
  * Relation between the subjects and the studies.
@@ -79,13 +78,13 @@ public class SubjectStudy extends AbstractEntity {
 	/**
 	 * @return the tags
 	 */
-	public List<Tag> getTags() {
-		if (getSubjectStudyTags() == null) return null;
-		return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
+	public List<SubjectTag> getTag() {
+		if (getSubjectStudyTag() == null) return null;
+		return getSubjectStudyTag().stream().map((subjectStudyTag) -> subjectStudyTag.getSubjectTag()).collect(Collectors.toList());
 	}
 	
 
-	public List<SubjectStudyTag> getSubjectStudyTags() {
+	public List<SubjectStudyTag> getSubjectStudyTag() {
 		return subjectStudyTags;
 	}
 

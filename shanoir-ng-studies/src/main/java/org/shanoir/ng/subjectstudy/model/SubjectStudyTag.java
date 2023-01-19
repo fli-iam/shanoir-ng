@@ -21,7 +21,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.shanoir.ng.tag.model.Tag;
+import org.shanoir.ng.tag.model.SubjectTag;
 
 /**
  * Relation between the subjects and the studies.
@@ -36,21 +36,20 @@ public class SubjectStudyTag {
 
 	@Id
 	@ManyToOne
-	@JoinColumn(name = "tag_id", insertable = false, updatable = false, nullable = false)
-	private Tag tag;
+	@JoinColumn(name = "subject_tag_id", insertable = false, updatable = false, nullable = false)
+	private SubjectTag subjectTag;
 	
 	@Id
 	@ManyToOne
 	@JoinColumn(name = "subject_study_id", insertable = false, updatable = false, nullable = false)
 	private SubjectStudy subjectStudy;
 
-
-	public Tag getTag() {
-		return tag;
+	public SubjectTag getSubjectTag() {
+		return subjectTag;
 	}
 
-	public void setTag(Tag tag) {
-		this.tag = tag;
+	public void setSubjectTag(SubjectTag subjectTag) {
+		this.subjectTag = subjectTag;
 	}
 
 	public SubjectStudy getSubjectStudy() {

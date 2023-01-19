@@ -20,7 +20,7 @@ import java.util.List;
 import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
-import org.shanoir.ng.tag.model.TagDTO;
+import org.shanoir.ng.tag.model.SubjectTagDTO;
 
 /**
  * Simple DTO for studies.
@@ -32,7 +32,7 @@ public class IdNameCenterStudyDTO extends IdName {
 	
 	private List<StudyCenterDTO> studyCenterList;
 	
-	private List<TagDTO> tags;
+	private List<SubjectTagDTO> tags;
 
 	private Profile profile;
 
@@ -64,11 +64,11 @@ public class IdNameCenterStudyDTO extends IdName {
 		this.studyCenterList = studyCenterList;
 	}
 
-	public List<TagDTO> getTags() {
+	public List<SubjectTagDTO> getTags() {
 		return tags;
 	}
 
-	public void setTags(List<TagDTO> tags) {
+	public void setTags(List<SubjectTagDTO> tags) {
 		this.tags = tags;
 	}
 
