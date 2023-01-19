@@ -36,6 +36,9 @@ export type ColumnDefinition = {
     /** disable the possibility of sorting the table based on that column */
     disableSorting?: boolean,
 
+    /** disable the possibility of sorting the table based on that column */
+    disableSearch?: boolean,
+
     /** default width of the column as a css representation (20px, 15%, ...) */
     width?: string,
 

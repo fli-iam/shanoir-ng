@@ -328,7 +328,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     /**
-     * Call to refresh from outsilde
+     * Call to refresh from outside
      */
     public refresh(page?: number): Promise<SolrResultPage> {
         if (page == undefined) {
