@@ -326,5 +326,4 @@ export class PublicStudyDataDTO {
   studyStatus: string;
   studyType: StudyType;
   description: string;
-  studyFlag: string[];
 }
