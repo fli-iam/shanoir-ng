@@ -36,7 +36,7 @@
       <span class="studyValues">Examinations: {{ study.nbExaminations }} | Subjects: {{ study.nbSubjects }}</span>
       <span *ngIf="study.studyType"> | Study type: {{ StudyType[study.studyType] }}</span>
       <div class="tags" *ngIf="study.studyTags">
-        <span class="tag" [style.background]="tag.color" *ngFor="let tag of study.studyTags"> {{ tag.name }}</span>
+        <span class="tag" [style.background]="tag.color" [class.dark]="getFontColor(tag.color)" *ngFor="let tag of study.studyTags"> {{ tag.name }}</span>
       </div>
       <hr>
     </div>
