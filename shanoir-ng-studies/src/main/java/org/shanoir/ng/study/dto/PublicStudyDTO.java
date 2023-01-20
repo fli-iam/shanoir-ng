@@ -210,7 +210,6 @@ public class PublicStudyDTO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
 	public List<StudyTagDTO> getStudyTags() {
 		return studyTags;
 	}
