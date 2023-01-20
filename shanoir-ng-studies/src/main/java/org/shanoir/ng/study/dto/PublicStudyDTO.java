@@ -58,8 +58,6 @@ public class PublicStudyDTO {
 
 	private String description;
 
-	private List<String> studyFlag;
-
 	/**
 	 * Default constructor.
 	 */
@@ -208,13 +206,5 @@ public class PublicStudyDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public List<String> getStudyFlag() {
-		return studyFlag;
-	}
-
-	public void setStudyFlag(List<String> studyFlag) {
-		this.studyFlag = studyFlag;
 	}
 }

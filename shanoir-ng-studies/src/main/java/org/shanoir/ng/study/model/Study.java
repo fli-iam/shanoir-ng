@@ -151,9 +151,6 @@ public class Study extends HalEntity {
 	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 
-	@ElementCollection
-	private List<String> studyFlag;
-
 	/**
 	 * Init HATEOAS links
 	 */
@@ -507,13 +504,5 @@ public class Study extends HalEntity {
 
 	public void setDescription(String publicDescription) {
 		this.description = publicDescription;
-	}
-
-	public List<String> getStudyFlag() {
-		return studyFlag;
-	}
-
-	public void setStudyFlag(List<String> studyFlag) {
-		this.studyFlag = studyFlag;
 	}
 }
