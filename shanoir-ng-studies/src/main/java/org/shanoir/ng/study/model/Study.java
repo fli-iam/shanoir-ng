@@ -18,20 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ColumnResult;
-import javax.persistence.ConstructorResult;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.PostLoad;
-import javax.persistence.SqlResultSetMapping;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
@@ -164,10 +151,9 @@ public class Study extends HalEntity {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Tag> tags;
 
+	@Lob
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
-
-	@ElementCollection
-	private List<String> studyFlag;
 
 	/**
 	 * Init HATEOAS links
@@ -522,13 +508,5 @@ public class Study extends HalEntity {
 
 	public void setDescription(String publicDescription) {
 		this.description = publicDescription;
-	}
-
-	public List<String> getStudyFlag() {
-		return studyFlag;
-	}
-
-	public void setStudyFlag(List<String> studyFlag) {
-		this.studyFlag = studyFlag;
 	}
 }
