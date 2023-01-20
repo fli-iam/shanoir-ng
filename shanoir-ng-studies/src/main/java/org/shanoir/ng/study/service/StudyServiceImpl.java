@@ -50,6 +50,7 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
@@ -148,6 +149,11 @@ public class StudyServiceImpl implements StudyService {
 
 		if (study.getTags() != null) {
 			for (final Tag tag : study.getTags()) {
+				tag.setStudy(study);
+			}
+		}
+		if (study.getStudyTags() != null) {
+			for (final StudyTag tag : study.getStudyTags()) {
 				tag.setStudy(study);
 			}
 		}
@@ -257,6 +263,12 @@ public class StudyServiceImpl implements StudyService {
 				tag.setStudy(studyDb);
 			}
 		}
+		if (study.getStudyTags() != null) {
+			ListDependencyUpdate.updateWithNoRemove(studyDb.getStudyTags(), study.getStudyTags());
+			for (StudyTag tag : studyDb.getStudyTags()) {
+				tag.setStudy(studyDb);
+			}
+		}
 
 		if (studyDb.getProtocolFilePaths() != null) {
 			for (String filePath : studyDb.getProtocolFilePaths()) {
@@ -301,8 +313,8 @@ public class StudyServiceImpl implements StudyService {
 	 * For each subject study tag of study, set the fresh tag id by looking into studyDb tags, 
 	 * then update db subject study tags lists with the given study
 	 * 
-	 * @param study
-	 * @param studyDb
+	 * @param subjectStudyList
+	 * @param dbStudyTags
 	 * @return updated study
 	 */
 	private void updateTags(List<SubjectStudy> subjectStudyList, List<Tag> dbStudyTags) {

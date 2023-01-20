@@ -48,6 +48,7 @@ export class Study extends Entity {
     withExamination: boolean;
     studyCardList: StudyCard[];
     tags: Tag[];
+    studyTags: Tag[];
     description: string;
 
     private completeMembers(users: User[]) {
@@ -65,12 +66,14 @@ export class SimpleStudy {
     id: number;
     name: string;
     tags: Tag[];
+    studyTags: Tag[];
     studyUserList: StudyUser[];
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
         this.name = study.name;
         this.tags = study.tags;
+        this.studyTags = study.studyTags;
         this.studyUserList = study.studyUserList;
     }
 }
