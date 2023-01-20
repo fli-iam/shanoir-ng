@@ -13,16 +13,15 @@
  */
 import { Component, ViewChild } from '@angular/core';
 
-import { DatasetService } from '../../datasets/shared/dataset.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
-import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { EntityListComponent } from 'src/app/shared/components/entity/entity-list.component.abstract';
+import { Pageable, Page } from 'src/app/shared/components/table/pageable.model';
 
 
 @Component({
@@ -31,14 +30,17 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
     styleUrls: ['subject-list.component.css']
 })
 
-export class SubjectListComponent extends BrowserPaginEntityListComponent<Subject> {
-    
+export class SubjectListComponent extends EntityListComponent<Subject> {
+
+    getPage(pageable: Pageable): Promise<Page<Subject>> {
+        return this.subjectService.getPage(pageable, this.table.filter.searchStr ? this.table.filter.searchStr : "");
+    }
+
     @ViewChild('table', { static: false }) table: TableComponent;
     private studiesICanAdmin: number[];
 
     constructor(
             private subjectService: SubjectService, 
-            private datasetService: DatasetService,
             private studyService: StudyService) {       
                 
         super('subject');
@@ -63,18 +65,23 @@ export class SubjectListComponent extends BrowserPaginEntityListComponent<Subjec
         };
         return [
             { headerName: "Common Name", field: "name", defaultSortCol: true, defaultAsc: true },
-            { headerName: "Sex", field: "sex" },
+            { headerName: "Sex", field: "sex", disableSearch: true },
 
             {
-                headerName: "Birth Date", field: "birthDate", type: "date", cellRenderer: function (params: any) {
+                headerName: "Birth Date", field: "birthDate", type: "date", disableSearch: true, cellRenderer: function (params: any) {
                     return dateRenderer(params.data.birthDate);
                 }
             },
-            { headerName: "Manual HD", field: "manualHemisphericDominance"},
-            { headerName: "Language HD", field: "languageHemisphericDominance"},
-            { headerName: "Imaged object category", field: "imagedObjectCategory"},
-            { headerName: "Personal Comments", field: ""}
+            { headerName: "Manual HD", field: "manualHemisphericDominance", disableSearch: true},
+            { headerName: "Language HD", field: "languageHemisphericDominance", disableSearch: true},
+            { headerName: "Imaged object category", field: "imagedObjectCategory", disableSearch: true},
+            { headerName: "Personal Comments", field: "", disableSearch: true}
         ];
+    }
+
+    completeColDefs() {
+        super.completeColDefs();
+        this.columnDefs[this.columnDefs.findIndex(col => col.headerName == "Id")].disableSearch = true;
     }
 
     getCustomActionsDefs(): any[] {

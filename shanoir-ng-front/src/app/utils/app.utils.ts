@@ -78,7 +78,7 @@ export const BACKEND_API_STUDY_CHALLENGES_URL: string = BACKEND_API_STUDIES_MS_U
 // Subjects http api
 export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects';
 export const BACKEND_API_SUBJECT_NAMES_URL: string = BACKEND_API_SUBJECT_URL + '/names';
-export const BACKEND_API_SUBJECT_FILTER_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects/filter';
+export const BACKEND_API_SUBJECT_FILTER_URL: string = BACKEND_API_SUBJECT_URL + '/filter';
 export const BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER : string = BACKEND_API_SUBJECT_URL + '/findByIdentifier';
 
 // Subject Study http api

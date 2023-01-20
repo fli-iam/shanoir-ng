@@ -18,23 +18,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ColumnResult;
-import javax.persistence.ConstructorResult;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.PostLoad;
-import javax.persistence.SqlResultSetMapping;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.validator.constraints.NotBlank;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjects;
@@ -88,10 +77,6 @@ public class Study extends HalEntity {
 	@LocalDateAnnotations
 	private LocalDate endDate;
 
-	/** List of the examinations related to this study. */
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<StudyExamination> examinations;
-
 	/** Associated experimental groups of subjects. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = { CascadeType.ALL }, orphanRemoval = true)
 	private List<ExperimentalGroupOfSubjects> experimentalGroupsOfSubjects;
@@ -140,8 +125,14 @@ public class Study extends HalEntity {
 	@OneToMany(mappedBy = "study", targetEntity = StudyUser.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyUser> studyUserList;
 
+	/** List of the examinations related to this study. */
+	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	@LazyCollection(LazyCollectionOption.EXTRA)
+	private Set<StudyExamination> examinations;
+
 	/** Relations between the subjects and the studies. */
-	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	@LazyCollection(LazyCollectionOption.EXTRA)
 	private List<SubjectStudy> subjectStudyList;
 
 	/** List of Timepoints dividing the study **/
@@ -160,10 +151,9 @@ public class Study extends HalEntity {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Tag> tags;
 
+	@Lob
+	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
-
-	@ElementCollection
-	private List<String> studyFlag;
 
 	/**
 	 * Init HATEOAS links
@@ -518,13 +508,5 @@ public class Study extends HalEntity {
 
 	public void setDescription(String publicDescription) {
 		this.description = publicDescription;
-	}
-
-	public List<String> getStudyFlag() {
-		return studyFlag;
-	}
-
-	public void setStudyFlag(List<String> studyFlag) {
-		this.studyFlag = studyFlag;
 	}
 }
