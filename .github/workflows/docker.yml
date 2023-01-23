@@ -87,3 +87,10 @@ jobs:
           context: ./docker-compose/preclinical
           push: true
           tags: shanoir-ng/preclinical:latest
+          
+      - name: Nginx - Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: ./docker-compose/nginx
+          push: true
+          tags: shanoir-ng/nginx:latest
