@@ -47,18 +47,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+#      - name: Extract metadata (tags, labels) for Docker
+#        id: meta
+#        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+#        with:
+#          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Microservice Users - Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v3
         with:
           context: ./docker-compose/users
           push: true
-          tags: shanoir-ng/users:latest
+          tags: shanoir-ng/users:1.0.0
           
       - name: Microservice Studies - Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
