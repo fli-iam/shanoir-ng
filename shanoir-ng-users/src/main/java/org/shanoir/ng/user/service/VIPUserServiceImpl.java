@@ -10,7 +10,7 @@ import org.shanoir.ng.user.model.vip.CountryCode;
 import org.shanoir.ng.user.model.vip.VIPUser;
 import org.shanoir.ng.user.model.vip.VIPUserLevel;
 import org.shanoir.ng.user.repository.UserRepository;
-import org.shanoir.ng.user.utils.KeycloakServiceAccountUtils;
+import org.shanoir.ng.utils.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

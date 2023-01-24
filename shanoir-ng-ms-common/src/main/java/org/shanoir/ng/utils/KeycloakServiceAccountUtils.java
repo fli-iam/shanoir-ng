@@ -1,4 +1,4 @@
-package org.shanoir.ng.user.utils;
+package org.shanoir.ng.utils;
 
 
 import org.keycloak.representations.AccessTokenResponse;
