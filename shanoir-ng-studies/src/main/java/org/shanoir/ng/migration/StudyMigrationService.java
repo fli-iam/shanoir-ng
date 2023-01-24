@@ -94,6 +94,9 @@ public class StudyMigrationService {
 			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 				Subject subj = subjectStudy.getSubject();
 				subj.setUserPersonalCommentList(null);
+				if (subj.getPseudonymusHashValues() != null) {
+					subj.getPseudonymusHashValues().setSubject(subj);
+				}
 				Long oldId = subj.getId();
 				subj.setId(null);
 				subj.setSubjectStudyList(Collections.emptyList());
