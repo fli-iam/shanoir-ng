@@ -1,6 +1,8 @@
-package org.shanoir.ng.utils;
+package org.shanoir.ng.shared.security;
+
 
 import org.keycloak.representations.AccessTokenResponse;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +45,7 @@ public class KeycloakServiceAccountUtils {
      *
      * @return AccessTokenResponse
      */
-    public AccessTokenResponse getServiceAccountAccessToken(){
+    public AccessTokenResponse getServiceAccountAccessToken() throws SecurityException {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -62,14 +64,12 @@ public class KeycloakServiceAccountUtils {
             return response.getBody();
         }catch(HttpStatusCodeException e){
             // in case of error with a response payload.
-            LOG.error("error response, message : {}",e.getStatusCode(), e.getMessage());
-            e.printStackTrace();
+            LOG.error("error response, message : {}, {}",e.getStatusCode(), e.getMessage());
+            throw new SecurityException("error response, message : "+ e.getMessage());
         }catch (RestClientException e){
             // in case of an error but no response payload;
             LOG.error("there is no response payload");
-            e.printStackTrace();
+            throw new SecurityException("No response payload for service account token request");
         }
-
-        return null;
     }
 }
