@@ -24,11 +24,6 @@ public class StudyTag extends HalEntity {
 	@JoinColumn(name = "study_id")
 	private Study study;
 
-//	@JsonIgnore
-//	@OneToMany(mappedBy = "studyTag", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-//	@OnDelete(action = OnDeleteAction.CASCADE)
-//	private List<StudyTag> studyTag;
-
 	/**
 	 * @return the name
 	 */
