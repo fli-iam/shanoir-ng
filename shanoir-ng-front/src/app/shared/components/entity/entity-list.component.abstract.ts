@@ -84,7 +84,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         if (options.id != undefined) this.showId = options.id;
     }
 
-    private completeColDefs(): void {
+    protected completeColDefs(): void {
         if (this.edit) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
         }

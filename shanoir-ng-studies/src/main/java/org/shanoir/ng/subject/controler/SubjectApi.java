@@ -23,6 +23,8 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,7 +36,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-
 import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.annotations.Api;
@@ -68,7 +69,18 @@ public interface SubjectApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SubjectDTO>> findSubjects();
-	
+
+	@ApiOperation(value = "", notes = "Returns the subjects as Pageable with corresponding name", response = Subject.class, responseContainer = "List", tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subjects", response = Subject.class),
+			@ApiResponse(code = 204, message = "no subject found", response = Subject.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
+	@GetMapping(value = "/filter", produces = { "application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
+	ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name);
+
 	@ApiOperation(value = "", notes = "Returns id and name for all the subjects", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found subjects", response = IdName.class, responseContainer = "List"),

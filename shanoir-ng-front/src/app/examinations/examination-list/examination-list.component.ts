@@ -19,7 +19,6 @@ import { ColumnDefinition } from '../../shared/components/table/column.definitio
 import { StudyService } from '../../studies/shared/study.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 

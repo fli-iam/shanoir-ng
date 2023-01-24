@@ -1,0 +1,62 @@
+# Create a Docker image for each microservice in Shanoir
+name: Publish Docker images
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+#on:
+#  release:
+#    types: [published]
+#on:
+#  push:
+#    branches: [ master ]
+# use manual runs for testing purpose
+on: workflow_dispatch
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Container registry
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: Create directory /shanoir-ng-logs
+        run: sudo mkdir -m777 /var/log/shanoir-ng-logs
+      - name: Build with Maven
+        run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
+        env:
+          SHANOIR_URL_HOST: localhost
+          SHANOIR_URL_SCHEME: http
+          SHANOIR_PREFIX: github
+          SHANOIR_ADMIN_EMAIL: nobody@inria.fr
+          SHANOIR_KEYCLOAK_USER: admin
+          SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
+        
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Microservice Users - Build and push Docker image
+        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        with:
+          context: ./docker-compose/users
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

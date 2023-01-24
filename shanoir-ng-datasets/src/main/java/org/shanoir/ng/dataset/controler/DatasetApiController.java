@@ -257,6 +257,16 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByIds(
+			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
+		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+		if (datasets.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK); 
+	}
+
+	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
 		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
 		if (datasets.isEmpty()) {

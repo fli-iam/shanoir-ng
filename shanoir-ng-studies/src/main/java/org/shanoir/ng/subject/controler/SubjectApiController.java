@@ -36,6 +36,8 @@ import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -182,5 +184,13 @@ public class SubjectApiController implements SubjectApi {
 					new ErrorDetails(errors));
 			throw new RestServiceException(error);
 		}
+	}
+
+	public ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name) {
+		Page<Subject> subjects = this.subjectService.getFilteredPage(page, name);
+		if (subjects.getContent().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 }
