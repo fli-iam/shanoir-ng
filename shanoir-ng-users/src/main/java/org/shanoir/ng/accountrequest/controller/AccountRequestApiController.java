@@ -20,6 +20,7 @@ import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -30,7 +31,10 @@ import io.swagger.annotations.ApiParam;
 
 @Controller
 public class AccountRequestApiController extends AbstractUserRequestApiController implements AccountRequestApi {
-	
+
+	@Value("${vip.enabled}")
+	private boolean vipEnabled;
+
 	@Override
 	public ResponseEntity<Void> saveNewAccountRequest(
 			@ApiParam(value = "user to create from account request", required = true) @RequestBody final User user,
@@ -51,7 +55,9 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 		/* Save user in db. */
 		try {
 			getUserService().createAccountRequest(user);
-			getVipUserService().createVIPAccountRequest(user);
+			if(vipEnabled){
+				getVipUserService().createVIPAccountRequest(user);
+			}
 		} catch (PasswordPolicyException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while generating the new password"));

@@ -29,6 +29,7 @@ import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -41,6 +42,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	
 	@Autowired
 	ShanoirEventService eventService;
+
+	@Value("${vip.enabled}")
+	private boolean vipEnabled;
 
 	@Override
 	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
@@ -142,7 +146,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		/* Save user in db. */
 		try {
 			User createdUser = getUserService().create(user);
-			getVipUserService().createVIPAccountRequest(createdUser);
+			if(vipEnabled){
+				getVipUserService().createVIPAccountRequest(createdUser);
+			}
 			return new ResponseEntity<>(createdUser, HttpStatus.OK);
 		} catch (PasswordPolicyException e) {
 			throw new RestServiceException(

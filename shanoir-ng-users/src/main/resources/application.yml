@@ -109,6 +109,7 @@ logging:
     org.hibernate: ERROR
 
 vip:
+  enabled: true
   uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/vip/rest/register
 service-account:
   token:
