@@ -5,15 +5,14 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
-#on:
-#  release:
-#    types: [published]
-#on:
-#  push:
-#    branches: [ master ]
-# use manual runs for testing purpose
-on: workflow_dispatch
-
+on:
+  push:
+    branches:
+      - 'master'
+    tags:
+      - 'v*'
+  workflow_dispatch
+  
 jobs:
   push_to_registry:
     name: Push Docker images to Container registry
