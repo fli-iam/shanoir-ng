@@ -25,10 +25,13 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 11
+
       - name: Check out the repo
         uses: actions/checkout@v3
+
       - name: Create directory /shanoir-ng-logs
         run: sudo mkdir -m777 /var/log/shanoir-ng-logs
+      
       - name: Build with Maven
         run: mvn -f ./shanoir-ng-parent/pom.xml install -DskipTests
         env:
@@ -38,6 +41,9 @@ jobs:
           SHANOIR_ADMIN_EMAIL: nobody@inria.fr
           SHANOIR_KEYCLOAK_USER: admin
           SHANOIR_KEYCLOAK_PASSWORD: '&a1A&a1A'
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
         
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v2
@@ -53,11 +59,12 @@ jobs:
 #          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Microservice Users - Build and push Docker image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/users
+          builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: shanoir-ng/users:1.0.0
+          tags: shanoir-ng/users:latest
           
       - name: Microservice Studies - Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
