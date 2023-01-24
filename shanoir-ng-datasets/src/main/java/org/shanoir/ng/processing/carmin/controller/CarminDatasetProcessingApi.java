@@ -5,6 +5,7 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public interface CarminDatasetProcessingApi {
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
         ResponseEntity<CarminDatasetProcessing> saveNewCarminDatasetProcessing(
                         @ApiParam(value = "carmin dataset processing to create", required = true) @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing,
-                        BindingResult result) throws RestServiceException;
+                        BindingResult result) throws RestServiceException, EntityNotFoundException;
 
         @ApiOperation(value = "", notes = "If exists, returns the carmin dataset processing corresponding to the given id", response = CarminDatasetProcessing.class, tags = {})
         @ApiResponses(value = {

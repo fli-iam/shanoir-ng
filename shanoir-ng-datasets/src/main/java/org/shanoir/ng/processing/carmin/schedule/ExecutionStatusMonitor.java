@@ -2,7 +2,6 @@ package org.shanoir.ng.processing.carmin.schedule;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +18,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.utils.IOUtils;
+import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
@@ -34,11 +34,15 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.utils.KeycloakServiceAccountUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,9 +66,11 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     @Value("${vip.file-formats}")
     private String[] listOfNiftiExt;
 
-    private boolean stop;
+    private ThreadLocal<Boolean> stop = new ThreadLocal<>();
 
     private String identifier;
+
+    private String accessToken = "";
 
     private static final Logger LOG = LoggerFactory.getLogger(ExecutionStatusMonitor.class);
 
@@ -83,25 +89,54 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     @Autowired
     private SubjectRepository subjectRepository;
 
+    @Autowired
+    private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
+
     @Async
     @Override
     @Transactional
-    public void startJob(String identifier) {
-
+    public void startJob(String identifier) throws EntityNotFoundException {
+        int attempts = 1;
         this.identifier = identifier;
-        this.stop = false;
+
+        stop.set(false);
 
         String uri = VIP_URI + identifier + "/summary";
         RestTemplate restTemplate = new RestTemplate();
 
-        while (!stop) {
-            Execution execution = restTemplate.getForObject(uri, Execution.class);
-            try {
-                CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
-                        .findByIdentifier(this.identifier)
-                        .orElseThrow(() -> new EntityNotFoundException(
-                                "entity not found with identifier :" + this.identifier));
+        // check if the token is initialized
+        if (this.accessToken.isEmpty()) {
+            // refresh the token and stop the thread if it's not refreshed
+            if (!this.refreshServiceAccountAccessToken()) {
+                return;
+            }
+        }
 
+        CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
+                .findByIdentifier(this.identifier)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "entity not found with identifier :" + this.identifier));
+
+        while (!stop.get()) {
+
+            // init headers with the active access token
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + this.accessToken);
+            HttpEntity entity = new HttpEntity(headers);
+
+            // check how many times the loop tried to get the execution's info without success
+            if(attempts >= 3){
+                LOG.error("failed to get execution details in {} attempts.", attempts);
+                LOG.error("Stopping the thread...");
+                stop.set(true);
+                break;
+            }
+
+            try {
+                ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
+                Execution execution = executionResponseEntity.getBody();
+                // init attempts due to successful response
+                attempts = 1;
                 switch (execution.getStatus()) {
                     case FINISHED:
                         /**
@@ -126,10 +161,9 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                                         userImportDir.getAbsoluteFile(),
                                         carminDatasetProcessing));
 
-                        LOG.info("execution status updated stopping job...");
+                        LOG.info("execution status updated, stopping job...");
 
-                        stop = true;
-
+                        stop.set(true);
                         break;
 
                     case UNKOWN:
@@ -138,9 +172,9 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
                         carminDatasetProcessing.setStatus(execution.getStatus());
                         this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
-                        LOG.info("execution status updated stopping job...");
+                        LOG.info("execution status updated, stopping job...");
 
-                        stop = true;
+                        stop.set(true);
                         break;
 
                     case RUNNING:
@@ -148,22 +182,35 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                         break;
 
                     default:
-                        this.stop = true;
+                        stop.set(true);
                         break;
-
                 }
-
+            } catch (HttpStatusCodeException e) {
+                // in case of an error with response payload
+                if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+                    LOG.warn("Unauthorized");
+                    LOG.info("Getting new token...");
+                    if (!this.refreshServiceAccountAccessToken()) {
+                        stop.set(true);
+                        break;
+                    }
+                    // inc attempts.
+                    attempts++;
+                } else {
+                    LOG.error("error while getting execution info with status : {} ,and message :", e.getStatusCode(), e.getMessage());
+                    stop.set(true);
+                }
+            } catch (RestClientException e) {
+                // in case of an error with no response payload
+                LOG.error("there is no response payload while getting execution info");
+                stop.set(true);
             } catch (InterruptedException e) {
                 LOG.error("sleep thread exception :", e);
-                e.getMessage();
-            } catch (EntityNotFoundException e) {
-                LOG.error("entity not found :", e);
-                e.getMessage();
+                stop.set(true);
             } catch (IOException e) {
                 LOG.error("file exception :", e);
-                e.getMessage();
+                stop.set(true);
             }
-
         }
     }
 
@@ -296,4 +343,18 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
         return (dotIndex == -1) ? file : file.substring(0, dotIndex);
     }
 
+    /**
+     * Get token from keycloak service account
+     * @return
+     */
+    private boolean refreshServiceAccountAccessToken(){
+        AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
+        if(accessTokenResponse == null){
+            LOG.error("error while getting service account token");
+            return false;
+        }
+        this.accessToken = accessTokenResponse.getToken();
+        LOG.info("new Token retrieved !");
+        return true;
+    }
 }
