@@ -158,7 +158,6 @@ import { AccountRequestComponent } from './users/account-request/account-request
 // import { AccountEventsService } from './users/account/account-events.service';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
 import { UserService } from './users/shared/user.service';
-import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { GetValuesPipe, TimesPipe } from './utils/app.utils';
 import { ServiceLocator } from './utils/locator.service';
@@ -315,7 +314,6 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         TreeNodeComponent,
         BidsTreeComponent,
         TooltipComponent,
-        UserListComponent,
         InstrumentAssessmentComponent,
         CoilComponent,
         CoilListComponent,

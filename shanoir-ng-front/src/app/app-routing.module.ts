@@ -45,7 +45,6 @@ import { SubjectListComponent } from './subjects/subject-list/subject-list.compo
 import { SubjectComponent } from './subjects/subject/subject.component';
 import { AccountRequestComponent } from './users/account-request/account-request.component';
 import { ExtensionRequestComponent } from './users/extension-request/extension-request.component';
-import { UserListComponent } from './users/user-list/user-list.component';
 import { UserComponent } from './users/user/user.component';
 import { AsyncTasksComponent } from './async-tasks/async-tasks.component';
 import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
@@ -431,10 +430,6 @@ let routes: Routes = [
     {
         path: 'user',
         redirectTo: 'user/list',
-    },
-    {
-        path: 'user/list',
-        component: UserListComponent,
     },
     {
         path: 'user/details/:id',
