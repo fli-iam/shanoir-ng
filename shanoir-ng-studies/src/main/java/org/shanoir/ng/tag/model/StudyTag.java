@@ -65,19 +65,4 @@ public class StudyTag extends HalEntity {
 	public void setStudy(Study study) {
 		this.study = study;
 	}
-
-//	public List<SubjectStudyTag> getSubjectStudyTags() {
-//		return subjectStudyTags;
-//	}
-//
-//	public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
-//		if (this.subjectStudyTags != null) {
-//			this.subjectStudyTags.clear();
-//			if (subjectStudyTags != null) {
-//				this.subjectStudyTags.addAll(subjectStudyTags);
-//			}
-//		} else {
-//			this.subjectStudyTags = subjectStudyTags;
-//		}
-//	}
 }

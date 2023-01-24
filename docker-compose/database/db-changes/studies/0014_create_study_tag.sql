@@ -7,5 +7,3 @@ CREATE TABLE `study_tag` (
   KEY `FKboew1v3lqqa0afxnigq4fxhf3` (`study_id`),
   CONSTRAINT `FKboew1v3lqqa0afxnigq4fxhf3` FOREIGN KEY (`study_id`) REFERENCES `study` (`id`)
 );
-
-DROP TABLE study_study_flag;
