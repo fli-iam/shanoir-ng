@@ -67,36 +67,36 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/users:latest
           
       - name: Microservice Studies - Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/studies
           push: true
-          tags: shanoir-ng/studies:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/studies:latest
           
       - name: Microservice Import - Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/import
           push: true
-          tags: shanoir-ng/import:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/import:latest
           
       - name: Microservice Datasets - Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/datasets
           push: true
-          tags: shanoir-ng/datasets:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/datasets:latest
 
       - name: Microservice Preclinical - Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/preclinical
           push: true
-          tags: shanoir-ng/preclinical:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/preclinical:latest
           
       - name: Nginx - Build and push Docker image
-        uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+        uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/nginx
           push: true
-          tags: shanoir-ng/nginx:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/nginx:latest
