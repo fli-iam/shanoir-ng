@@ -232,6 +232,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'subjects'">
+        <legend>Subject tags</legend>
+        <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
 				<subject-study-list [study]="study" [selectableList]="subjects" [(ngModel)]="study.subjectStudyList" formControlName="subjectStudyList" [mode]="mode"></subject-study-list>
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'centers'">
@@ -356,8 +358,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</study-node>
 			</fieldset>
             <fieldset [class.hidden]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
-                <legend>Study tags</legend>
-                <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.tags" (onChange)="onTagListChange()" formControlName="tags"></tag-creator>
+                <legend>Public Study tags</legend>
+                <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.studyTags" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
             </fieldset>
             <fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'bids'">
 				        <legend>BIDS tree</legend>

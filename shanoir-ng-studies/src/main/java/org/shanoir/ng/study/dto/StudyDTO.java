@@ -63,6 +63,8 @@ public class StudyDTO {
 
 	private List<TagDTO> tags;
 
+	private List<TagDTO> studyTags;
+
 	@LocalDateAnnotations
 	private LocalDate startDate;
 
@@ -445,6 +447,13 @@ public class StudyDTO {
 		this.tags = tags;
 	}
 
+	public List<TagDTO> getStudyTags() {
+		return studyTags;
+	}
+
+	public void setStudyTags(List<TagDTO> studyTags) {
+		this.studyTags = studyTags;
+	}
 
 	public String getDescription() {
 		return description;

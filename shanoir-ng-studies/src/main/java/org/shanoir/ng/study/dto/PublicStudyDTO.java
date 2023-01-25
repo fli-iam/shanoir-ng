@@ -22,6 +22,7 @@ import org.shanoir.ng.study.model.StudyType;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
+import org.shanoir.ng.tag.model.StudyTagDTO;
 import org.shanoir.ng.tag.model.TagDTO;
 import org.shanoir.ng.timepoint.TimepointDTO;
 
@@ -57,6 +58,8 @@ public class PublicStudyDTO {
 	private StudyType studyType;
 
 	private String description;
+
+	private List<StudyTagDTO> studyTags;
 
 	/**
 	 * Default constructor.
@@ -206,5 +209,12 @@ public class PublicStudyDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public List<StudyTagDTO> getStudyTags() {
+		return studyTags;
+	}
+
+	public void setStudyTags(List<StudyTagDTO> studyTags) {
+		this.studyTags = studyTags;
 	}
 }

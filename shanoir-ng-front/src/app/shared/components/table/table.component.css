@@ -88,7 +88,7 @@ td checkbox { transform: scale(0.8); border-color: var(--color-b-light2); }
 .bottom-refresh { padding: 0 !important; }
 .error { color: var(--color-error); font-weight: bold; }
 
-tr:hover .col-settings-button, .col-settings-button:hover { opacity: 0.8;} 
+tr:hover .col-settings-button, .col-settings-button:hover { opacity: 0.8;}
 .col-settings-button { display: block; opacity: 0; position: absolute; left: -21px; top: 1px; bottom: 0; width: 20px; height: 25px; color: var(--color-b); cursor: pointer; font-size: 16px; }
 
 app-modal .main { background-color: var(--very-light-grey); border-radius: 2px; }
@@ -119,3 +119,4 @@ tr.opened { border-left: 1px solid var(--grey); border-top: 1px solid var(--grey
 .block i { vertical-align: -1px; }
 .block i, .label { white-space: nowrap; }
 .label { vertical-align: -1px; }
+.dark { color:white; }

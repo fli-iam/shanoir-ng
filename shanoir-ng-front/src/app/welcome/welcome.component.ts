@@ -4,6 +4,7 @@ import {ImagesUrlUtil} from "../shared/utils/images-url.util";
 import {StudyService} from "../studies/shared/study.service";
 import {PublicStudyDataDTO} from "../studies/shared/study.dto";
 import {StudyType} from "../studies/shared/study-type.enum";
+import {isDarkColor} from "../utils/app.utils";
 
 @Component({
   selector: 'app-welcome',
@@ -59,5 +60,9 @@ export class WelcomeComponent implements OnInit {
 
   accessRequest(study: any): void {
     window.location.href = window.location.protocol + "//" + window.location.hostname + "/shanoir-ng/account/study/" + study.id + "/account-request";
+  }
+
+  getFontColor(colorInp: string): boolean {
+    return isDarkColor(colorInp);
   }
 }
