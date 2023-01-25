@@ -64,7 +64,7 @@ jobs:
           context: ./docker-compose/users
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ env.REGISTRY }}/shanoir-ng/users:latest
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/users:latest
           
       - name: Microservice Studies - Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
