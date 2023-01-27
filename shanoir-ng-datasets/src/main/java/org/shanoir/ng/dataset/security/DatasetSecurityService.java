@@ -379,7 +379,20 @@ public class DatasetSecurityService {
     	 
     	boolean hasRight = true;
     	for (Dataset dataset : datasets) {
-    		hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
+            if (dataset.getDatasetAcquisition() == null 
+                    || dataset.getDatasetAcquisition().getExamination() == null
+                    || dataset.getDatasetAcquisition().getExamination().getStudyId() == null) {
+                
+                if (dataset.getDatasetProcessing() != null && dataset.getDatasetProcessing().getInputDatasets() != null) {
+                    for (Dataset inputDs : dataset.getDatasetProcessing().getInputDatasets()) {
+                    	hasRight &= hasRightOnTrustedDataset(inputDs, rightStr);
+                    }
+                } else {
+                    throw new IllegalStateException("Cannot check dataset n°" + dataset.getId() + " rights, this dataset has neither examination nor processing parent !");                
+                }
+            } else {
+            	hasRight &= this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
+            }
     	}
     	return hasRight;
     }
@@ -593,7 +606,21 @@ public class DatasetSecurityService {
     public boolean filterDatasetList(List<Dataset> list, String rightStr) {
     	Set<Dataset> toRemove = new HashSet<>();
     	list.forEach((Dataset ds) -> {
-        	if (!this.hasRightOnStudyCenter(ds.getDatasetAcquisition().getExamination().getCenterId(), ds.getDatasetAcquisition().getExamination().getStudyId(), rightStr)) {
+            if (ds.getDatasetAcquisition() == null 
+                    || ds.getDatasetAcquisition().getExamination() == null
+                    || ds.getDatasetAcquisition().getExamination().getStudyId() == null) {
+                
+                if (ds.getDatasetProcessing() != null && ds.getDatasetProcessing().getInputDatasets() != null) {
+                    for (Dataset inputDs : ds.getDatasetProcessing().getInputDatasets()) {
+                        if (!hasRightOnTrustedDataset(inputDs, rightStr)) {
+                        	toRemove.add(ds);
+                        }
+                    }
+                } else {
+                    throw new IllegalStateException("Cannot check dataset n°" + ds.getId() + " rights, this dataset has neither examination nor processing parent !");                
+                }
+            }
+            else if (!this.hasRightOnStudyCenter(ds.getDatasetAcquisition().getExamination().getCenterId(), ds.getDatasetAcquisition().getExamination().getStudyId(), rightStr)) {
         		toRemove.add(ds);
         	}
     	});
