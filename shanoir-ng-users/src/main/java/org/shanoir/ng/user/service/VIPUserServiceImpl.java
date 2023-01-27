@@ -83,7 +83,7 @@ public class VIPUserServiceImpl implements VIPUserService{
         HttpEntity entity = new HttpEntity(vipUser, headers);
 
         try {
-            ResponseEntity<Void> executionResponseEntity = restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
+            restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
             return user;
         }catch (HttpStatusCodeException e) {
             // in case of an error with response payload
