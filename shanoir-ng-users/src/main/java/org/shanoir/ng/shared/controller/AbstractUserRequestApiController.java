@@ -41,7 +41,7 @@ public abstract class AbstractUserRequestApiController {
 	@Autowired
 	private UserService userService;
 
-	@Autowired
+	@Autowired(required = false)
 	private VIPUserService vipUserService;
 	
 	@Autowired
