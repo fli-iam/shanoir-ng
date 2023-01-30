@@ -25,15 +25,11 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ForbiddenException;
-import org.shanoir.ng.shared.exception.PasswordPolicyException;
-import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -46,6 +42,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 	
 	@Autowired
 	ShanoirEventService eventService;
+
+	@Value("${vip.enabled}")
+	private boolean vipEnabled;
 
 	@Override
 	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
@@ -147,6 +146,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		/* Save user in db. */
 		try {
 			User createdUser = getUserService().create(user);
+			if(vipEnabled){
+				getVipUserService().createVIPAccountRequest(createdUser);
+			}
 			return new ResponseEntity<>(createdUser, HttpStatus.OK);
 		} catch (PasswordPolicyException e) {
 			throw new RestServiceException(
@@ -154,8 +156,12 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		} catch (SecurityException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
+		} catch (EntityNotFoundException e) {
+			throw new RuntimeException(e);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while communicating with VIP"));
 		}
-
 	}
 
 	@Override

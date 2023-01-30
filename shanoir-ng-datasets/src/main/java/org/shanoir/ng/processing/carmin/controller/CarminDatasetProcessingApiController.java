@@ -13,6 +13,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
     @Override
     public ResponseEntity<CarminDatasetProcessing> saveNewCarminDatasetProcessing(
             @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing, BindingResult result)
-            throws RestServiceException, EntityNotFoundException {
+            throws RestServiceException, EntityNotFoundException, SecurityException {
 
         /* Validation */
         validate(result);

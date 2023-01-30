@@ -30,11 +30,12 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.processing.carmin.model.Execution;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.utils.KeycloakServiceAccountUtils;
+import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,7 +96,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
     @Async
     @Override
     @Transactional
-    public void startJob(String identifier) throws EntityNotFoundException {
+    public void startJob(String identifier) throws EntityNotFoundException, SecurityException {
         int attempts = 1;
         this.identifier = identifier;
 
@@ -106,10 +107,8 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
         // check if the token is initialized
         if (this.accessToken.isEmpty()) {
-            // refresh the token and stop the thread if it's not refreshed
-            if (!this.refreshServiceAccountAccessToken()) {
-                return;
-            }
+            // refresh the token
+            this.refreshServiceAccountAccessToken();
         }
 
         CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
@@ -124,7 +123,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
             headers.set("Authorization", "Bearer " + this.accessToken);
             HttpEntity entity = new HttpEntity(headers);
 
-            // check how many times the loop tried to get the execution's info without success
+            // check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
             if(attempts >= 3){
                 LOG.error("failed to get execution details in {} attempts.", attempts);
                 LOG.error("Stopping the thread...");
@@ -190,10 +189,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
                 if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
                     LOG.warn("Unauthorized");
                     LOG.info("Getting new token...");
-                    if (!this.refreshServiceAccountAccessToken()) {
-                        stop.set(true);
-                        break;
-                    }
+                    this.refreshServiceAccountAccessToken();
                     // inc attempts.
                     attempts++;
                 } else {
@@ -347,14 +343,8 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
      * Get token from keycloak service account
      * @return
      */
-    private boolean refreshServiceAccountAccessToken(){
+    private void refreshServiceAccountAccessToken() throws SecurityException {
         AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
-        if(accessTokenResponse == null){
-            LOG.error("error while getting service account token");
-            return false;
-        }
         this.accessToken = accessTokenResponse.getToken();
-        LOG.info("new Token retrieved !");
-        return true;
     }
 }
