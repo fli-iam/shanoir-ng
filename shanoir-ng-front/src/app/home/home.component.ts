@@ -25,6 +25,7 @@ import { StudyService } from '../studies/shared/study.service';
 import { User } from '../users/shared/user.model';
 import { UserService } from '../users/shared/user.service';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
+import { AccessRequest } from '../users/access-request/access-request.model';
 
 @Component({
     selector: 'home',
@@ -41,6 +42,7 @@ export class HomeComponent {
     challengeDua: DataUserAgreement;
     challengeStudies: Study[];
     studies: Study[];
+    allStudies: Study[];
     accountRequests: User[];
     jobs: Task[];
     solrInput: string;
@@ -48,6 +50,8 @@ export class HomeComponent {
     loaded: boolean = false;
     nbAccountRequests: number;
     nbExtensionRequests: number;
+    accessRequests: AccessRequest[];
+    nbAccessRequest: number;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
@@ -82,6 +86,16 @@ export class HomeComponent {
                 }
                 this.fetchJobs();
             }
+        }).then(() =>{
+            // Load access requests
+            if (this.isUserAtLeastExpert()) {
+                this.userService.getAccessRequests().then(acs => {
+                    if (acs) {
+                        this.accessRequests = acs;
+                        this.nbAccessRequest = acs.length;
+                    }
+                });
+            }
         });
     }
 
@@ -93,6 +107,7 @@ export class HomeComponent {
         this.studyService.getAll().then(studies => {
             this.challengeStudies = [];
             if (studies) {
+                this.allStudies = studies;
                 this.studies = studies.slice(0, 8);
                 for (let study of studies) {
                     if (study.challenge) {
@@ -113,6 +128,16 @@ export class HomeComponent {
 
     get admin(): boolean {
         return this.keycloakService.isUserAdmin();
+    }
+    
+    private isUserAtLeastExpert() {
+        return this.keycloakService.isUserAdminOrExpert();
+    }
+
+    public getStudyName(studyId: number): String {
+        if (this.allStudies) {
+            return this.allStudies.find(study => study.id == studyId).name;
+        }
     }
 
     fetchAccountRequests() {

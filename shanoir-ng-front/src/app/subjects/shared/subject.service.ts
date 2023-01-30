@@ -21,8 +21,8 @@ import { SubjectStudy } from './subject-study.model';
 import { Subject } from './subject.model';
 import { HttpClient } from '@angular/common/http';
 import { SubjectDTO, SubjectDTOService } from './subject.dto';
-import { StudyDTOService } from '../../studies/shared/study.dto';
 import { SubjectStudyDTO } from './subject-study.dto';
+import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
@@ -38,6 +38,12 @@ export class SubjectService extends EntityService<Subject> {
     getSubjectsNames(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_SUBJECT_NAMES_URL)
         .toPromise();
+    }
+
+    getPage(pageable: Pageable, name: String):  Promise<Page<Subject>> {
+        let params = { 'params': pageable.toParams() };
+        params['params']['name'] = name;
+        return this.http.get<Page<Subject>>(AppUtils.BACKEND_API_SUBJECT_FILTER_URL, params).toPromise();
     }
 
     findSubjectByIdentifier(identifier: string): Promise<Subject> {

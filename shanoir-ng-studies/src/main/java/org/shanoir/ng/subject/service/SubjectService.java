@@ -24,6 +24,8 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -180,5 +182,14 @@ public interface SubjectService {
 	 * @throws MicroServiceCommunicationException 
 	 */
 	boolean updateSubjectName(SubjectDTO subjectToSubjectDTO) throws MicroServiceCommunicationException;
+
+
+	/**
+	 * Returns a filtered page by name.
+	 * @param page pageable
+	 * @param name the subject name filter
+	 * @return the list of subject as page
+	 */
+	Page<Subject> getFilteredPage(Pageable page, String name);
 
 }

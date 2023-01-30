@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -22,6 +22,7 @@ import * as shajs from 'sha.js';
 import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ColumnDefinition } from './column.definition.type';
+import {isDarkColor} from "../../../utils/app.utils";
 
 @Component({
     selector: 'shanoir-table',
@@ -74,7 +75,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             private globalClickService: GlobalService) {
         this.maxResultsField = this.maxResults;
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['selection'] && !changes['selection'].isFirstChange()) {
             this.saveSelection();
@@ -121,7 +122,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     private checkCompactMode() {
-        let width: number = this.elementRef.nativeElement.offsetWidth; 
+        let width: number = this.elementRef.nativeElement.offsetWidth;
         this.compactMode = width < 620;
     }
 
@@ -146,11 +147,11 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 .then(() => this.firstLoading = false);
         }
     }
-    
+
     get items(): Object[] {
         return this.page ? this.page.content : [];
     }
-    
+
 
     sortBy(col: Object): void {
         if (col['disableSorting'] || col["type"] == "button") return;
@@ -185,7 +186,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         } else {
             let fieldValue = this.getFieldRawValue(item, col["field"]);
             if (fieldValue) return fieldValue;
-            else if (col.defaultField) 
+            else if (col.defaultField)
                 return this.getFieldRawValue(item, col["defaultField"]);
             else
                 return;
@@ -225,11 +226,11 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         currentObj[split[split.length-1]] = value;
     }
 
-    /** 
+    /**
      * Triggered when a field is edited
      */
     onFieldEdit(obj: Object, col: Object, value: any) {
-        this.setFieldRawValue(obj, col['field'], value); 
+        this.setFieldRawValue(obj, col['field'], value);
         this.rowEdit.emit(obj);
         if (col['onEdit']) col['onEdit'](obj, value);
     }
@@ -297,7 +298,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         return type != null ? "col-" + type : "";
     }
 
-    /** 
+    /**
      * Get a cell type and format it to be used a dom element class
      */
     getCellTypeStr(col: ColumnDefinition): string {
@@ -337,7 +338,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     /**
-     * Call to refresh from outsilde
+     * Call to refresh from outside
      */
     public refresh(page?: number): Promise<Page<any>> {
         if (page == undefined) {
@@ -361,14 +362,14 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
         if (this.filter) {
             return new FilterablePageable(
-                this.currentPage, 
+                this.currentPage,
                 this.maxResults,
                 new Sort(orders),
                 this.filter
             );
         } else {
             return new Pageable(
-                this.currentPage, 
+                this.currentPage,
                 this.maxResults,
                 new Sort(orders)
             );
@@ -519,8 +520,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     startDrag(leftColIndex: number, thRef: HTMLElement, event: MouseEvent, columnDefs: ColumnDefinition) {
         this.currentDrag = {
             columns: columnDefs,
-            leftOrigin: event.pageX - thRef.offsetWidth + 10, 
-            totalWidth: (thRef.nextElementSibling as HTMLElement).offsetWidth + thRef.offsetWidth - 22, 
+            leftOrigin: event.pageX - thRef.offsetWidth + 10,
+            totalWidth: (thRef.nextElementSibling as HTMLElement).offsetWidth + thRef.offsetWidth - 22,
             leftColIndex: leftColIndex
         };
     }
@@ -580,6 +581,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
     isFunction(a: any): boolean {
         return typeof a === 'function';
+    }
+
+    getFontColor(colorInp: string): boolean {
+      return isDarkColor(colorInp);
     }
 }
 

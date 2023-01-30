@@ -37,7 +37,6 @@
  ],
   "url": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST"
 }
-
 </script>
 <head>
     <meta charset="utf-8">

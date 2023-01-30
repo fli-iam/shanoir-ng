@@ -69,6 +69,9 @@ public class RabbitMQConfiguration {
 	
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
+
+	/** Get the type of dataset from a given study. */
+	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
 	
 	/** Create a subject study for a given subject and study. */
 	public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
@@ -97,9 +100,6 @@ public class RabbitMQConfiguration {
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
 
-	/** Queue to create a study_user when subscribing to a challenge */
-	public static final String CHALLENGE_SUBSCRIPTION_QUEUE = "challenge-subscription-queue";
-	
 	/** Queue used to get information for study_examination relationship.*/
 	public static final String EXAMINATION_STUDY_QUEUE = "examination-study-queue";
 
@@ -135,6 +135,21 @@ public class RabbitMQConfiguration {
 
 	/** Queue to get an equipment id from a code. */
 	public static final String EQUIPMENT_FROM_CODE_QUEUE="equipment-from-code-queue";
+
+	/** Queue to create a study_user when subscribing to a study */
+	public static final String STUDY_SUBSCRIPTION_QUEUE = "study-subscription-queue";
+
+	/** Queue used to get the list of studies I can Admin. */
+	public static final String STUDY_I_CAN_ADMIN_QUEUE = "study-i-can-admin";
+	
+	/** Queue used to send invitation email for a given study. */
+	public static final String STUDY_INVITATION_QUEUE = "study-invitation-queue";
+	
+	/** Queue used to get the list of study admins. */
+	public static final String STUDY_ADMINS_QUEUE = "study-admin-queue";
+
+	/** Queue used to get the name of a study from ID */
+	public static final String STUDY_NAME_QUEUE = "study-name-queue";
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
@@ -207,11 +222,14 @@ public class RabbitMQConfiguration {
 	public static Queue subjectsQueue() {
 		return new Queue(SUBJECTS_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue datasetSubjectQueue() {
 		return new Queue(DATASET_SUBJECT_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue studyDatasetTypeQueue() { return new Queue(STUDY_DATASET_TYPE, true); }
 
 	@Bean
 	public static Queue datasetSubjectStudyQueue() {
@@ -279,11 +297,6 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
-	public static Queue challengeSubscriptionQueue() {
-		return new Queue(CHALLENGE_SUBSCRIPTION_QUEUE, true);
-	}
-
-	@Bean
 	public static Queue examinationStudyQueue() {
 		return new Queue(EXAMINATION_STUDY_QUEUE, true);
 	}
@@ -337,7 +350,22 @@ public class RabbitMQConfiguration {
 	public static Queue deleteUserQueue() {
 		return new Queue(DELETE_USER_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue studySubscriptionQueue() {
+		return new Queue(STUDY_SUBSCRIPTION_QUEUE, true);
+	}
 	
+	@Bean
+	public static Queue studyICanAdminQueue() {
+		return new Queue(STUDY_I_CAN_ADMIN_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue studyInvitationQueue() {
+		return new Queue(STUDY_INVITATION_QUEUE, true);
+	}
+
 	@Bean
 	public static Queue importStudyCardQueue() {
 		return new Queue(IMPORT_STUDY_CARD_QUEUE, true);
@@ -345,5 +373,15 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue equipmentFromCodeQueue() {
 		return new Queue(EQUIPMENT_FROM_CODE_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue studyAdminQueue() {
+		return new Queue(STUDY_ADMINS_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue studyNameQueue() {
+		return new Queue(STUDY_NAME_QUEUE, true);
 	}
 }

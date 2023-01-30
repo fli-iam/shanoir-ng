@@ -63,6 +63,8 @@ public class StudyDTO {
 
 	private List<TagDTO> tags;
 
+	private List<TagDTO> studyTags;
+
 	@LocalDateAnnotations
 	private LocalDate startDate;
 
@@ -85,6 +87,8 @@ public class StudyDTO {
 	private List<StudyUser> studyUserList;
 
 	private boolean challenge;
+
+	private String description;
 
 	/**
 	 * Default constructor.
@@ -443,4 +447,19 @@ public class StudyDTO {
 		this.tags = tags;
 	}
 
+	public List<TagDTO> getStudyTags() {
+		return studyTags;
+	}
+
+	public void setStudyTags(List<TagDTO> studyTags) {
+		this.studyTags = studyTags;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 }

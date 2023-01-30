@@ -14,9 +14,12 @@
 
 package org.shanoir.ng.email;
 
+import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.email.StudyInvitationEmail;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 
 /**
@@ -34,14 +37,6 @@ public interface EmailService {
 	 *            user.
 	 */
 	void notifyAccountWillExpire(User user);
-
-	/**
-	 * Send an email to administrators to indicate an account request.
-	 * 
-	 * @param user
-	 *            created user.
-	 */
-	void notifyAdminAccountRequest(User user);
 
 	/**
 	 * Send an email to administrators to indicate an account extension request.
@@ -128,10 +123,25 @@ public interface EmailService {
 	void notifyStudyManagerStudyUsersAdded(EmailStudyUsersAdded email);
 
 	/**
-	 *  This method notifies a study manager that san import fail for a given study
+	 *  This method notifies a study manager that an import failed for a given study
 	 * @param generatedMail: The object containing all the mail informations
 	 */
 	void notifyStudyManagerImportFailure(EmailDatasetImportFailed generatedMail);
 
+	/** Invites an user to join a study. */
+	void inviteToStudy(StudyInvitationEmail mail);
+	
+	/**
+	 * This method notifies a study manager that a user asked an access to a study.
+	 * @param createdRequest the access request object
+	 * @throws ShanoirException 
+	 */
+	void notifyStudyManagerAccessRequest(AccessRequest createdRequest) throws ShanoirException;
+
+	/**
+	 * Notify a user its study request was refused
+	 * @param accessRequest the access request
+	 */
+	void notifyUserRefusedFromStudy(AccessRequest refusedRequest);
 
 }
