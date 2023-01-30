@@ -40,11 +40,6 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
     @Autowired
     private ExecutionStatusMonitorService executionStatusMonitorService;
 
-    @Autowired
-    private CarminDatasetProcessingSecurityService carminDatasetProcessingSecurityService;
-
-    private final String RIGHT_STR = "CAN_SEE_ALL";
-
     @Override
     public ResponseEntity<CarminDatasetProcessing> saveNewCarminDatasetProcessing(
             @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing, BindingResult result)
@@ -105,7 +100,7 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
     @Override
     public ResponseEntity<List<CarminDatasetProcessing>> findCarminDatasetProcessings() {
-        final List<CarminDatasetProcessing> carminDatasetProcessings = carminDatasetProcessingSecurityService.filterCarminDatasetList(carminDatasetProcessingService.findAll(), RIGHT_STR);
+        final List<CarminDatasetProcessing> carminDatasetProcessings = carminDatasetProcessingService.findAllAllowed();
 		if (carminDatasetProcessings.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

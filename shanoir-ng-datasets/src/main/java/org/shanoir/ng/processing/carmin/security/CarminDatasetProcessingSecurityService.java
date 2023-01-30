@@ -14,8 +14,6 @@ import java.util.Set;
 @Service
 public class CarminDatasetProcessingSecurityService {
 
-    private static final String ROLE_ADMIN = "ROLE_ADMIN";
-
     @Autowired
     private StudyRightsService studyRightsService;
 
