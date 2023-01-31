@@ -21,6 +21,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -188,8 +189,9 @@ public interface SubjectService {
 	 * Returns a filtered page by name.
 	 * @param page pageable
 	 * @param name the subject name filter
+	 * @param studies the list of allowed studies
 	 * @return the list of subject as page
 	 */
-	Page<Subject> getFilteredPage(Pageable page, String name);
+	Page<Subject> getFilteredPageByStudies(Pageable page, String name, List<Study> studies);
 
 }
