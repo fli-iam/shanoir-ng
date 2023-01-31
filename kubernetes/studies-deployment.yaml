@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.17.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: studies
+  name: studies
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: studies
+    spec:
+      containers:
+      - image: studies
+        name: studies
+        ports:
+        - containerPort: 9902
+        - containerPort: 9912
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/log/shanoir-ng-logs
+          name: logs
+        - mountPath: /etc/ssl/certs/java
+          name: certificate-share-data
+          readOnly: true
+        - mountPath: /var/studies-data
+          name: studies-data
+        - mountPath: /tmp
+          name: tmp
+      restartPolicy: Always
+      volumes:
+      - name: logs
+        persistentVolumeClaim:
+          claimName: logs
+      - name: certificate-share-data
+        persistentVolumeClaim:
+          claimName: certificate-share-data
+          readOnly: true
+      - name: studies-data
+        persistentVolumeClaim:
+          claimName: studies-data
+      - name: tmp
+        persistentVolumeClaim:
+          claimName: tmp
+status: {}

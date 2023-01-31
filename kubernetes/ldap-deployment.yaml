@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.17.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: ldap
+  name: ldap
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: ldap
+    spec:
+      containers:
+      - env:
+        - name: HTTP_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: HTTP_PORT
+              name: ldap-docker-compose-dcm4chee-variables-env
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              key: POSTGRES_DB
+              name: ldap-docker-compose-dcm4chee-variables-env
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: POSTGRES_PASSWORD
+              name: ldap-docker-compose-dcm4chee-variables-env
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              key: POSTGRES_USER
+              name: ldap-docker-compose-dcm4chee-variables-env
+        - name: STORAGE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: STORAGE_DIR
+              name: ldap-docker-compose-dcm4chee-variables-env
+        image: dcm4che/slapd-dcm4chee:2.6.2-27.0
+        name: ldap
+        ports:
+        - containerPort: 389
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/openldap/openldap-data
+          name: dcm4chee-ldap-data
+        - mountPath: /etc/openldap/slapd.d
+          name: dcm4chee-sldap-data
+      restartPolicy: Always
+      volumes:
+      - name: dcm4chee-ldap-data
+        persistentVolumeClaim:
+          claimName: dcm4chee-ldap-data
+      - name: dcm4chee-sldap-data
+        persistentVolumeClaim:
+          claimName: dcm4chee-sldap-data
+status: {}

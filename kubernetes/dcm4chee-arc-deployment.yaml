@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.17.0 (HEAD)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: dcm4chee-arc
+  name: dcm4chee-arc
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        io.kompose.service: dcm4chee-arc
+    spec:
+      containers:
+      - env:
+        - name: HTTP_PORT
+          valueFrom:
+            configMapKeyRef:
+              key: HTTP_PORT
+              name: dcm4chee-arc-docker-compose-dcm4chee-variables-env
+        - name: POSTGRES_DB
+          valueFrom:
+            configMapKeyRef:
+              key: POSTGRES_DB
+              name: dcm4chee-arc-docker-compose-dcm4chee-variables-env
+        - name: POSTGRES_HOST
+          value: dcm4chee-database
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: POSTGRES_PASSWORD
+              name: dcm4chee-arc-docker-compose-dcm4chee-variables-env
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              key: POSTGRES_USER
+              name: dcm4chee-arc-docker-compose-dcm4chee-variables-env
+        - name: STORAGE_DIR
+          valueFrom:
+            configMapKeyRef:
+              key: STORAGE_DIR
+              name: dcm4chee-arc-docker-compose-dcm4chee-variables-env
+        - name: WILDFLY_CHOWN
+          value: /storage
+        - name: WILDFLY_WAIT_FOR
+          value: ldap:389 dcm4chee-database:5432
+        image: dcm4che/dcm4chee-arc-psql:5.27.0
+        name: dcm4chee-arc
+        ports:
+        - containerPort: 8081
+        - containerPort: 8443
+        - containerPort: 9990
+        - containerPort: 11112
+        - containerPort: 2575
+        resources: {}
+        volumeMounts:
+        - mountPath: /opt/wildfly/standalone
+          name: dcm4chee-arc-wildfly-data
+        - mountPath: /storage
+          name: dcm4chee-arc-storage-data
+      restartPolicy: Always
+      volumes:
+      - name: dcm4chee-arc-wildfly-data
+        persistentVolumeClaim:
+          claimName: dcm4chee-arc-wildfly-data
+      - name: dcm4chee-arc-storage-data
+        persistentVolumeClaim:
+          claimName: dcm4chee-arc-storage-data
+status: {}
