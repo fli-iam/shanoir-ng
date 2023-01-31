@@ -231,6 +231,7 @@ public class StudyServiceImpl implements StudyService {
 		Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 		
 		List<Long> tagsToDelete = getTagsToDelete(study, studyDb);
+		List<Long> studyTagsToDelete = getStudyTagsToDelete(study, studyDb);
 		
 		if (studyDb == null) {
 			throw new EntityNotFoundException(Study.class, study.getId());
@@ -298,10 +299,14 @@ public class StudyServiceImpl implements StudyService {
 			}
 			studyDb = studyRepository.save(studyDb);
 		}
-		
+
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
-			studyDb = studyRepository.save(studyDb);			
+			studyDb = studyRepository.save(studyDb);
+		}
+		if (studyDb.getStudyTags() != null) {
+			studyDb.getStudyTags().removeIf(tag -> studyTagsToDelete.contains(tag.getId()));
+			studyDb = studyRepository.save(studyDb);
 		}
 
 		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
@@ -337,7 +342,7 @@ public class StudyServiceImpl implements StudyService {
 			}	
 		} 
 	}
-	
+
 	private List<Long> getTagsToDelete(Study study, Study studyDb) {
 		List<Long> tagsToDelete = new ArrayList<>();
 		if (studyDb.getTags() != null && study.getTags() != null) {
@@ -353,6 +358,23 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		return tagsToDelete;
+	}
+
+	private List<Long> getStudyTagsToDelete(Study study, Study studyDb) {
+		List<Long> studyTagsToDelete = new ArrayList<>();
+		if (studyDb.getStudyTags() != null && study.getStudyTags() != null) {
+			for (StudyTag dbStudyTag : studyDb.getStudyTags()) {
+				boolean found = false;
+				for (StudyTag studyTag : study.getStudyTags()) {
+					if (studyTag.getId() != null && studyTag.getId().equals(dbStudyTag.getId())) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) studyTagsToDelete.add(dbStudyTag.getId());
+			}
+		}
+		return studyTagsToDelete;
 	}
 
 	/**
