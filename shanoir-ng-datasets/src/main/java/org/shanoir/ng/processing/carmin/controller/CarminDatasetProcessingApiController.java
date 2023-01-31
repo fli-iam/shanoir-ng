@@ -2,11 +2,13 @@ package org.shanoir.ng.processing.carmin.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.schedule.ExecutionStatusMonitorService;
+import org.shanoir.ng.processing.carmin.security.CarminDatasetProcessingSecurityService;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -98,11 +101,30 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
     @Override
     public ResponseEntity<List<CarminDatasetProcessing>> findCarminDatasetProcessings() {
-        final List<CarminDatasetProcessing> carminDatasetProcessings = carminDatasetProcessingService.findAll();
+        final List<CarminDatasetProcessing> carminDatasetProcessings = carminDatasetProcessingService.findAllAllowed();
 		if (carminDatasetProcessings.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(carminDatasetProcessings, HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<CarminDatasetProcessing>> findCarminDatasetProcessingsByStudyIdAndSubjectId(
+            @ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+        List<CarminDatasetProcessing> carminDatasetProcessings = carminDatasetProcessingService.findAll();
+        if (carminDatasetProcessings.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        carminDatasetProcessings = carminDatasetProcessings.stream().filter(processing -> {
+            return !CollectionUtils.isEmpty(processing.getInputDatasets())
+                    && processing.getInputDatasets().get(0).getStudyId().equals(studyId)
+                    && processing.getInputDatasets().get(0).getSubjectId().equals(subjectId);
+        }).collect(Collectors.toList());
+        if (carminDatasetProcessings.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(carminDatasetProcessings, HttpStatus.OK);
     }
 
 

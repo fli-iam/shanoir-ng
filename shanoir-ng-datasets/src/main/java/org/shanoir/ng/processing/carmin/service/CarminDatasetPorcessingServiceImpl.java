@@ -1,9 +1,11 @@
 package org.shanoir.ng.processing.carmin.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.repository.CarminDatasetProcessingRepository;
+import org.shanoir.ng.processing.carmin.security.CarminDatasetProcessingSecurityService;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,11 @@ public class CarminDatasetPorcessingServiceImpl extends BasicEntityServiceImpl<C
 
         @Autowired
         private CarminDatasetProcessingRepository carminDatasetProcessingRepository;
+
+        @Autowired
+        private CarminDatasetProcessingSecurityService carminDatasetProcessingSecurityService;
+
+        private final String RIGHT_STR = "CAN_SEE_ALL";
 
         @Override
         protected CarminDatasetProcessing updateValues(CarminDatasetProcessing from, CarminDatasetProcessing to) {
@@ -50,6 +57,11 @@ public class CarminDatasetPorcessingServiceImpl extends BasicEntityServiceImpl<C
         @Override
         public Optional<CarminDatasetProcessing> findByIdentifier(String identifier) {
                 return carminDatasetProcessingRepository.findByIdentifier(identifier);
+        }
+
+        @Override
+        public List<CarminDatasetProcessing> findAllAllowed() {
+               return carminDatasetProcessingSecurityService.filterCarminDatasetList(findAll(), RIGHT_STR);
         }
 
         @Override
