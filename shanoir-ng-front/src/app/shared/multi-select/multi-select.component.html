@@ -12,9 +12,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span *ngFor="let option of selectedOptions; let i = index" 
+<span *ngFor="let option of selectedOptions; let i = index"
         class="left-icon block"
-        [style.color]="option.color"
+        [class.dark]="getFontColor(option.backgroundColor)"
         [style.background-color]="option.backgroundColor">
     <i class="fa-solid fa-xmark remove" (click)="onRemoveOption(option, i)"></i>
     <span class="label">{{option.label}}</span>
@@ -26,5 +26,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [pipe]="pipe"
     [disabled]="disabled"
     [placeholder]="placeholder"
-    (selectOption)="onSelectOption($event?.value?.id)">
+    (selectOption)="onSelectOption($event)">
 </select-box>

@@ -37,6 +37,7 @@ import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.timepoint.Timepoint;
 
@@ -154,6 +155,9 @@ public class Study extends HalEntity {
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
+
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<StudyTag> studyTags;
 
 	/**
 	 * Init HATEOAS links
@@ -508,5 +512,13 @@ public class Study extends HalEntity {
 
 	public void setDescription(String publicDescription) {
 		this.description = publicDescription;
+	}
+
+	public List<StudyTag> getStudyTags() {
+		return studyTags;
+	}
+
+	public void setStudyTags(List<StudyTag> studyTags) {
+		this.studyTags = studyTags;
 	}
 }
