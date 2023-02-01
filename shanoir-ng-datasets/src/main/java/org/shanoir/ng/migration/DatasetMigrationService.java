@@ -477,7 +477,7 @@ public class DatasetMigrationService {
 		} catch (Exception e) {
 			// Add error to list of errors and continue
 			job.getLogging().add("ERROR : Dataset File could not be migrated: " + file.getPath() + " : " + e.getMessage());
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, mapper.writeValueAsString(job));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, job);
 		} finally {
 			FileUtils.deleteQuietly(workFolder);
 		}
