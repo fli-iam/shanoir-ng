@@ -143,6 +143,8 @@ public class DatasetMigrationService {
 			job.setEvent(event);
 			job.setAccessToken(distantKeycloakConfigurationService.getAccessToken());
 			job.setRefreshToken(distantKeycloakConfigurationService.getRefreshToken());
+			
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, mapper.writeValueAsString(job));
 
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_PRECLINICAL_QUEUE, mapper.writeValueAsString(job));
 
@@ -161,30 +163,33 @@ public class DatasetMigrationService {
 		// Migrate all studyCards
 		List<StudyCard> studyCards = studyCardService.findByStudyId(job.getOldStudyId());
 		Map<Long, Long> studyCardsMap = new HashMap<>();
+		job.getLogging().add("Study card migration");
 		for (StudyCard sc : studyCards) {
 			long oldId = sc.getId();
-			publishEvent("Migrating study card : " + oldId , 0f);
 			sc = moveStudyCard(sc, job);
 			studyCardsMap.put(oldId, sc.getId());
 		}
 		job.setStudyCardsMap(studyCardsMap);
+		job.getLogging().add("Study card migration - success");
+
+		job.getLogging().add("Examination migration");
 
 		// Migrate all examinations
 		List<Examination> examinations = examRepository.findByStudyId(job.getOldStudyId());
 		Map<Long, Long> examMap = new HashMap<>();
 		for (Examination exam : examinations) {
 			Long oldId = exam.getId();
-			publishEvent("Migrating Examination: " + oldId , event.getProgress() +  1 / examinations.size());
+			job.getLogging().add("Migrating Examination: " + oldId);
 
 			Examination createdExam = migrateExamination(exam, job);
 			examMap.put(oldId, createdExam.getId());
 		}
 		job.setExaminationMap(examMap);
+		job.getLogging().add("Examination migration - success");
+
 	}
 
 	private StudyCard moveStudyCard(StudyCard sc, MigrationJob job) throws ShanoirException {
-		LOG.error("StudyCard " + job);
-
 		sc.setId(null);
 		sc.setStudyId(job.getStudy().getId());
 		if (sc.getAcquisitionEquipmentId() != null) {
@@ -240,8 +245,7 @@ public class DatasetMigrationService {
 
 		job.getExaminationMap().put(oldId, createdExam.getId());
 
-		event.setMessage("Migrating acquisitions...");
-		eventService.publishEvent(event);
+		job.getLogging().add("Migrating acquisitions...");
 		// Migrate datasetAcquisition
 		float prog = event.getProgress() / job.getExaminationMap().size();
 		int i = 1;
@@ -311,13 +315,14 @@ public class DatasetMigrationService {
 		}
 
 		//  Migrate acquisition
-		LOG.error("Acq " + acq);
 		DatasetAcquisition newacq = distantShanoir.createAcquisition(acq);
 		entityManager.detach(acq);
 
 		// Update datasets
 		for (Dataset ds : datasets) {
+			job.getLogging().add("Migrating dataset : " + ds.getName() + " of examination " + examId);
 			publishEvent("Migrating dataset : " + ds.getName() + " of examination " + examId, event.getProgress());
+
 			migrateDataset(ds, newacq, oldExamId, job);
 		}
 	}
@@ -413,14 +418,13 @@ public class DatasetMigrationService {
 		}
 		// Once all files of the expression were loaded, add them to the pacs if necessary
 		if (DatasetExpressionFormat.DICOM.equals(expression.getDatasetExpressionFormat())) {
-			LOG.error("We move the following dataset expression " + expression);
 			distantShanoir.moveDatasetFiles(createdFile.getId());
 		}
 	}
 
 	private DatasetFile migrateDatasetFile(DatasetFile file, DatasetExpression createdExpression, Dataset createdDataset, Long oldExamId, MigrationJob job) throws ShanoirException {
 		File workFolder = new File(migrationFolder, "/Migration_" + LocalDateTime.now());
-		DatasetFile createdFile;
+		DatasetFile createdFile = null;
 		try {
 			workFolder.mkdirs();
 
@@ -471,7 +475,9 @@ public class DatasetMigrationService {
 			distantShanoir.moveDatasetFile(createdFile, new File(result));
 
 		} catch (Exception e) {
-			throw new ShanoirException("Error while creating the new dataset file", e);
+			// Add error to list of errors and continue
+			job.getLogging().add("ERROR : Dataset File could not be migrated: " + file.getPath() + " : " + e.getMessage());
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, mapper.writeValueAsString(job));
 		} finally {
 			FileUtils.deleteQuietly(workFolder);
 		}

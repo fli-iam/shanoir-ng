@@ -33,13 +33,17 @@ import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
 import org.shanoir.ng.shared.migration.MigrationJob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -48,6 +52,9 @@ public class PreclinicalMigrationService {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(PreclinicalMigrationService.class);
 
+	@Value("${migration-folder}")
+	private String migrationFolder;
+	
 	@Autowired
 	ObjectMapper mapper;
 
@@ -96,6 +103,9 @@ public class PreclinicalMigrationService {
 	
 	ShanoirEvent event;
 
+	@Autowired
+	RabbitTemplate rabbittemplate;
+
 	/**
 	 * Migrates all the datasets from a study using a MigrationJob
 	 * @throws ShanoirException
@@ -104,21 +114,29 @@ public class PreclinicalMigrationService {
 	@RabbitHandler
 	@Transactional(readOnly = true)
 	public void migrate(String migrationJobAsString) throws AmqpRejectAndDontRequeueException {
+		MigrationJob job;
 		try {
-			MigrationJob job = mapper.readValue(migrationJobAsString, MigrationJob.class);
+			job = mapper.readValue(migrationJobAsString, MigrationJob.class);
+		} catch (JsonProcessingException e) {
+			LOG.error("Error while moving preclinical elements: ", e);
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+		event = job.getEvent();
+		try {
 			distantKeycloakConfigurationService.setRefreshToken(job.getRefreshToken());
 			String keycloakURL = job.getShanoirUrl() + "/auth/realms/shanoir-ng/protocol/openid-connect/token";
 			distantKeycloakConfigurationService.setServer(job.getShanoirUrl());
 			distantKeycloakConfigurationService.setAccessToken(job.getAccessToken());
 			distantKeycloakConfigurationService.refreshToken(keycloakURL);
 			
-			event = job.getEvent();
-			publishEvent("Finishing migration with preclinical elements...", 1f);
+			job.getLogging().add("Starting preclinical elements migration.");
 
 			this.migratePreclinical(job);
+			
 			event.setStatus(ShanoirEvent.SUCCESS);
-			publishEvent("Successfully migrated study " + job.getStudy().getName() +  " to server " + job.getShanoirUrl(), 1f);
-		} catch (Exception e) {
+			publishEvent("Migrated study " + job.getStudy().getName() +  " to server " + job.getShanoirUrl() + ". Please check migration.log file on source study for errors.", 1f);
+			rabbittemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, mapper.writeValueAsString(job));
+		} catch (ShanoirException | JsonProcessingException | AmqpException e) {
 			LOG.error("Error while moving preclinical elements: ", e);
 			event.setStatus(ShanoirEvent.ERROR);
 			publishEvent("An error occured while migrating preclinical elements, please contact an administrator.", 1f);
@@ -151,6 +169,8 @@ public class PreclinicalMigrationService {
 		LOG.error("Retrieving all preclinical references");
 		prepareReferences();
 
+		job.getLogging().add("Animal subject migration");
+
 		// Animal_subject
 		for (Entry<Long, IdName> entry : job.getSubjectsMap().entrySet()) {
 			for (AnimalSubject animalSubject : animalSubjectRepository.findBySubjectId(entry.getKey())) {
@@ -158,13 +178,17 @@ public class PreclinicalMigrationService {
 				migrateSubject(animalSubject, job);
 			}
 		}
-		
+
+		job.getLogging().add("Animal subject migration - success");
+		job.getLogging().add("Anesthetic examination migration");
+
 		// Migrate AnestheticExamination
 		for (Long exam : job.getExaminationMap().keySet()) {
 			for (ExaminationAnesthetic examAnes :  examAnetheticRepository.findByExaminationId(exam)) {
 				migrateAnestheticExamination(examAnes, job);
 			}
 		}
+		job.getLogging().add("Anesthetic examination migration - success");
 	}
 
 	private void migrateAnestheticExamination(ExaminationAnesthetic examAnes, MigrationJob job) throws ShanoirException {

@@ -16,6 +16,7 @@ package org.shanoir.ng.shared.configuration;
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -154,6 +155,9 @@ public class RabbitMQConfiguration {
 	/** Queue used to get the name of a study from ID */
 	public static final String STUDY_NAME_QUEUE = "study-name-queue";
 
+	/** Queue used to publish logging file. */
+	public static final String STUDY_MIGRATION_LOGGING_QUEUE = "study-migration-logging-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -190,6 +194,7 @@ public class RabbitMQConfiguration {
 
 	/** Exchange to notify when a user / study is update / deleted. */
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
+
 
 
 
@@ -464,6 +469,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue studyNameQueue() {
 		return new Queue(STUDY_NAME_QUEUE, true);
+	}
+	
+	@Bean
+	public static Queue studyMigrationLoggingQueue() {
+		return new Queue(STUDY_MIGRATION_LOGGING_QUEUE, true);
 	}
 	
 }

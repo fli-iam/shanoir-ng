@@ -7,6 +7,7 @@ public class ShanoirEvent {
 	public static final int ERROR = -1;
 	public static final int SUCCESS = 1;
 	public static final int IN_PROGRESS = 2;
+	public static final int WARNING = 3;
 
 	protected Long id;
 	

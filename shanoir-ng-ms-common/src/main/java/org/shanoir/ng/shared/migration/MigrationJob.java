@@ -1,5 +1,7 @@
 package org.shanoir.ng.shared.migration;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
@@ -28,6 +30,8 @@ public class MigrationJob {
 
 	private ShanoirEvent event;
 
+	private List<String> logging = new ArrayList<String>();
+	
 	private String refreshToken;
 	
 	private String accessToken;
@@ -145,6 +149,14 @@ public class MigrationJob {
 
 	public void setExaminationMap(Map<Long, Long> examinationMap) {
 		this.examinationMap = examinationMap;
+	}
+
+	public List<String> getLogging() {
+		return logging;
+	}
+
+	public void setLogging(List<String> logging) {
+		this.logging = logging;
 	}
 	
 }

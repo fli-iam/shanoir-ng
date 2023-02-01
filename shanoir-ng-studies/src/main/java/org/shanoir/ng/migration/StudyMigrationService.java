@@ -1,12 +1,19 @@
 package org.shanoir.ng.migration;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
@@ -31,9 +38,12 @@ import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -77,18 +87,23 @@ public class StudyMigrationService {
 	 */
 	public synchronized void migrateStudy(Long studyId, Long userId, String username, String url) throws Exception {
 		Long currentUserId = KeycloakUtil.getTokenUserId();
+		MigrationJob job = new MigrationJob();
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.MIGRATE_STUDY_EVENT, ""+studyId, currentUserId, "Starting migration...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 		try {
 			Study study = this.studyService.findById(studyId);
+			job.setOldStudyId(study.getId());
+
+			job.getLogging().add("Starting migration of study " + study.getName() + "(" + studyId + ") to server: " + url);
+
+			job.getLogging().add("Successfuly connected to distant Shanoir as " + username);
 
 			Map<Long,IdName> subjectMap = new HashMap<>();
 
 			// Remove all groupsOfSubjects
 			study.setExperimentalGroupsOfSubjects(null);
 
-			event.setMessage("Migrating subjects...");
-			eventService.publishEvent(event);
+			job.getLogging().add("Subjects migration.");
 
 			// Move all concerned subjects
 			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
@@ -105,17 +120,18 @@ public class StudyMigrationService {
 				// Keep updated a map of oldSubjectId => distantSubjectId
 				subjectMap.put(oldId, new IdName(sub.getId(), sub.getName()));
 			}
+			job.getLogging().add(study.getSubjectStudyList().size() +  " subjects successfuly migrated.");
 
-			event.setMessage("Migrating centers...");
-			eventService.publishEvent(event);
+			job.getLogging().add("Center migration.");
 
 			// Move all centers
 			List<StudyCenter> centers = moveCenters(study.getStudyCenterList());
 			study.setStudyCenterList(centers);
 
-			event.setMessage("Migrating study...");
-			eventService.publishEvent(event);
-			
+			job.getLogging().add(centers.size() +  " centers successfuly migrated.");
+
+			job.getLogging().add("Study migration");
+
 			// Migrate study
 			Long oldStudyId = study.getId();
 
@@ -126,7 +142,7 @@ public class StudyMigrationService {
 			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 				subjectStudy.setId(null);
 				subjectStudy.setStudy(null);
-				
+
 				for (Tag tag : subjectStudy.getTags()) {
 					tag.setId(null);
 				}
@@ -161,7 +177,7 @@ public class StudyMigrationService {
 			for (Tag tag : study.getTags()) {
 				tag.setId(null);
 			}
-			
+
 			// Reset DUA because otherwise the user is not allowed to do anything
 			study.setDataUserAgreementPaths(null);
 
@@ -175,10 +191,10 @@ public class StudyMigrationService {
 				distantShanoir.addProtocoleFile(file, newStudy.getId());
 			}
 
+			job.getLogging().add("Study successfuly created with distant ID: " + newStudy.getId());
+
 			// Send a message over rabbitMQ to move all other microservices
 			// In the event message, put the subject/subject map and the new study Service (use a specific usefull object used in common ?)
-			MigrationJob job = new MigrationJob();
-			job.setOldStudyId(oldStudyId);
 			job.setStudy(new IdName(newStudy.getId(), newStudy.getName()));
 			job.setCentersMap(centerMap);
 			job.setEquipmentMap(equipmentMap);
@@ -188,31 +204,65 @@ public class StudyMigrationService {
 			job.setAccessToken(distantKeycloak.getAccessToken());
 			job.setRefreshToken(this.distantKeycloak.getRefreshToken());
 
-			event.setMessage("Migrating data...");
-			eventService.publishEvent(event);
+			this.publishLoggingFile(job);
 
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_QUEUE, objectMapper.writeValueAsString(job));
-
 		} catch (ShanoirException se) {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setProgress(0f);
 			event.setMessage(se.getMessage());
 			eventService.publishEvent(event);
+			job.getLogging().add("Error while moving study: " + se.getMessage());
+			this.publishLoggingFile(job);
 			throw se;
 		} catch (Exception e) {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setProgress(0f);
 			event.setMessage("An unexpected error occured during study migration, please contact an administrator.");
 			eventService.publishEvent(event);
+			job.getLogging().add("Unexpected error while moving study: " + e.getMessage());
+			this.publishLoggingFile(job);
 			throw e;
 		}
-
 		// Reset lists
 		distantModels = null;
 		distantEquipements = null;
 		distantManufacturers = null;
 		equipmentMap = new HashMap<>();
 		centerMap = new HashMap<>();
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE)
+	@RabbitHandler
+	@Transactional
+	private void publishLoggingFileFromWS(String jobAsString) {
+		try {
+			MigrationJob job = objectMapper.readValue(jobAsString, MigrationJob.class);
+			this.publishLoggingFile(job);
+		} catch (Exception e) {
+			LOG.error("ERROR: Could not publish migration logs.", e);
+		}
+	}
+
+	private void publishLoggingFile(MigrationJob job) {
+		try {
+			// Publish on local study
+			Path path = Paths.get("/tmp/migration" + job.getOldStudyId() + ".log");
+			Files.write(path, job.getLogging(), StandardCharsets.UTF_8);
+
+			if (job.getOldStudyId() != null) {
+				String filePath = studyService.getStudyFilePath(job.getOldStudyId(), "migration.log");
+				File fileToCreate = new File(filePath);
+				fileToCreate.getParentFile().mkdirs();
+				Files.copy(path, fileToCreate.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			}
+		} catch (IOException e) {
+			LOG.error("ERROR: Could not publish migration logs.", e);
+		} finally {
+			if (job != null && job.getOldStudyId() != null) {
+				FileUtils.deleteQuietly(Paths.get("/tmp/migration" + job.getOldStudyId() + ".log").toFile());
+			}
+		}
 	}
 
 	/**
