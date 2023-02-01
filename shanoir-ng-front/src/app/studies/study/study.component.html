@@ -361,7 +361,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[hasBox]="true">
 				</study-node>
 			</fieldset>
-            <fieldset [class.hidden]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.tags && study.tags.length > 0)">
+            <fieldset [class.hidden]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.studyTags && study.studyTags.length > 0)">
                 <legend>Public Study tags</legend>
                 <tag-creator ngDefaultControl [mode]="mode" [study]="study" [(ngModel)]="study.studyTags" (onChange)="onStudyTagListChange()" formControlName="studyTags"></tag-creator>
             </fieldset>
