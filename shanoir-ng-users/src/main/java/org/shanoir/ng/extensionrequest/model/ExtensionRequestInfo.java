@@ -19,7 +19,7 @@ import java.time.LocalDate;
 
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 

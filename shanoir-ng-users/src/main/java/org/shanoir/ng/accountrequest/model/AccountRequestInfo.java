@@ -15,7 +15,7 @@
 package org.shanoir.ng.accountrequest.model;
 
 import javax.persistence.Entity;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 

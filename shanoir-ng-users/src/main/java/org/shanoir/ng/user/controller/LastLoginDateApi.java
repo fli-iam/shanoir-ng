@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.user.controller;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 
 import org.springframework.http.ResponseEntity;
