@@ -18,13 +18,13 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
