@@ -21,7 +21,7 @@ spec:
         io.kompose.service: users
     spec:
       containers:
-      - image: ghcr.io/shanoir-ng/users
+      - image: ghcr.io/fli-iam/shanoir-ng/users:latest
         name: users
         ports:
         - containerPort: 9901
