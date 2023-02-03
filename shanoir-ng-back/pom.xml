@@ -51,7 +51,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<keycloak.version>20.0.0</keycloak.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<springfox.version>2.5.0</springfox.version>
-		<powermock.version>2.0.9</powermock.version>
 	</properties>
 
 	<dependencyManagement>
@@ -126,7 +125,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
 		</dependency>
-		
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-ant</artifactId>
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct-processor -->
 		<dependency>
 			<groupId>org.mapstruct</groupId>
@@ -194,18 +197,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito2</artifactId>
-			<version>${powermock.version}</version>
 			<scope>test</scope>
 		</dependency>
 
