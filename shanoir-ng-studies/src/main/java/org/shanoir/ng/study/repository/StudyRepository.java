@@ -65,7 +65,7 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	List<Study> findByVisibleByDefaultTrue();
 
 	@Modifying
-	@Query("insert into protocol_file_path VALUES (:studyId, :filePath)")
+	@Query(value="insert into protocol_file_path (study_id, path) VALUES (:studyId, :filePath)", nativeQuery = true)
 	void addProtocolFile(@Param("studyId") Long studyId, @Param("filePath") String filePath);
 
 }
