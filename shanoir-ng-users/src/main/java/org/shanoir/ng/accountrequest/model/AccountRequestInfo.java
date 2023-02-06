@@ -33,7 +33,6 @@ public class AccountRequestInfo extends AbstractEntity {
 	 */
 	private static final long serialVersionUID = -1062233564645766489L;
 
-	@NotNull
 	private String contact;
 
 	@NotNull
@@ -43,29 +42,9 @@ public class AccountRequestInfo extends AbstractEntity {
 	private String institution;
 
 	@NotNull
-	private String service;
+	private Long studyId;
 
-	@NotNull
-	private String study;
-
-	@NotNull
-	private String work;
-
-	private Long challenge;
-
-	/**
-	 * @return the challenge
-	 */
-	public Long getChallenge() {
-		return challenge;
-	}
-
-	/**
-	 * @param challenge the challenge to set
-	 */
-	public void setChallenge(Long challenge) {
-		this.challenge = challenge;
-	}
+	private String studyName;
 
 	/**
 	 * @return the contact
@@ -109,46 +88,20 @@ public class AccountRequestInfo extends AbstractEntity {
 		this.institution = institution;
 	}
 
-	/**
-	 * @return the service
-	 */
-	public String getService() {
-		return service;
+	public Long getStudyId() {
+		return studyId;
 	}
 
-	/**
-	 * @param service the service to set
-	 */
-	public void setService(String service) {
-		this.service = service;
+	public void setStudyId(Long studyId) {
+		this.studyId = studyId;
 	}
 
-	/**
-	 * @return the study
-	 */
-	public String getStudy() {
-		return study;
+	public String getStudyName() {
+		return studyName;
 	}
 
-	/**
-	 * @param study the study to set
-	 */
-	public void setStudy(String study) {
-		this.study = study;
-	}
-
-	/**
-	 * @return the work
-	 */
-	public String getWork() {
-		return work;
-	}
-
-	/**
-	 * @param work the work to set
-	 */
-	public void setWork(String work) {
-		this.work = work;
+	public void setStudyName(String studyName) {
+		this.studyName = studyName;
 	}
 
 }

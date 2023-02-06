@@ -40,7 +40,9 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
+import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import {Profile} from "../../shared/models/profile.model";
+import { AccessRequest } from 'src/app/users/access-request/access-request.model';
 
 @Component({
     selector: 'study-detail',
@@ -67,6 +69,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
+    accessRequests: AccessRequest[];
 
     public openPrefix: boolean = false;
 
@@ -84,7 +87,8 @@ export class StudyComponent extends EntityComponent<Study> {
             private subjectService: SubjectService,
             private userService: UserService,
             private studyRightsService: StudyRightsService,
-            private studyCardService: StudyCardService) {
+            private studyCardService: StudyCardService,
+            private accessRequestService: AccessRequestService) {
 
         super(route, 'study');
         this.activeTab = 'general';
@@ -148,9 +152,11 @@ export class StudyComponent extends EntityComponent<Study> {
 
         Promise.all([
             studyPromise,
-            this.fetchUsers()
-        ]).then(([study, users]) => {
+            this.fetchUsers(),
+            this.accessRequestService.findByStudy(this.id)
+        ]).then(([study, users, accessReqs]) => {
             Study.completeMembers(study, users);
+            this.accessRequests = accessReqs;
         });
 
         Promise.all([
@@ -195,12 +201,14 @@ export class StudyComponent extends EntityComponent<Study> {
             'profile': [this.study.profile, [Validators.required]],
             'withExamination': [this.study.withExamination],
             'clinical': [this.study.clinical],
+            'description': [this.study.description],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
             'tags': [this.study.tags],
+            'studyTags': [this.study.studyTags],
             'challenge': [this.study.challenge],
             'protocolFile': [],
             'dataUserAgreement': [],
@@ -238,6 +246,7 @@ export class StudyComponent extends EntityComponent<Study> {
         study.monoCenter = true;
         study.studyCenterList = [];
         study.tags = [];
+        study.studyTags = [];
         study.timepoints = [];
         study.withExamination = true;
         return study;
@@ -537,13 +546,28 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     onTagListChange() {
-        // hack : force change detection
-        this.study.tags = [].concat(this.study.tags);
+      // hack : force change detection
+      this.study.tags = [].concat(this.study.tags);
 
-        // hack : force change detection for the subject-study tag list
-        this.study.subjectStudyList.forEach(subjStu => {
-            subjStu.study.tags = this.study.tags;
-        });
-        this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
+      // hack : force change detection for the subject-study tag list
+      this.study.subjectStudyList.forEach(subjStu => {
+        subjStu.study.tags = this.study.tags;
+      });
+      this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
+    }
+
+    onStudyTagListChange() {
+      // hack : force change detection
+      this.study.studyTags = [].concat(this.study.studyTags);
+
+      // hack : force change detection for the subject-study tag list
+      this.study.subjectStudyList.forEach(subjStu => {
+        subjStu.study.studyTags = this.study.studyTags;
+      });
+      this.study.subjectStudyList = [].concat(this.study.subjectStudyList);
+    }
+
+    goToAccessRequest(accessRequest : AccessRequest) {
+        this.router.navigate(["/access-request/details/" + accessRequest.id]);
     }
 }

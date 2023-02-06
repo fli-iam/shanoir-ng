@@ -257,6 +257,16 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByIds(
+			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
+		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
+		if (datasets.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK); 
+	}
+
+	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
 		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
 		if (datasets.isEmpty()) {
@@ -545,7 +555,13 @@ public class DatasetApiController implements DatasetApi {
 				}
 				String studyName = studyRepo.findById(dataset.getStudyId()).orElse(null).getName();
 
-				Examination exam = dataset.getDatasetAcquisition().getExamination();
+				Examination exam;
+				if (dataset.getDatasetAcquisition() == null && dataset.getDatasetProcessing() != null) {
+					exam = dataset.getDatasetProcessing().getInputDatasets().get(0).getDatasetAcquisition().getExamination();
+				} else {
+					exam = dataset.getDatasetAcquisition().getExamination();
+				}
+				
 				String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId();
 				if (exam.getComment() != null) {
 					datasetFilePath += "-" + exam.getComment();
@@ -566,6 +582,10 @@ public class DatasetApiController implements DatasetApi {
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
 					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, datasetFile, dataset, subjectName, false);
 				} else if (DCM.equals(format)) {
+					if (dataset.getDatasetProcessing() != null) {
+						// Do not load dicom for processed dataset
+						continue;
+					}
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					downloader.downloadDicomFilesForURLs(pathURLs, datasetFile, subjectName, dataset);
 				} else if (NII.equals(format)) {
@@ -647,7 +667,6 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	/**
-<<<<<<< HEAD
 	 * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
 	 * @param urls
 	 * @param workFolder

@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
@@ -89,6 +90,9 @@ public class UserServiceTest {
 
 	@Autowired
 	private UserService userService;
+
+	@MockBean
+	private AccessRequestRepository accessRequestRepository;
 
 	@Before
 	public void setup() throws SecurityException {
@@ -279,9 +283,7 @@ public class UserServiceTest {
 		accountRequestInfo.setContact("contact");
 		accountRequestInfo.setFunction("function");
 		accountRequestInfo.setInstitution("institution");
-		accountRequestInfo.setService("service");
-		accountRequestInfo.setStudy("study");
-		accountRequestInfo.setWork("work");
+		accountRequestInfo.setStudyId(1L);
 		user.setAccountRequestDemand(true);
 		user.setAccountRequestInfo(accountRequestInfo);
 		user.setId(null);

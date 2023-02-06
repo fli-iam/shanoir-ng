@@ -31,10 +31,6 @@ export class CarminDatasetProcessingService extends EntityService<CarminDatasetP
 
     getEntityInstance() { return new CarminDatasetProcessing(); }
 
-    public saveNewCarminDatasetProcessing(carminDatasetProcessing: CarminDatasetProcessing): Observable<Object> {
-        return this.httpClient.post<Object>(this.API_URL, carminDatasetProcessing);
-    }
-
     public getAllCarminDatasetProcessings(): Observable<CarminDatasetProcessing[]>{
         return this.httpClient.get<CarminDatasetProcessing[]>(`${this.API_URL}/carminDatasetProcessings`);
     }
@@ -44,3 +40,4 @@ export class CarminDatasetProcessingService extends EntityService<CarminDatasetP
     }
 
 }
+ 

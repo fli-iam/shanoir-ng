@@ -1,0 +1,47 @@
+<div class="welcome-component">
+  <div class="header">
+    <img class="github-logo" title="Shanoir on GitHub" [src]="githubLogoUrl" (click)="toGithub()"/>
+    <div class="buttons">
+      <button class="buttonItem" type="button" (click)="login()">Access Shanoir</button>
+      <button class="buttonItem" type="button" (click)="toShanoir()">More info</button>
+      <a href="mailto:developers_shanoir-request@inria.fr">
+        <button class="buttonItem" type="button">Contact</button>
+      </a>
+    </div>
+  </div>
+  <div class="shanoir">
+    <img class="shanoir-logo" [src]="shanoirLogoUrl"/>
+    <div class="shanoir-text">
+      Sharing NeurOImaging Resources
+    </div>
+  </div>
+  <div class="shanoir-text">
+    <p style="margin-left: 50px; margin-top: 30px; font-size: 16px;">
+      {{ studies.length }} public studies
+    </p>
+  </div>
+  <div *ngIf="studies.length > 0" class="studyTab">
+    <div class="studyItem" *ngFor="let study of studies | slice:0:show">
+      <span class="studyTitle"><b>{{study.name}}</b></span>
+      <span *ngIf="study.description" class="studyDescription"> | {{ study.description }}</span>
+      <br/>
+      <span *ngIf="study.startDate" class="studyStartDate">Start date: {{ study.startDate }}</span>
+      <span *ngIf="study.startDate && study.endDate" class="studyStartDate"> | </span>
+      <span *ngIf="study.endDate" class="studyStartDate">End date: {{ study.endDate }}</span>
+      <br/>
+      <div class="accessRequest">
+        <button class="buttonItem" type="button" (click)="accessRequest(study)">Access Request</button>
+      </div>
+      <p>id: {{ study.id }} | Status: {{study.studyStatus.replace('_', ' ') | titlecase }}</p>
+      <span class="studyValues">Examinations: {{ study.nbExaminations }} | Subjects: {{ study.nbSubjects }}</span>
+      <span *ngIf="study.studyType"> | Study type: {{ StudyType[study.studyType] }}</span>
+      <div class="tags" *ngIf="study.studyTags">
+        <span class="tag" [style.background]="tag.color" [class.dark]="getFontColor(tag.color)" *ngFor="let tag of study.studyTags"> {{ tag.name }}</span>
+      </div>
+      <hr>
+    </div>
+    <div class="showMoreButton">
+      <button [disabled]="studies.length <= show" (click)="increaseShow()">Show more</button>
+    </div>
+  </div>
+</div>

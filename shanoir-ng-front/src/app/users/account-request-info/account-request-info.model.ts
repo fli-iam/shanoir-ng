@@ -17,8 +17,6 @@ export class AccountRequestInfo {
     contact: string;
     function: string;
     institution: string;
-    service: string;
-    study: string;
-    work: string;
-    challenge: number;
+    studyId: number;
+    studyName: string;
 }

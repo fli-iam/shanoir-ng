@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
-import org.assertj.core.util.Arrays;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
@@ -51,6 +50,7 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
+import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ListDependencyUpdate;
@@ -141,7 +141,6 @@ public class StudyServiceImpl implements StudyService {
 			for (final StudyCenter studyCenter : study.getStudyCenterList()) {
 				studyCenter.setStudy(study);
 			}
-
 		}
 
 		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
@@ -150,6 +149,11 @@ public class StudyServiceImpl implements StudyService {
 
 		if (study.getTags() != null) {
 			for (final Tag tag : study.getTags()) {
+				tag.setStudy(study);
+			}
+		}
+		if (study.getStudyTags() != null) {
+			for (final StudyTag tag : study.getStudyTags()) {
 				tag.setStudy(study);
 			}
 		}
@@ -227,6 +231,7 @@ public class StudyServiceImpl implements StudyService {
 		Study studyDb = studyRepository.findById(study.getId()).orElse(null);
 		
 		List<Long> tagsToDelete = getTagsToDelete(study, studyDb);
+		List<Long> studyTagsToDelete = getStudyTagsToDelete(study, studyDb);
 		
 		if (studyDb == null) {
 			throw new EntityNotFoundException(Study.class, study.getId());
@@ -240,6 +245,7 @@ public class StudyServiceImpl implements StudyService {
 		}
 		studyDb.setName(study.getName());
 		studyDb.setProfile(study.getProfile());
+		studyDb.setDescription(study.getDescription());
 		studyDb.setStudyStatus(study.getStudyStatus());
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setWithExamination(study.isWithExamination());
@@ -255,6 +261,12 @@ public class StudyServiceImpl implements StudyService {
 		if (study.getTags() != null) {
 			ListDependencyUpdate.updateWithNoRemove(studyDb.getTags(), study.getTags());
 			for (Tag tag : studyDb.getTags()) {
+				tag.setStudy(studyDb);
+			}
+		}
+		if (study.getStudyTags() != null) {
+			ListDependencyUpdate.updateWithNoRemove(studyDb.getStudyTags(), study.getStudyTags());
+			for (StudyTag tag : studyDb.getStudyTags()) {
 				tag.setStudy(studyDb);
 			}
 		}
@@ -287,10 +299,14 @@ public class StudyServiceImpl implements StudyService {
 			}
 			studyDb = studyRepository.save(studyDb);
 		}
-		
+
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
-			studyDb = studyRepository.save(studyDb);			
+			studyDb = studyRepository.save(studyDb);
+		}
+		if (studyDb.getStudyTags() != null) {
+			studyDb.getStudyTags().removeIf(tag -> studyTagsToDelete.contains(tag.getId()));
+			studyDb = studyRepository.save(studyDb);
 		}
 
 		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
@@ -302,8 +318,8 @@ public class StudyServiceImpl implements StudyService {
 	 * For each subject study tag of study, set the fresh tag id by looking into studyDb tags, 
 	 * then update db subject study tags lists with the given study
 	 * 
-	 * @param study
-	 * @param studyDb
+	 * @param subjectStudyList
+	 * @param dbStudyTags
 	 * @return updated study
 	 */
 	private void updateTags(List<SubjectStudy> subjectStudyList, List<Tag> dbStudyTags) {
@@ -326,7 +342,7 @@ public class StudyServiceImpl implements StudyService {
 			}	
 		} 
 	}
-	
+
 	private List<Long> getTagsToDelete(Study study, Study studyDb) {
 		List<Long> tagsToDelete = new ArrayList<>();
 		if (studyDb.getTags() != null && study.getTags() != null) {
@@ -342,6 +358,23 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 		return tagsToDelete;
+	}
+
+	private List<Long> getStudyTagsToDelete(Study study, Study studyDb) {
+		List<Long> studyTagsToDelete = new ArrayList<>();
+		if (studyDb.getStudyTags() != null && study.getStudyTags() != null) {
+			for (StudyTag dbStudyTag : studyDb.getStudyTags()) {
+				boolean found = false;
+				for (StudyTag studyTag : study.getStudyTags()) {
+					if (studyTag.getId() != null && studyTag.getId().equals(dbStudyTag.getId())) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) studyTagsToDelete.add(dbStudyTag.getId());
+			}
+		}
+		return studyTagsToDelete;
 	}
 
 	/**
@@ -579,4 +612,8 @@ public class StudyServiceImpl implements StudyService {
 		return Utils.copyList(studyRepository.findByChallengeTrue());
 	}
 
+	@Override
+	public List<Study> findPublicStudies() {
+		return this.studyRepository.findByVisibleByDefaultTrue();
+	}
 }
