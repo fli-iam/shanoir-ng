@@ -15,13 +15,6 @@
 package org.shanoir.ng.studycard.model.field;
 
 import org.shanoir.ng.dataset.modality.BidsDataType;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.MrDatasetMetadata;
-import org.shanoir.ng.dataset.modality.MrDatasetNature;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetMetadata;
-import org.shanoir.ng.dataset.model.DatasetModalityType;
-import org.shanoir.ng.dataset.model.ExploredEntity;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.AcquisitionContrast;
 import org.shanoir.ng.datasetacquisition.model.mr.ContrastAgentUsed;
@@ -71,7 +64,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
 				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
 					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getComment();
-				}
+				} 
 			}
 			return null;
 		}
@@ -92,9 +85,11 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		public String get(DatasetAcquisition datasetAcquisition) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
-				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getTransmittingCoilId() != null) {
 					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getTransmittingCoilId().toString();
-				}
+				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getTransmittingCoilId() != null) {
+                    return mrDsAcq.getMrProtocol().getOriginMetadata().getTransmittingCoilId().toString();
+                }
 			}
 			return null;
 		}
@@ -116,9 +111,11 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		public String get(DatasetAcquisition datasetAcquisition) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
-				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getReceivingCoilId() != null) {
 					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getReceivingCoilId().toString();
-				}
+				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getReceivingCoilId() != null) {
+                    return mrDsAcq.getMrProtocol().getOriginMetadata().getReceivingCoilId().toString();
+                }
 			}
 			return null;
 		}
@@ -139,9 +136,11 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		public String get(DatasetAcquisition datasetAcquisition) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
-				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getAcquisitionContrast() != null) {
 					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getAcquisitionContrast().name();
-				}
+				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getAcquisitionContrast() != null) {
+                    return mrDsAcq.getMrProtocol().getOriginMetadata().getAcquisitionContrast().name();
+                }
 			}
 			return null;
 		}
@@ -163,7 +162,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		public String get(DatasetAcquisition datasetAcquisition) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
-				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceApplication() != null) {
 					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceApplication().name();
 				}
 			}
@@ -213,7 +212,9 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
 				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
 					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceName();
-				}
+				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null) {
+                    return mrDsAcq.getMrProtocol().getOriginMetadata().getMrSequenceName();
+                }
 			}
 			return null;
 		}
@@ -234,9 +235,11 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		public String get(DatasetAcquisition datasetAcquisition) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
-				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getContrastAgentUsed() != null) {
 					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getContrastAgentUsed().name();
-				}
+				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getContrastAgentUsed() != null) {
+                    return mrDsAcq.getMrProtocol().getOriginMetadata().getContrastAgentUsed().name();
+                }
 			}
 			return null;
 		}

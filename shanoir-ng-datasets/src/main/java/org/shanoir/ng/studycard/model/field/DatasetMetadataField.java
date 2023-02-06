@@ -32,7 +32,9 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 		public String get(Dataset dataset) {
 			if (dataset.getUpdatedMetadata() == null && dataset.getUpdatedMetadata().getDatasetModalityType() != null) {
 				return dataset.getUpdatedMetadata().getDatasetModalityType().name();
-			} 
+			} else if (dataset.getOriginMetadata() == null && dataset.getOriginMetadata().getDatasetModalityType() != null) {
+                return dataset.getOriginMetadata().getDatasetModalityType().name();
+            }
 			else return null;
 		}
 		
@@ -48,7 +50,9 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 		public String get(Dataset dataset) {
 			if (dataset.getUpdatedMetadata() == null && dataset.getUpdatedMetadata().getExploredEntity() != null) {
 				return dataset.getUpdatedMetadata().getExploredEntity().name();
-			}
+			} else if (dataset.getOriginMetadata() == null && dataset.getOriginMetadata().getExploredEntity() != null) {
+                return dataset.getOriginMetadata().getExploredEntity().name();
+            }
 			return null;
 		}
 		
@@ -62,9 +66,11 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 	NAME(10) {
 		@Override
 		public String get(Dataset dataset) {
-			if (dataset.getUpdatedMetadata() == null && dataset.getUpdatedMetadata().getExploredEntity() != null) {
+			if (dataset.getUpdatedMetadata() != null) {
 				return dataset.getUpdatedMetadata().getName();
-			}
+			} else if (dataset.getOriginMetadata() != null) {
+                return dataset.getOriginMetadata().getName();
+            }
 			return null;
 		}
 		
@@ -77,8 +83,10 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 	COMMENT(11) {
 		@Override
 		public String get(Dataset dataset) {
-			if (dataset.getUpdatedMetadata() == null && dataset.getUpdatedMetadata().getExploredEntity() != null) {
+			if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
 				return dataset.getUpdatedMetadata().getComment();
+			} else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getComment() != null) {
+			    return dataset.getOriginMetadata().getComment();
 			}
 			return null;
 		}
@@ -94,9 +102,11 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 		public String get(Dataset dataset) {
 			if (dataset instanceof MrDataset) {
 				MrDataset mrDataset = (MrDataset) dataset;
-				if (mrDataset.getUpdatedMrMetadata() == null && mrDataset.getUpdatedMrMetadata() != null) {
-					mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();	
-				}		
+				if (mrDataset.getUpdatedMrMetadata() == null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
+					return mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();	
+				} else if (mrDataset.getOriginMrMetadata() == null && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
+                    return mrDataset.getOriginMrMetadata().getMrDatasetNature().name();   
+                }		
 				return null;
 			} else {
 				throw new IllegalArgumentException("dataset should be of type MrDataset");
