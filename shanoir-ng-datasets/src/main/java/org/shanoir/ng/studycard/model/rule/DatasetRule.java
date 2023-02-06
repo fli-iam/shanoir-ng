@@ -19,6 +19,7 @@ import javax.persistence.Entity;
 
 import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.studycard.model.assignment.DatasetAssignment;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.condition.DatasetMetadataConditionOnDataset;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
@@ -52,12 +53,14 @@ public class DatasetRule extends StudyCardRule<Dataset> {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }
         }
-       return fulfilled;
+        return fulfilled;
     }
    
     private void applyAssignments(Dataset dataset) {
-       for (StudyCardAssignment<Dataset> assignment : getAssignments()) {
-           assignment.apply(dataset);
+       for (StudyCardAssignment<?> assignment : getAssignments()) {
+           if (assignment instanceof DatasetAssignment) {
+               ((DatasetAssignment)assignment).apply(dataset);                              
+           } else throw new IllegalArgumentException("Unimplemented assignment type");
        }
     }
 }

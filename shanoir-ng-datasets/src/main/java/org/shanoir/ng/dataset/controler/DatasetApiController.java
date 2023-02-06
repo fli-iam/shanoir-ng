@@ -102,8 +102,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.swagger.annotations.ApiParam;
 
 @Controller
@@ -464,29 +462,15 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<String> getDicomMetadataByDatasetId(
-    		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
-		
-		final Dataset dataset = datasetService.findById(datasetId);
-		
-		
-		
-		String jsonObject = downloader.getDicomJsonForExamination(dataset.getDatasetAcquisition().getExamination());
-		System.out.println("##########################################################");
-		System.out.println("##########################################################");
-		System.out.println("##########################################################");
-		System.out.println("##########################################################");
-		//System.out.println(jsonObject);
-		
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		
-		
-//		List<URL> pathURLs = new ArrayList<>();
-//		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-//		if (pathURLs.isEmpty()) {
-//			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//		} else {
-//			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);			
-//		}
+    		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {	
+		final Dataset dataset = datasetService.findById(datasetId);		
+		List<URL> pathURLs = new ArrayList<>();
+		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+		if (pathURLs.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(downloader.downloadDicomMetadataForURL(pathURLs.get(0)), HttpStatus.OK);			
+		}
 	}
 	
 	public ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) {

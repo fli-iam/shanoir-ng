@@ -30,13 +30,7 @@ import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
-import org.shanoir.ng.studycard.model.condition.AcquisitionMetadataConditionOnAcquisition;
-import org.shanoir.ng.studycard.model.condition.AcquisitionMetadataConditionOnDatasets;
-import org.shanoir.ng.studycard.model.condition.DatasetMetadataConditionOnDataset;
-import org.shanoir.ng.studycard.model.condition.ExaminationMetadataConditionOnAcquisitions;
-import org.shanoir.ng.studycard.model.condition.ExaminationMetadataConditionOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
-import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -55,17 +49,17 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name="rule_id")
-	private List<StudyCardAssignment<T>> assignments;
+	private List<StudyCardAssignment<?>> assignments;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name="rule_id")
 	private List<StudyCardCondition> conditions;
 	
-	public List<StudyCardAssignment<T>> getAssignments() {
+	public List<StudyCardAssignment<?>> getAssignments() {
 		return assignments;
 	}
 
-	public void setAssignments(List<StudyCardAssignment<T>> assignments) {
+	public void setAssignments(List<StudyCardAssignment<?>> assignments) {
 		this.assignments = assignments;
 	}
 

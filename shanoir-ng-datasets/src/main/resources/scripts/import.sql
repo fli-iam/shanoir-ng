@@ -54,10 +54,10 @@ VALUES
 	(2,2,'Dataset');
 
 INSERT INTO study_card_condition
-	(id, rule_id, dicom_tag_or_field, operation)
+	(id, rule_id, dicom_tag, operationn scope)
 VALUES 
-	(1,1,2,4),
-	(2,2,2,4);
+	(1,1,2,4,'StudyCardDICOMCondition'),
+	(2,2,2,4,'StudyCardDICOMCondition');
 
 INSERT INTO study_card_condition_value
 	(id, condition_id, value)

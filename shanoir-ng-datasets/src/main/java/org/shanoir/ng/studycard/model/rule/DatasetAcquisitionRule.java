@@ -18,7 +18,10 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 import org.dcm4che3.data.Attributes;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.studycard.model.assignment.DatasetAcquisitionAssignment;
+import org.shanoir.ng.studycard.model.assignment.DatasetAssignment;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.condition.AcquisitionMetadataConditionOnAcquisition;
 import org.shanoir.ng.studycard.model.condition.AcquisitionMetadataConditionOnDatasets;
@@ -55,12 +58,17 @@ public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }
         }
-       return fulfilled;
+        return fulfilled;
     }
    
     private void applyAssignments(DatasetAcquisition acquisition) {
-       for (StudyCardAssignment<DatasetAcquisition> assignment : getAssignments()) {
-           assignment.apply(acquisition);
-       }
-    }
+        for (StudyCardAssignment<?> assignment : getAssignments()) {
+            if (assignment instanceof DatasetAssignment) {
+                for (Dataset dataset : acquisition.getDatasets())
+                ((DatasetAssignment)assignment).apply(dataset);               
+            } else if (assignment instanceof DatasetAcquisitionAssignment) {
+                ((DatasetAcquisitionAssignment)assignment).apply(acquisition);               
+            } else throw new IllegalArgumentException("Unimplemented assignment type");
+        }
+     }
 }
