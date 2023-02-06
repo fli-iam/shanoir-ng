@@ -25,7 +25,7 @@ import { of } from 'rxjs';
     templateUrl: 'action.component.html',
     styleUrls: ['action.component.css']
 })
-export class StudyCardActionComponent implements OnChanges, OnDestroy {  
+export class StudyCardActionComponent implements OnChanges, OnDestroy {
     @Input() assignment: StudyCardAssignment;
     @Output() actionChange: EventEmitter<StudyCardAssignment> = new EventEmitter();
     @Input() mode: Mode = 'view';
@@ -125,7 +125,14 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
     }
 
     onSelectFieldOption(option: Option<any>) {
-        if (option) option.disabled = true;
+        if (option) {
+            option.disabled = true;
+            if (option.section == 'Dataset') {
+                this.assignment.scope = 'Dataset';
+            } else if (option.section == 'DatasetAcquisition') {
+                this.assignment.scope = 'DatasetAcquisition';
+            }
+        }
     }
 
     onDeSelectFieldOption(option: Option<any>) {

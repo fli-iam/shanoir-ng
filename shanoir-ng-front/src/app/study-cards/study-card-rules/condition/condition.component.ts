@@ -123,7 +123,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             } else {
                 if (conditionField && conditionField.options) {
                     this.conditionChangeSubscription = conditionField.options.subscribe(opts => {
-                        this.shanoirFieldOptions = opts.map(opt => opt.clone());
+                        this.shanoirFieldOptions = opts?.map(opt => opt.clone());
                         if (opts && opts.length > 0) {
                             this.condition.values?.forEach(value => {
                                 let valueOption: Option<any> = opts.find(opt => {
