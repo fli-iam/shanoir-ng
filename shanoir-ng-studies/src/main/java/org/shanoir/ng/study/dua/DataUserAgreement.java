@@ -72,7 +72,7 @@ public class DataUserAgreement extends AbstractEntity {
 	
 	@JsonProperty("path")
 	public String getPath() {
-		return this.study.getDataUserAgreementPaths().get(0);
+		return this.study.getDataUserAgreementPaths().iterator().next();
 	}
 
 	@JsonProperty("studyName")

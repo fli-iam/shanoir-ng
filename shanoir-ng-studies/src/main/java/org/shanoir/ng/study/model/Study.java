@@ -93,16 +93,16 @@ public class Study extends HalEntity {
 	private String name;
 
 	/** List of protocol files directly attached to the study. */
-	@ElementCollection
+	@ElementCollection(fetch = FetchType.EAGER)
 	@CollectionTable(name = "protocol_file_path")
 	@Column(name = "path")
-	private List<String> protocolFilePaths;
+	private Set<String> protocolFilePaths;
 	
 	/** List of data user agreement form directly attached to the study. */
 	@ElementCollection
 	@CollectionTable(name = "data_user_agreement_file")
 	@Column(name = "path")
-	private List<String> dataUserAgreementPaths;
+	private Set<String> dataUserAgreementPaths;
 
 	/** Start date. */
 	@LocalDateAnnotations
@@ -310,7 +310,7 @@ public class Study extends HalEntity {
 	/**
 	 * @return the protocolFilePaths
 	 */
-	public List<String> getProtocolFilePaths() {
+	public Set<String> getProtocolFilePaths() {
 		return protocolFilePaths;
 	}
 
@@ -318,21 +318,21 @@ public class Study extends HalEntity {
 	 * @param protocolFilePaths
 	 *            the protocolFilePaths to set
 	 */
-	public void setProtocolFilePaths(List<String> protocolFilePaths) {
+	public void setProtocolFilePaths(Set<String> protocolFilePaths) {
 		this.protocolFilePaths = protocolFilePaths;
 	}
 
 	/**
 	 * @return the dataUserAgreementPaths
 	 */
-	public List<String> getDataUserAgreementPaths() {
+	public Set<String> getDataUserAgreementPaths() {
 		return dataUserAgreementPaths;
 	}
 
 	/**
 	 * @param dataUserAgreementPaths the dataUserAgreementPaths to set
 	 */
-	public void setDataUserAgreementPaths(List<String> dataUserAgreementPaths) {
+	public void setDataUserAgreementPaths(Set<String> dataUserAgreementPaths) {
 		this.dataUserAgreementPaths = dataUserAgreementPaths;
 	}
 

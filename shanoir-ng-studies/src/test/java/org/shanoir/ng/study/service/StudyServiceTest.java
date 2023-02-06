@@ -177,10 +177,10 @@ public class StudyServiceTest {
 		protocol.createNewFile();
 		Study dbStudy = ModelsUtil.createStudy();
 		dbStudy.setId(1L);
-		dbStudy.setProtocolFilePaths(Collections.singletonList("old.txt"));
+		dbStudy.setProtocolFilePaths(Collections.singleton("old.txt"));
 		Study updatedStudy = createStudy();
 		updatedStudy.setId(1L);
-		updatedStudy.setProtocolFilePaths(Collections.singletonList("new.txt"));
+		updatedStudy.setProtocolFilePaths(Collections.singleton("new.txt"));
 
 		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(dbStudy));
 
@@ -192,7 +192,7 @@ public class StudyServiceTest {
 		Assert.assertTrue(UPDATED_STUDY_NAME.equals(returnedStudy.getName()));
 		assertNotNull(returnedStudy.getProtocolFilePaths());
 		assertEquals(1, returnedStudy.getProtocolFilePaths().size());
-		assertEquals("new.txt", returnedStudy.getProtocolFilePaths().get(0));
+		assertEquals("new.txt", returnedStudy.getProtocolFilePaths().iterator().next());
 		// Check that the file was deleted
 		assertFalse(protocol.exists());
 		//Mockito.verify(studyRepository, Mockito.times(3)).save(Mockito.any(Study.class));
@@ -226,7 +226,7 @@ public class StudyServiceTest {
 	public void testUpdateStudyUsersNoDUA() {
 		// We delete the DUA from the old study
 		Study existing = createStudy();
-		existing.setDataUserAgreementPaths(Collections.singletonList("test"));
+		existing.setDataUserAgreementPaths(Collections.singleton("test"));
 		existing.setStudyUserList(new ArrayList<StudyUser>());
 		existing.getStudyUserList().add(createStudyUsers(1L, 1L, existing, true, StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_IMPORT));
 		StudyUser suToBeDeleted = createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE);
@@ -274,7 +274,7 @@ public class StudyServiceTest {
 		existing.getStudyUserList().add(createStudyUsers(2L, 2L, existing, true, StudyUserRight.CAN_ADMINISTRATE));
 		
 		Study updated = createStudy();
-		updated.setDataUserAgreementPaths(Collections.singletonList("truc"));
+		updated.setDataUserAgreementPaths(Collections.singleton("truc"));
 		updated.setStudyUserList(new ArrayList<StudyUser>());
 		updated.getStudyUserList().add(createStudyUsers(1L, 1L, updated, true, StudyUserRight.CAN_DOWNLOAD));
 		StudyUser suToBeAdded = createStudyUsers(null, 3L, updated, true, StudyUserRight.CAN_SEE_ALL);

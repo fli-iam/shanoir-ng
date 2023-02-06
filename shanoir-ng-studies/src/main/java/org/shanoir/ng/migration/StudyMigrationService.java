@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.center.model.Center;
@@ -23,8 +26,6 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
 import org.shanoir.ng.shared.migration.MigrationJob;
@@ -39,6 +40,7 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
@@ -84,6 +86,10 @@ public class StudyMigrationService {
 	DistantKeycloakConfigurationService distantKeycloak;
 
 	@Autowired ObjectMapper objectMapper;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
 
 	/**
 	 * Migrates a given study and all its elements
@@ -243,25 +249,29 @@ public class StudyMigrationService {
 	private void publishLoggingFileFromWS(String jobAsString) {
 		try {
 			MigrationJob job = objectMapper.readValue(jobAsString, MigrationJob.class);
+			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 			this.publishLoggingFile(job, job.getOldStudyId());
 		} catch (Exception e) {
 			LOG.error("ERROR: Could not publish migration logs.", e);
 		}
 	}
 
+	@Transactional
 	private void publishLoggingFile(MigrationJob job, Long studyId) {
 		try {
 			// Publish on local study
 			Path path = Paths.get("/tmp/migration" + studyId + ".log");
 			Files.write(path, job.getLogging(), StandardCharsets.UTF_8);
-
-			String filePath = studyService.getStudyFilePath(studyId, "migration.log");
+			String fileName = studyId + "_migration.log";
+			String filePath = studyService.getStudyFilePath(studyId, fileName);
 			File fileToCreate = new File(filePath);
 			fileToCreate.getParentFile().mkdirs();
 			Files.copy(path, fileToCreate.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			Study study = this.studyService.findById(studyId);
-			if (study.getProtocolFilePaths().contains(filePath)) {
-				this.studyRepository.addProtocolFile(studyId, filePath);
+			Study study = this.studyRepository.findById(studyId).get();
+
+			if (!study.getProtocolFilePaths().contains(fileName)) {
+				entityManager.clear();
+				this.studyRepository.addProtocolFile(studyId, fileName);
 			}
 		} catch (IOException e) {
 			LOG.error("ERROR: Could not publish migration logs.", e);

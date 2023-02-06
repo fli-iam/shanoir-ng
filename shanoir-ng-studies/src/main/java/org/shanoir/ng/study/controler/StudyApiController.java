@@ -378,7 +378,7 @@ public class StudyApiController implements StudyApi {
 		if (study.getDataUserAgreementPaths() == null || study.getDataUserAgreementPaths().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		String filePath = studyService.getStudyFilePath(studyId, study.getDataUserAgreementPaths().get(0));
+		String filePath = studyService.getStudyFilePath(studyId, study.getDataUserAgreementPaths().iterator().next());
 		File fileToDelete = new File(filePath);
 		if (!fileToDelete.exists()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

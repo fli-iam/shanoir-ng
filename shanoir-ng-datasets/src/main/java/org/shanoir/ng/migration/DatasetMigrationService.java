@@ -58,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
@@ -147,7 +148,7 @@ public class DatasetMigrationService {
 			job.setAccessToken(distantKeycloakConfigurationService.getAccessToken());
 			job.setRefreshToken(distantKeycloakConfigurationService.getRefreshToken());
 			
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, mapper.writeValueAsString(job));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, getJobAsString(job));
 
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_PRECLINICAL_QUEUE, mapper.writeValueAsString(job));
 
@@ -179,10 +180,15 @@ public class DatasetMigrationService {
 
 		// Migrate all examinations
 		List<Examination> examinations = examRepository.findByStudyId(job.getOldStudyId());
+		
+		float percentage = 1f / (float) examinations.size();;
+		
 		Map<Long, Long> examMap = new HashMap<>();
 		for (Examination exam : examinations) {
 			Long oldId = exam.getId();
 			job.getLogging().add("Migrating Examination: " + oldId);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, getJobAsString(job));
+			publishEvent("Migrating examination : " + exam.getComment(), event.getProgress() + percentage);
 
 			Examination createdExam = migrateExamination(exam, job);
 			examMap.put(oldId, createdExam.getId());
@@ -190,6 +196,14 @@ public class DatasetMigrationService {
 		job.setExaminationMap(examMap);
 		job.getLogging().add("Examination migration - success");
 
+	}
+
+	private String getJobAsString(MigrationJob job) {
+		try {
+			return this.mapper.writeValueAsString(job);
+		} catch (JsonProcessingException e) {
+			return null;
+		}
 	}
 
 	private StudyCard moveStudyCard(StudyCard sc, MigrationJob job) throws ShanoirException {
@@ -494,7 +508,7 @@ public class DatasetMigrationService {
 		} catch (Exception e) {
 			// Add error to list of errors and continue
 			job.getLogging().add("ERROR : Dataset File could not be migrated: " + file.getPath() + " : " + e.getMessage());
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, job);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, getJobAsString(job));
 		} finally {
 			FileUtils.deleteQuietly(workFolder);
 		}

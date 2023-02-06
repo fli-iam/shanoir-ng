@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface StudyRepository extends CrudRepository<Study, Long> {
@@ -65,6 +66,7 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	List<Study> findByVisibleByDefaultTrue();
 
 	@Modifying
+	@Transactional
 	@Query(value="insert into protocol_file_path (study_id, path) VALUES (:studyId, :filePath)", nativeQuery = true)
 	void addProtocolFile(@Param("studyId") Long studyId, @Param("filePath") String filePath);
 
