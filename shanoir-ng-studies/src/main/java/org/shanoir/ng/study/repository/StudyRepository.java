@@ -17,8 +17,10 @@ package org.shanoir.ng.study.repository;
 import java.util.List;
 
 import org.shanoir.ng.study.model.Study;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -61,5 +63,9 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 * @return all the publicly available studies.
 	 */
 	List<Study> findByVisibleByDefaultTrue();
+
+	@Modifying
+	@Query("insert into protocol_file_path VALUES (:studyId, :filePath)")
+	void addProtocolFile(@Param("studyId") Long studyId, @Param("filePath") String filePath);
 
 }

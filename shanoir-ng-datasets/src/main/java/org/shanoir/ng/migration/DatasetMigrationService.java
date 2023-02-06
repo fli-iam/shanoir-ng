@@ -10,6 +10,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 
 import org.apache.commons.io.FileUtils;
+import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -20,6 +21,8 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
+import org.shanoir.ng.eeg.model.Channel;
+import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -376,6 +379,20 @@ public class DatasetMigrationService {
 				for (RepetitionTime element : mrDs.getRepetitionTime()) {
 					element.setId(null);
 					element.setMrDataset(mrDs);
+				}
+			}
+		} else if ("Eeg".equals(ds.getType())) {
+			EegDataset eegDs = (EegDataset) ds;
+			if (!CollectionUtils.isEmpty(eegDs.getChannels())) {
+				for (Channel ch : eegDs.getChannels()) {
+					ch.setId(null);
+					ch.setDataset(eegDs);
+				}
+			}
+			if (!CollectionUtils.isEmpty(eegDs.getEvents())) {
+				for (Event ev : eegDs.getEvents()) {
+					ev.setId(null);
+					ev.setDataset(eegDs);
 				}
 			}
 		}

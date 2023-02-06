@@ -23,6 +23,8 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
 import org.shanoir.ng.shared.migration.MigrationJob;
@@ -30,6 +32,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.subject.model.Subject;
@@ -55,6 +58,9 @@ public class StudyMigrationService {
 	@Autowired
 	private StudyService studyService;
 
+	@Autowired
+	private StudyRepository studyRepository;
+	
 	@Autowired
 	private DistantStudiesShanoirService distantShanoir;
 
@@ -132,12 +138,6 @@ public class StudyMigrationService {
 
 			job.getLogging().add("Study migration");
 
-			// Migrate study
-			Long oldStudyId = study.getId();
-
-			// Reset ID
-			study.setId(null);
-
 			// Reset SubjectStudy to update with subjects
 			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
 				subjectStudy.setId(null);
@@ -181,13 +181,18 @@ public class StudyMigrationService {
 			// Reset DUA because otherwise the user is not allowed to do anything
 			study.setDataUserAgreementPaths(null);
 
-			StudyDTO newStudy = distantShanoir.createStudy(study);
+			// Reset ID
+			study.setId(null);
 
+			StudyDTO newStudy = distantShanoir.createStudy(study);
+			
+			study.setId(studyId);
+			
 			// Add protocol files
 			// Can easily be done manually
 
 			for (String fileName : study.getProtocolFilePaths()) {
-				File file = new File(studyService.getStudyFilePath(oldStudyId, fileName));
+				File file = new File(studyService.getStudyFilePath(studyId, fileName));
 				distantShanoir.addProtocoleFile(file, newStudy.getId());
 			}
 
@@ -204,7 +209,7 @@ public class StudyMigrationService {
 			job.setAccessToken(distantKeycloak.getAccessToken());
 			job.setRefreshToken(this.distantKeycloak.getRefreshToken());
 
-			this.publishLoggingFile(job);
+			this.publishLoggingFile(job, studyId);
 
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_QUEUE, objectMapper.writeValueAsString(job));
 		} catch (ShanoirException se) {
@@ -213,7 +218,7 @@ public class StudyMigrationService {
 			event.setMessage(se.getMessage());
 			eventService.publishEvent(event);
 			job.getLogging().add("Error while moving study: " + se.getMessage());
-			this.publishLoggingFile(job);
+			this.publishLoggingFile(job, studyId);
 			throw se;
 		} catch (Exception e) {
 			event.setStatus(ShanoirEvent.ERROR);
@@ -221,7 +226,7 @@ public class StudyMigrationService {
 			event.setMessage("An unexpected error occured during study migration, please contact an administrator.");
 			eventService.publishEvent(event);
 			job.getLogging().add("Unexpected error while moving study: " + e.getMessage());
-			this.publishLoggingFile(job);
+			this.publishLoggingFile(job, studyId);
 			throw e;
 		}
 		// Reset lists
@@ -238,23 +243,25 @@ public class StudyMigrationService {
 	private void publishLoggingFileFromWS(String jobAsString) {
 		try {
 			MigrationJob job = objectMapper.readValue(jobAsString, MigrationJob.class);
-			this.publishLoggingFile(job);
+			this.publishLoggingFile(job, job.getOldStudyId());
 		} catch (Exception e) {
 			LOG.error("ERROR: Could not publish migration logs.", e);
 		}
 	}
 
-	private void publishLoggingFile(MigrationJob job) {
+	private void publishLoggingFile(MigrationJob job, Long studyId) {
 		try {
 			// Publish on local study
-			Path path = Paths.get("/tmp/migration" + job.getOldStudyId() + ".log");
+			Path path = Paths.get("/tmp/migration" + studyId + ".log");
 			Files.write(path, job.getLogging(), StandardCharsets.UTF_8);
 
-			if (job.getOldStudyId() != null) {
-				String filePath = studyService.getStudyFilePath(job.getOldStudyId(), "migration.log");
-				File fileToCreate = new File(filePath);
-				fileToCreate.getParentFile().mkdirs();
-				Files.copy(path, fileToCreate.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			String filePath = studyService.getStudyFilePath(studyId, "migration.log");
+			File fileToCreate = new File(filePath);
+			fileToCreate.getParentFile().mkdirs();
+			Files.copy(path, fileToCreate.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			Study study = this.studyService.findById(studyId);
+			if (study.getProtocolFilePaths().contains(filePath)) {
+				this.studyRepository.addProtocolFile(studyId, filePath);
 			}
 		} catch (IOException e) {
 			LOG.error("ERROR: Could not publish migration logs.", e);
