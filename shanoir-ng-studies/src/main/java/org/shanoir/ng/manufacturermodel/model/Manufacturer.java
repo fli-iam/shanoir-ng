@@ -14,9 +14,9 @@
 
 package org.shanoir.ng.manufacturermodel.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.PostLoad;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PostLoad;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.Length;

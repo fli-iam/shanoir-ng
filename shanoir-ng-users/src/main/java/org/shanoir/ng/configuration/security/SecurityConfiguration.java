@@ -54,7 +54,7 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 			.sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -71,12 +71,12 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-	public KeycloakConfigResolver keycloakConfigResolver() {
+	KeycloakConfigResolver keycloakConfigResolver() {
 		return new KeycloakSpringBootConfigResolver();
 	}
 
 	@Bean
-	public FilterRegistrationBean corsFilter() {
+	FilterRegistrationBean corsFilter() {
 		final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		final CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);

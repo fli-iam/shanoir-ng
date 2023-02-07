@@ -2,8 +2,8 @@ package org.shanoir.ng.subjectstudy.model;
 
 import java.io.Serializable;
 
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import org.shanoir.ng.tag.model.Tag;
 

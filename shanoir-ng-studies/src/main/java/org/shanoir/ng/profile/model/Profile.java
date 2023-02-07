@@ -20,8 +20,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.validation.Unique;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 
 /**
  * Profile

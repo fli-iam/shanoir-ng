@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.manufacturermodel.model;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 /**
  * Validates if a manufacturer model is correct depending on its type.

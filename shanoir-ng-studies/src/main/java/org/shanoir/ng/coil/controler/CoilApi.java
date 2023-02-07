@@ -16,7 +16,7 @@ package org.shanoir.ng.coil.controler;
 
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.shanoir.ng.coil.dto.CoilDTO;
 import org.shanoir.ng.coil.model.Coil;

@@ -7,7 +7,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.List;
 
 @Entity

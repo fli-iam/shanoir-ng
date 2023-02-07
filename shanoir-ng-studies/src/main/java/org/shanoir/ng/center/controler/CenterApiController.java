@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.shanoir.ng.center.dto.CenterDTO;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
