@@ -192,7 +192,7 @@ public class StudyApiControllerTest {
 
 			// WHEN The file is added to the examination
 
-			mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH + "/protocol-file-upload/1").file(file))
+			mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/protocol-file-upload/1").file(file))
 			.andExpect(status().isOk());
 
 			// THEN the file is saved
