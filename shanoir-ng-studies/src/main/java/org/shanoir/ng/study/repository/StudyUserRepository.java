@@ -17,7 +17,7 @@ package org.shanoir.ng.study.repository;
 import java.util.List;
 import java.util.Set;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.data.jpa.repository.Query;
