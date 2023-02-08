@@ -188,13 +188,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selections = [];
         if (this.solrRequest.datasetStartDate && this.solrRequest.datasetStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'from: ' + formatDate(this.solrRequest.datasetStartDate, 'dd/MM/yyy', 'en-US'),
+                    'from: ' + formatDate(this.solrRequest.datasetStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),
                     () => this.solrRequest.datasetStartDate = null
             ));
         }
         if (this.solrRequest.datasetEndDate && this.solrRequest.datasetEndDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'to: ' + formatDate(this.solrRequest.datasetEndDate, 'dd/MM/yyy', 'en-US'),
+                    'to: ' + formatDate(this.solrRequest.datasetEndDate, 'dd/MM/yyy', 'en-US', 'UTC'),
                     () => this.solrRequest.datasetEndDate = null 
             ));
         }
@@ -392,7 +392,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         
         function dateRenderer(date: number) {
             if (date) {
-                return formatDate(new Date(date),'dd/MM/yyyy', 'en-US');
+                return formatDate(new Date(date),'dd/MM/yyyy', 'en-US', 'UTC');
             }
             return null;
         };
