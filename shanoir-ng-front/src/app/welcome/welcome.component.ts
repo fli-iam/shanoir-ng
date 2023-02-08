@@ -54,7 +54,7 @@ export class WelcomeComponent implements OnInit {
   }
 
   toShanoir(): void {
-    const url = 'https://shanoir.org';
+    const url = 'https://project.inria.fr/shanoir/';
     window.open(url, '_blank');
   }
 
