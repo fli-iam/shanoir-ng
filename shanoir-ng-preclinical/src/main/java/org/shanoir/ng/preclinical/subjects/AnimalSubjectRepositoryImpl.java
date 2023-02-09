@@ -16,8 +16,8 @@ package org.shanoir.ng.preclinical.subjects;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.shanoir.ng.preclinical.references.Reference;
 import org.springframework.stereotype.Component;

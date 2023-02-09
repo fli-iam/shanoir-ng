@@ -16,8 +16,8 @@ package org.shanoir.ng.preclinical.extra_data.physiological_data;
 
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Entity;
+import jakarta.validation.constraints.NotNull;
 
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
 

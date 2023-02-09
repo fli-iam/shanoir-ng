@@ -16,7 +16,7 @@ package org.shanoir.ng.preclinical.extra_data;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;

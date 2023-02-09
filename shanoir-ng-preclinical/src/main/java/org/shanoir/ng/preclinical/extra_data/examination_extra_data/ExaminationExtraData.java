@@ -16,10 +16,10 @@ package org.shanoir.ng.preclinical.extra_data.examination_extra_data;
 
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
