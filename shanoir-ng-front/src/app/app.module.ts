@@ -264,6 +264,8 @@ import { QualityControlComponent } from './quality-control/quality-control.compo
 import { QualityCardService } from './study-cards/shared/quality-card.service';
 import { QualityCardDTOService } from './study-cards/shared/quality-card.dto';
 import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
+import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
+import { QualityCardRuleComponent } from './study-cards/study-card-rules/quality-card-rule.component';
 import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
@@ -452,6 +454,8 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         CarminDatasetProcessingsComponent,
         QualityControlComponent,
         QualityCardListComponent,
+        QualityCardComponent,
+        QualityCardRuleComponent,
         WelcomeComponent
     ],
     entryComponents: [

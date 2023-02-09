@@ -79,7 +79,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public noResult: boolean;
     @Input() clear: boolean = true;
     @Input() search: boolean = true;
-
+    @Input() selectionColor: boolean = false;
 
     @Input() viewDisabled: boolean;
     @Input() viewHidden: boolean;
@@ -635,13 +635,14 @@ export class Option<T> {
 
     disabled: boolean = false;
     compatible: boolean = undefined;
-    color: string;
     backgroundColor: string;
       
     constructor(
         public value: T,
         public label: string,
-        public section?: string) {}
+        public section?: string,
+        public color?: string,
+        public awesome?: string) {}
 
     clone(): Option<T> {
         let option: Option<T> = new Option(this.value, this.label, this.section);

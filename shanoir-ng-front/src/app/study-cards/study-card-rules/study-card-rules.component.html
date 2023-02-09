@@ -13,6 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 <ng-container *ngFor="let rule of rules; let i = index;">
 	<study-card-rule
+		*ngIf="cardType == 'studycard'"
 		[class.appear]="canAnimateEnter(i)"
 		[class.select-mode]="mode == 'select'"
 		[class.selected]="selectedRules.get(i) != undefined"
@@ -28,17 +29,37 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		[showErrors]="showErrors"
 		(click)="clickRule(i)">
 	</study-card-rule>
+	<quality-card-rule
+		*ngIf="cardType == 'qualitycard'"
+		[class.appear]="canAnimateEnter(i)"
+		[class.select-mode]="mode == 'select'"
+		[class.selected]="selectedRules.get(i) != undefined"
+		[rule]="rule" 
+		[conditionFields]="conditionFields" 
+		[mode]="mode == 'select' ? 'view' : mode" 
+		(change)="onChangeCallback(rules)" 
+		(moveUp)="moveUp(i)"
+		(moveDown)="moveDown(i)"
+		(copy)="copy(i)"
+		(delete)="delete(i)"
+		[showErrors]="showErrors"
+		(click)="clickRule(i)">
+	</quality-card-rule>
 </ng-container>
 <div *ngIf="mode == 'edit' || mode == 'create'" class="add-container">
-	<span (click)="addNewRule('DatasetAcquisition')" class="acquisition">
+	<span (click)="addNewRule('DatasetAcquisition')" class="acquisition" *ngIf="cardType == 'studycard'">
 		<i class="fa-solid fa-bed-pulse"></i>
 		<div>Add a rule on <span class="entity">acquisition</span></div>
 	</span>
-	<span (click)="addNewRule('Dataset')" class="dataset">
+	<span (click)="addNewRule('Dataset')" class="dataset" *ngIf="cardType == 'studycard'">
 		<i class="fa-solid fa-brain"></i>
 		<div>Add a rule on <span class="entity">dataset</span></div>
 	</span>
-	<span (click)="importRules.emit()">
+	<span (click)="addNewExamRule()" class="dataset" *ngIf="cardType == 'qualitycard'">
+		<i class="fas fa-plus"></i>
+		<div>Add a rule</div>
+	</span>
+	<span (click)="importRules.emit()" *ngIf="cardType == 'studycard'">
 		<i class="fas fa-file-import"></i>
 		<div>Import a rule</div>
 	</span>

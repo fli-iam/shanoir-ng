@@ -14,13 +14,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="root" [class.disabled]="disabled" *ngIf="!readOnly">
     <span class="frame" *ngIf="!compactMode"> 
-        <span class="input-container">
-            <span class="fake-input">{{inputText ? inputText : (placeholder ? placeholder : 'Select an option...')}}</span>
+        <span class="input-container left-icon" [style.color]="selectionColor ? selectedOption?.color : null">
+            <span  *ngIf="selectedOption?.awesome"><i class="{{selectedOption?.awesome}}"></i></span>
+            <span class="fake-input">
+                {{inputText ? inputText : (placeholder ? placeholder : 'Select an option...')}}
+            </span>
             <input #input
                 *ngIf="options?.length > 0"
                 type="text" 
                 tabindex="-1" 
                 class="label" 
+                [class.icon]="selectedOption?.awesome"
                 [ngModel]="inputText" 
                 (ngModelChange)="onTypeText($event)" 
                 [placeholder]="placeholder ? placeholder : 'Select an option...'" 
@@ -69,6 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     (mousemove)="focusedOptionIndex = i"
                     [style.color]="option.color">
                 <span [style.background-color]="option.backgroundColor" class="inner-option">
+                    <i *ngIf="option.awesome" class="{{option.awesome}}"></i>
                     {{option.label}}
                 </span>
             </div>
@@ -99,7 +104,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="root" [class.disabled]="disabled" *ngIf="readOnly">
     <span class="frame">
-        <span class="input-container">{{inputText}}</span>
+        <span class="input-container left-icon" [style.color]="selectedOption?.color">
+            <span  *ngIf="selectedOption?.awesome"><i class="{{selectedOption?.awesome}}"></i></span>
+            {{inputText}}
+        </span>
         <span class="commands">
             <span *ngIf="onViewClick.observers.length > 0 && !viewHidden" (click)="clickView()" [class.disabled]="viewDisabled || !selectedOption" class="button"><i class="fa-regular fa-eye"></i></span>
         </span>

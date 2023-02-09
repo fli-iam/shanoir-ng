@@ -9,6 +9,7 @@
 .fake-input { color: transparent; }
 .auto-width label { width: auto; }
 .label { display: inline-block; cursor: default; min-width: 50px; width: 100%; height: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0; position: absolute; left: 0; right: 0; top: 0; }
+.label.icon { left: 15px; }
 .empty { font-style: italic; color: var(--greyer); }
 .empty-list { padding: 0 5px; }
 .reset { color: var(--color-a); cursor: pointer; font-style: normal; }

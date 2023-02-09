@@ -46,9 +46,32 @@ CREATE TABLE study_card_condition_values (
 ALTER TABLE study_card_condition_values ADD CONSTRAINT FKnmg0gxqrew2nqktd0mm5hvi64 FOREIGN KEY (study_card_condition_id) REFERENCES study_card_condition(id);
 
 -- copy values afterwards
-INSERT INTO study_card_condition_values (study_card_condition_id, value) select id, dicom_value FROM study_card_condition;
+INSERT INTO study_card_condition_values (study_card_condition_id, value) SELECT id, dicom_value FROM study_card_condition;
 -- delete old column
 ALTER TABLE study_card_condition DROP dicom_value;
 
 -- add quality_tag in subject_study
 ALTER TABLE subject_study ADD COLUMN quality_tag int(11) NULL;
+
+-- create table study_card_condition_join
+CREATE TABLE study_card_condition_join (
+  study_card_rule_id bigint(20) NOT NULL,
+  condition_id bigint(20) NOT NULL,
+  UNIQUE KEY UK_n8b95p3jtob4ot3t48isme8xe (condition_id),
+  KEY FKs853rms23vbo6qtbnuiyqv1ci (study_card_rule_id),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ALTER TABLE study_card_condition_join ADD CONSTRAINT FK1k7n1md79nkowvqbibyn7a72k FOREIGN KEY (condition_id) REFERENCES study_card_condition(id);
+ALTER TABLE study_card_condition_join ADD CONSTRAINT FKs853rms23vbo6qtbnuiyqv1ci FOREIGN KEY (study_card_rule_id) REFERENCES study_card_rule(id);
+
+-- create table quality_card_condition_join
+CREATE TABLE quality_card_condition_join (
+  quality_card_rule_id bigint(20) NOT NULL,
+  condition_id bigint(20) NOT NULL,
+  UNIQUE KEY UK_6m1dha1llcmucyobv1nlxbqej (condition_id),
+  KEY FKahmgub56cris7hca5ya5rj8m6 (quality_card_rule_id),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ALTER TABLE quality_card_condition_join ADD CONSTRAINT UK_6m1dha1llcmucyobv1nlxbqej FOREIGN KEY (condition_id) REFERENCES study_card_condition(id);
+ALTER TABLE quality_card_condition_join ADD CONSTRAINT FKahmgub56cris7hca5ya5rj8m6 FOREIGN KEY (quality_card_rule_id) REFERENCES quality_card_rule(id);
+
+-- transfer study card condition relations
+INSERT INTO study_card_condition_join (study_card_rule_id, condition_id) SELECT rule_id, id FROM study_card_condition WHERE rule_id IS NOT NULL;

@@ -24,6 +24,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 
 import org.dcm4che3.data.Attributes;
@@ -49,7 +50,9 @@ public class QualityExaminationRule extends AbstractEntity {
 	private Integer tag;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinColumn(name="rule_id")
+	// there is a join table because a rule_id fk would lead to an ambiguity and bugs 
+	// because it could refer to a study card or quality card rule
+	@JoinTable(name="quality_card_condition_join", joinColumns = {@JoinColumn(name = "quality_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
 	private List<StudyCardCondition> conditions;
 
 	public QualityTag getQualityTag() {

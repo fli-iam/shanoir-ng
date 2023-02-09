@@ -29,7 +29,7 @@ import { Subscription } from 'rxjs';
 })
 export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges {
     
-    @Input() ruleScope: MetadataFieldScope;
+    @Input() ruleScope: 'Dataset' | 'DatasetAcquisition' | 'Examination';
     @Input() condition: StudyCardCondition;
     @Output() conditionChange: EventEmitter<StudyCardCondition> = new EventEmitter();
     @Input() mode: Mode = 'view';
@@ -88,6 +88,12 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
                     new Option('StudyCardDICOMCondition', 'the DICOM field'),
                     new Option('AcquisitionMetadataConditionOnAcquisition', 'the acquisition field'),
                     new Option('AcquisitionMetadataConditionOnDatasets', 'the dataset field'),
+                ];
+            } else if (this.ruleScope == 'Examination') {
+                this.conditionTypeOptions = [
+                    new Option('StudyCardDICOMCondition', 'the DICOM field'),
+                    new Option('ExaminationMetadataConditionOnAcquisitions', 'the acquisition field'),
+                    new Option('ExaminationMetadataConditionOnDatasets', 'the dataset field'),
                 ];
             }
         }

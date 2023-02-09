@@ -24,7 +24,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </span>
         <span class="nb-rules" (mouseover)="onMouseOverNbRules(studyCard, $event)" (mouseleave)="onMouseOutNbRules(studyCard)" [class.hover]="selectedStudyCard?.id == studyCard.id">
             {{studyCard.rules?.length}} rule(s)
-            <study-card-rules class="rules"
+            <study-card-rules class="rules" cardType="qualitycard"
                     *ngIf="selectedStudyCard?.id == studyCard.id"
                     [ngModel]="selectedStudyCard.rules" 
                     mode="view"

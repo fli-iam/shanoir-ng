@@ -7,11 +7,13 @@
 
 .conditions::ng-deep .condition:not(:first-child) condition::before { display: inline; content: "and " }
 
-condition, action, .add, .always {
+condition, action, .add, .always, .quality-tag {
     border: 1px solid var(--grey);
     border-radius: 10px;
     margin: 3px 0;
     padding: 0px 7px; }
+
+.quality-tag select-box { width: auto; border: none !important; }
 
 .conditions.dataset condition, .actions.dataset action { border-color: lightseagreen; }
 .conditions.acquisition condition, .actions.acquisition action { border-color: coral; }

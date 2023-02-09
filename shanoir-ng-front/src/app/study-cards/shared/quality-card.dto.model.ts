@@ -30,7 +30,7 @@ export class QualityCardDTO {
             this.rules = qualityCard.rules.map(rule => {
                 let ruleDTO: QualityCardRuleDTO = new QualityCardRuleDTO();
                 ruleDTO.conditions = rule.conditions.map(cond => new StudyCardConditionDTO(cond));
-                ruleDTO.tag = rule.tag;
+                ruleDTO.qualityTag = rule.tag;
                 return ruleDTO;
             });
         }
@@ -38,6 +38,6 @@ export class QualityCardDTO {
 }
 
 export class QualityCardRuleDTO {
-    tag: QualityTag[];
+    qualityTag: QualityTag[];
     conditions: StudyCardConditionDTO[];
 }

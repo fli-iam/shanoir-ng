@@ -31,6 +31,20 @@ export class QualityCardRule {
 
     tag: QualityTag[];
     conditions: StudyCardCondition[];
+
+    static copy(rule: QualityCardRule): QualityCardRule {
+        let copy: QualityCardRule = new QualityCardRule();
+        copy.tag = rule.tag;
+        copy.conditions = rule.conditions.map(con => {
+            let conCopy: StudyCardCondition = new StudyCardCondition(con.scope);
+            conCopy.dicomTag = con.dicomTag;
+            conCopy.shanoirField = con.shanoirField;
+            conCopy.values = [...con.values];
+            conCopy.operation = con.operation;
+            return conCopy;
+        });
+        return copy;
+    }
 }
 
 export enum QualityTag {

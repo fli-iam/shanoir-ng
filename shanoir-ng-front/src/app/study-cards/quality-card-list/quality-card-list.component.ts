@@ -33,7 +33,7 @@ export class QualityCardListComponent extends BrowserPaginEntityListComponent<Qu
     constructor(
             private qualityCardService: QualityCardService) {
                 
-        super('study-card');
+        super('quality-card');
     }
 
     getService(): EntityService<QualityCard> {

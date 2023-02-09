@@ -24,6 +24,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 
 import org.dcm4che3.data.Attributes;
@@ -52,7 +53,9 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
 	private List<StudyCardAssignment<?>> assignments;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinColumn(name="rule_id")
+	// there is a join table because a rule_id fk would lead to an ambiguity and bugs 
+    // because it could refer to a study card or quality card rule
+	@JoinTable(name="study_card_condition_join", joinColumns = {@JoinColumn(name = "study_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
 	private List<StudyCardCondition> conditions;
 	
 	public List<StudyCardAssignment<?>> getAssignments() {

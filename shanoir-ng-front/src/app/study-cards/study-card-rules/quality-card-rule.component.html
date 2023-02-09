@@ -12,10 +12,10 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="conditions" [class.dataset]="rule.scope == 'Dataset'" [class.acquisition]="rule.scope == 'DatasetAcquisition'">
+<div class="conditions">
 	<div *ngFor="let condition of rule.conditions; let i = index" class="condition">	
 		<condition 
-				[ruleScope]="rule.scope"
+				ruleScope="Examination"
 				[(condition)]="rule.conditions[i]" 
 				[mode]="mode"
 				[fieldOptions]="conditionFieldOptions" 
@@ -46,20 +46,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</span>
 </div>
 
-<div class="actions" [class.dataset]="rule.scope == 'Dataset'" [class.acquisition]="rule.scope == 'DatasetAcquisition'">
-	<div *ngFor="let action of rule.assignments; let i = index" class="action">
-		<action 
-				[(assignment)]="rule.assignments[i]" 
-				[mode]="mode" 
-				[fieldOptions]="assignmentFieldOptions" 
-				[fields]="assignmentFields" 
-				[class.edit]="mode != 'view'"
-				(actionChange)="change.emit(rule)"
-				(delete)="deleteAction(i)"
-				[showErrors]="showErrors">
-		</action>
-	</div>
-	<div *ngIf="mode != 'view'">
-		<span class="add" (click)="addNewAction()" [class.error]="rule.assignments?.length == 0 && (showErrors || touched)"><i class="fas fa-plus"></i>Add an action</span>
+<div class="actions">
+	<div class="action quality-tag">
+		<select-box
+			[class.error]="showErrors && !rule.tag"
+			[readOnly]="mode == 'view'"
+			[(ngModel)]="rule.tag"
+			[options]="tagOptions"
+			(userChange)="change.emit(rule)"
+			[clear]="false"
+			[selectionColor]="true">
+		</select-box>
 	</div>
 </div>

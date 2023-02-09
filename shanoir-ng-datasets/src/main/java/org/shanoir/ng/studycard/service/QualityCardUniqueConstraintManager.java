@@ -15,10 +15,10 @@
 package org.shanoir.ng.studycard.service;
 
 import org.shanoir.ng.shared.validation.UniqueConstraintManagerImpl;
-import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.model.QualityCard;
 import org.springframework.stereotype.Service;
 
 @Service
-public class StudyCardUniqueConstraintManager extends UniqueConstraintManagerImpl<StudyCard> {
+public class QualityCardUniqueConstraintManager extends UniqueConstraintManagerImpl<QualityCard> {
 
 } 

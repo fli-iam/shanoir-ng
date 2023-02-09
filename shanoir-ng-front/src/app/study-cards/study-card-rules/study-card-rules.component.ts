@@ -44,6 +44,7 @@ import { MrDatasetNature } from '../../datasets/dataset/mr/dataset.mr.model';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { BidsDataType } from '../../enum/bids-data-type.enum';
 import { SuperPromise } from '../../utils/super-promise';
+import { QualityCardRule } from '../shared/quality-card.model';
 
 @Component({
     selector: 'study-card-rules',
@@ -60,7 +61,8 @@ import { SuperPromise } from '../../utils/super-promise';
 export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor {
     
     @Input() mode: Mode | 'select';
-    rules: StudyCardRule[];
+    @Input() cardType: 'studycard' | 'qualitycard';
+    rules: (StudyCardRule | QualityCardRule)[];
     @ViewChildren(StudyCardRuleComponent) ruleElements: QueryList<StudyCardRuleComponent>;
     private onTouchedCallback = () => {};
     onChangeCallback = (_: any) => {};
@@ -73,8 +75,8 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     private allCoilsPromise: SuperPromise<Coil[]> = new SuperPromise();
     @Input() showErrors: boolean = false;
     @Output() importRules: EventEmitter<void> = new EventEmitter();
-    @Output() selectedRulesChange: EventEmitter<StudyCardRule[]> = new EventEmitter();
-    selectedRules: Map<number, StudyCardRule> = new Map();
+    @Output() selectedRulesChange: EventEmitter<(StudyCardRule | QualityCardRule)[]> = new EventEmitter();
+    selectedRules: Map<number, StudyCardRule | QualityCardRule> = new Map();
     rulesToAnimate: Set<number> = new Set();
 
     
@@ -103,6 +105,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
 
         // here we reference assignment fields but conditions could be different
         this.conditionFields = this.assignmentFields;
+        console.log(this.conditionFields);
 
         if (this.breadcrumbService.currentStep.data.rulesToAnimate) 
             this.rulesToAnimate = this.breadcrumbService.currentStep.data.rulesToAnimate;
@@ -133,6 +136,14 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         let rule: StudyCardRule = new StudyCardRule(scope);
         rule.conditions = [];
         rule.assignments = []; 
+        this.rules.push(rule);
+        this.animateRule(this.rules.length - 1);
+        this.onChangeCallback(this.rules);
+    }
+
+    addNewExamRule() {
+        let rule: QualityCardRule = new QualityCardRule();
+        rule.conditions = [];
         this.rules.push(rule);
         this.animateRule(this.rules.length - 1);
         this.onChangeCallback(this.rules);
@@ -207,8 +218,13 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     };
 
     copy(index: number) {
-        let original: StudyCardRule = this.rules.slice(index, index + 1)[0];
-        let copy = StudyCardRule.copy(original);
+        let original: StudyCardRule | QualityCardRule = this.rules.slice(index, index + 1)[0];
+        let copy;
+        if (original instanceof StudyCardRule) {
+            copy = StudyCardRule.copy(original);
+        } else if (original instanceof QualityCardRule) {
+            copy = QualityCardRule.copy(original);
+        } 
         this.rules.push(copy);
         this.animateRule(this.rules.length - 1);
         this.onChangeCallback(this.rules);
@@ -222,7 +238,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
 
     public static validator = (control: AbstractControl): ValidationErrors | null => {
-        const rules: StudyCardRule[] = control.value; 
+        const rules: (StudyCardRule | QualityCardRule)[] = control.value; 
         let errors: any = {};
         if (rules) {
             rules.forEach(rule => {
@@ -241,14 +257,20 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
                 if (rule.conditions?.find(cond => cond.values?.length <= 0)) {
                     errors.missingField = 'condition values';
                 }                     
-                if (rule.assignments?.find(ass => !ass.field)) {
-                    errors.missingField = 'assignment field';
-                }
-                if (rule.assignments?.find(ass => !ass.value)) {
-                    errors.missingField = 'assignment value';
-                }
-                if (!rule.assignments || rule.assignments.length == 0) {
-                    errors.noAssignment = true;
+                if (rule instanceof StudyCardRule) {
+                    if (rule.assignments?.find(ass => !ass.field)) {
+                        errors.missingField = 'assignment field';
+                    }
+                    if (rule.assignments?.find(ass => !ass.value)) {
+                        errors.missingField = 'assignment value';
+                    }
+                    if (!rule.assignments || rule.assignments.length == 0) {
+                        errors.noAssignment = true;
+                    }
+                } else if (rule instanceof QualityCardRule) {
+                    if (!rule.tag) {
+                        errors.missingField = 'quality tag';
+                    }
                 }
             });
         }
@@ -260,7 +282,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
         if (this.mode == 'select') {
             if (this.selectedRules.has(i)) this.selectedRules.delete(i);
             else (this.selectedRules.set(i, this.rules[i]));
-            let rulesArr: StudyCardRule[] = [];
+            let rulesArr: (StudyCardRule | QualityCardRule)[] = [];
             this.selectedRules.forEach(rule => rulesArr.push(rule));
             this.selectedRulesChange.emit(rulesArr);
         }

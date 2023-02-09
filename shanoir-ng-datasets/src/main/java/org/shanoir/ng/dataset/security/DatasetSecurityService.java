@@ -16,7 +16,6 @@ package org.shanoir.ng.dataset.security;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -558,20 +557,53 @@ public class DatasetSecurityService {
 			throw new IllegalArgumentException("Study card cannot be null here.");
 		}
     	if (studyCard.getId() == null) {
-			throw new IllegalArgumentException("Dataset acquisition id cannot be null here.");
+			throw new IllegalArgumentException("Study card id cannot be null here.");
 		}
     	if (studyCard.getStudyId() == null) {
 			return false;
 		}
     	StudyCard dbStudyCard = studyCardRepository.findById(studyCard.getId()).orElse(null);
     	if (dbStudyCard == null) {
-			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + studyCard.getId());
+			throw new EntityNotFoundException("Cannot find study card with id " + studyCard.getId());
 		}
     	if (studyCard.getStudyId() == dbStudyCard.getStudyId()) { // study hasn't changed
     		return commService.hasRightOnStudy(studyCard.getStudyId(), rightStr);
     	} else { // study has changed : check user has right on both studies
     		return commService.hasRightOnStudy(studyCard.getStudyId(), rightStr) && commService.hasRightOnStudy(dbStudyCard.getStudyId(), rightStr);
     	}
+    }
+    
+    /**
+     * Check the connected user has the given right for the given study card.
+     * If the study card is updated, check the user has the given right in both former and new study cards.
+     * 
+     * @param studyCard the study card
+     * @param rightStr the right
+     * @return true or false
+     * @throws EntityNotFoundException
+     */
+    public boolean hasUpdateRightOnQualityCard(QualityCard qualityCard, String rightStr) throws EntityNotFoundException {
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return true;
+        }
+        if (qualityCard == null) {
+            throw new IllegalArgumentException("Quality card cannot be null here.");
+        }
+        if (qualityCard.getId() == null) {
+            throw new IllegalArgumentException("Quality card id cannot be null here.");
+        }
+        if (qualityCard.getStudyId() == null) {
+            return false;
+        }
+        QualityCard dbCard = qualityCardRepository.findById(qualityCard.getId()).orElse(null);
+        if (dbCard == null) {
+            throw new EntityNotFoundException("Cannot find quality card with id " + qualityCard.getId());
+        }
+        if (qualityCard.getStudyId() == dbCard.getStudyId()) { // study hasn't changed
+            return commService.hasRightOnStudy(qualityCard.getStudyId(), rightStr);
+        } else { // study has changed : check user has right on both studies
+            return commService.hasRightOnStudy(qualityCard.getStudyId(), rightStr) && commService.hasRightOnStudy(dbCard.getStudyId(), rightStr);
+        }
     }
     
     /**
@@ -849,7 +881,7 @@ public class DatasetSecurityService {
     }
     
     /**
-     * Filter examinations in that page checking the connected user has the right on those examinations.
+     * Filter study cards in that page checking the connected user has the right on those cards.
      * 
      * @param page the page
      * @param rightStr the right
@@ -867,6 +899,27 @@ public class DatasetSecurityService {
     	list.removeIf((StudyCard sc) -> !checkedIds.contains(sc.getStudyId()));
     	
     	return true;
+    }
+    
+    /**
+     * Filter quality cards in that page checking the connected user has the right on those cards.
+     * 
+     * @param page the page
+     * @param rightStr the right
+     * @return true
+     */
+    public boolean filterQualityCardList(List<QualityCard> list, String rightStr) {
+        if (list == null) {
+            return true;
+        }
+        Set<Long> studyIds = new HashSet<Long>();
+        list.forEach((QualityCard qc) -> {
+            studyIds.add(qc.getStudyId());
+        });
+        Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
+        list.removeIf((QualityCard qc) -> !checkedIds.contains(qc.getStudyId()));
+        
+        return true;
     }
     
     /**

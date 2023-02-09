@@ -46,7 +46,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
-import org.shanoir.ng.studycard.controler.StudyCardApi;
+import org.shanoir.ng.studycard.controler.StudyCardApiController;
 import org.shanoir.ng.studycard.model.StudyCardApply;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
@@ -79,7 +79,7 @@ public class StudyCardApiSecurityTest {
 	private static final String LOGGED_USER_USERNAME = "logged";
 	
 	@Autowired
-	private StudyCardApi api;
+	private StudyCardApiController api;
 	
 	@MockBean
 	private StudyCardService studyCardService;
