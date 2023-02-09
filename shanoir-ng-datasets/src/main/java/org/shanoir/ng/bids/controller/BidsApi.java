@@ -4,8 +4,8 @@ package org.shanoir.ng.bids.controller;
 import java.io.IOException;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.shared.exception.ErrorModel;

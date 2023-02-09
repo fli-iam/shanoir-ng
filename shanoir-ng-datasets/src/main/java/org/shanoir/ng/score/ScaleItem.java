@@ -1,10 +1,10 @@
 package org.shanoir.ng.score;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
 
 import org.shanoir.ng.examination.model.CodedVariable;
 import org.shanoir.ng.shared.core.model.AbstractEntity;

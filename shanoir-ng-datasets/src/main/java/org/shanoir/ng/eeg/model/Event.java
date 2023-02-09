@@ -2,10 +2,10 @@ package org.shanoir.ng.eeg.model;
 
 import java.util.Date;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;

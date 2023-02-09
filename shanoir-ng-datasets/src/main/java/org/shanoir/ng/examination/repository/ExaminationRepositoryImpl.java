@@ -2,9 +2,9 @@ package org.shanoir.ng.examination.repository;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 import org.apache.commons.math3.util.Pair;
 import org.shanoir.ng.examination.model.Examination;
