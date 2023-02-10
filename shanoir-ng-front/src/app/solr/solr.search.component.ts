@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { DatePipe } from '@angular/common';
+import { formatDate } from '@angular/common';
 import { AfterContentInit, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -48,7 +48,6 @@ export type TextualFacet = typeof TextualFacetNames[number];
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
     animations: [slideDown],
-    providers: [DatePipe]
 })
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
@@ -77,7 +76,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     private facetPageable: Map<string, FacetPageable>;
 
     constructor(
-            private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
+            private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
             private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
@@ -189,13 +188,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selections = [];
         if (this.solrRequest.datasetStartDate && this.solrRequest.datasetStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'from: ' + this.datePipe.transform(this.solrRequest.datasetStartDate, 'dd/MM/yyy'),
+                    'from: ' + formatDate(this.solrRequest.datasetStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),
                     () => this.solrRequest.datasetStartDate = null
             ));
         }
         if (this.solrRequest.datasetEndDate && this.solrRequest.datasetEndDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'to: ' + this.datePipe.transform(this.solrRequest.datasetEndDate, 'dd/MM/yyy'),
+                    'to: ' + formatDate(this.solrRequest.datasetEndDate, 'dd/MM/yyy', 'en-US', 'UTC'),
                     () => this.solrRequest.datasetEndDate = null 
             ));
         }
@@ -390,9 +389,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     private getCommonColumnDefs() {
+        
         function dateRenderer(date: number) {
             if (date) {
-                return new Date(date).toLocaleDateString();
+                return formatDate(new Date(date),'dd/MM/yyyy', 'en-US', 'UTC');
             }
             return null;
         };
