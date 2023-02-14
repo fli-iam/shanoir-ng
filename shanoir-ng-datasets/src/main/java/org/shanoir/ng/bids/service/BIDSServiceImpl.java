@@ -60,6 +60,7 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -372,6 +373,9 @@ public class BIDSServiceImpl implements BIDSService {
 		// Iterate over acquisitions/datasets		
 		for (DatasetAcquisition acq : examination.getDatasetAcquisitions()) {
 			List<Dataset> datasets = acq.getDatasets();
+			if (CollectionUtils.isEmpty(datasets)) {
+				continue;
+			}
 			for (Dataset ds : datasets) {
 				try {
 					getScansFile(examDir, subjectName);
