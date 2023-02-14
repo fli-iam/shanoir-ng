@@ -377,7 +377,7 @@ public class BIDSServiceImpl implements BIDSService {
 					getScansFile(examDir, subjectName);
 					createDatasetBidsFiles(ds, examDir, studyName, subjectName);
 				} catch (IOException e) {
-					LOG.error(e.getMessage());
+					LOG.error("Euh, là ?" + e.getMessage(), e);
 				}
 			}
 		}
@@ -505,8 +505,8 @@ public class BIDSServiceImpl implements BIDSService {
 
 			fileName += srcFile.getName();
 
-			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + fileName);
 			try {
+			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + fileName);
 				// Use link to avoid file duplication
 				deleteIfExists(pathToGo.toAbsolutePath().toString());
 				Files.createLink(pathToGo, srcFile.toPath());
