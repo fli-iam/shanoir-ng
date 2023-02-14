@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.user;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDate;
@@ -24,8 +25,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
@@ -53,7 +53,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * User detail service test.
@@ -61,7 +60,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author msimon
  * 
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserServiceTest {
@@ -126,23 +124,27 @@ public class UserServiceTest {
 		Mockito.verify(userRepository, Mockito.times(1)).save(user);
 	}
 
-	@Test(expected = EntityNotFoundException.class)
+	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void confirmAccountRequestBadUserIdTest() throws AccountNotOnDemandException, EntityNotFoundException {
-		given(userRepository.findById(USER_ID).orElse(null)).willReturn(null);
-		userService.confirmAccountRequest(new User());
-		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-		Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
+		assertThrows(EntityNotFoundException.class, () -> {
+			given(userRepository.findById(USER_ID).orElse(null)).willReturn(null);
+			userService.confirmAccountRequest(new User());
+			Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+			Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
+		});
 	}
 
-	@Test(expected = ShanoirUsersException.class)
+	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void confirmAccountRequestNoDemandTest() throws AccountNotOnDemandException, EntityNotFoundException {
-		User user = ModelsUtil.createUser(USER_ID);
-		given(userRepository.findById(USER_ID)).willReturn(Optional.of(user));
-		userService.confirmAccountRequest(user);
-		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-		Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
+		assertThrows(ShanoirUsersException.class, () -> {
+			User user = ModelsUtil.createUser(USER_ID);
+			given(userRepository.findById(USER_ID)).willReturn(Optional.of(user));
+			userService.confirmAccountRequest(user);
+			Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+			Mockito.verify(userRepository, Mockito.times(0)).save(Mockito.any(User.class));
+		});
 	}
 
 	@Test
@@ -166,24 +168,26 @@ public class UserServiceTest {
 	 * @throws AccountNotOnDemandException
 	 * @throws EntityNotFoundException
 	 */
-	@Test(expected = NullPointerException.class)
+	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void denyAccountRequestBadUserIdTest() throws NullPointerException, AccountNotOnDemandException, EntityNotFoundException {
-		given(userRepository.findById(USER_ID)).willReturn(null);
-		userService.denyAccountRequest(USER_ID);
-		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-		Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
+	public void denyAccountRequestBadUserIdTest() {
+		assertThrows(NullPointerException.class, () -> {
+			given(userRepository.findById(USER_ID)).willReturn(null);
+			userService.denyAccountRequest(USER_ID);
+			Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+			Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
+		});
 	}
 
-	@Test(expected = AccountNotOnDemandException.class)
+	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void denyAccountRequestNoDemandTest() throws EntityNotFoundException, AccountNotOnDemandException {
-		given(userRepository.findById(USER_ID)).willReturn(Optional.of(ModelsUtil.createUser()));
-
-		userService.denyAccountRequest(USER_ID);
-
-		Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
-		Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
+		assertThrows(AccountNotOnDemandException.class, () -> {
+			given(userRepository.findById(USER_ID)).willReturn(Optional.of(ModelsUtil.createUser()));
+			userService.denyAccountRequest(USER_ID);	
+			Mockito.verify(userRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
+			Mockito.verify(userRepository, Mockito.times(0)).deleteById(USER_ID);
+		});
 	}
 
 	@Test
@@ -193,11 +197,13 @@ public class UserServiceTest {
 		Mockito.verify(userRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
-	@Test(expected = AccessDeniedException.class)
+	@Test
 	@WithMockKeycloakUser(id = USER_ID, authorities = { "ROLE_ADMIN" })
 	public void deleteByIdByUserWithSameIdTest() throws EntityNotFoundException, ForbiddenException {
-		userService.deleteById(USER_ID);
-		Mockito.verify(userRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+		assertThrows(AccessDeniedException.class, () -> {
+			userService.deleteById(USER_ID);
+			Mockito.verify(userRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+		});
 	}
 
 	@Test

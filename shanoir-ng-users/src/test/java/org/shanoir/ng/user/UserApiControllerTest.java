@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.user;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,17 +24,11 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
-import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
-import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
-import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -61,7 +54,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -71,7 +63,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {UserApiController.class, ControlerSecurityService.class, UserPrivacySecurityService.class,
 		IsMeSecurityService.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class, 
 		AccessRequestService.class})

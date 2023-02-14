@@ -14,8 +14,7 @@ import java.util.Optional;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.accessrequest.controller.AccessRequestApiController;
@@ -37,8 +36,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -46,9 +43,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@RunWith(SpringRunner.class)
-@WebMvcTest(controllers = AccessRequestApiController.class)
-@ActiveProfiles("test")
+@WebMvcTest(AccessRequestApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 public class AccessRequestApiControllerTest {
 
@@ -58,29 +53,29 @@ public class AccessRequestApiControllerTest {
 	private MockMvc mvc;
 
 	@MockBean
-	ShanoirEventService eventService;
+	private ShanoirEventService eventService;
 
 	@MockBean
-	AccessRequestService accessRequestService;
+	private AccessRequestService accessRequestService;
 
 	@MockBean
-	EmailService emailService;
+	private EmailService emailService;
 
 	@MockBean
-	UserService userService;
+	private UserService userService;
 
 	@MockBean
-	RabbitTemplate rabbitTemplate;
+	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
-	ObjectMapper mapper;
+	private ObjectMapper mapper;
 
-	User user = new User();
+	private User user = new User();
 
 	@Before
 	public void setup() throws SecurityException {
 		user.setId(1L);
-		given(userService.findById(Mockito.any(Long.class))).willReturn(user);
+		given(this.userService.findById(Mockito.any(Long.class))).willReturn(user);
 	}
 
 	@Test
@@ -155,8 +150,6 @@ public class AccessRequestApiControllerTest {
 		
 		Mockito.when(this.accessRequestService.findByStudyIdAndStatus(Mockito.any(List.class), Mockito.anyInt()))
 		.thenReturn(listOfRequests);
-		
-
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().string(
@@ -170,15 +163,10 @@ public class AccessRequestApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 1)
 	public void findAllByUserIdNoStudyTest() throws Exception {
-		Mockito.when(rabbitTemplate.
-				convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, 1L))
-		.thenReturn(null);
-
-
+		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, 1L)).thenReturn(null);
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
-
 	}
 
 	@Test
