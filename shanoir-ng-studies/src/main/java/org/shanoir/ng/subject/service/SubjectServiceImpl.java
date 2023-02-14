@@ -16,8 +16,10 @@ package org.shanoir.ng.subject.service;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -25,6 +27,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
@@ -310,7 +313,8 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public Page<Subject> getFilteredPage(Pageable page, String name) {
-		return subjectRepository.findByNameContaining(name, page);
+	public Page<Subject> getFilteredPageByStudies(Pageable page, String name, List<Study> studies) {
+		Iterable<Long> studyIds = studies.stream().map(study -> study.getId()).collect(Collectors.toList());
+		return subjectRepository.findByNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
 	}
 }

@@ -25,6 +25,7 @@ import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.ForbiddenException;
@@ -64,6 +65,37 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 	}
 
+	@Override
+	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
+			@RequestBody final User user, final BindingResult result) throws RestServiceException {
+		
+		try {
+			validate(user, result);
+			getUserService().confirmAccountRequest(user);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			
+		} catch (EntityNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (AccountNotOnDemandException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
+		}
+	}
+
+	
+	@Override
+	public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
+		try {
+			getUserService().denyAccountRequest(userId);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			
+		} catch (EntityNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (AccountNotOnDemandException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
+		}
+	}
+
+	
 	@Override
 	public ResponseEntity<User> findUserById(@PathVariable("userId") final Long userId) {
 		final User user = getUserService().findById(userId);

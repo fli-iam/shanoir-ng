@@ -42,7 +42,6 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     constructor(
             private subjectService: SubjectService, 
             private studyService: StudyService) {       
-                
         super('subject');
         this.studyService.findStudyIdsIcanAdmin().then(ids => this.studiesICanAdmin = ids);
     }
@@ -100,7 +99,7 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     canDelete(subject: Subject): boolean {
         return this.keycloakService.isUserAdmin() || (
             subject.subjectStudyList &&
-            subject.subjectStudyList.filter(ss => this.studiesICanAdmin.includes(ss.study.id)).length > 0
+            subject.subjectStudyList.filter(ss => this.studiesICanAdmin?.includes(ss.study.id)).length > 0
         );
     }
 }
