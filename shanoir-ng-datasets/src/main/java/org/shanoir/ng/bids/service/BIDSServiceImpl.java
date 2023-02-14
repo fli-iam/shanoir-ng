@@ -307,6 +307,7 @@ public class BIDSServiceImpl implements BIDSService {
 		File sessionFile = new File(subjDir.getAbsolutePath() + "/" + subjDir.getName() + SESSIONS_TSV);
 		if (useSessionFolder) {
 			// Generate  sub-<label>_sessions.tsv file
+			sessionFile.getParentFile().mkdirs();
 			sessionFile.createNewFile();
 			StringBuilder buffer = new StringBuilder();
 			buffer.append("session_id").append(TABULATION)
