@@ -36,6 +36,7 @@ import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.GenericDataset;
+import org.shanoir.ng.dataset.modality.MeasurementDataset;
 import org.shanoir.ng.dataset.modality.MegDataset;
 import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -81,7 +82,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 		@JsonSubTypes.Type(value = SpectDataset.class, name = "Spect"),
 		@JsonSubTypes.Type(value = StatisticalDataset.class, name = "Statistical"),
 		@JsonSubTypes.Type(value = TemplateDataset.class, name = "Template"),
-		@JsonSubTypes.Type(value = BidsDataset.class, name = "BIDS") })
+		@JsonSubTypes.Type(value = BidsDataset.class, name = "BIDS"),
+		@JsonSubTypes.Type(value = MeasurementDataset.class, name = "Measurement") })
 public abstract class Dataset extends AbstractEntity {
 
 	/**
@@ -330,6 +332,17 @@ public abstract class Dataset extends AbstractEntity {
 			return studyId;
 		}
 		return getDatasetAcquisition().getExamination().getStudyId();
+	}
+	
+	/**
+	 * @return the studyId
+	 */
+	@Transient
+	public Long getCenterId() {
+		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
+			return studyId;
+		}
+		return getDatasetAcquisition().getExamination().getCenterId();
 	}
 
 	/**

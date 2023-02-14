@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <input class="search-txt" [(ngModel)]="filter.searchStr" (change)="search()" type="text" placeholder="search..."/> 
 to filter
 <select class="search-field" [(ngModel)]="filter.searchField" (change)="search()"> 
-    <option value="">*</option>
+    <option *ngIf="searchableColumns?.length > 1" value="">*</option>
     <option *ngFor="let col of searchableColumns" value="{{col.field}}">
         {{col.headerName}}
     </option>

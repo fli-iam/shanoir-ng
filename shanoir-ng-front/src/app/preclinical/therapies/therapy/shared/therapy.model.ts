@@ -15,7 +15,7 @@
 import { TherapyType } from '../../../shared/enum/therapyType';
 import { Entity } from "../../../../shared/components/entity/entity.abstract";
 
-export class Therapy extends Entity{
+export class Therapy extends Entity {
     id: number;
     name: string;
     comment: string;

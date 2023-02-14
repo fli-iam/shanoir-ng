@@ -64,7 +64,7 @@ public class RestServiceException extends Exception {
 	@Override
 	public String toString() {
 		try {
-			return objectMapper.writeValueAsString(errorModel);
+			return objectMapper != null ? objectMapper.writeValueAsString(errorModel) : errorModel.toString();
 		} catch (JsonProcessingException e) {
 			return "error while serializing errorModel : " + e.toString();
 		}

@@ -26,7 +26,11 @@ import { FilterablePageable, Page } from '../../shared/components/table/pageable
 import { Option } from '../../shared/select/select.component';
 import { StudyCard } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
+import { StudyRightsService } from '../../studies/shared/study-rights.service';
+import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 
+export type Status = 'default' | 'loading' | 'done' | 'error';
 @Component({
     selector: 'apply-study-card-on',
     templateUrl: 'apply-study-card-on.component.html',
@@ -36,6 +40,8 @@ import { StudyCardService } from '../shared/study-card.service';
 export class ApplyStudyCardOnComponent implements OnInit {
 
     datasetAcquisitions: DatasetAcquisition[];
+    nbNonAdminAcquisitions: number;
+    nonAdminStudies: Set<string>;
     selectedAcquisitionIds: Set<number> = new Set();
     studycard: StudyCard;
     studyCards: StudyCard[];
@@ -46,12 +52,13 @@ export class ApplyStudyCardOnComponent implements OnInit {
     browserPaging: BrowserPaging<DatasetAcquisition>;
     nbSelectedDatasets: number;
     nbIncompatible: number = 0;
-    finished: boolean = false;
-    loading: boolean = false;
+    private _status: Status = 'default';
     showIncompatibles: boolean = true;
+    studyRights: Map<number, StudyUserRight[]>;
 
     constructor(
             private datasetAcquisitionService: DatasetAcquisitionService,
+            private studyRightsService: StudyRightsService,
             private studycardService: StudyCardService,
             private breadcrumbsService: BreadcrumbsService,
             private confirmService: ConfirmDialogService,
@@ -61,6 +68,15 @@ export class ApplyStudyCardOnComponent implements OnInit {
 
     }
 
+    get status(): Status {
+        return this._status;
+    }
+
+    set status(status: Status) {
+        this._status = status;
+        this.breadcrumbsService.currentStep.data.status = status;
+    }
+
     ngOnInit(): void {
         let datasetIds: number[] = this.breadcrumbsService.currentStep.data.datasetIds;
         if (!datasetIds || datasetIds.length == 0) {
@@ -68,18 +84,32 @@ export class ApplyStudyCardOnComponent implements OnInit {
             return;
         }
         
-        let acquisitionPromise: Promise<DatasetAcquisition[]> = this.datasetAcquisitionService.getAllForDatasets(datasetIds).then(dsAcqs => {
-            this.datasetAcquisitions = dsAcqs;
-            this.browserPaging = new BrowserPaging(dsAcqs, this.columnsDefs);
-            this.selectAll();
-            return dsAcqs;
-        });
+        let acquisitionPromise: Promise<DatasetAcquisition[]> = this.datasetAcquisitionService.getAllForDatasets(datasetIds);
+        let rightsPromise: Promise<Map<number, StudyUserRight[]>> = this.studyRightsService.getMyRights().then(rights => this.studyRights = rights);
 
-        this.finished = this.breadcrumbsService.currentStep.data.finished;
+        this.status = this.breadcrumbsService.currentStep.data.status ? this.breadcrumbsService.currentStep.data.status : 'default';
         if (this.breadcrumbsService.currentStep.data.showIncompatibles != undefined) {
             this.showIncompatibles = this.breadcrumbsService.currentStep.data.showIncompatibles;
         }
-        Promise.all([acquisitionPromise, this.studycardService.getAll()]).then(([acquisitions, studycards]) => {
+
+        let filteredAcquisitionsPromise: Promise<DatasetAcquisition[]> = Promise.all([acquisitionPromise, rightsPromise]).then(([acquisitions, rights]) => {
+            let nonAdminAcquisitions: DatasetAcquisition[] = acquisitions?.filter(acq => 
+                !rights.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
+            );
+            this.nonAdminStudies = new Set();
+            nonAdminAcquisitions.forEach(acq => {
+                this.nonAdminStudies.add(acq.examination?.study?.name);
+            });
+            this.nbNonAdminAcquisitions = nonAdminAcquisitions?.length;
+            this.datasetAcquisitions = acquisitions?.filter(acq => 
+                rights.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
+            );
+            this.browserPaging = new BrowserPaging(this.datasetAcquisitions, this.columnsDefs);
+            this.selectAll();
+            return this.datasetAcquisitions;
+        });
+
+        Promise.all([filteredAcquisitionsPromise, this.studycardService.getAll()]).then(([acquisitions, studycards]) => {
             this.studyCards = studycards;
             this.updateOptions();
             if (this.breadcrumbsService.currentStep.data.studyCardId) {
@@ -103,10 +133,6 @@ export class ApplyStudyCardOnComponent implements OnInit {
         return Promise.resolve(this.browserPaging.getPage(pageable));
     }
 
-    // reapplyOnAll() {
-    //     this.reapplyOn(this.getAllDatasetsIds());
-    // }
-
     reapplyOnSelected() {
         this.reapplyOn([...this.selectedAcquisitionIds]);
     }
@@ -119,21 +145,20 @@ export class ApplyStudyCardOnComponent implements OnInit {
                 + ' datasets? Note that any previous study card application will be permanentely overwriten by new values.'
         ).then(res => {
             if (res) {
-                this.loading = true;
+                this.status = 'loading';
                 this.studycardService.applyStudyCardOn(this.studycard.id, datasetAcquisitionIds).then(() => {
-                    this.loading = false;
-                    this.finished = true;
-                    this.breadcrumbsService.currentStep.data.finished = true;
-                }).catch(() => {
-                    this.loading = false;
+                    this.status = 'done';
+                }).catch(error => {
+                    this.status = 'error';
+                    throw error;
                 });
             }
         });
     }
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
-            { headerName: "Compatible", type: "boolean", cellRenderer: row => this.isCompatible(row.data.acquisitionEquipment?.id), awesome: "fa-solid fa-circle", awesomeFalse: "fa-solid fa-triangle-exclamation", color: "green", colorFalse: "orangered", suppressSorting: true },
+    getColumnDefs(): ColumnDefinition[] {
+        let colDef: ColumnDefinition[] = [
+            { headerName: "Compatible", type: "boolean", cellRenderer: row => this.isCompatible(row.data.acquisitionEquipment?.id), awesome: "fa-solid fa-circle", awesomeFalse: "fa-solid fa-triangle-exclamation", color: "green", colorFalse: "orangered", disableSorting: true },
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
             { headerName: 'Type', field: 'type', width: '22px'},
             { headerName: "Acquisition Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
@@ -145,7 +170,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
             { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
                 return this.dateRenderer(params.data.examination.examinationDate);
             }},    
-            { headerName: "Center", field: "acquisitionEquipment.center.name", suppressSorting: true,
+            { headerName: "Center", field: "acquisitionEquipment.center.name", disableSorting: true,
 				route: (dsAcq: DatasetAcquisition) => dsAcq.acquisitionEquipment.center? '/center/details/' + dsAcq.acquisitionEquipment.center.id : null
 			},
             { headerName: "Last StudyCard", field: "studyCard.name"},

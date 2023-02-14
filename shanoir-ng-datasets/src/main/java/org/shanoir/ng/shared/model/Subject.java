@@ -34,15 +34,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "subject")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Subject extends IdName {
-	
-	@Id
-	private Long id;
-	 
-	private String name;
 
 	/** Relations beetween the subjects and the studies. */
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "subject", fetch = FetchType.LAZY, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
+	
+	@Id
+	protected Long id;
+	
+	protected String name;
 	
 	public Subject() {}
 	
@@ -51,40 +51,8 @@ public class Subject extends IdName {
 	 * @param name
 	 */
 	public Subject (Long id, String name) {
-		this.id = id;
-		this.name = name;
-	}
-
-	/**
-	 * @return the id
-	 */
-	@Override
-	public Long getId() {
-		return id;
-	}
-
-	/**
-	 * @param id the id to set
-	 */
-	@Override
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	/**
-	 * @return the name
-	 */
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	/**
-	 * @param name the name to set
-	 */
-	@Override
-	public void setName(String name) {
-		this.name = name;
+		this.setId(id);
+		this.setName(name);
 	}
 
 	/**
@@ -101,4 +69,23 @@ public class Subject extends IdName {
 		this.subjectStudyList = subjectStudyList;
 	}
 
+	@Override
+	public Long getId() {
+		return id;
+	}
+
+	@Override
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	public void setName(String name) {
+		this.name = name;
+	}
 }

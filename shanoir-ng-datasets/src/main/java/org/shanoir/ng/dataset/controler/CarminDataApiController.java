@@ -37,6 +37,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -234,7 +235,7 @@ public class CarminDataApiController implements CarminDataApi{
             File zipFile = new File(tmpFilePath + ZIP);
             zipFile.createNewFile();
 
-            DatasetFileUtils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
+            Utils.zip(workFolder.getAbsolutePath(), zipFile.getAbsolutePath());
 
             resultFile = zipFile;
         }

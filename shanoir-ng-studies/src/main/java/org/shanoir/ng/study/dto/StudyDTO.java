@@ -16,6 +16,8 @@ package org.shanoir.ng.study.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.study.model.StudyStatus;
@@ -49,6 +51,8 @@ public class StudyDTO {
 
 	private String name;
 
+	private Profile profile;
+
 	private int nbExaminations;
 
 	private int nbSujects;
@@ -58,6 +62,8 @@ public class StudyDTO {
 	private List<String> dataUserAgreementPaths;
 
 	private List<TagDTO> tags;
+
+	private List<TagDTO> studyTags;
 
 	@LocalDateAnnotations
 	private LocalDate startDate;
@@ -81,6 +87,8 @@ public class StudyDTO {
 	private List<StudyUser> studyUserList;
 
 	private boolean challenge;
+
+	private String description;
 
 	/**
 	 * Default constructor.
@@ -192,6 +200,21 @@ public class StudyDTO {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the profileName
+	 */
+	public Profile getProfile() {
+		return profile;
+	}
+
+	/**
+	 * @param profile
+	 *            the profileName to set
+	 */
+	public void setProfile(Profile profile) {
+		this.profile = profile;
 	}
 
 	/**
@@ -424,4 +447,19 @@ public class StudyDTO {
 		this.tags = tags;
 	}
 
+	public List<TagDTO> getStudyTags() {
+		return studyTags;
+	}
+
+	public void setStudyTags(List<TagDTO> studyTags) {
+		this.studyTags = studyTags;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 }

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -78,7 +78,9 @@ import { ExaminationService } from './examinations/shared/examination.service';
 import { SubjectExaminationPipe } from './examinations/shared/subject-examination.pipe';
 import { HomeComponent } from './home/home.component';
 import { BidsUploadComponent } from './import/bids/bids-upload.component';
-import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { BasicClinicalContextComponent } from './import/basic-clinical-context/basic-clinical-context.component';
+import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
+import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
@@ -248,6 +250,9 @@ import { StudyDTOService } from './studies/shared/study.dto';
 import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
+import { AccessRequestComponent } from './users/access-request/access-request.component';
+import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
+import { MultiSelectTableComponent } from './shared/multi-select-table/multi-select-table.component';
 import { ProcessingComponent } from './processing/processing.component';
 import { PipelinesComponent } from './processing/pipelines/pipelines.component';
 import { CarminClientService } from './carmin/shared/carmin-client.service';
@@ -255,6 +260,10 @@ import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.comp
 import { ExecutionComponent } from './processing/execution/execution.component';
 import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
 import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { WelcomeComponent } from './welcome/welcome.component';
+import {LoginGuard} from "./shared/roles/login-guard";
+import { AccessRequestService } from './users/access-request/access-request.service';
+
 
 @NgModule({
     imports: [
@@ -333,9 +342,11 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         BidsUploadComponent,
         QueryPacsComponent,
         ImportProcessedDatasetComponent,
-        ClinicalContextComponent,
+        BasicClinicalContextComponent,
+        PreClinicalContextComponent,
         EegClinicalContextComponent,
         ProcessedDatasetClinicalContextComponent,
+        PacsClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,
@@ -367,7 +378,7 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         AutoAdjustInputComponent,
         SolrSearchComponent,
         CheckboxListComponent,
-    	AnimalSubjectsListComponent,   
+    	AnimalSubjectsListComponent,
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,
     	ReferenceFormComponent,
@@ -393,7 +404,7 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
     	AnimalExaminationListComponent,
     	FileUploadComponent,
     	PhysiologicalDataFormComponent,
-    	BloodGasDataFormComponent, 
+    	BloodGasDataFormComponent,
     	BrukerUploadComponent,
         BrukerSelectSeriesComponent,
         LoaderComponent,
@@ -427,11 +438,15 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         TagInputComponent,
         StudyUserListComponent,
         VarDirective,
+        AccessRequestComponent,
+        MultiSelectComponent,
+        MultiSelectTableComponent,
         ProcessingComponent,
         PipelinesComponent,
         PipelineComponent,
         ExecutionComponent,
-        CarminDatasetProcessingsComponent
+        CarminDatasetProcessingsComponent,
+        WelcomeComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -444,7 +459,7 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
     // ],
     providers: [
         // {
-        //     provide: APP_BASE_HREF, 
+        //     provide: APP_BASE_HREF,
         //     useValue: environment.production  ? '/shanoir-ng/' : '/dev/'
         // },
         // AccountEventsService,
@@ -452,6 +467,7 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         AuthAdminGuard,
         AuthAdminOrExpertGuard,
         CanImportFromPACSGuard,
+        LoginGuard,
         CenterService,
         ConfirmDialogService,
         ExaminationService,
@@ -469,6 +485,7 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
         RoleService,
         StudyService,
         CoilService,
+        AccessRequestService,
         // ToolService,
         SubjectService,
         UserService,

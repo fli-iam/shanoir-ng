@@ -140,6 +140,7 @@ public class ImportDialogOpener {
 											String manufacturerModelNameSC = acquisitionEquipment.getManufacturerModel().getName();
 											if (manufacturerSC.compareToIgnoreCase(manufacturer) == 0
 													&& manufacturerModelNameSC.compareToIgnoreCase(manufacturerModelName) == 0
+													&& acquisitionEquipment.getSerialNumber() != null
 													&& acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0) {
 												studyCard.setCompatible(true);
 												compatibleStudyCard = true;

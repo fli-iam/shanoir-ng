@@ -40,6 +40,7 @@ public abstract class AbstractTest {
 		initProperties(TEST_PROPERTIES, testProperties);
 		initProperties(ShUpConfig.PROFILE_DIR + testProperties.getProperty(PROFILE) + "/" + ShUpConfig.PROFILE_PROPERTIES,
 				ShUpConfig.profileProperties);
+		initProperties(ShUpConfig.ENDPOINT_PROPERTIES, ShUpConfig.endpointProperties);
 		shUpClient = new ShanoirUploaderServiceClient();
 		String user = testProperties.getProperty(USER_NAME);
 		String password = testProperties.getProperty(USER_PASSWORD);

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.shared.service;
+package org.shanoir.ng.dicom;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +27,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
- * The class CStoreDicomService calls the command storescu of dcm4che3 on the
+ * The class DIMSEService calls the command store-scu of dcm4che3 on the
  * command line to send the dicom images to the PACS via c-store. In the
  * dockerbuild file of the ms datasets /docker-compose/datasets
  * dcm4che-5.21.0-bin.zip is installed and configured to be available for this.
@@ -36,8 +35,8 @@ import org.springframework.stereotype.Component;
  * @author mkain
  *
  */
-@Component(value = "cstore")
-public class DIMSEService implements DicomServiceApi {
+@Component
+public class DIMSEService {
 	
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(DIMSEService.class);
@@ -55,7 +54,6 @@ public class DIMSEService implements DicomServiceApi {
 	@Value("${dcm4chee-arc.dicom.c-store.aet.called}")
 	private String dcm4cheeCStoreAETCalled;
 	
-	@Override
 	public void sendDicomFilesToPacs(File directoryWithDicomFiles) throws Exception {
 		if (directoryWithDicomFiles != null && directoryWithDicomFiles.exists()
 				&& directoryWithDicomFiles.isDirectory()) {
@@ -104,11 +102,6 @@ public class DIMSEService implements DicomServiceApi {
         int exitCode = process.waitFor();
 		if (exitCode != 0)
 			throw new ShanoirException("Send to PACS (c-store) error occured on cmd line.");
-	}
-
-	@Override
-	public void deleteDicomFilesFromPacs(String url) throws ShanoirException {
-		throw new NotImplementedException("Cannot delete datasets from PACS with CSTORE methods.");
 	}
 
 }

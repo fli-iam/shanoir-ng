@@ -1,5 +1,4 @@
 /**
-< * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
  * 
@@ -26,6 +25,7 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +34,7 @@ import org.shanoir.ng.importer.ImporterApiController;
 import org.shanoir.ng.importer.dto.ExaminationDTO;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.importer.model.SubjectStudy;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -133,13 +134,13 @@ public class BidsImporterApiController implements BidsImporterApi {
 		Long subjectId = null;
 		for (File subjectFile : importJobDir.listFiles()) {
 			String fileName = subjectFile.getName();
+			String subjectName = null;
 			if (fileName.startsWith("sub-")) {
 				// We found a subject
-				String subjectName = studyName + "_" + subjectFile.getName().split("sub-")[1];
+				subjectName = studyName + "_" + subjectFile.getName().split("sub-")[1];
 				Subject subject = new Subject();
 				subject.setName(subjectName);
-				// Be carefull here, ID field is used to carry study id information
-				subject.setId(studyId);
+				subject.setSubjectStudyList(Collections.singletonList(new SubjectStudy(subject, new IdName(studyId, studyName))));
 				importJob.setSubjectName(subjectName);
 
 				LOG.debug("We found a subject " + subjectName);
@@ -188,7 +189,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 					if (examDate == null) {
 						examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneId.systemDefault());
 					}
-					examination = createExam(studyId, centerId, subjectId, sessionLabel, examDate);
+					examination = ImportUtils.createExam(studyId, centerId, subjectId, sessionLabel, examDate, subjectName);
 					examCreated = true;
 
 					// Create multiple examinations for every session folder
@@ -197,7 +198,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 					if (examId == null) {
 						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
 					}
-					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "" + examination.getStudyId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
+					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 					
 					LOG.debug("We found a session " + sessionFile.getName());
 					importJob.setExaminationId(examId);
@@ -215,7 +216,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 							// Set exam date by default using file creation date
 							examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneOffset.UTC);
 						}
-						examination = createExam(studyId, centerId, subjectId, null, examDate);
+						examination = ImportUtils.createExam(studyId, centerId, subjectId, null, examDate, subjectName);
 						examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 						
 						if (examId == null) {
@@ -331,32 +332,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 			examDates.put(sessionLabel, LocalDate.from(date));
 		}
 		return examDates;
-	}
-
-	/**
-	 * Create an exam from fiew attributes
-	 * @return the created exam
-	 */
-	private ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, String comment, LocalDate examDate) {
-		// Create one examination
-		ExaminationDTO examination = new ExaminationDTO();
-		IdName study = new IdName();
-		study.setId(studyId);
-		examination.setStudy(study);
-
-		IdName subj = new IdName();
-		subj.setId(subjectId);
-		examination.setSubject(subj);
-
-		IdName center = new IdName();
-		center.setId(centerId);
-		examination.setCenter(center);
-
-		examination.setComment(comment);
-
-		examination.setExaminationDate(examDate);
-		
-		return examination;
 	}
 
 	/**

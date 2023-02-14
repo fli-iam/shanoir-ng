@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -16,9 +16,10 @@ import { Injectable } from '@angular/core';
 import { Center } from '../../centers/shared/center.model';
 import { Id } from '../../shared/models/id.model';
 import { StudyCardDTOServiceAbstract } from '../../study-cards/shared/study-card.dto.abstract';
+import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { SubjectStudyDTO } from '../../subjects/shared/subject-study.dto';
+import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { Tag } from '../../tags/tag.model';
@@ -26,7 +27,7 @@ import { StudyCenter, StudyCenterDTO } from './study-center.model';
 import { StudyType } from './study-type.enum';
 import { StudyUser, StudyUserDTO } from './study-user.model';
 import { Study } from './study.model';
-import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
+import {Profile} from '../../shared/models/profile.model';
 
 @Injectable()
 export class StudyDTOService {
@@ -39,7 +40,7 @@ export class StudyDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntity(dto: StudyDTO, result?: Study): Promise<Study> {        
+    public toEntity(dto: StudyDTO, result?: Study): Promise<Study> {
         if (!result) result = new Study();
         StudyDTOService.mapSyncFields(dto, result);
         return Promise.resolve(result);
@@ -89,6 +90,8 @@ export class StudyDTOService {
         entity.nbExaminations = dto.nbExaminations;
         entity.nbSujects = dto.nbSujects;
         entity.protocolFilePaths = dto.protocolFilePaths;
+        entity.profile = dto.profile;
+        entity.description = dto.description;
         entity.dataUserAgreementPaths = dto.dataUserAgreementPaths;
         entity.startDate = dto.startDate ? new Date(dto.startDate) : null;
         if (dto.studyCenterList) {
@@ -120,6 +123,11 @@ export class StudyDTOService {
                 studyUser.user = studyUserDto.user;
                 studyUser.userId = studyUserDto.userId;
                 studyUser.userName = studyUserDto.userName;
+                studyUser.centers = studyUserDto.centerIds?.map(centerId => {
+                    let center: Center = new Center();
+                    center.id = centerId;
+                    return center;
+                });
                 return studyUser;
             });
         } else {
@@ -138,9 +146,15 @@ export class StudyDTOService {
         } else {
             entity.tags = [];
         }
+
+        if (dto.studyTags) {
+          entity.studyTags = dto.studyTags.map(this.tagDTOToTag);
+        } else {
+          entity.studyTags = [];
+        }
         return entity;
     }
-    
+
     static tagDTOToTag(tagDTO: any): Tag {
         let tag: Tag = new Tag();
         tag.id = tagDTO.id;
@@ -157,11 +171,13 @@ export class StudyDTOService {
             subjectStudy.study = study;
             subjectStudy.studyId = study.id;
             subjectStudy.study.tags = study.tags;
+            subjectStudy.study.studyTags = study.studyTags;
         } else if (subjectStudyDto.study) {
             subjectStudy.study = new Study();
             subjectStudy.study.id = subjectStudyDto.study.id;
             subjectStudy.study.name = subjectStudyDto.study.name;
             subjectStudy.study.tags = subjectStudyDto.study.tags ? subjectStudyDto.study.tags.map(this.tagDTOToTag) : [];
+            subjectStudy.study.studyTags = subjectStudyDto.study.studyTags ? subjectStudyDto.study.studyTags.map(this.tagDTOToTag) : [];
         }
         subjectStudy.studyId = subjectStudy.study.id;
         if (subject) {
@@ -176,9 +192,9 @@ export class StudyDTOService {
         subjectStudy.subjectStudyIdentifier = subjectStudyDto.subjectStudyIdentifier;
         subjectStudy.subjectType = subjectStudyDto.subjectType;
         if (subjectStudyDto.tags) {
-            subjectStudy.tags = subjectStudyDto.tags.map(this.tagDTOToTag);
+          subjectStudy.tags = subjectStudyDto.tags.map(this.tagDTOToTag);
         } else {
-            subjectStudy.tags = [];
+          subjectStudy.tags = [];
         }
         return subjectStudy;
     }
@@ -198,6 +214,7 @@ export class StudyDTOService {
         let study: Study = new Study();
         study.id = dto.id;
         study.name = dto.name;
+        study.profile = dto.profile;
         if (dto.studyCenterList) {
             study.studyCenterList = (dto.studyCenterList as StudyCenterDTO[]).map(dtoStudyCenter => {
                 return this.dtoToStudyCenter(dtoStudyCenter);
@@ -206,9 +223,9 @@ export class StudyDTOService {
             study.studyCenterList = [];
         }
         if (dto.tags) {
-            study.tags = dto.tags.map(this.tagDTOToTag);
+          study.tags = dto.tags.map(this.tagDTOToTag);
         } else {
-            study.tags = [];
+          study.tags = [];
         }
         return study;
     }
@@ -228,6 +245,7 @@ export class StudyDTO {
     nbSujects: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
+    profile: Profile;
     startDate: Date;
     studyCenterList: StudyCenterDTO[];
     studyStatus: 'IN_PROGRESS' | 'FINISHED';
@@ -238,7 +256,9 @@ export class StudyDTO {
     visibleByDefault: boolean;
     withExamination: boolean;
     tags: Tag[];
+    studyTags: Tag[];
     studyCards: StudyCardDTO[];
+    description: string;
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
@@ -248,6 +268,7 @@ export class StudyDTO {
         this.experimentalGroupsOfSubjects = study.experimentalGroupsOfSubjects ? study.experimentalGroupsOfSubjects.map(egos => new Id(egos.id)) : null;
         this.monoCenter = study.monoCenter;
         this.name = study.name;
+        this.profile = study.profile;
         this.challenge = study.challenge;
         this.protocolFilePaths = study.protocolFilePaths;
         this.dataUserAgreementPaths = study.dataUserAgreementPaths;
@@ -263,7 +284,7 @@ export class StudyDTO {
             let dto = new StudyUserDTO(su);
             dto.study = null;
             return dto;
-        }) : null; 
+        }) : null;
         this.subjectStudyList = study.subjectStudyList ? study.subjectStudyList.map(ss => {
             let dto = new SubjectStudyDTO(ss);
             dto.study = null;
@@ -272,6 +293,8 @@ export class StudyDTO {
         this.visibleByDefault = study.visibleByDefault;
         this.withExamination = study.withExamination;
         this.tags = study.tags;
+        this.studyTags = study.studyTags;
+        this.description = study.description;
     }
 
 }
@@ -294,9 +317,24 @@ export class SubjectWithSubjectStudyDTO {
 }
 
 export class CenterStudyDTO {
-	
+
     id: number;
     name: string;
-	studyCenterList: StudyCenterDTO[];
-	tags: Tag[];
+    studyCenterList: StudyCenterDTO[];
+    profile: Profile;
+    tags: Tag[];
+}
+
+export class PublicStudyDataDTO {
+  downloadableByDefault: boolean;
+  endDate: Date;
+  id: number;
+  name: string;
+  nbExaminations: number;
+  nbSubjects: number;
+  startDate: Date;
+  studyStatus: string;
+  studyType: StudyType;
+  description: string;
+  studyTags: Tag[];
 }

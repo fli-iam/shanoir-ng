@@ -3,7 +3,7 @@ package org.shanoir.ng.dicom.web;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.validation.Valid;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.solr.common.StringUtils;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
@@ -19,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -128,9 +127,21 @@ public class DICOMWebApiController implements DICOMWebApi {
 	}
 
 	@Override
-	public ResponseEntity<String> findInstancesOfStudyOfSerie(String studyInstanceUID, String serieInstanceUID)
+	public ResponseEntity<String> findInstancesOfStudyOfSerie(String examinationUID, String serieInstanceUID)
 			throws RestServiceException {
 		return null;
+	}
+	
+	@Override
+	public ResponseEntity findInstance(String examinationUID, String serieInstanceUID, String sopInstanceUID)
+			throws RestServiceException {
+		String studyInstanceUID = studyInstanceUIDHandler.findStudyInstanceUIDFromCacheOrDatabase(examinationUID);
+		if (!StringUtils.isEmpty(studyInstanceUID) && !StringUtils.isEmpty(serieInstanceUID)
+				&& !StringUtils.isEmpty(sopInstanceUID))  {
+			return dicomWebService.findInstance(studyInstanceUID, serieInstanceUID, sopInstanceUID);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
 	}
 
 	@Override
@@ -143,9 +154,17 @@ public class DICOMWebApiController implements DICOMWebApi {
 		return null;
 	}
 
+	/**
+	 * This method might never be implemented, as for DICOM file imports shanoir-ng has its
+	 * specific classic import, that manages pseudonymization and relation of DICOM files to
+	 * the Shanoir research study/project and the subjects, that are pure shanoir entities.
+	 * In the future there might be an option for temporary file storage via stow-rs and then
+	 * using the dicom files from this tmp folder to process a classic shanoir DICOM import.
+	 * The implementation of stow-sr for the ohif-viewer can be found in the MultipartRequestFilter. 
+	 */
 	@Override
-	public ResponseEntity<Void> stow(@Valid MultipartFile file) throws RestServiceException {
-		return new ResponseEntity<>(HttpStatus.OK);
+	public ResponseEntity<Void> stow(HttpServletRequest request) throws RestServiceException {
+		return null;
 	}
 	
 }

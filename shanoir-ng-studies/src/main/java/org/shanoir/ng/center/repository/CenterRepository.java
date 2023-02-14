@@ -38,4 +38,8 @@ public interface CenterRepository extends CrudRepository<Center, Long> {
 	@Query("select new org.shanoir.ng.shared.core.model.IdName(c.id, c.name) from Center c, StudyCenter sc where sc.center = c and sc.study.id = :studyId")
 	public List<IdName> findIdsAndNames(@Param("studyId") Long studyId);
 
+	@Query("select c from Center c, StudyCenter sc where sc.center = c and sc.study.id = :studyId")
+	public List<Center> findByStudy(@Param("studyId") Long studyId);
+
+
 }

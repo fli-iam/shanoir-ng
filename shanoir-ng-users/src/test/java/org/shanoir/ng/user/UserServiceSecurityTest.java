@@ -179,16 +179,16 @@ public class UserServiceSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_EXPERT" })
 	public void testAsExpert() throws ShanoirException {
 
-		assertAccessDenied(userService::confirmAccountRequest, mockUser);
+		assertAccessAuthorized(userService::confirmAccountRequest, mockUser);
+		assertAccessAuthorized(userService::denyAccountRequest, USER_ID);
 		assertAccessDenied(userService::deleteById, USER_ID);
-		assertAccessDenied(userService::denyAccountRequest, USER_ID);
 		assertAccessAuthorized(userService::findAll);
 		for (User user : userService.findAll()) {
 			assertNull(user.getEmail());
 			assertNull(user.getLastLogin());
 			assertNull(user.getCreationDate());
 		}
-		assertAccessDenied(userService::findByEmail, USER_EMAIL);
+		assertAccessAuthorized(userService::findByEmail, USER_EMAIL);
 		assertAccessDenied(userService::findById, USER_ID);
 		assertAccessAuthorized(userService::findById, LOGGED_USER_ID);
 		assertAccessDenied(userService::findByUsername, USER_USERNAME);

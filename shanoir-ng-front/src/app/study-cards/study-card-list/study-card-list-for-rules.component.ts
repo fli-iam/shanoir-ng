@@ -19,6 +19,7 @@ import { StudyCardListComponent } from './study-card-list.component';
 import { StudyCardService } from '../shared/study-card.service';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { ActivatedRoute } from '@angular/router';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 
 
 
@@ -45,8 +46,8 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
         this.idToExclude = +this.activatedRoute.snapshot.params['id'];
     }
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefinition[] {
+        let colDef: ColumnDefinition[] = [
             { headerName: "Name", field: "name" },
             { headerName: "Study", field: 'study.name', defaultField: 'study.id' },
             { headerName: "Center", field: 'acquisitionEquipment.center.name'},

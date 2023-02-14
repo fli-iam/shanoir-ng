@@ -14,12 +14,15 @@
 
 package org.shanoir.ng.processing.service;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.data.repository.CrudRepository;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.repository.DatasetProcessingRepository;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -29,12 +32,11 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class DatasetProcessingServiceImpl extends BasicEntityServiceImpl<DatasetProcessing> implements DatasetProcessingService {
+public class DatasetProcessingServiceImpl implements DatasetProcessingService {
 
 	@Autowired
 	private DatasetProcessingRepository datasetProcessingRepository;
 
-	@Override
 	protected DatasetProcessing updateValues(final DatasetProcessing from, final DatasetProcessing to) {
 		to.setDatasetProcessingType(from.getDatasetProcessingType());
 		to.setComment(from.getComment());
@@ -45,8 +47,39 @@ public class DatasetProcessingServiceImpl extends BasicEntityServiceImpl<Dataset
 		return to;
 	}
 
-	@Override
 	public Optional<DatasetProcessing> findByComment(String comment) {
 		return datasetProcessingRepository.findByComment(comment);
 	}
+	
+    @Override
+    public Optional<DatasetProcessing> findById(final Long id) {
+        return datasetProcessingRepository.findById(id);
+    }
+    
+    @Override
+    public List<DatasetProcessing> findAll() {
+        return Utils.toList(datasetProcessingRepository.findAll());
+    }
+    
+    @Override
+    public DatasetProcessing create(final DatasetProcessing entity) {
+        DatasetProcessing savedEntity = datasetProcessingRepository.save(entity);
+        return savedEntity;
+    }
+    
+    @Override
+    public DatasetProcessing update(final DatasetProcessing entity) throws EntityNotFoundException {
+        final Optional<DatasetProcessing> entityDbOpt = datasetProcessingRepository.findById(entity.getId());
+        final DatasetProcessing entityDb = entityDbOpt.orElseThrow(
+                () -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+        updateValues(entity, entityDb);
+        return datasetProcessingRepository.save(entityDb);
+    }
+
+    @Override
+    public void deleteById(final Long id) throws EntityNotFoundException  {
+        final Optional<DatasetProcessing> entity = datasetProcessingRepository.findById(id);
+        entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+        datasetProcessingRepository.deleteById(id);
+    }
 }

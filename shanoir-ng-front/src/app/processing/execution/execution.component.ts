@@ -46,17 +46,11 @@ export class ExecutionComponent implements OnInit {
     )
     this.processingService.selectedDatasets.subscribe(
       (datasets: Set<number>) => {
-        let selectedDatasets = new Set<Dataset>();
-        datasets.forEach(
-          id => {
-            this.datasetService.get(id).then((dataset: Dataset) => {
-              selectedDatasets.add(dataset);
-            })
-          }
-        )
-        this.selectedDatasets = selectedDatasets;
-      }
-    )
+        this.datasetService.getByIds(datasets).then(
+            result => {
+                this.selectedDatasets = new Set(result);
+            });
+        });
     this.keycloakService.getToken().then(
       (token: String) => {
         this.token = token;
@@ -134,7 +128,7 @@ export class ExecutionComponent implements OnInit {
 
         carminDatasetProcessing.inputDatasets = Array.from(this.selectedDatasets);
 
-        this.carminDatasetProcessing.saveNewCarminDatasetProcessing(carminDatasetProcessing).subscribe(
+        this.carminDatasetProcessing.create(carminDatasetProcessing).then(
           (response: CarminDatasetProcessing) => {
             this.router.navigate([`/dataset-processing/details/${response.id}`]);
           },
