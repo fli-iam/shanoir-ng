@@ -63,18 +63,18 @@ VALUES
 	(4,1573009,6,8,'AcquisitionMetadataConditionOnAcquisition', null),
 	(5,1573013,6,8,'AcquisitionMetadataConditionOnAcquisition', null);
 
-INSERT INTO study_card_condition_value
-	(id, value, condition_id)
+INSERT INTO study_card_condition_values
+	(value, study_card_condition_id)
 VALUES 
-	(1,'TOF',1),
-	(2,'flight',1),
-	(3,'gadolinium',2),
-	(4,'contrast',2),
-	(5,'enhanced',2),
-	(6,'Gd',2),
-	(7,'150',3),
-	(8,'150',4),
-	(9,'781.00',5);
+	('TOF',1),
+	('flight',1),
+	('gadolinium',2),
+	('contrast',2),
+	('enhanced',2),
+	('Gd',2),
+	('150',3),
+	('150',4),
+	('781.00',5);
 	
 INSERT INTO subject
 	(id, name)

@@ -59,13 +59,13 @@ VALUES
 	(1,1,2,4,'StudyCardDICOMCondition'),
 	(2,2,2,4,'StudyCardDICOMCondition');
 
-INSERT INTO study_card_condition_value
-	(id, condition_id, value)
+INSERT INTO study_card_condition_values
+	(study_card_condition_id, value)
 VALUES
-	(1,1,'tof'),
-	(2,1,'flight'),
-	(3,2,'gado'),
-	(4,2,'gd'),
-	(5,2,'gadolinium'),
-	(6,2,'contrast'),
-	(7,2,'enhanced');
+	(1,'tof'),
+	(1,'flight'),
+	(2,'gado'),
+	(2,'gd'),
+	(2,'gadolinium'),
+	(2,'contrast'),
+	(2,'enhanced');
