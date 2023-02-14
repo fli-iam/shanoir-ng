@@ -14,35 +14,35 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <span class="subtitle">These are the compatible quality cards that you can apply all over your study.</span>
 
-<ng-container *ngFor="let studyCard of studyCards">
+<ng-container *ngFor="let qualityCard of qualityCards">
     <div>
         <span class="sc-name left-icon" 
-                [routerLink]="'/study-card/details/' + studyCard.study?.id" 
+                [routerLink]="'/quality-card/details/' + qualityCard.study?.id" 
                 routerLinkActive="active"
                 title="open details">
-            <i class="fa-solid fa-shuffle"></i>{{studyCard.name}}
+            <i class="fa-solid fa-shuffle"></i>{{qualityCard.name}}
         </span>
-        <span class="nb-rules" (mouseover)="onMouseOverNbRules(studyCard, $event)" (mouseleave)="onMouseOutNbRules(studyCard)" [class.hover]="selectedStudyCard?.id == studyCard.id">
-            {{studyCard.rules?.length}} rule(s)
+        <span class="nb-rules" (mouseover)="onMouseOverNbRules(qualityCard, $event)" (mouseleave)="onMouseOutNbRules(qualityCard)" [class.hover]="selectedQualityCard?.id == qualityCard.id">
+            {{qualityCard.rules?.length}} rule(s)
             <study-card-rules class="rules" cardType="qualitycard"
-                    *ngIf="selectedStudyCard?.id == studyCard.id"
-                    [ngModel]="selectedStudyCard.rules" 
+                    *ngIf="selectedQualityCard?.id == qualityCard.id"
+                    [ngModel]="selectedQualityCard.rules" 
                     mode="view"
                     [allCoils]="allCoils">
             </study-card-rules>
         </span>
-        <button type="button" *ngIf="!pagings.get(studyCard.id)" class="alt right-icon apply" (click)="apply(studyCard)" [disabled]="loading.get(studyCard.id)">
+        <button type="button" *ngIf="!pagings.get(qualityCard.id)" class="alt right-icon apply" (click)="apply(qualityCard)" [disabled]="loading.get(qualityCard.id)">
             Apply
-            <i *ngIf="loading.get(studyCard.id)" class="fa fa-cog fa-spin"></i> 
+            <i *ngIf="loading.get(qualityCard.id)" class="fa fa-cog fa-spin"></i> 
         </button>
-        <ng-container *ngIf="pagings.get(studyCard.id)">
+        <ng-container *ngIf="pagings.get(qualityCard.id)">
             <button type="button" class="alt apply" disabled>Applied !</button>
             <span class="right-icon">See report<i class="fa-solid fa-arrow-down"></i></span> 
         </ng-container>
     </div>
     <shanoir-table
-            *ngIf="pagings.get(studyCard.id)"
-            [getPage]="getPage.get(studyCard.id).bind(this)"
+            *ngIf="pagings.get(qualityCard.id)"
+            [getPage]="getPage.get(qualityCard.id).bind(this)"
             [columnDefs]="columnDefs"
             [browserSearch]="false"
             [collapseControls]="true"

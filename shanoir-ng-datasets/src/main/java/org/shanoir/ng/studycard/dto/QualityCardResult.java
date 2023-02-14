@@ -16,7 +16,9 @@ package org.shanoir.ng.studycard.dto;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
 
 /**
@@ -50,7 +52,8 @@ public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
         if (getUpdatedSubjectStudies() == null) setUpdatedSubjectStudies(new ArrayList<>());
         if (subjectStudy == null || subjectStudy.getId() == null) return;
         for (SubjectStudy presentSubStu : getUpdatedSubjectStudies()) {
-            if (subjectStudy.getId().equals(presentSubStu.getId())) {
+            if (subjectStudy.getId().equals(presentSubStu.getId()) 
+                    && presentSubStu.getQualityTag().getId() >= subjectStudy.getQualityTag().getId()) {
                 return;
             }
         }
@@ -61,6 +64,21 @@ public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
         if (subjectStudies == null) return;
         for (SubjectStudy subjectStudy : subjectStudies) {
             addUpdatedSubjectStudy(subjectStudy);
+        }
+    }
+
+    /***
+     * Remove unchanged subject-studies 
+     * @param study the study containing the original subject-studies
+     */
+    public void removeUnchanged(Study study) {
+        if (getUpdatedSubjectStudies() == null) return;
+        for (SubjectStudy original : study.getSubjectStudyList()) {
+            getUpdatedSubjectStudies().removeIf(updated -> 
+                updated.getId().equals(original.getId()) 
+                && updated.getQualityTag() != null
+                && updated.getQualityTag().equals(original.getQualityTag())
+             );
         }
     }
     

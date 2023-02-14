@@ -45,6 +45,7 @@ import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { BidsDataType } from '../../enum/bids-data-type.enum';
 import { SuperPromise } from '../../utils/super-promise';
 import { QualityCardRule } from '../shared/quality-card.model';
+import { QualityCardRuleComponent } from './quality-card-rule.component';
 
 @Component({
     selector: 'study-card-rules',
@@ -63,7 +64,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     @Input() mode: Mode | 'select';
     @Input() cardType: 'studycard' | 'qualitycard';
     rules: (StudyCardRule | QualityCardRule)[];
-    @ViewChildren(StudyCardRuleComponent) ruleElements: QueryList<StudyCardRuleComponent>;
+    @ViewChildren('studyCardRule,qualityCardRule') ruleElements: QueryList<StudyCardRuleComponent | QualityCardRuleComponent>;
     private onTouchedCallback = () => {};
     onChangeCallback = (_: any) => {};
     @Input() manufModelId: number;
@@ -105,7 +106,6 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
 
         // here we reference assignment fields but conditions could be different
         this.conditionFields = this.assignmentFields;
-        console.log(this.conditionFields);
 
         if (this.breadcrumbService.currentStep.data.rulesToAnimate) 
             this.rulesToAnimate = this.breadcrumbService.currentStep.data.rulesToAnimate;

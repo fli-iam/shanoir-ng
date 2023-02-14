@@ -20,7 +20,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 boolean: isFieldBoolean(col),
                 editable: cellEditable(item, col),
                 possibleValues: (page?._savedContentRendering && page?._savedContentRendering[itemIndex]) ? page._savedContentRendering[itemIndex][colIndex]?.possibleValues : null,
-                cellValue: getCellValue(item, col)
+                cellValue: getCellValue(item, col),
+                cellGraphics: getCellGraphics(item, col)
         } as vars">
             <td
                     *ngIf="!col.hidden"
@@ -28,13 +29,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [class.bool]="vars.boolean"
                     [class.progress]="col.type == 'progress'"
                     [attr.title]="col.tip != undefined ? col.tip : (vars.render.text ? vars.render.text : '')"
-                    [style.color]="vars.render.color"
+                    [style.color]="vars.render?.color"
+                    [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
                     #refTd
                     >
 
-                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi">
+                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi" [class.wrap]="!col.nowrap">
                     <!-- default display -->
-                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi">{{vars.render.text ? vars.render.text : vars.render}}</ng-container>
+                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi">
+                        <span
+                            [style.color]="vars.cellGraphics?.color"
+                            [style.border-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.color : null"
+                            [style.background-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.backgroundColor : null"
+                            [class.block]="vars.cellGraphics?.tag"
+                        >
+                            <i *ngIf="vars.cellGraphics?.awesome" class="{{vars.cellGraphics.awesome}}"></i>
+                            {{vars.render.text ? vars.render.text : vars.render}}
+                        </span>
+                    </ng-container>
 
                     <!-- link -->
                     <a class="link" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi"

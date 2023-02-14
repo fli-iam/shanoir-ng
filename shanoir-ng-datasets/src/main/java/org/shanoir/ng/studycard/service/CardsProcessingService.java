@@ -28,11 +28,13 @@ import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.quality.SubjectStudyQualityTagDTO;
 import org.shanoir.ng.shared.service.StudyService;
+import org.shanoir.ng.shared.service.SubjectStudyService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -59,6 +61,9 @@ public class CardsProcessingService {
 	
 	@Autowired
     private WADODownloaderService downloader;
+	
+	@Autowired
+	private SubjectStudyService subjectStudyService;
 
 	
 	/**
@@ -88,7 +93,7 @@ public class CardsProcessingService {
 	 * @throws MicroServiceCommunicationException 
 	 */
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard) throws MicroServiceCommunicationException {
-		if (qualityCard == null) throw new IllegalArgumentException("studycard can't be null");
+	    if (qualityCard == null) throw new IllegalArgumentException("studycard can't be null");
 		Study study = studyService.findById(qualityCard.getStudyId());
 		if (study == null ) throw new IllegalArgumentException("study can't be null");
 		if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
@@ -108,7 +113,13 @@ public class CardsProcessingService {
 					    rule.apply(examination, examinationDicomAttributes, result);
 					}
 				}				
-			}
+			};
+			result.removeUnchanged(study);
+			try {
+                subjectStudyService.update(result.getUpdatedSubjectStudies());
+            } catch (EntityNotFoundException e) {
+                throw new IllegalStateException("Could not update subject-studies", e);
+            }
 			List<SubjectStudyQualityTagDTO> subjectStudyTagDTOs = getSubjectStudyTagDTOs(result.getUpdatedSubjectStudies());
 			rabbitSender.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
 			return result;
@@ -120,10 +131,13 @@ public class CardsProcessingService {
 
     private List<SubjectStudyQualityTagDTO> getSubjectStudyTagDTOs(List<SubjectStudy> updatedSubjectStudies) {
         List<SubjectStudyQualityTagDTO> dtos = new ArrayList<>();
-        for (SubjectStudy subjectStudy : updatedSubjectStudies) {
-            SubjectStudyQualityTagDTO dto = new SubjectStudyQualityTagDTO();
-            dto.setSubjectStudyId(subjectStudy.getId());
-            dto.setTag(subjectStudy.getQualityTag());
+        if (updatedSubjectStudies != null) {
+            for (SubjectStudy subjectStudy : updatedSubjectStudies) {
+                SubjectStudyQualityTagDTO dto = new SubjectStudyQualityTagDTO();
+                dto.setSubjectStudyId(subjectStudy.getId());
+                dto.setTag(subjectStudy.getQualityTag());
+                dtos.add(dto);
+            }            
         }
         return dtos;
     }

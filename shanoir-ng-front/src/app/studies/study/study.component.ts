@@ -570,4 +570,12 @@ export class StudyComponent extends EntityComponent<Study> {
     goToAccessRequest(accessRequest : AccessRequest) {
         this.router.navigate(["/access-request/details/" + accessRequest.id]);
     }
+
+    reloadSubjectStudies() {
+        setTimeout(() => {
+            this.studyService.get(this.id).then(study => {
+                this.study.subjectStudyList = study.subjectStudyList;
+            });
+        }, 1000);
+    }
 }

@@ -27,6 +27,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -77,12 +78,31 @@ public class QualityExaminationRule extends AbstractEntity {
     }
 
     public void apply(ExaminationData examination, Attributes examinationDicomAttributes, QualityCardResult result) {
-        if (this.getConditions() == null || this.getConditions().isEmpty() 
-                || conditionsfulfilled(examinationDicomAttributes, examination, result)) {
+        if (this.getConditions() == null || this.getConditions().isEmpty()) {
             result.addUpdatedSubjectStudies( 
                     setTagToSubjectStudies(examination.getSubjectStudies()));
+        } else {
+            ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result);
+            if (conditionResult.isFulfilled()) {
+                result.addUpdatedSubjectStudies( 
+                        setTagToSubjectStudies(examination.getSubjectStudies()));
+            }            
+            // if conditions not fulfilled for a VALID tag
+            // or if conditions fulfilled for a ERROR or WARNING tag
+            // then add an entry to the report
+            if ((conditionResult.isFulfilled() && !getQualityTag().equals(QualityTag.VALID))
+                    || (!conditionResult.isFulfilled() && getQualityTag().equals(QualityTag.VALID))) {
+                QualityCardResultEntry resultEntry = initResult(examination);
+                if (conditionResult.isFulfilled()) {
+                    resultEntry.setMessage("Tag " + getQualityTag().name() + " was set because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));                   
+                } else {
+                    resultEntry.setMessage("Tag " + getQualityTag().name() + " could not be set because those conditions failed : " + StringUtils.join(conditionResult.getUnfulfilledConditionsMsgList(), ", "));
+                }
+                result.add(resultEntry);
+            }
         }
-    }
+    }            
+          
     
     /**
      * 
@@ -93,39 +113,41 @@ public class QualityExaminationRule extends AbstractEntity {
         if (subjectStudies == null) throw new IllegalArgumentException("subjectStudies can't be null");
         List<SubjectStudy> updatedList = new ArrayList<>();
         for (SubjectStudy subjectStudy : subjectStudies) {
-            if (!getQualityTag().equals(subjectStudy.getQualityTag())) {
-                subjectStudy.setQualityTag(getQualityTag());
-                updatedList.add(subjectStudy);
-            }
+            // don't touch subjectStudy as we later will compare the original with the updated
+            SubjectStudy subjectStudyCopy = new SubjectStudy();
+            subjectStudyCopy.setId(subjectStudy.getId());
+            subjectStudyCopy.setQualityTag(getQualityTag());
+            updatedList.add(subjectStudyCopy);
         }
         return updatedList;
     }
 
     @SuppressWarnings("unused")
-    private boolean conditionsfulfilled(Attributes dicomAttributes, ExaminationData examination, QualityCardResult result) {
-        boolean fulfilled = true;
+    private ConditionResult conditionsfulfilled(Attributes dicomAttributes, ExaminationData examination, QualityCardResult result) {
+        boolean allFulfilled = true;
+        ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
         for (StudyCardCondition condition : getConditions()) {
-            String errorMsg = null;
+            StringBuffer msg = new StringBuffer();
+            boolean fulfilled = true;
             if (condition instanceof StudyCardDICOMCondition) {
-                fulfilled &= ((StudyCardDICOMCondition) condition).fulfilled(dicomAttributes, errorMsg);
+                fulfilled = ((StudyCardDICOMCondition) condition).fulfilled(dicomAttributes, msg);
             } else if (condition instanceof ExaminationMetadataConditionOnAcquisitions) {
-                fulfilled &= ((ExaminationMetadataConditionOnAcquisitions) condition).fulfilled(examination.getDatasetAcquisitions(), errorMsg);
+                fulfilled = ((ExaminationMetadataConditionOnAcquisitions) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
             } else if (condition instanceof ExaminationMetadataConditionOnDatasets) {
-                fulfilled &= ((ExaminationMetadataConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), errorMsg);
+                fulfilled = ((ExaminationMetadataConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }
-            if (!fulfilled) {
-                if (errorMsg != null && result != null) {
-                    QualityCardResultEntry resultEntry = initResult(examination);
-                    resultEntry.setMessage(errorMsg);
-                    result.add(resultEntry);
-                }
-                break; // don't go further if one condition is false
+            if (fulfilled) {
+                condResult.addFulfilledConditionsMsg(msg.toString());
+            } else {
+                condResult.addUnfulfilledConditionsMsg(msg.toString());
             }
+            allFulfilled &= fulfilled;
         }
-       return fulfilled;
+        condResult.setFulfilled(allFulfilled);
+        return condResult;
     }
     
     private QualityCardResultEntry initResult(ExaminationData examination) {
@@ -170,6 +192,37 @@ public class QualityExaminationRule extends AbstractEntity {
             } else {
                 return 0;
             }
+        }
+    }
+    
+    public class ConditionResult {
+        
+        private boolean fulfilled;
+        private List<String> fulfilledConditionsMsgList = new ArrayList<>();
+        private List<String> unfulfilledConditionsMsgList = new ArrayList<>();
+
+        public boolean isFulfilled() {
+            return fulfilled;
+        }
+
+        public void setFulfilled(boolean fulfilled) {
+            this.fulfilled = fulfilled;
+        }
+
+        public List<String> getFulfilledConditionsMsgList() {
+            return fulfilledConditionsMsgList;
+        }
+
+        public void addFulfilledConditionsMsg(String msg) {
+            this.fulfilledConditionsMsgList.add(msg);
+        }
+
+        public List<String> getUnfulfilledConditionsMsgList() {
+            return unfulfilledConditionsMsgList;
+        }
+
+        public void addUnfulfilledConditionsMsg(String msg) {
+            this.unfulfilledConditionsMsgList.add(msg);
         }
     }
 }

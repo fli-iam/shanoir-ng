@@ -249,6 +249,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
+    getCellGraphics(item: any, col: ColumnDefinition): any {
+        if (col.hasOwnProperty("cellGraphics")) {
+            return col["cellGraphics"](item);
+        } else return null;
+    }
+
     /**
      * Test if a cell content is a boolean
      */

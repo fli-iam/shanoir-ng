@@ -11,16 +11,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Coil } from '../coils/shared/coil.model';
 import { CoilService } from '../coils/shared/coil.service';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 import { BrowserPaging } from '../shared/components/table/browser-paging.model';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
-import { FilterablePageable, Page, Pageable } from '../shared/components/table/pageable.model';
-import { StudyCard } from '../study-cards/shared/study-card.model';
-import { StudyCardService } from '../study-cards/shared/study-card.service';
+import { FilterablePageable, Page } from '../shared/components/table/pageable.model';
+import { QualityCard } from '../study-cards/shared/quality-card.model';
+import { QualityCardService } from '../study-cards/shared/quality-card.service';
+
 
 @Component({
     selector: 'quality-control',
@@ -31,9 +32,10 @@ import { StudyCardService } from '../study-cards/shared/study-card.service';
 export class QualityControlComponent implements OnChanges {
     
     @Input() studyId: number;
-    studyCards: StudyCard[] = [];
+    @Output() tagUpdate: EventEmitter<void> = new EventEmitter();
+    qualityCards: QualityCard[] = [];
     allCoils: Coil[];
-    selectedStudyCard: StudyCard;
+    selectedQualityCard: QualityCard;
     timeoutId: number;
     overTimeout: any;
     pagings: Map<number, BrowserPaging<any>> = new Map();
@@ -43,13 +45,11 @@ export class QualityControlComponent implements OnChanges {
         {headerName: 'Subject Name', field: 'subjectName'},
         {headerName: 'Examination Comment', field: 'examinationComment'},
         {headerName: 'Examination Date', field: 'examinationDate', type: 'date'},
-        {headerName: 'Acquisition Level', field: 'resultAcquisitionLevel'},
-        {headerName: 'Dataset Level', field: 'resultDatasetLevel'},
-        {headerName: 'Examination Level', field: 'resultExaminationLevel'}
+        {headerName: 'Details', field: 'message', wrap: true}
     ];
     
     constructor(
-            private studyCardService: StudyCardService,
+            private qualityCardService: QualityCardService,
             coilService: CoilService,
             private confirmService: ConfirmDialogService
     ) {
@@ -58,43 +58,44 @@ export class QualityControlComponent implements OnChanges {
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.studyId && this.studyId) {
-            this.studyCardService.getAllForStudy(this.studyId).then(studyCards => this.studyCards = studyCards?.filter(sc => sc.acquisitionEquipment == null));
+            this.qualityCardService.getAllForStudy(this.studyId).then(qualityCards => this.qualityCards = qualityCards);
         }
     }
 
-    apply(studyCard: StudyCard) {
+    apply(qualityCard: QualityCard) {
         this.confirmService.confirm(
             'Apply Quality Card', 
-            `Do you want to apply the quality card named "${studyCard.name}" all over the study "${studyCard.study.name}" ? This would permanentely overwrite previous Shanoir metadata that has been previously updated by any study/quality cards for theses datasets.`
+            `Do you want to apply the quality card named "${qualityCard.name}" all over the study "${qualityCard.study.name}" ? This would permanentely overwrite previous quality tags for the study's subjects.`
         ).then(accept => {
             if (accept) {
-                this.loading.set(studyCard.id, true);
-                this.studyCardService.applyStudyCardOnStudy(studyCard.id).then(result => {
-                    this.pagings.set(studyCard.id, new BrowserPaging(result, this.columnDefs));
-                    this.getPage.set(studyCard.id, (pageable: FilterablePageable) => {
-                        return Promise.resolve(this.pagings.get(studyCard.id).getPage(pageable));
+                this.loading.set(qualityCard.id, true);
+                this.qualityCardService.applyOnStudy(qualityCard.id).then(result => {
+                    this.pagings.set(qualityCard.id, new BrowserPaging(result, this.columnDefs));
+                    this.getPage.set(qualityCard.id, (pageable: FilterablePageable) => {
+                        return Promise.resolve(this.pagings.get(qualityCard.id).getPage(pageable));
                     });
-                }).finally(() => this.loading.set(studyCard.id, false));
+                    this.tagUpdate.emit();
+                }).finally(() => this.loading.set(qualityCard.id, false));
             }
         });
 
     }
 
-    onMouseOverNbRules(studyCard: StudyCard, event: any) {
-        if (studyCard.id != this.timeoutId) {
-            this.timeoutId = studyCard.id;
+    onMouseOverNbRules(qualityCard: QualityCard, event: any) {
+        if (qualityCard.id != this.timeoutId) {
+            this.timeoutId = qualityCard.id;
             clearTimeout(this.overTimeout);
             this.overTimeout = setTimeout(() => {
-                this.selectedStudyCard = studyCard;
+                this.selectedQualityCard = qualityCard;
             }, 500);
         }
     }
 
-    onMouseOutNbRules(studyCard: StudyCard) {
-        if (studyCard.id == this.timeoutId) {
+    onMouseOutNbRules(qualityCard: QualityCard) {
+        if (qualityCard.id == this.timeoutId) {
             this.timeoutId = null;
             clearTimeout(this.overTimeout);
-            this.selectedStudyCard = null;
+            this.selectedQualityCard = null;
         }
     }
 }

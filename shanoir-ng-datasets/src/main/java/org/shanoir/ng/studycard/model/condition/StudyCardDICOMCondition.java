@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
@@ -49,7 +50,7 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
         return fulfilled(dicomAttributes, null);
     }
         
-    public boolean fulfilled(Attributes dicomAttributes, String errorMsg) {
+    public boolean fulfilled(Attributes dicomAttributes, StringBuffer errorMsg) {
         LOG.info("conditionFulfilled: " + this.getId() + " processing one condition with all its values: ");
         this.getValues().stream().forEach(s -> LOG.info(s));
         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(this.getDicomTag());
@@ -75,6 +76,7 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
                     comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
                 }
                 if (comparison != null && numericalCompare(this.getOperation(), comparison)) {
+                    errorMsg.append("condition [" + toString() + "] succeed");
                     return true; // as condition values are combined by OR: return if one is true
                 }
             } else if (tagType.isTextual()) {
@@ -85,13 +87,34 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
                 String stringValue = dicomAttributes.getString(this.getDicomTag());
                 if (stringValue == null) {
                     LOG.warn("Could not find a value in the dicom for the tag " + this.getDicomTag());
+                    errorMsg.append("condition [" + toString() 
+                        + "] failed because no value was found in the dicom for the tag " + this.getDicomTag());
                     return false;
                 }               
                 if (textualCompare(this.getOperation(), stringValue, value)) {
+                    errorMsg.append("condition [" + toString() + "] succeed");
                     return true; // as condition values are combined by OR: return if one is true
                 }
             }
         }
+        errorMsg.append("condition [" + toString() + "] failed ");
         return false;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("DICOM field n°").append(getDicomTagHexString(getDicomTag()))
+            .append(" ").append(getOperation().name())
+            .append(" to ")
+            .append(StringUtils.join(getValues(), " or "));        
+        return sb.toString();
+    }
+    
+    private String getDicomTagHexString(int tag) {
+        String hexStr = Integer.toHexString(tag);
+        hexStr = StringUtils.leftPad(hexStr, 8, "0");
+        hexStr = hexStr.substring(0, 5) + "," + hexStr.substring(5);
+        return hexStr;
     }
 }

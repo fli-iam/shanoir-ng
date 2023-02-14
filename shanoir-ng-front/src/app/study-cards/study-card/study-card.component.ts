@@ -36,6 +36,7 @@ import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
+import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.component';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 
 @Component({
@@ -223,7 +224,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     onChangeAcqEq() {
         if (!this.rulesComponent) return;
         this.rulesComponent.ruleElements.forEach(ruleComp => {
-            ruleComp.assignmentChildren.forEach(assComp => {
+            (ruleComp as StudyCardRuleComponent).assignmentChildren.forEach(assComp => {
                 if (assComp.assignment.field.toLowerCase().includes('coil')) {
                     assComp.assignment.value = null
                     assComp.valueTouched = true;

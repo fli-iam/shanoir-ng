@@ -19,6 +19,7 @@ import java.util.List;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
@@ -52,8 +53,7 @@ public class ExaminationMetadataConditionOnDatasets extends StudyCardMetadataCon
         return fulfilled(acquisitions, null);
     }
     
-    public boolean fulfilled(List<DatasetAcquisition> acquisitions, String errorMsg) {
-        errorMsg = null;
+    public boolean fulfilled(List<DatasetAcquisition> acquisitions, StringBuffer errorMsg) {
         if (acquisitions == null) throw new IllegalArgumentException("datasets can not be null");
         DatasetMetadataField field = this.getShanoirField();
         if (field == null) throw new IllegalArgumentException("field can not be null");
@@ -77,15 +77,37 @@ public class ExaminationMetadataConditionOnDatasets extends StudyCardMetadataCon
             }
         }
         boolean complies = cardinalityComplies(nbOk, total);
-        if (!complies) errorMsg = getErrorMsg(nbOk, total);
+        if (!complies) {
+            if (getCardinality() == -1) {
+                errorMsg.append("condition [" + toString() + "] failed because only " + nbOk + " out of all (" + total + ") acquisitions complied");
+            } else if (getCardinality() == 0) {
+                errorMsg.append("condition [" + toString() + "] failed because " + nbOk + " acquisitions complied where 0 was required");
+            } else {
+                errorMsg.append("condition [" + toString() + "] failed because only " + nbOk + " out of " + total + " acquisitions complied");
+            }
+        } else {
+            errorMsg.append("condition [" + toString() + "] succeed");
+        }
         return complies;
-    } 
+    }
     
-    private String getErrorMsg(int nbOk, int total) {
-        String values = String.join(", ", getValues());
-        String msg = "Error with condition: " + getShanoirField() + ", " + getOperation().name() + ", with values: " + values
-                + ". " + nbOk + "/" + total + " datasets complied when " + getCardinality() + " were needed.";
-        return msg;
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        if (getCardinality() == -1) {
+            sb.append("all of the ");
+        } else if (getCardinality() == 0) {
+            sb.append("none of the ");
+        } else {
+            sb.append("at least ")
+                .append(getCardinality())
+                .append(" of the ");
+        }
+        sb.append("Dataset metadata field '").append(getShanoirField().name())
+            .append("' ").append(getOperation().name())
+            .append(" ")
+            .append(StringUtils.join(getValues(), " or "));        
+        return sb.toString();
     }
 
 }

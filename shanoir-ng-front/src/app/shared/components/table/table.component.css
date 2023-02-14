@@ -60,7 +60,7 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 	td.loading,
 	td.empty { padding: 20px 20px; text-align: center; }
 	.cell-container:not(.select) { overflow: hidden; text-overflow: ellipsis; }
-	.cell-container.multiselect { white-space: initial; }
+	.cell-container.multiselect, .cell-container.wrap { white-space: initial; }
 	.cell-container:empty:after { content: '.'; visibility: hidden; }
 
 .loader { float: right; border-left: none !important; }

@@ -34,8 +34,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" skipLocationChange replaceUrl="true">Centers</li>
 				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" skipLocationChange replaceUrl="true">Members</li>
 				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" skipLocationChange replaceUrl="true">Tags</li>
-				<li [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" skipLocationChange replaceUrl="true">Quality</li>				
 				<ng-container *ngIf="mode == 'view'">
+					<li [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" skipLocationChange replaceUrl="true">Quality</li>				
 					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" skipLocationChange replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" skipLocationChange replaceUrl="true">BIDS</li>
 				</ng-container>
@@ -349,9 +349,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[mode]="mode">
 				</studyuser-list>
 			</fieldset>
-			<fieldset [class.hidden]="activeTab != 'quality'">
+			<fieldset [class.hidden]="activeTab != 'quality'" *ngIf="mode == 'view'">
 				<legend>Quality control</legend>
-				<quality-control [studyId]="study.id"></quality-control>		
+				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>		
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">
 				<legend>Tree</legend>
