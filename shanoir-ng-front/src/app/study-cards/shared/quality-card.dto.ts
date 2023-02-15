@@ -34,7 +34,7 @@ export class QualityCardDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntity(dto: QualityCardDTO, result?: QualityCard): Promise<QualityCard> {        
+    public toEntity(dto: QualityCardDTO, result?: QualityCard): Promise<QualityCard> {
         if (!result) result = new QualityCard();
         QualityCardDTOService.mapSyncFields(dto, result);
         return Promise.all([
@@ -70,12 +70,19 @@ export class QualityCardDTOService {
                 result.push(entity);
             }
         }
-        return this.studyService.getStudiesNames().then(studies => {
-            for (let entity of result) {
-                if (entity.study) 
-                    entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
-            }
-        }).then(() => {
+        return Promise.all([
+            this.studyService.getStudiesNames().then(studies => {
+                for (let entity of result) {
+                    if (entity.study) 
+                        entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
+                }
+            }),
+            this.dicomService.getDicomTags().then(tags => {
+                for (let entity of result) {
+                    this.completeDicomTagNames(entity, tags)
+                }
+            })   
+        ]).then(() => {
             return result;
         })
     }

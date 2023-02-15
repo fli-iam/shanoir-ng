@@ -18,8 +18,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span class="cardinality-type" *ngIf="condition.cardinality == 0">none of</span>
     <span class="cardinality-type" *ngIf="condition.cardinality > 0">at least</span>
     <span class="cardinality" *ngIf="condition.cardinality > 0">{{condition.cardinality}}</span>
-    <span class="var" *ngIf="condition.dicomTag" title="{{condition.dicomTag | dicomTagLabel}}">{{condition.dicomTag?.label ? condition.dicomTag.label : condition.dicomTag?.code}}</span>
-    <span class="var" *ngIf="condition.shanoirField">{{fieldLabel}}</span>
+    <span class="var" *ngIf="condition.scope == 'StudyCardDICOMCondition'" title="{{condition.dicomTag | dicomTagLabel}}">{{condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel)}}</span>
+    <span class="var" *ngIf="condition.scope != 'StudyCardDICOMCondition'">{{fieldLabel}}</span>
     <span class="method">{{condition.operation}}</span>
     <span class="multi-value">
         <div class="value" *ngFor="let value of condition.values; let i=index;">
