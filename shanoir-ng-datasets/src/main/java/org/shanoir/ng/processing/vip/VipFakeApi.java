@@ -1,9 +1,14 @@
 package org.shanoir.ng.processing.vip;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 
 /**
  * Please do not use this API in production
@@ -14,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/fakevip")
 public interface VipFakeApi {
 	
-    @GetMapping(value = "", produces = { "application/json" }, consumes = {
+    @GetMapping(value = "/pipelines", produces = { "application/json" }, consumes = {
                     "application/json" })
-	public ResponseEntity<String> getProcessing();
+	public ResponseEntity<List<Pipeline>> getProcessing() throws JsonMappingException, JsonProcessingException;
 
     @PostMapping(value = "", produces = { "application/json" }, consumes = {
     "application/json" })
