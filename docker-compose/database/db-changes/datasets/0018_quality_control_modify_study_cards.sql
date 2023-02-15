@@ -58,7 +58,7 @@ CREATE TABLE study_card_condition_join (
   study_card_rule_id bigint(20) NOT NULL,
   condition_id bigint(20) NOT NULL,
   UNIQUE KEY UK_n8b95p3jtob4ot3t48isme8xe (condition_id),
-  KEY FKs853rms23vbo6qtbnuiyqv1ci (study_card_rule_id),
+  KEY FKs853rms23vbo6qtbnuiyqv1ci (study_card_rule_id)
 );
 ALTER TABLE study_card_condition_join ADD CONSTRAINT FK1k7n1md79nkowvqbibyn7a72k FOREIGN KEY (condition_id) REFERENCES study_card_condition(id);
 ALTER TABLE study_card_condition_join ADD CONSTRAINT FKs853rms23vbo6qtbnuiyqv1ci FOREIGN KEY (study_card_rule_id) REFERENCES study_card_rule(id);
