@@ -172,3 +172,6 @@ spring:
 front:
   server:
     url: https://shanoir-ng-nginx
+logging:
+  file:
+    name: /tmp/shanoir-ng-logs/shanoir-ng-users.log

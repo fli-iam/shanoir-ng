@@ -68,8 +68,7 @@ public interface AccessRequestApi {
 			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
-	@GetMapping(value = "byUser", produces = { "application/json" }, consumes = {
-			"application/json" })
+	@GetMapping(value = "byUser", produces = { "application/json" })
 	ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException;
 
 	@ApiOperation(value = "byStudy", notes = "Find all the access request for the given study", response = AccessRequest.class, tags = {})

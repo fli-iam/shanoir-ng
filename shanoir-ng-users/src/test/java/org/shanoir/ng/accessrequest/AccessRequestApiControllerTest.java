@@ -2,6 +2,7 @@ package org.shanoir.ng.accessrequest;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -36,6 +37,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -44,6 +46,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(AccessRequestApiController.class)
+@ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
 public class AccessRequestApiControllerTest {
 
@@ -150,7 +153,7 @@ public class AccessRequestApiControllerTest {
 		
 		Mockito.when(this.accessRequestService.findByStudyIdAndStatus(Mockito.any(List.class), Mockito.anyInt()))
 		.thenReturn(listOfRequests);
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
+		mvc.perform(get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().string(
 						Matchers.allOf(
@@ -164,7 +167,7 @@ public class AccessRequestApiControllerTest {
 	@WithMockKeycloakUser(id = 1)
 	public void findAllByUserIdNoStudyTest() throws Exception {
 		Mockito.when(rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, 1L)).thenReturn(null);
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
+		this.mvc.perform(get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNoContent());
 	}
