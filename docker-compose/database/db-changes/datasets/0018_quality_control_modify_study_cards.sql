@@ -5,7 +5,7 @@ CREATE TABLE quality_card (
   study_id bigint(20) DEFAULT NULL,
   PRIMARY KEY (id),
   UNIQUE KEY UK_poown2bfypi2y14oa0ve4k22s (name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 
 -- create quality_examination_rule
 CREATE TABLE quality_examination_rule (
@@ -13,7 +13,7 @@ CREATE TABLE quality_examination_rule (
   tag int(11) DEFAULT NULL,
   quality_card_id bigint(20) DEFAULT NULL,
   PRIMARY KEY (id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 ALTER TABLE quality_examination_rule ADD CONSTRAINT FK8bavfrsgqwil7aei15l00dg6g FOREIGN KEY (quality_card_id) REFERENCES quality_card (id);
 
 -- study_card_condition
@@ -59,7 +59,7 @@ CREATE TABLE study_card_condition_join (
   condition_id bigint(20) NOT NULL,
   UNIQUE KEY UK_n8b95p3jtob4ot3t48isme8xe (condition_id),
   KEY FKs853rms23vbo6qtbnuiyqv1ci (study_card_rule_id),
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 ALTER TABLE study_card_condition_join ADD CONSTRAINT FK1k7n1md79nkowvqbibyn7a72k FOREIGN KEY (condition_id) REFERENCES study_card_condition(id);
 ALTER TABLE study_card_condition_join ADD CONSTRAINT FKs853rms23vbo6qtbnuiyqv1ci FOREIGN KEY (study_card_rule_id) REFERENCES study_card_rule(id);
 
@@ -69,7 +69,7 @@ CREATE TABLE quality_card_condition_join (
   condition_id bigint(20) NOT NULL,
   UNIQUE KEY UK_6m1dha1llcmucyobv1nlxbqej (condition_id),
   KEY FKahmgub56cris7hca5ya5rj8m6 (quality_card_rule_id),
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+);
 ALTER TABLE quality_card_condition_join ADD CONSTRAINT UK_6m1dha1llcmucyobv1nlxbqej FOREIGN KEY (condition_id) REFERENCES study_card_condition(id);
 ALTER TABLE quality_card_condition_join ADD CONSTRAINT FKahmgub56cris7hca5ya5rj8m6 FOREIGN KEY (quality_card_rule_id) REFERENCES quality_card_rule(id);
 
