@@ -148,7 +148,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 		if (validation) {
 			// if there is an account request, accept it.
-			if (resolvedRequest.getUser().isAccountRequestDemand()) {
+			if (resolvedRequest.getUser().isAccountRequestDemand() != null && resolvedRequest.getUser().isAccountRequestDemand()) {
 				this.userService.confirmAccountRequest(resolvedRequest.getUser());
 			}
 			// Update study to add a new user

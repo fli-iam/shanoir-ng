@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
@@ -130,6 +131,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final User user = (User) userRepository.findById(id).orElse(null);
+		
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, id);
 		}
