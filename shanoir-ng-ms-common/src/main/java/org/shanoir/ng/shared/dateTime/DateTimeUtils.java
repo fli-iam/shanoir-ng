@@ -37,7 +37,8 @@ public class DateTimeUtils {
 	
 	public static Date localDateToDate(LocalDate localDate) {
 		if (localDate == null) return null;
-		else return Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
+		// Here we use UTC, otherwise the date can be "changed" if the system is not in UTC
+		else return Date.from(localDate.atStartOfDay().atZone(ZoneId.of("UTC")).toInstant());
 	}
 	
 	public static LocalDateTime dateToLocalDateTime(Date date) {
