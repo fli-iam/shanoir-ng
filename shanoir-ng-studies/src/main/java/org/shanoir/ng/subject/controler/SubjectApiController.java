@@ -28,6 +28,8 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
@@ -62,6 +64,9 @@ public class SubjectApiController implements SubjectApi {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private StudyService studyService;
 
 	@Override
 	public ResponseEntity<Void> deleteSubject(
@@ -187,7 +192,11 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	public ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name) {
-		Page<Subject> subjects = this.subjectService.getFilteredPage(page, name);
+		// Get all allowed studies
+		List<Study> studies = this.studyService.findAll();
+		
+		Page<Subject> subjects = this.subjectService.getFilteredPageByStudies(page, name, studies);
+		
 		if (subjects.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

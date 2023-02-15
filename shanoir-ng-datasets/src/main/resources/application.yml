@@ -128,9 +128,9 @@ dcm4chee-arc:
   # default is true as we want to use new protocols in sh-ng
   dicom.web: false
   dicom.c-store.aet.called: DCM4CHEE
-  # use "/wado" for dcm4chee2 and "/dcm4chee-arc/aets/DCM4CHEE/wado" for dcm4chee3
-  dicom.wado.uri: /dcm4chee-arc/aets/DCM4CHEE/wado
-  dicom.web.rs: /dcm4chee-arc/aets/DCM4CHEE/rs/studies
+  # use "/wado" for dcm4chee2 and "/dcm4chee-arc/aets/AS_RECEIVED/wado" for dcm4chee3
+  dicom.wado.uri: /dcm4chee-arc/aets/AS_RECEIVED/wado
+  dicom.web.rs: /dcm4chee-arc/aets/AS_RECEIVED/rs/studies
   dicom.web.http.client.max.total: 500
   dicom.web.http.client.max.per.route: 500
 

@@ -120,3 +120,5 @@ INSERT INTO `coil`
 	(id, center_id, coil_type, manufacturer_model_id, name, number_of_channels, serial_number)
 VALUES
 	(1, 1, 1, 3, 'BODY', 1, NULL);
+
+INSERT INTO profile (id, profile_name) VALUES (1,'Profile Neurinfo'), (2,'Profile OFSEP');
