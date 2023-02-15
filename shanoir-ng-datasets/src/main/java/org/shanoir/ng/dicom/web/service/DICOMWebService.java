@@ -280,7 +280,7 @@ public class DICOMWebService {
 			instanceId = this.extractInstanceUID(url, null);
 			studyId = this.extractStudyUID(url, null);
 			serieId = this.extractSeriesUIDUID(url, null);
-			// http://localhost:8081/dcm4chee-arc/aets/DCM4CHEE/rs/studies//series//instances//reject/113001%5EDCM
+			// http://localhost:8081/dcm4chee-arc/aets/AS_RECEIVED/rs/studies//series//instances//reject/113001%5EDCM
 			rejectURL = url.substring(0, url.indexOf("wado?")) + "rs/studies/" + studyId + "/series/" + serieId
 					+ "/instances/" + instanceId + REJECT_SUFFIX;
 			deleteUrl = url.substring(0, url.indexOf("/aets/")) + REJECT_SUFFIX;
