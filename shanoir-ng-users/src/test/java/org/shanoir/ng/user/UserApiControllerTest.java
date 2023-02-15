@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
@@ -95,7 +95,7 @@ public class UserApiControllerTest {
 	@MockBean
 	private ShanoirEventService eventService;
 
-	@Before
+	@BeforeEach
 	public void setup() throws EntityNotFoundException, AccountNotOnDemandException, SecurityException  {
 		User mockUser = ModelsUtil.createUser(1L);
 		given(userService.confirmAccountRequest(Mockito.any(User.class))).willReturn(mockUser);

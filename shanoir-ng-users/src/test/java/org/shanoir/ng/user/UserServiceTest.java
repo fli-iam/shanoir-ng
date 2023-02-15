@@ -24,7 +24,7 @@ import java.util.Optional;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
@@ -92,7 +92,7 @@ public class UserServiceTest {
 	@MockBean
 	private AccessRequestRepository accessRequestRepository;
 
-	@Before
+	@BeforeEach
 	public void setup() throws SecurityException {
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
 		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));

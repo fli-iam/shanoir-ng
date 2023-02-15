@@ -17,7 +17,7 @@ package org.shanoir.ng.accountrequest;
 import static org.junit.Assert.fail;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.accountrequest.controller.AccountRequestApi;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -53,7 +53,7 @@ public class AccountRequestApiSecurityTest {
 	
 	private User mockAccountReqUser;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockAccountReqUser = ModelsUtil.createUser(null);
 			mockAccountReqUser.setAccountRequestDemand(true);

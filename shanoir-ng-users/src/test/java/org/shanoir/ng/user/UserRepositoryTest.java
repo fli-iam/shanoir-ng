@@ -60,8 +60,10 @@ public class UserRepositoryTest {
 	 */
 	@MockBean
 	private AuthenticationManager authenticationManager;
+
 	@MockBean
 	private DocumentationPluginsBootstrapper documentationPluginsBootstrapper;
+	
 	@MockBean
 	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
 	

@@ -17,7 +17,7 @@ package org.shanoir.ng.accountrequest;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.controller.AccountRequestApiController;
@@ -68,7 +68,7 @@ public class AccountRequestApiControllerTest {
 	@MockBean
 	private UserUniqueConstraintManager uniqueConstraintManager;
 
-	@Before
+	@BeforeEach
 	public void setup() throws SecurityException {
 		given(fieldEditionSecurityManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());
 		given(uniqueConstraintManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());

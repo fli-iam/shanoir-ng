@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
@@ -63,7 +63,7 @@ public class EmailServiceTest {
 	@MockBean
 	private UserRepository userRepositoryMock;
 	
-	@Before
+	@BeforeEach
 	public void initGreenMail() {
 		ServerSetup setup = new ServerSetup(3025, "localhost", "smtp");
 		greenMail = new GreenMail(setup);

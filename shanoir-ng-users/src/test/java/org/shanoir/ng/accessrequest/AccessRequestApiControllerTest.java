@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -75,7 +75,7 @@ public class AccessRequestApiControllerTest {
 
 	private User user = new User();
 
-	@Before
+	@BeforeEach
 	public void setup() throws SecurityException {
 		user.setId(1L);
 		given(this.userService.findById(Mockito.any(Long.class))).willReturn(user);

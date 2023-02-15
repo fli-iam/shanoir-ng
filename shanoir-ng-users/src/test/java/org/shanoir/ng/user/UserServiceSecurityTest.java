@@ -22,7 +22,7 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import java.util.Arrays;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
@@ -85,7 +85,7 @@ public class UserServiceSecurityTest {
 	private User mockAccountReqUser;
 	private User mockMe;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockUser = ModelsUtil.createUser(USER_ID);
 		mockNewUser = ModelsUtil.createUser(null);

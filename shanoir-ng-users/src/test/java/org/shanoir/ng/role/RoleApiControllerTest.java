@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.role.controller.RoleApiController;
 import org.shanoir.ng.role.model.Role;
@@ -52,7 +52,7 @@ public class RoleApiControllerTest {
 	@MockBean
 	private RoleService roleServiceMock;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(roleServiceMock.findAll()).willReturn(Arrays.asList(new Role()));
 	}
