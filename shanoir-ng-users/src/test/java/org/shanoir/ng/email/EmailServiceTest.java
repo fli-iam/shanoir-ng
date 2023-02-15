@@ -24,8 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -59,27 +58,23 @@ public class EmailServiceTest {
 	@Autowired
 	private EmailService emailService;
 	
-	private static GreenMail greenMail;
+	private GreenMail greenMail;
 	
 	@MockBean
 	private UserRepository userRepositoryMock;
 	
-	@BeforeAll
-	static void initGreenMail() {
+	@BeforeEach
+	void setup() {
 		ServerSetup setup = new ServerSetup(3025, "localhost", "smtp");
 		greenMail = new GreenMail(setup);
 		greenMail.start();
-	}
-	
-	@AfterAll
-    static void stopMailServer() {
-        greenMail.stop();
-    }
-
-	@BeforeEach
-	void setup() {
 		given(userRepositoryMock.findAdminEmails()).willReturn(Arrays.asList(new String[]{"admin@test.shanoir.fr"}));
 	}
+
+	@AfterEach
+    void stopMailServer() {
+        greenMail.stop();
+    }
 	
 	@Test
 	public void notifyAccountWillExpireTest() throws Exception {
