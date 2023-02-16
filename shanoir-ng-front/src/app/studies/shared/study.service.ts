@@ -28,6 +28,7 @@ import {StudyUserRight} from './study-user-right.enum';
 import {CenterStudyDTO, PublicStudyDataDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
 import {Study} from './study.model';
 import {Profile} from "../../shared/models/profile.model";
+import {saveAs} from "file-saver";
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
