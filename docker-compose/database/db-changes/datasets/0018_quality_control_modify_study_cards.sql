@@ -71,7 +71,7 @@ CREATE TABLE quality_card_condition_join (
   KEY FKahmgub56cris7hca5ya5rj8m6 (quality_card_rule_id)
 );
 ALTER TABLE quality_card_condition_join ADD CONSTRAINT UK_6m1dha1llcmucyobv1nlxbqej FOREIGN KEY (condition_id) REFERENCES study_card_condition(id);
-ALTER TABLE quality_card_condition_join ADD CONSTRAINT FKahmgub56cris7hca5ya5rj8m6 FOREIGN KEY (quality_card_rule_id) REFERENCES quality_card_rule(id);
+ALTER TABLE quality_card_condition_join ADD CONSTRAINT FKahmgub56cris7hca5ya5rj8m6 FOREIGN KEY (quality_card_rule_id) REFERENCES quality_examination_rule(id);
 
 -- transfer study card condition relations
 INSERT INTO study_card_condition_join (study_card_rule_id, condition_id) SELECT rule_id, id FROM study_card_condition WHERE rule_id IS NOT NULL;
