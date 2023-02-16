@@ -34,7 +34,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
