@@ -21,9 +21,11 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
@@ -90,14 +92,14 @@ public class UserServiceSecurityTest {
 		mockUser = ModelsUtil.createUser(USER_ID);
 		mockNewUser = ModelsUtil.createUser(null);
 		mockAccountReqUser = ModelsUtil.createUser(null);
-			mockAccountReqUser.setAccountRequestDemand(true);
-			mockAccountReqUser.setRole(null);
+		mockAccountReqUser.setAccountRequestDemand(true);
+		mockAccountReqUser.setRole(null);
 		mockMe = ModelsUtil.createAdmin(LOGGED_USER_ID);
 		
-//		given(userRepository.findOne(USER_ID)).willReturn(mockUser);
-//		given(userRepository.findOne(LOGGED_USER_ID)).willReturn(mockMe);
+		given(userRepository.findById(USER_ID)).willReturn(Optional.of(mockUser));
+		given(userRepository.findById(LOGGED_USER_ID)).willReturn(Optional.of(mockMe));
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
-//		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
+		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
 //		given(userRepository.findByIdIn(Mockito.anyListOf(Long.class)))
 //				.willReturn(Arrays.asList(createUser()));
 //		given(userRepository

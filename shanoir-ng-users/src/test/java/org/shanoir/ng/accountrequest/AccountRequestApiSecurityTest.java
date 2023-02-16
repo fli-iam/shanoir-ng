@@ -56,8 +56,8 @@ public class AccountRequestApiSecurityTest {
 	@BeforeEach
 	public void setup() {
 		mockAccountReqUser = ModelsUtil.createUser(null);
-			mockAccountReqUser.setAccountRequestDemand(true);
-			mockAccountReqUser.setRole(null);
+		mockAccountReqUser.setAccountRequestDemand(true);
+		mockAccountReqUser.setRole(null);
 		mockBindingResult = new BeanPropertyBindingResult(mockAccountReqUser, "accountRequest");
 	}
 	
