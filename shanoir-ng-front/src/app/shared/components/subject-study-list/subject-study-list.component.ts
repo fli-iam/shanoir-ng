@@ -103,7 +103,6 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
 
     getPage(pageable: FilterablePageable): Promise<Page<SubjectStudy>> {
         return Promise.resolve(new BrowserPaging<SubjectStudy>(this.model, this.columnDefs).getPage(pageable));
-
     }
 
     private createColumnDefs() {

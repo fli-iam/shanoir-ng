@@ -4,11 +4,14 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+
+import io.swagger.annotations.ApiParam;
 
 /**
  * Please do not use this API in production
@@ -21,7 +24,11 @@ public interface VipFakeApi {
 	
     @GetMapping(value = "/pipelines", produces = { "application/json" }, consumes = {
                     "application/json" })
-	public ResponseEntity<List<Pipeline>> getProcessing() throws JsonMappingException, JsonProcessingException;
+	public ResponseEntity<List<Pipeline>> getProcessings() throws JsonMappingException, JsonProcessingException;
+    
+    @GetMapping(value = "/pipelines/{pipelineId}", produces = { "application/json" }, consumes = {
+    "application/json" })
+    public ResponseEntity<Pipeline> getProcessing(@ApiParam(value = "id of the pipeline", required = true) @PathVariable("pipelineId") String pipelineId) throws JsonMappingException, JsonProcessingException;
 
     @PostMapping(value = "", produces = { "application/json" }, consumes = {
     "application/json" })

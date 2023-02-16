@@ -5,11 +5,16 @@
         <label for="execution_name">Execution Name *</label>
         <input type="text" id="execution_name" formControlName="execution_name" required>
     </div>
+    
+    <div>
+        <p> Default execution parameters: please choose default parameters value for every parameter.</p>
+        <p> You will be able to check every execution parameters in the following table.</p>
+    </div>
 
     <div *ngFor="let parameter of pipeline.parameters">
         
         <div *ngIf="parameter.name != 'executable'">
-             <label for="{{parameter.name}}">{{parameter.name}} {{parameter.isOptional ? '' : '*'}}</label>
+             <label>{{parameter.name}} {{parameter.description}} {{parameter.isOptional ? '' : '*'}</label>
              <input *ngIf="!isAFile(parameter.type)" [type]="getParameterType(parameter.type)"
                     formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
              <span *ngIf="isAFile(parameter.type)">
@@ -21,15 +26,22 @@
                  <ng-template #loading>Loading datasets...</ng-template>
              </span>
 	</div>    
-
     </div>
-    <!-- <div *ngIf="selectedDatasets">
-        <p>
-            Selected Dataset :
-            <span class="dataset-id" *ngFor="let dataset of selectedDatasets">
-                {{dataset.name}}.
-            </span>
-        </p>
-    </div> -->
+    
+    <button type='button' (click)="onApplyParameters()">Apply</button>
+    
+    <div [hidden]="!parametersApplied">
+    <legend> List of executions: </legend>
+    </div>
+    <div [hidden]="!parametersApplied">
+    <shanoir-table #executionsTable
+                [getPage]="getPage.bind(this)" 
+                [editMode]="true"
+                [columnDefs]="columnDefs"
+                [browserSearch]="false">
+    </shanoir-table>
+    </div>
+    <div [hidden]="!parametersApplied">
     <button type="submit" [disabled]="!executionForm.valid">Run</button>
+    </div>
 </form>

@@ -1,3 +1,4 @@
+import { ViewChild } from '@angular/core';
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,6 +12,9 @@ import { CarminDatasetProcessingService } from 'src/app/carmin/shared/carmin-dat
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService } from 'src/app/datasets/shared/dataset.service';
 import { DatasetProcessingType } from 'src/app/enum/dataset-processing-type.enum';
+import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
+import { Page } from 'src/app/shared/components/table/pageable.model';
+import { TableComponent } from 'src/app/shared/components/table/table.component';
 import { KeycloakService } from 'src/app/shared/keycloak/keycloak.service';
 import { MsgBoxService } from 'src/app/shared/msg-box/msg-box.service';
 import { ProcessingService } from '../processing.service';
@@ -27,9 +31,14 @@ export class ExecutionComponent implements OnInit {
   selectedDatasets: Set<Dataset>;
   token: String;
   refreshToken: String;
+  parametersApplied: boolean;
+  nbExecutions = 0;
+  executions: Execution[] = [];
+  columnDefs: ColumnDefinition[] = [];
+  @ViewChild('executionsTable') table: TableComponent;
 
   constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
-    this.breadcrumbsService.nameStep('2. Execution');
+    this.breadcrumbsService.nameStep('2. Executions');
     this.selectedDatasets = new Set<Dataset>();
   }
 
@@ -42,6 +51,7 @@ export class ExecutionComponent implements OnInit {
       (pipeline: Pipeline) => {
         this.pipeline = pipeline;
         this.initExecutionForm()
+        this.createColumnDefs();
       }
     )
     this.processingService.selectedDatasets.subscribe(
@@ -49,6 +59,7 @@ export class ExecutionComponent implements OnInit {
         this.datasetService.getByIds(datasets).then(
             result => {
                 this.selectedDatasets = new Set(result);
+                this.recalculateExecutionNumber();
             });
         });
     this.keycloakService.getToken().then(
@@ -77,8 +88,41 @@ export class ExecutionComponent implements OnInit {
       }
     )
   }
+  
+  private createColumnDefs() {
+    this.pipeline.parameters.forEach( parameter => {
+        // TODO: do something specific if File ?
+        this.columnDefs.push({ headerName: parameter.name, field: "inputValues." + parameter.name, editable: true });
+    });
+  }
 
-  onSubmitExecutionForm() {
+  // This method recalculates the number of executions that will be created
+  recalculateExecutionNumber() {
+    let nbDatasets = this.selectedDatasets.size;
+    let nbDatasetsToSelectByExecution = 0;
+    this.pipeline.parameters.forEach(parameter =>  {
+        // Get parameter from executionForm
+        if (parameter.type == ParameterType.File) {
+            nbDatasetsToSelectByExecution +=1;
+        }
+    });
+    this.nbExecutions = Math.floor(nbDatasets / nbDatasetsToSelectByExecution);
+  }
+
+  // Here we create a bunch of executions with default parameters
+  onApplyParameters() {
+
+    let availableDatasets: Dataset[] = Array.from(this.selectedDatasets);
+    // By default, we order by alphabtical order
+    // TODO: Propose another possible order (by ID?) 
+    availableDatasets.sort((a: Dataset, b: Dataset) => {
+      return a.name.localeCompare(b.name);
+    })
+    
+    // Reset executions
+    this.executions = [];
+
+    for (let i = 0; i < this.nbExecutions; i++) {
     let execution: Execution = new Execution();
     
     execution.name = this.executionForm.get("execution_name").value;
@@ -89,8 +133,23 @@ export class ExecutionComponent implements OnInit {
     this.pipeline.parameters.forEach(
       parameter => {
         if (parameter.type == ParameterType.File) {
-          let dataset = this.executionForm.get(parameter.name).value;
-            
+            // If we have a file, we try to set up the adapted dataset
+          //let dataset = this.executionForm.get(parameter.name).value;
+          // We try to find the first adapted dataset
+          let datasetFilter: RegExp = new RegExp(this.executionForm.get(parameter.name).value);
+
+          let index = availableDatasets.findIndex(ds => {
+            return datasetFilter.test(ds.name);
+          })
+          let dataset;
+          if (index != -1) {
+              // Remove dataset and get it (should be of length one)
+              dataset = availableDatasets.splice(index, 1)[0];              
+          } else {
+              // If regex is wrong / faulty
+              dataset = availableDatasets.splice(0, 1)[0];
+          }
+
           // TODO the dataset extension format should be selected depending on the pipeline.
           let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g,"_")}.nii.gz`
 
@@ -102,14 +161,40 @@ export class ExecutionComponent implements OnInit {
         }
       }
     )
+      this.executions.push(execution);
+    }
+  this.parametersApplied = true;
+  this.table.refresh();
+  }
+
+  getPage() : Promise<Page<Execution>> {
+        let page: Page<Execution> = new Page();
+        page.content = this.executions;
+        page.number = 1;
+        page.size = this.executions.length;
+        page.numberOfElements = this.executions.length;
+        page.totalElements = this.executions.length;
+        page.totalPages = Math.ceil(page.numberOfElements/page.size);
+        return new Promise((resolve, reject) => {
+            resolve(page);
+        });
+  }
+
+  onSubmitExecutionForm() {
     /**
      * Init result location
      * The result directory should be dynamic
      */
+    let promises: Promise<Execution>[] = [];
     let resultPath = this.generateResultPath();
-    execution.resultsLocation = `shanoir:/${resultPath}?token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
-    this.carminClientService.createExecution(execution).subscribe(
-      (execution: Execution) => {
+
+    this.executions.forEach(exec => {
+        exec.resultsLocation = `shanoir:/${resultPath}?token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+        promises.push(this.carminClientService.createExecution(exec));
+    });
+
+    Promise.all(promises).then(results => {
+        let execution = results[0];
         this.msgService.log('info', 'the execution successfully started.')
 
         let carminDatasetProcessing: CarminDatasetProcessing = new CarminDatasetProcessing(execution.identifier, execution.name, execution.pipelineIdentifier, resultPath, execution.status, execution.timeout, execution.startDate, execution.endDate);
@@ -125,9 +210,9 @@ export class ExecutionComponent implements OnInit {
           dataset.subject.subjectStudyList = [];
           this.selectedDatasets.add(dataset);
         })
-
+    
         carminDatasetProcessing.inputDatasets = Array.from(this.selectedDatasets);
-
+    
         this.carminDatasetProcessing.create(carminDatasetProcessing).then(
           (response: CarminDatasetProcessing) => {
             this.router.navigate([`/dataset-processing/details/${response.id}`]);
@@ -137,12 +222,7 @@ export class ExecutionComponent implements OnInit {
             console.error(error);
           }
         )
-      },
-      (error) => {
-        this.msgService.log('error', 'Sorry, an error occurred while starting the execution.');
-        console.error(error);
-      }
-    )
+    })
   }
 
   getParameterType(parameterType: ParameterType): String {
