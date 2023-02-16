@@ -107,7 +107,7 @@ public class StudyCardApiControllerTest {
 		given(studyCardServiceMock.findById(1L)).willReturn(studyCardMock);
 		given(studyCardServiceMock.save(Mockito.mock(StudyCard.class))).willReturn(new StudyCard());
 		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), Mockito.any())).willReturn(new ArrayList<StudyCard>());
-		given(datasetSecurityService.filterStudyCardList(Mockito.any(), Mockito.anyString())).willReturn(true);
+		given(datasetSecurityService.filterCardList(Mockito.any(), Mockito.anyString())).willReturn(true);
 		given(datasetSecurityService.hasRightOnStudy(Mockito.any(), Mockito.anyString())).willReturn(true);
 	}
 

@@ -25,7 +25,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface StudyCardService extends CardService<StudyCard> {
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	List<StudyCard> findStudyCardsByAcqEq (Long acqEqId);
 
 }

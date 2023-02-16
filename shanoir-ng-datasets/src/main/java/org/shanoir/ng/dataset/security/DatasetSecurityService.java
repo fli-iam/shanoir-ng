@@ -42,6 +42,7 @@ import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.study.rights.StudyRightsService;
+import org.shanoir.ng.studycard.model.Card;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.QualityCardRepository;
@@ -887,37 +888,16 @@ public class DatasetSecurityService {
      * @param rightStr the right
      * @return true
      */
-    public boolean filterStudyCardList(List<StudyCard> list, String rightStr) {
-    	if (list == null) {
-			return true;
-		}
-    	Set<Long> studyIds = new HashSet<Long>();
-    	list.forEach((StudyCard sc) -> {
-    		studyIds.add(sc.getStudyId());
-    	});
-    	Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
-    	list.removeIf((StudyCard sc) -> !checkedIds.contains(sc.getStudyId()));
-    	
-    	return true;
-    }
-    
-    /**
-     * Filter quality cards in that page checking the connected user has the right on those cards.
-     * 
-     * @param page the page
-     * @param rightStr the right
-     * @return true
-     */
-    public boolean filterQualityCardList(List<QualityCard> list, String rightStr) {
+    public boolean filterCardList(List<Card> list, String rightStr) {
         if (list == null) {
             return true;
         }
         Set<Long> studyIds = new HashSet<Long>();
-        list.forEach((QualityCard qc) -> {
-            studyIds.add(qc.getStudyId());
+        list.forEach((Card sc) -> {
+            studyIds.add(sc.getStudyId());
         });
         Set<Long> checkedIds = commService.hasRightOnStudies(studyIds, rightStr);
-        list.removeIf((QualityCard qc) -> !checkedIds.contains(qc.getStudyId()));
+        list.removeIf((Card sc) -> !checkedIds.contains(sc.getStudyId()));
         
         return true;
     }

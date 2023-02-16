@@ -70,7 +70,7 @@ public interface QualityCardApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = QualityCard.class) })
 	@RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterQualityCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<QualityCard>> findQualityCardByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 	
@@ -82,7 +82,7 @@ public interface QualityCardApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = QualityCard.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterQualityCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<QualityCard>> findQualityCards();
 
 	@ApiOperation(value = "", notes = "Saves a new quality card", response = QualityCard.class, tags = {})

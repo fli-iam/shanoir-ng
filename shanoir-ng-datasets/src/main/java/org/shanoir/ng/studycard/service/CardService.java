@@ -36,7 +36,7 @@ public interface CardService<T extends Card> {
 	T update(T studyCard) throws EntityNotFoundException, MicroServiceCommunicationException;
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	List<T> findAll();
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -52,11 +52,11 @@ public interface CardService<T extends Card> {
 	T findByName(String name);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	List<T> search(List<Long> studyIdList);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	List<T> findByStudy (Long studyId);
 
 }
