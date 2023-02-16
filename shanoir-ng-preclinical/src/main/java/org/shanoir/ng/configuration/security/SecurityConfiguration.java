@@ -27,9 +27,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.web.cors.CorsConfiguration;
@@ -44,43 +46,33 @@ import org.springframework.web.filter.CorsFilter;
  */
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-@ComponentScan(basePackageClasses = KeycloakSecurityComponents.class)
-public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter {
+@EnableMethodSecurity
+public class SecurityConfiguration {
 
 	@Value("${front.server.url}")
 	private String frontServerUrl;
 
 	/**
-	 * Registers the KeycloakAuthenticationProvider with the authentication
-	 * manager.
-	 */
-	@Autowired
-	public void configureGlobal(AuthenticationManagerBuilder auth) {
-		auth.authenticationProvider(keycloakAuthenticationProvider());
-	}
-
-	/**
 	 * Defines the session authentication strategy.
 	 */
 	@Bean
-	@Override
 	protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
 		return new NullAuthenticatedSessionStrategy();
 	}
 
-	@Override
-	protected void configure(HttpSecurity http) throws Exception {
-		super.configure(http);
+	@Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 			.sessionManagement()
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 			.and()
 			.csrf()
 				.disable()
-			.authorizeRequests()
-				.antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
-				.anyRequest().authenticated();
+			.authorizeHttpRequests()
+				.requestMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
+			.anyRequest()
+				.authenticated();
+		return http.build();
 	}
 
 	@Bean
