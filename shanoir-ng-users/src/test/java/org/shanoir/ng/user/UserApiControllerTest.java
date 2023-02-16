@@ -163,12 +163,12 @@ public class UserApiControllerTest {
 		User user = ModelsUtil.createAdmin(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isUnprocessableEntity());
 		user = ModelsUtil.createUser(1L);
 		user.setExpirationDate(LocalDate.now().plusYears(100));
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isUnprocessableEntity());
 	}
 
 }
