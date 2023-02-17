@@ -19,8 +19,10 @@ import { ConfirmDialogService } from '../shared/components/confirm-dialog/confir
 import { BrowserPaging } from '../shared/components/table/browser-paging.model';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../shared/components/table/pageable.model';
+import { TableComponent } from '../shared/components/table/table.component';
 import { QualityCard } from '../study-cards/shared/quality-card.model';
 import { QualityCardService } from '../study-cards/shared/quality-card.service';
+import * as AppUtils from '../utils/app.utils';
 
 
 @Component({
@@ -97,5 +99,22 @@ export class QualityControlComponent implements OnChanges {
             clearTimeout(this.overTimeout);
             this.selectedQualityCard = null;
         }
+    }
+
+    downloadReport(qualityCard: QualityCard) {
+        let browserPaging: BrowserPaging<any> = this.pagings.get(qualityCard?.id);
+        let csvStr: string = '';
+        csvStr += browserPaging.columnDefs.map(col => col.headerName).join(',');
+        for (let entry of browserPaging.items) {
+            csvStr += '\n' + browserPaging.columnDefs.map(col => TableComponent.getCellValue(entry, col)).join(',');
+        }
+        const csvBlob = new Blob([csvStr], {
+            type: 'text/csv'
+        });
+        AppUtils.browserDownloadFile(csvBlob, this.getReportFileName(qualityCard));
+    }
+
+    private getReportFileName(qualityCard: QualityCard): string {
+        return 'qcReport_' + qualityCard.name + '_' + Date.now().toLocaleString('fr-FR');
     }
 }
