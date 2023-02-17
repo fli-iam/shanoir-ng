@@ -43,6 +43,9 @@ import org.shanoir.ng.studycard.model.condition.ExaminationMetadataConditionOnAc
 import org.shanoir.ng.studycard.model.condition.ExaminationMetadataConditionOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
@@ -74,7 +77,11 @@ public class QualityExaminationRule extends AbstractEntity {
 	
 	public void apply(Examination examination, Attributes examinationDicomAttributes, QualityCardResult result) {
 	    ExaminationData examData = convert(examination);
-	    apply(examData, examinationDicomAttributes, result);
+	    if (examData.getSubjectStudy() == null) {
+	        LoggerFactory.getLogger(QualityExaminationRule.class).warn("No subject study in exam " + examination.getId());
+	    } else {
+	        apply(examData, examinationDicomAttributes, result);	        
+	    }
     }
 
     public void apply(ExaminationData examination, Attributes examinationDicomAttributes, QualityCardResult result) {
