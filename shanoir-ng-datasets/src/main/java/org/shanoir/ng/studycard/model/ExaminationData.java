@@ -32,7 +32,7 @@ public class ExaminationData {
     
     private List<DatasetAcquisition> datasetAcquisitions;
     
-    private List<SubjectStudy> subjectStudies;
+    private SubjectStudy subjectStudy;
 
     public String getSubjectName() {
         return subjectName;
@@ -66,11 +66,11 @@ public class ExaminationData {
         this.datasetAcquisitions = datasetAcquisitions;
     }
 
-    public List<SubjectStudy> getSubjectStudies() {
-        return subjectStudies;
+    public SubjectStudy getSubjectStudy() {
+        return subjectStudy;
     }
 
-    public void setSubjectStudies(List<SubjectStudy> subjectStudies) {
-        this.subjectStudies = subjectStudies;
+    public void setSubjectStudy(SubjectStudy subjectStudy) {
+        this.subjectStudy = subjectStudy;
     }
 }

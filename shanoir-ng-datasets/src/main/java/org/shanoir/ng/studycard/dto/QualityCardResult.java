@@ -16,7 +16,6 @@ package org.shanoir.ng.studycard.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
@@ -58,13 +57,6 @@ public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
             }
         }
         getUpdatedSubjectStudies().add(subjectStudy);
-    }
-    
-    public void addUpdatedSubjectStudies(List<SubjectStudy> subjectStudies) {
-        if (subjectStudies == null) return;
-        for (SubjectStudy subjectStudy : subjectStudies) {
-            addUpdatedSubjectStudy(subjectStudy);
-        }
     }
 
     /***

@@ -79,13 +79,13 @@ public class QualityExaminationRule extends AbstractEntity {
 
     public void apply(ExaminationData examination, Attributes examinationDicomAttributes, QualityCardResult result) {
         if (this.getConditions() == null || this.getConditions().isEmpty()) {
-            result.addUpdatedSubjectStudies( 
-                    setTagToSubjectStudies(examination.getSubjectStudies()));
+            result.addUpdatedSubjectStudy( 
+                    setTagToSubjectStudy(examination.getSubjectStudy()));
         } else {
             ConditionResult conditionResult = conditionsfulfilled(examinationDicomAttributes, examination, result);
             if (conditionResult.isFulfilled()) {
-                result.addUpdatedSubjectStudies( 
-                        setTagToSubjectStudies(examination.getSubjectStudies()));
+                result.addUpdatedSubjectStudy( 
+                        setTagToSubjectStudy(examination.getSubjectStudy()));
             }            
             // if conditions not fulfilled for a VALID tag
             // or if conditions fulfilled for a ERROR or WARNING tag
@@ -107,22 +107,16 @@ public class QualityExaminationRule extends AbstractEntity {
     /**
      * 
      * @param subjectStudies
-     * @return list of updated subject studies, ignoring those which tag is unchanged
+     * @return list of updated subject studies
      */
-    private List<SubjectStudy> setTagToSubjectStudies(List<SubjectStudy> subjectStudies) {
-        if (subjectStudies == null) throw new IllegalArgumentException("subjectStudies can't be null");
-        List<SubjectStudy> updatedList = new ArrayList<>();
-        for (SubjectStudy subjectStudy : subjectStudies) {
-            // don't touch subjectStudy as we later will compare the original with the updated
-            SubjectStudy subjectStudyCopy = new SubjectStudy();
-            subjectStudyCopy.setId(subjectStudy.getId());
-            subjectStudyCopy.setQualityTag(getQualityTag());
-            updatedList.add(subjectStudyCopy);
-        }
-        return updatedList;
+    private SubjectStudy setTagToSubjectStudy(SubjectStudy subjectStudy) {
+        // don't touch subjectStudy as we later will compare the original with the updated
+        SubjectStudy subjectStudyCopy = new SubjectStudy();
+        subjectStudyCopy.setId(subjectStudy.getId());
+        subjectStudyCopy.setQualityTag(getQualityTag());
+        return subjectStudyCopy;
     }
 
-    @SuppressWarnings("unused")
     private ConditionResult conditionsfulfilled(Attributes dicomAttributes, ExaminationData examination, QualityCardResult result) {
         boolean allFulfilled = true;
         ConditionResult condResult = new ConditionResult();
@@ -170,7 +164,10 @@ public class QualityExaminationRule extends AbstractEntity {
         examData.setExaminationComment(examination.getComment());
         examData.setExaminationDate(examination.getExaminationDate());
         examData.setSubjectName(examination.getSubject().getName());
-        examData.setSubjectStudies(examination.getStudy().getSubjectStudyList());
+        examData.setSubjectStudy(
+                examination.getStudy().getSubjectStudyList().stream()
+                    .filter(ss -> ss.getId().equals(examination.getSubject().getId()))
+                    .findFirst().orElse(null));
         return examData;
     }
     
