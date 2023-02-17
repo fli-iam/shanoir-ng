@@ -79,6 +79,12 @@ public class QualityExaminationRule extends AbstractEntity {
 	    if (examData.getSubjectStudy() == null) {
 	        Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
 	        log.warn("No subject study in exam " + examination.getId());
+	        for (SubjectStudy ss : examination.getStudy().getSubjectStudyList()) {
+	            log.warn("study subject-study " + ss.getSubject().getId() + " - " + ss.getStudy().getId());
+	        }
+	        for (SubjectStudy ss : examination.getSubject().getSubjectStudyList()) {
+                log.warn("subject subject-study " + ss.getSubject().getId() + " - " + ss.getStudy().getId());
+            }
 	    } else {
 	        apply(examData, examinationDicomAttributes, result);	        
 	    }
