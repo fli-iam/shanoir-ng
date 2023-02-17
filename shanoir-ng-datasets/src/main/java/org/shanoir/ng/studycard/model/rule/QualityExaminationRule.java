@@ -43,7 +43,6 @@ import org.shanoir.ng.studycard.model.condition.ExaminationMetadataConditionOnAc
 import org.shanoir.ng.studycard.model.condition.ExaminationMetadataConditionOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
-import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +77,8 @@ public class QualityExaminationRule extends AbstractEntity {
 	public void apply(Examination examination, Attributes examinationDicomAttributes, QualityCardResult result) {
 	    ExaminationData examData = convert(examination);
 	    if (examData.getSubjectStudy() == null) {
-	        LoggerFactory.getLogger(QualityExaminationRule.class).warn("No subject study in exam " + examination.getId());
+	        Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
+	        log.warn("No subject study in exam " + examination.getId());
 	    } else {
 	        apply(examData, examinationDicomAttributes, result);	        
 	    }
@@ -172,8 +172,8 @@ public class QualityExaminationRule extends AbstractEntity {
         examData.setExaminationDate(examination.getExaminationDate());
         examData.setSubjectName(examination.getSubject().getName());
         examData.setSubjectStudy(
-                examination.getStudy().getSubjectStudyList().stream()
-                    .filter(ss -> ss.getId().equals(examination.getSubject().getId()))
+                examination.getSubject().getSubjectStudyList().stream()
+                    .filter(ss -> ss.getId().equals(examination.getStudy().getId()))
                     .findFirst().orElse(null));
         return examData;
     }
