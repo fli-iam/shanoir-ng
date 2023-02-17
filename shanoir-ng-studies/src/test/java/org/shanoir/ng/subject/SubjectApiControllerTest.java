@@ -23,9 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -49,7 +48,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
@@ -63,7 +61,7 @@ import com.google.gson.GsonBuilder;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = SubjectApiController.class)
 @ContextConfiguration(classes = {SubjectApiController.class, RestTemplate.class, MicroserviceRequestsService.class})
 @AutoConfigureMockMvc(addFilters = false)
@@ -92,7 +90,7 @@ public class SubjectApiControllerTest {
 	@MockBean
 	private ShanoirEventService eventService;
 
-	@Before
+	@BeforeEach
 	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 

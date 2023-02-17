@@ -20,10 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -33,7 +32,8 @@ import org.shanoir.ng.manufacturermodel.service.ManufacturerServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Manufacturer service test.
@@ -41,7 +41,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author msimon
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class ManufacturerServiceTest {
 
 	private static final Long MANUFACTURER_ID = 1L;
@@ -56,7 +57,7 @@ public class ManufacturerServiceTest {
 	@InjectMocks
 	private ManufacturerServiceImpl manufacturerService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(manufacturerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturer()));
 		given(manufacturerRepository.findById(MANUFACTURER_ID)).willReturn(Optional.of(ModelsUtil.createManufacturer()));
@@ -66,8 +67,8 @@ public class ManufacturerServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<Manufacturer> manufacturers = manufacturerService.findAll();
-		Assert.assertNotNull(manufacturers);
-		Assert.assertTrue(manufacturers.size() == 1);
+		Assertions.assertNotNull(manufacturers);
+		Assertions.assertTrue(manufacturers.size() == 1);
 
 		Mockito.verify(manufacturerRepository, Mockito.times(1)).findAll();
 	}
@@ -75,8 +76,8 @@ public class ManufacturerServiceTest {
 	@Test
 	public void findByIdTest() {
 		final Manufacturer manufacturer = manufacturerService.findById(MANUFACTURER_ID).orElseThrow();
-		Assert.assertNotNull(manufacturer);
-		Assert.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturer.getName()));
+		Assertions.assertNotNull(manufacturer);
+		Assertions.assertTrue(ModelsUtil.MANUFACTURER_NAME.equals(manufacturer.getName()));
 
 		Mockito.verify(manufacturerRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -91,8 +92,8 @@ public class ManufacturerServiceTest {
 	@Test
 	public void updateTest() throws EntityNotFoundException {
 		final Manufacturer updatedManufacturer = manufacturerService.update(createManufacturer());
-		Assert.assertNotNull(updatedManufacturer);
-		Assert.assertTrue(UPDATED_MANUFACTURER_NAME.equals(updatedManufacturer.getName()));
+		Assertions.assertNotNull(updatedManufacturer);
+		Assertions.assertTrue(UPDATED_MANUFACTURER_NAME.equals(updatedManufacturer.getName()));
 
 		Mockito.verify(manufacturerRepository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
 	}

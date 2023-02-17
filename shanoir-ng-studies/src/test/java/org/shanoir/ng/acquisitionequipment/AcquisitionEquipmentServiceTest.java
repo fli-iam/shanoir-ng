@@ -14,16 +14,16 @@
 
 package org.shanoir.ng.acquisitionequipment;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -33,7 +33,8 @@ import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentServiceIm
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Acquisition equipment service test.
@@ -41,7 +42,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author msimon
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class AcquisitionEquipmentServiceTest {
 
 	private static final Long ACQ_EQPT_ID = 1L;
@@ -56,30 +58,31 @@ public class AcquisitionEquipmentServiceTest {
 	@InjectMocks
 	private AcquisitionEquipmentServiceImpl acquisitionEquipmentService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(acquisitionEquipmentRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createAcquisitionEquipment()));
 		given(acquisitionEquipmentRepository.findById(ACQ_EQPT_ID)).willReturn(Optional.of(ModelsUtil.createAcquisitionEquipment()));
 		given(acquisitionEquipmentRepository.save(Mockito.any(AcquisitionEquipment.class))).willReturn(createAcquisitionEquipment());
 	}
 
-	@Test(expected = EntityNotFoundException.class)
+	@Test
 	public void deleteByBadIdTest() throws EntityNotFoundException  {
-		acquisitionEquipmentService.deleteById(2L);
+		assertThrows(EntityNotFoundException.class, () -> {
+			acquisitionEquipmentService.deleteById(2L);
+		});
 	}
 	
 	@Test
 	public void deleteByIdTest() throws EntityNotFoundException {
 		acquisitionEquipmentService.deleteById(ACQ_EQPT_ID);
-		
 		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
 	public void findAllTest() {
 		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAll();
-		Assert.assertNotNull(equipments);
-		Assert.assertTrue(equipments.size() == 1);
+		Assertions.assertNotNull(equipments);
+		Assertions.assertTrue(equipments.size() == 1);
 
 		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).findAll();
 	}
@@ -87,8 +90,8 @@ public class AcquisitionEquipmentServiceTest {
 	@Test
 	public void findByIdTest() {
 		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(ACQ_EQPT_ID).orElse(null);
-		Assert.assertNotNull(equipment);
-		Assert.assertTrue(ModelsUtil.ACQ_EQPT_SERIAL_NUMBER.equals(equipment.getSerialNumber()));
+		Assertions.assertNotNull(equipment);
+		Assertions.assertTrue(ModelsUtil.ACQ_EQPT_SERIAL_NUMBER.equals(equipment.getSerialNumber()));
 
 		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -103,8 +106,8 @@ public class AcquisitionEquipmentServiceTest {
 	@Test
 	public void updateTest() throws EntityNotFoundException {
 		final AcquisitionEquipment updatedEquipment = acquisitionEquipmentService.update(createAcquisitionEquipment());
-		Assert.assertNotNull(updatedEquipment);
-		Assert.assertTrue(UPDATED_ACQ_EQPT_SERIAL_NUMBER.equals(updatedEquipment.getSerialNumber()));
+		Assertions.assertNotNull(updatedEquipment);
+		Assertions.assertTrue(UPDATED_ACQ_EQPT_SERIAL_NUMBER.equals(updatedEquipment.getSerialNumber()));
 
 		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).save(Mockito.any(AcquisitionEquipment.class));
 	}

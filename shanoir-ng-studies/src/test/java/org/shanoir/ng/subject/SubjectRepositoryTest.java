@@ -15,13 +15,12 @@
 package org.shanoir.ng.subject;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +28,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper;
 import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
@@ -40,7 +38,7 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
+
 @DataJpaTest
 @ActiveProfiles("test")
 public class SubjectRepositoryTest {

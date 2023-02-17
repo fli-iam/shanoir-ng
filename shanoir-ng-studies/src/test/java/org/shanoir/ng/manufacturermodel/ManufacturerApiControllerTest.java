@@ -20,9 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.manufacturermodel.controler.ManufacturerApiController;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
@@ -38,7 +37,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -51,7 +49,7 @@ import com.google.gson.GsonBuilder;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = {ManufacturerApiController.class, ControlerSecurityService.class})
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -71,7 +69,7 @@ public class ManufacturerApiControllerTest {
 	@MockBean
 	private ManufacturerUniqueConstraintManager uniqueConstraintManager;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		Manufacturer manuf = new Manufacturer();
 		manuf.setId(1L);
