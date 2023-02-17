@@ -30,7 +30,6 @@ import org.springframework.test.context.ActiveProfiles;
  * @author msimon
  * 
  */
-
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class TimepointMapperTest {
