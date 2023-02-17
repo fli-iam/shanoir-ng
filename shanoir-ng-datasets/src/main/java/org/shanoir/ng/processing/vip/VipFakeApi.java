@@ -2,10 +2,12 @@ package org.shanoir.ng.processing.vip;
 
 import java.util.List;
 
+import org.shanoir.ng.processing.carmin.model.Execution;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -33,5 +35,9 @@ public interface VipFakeApi {
     @PostMapping(value = "", produces = { "application/json" }, consumes = {
     "application/json" })
 	public void launchProcessing();
+    
+    @PostMapping(value = "/executions", produces = { "application/json" }, consumes = {
+    "application/json" })
+	public ResponseEntity<Execution> createExecution(@ApiParam(value = "execution to create", required = true) @RequestBody Execution execution);
 
 }

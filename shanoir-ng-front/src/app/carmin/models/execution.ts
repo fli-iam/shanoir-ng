@@ -12,7 +12,11 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-export class Execution { 
+export class Execution {
+    
+    /* local ID for angular, remove it before creatin it. */
+    id: number;
+    
     /**
      * execution id. Must always be present in responses.
      */

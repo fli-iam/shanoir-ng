@@ -6,29 +6,26 @@
         <input type="text" id="execution_name" formControlName="execution_name" required>
     </div>
     
-    <div>
-        <p> Default execution parameters: please choose default parameters value for every parameter.</p>
-        <p> You will be able to check every execution parameters in the following table.</p>
-    </div>
+    <div> Default execution parameters: please choose default parameters value for every parameter.<br/></div>
+    <div> You will be able to check every execution parameters in the following table.<br/></div>
+    <div> Please note that for file, the text box is used for regular expression if you want to organize dataset in different arguments </div>
 
     <div *ngFor="let parameter of pipeline.parameters">
-        
         <div *ngIf="parameter.name != 'executable'">
-             <label>{{parameter.name}} {{parameter.description}} {{parameter.isOptional ? '' : '*'}</label>
-             <input *ngIf="!isAFile(parameter.type)" [type]="getParameterType(parameter.type)"
-                    formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+             <label>{{parameter.name}}{{!parameter.isOptional && parameter.type != 'Boolean' ? '*' : ''}} <tool-tip> {{parameter.description}} </tool-tip></label>
+             <input *ngIf="!isAFile(parameter.type) && parameter.type != 'Boolean'" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+             <span *ngIf="parameter.type == 'Boolean'">
+                 <checkbox formControlName="{{parameter.name}}" id="{{parameter.name}}"></checkbox>
+             </span>
              <span *ngIf="isAFile(parameter.type)">
-                 <select *ngIf="selectedDatasets else loading" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
-                    <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">
-                      {{dataset.id}}_{{dataset.name}}
-                    </option>
-                 </select>
+                 <input *ngIf="isAFile(parameter.type)"
+                    formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
                  <ng-template #loading>Loading datasets...</ng-template>
              </span>
-	</div>    
+	   </div>
     </div>
     
-    <button type='button' (click)="onApplyParameters()">Apply</button>
+    <button type='button' (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
     
     <div [hidden]="!parametersApplied">
     <legend> List of executions: </legend>
@@ -37,11 +34,12 @@
     <shanoir-table #executionsTable
                 [getPage]="getPage.bind(this)" 
                 [editMode]="true"
+                [customActionDefs]="customActionDefs"
                 [columnDefs]="columnDefs"
                 [browserSearch]="false">
     </shanoir-table>
     </div>
     <div [hidden]="!parametersApplied">
-    <button type="submit" [disabled]="!executionForm.valid">Run</button>
+    <button type="submit" [disabled]="!allExecsValid">Run all</button>
     </div>
 </form>

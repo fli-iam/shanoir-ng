@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.schedule.ExecutionStatusMonitorService;
 import org.shanoir.ng.processing.carmin.security.CarminDatasetProcessingSecurityService;
@@ -68,6 +69,10 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 		if (!carminDatasetProcessing.isPresent()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
+		// Avoid infinite loop error -> We should be using datasetDTO here in a general matter.
+		for (Dataset dataset : carminDatasetProcessing.get().getInputDatasets()) {
+			dataset.setDatasetAcquisition(null);
+		}
 		return new ResponseEntity<>(carminDatasetProcessing.get(), HttpStatus.OK);
     }
 
@@ -126,7 +131,6 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
         }
         return new ResponseEntity<>(carminDatasetProcessings, HttpStatus.OK);
     }
-
 
     private void validate(BindingResult result) throws RestServiceException {
         final FieldErrorMap errors = new FieldErrorMap(result);

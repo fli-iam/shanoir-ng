@@ -3,6 +3,7 @@ package org.shanoir.ng.processing.vip;
 import java.util.Collections;
 import java.util.List;
 
+import org.shanoir.ng.processing.carmin.model.Execution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -51,6 +53,12 @@ public class VipFakeApiController implements VipFakeApi {
 		+ "\"description\":\"Input image (e.g. img.nii, img.nii.gz) to be processed. It must be a brain CT-scan.\","
 		+ "\"isOptional\":false,"
 		+ "\"isReturnedValue\":false"
+		+ "},{"
+		+ "\"name\":\"infile2\","
+		+ "\"type\":\"File\","
+		+ "\"description\":\"Input 2 image (e.g. img.nii, img.nii.gz) to be processed. It must be a Muscular CT-scan.\","
+		+ "\"isOptional\":false,"
+		+ "\"isReturnedValue\":false"
 		+ "}],"
 		+ "\"canExecute\":true"
 		+ "}";
@@ -84,6 +92,12 @@ public class VipFakeApiController implements VipFakeApi {
 		+ "\"description\":\"Input image (e.g. img.nii, img.nii.gz) to be processed. It must be a brain CT-scan.\","
 		+ "\"isOptional\":false,"
 		+ "\"isReturnedValue\":false"
+		+ "},{"
+		+ "\"name\":\"infile2\","
+		+ "\"type\":\"File\","
+		+ "\"description\":\"Input 2 image (e.g. img.nii, img.nii.gz) to be processed. It must be a Muscular CT-scan.\","
+		+ "\"isOptional\":false,"
+		+ "\"isReturnedValue\":false"
 		+ "}],"
 		+ "\"canExecute\":true"
 		+ "}";
@@ -91,6 +105,15 @@ public class VipFakeApiController implements VipFakeApi {
 		return new ResponseEntity<Pipeline>(pipeline, HttpStatus.OK);
     }
 
+    public ResponseEntity<Execution> createExecution(@ApiParam(value = "execution to create", required = true) @RequestBody Execution execution) {
+    	execution.setIdentifier("localIdentifier");
+    	try {
+			LOG.error("We are saving execution, are we ?" + mapper.writeValueAsString(execution));
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+    	return new ResponseEntity<Execution>(execution, HttpStatus.OK);
+    }
 
 	public void launchProcessing() {
 

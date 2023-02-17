@@ -373,6 +373,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(cancel)="goToView()"
 					(back)="goBack()">
 				<dataset-download  *ngIf="mode == 'view' && hasDownloadRights()" [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
+				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="!selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button> 
 			</form-footer>
 		</form>
 	</div>

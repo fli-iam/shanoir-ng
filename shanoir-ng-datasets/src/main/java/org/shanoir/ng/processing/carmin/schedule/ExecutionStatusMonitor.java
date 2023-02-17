@@ -36,6 +36,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -344,7 +345,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
      * @return
      */
     private void refreshServiceAccountAccessToken() throws SecurityException {
-        AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
-        this.accessToken = accessTokenResponse.getToken();
+        //AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
+        this.accessToken = "" + KeycloakUtil.getTokenUserId();
     }
 }
