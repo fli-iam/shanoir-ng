@@ -17,17 +17,21 @@ package org.shanoir.ng.user.model;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotBlank;
+import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
 import org.shanoir.ng.role.model.Role;
@@ -122,6 +126,10 @@ public class User extends HalEntity implements UserDetails {
 	private String username;
 
 	private String teamName;
+
+	@JsonIgnore
+    @OneToMany(mappedBy = "user", orphanRemoval = true)
+	List<AccessRequest> accessRequests;
 
 	/**
 	 * Init HATEOAS links
