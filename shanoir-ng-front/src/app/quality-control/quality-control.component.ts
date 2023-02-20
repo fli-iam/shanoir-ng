@@ -106,7 +106,7 @@ export class QualityControlComponent implements OnChanges {
         let csvStr: string = '';
         csvStr += browserPaging.columnDefs.map(col => col.headerName).join(',');
         for (let entry of browserPaging.items) {
-            csvStr += '\n' + browserPaging.columnDefs.map(col => TableComponent.getCellValue(entry, col)).join(',');
+            csvStr += '\n' + browserPaging.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
         }
         const csvBlob = new Blob([csvStr], {
             type: 'text/csv'
