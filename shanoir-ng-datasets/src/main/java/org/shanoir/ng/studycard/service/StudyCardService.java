@@ -16,8 +16,6 @@ package org.shanoir.ng.studycard.service;
 
 import java.util.List;
 
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
