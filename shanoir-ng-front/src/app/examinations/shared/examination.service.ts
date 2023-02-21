@@ -11,20 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
+import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { HttpResponse, HttpEvent, HttpEventType  } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
+import { saveAs } from 'file-saver-es';
+import { Subscription } from 'rxjs';
+
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
+import { ServiceLocator } from '../../utils/locator.service';
+import { ExaminationDTO, ExaminationDTOService } from './examination.dto';
 import { Examination } from './examination.model';
 import { SubjectExamination } from './subject-examination.model';
-import { HttpClient } from '@angular/common/http';
-import { ExaminationDTO, ExaminationDTOService } from './examination.dto';
-import { ServiceLocator } from '../../utils/locator.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { Subscription } from 'rxjs'
+
 
 
 @Injectable()

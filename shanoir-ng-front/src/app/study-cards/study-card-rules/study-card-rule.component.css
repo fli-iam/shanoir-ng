@@ -1,4 +1,4 @@
-:host() { display: block; position: relative; white-space: nowrap; }
+:host { display: block; position: relative; white-space: nowrap; }
 .conditions { text-align: right; }
 .separator { width: 100px; color: purple; text-align: center; }
 .actions { text-align: left; }

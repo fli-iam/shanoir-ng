@@ -1,4 +1,4 @@
- :host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; border-collapse: collapse; }
+ :host { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; border-collapse: collapse; }
 .full-row { background-color: var(--color-b); overflow: initial; }
 th,
 caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; }

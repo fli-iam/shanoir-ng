@@ -549,3 +549,8 @@ export class AppModule {
         ServiceLocator.injector = injector;
     }
 }
+declare global {
+    interface Navigator {
+        msSaveBlob?: (blob: any, defaultName?: string) => boolean
+    }
+}
