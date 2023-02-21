@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
@@ -64,7 +64,7 @@ export class PathologyFormComponent extends EntityComponent<Pathology>{
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'name': [this.pathology.name, Validators.required]
         });

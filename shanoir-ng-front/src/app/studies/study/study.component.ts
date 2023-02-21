@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { AbstractControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { Center } from '../../centers/shared/center.model';
@@ -192,7 +192,7 @@ export class StudyComponent extends EntityComponent<Study> {
         });
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         let formGroup = this.formBuilder.group({
             'name': [this.study.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'startDate': [this.study.startDate, [DatepickerComponent.validator]],

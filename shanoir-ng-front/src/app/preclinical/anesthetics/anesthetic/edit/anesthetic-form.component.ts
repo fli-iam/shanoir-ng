@@ -13,7 +13,7 @@
  */
 
 import { Component, ViewChild} from '@angular/core';
-import { Validators, FormGroup } from '@angular/forms';
+import { Validators, UntypedFormGroup } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
@@ -143,7 +143,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'name': [this.anesthetic.name],
             'comment': [this.anesthetic.comment],

@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
@@ -65,7 +65,7 @@ export class CenterComponent extends EntityComponent<Center> {
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'name': [this.center.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'street': [this.center.street],

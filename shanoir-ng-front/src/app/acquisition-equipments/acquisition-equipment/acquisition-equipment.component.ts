@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { AbstractControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
@@ -100,9 +100,9 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         if (mod) this.datasetModalityTypeStr = DatasetModalityType.getLabel(mod);
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         this.prefill();
-        let form: FormGroup = this.formBuilder.group({
+        let form: UntypedFormGroup = this.formBuilder.group({
             'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
             'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required], 
@@ -131,7 +131,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
         });
     }
 
-    private registerManufAndSerialUnicityValidator(form: FormGroup) {
+    private registerManufAndSerialUnicityValidator(form: UntypedFormGroup) {
         this.onSubmitValidatedFields.push('serialNumber');
         this.subscribtions.push(
             form.get('manufacturerModel').valueChanges.subscribe(value => {

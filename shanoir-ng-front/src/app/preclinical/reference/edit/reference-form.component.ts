@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { FormGroup, Validators} from '@angular/forms';
+import { UntypedFormGroup, Validators} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { Reference }   from '../shared/reference.model';
@@ -77,7 +77,7 @@ export class ReferenceFormComponent extends EntityComponent<Reference>{
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'category': [this.reference.category,[Validators.required]],
             'reftype': [this.reference.reftype, [Validators.required]],
