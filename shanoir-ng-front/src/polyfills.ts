@@ -63,7 +63,7 @@ import '@angular/localize/init';
 // prevent error handler to wrap errors
 (window as any).__zone_symbol__DISABLE_WRAPPING_UNCAUGHT_PROMISE_REJECTION = true;
 
-import 'zone.js/dist/zone';  // Included with Angular CLI.
+import 'zone.js';  // Included with Angular CLI.
 
 (window as any).global = window;
 
