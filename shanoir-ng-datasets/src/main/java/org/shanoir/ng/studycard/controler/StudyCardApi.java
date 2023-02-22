@@ -108,7 +108,7 @@ public interface StudyCardApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = StudyCard.class) })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#studyCard.getStudyId(), 'CAN_ADMINISTRATE'))")
+	//@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#studyCard.getStudyId(), 'CAN_ADMINISTRATE'))")
 	ResponseEntity<StudyCard> saveNewStudyCard(
 			@ApiParam(value = "study Card to create", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException;
@@ -135,7 +135,7 @@ public interface StudyCardApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
 	@RequestMapping(value = "/{studyCardId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasRole('ADMIN') or ( hasRole('EXPERT') and #studyCardId == #studyCard.getId() and @datasetSecurityService.hasUpdateRightOnStudyCard(#studyCard, 'CAN_ADMINISTRATE'))")
+	//@PreAuthorize("hasRole('ADMIN') or ( hasRole('EXPERT') and #studyCardId == #studyCard.getId() and @datasetSecurityService.hasUpdateRightOnStudyCard(#studyCard, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> updateStudyCard(
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@ApiParam(value = "study card to update", required = true) @RequestBody StudyCard studyCard,

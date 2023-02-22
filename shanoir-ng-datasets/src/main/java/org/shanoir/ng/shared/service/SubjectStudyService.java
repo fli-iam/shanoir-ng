@@ -33,7 +33,7 @@ public interface SubjectStudyService {
 	 * @return updated subject study.
 	 * @throws EntityNotFoundException 
 	 */
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT') || @datasetSecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE')))")
+	//@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_IMPORT') || @datasetSecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE')))")
 	List<SubjectStudy> update(Iterable<SubjectStudy> subjectStudies) throws EntityNotFoundException;
 
 }
