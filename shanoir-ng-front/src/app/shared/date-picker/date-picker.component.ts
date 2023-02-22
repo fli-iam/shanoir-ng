@@ -14,20 +14,17 @@
 
 import { AfterViewChecked, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
-import { IMyOptions, MyDatePicker } from 'mydatepicker';
 
 @Component({
     selector: 'datepicker',
     template: `
         <span>
-            <my-date-picker 
-                [options]="options"
+            <input type="date" 
                 [disabled]="disabled"
                 [ngModel]="convertedDate"
                 (ngModelChange)="onModelChange($event)"
                 (inputFieldChanged)="onInputFieldChanged($event)"
-                (inputFocusBlur)="onTouch()">
-            </my-date-picker>
+                (inputFocusBlur)="onTouch()"/>
         </span>
     `,
     styles: [
@@ -43,20 +40,12 @@ import { IMyOptions, MyDatePicker } from 'mydatepicker';
 })
 export class DatepickerComponent implements ControlValueAccessor, AfterViewChecked {
 
-    @ViewChild(MyDatePicker) innerDatePicker;
     private inputFieldContent: string;
     private lastInputFieldContent: string;
     convertedDate: Object;
     onTouch: () => void;
     private onChange: (value) => void;
     @Input() disabled: boolean = false;
-
-    options: IMyOptions = {
-        dateFormat: 'dd/mm/yyyy',
-        height: '21px',
-        width: '160px',
-        indicateInvalidDate: false
-    };
 
     constructor(private element: ElementRef) { }
 
@@ -90,7 +79,6 @@ export class DatepickerComponent implements ControlValueAccessor, AfterViewCheck
             this.convertedDate = {jsdate: new Date(value)};
         } else {
             this.convertedDate = null;
-            if (this.innerDatePicker) this.innerDatePicker.clearDate();
         }
     }
     

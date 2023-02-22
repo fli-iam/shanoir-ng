@@ -16,8 +16,6 @@ import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/cor
 import { Router, ActivatedRoute, Params } from '@angular/router';
 import { UntypedFormGroup, UntypedFormBuilder, Validators, FormControl } from '@angular/forms';
 
-import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
-
 import { ExtensionRequestInfo } from './extension-request-info.model';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
 import { User } from '../shared/user.model';
