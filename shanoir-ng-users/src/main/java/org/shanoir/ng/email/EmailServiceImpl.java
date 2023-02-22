@@ -84,6 +84,8 @@ public class EmailServiceImpl implements EmailService {
 
 	private static final String SERIES = "series";
 	
+	private static final String MOTIVATION = "motivation";
+	
 	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
 	
 	@Autowired
@@ -531,6 +533,8 @@ public class EmailServiceImpl implements EmailService {
 					variables.put(LASTNAME, studyAdmin.getLastName());
 					variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
 					variables.put(STUDY_NAME, createdRequest.getStudyName());
+					variables.put(MOTIVATION, createdRequest.getMotivation());
+					variables.put(USERNAME, createdRequest.getUser().getUsername());
 					final String content = build("notifyStudyAdminAccessRequest", variables);
 					LOG.info(content);
 					messageHelper.setText(content, true);
