@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <ng-container *ngFor="let qualityCard of qualityCards">
     <div>
         <span class="sc-name left-icon" 
-                [routerLink]="'/quality-card/details/' + qualityCard.study?.id" 
+                [routerLink]="'/quality-card/details/' + qualityCard?.id" 
                 routerLinkActive="active"
                 title="open details">
             <i class="fa-solid fa-shuffle"></i>{{qualityCard.name}}
