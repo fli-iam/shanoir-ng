@@ -48,7 +48,7 @@ public interface ManufacturerApi {
 	@GetMapping(value = "/{manufacturerId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Manufacturer> findManufacturerById(
-			@ApiParam(value = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId);
+			@Parameter(name = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId);
 
 	@Operation(summary = "", description = "Returns all the manufacturers")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found manufacturers"),
@@ -70,7 +70,7 @@ public interface ManufacturerApi {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Manufacturer> saveNewManufacturer(
-			@ApiParam(value = "manufacturer to create", required = true) @RequestBody Manufacturer manufacturer,
+			@Parameter(name = "manufacturer to create", required = true) @RequestBody Manufacturer manufacturer,
 			final BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Updates a manufacturer")
@@ -84,8 +84,8 @@ public interface ManufacturerApi {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#manufacturerId, #manufacturer)")
 	ResponseEntity<Void> updateManufacturer(
-			@ApiParam(value = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId,
-			@ApiParam(value = "manufacturer to update", required = true) @RequestBody Manufacturer manufacturer,
+			@Parameter(name = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId,
+			@Parameter(name = "manufacturer to update", required = true) @RequestBody Manufacturer manufacturer,
 			BindingResult result) throws RestServiceException;
 	
 	@Operation(summary = "", description = "Deletes a manufacturer")
@@ -97,7 +97,7 @@ public interface ManufacturerApi {
 	@DeleteMapping(value = "/{manufacturerId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteManufacturer(
-			@ApiParam(value = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId)
+			@Parameter(name = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId)
 			throws RestServiceException;
 
 }

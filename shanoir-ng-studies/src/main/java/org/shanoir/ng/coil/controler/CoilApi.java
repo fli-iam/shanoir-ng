@@ -51,7 +51,7 @@ public interface CoilApi {
 	@DeleteMapping(value = "/{coilId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteCoil(
-			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
+			@Parameter(name = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the coil corresponding to the given id")
@@ -63,7 +63,7 @@ public interface CoilApi {
 	@GetMapping(value = "/{coilId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<CoilDTO> findCoilById(
-			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId);
+			@Parameter(name = "id of the coil", required = true) @PathVariable("coilId") Long coilId);
 
 	@Operation(summary = "", description = "Returns all the coils")
 	@ApiResponses(value = {
@@ -85,7 +85,7 @@ public interface CoilApi {
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	ResponseEntity<CoilDTO> saveNewCoil(@ApiParam(value = "coil to create", required = true) @Valid @RequestBody Coil coil,
+	ResponseEntity<CoilDTO> saveNewCoil(@Parameter(name = "coil to create", required = true) @Valid @RequestBody Coil coil,
 			BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Updates a coil")
@@ -98,8 +98,8 @@ public interface CoilApi {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#coilId, #coil)")
 	ResponseEntity<Void> updateCoil(
-			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
-			@ApiParam(value = "coil to update", required = true) @Valid @RequestBody Coil coil, BindingResult result)
+			@Parameter(name = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
+			@Parameter(name = "coil to update", required = true) @Valid @RequestBody Coil coil, BindingResult result)
 			throws RestServiceException;
 
 }

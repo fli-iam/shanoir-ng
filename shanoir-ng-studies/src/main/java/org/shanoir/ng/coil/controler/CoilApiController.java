@@ -55,7 +55,7 @@ public class CoilApiController implements CoilApi {
 
 	@Override
 	public ResponseEntity<Void> deleteCoil(
-			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
+			@Parameter(name = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
 			throws RestServiceException {
 
 		try {
@@ -70,7 +70,7 @@ public class CoilApiController implements CoilApi {
 
 	@Override
 	public ResponseEntity<CoilDTO> findCoilById(
-			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId) {
+			@Parameter(name = "id of the coil", required = true) @PathVariable("coilId") Long coilId) {
 		final Coil coil = coilService.findById(coilId).orElse(null);
 		if (coil == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -89,7 +89,7 @@ public class CoilApiController implements CoilApi {
 
 	@Override
 	public ResponseEntity<CoilDTO> saveNewCoil(
-			@ApiParam(value = "coil to create", required = true) @Valid @RequestBody Coil coil,
+			@Parameter(name = "coil to create", required = true) @Valid @RequestBody Coil coil,
 			final BindingResult result) throws RestServiceException {
 		
 		/* Validation */
@@ -103,8 +103,8 @@ public class CoilApiController implements CoilApi {
 
 	@Override
 	public ResponseEntity<Void> updateCoil(
-			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
-			@ApiParam(value = "coil to update", required = true) @Valid @RequestBody Coil coil,
+			@Parameter(name = "id of the coil", required = true) @PathVariable("coilId") Long coilId,
+			@Parameter(name = "coil to update", required = true) @Valid @RequestBody Coil coil,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);

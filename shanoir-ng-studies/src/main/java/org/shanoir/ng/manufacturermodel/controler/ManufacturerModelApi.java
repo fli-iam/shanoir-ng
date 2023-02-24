@@ -49,7 +49,7 @@ public interface ManufacturerModelApi {
 	@GetMapping(value = "/{manufacturerModelId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<ManufacturerModel> findManufacturerModelById(
-			@ApiParam(value = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId);
+			@Parameter(name = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId);
 
 	@Operation(summary = "", description = "Returns id and name of all the manufacturer models")
 	@ApiResponses(value = {
@@ -72,7 +72,7 @@ public interface ManufacturerModelApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/centerManuModelsNames/{centerId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<IdName>> findCenterManufacturerModelsNames(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+	ResponseEntity<List<IdName>> findCenterManufacturerModelsNames(@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 	
 	@Operation(summary = "", description = "Returns all the manufacturer models")
 	@ApiResponses(value = {
@@ -96,7 +96,7 @@ public interface ManufacturerModelApi {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<ManufacturerModel> saveNewManufacturerModel(
-			@ApiParam(value = "manufacturer model to create", required = true) @RequestBody ManufacturerModel manufacturerModel,
+			@Parameter(name = "manufacturer model to create", required = true) @RequestBody ManufacturerModel manufacturerModel,
 			final BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Updates a manufacturer model")
@@ -110,8 +110,8 @@ public interface ManufacturerModelApi {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#manufacturerModelId, #manufacturerModel)")
 	ResponseEntity<Void> updateManufacturerModel(
-			@ApiParam(value = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId,
-			@ApiParam(value = "manufacturer model to update", required = true) @RequestBody ManufacturerModel manufacturerModel,
+			@Parameter(name = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId,
+			@Parameter(name = "manufacturer model to update", required = true) @RequestBody ManufacturerModel manufacturerModel,
 			final BindingResult result) throws RestServiceException;
 
 }

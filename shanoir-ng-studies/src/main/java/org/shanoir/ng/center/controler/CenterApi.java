@@ -51,7 +51,7 @@ public interface CenterApi {
 	@RequestMapping(value = "/{centerId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteCenter(
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId)
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the center corresponding to the given id")
@@ -63,7 +63,7 @@ public interface CenterApi {
 	@RequestMapping(value = "/{centerId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<CenterDTO> findCenterById(
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 
 	@Operation(summary = "", description = "Returns all the centers")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found centers"),
@@ -84,7 +84,7 @@ public interface CenterApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/study/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	public ResponseEntity<List<CenterDTO>> findCentersByStudy (
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@Operation(summary = "", description = "Returns id and name for all the centers")
 	@ApiResponses(value = {
@@ -105,7 +105,7 @@ public interface CenterApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/names/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<IdName>> findCentersNames(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@Operation(summary = "", description = "Saves a new center")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created center"),
@@ -117,7 +117,7 @@ public interface CenterApi {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<CenterDTO> saveNewCenter(
-			@ApiParam(value = "center to create", required = true) @RequestBody Center center, BindingResult result)
+			@Parameter(name = "center to create", required = true) @RequestBody Center center, BindingResult result)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "Updates a center")
@@ -130,8 +130,8 @@ public interface CenterApi {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#centerId, #center)")
 	ResponseEntity<Void> updateCenter(
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
-			@ApiParam(value = "center to update", required = true) @RequestBody Center center, BindingResult result)
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+			@Parameter(name = "center to update", required = true) @RequestBody Center center, BindingResult result)
 			throws RestServiceException;
 
 }

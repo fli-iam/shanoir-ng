@@ -66,7 +66,7 @@ public interface StudyApi {
 	@RequestMapping(value = "/{studyId}", produces = { "application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> deleteStudy(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@Operation(summary = "", description = "If exists, returns the studies that the user is allowed to see")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
@@ -122,7 +122,7 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudyDTO(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<StudyDTO> findStudyById(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@Operation(summary = "", description = "Saves a new study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created study"),
@@ -134,7 +134,7 @@ public interface StudyApi {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<StudyDTO> saveNewStudy(
-			@ApiParam(value = "study to create", required = true) @RequestBody Study study, BindingResult result)
+			@Parameter(name = "study to create", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "Updates a study")
@@ -147,8 +147,8 @@ public interface StudyApi {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#studyId, #study) and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> updateStudy(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "study to update", required = true) @RequestBody Study study, BindingResult result)
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "study to update", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
 
 	@Operation(summary = "", description = "Get my rights on this study")
@@ -160,7 +160,7 @@ public interface StudyApi {
 			"application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<StudyUserRight>> rights(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException;
 	
 	@Operation(summary = "", description = "Get my rights")
@@ -194,8 +194,8 @@ public interface StudyApi {
 			"multipart/form-data" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> uploadProtocolFile(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Download protocol file from a study", tags = {})
@@ -208,8 +208,8 @@ public interface StudyApi {
 	@GetMapping(value = "protocol-file-download/{studyId}/{fileName:.+}/")
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
 	void downloadProtocolFile(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 	
 	@Operation(summary = "", description = "If one or more exist, return a list of data user agreements (DUAs) waiting for the given user id")
 	@ApiResponses(value = {
@@ -233,7 +233,7 @@ public interface StudyApi {
 	@PutMapping(value = "/dua/{duaId}", produces = { "application/json" }, consumes = {"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @studySecurityService.checkUserOnDUA(#duaId)")
 	ResponseEntity<Void> acceptDataUserAgreement(
-			@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
+			@Parameter(name = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
 			throws RestServiceException, MicroServiceCommunicationException;
 
 	@Operation(summary = "", description = "Add DUA to a study")
@@ -247,8 +247,8 @@ public interface StudyApi {
 			"multipart/form-data" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> uploadDataUserAgreement(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Download DUA of a study", tags = {})
@@ -261,8 +261,8 @@ public interface StudyApi {
 	@GetMapping(value = "dua-download/{studyId}/{fileName:.+}/")
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	void downloadDataUserAgreement(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
 	@Operation(summary = "", description = "Deletes the DUA of a study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dua deleted"),
@@ -274,7 +274,7 @@ public interface StudyApi {
 			"application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> deleteDataUserAgreement(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws IOException;
 
 	@Operation(summary = "", description = "If exists, returns the studies that are publicly available for a given user")

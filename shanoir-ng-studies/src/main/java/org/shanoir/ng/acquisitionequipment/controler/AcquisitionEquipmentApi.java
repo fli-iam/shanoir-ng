@@ -49,7 +49,7 @@ public interface AcquisitionEquipmentApi {
 			"application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteAcquisitionEquipment(
-			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
+			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
 
 	@Operation(summary = "", description = "If exists, returns the acquisition equipment corresponding to the given id")
 	@ApiResponses(value = {
@@ -61,7 +61,7 @@ public interface AcquisitionEquipmentApi {
 	@RequestMapping(value = "/{acquisitionEquipmentId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
-			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
+			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
 
 	@Operation(summary = "", description = "Returns all the acquisition equipments for a center")
 	@ApiResponses(value = {
@@ -72,7 +72,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byCenter/{centerId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
+	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 	
 	@Operation(summary = "", description = "Returns all the acquisition equipments for a study")
 	@ApiResponses(value = {
@@ -83,7 +83,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
-	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 	
 	
 	@Operation(summary = "", description = "Returns all the acquisition equipments")
@@ -108,7 +108,7 @@ public interface AcquisitionEquipmentApi {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<AcquisitionEquipmentDTO> saveNewAcquisitionEquipment(
-			@ApiParam(value = "acquisition equipment to create", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,
+			@Parameter(name = "acquisition equipment to create", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,
 			BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Updates a acquisition equipment")
@@ -122,8 +122,8 @@ public interface AcquisitionEquipmentApi {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#acquisitionEquipmentId, #acquisitionEquipment)")
 	ResponseEntity<Void> updateAcquisitionEquipment(
-			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId,
-			@ApiParam(value = "acquisition equipment to update", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,
+			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId,
+			@Parameter(name = "acquisition equipment to update", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException;
 
 }
