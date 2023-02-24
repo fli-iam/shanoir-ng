@@ -23,14 +23,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @javax.annotation.Generated(value = "class io.swagger.codegen.languages.SpringCodegen", date = "2016-11-18T15:36:13.002Z")
 
-@Api(value = "profile", description = "the profile API")
+@Tag(name = "profile", description = "the profile API")
 @RequestMapping("/profiles")
 public interface ProfileApi {
 	@ApiOperation(value = "", notes = "Returns all the profiles", response = Profile.class, responseContainer = "List", tags = {})

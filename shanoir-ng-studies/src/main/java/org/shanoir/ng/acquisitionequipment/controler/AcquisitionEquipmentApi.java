@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import io.swagger.annotations.Api;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -35,7 +35,7 @@ import io.swagger.annotations.ApiResponses;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-04-03T09:59:20.168Z")
 
-@Api(value = "acquisitionequipment", description = "the acquisitionequipment API")
+@Tag(name = "acquisitionequipment", description = "the acquisitionequipment API")
 @RequestMapping("/acquisitionequipments")
 public interface AcquisitionEquipmentApi {
 
