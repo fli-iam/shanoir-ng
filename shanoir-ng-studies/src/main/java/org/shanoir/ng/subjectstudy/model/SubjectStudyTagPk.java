@@ -2,10 +2,10 @@ package org.shanoir.ng.subjectstudy.model;
 
 import java.io.Serializable;
 
+import org.shanoir.ng.tag.model.Tag;
+
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-
-import org.shanoir.ng.tag.model.Tag;
 
 
 public class SubjectStudyTagPk implements Serializable {

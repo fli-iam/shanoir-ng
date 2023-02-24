@@ -16,8 +16,6 @@ package org.shanoir.ng.coil.controler;
 
 import java.util.List;
 
-import jakarta.validation.Valid;
-
 import org.shanoir.ng.coil.dto.CoilDTO;
 import org.shanoir.ng.coil.dto.mapper.CoilMapper;
 import org.shanoir.ng.coil.model.Coil;
@@ -40,6 +38,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 @Controller
 public class CoilApiController implements CoilApi {

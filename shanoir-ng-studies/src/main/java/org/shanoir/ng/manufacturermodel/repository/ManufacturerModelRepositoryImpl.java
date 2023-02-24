@@ -16,10 +16,10 @@ package org.shanoir.ng.manufacturermodel.repository;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.core.model.IdName;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-
-import org.shanoir.ng.shared.core.model.IdName;
 
 /**
  * Implementation of custom repository for centers.

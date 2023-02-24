@@ -14,9 +14,15 @@
 
 package org.shanoir.ng.subjectstudy.model;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.subject.model.Subject;
+import org.shanoir.ng.subject.model.SubjectType;
+import org.shanoir.ng.tag.model.Tag;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -27,13 +33,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subject.model.SubjectType;
-import org.shanoir.ng.tag.model.Tag;
 
 /**
  * Relation between the subjects and the studies.

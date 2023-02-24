@@ -17,12 +17,12 @@ package org.shanoir.ng.study.repository;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.transaction.Transactional;
-
 import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import jakarta.transaction.Transactional;
 
 /**
  * Repository for relations between a study and an user.

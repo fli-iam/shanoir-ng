@@ -16,18 +16,18 @@ package org.shanoir.ng.subject.model;
 
 import java.io.Serializable;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.hateoas.HalEntity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.hateoas.HalEntity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 @Entity

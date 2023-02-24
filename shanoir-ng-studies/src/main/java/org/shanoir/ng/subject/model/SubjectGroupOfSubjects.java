@@ -14,14 +14,14 @@
 
 package org.shanoir.ng.subject.model;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.groupofsubjects.GroupOfSubjects;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.groupofsubjects.GroupOfSubjects;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * Relation between the subjects and the groups of subjects.

@@ -16,6 +16,12 @@ package org.shanoir.ng.groupofsubjects;
 
 import java.util.Set;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.hateoas.HalEntity;
+import org.shanoir.ng.shared.hateoas.Links;
+import org.shanoir.ng.shared.validation.Unique;
+import org.shanoir.ng.subject.model.SubjectGroupOfSubjects;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -24,12 +30,6 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostLoad;
 import jakarta.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.hateoas.HalEntity;
-import org.shanoir.ng.shared.hateoas.Links;
-import org.shanoir.ng.shared.validation.Unique;
-import org.shanoir.ng.subject.model.SubjectGroupOfSubjects;
 
 /**
  * Group of subjects.

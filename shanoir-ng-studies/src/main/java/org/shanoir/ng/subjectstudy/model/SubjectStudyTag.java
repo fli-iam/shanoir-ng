@@ -14,14 +14,14 @@
 
 package org.shanoir.ng.subjectstudy.model;
 
+import org.shanoir.ng.tag.model.Tag;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
-import org.shanoir.ng.tag.model.Tag;
 
 /**
  * Relation between the subjects and the studies.

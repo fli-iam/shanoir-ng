@@ -1,14 +1,13 @@
 package org.shanoir.ng.tag.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
 
-import jakarta.persistence.*;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class StudyTag extends HalEntity {

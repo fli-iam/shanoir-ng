@@ -16,12 +16,12 @@ package org.shanoir.ng.subject.repository;
 
 import java.util.List;
 
+import org.shanoir.ng.subject.model.Subject;
+import org.springframework.stereotype.Component;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
-
-import org.shanoir.ng.subject.model.Subject;
-import org.springframework.stereotype.Component;
 
 /**
  * Implementation of custom repository for templates.
