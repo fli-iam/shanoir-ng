@@ -42,11 +42,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public interface SubjectStudyApi {
 	
 	@ApiOperation(value = "", notes = "Updates subject study", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "subject study updated", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "subject study updated"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{subjectStudyId}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("( hasRole('ADMIN') or ( hasAnyRole('EXPERT', 'USER')"

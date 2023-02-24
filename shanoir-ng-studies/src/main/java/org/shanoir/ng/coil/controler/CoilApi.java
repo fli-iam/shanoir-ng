@@ -43,11 +43,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public interface CoilApi {
 
 	@ApiOperation(value = "", notes = "Deletes a coil", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "coil deleted", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no coil found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "coil deleted"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no coil found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@DeleteMapping(value = "/{coilId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteCoil(
@@ -55,11 +55,11 @@ public interface CoilApi {
 			throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the coil corresponding to the given id", response = CoilDTO.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found coil", response = CoilDTO.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no coil found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found coil"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no coil found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{coilId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<CoilDTO> findCoilById(
@@ -68,20 +68,20 @@ public interface CoilApi {
 	@ApiOperation(value = "", notes = "Returns all the coils", response = CoilDTO.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found coils", response = CoilDTO.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no coil found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "204", description = "no coil found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<CoilDTO>> findCoils();
 
 	@ApiOperation(value = "", notes = "Saves a new coil", response = CoilDTO.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created coil", response = CoilDTO.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created coil"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
@@ -89,11 +89,11 @@ public interface CoilApi {
 			BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a coil", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "coil updated", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "coil updated"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{coilId}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#coilId, #coil)")

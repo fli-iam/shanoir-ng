@@ -24,10 +24,10 @@ public interface ChallengeApi {
 	@ApiOperation(value = "", notes = "Returns id and name for all available challenges", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found challenges", response = IdName.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no challenges found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "204", description = "no challenges found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<IdName>> findChallenges() throws RestServiceException;
 }

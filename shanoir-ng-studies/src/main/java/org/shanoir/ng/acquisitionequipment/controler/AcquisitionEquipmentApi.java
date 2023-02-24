@@ -40,11 +40,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public interface AcquisitionEquipmentApi {
 
 	@ApiOperation(value = "", notes = "Deletes an acquisition equipment", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "acquisition equipment deleted", response = Void.class),
-			@ApiResponse(code = 404, message = "no acquisition equipment found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "acquisition equipment deleted"),
+			@ApiResponse(responseCode = "404", description = "no acquisition equipment found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/{acquisitionEquipmentId}", produces = {
 			"application/json" }, method = RequestMethod.DELETE)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
@@ -53,11 +53,11 @@ public interface AcquisitionEquipmentApi {
 
 	@ApiOperation(value = "", notes = "If exists, returns the acquisition equipment corresponding to the given id", response = AcquisitionEquipment.class, tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found acquisition equipment", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 204, message = "no acquisition equipment found", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = AcquisitionEquipment.class) })
+			@ApiResponse(responseCode = "200", description = "found acquisition equipment"),
+			@ApiResponse(responseCode = "204", description = "no acquisition equipment found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/{acquisitionEquipmentId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
@@ -65,22 +65,22 @@ public interface AcquisitionEquipmentApi {
 
 	@ApiOperation(value = "", notes = "Returns all the acquisition equipments for a center", response = AcquisitionEquipment.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found acquisition equipments", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 204, message = "no acquisition equipment found", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = AcquisitionEquipment.class) })
+			@ApiResponse(responseCode = "200", description = "found acquisition equipments"),
+			@ApiResponse(responseCode = "204", description = "no acquisition equipment found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byCenter/{centerId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 	
 	@ApiOperation(value = "", notes = "Returns all the acquisition equipments for a study", response = AcquisitionEquipment.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found acquisition equipments", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 204, message = "no acquisition equipment found", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = AcquisitionEquipment.class) })
+			@ApiResponse(responseCode = "200", description = "found acquisition equipments"),
+			@ApiResponse(responseCode = "204", description = "no acquisition equipment found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
@@ -88,22 +88,22 @@ public interface AcquisitionEquipmentApi {
 	
 	@ApiOperation(value = "", notes = "Returns all the acquisition equipments", response = AcquisitionEquipment.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found acquisition equipments", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 204, message = "no acquisition equipment found", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = AcquisitionEquipment.class) })
+			@ApiResponse(responseCode = "200", description = "found acquisition equipments"),
+			@ApiResponse(responseCode = "204", description = "no acquisition equipment found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments();
 
 	@ApiOperation(value = "", notes = "Saves a new acquisition equipment", response = AcquisitionEquipment.class, tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "created acquisition equipment", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = AcquisitionEquipment.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = AcquisitionEquipment.class) })
+			@ApiResponse(responseCode = "200", description = "created acquisition equipment"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
@@ -112,12 +112,12 @@ public interface AcquisitionEquipmentApi {
 			BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "", notes = "Updates a acquisition equipment", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "acquisition equipment updated", response = Void.class),
-			@ApiResponse(code = 204, message = "acquisition equipment not found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "acquisition equipment updated"),
+			@ApiResponse(responseCode = "204", description = "acquisition equipment not found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/{acquisitionEquipmentId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#acquisitionEquipmentId, #acquisitionEquipment)")

@@ -49,33 +49,33 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public interface SubjectApi {
 
 	@ApiOperation(value = "", notes = "Deletes a subject", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "subject deleted", response = Void.class),
-			@ApiResponse(code = 204, message = "no subject found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "subject deleted"),
+			@ApiResponse(responseCode = "204", description = "no subject found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@DeleteMapping(value = "/{subjectId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#subjectId, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
 	@ApiOperation(value = "", notes = "Returns all the subjects", response = Subject.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subjects", response = Subject.class),
-			@ApiResponse(code = 204, message = "no subject found", response = Subject.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),
+			@ApiResponse(responseCode = "204", description = "no subject found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SubjectDTO>> findSubjects();
 
 	@ApiOperation(value = "", notes = "Returns the subjects as Pageable with corresponding name", response = Subject.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subjects", response = Subject.class),
-			@ApiResponse(code = 204, message = "no subject found", response = Subject.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),
+			@ApiResponse(responseCode = "204", description = "no subject found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/filter", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name);
@@ -83,20 +83,20 @@ public interface SubjectApi {
 	@ApiOperation(value = "", notes = "Returns id and name for all the subjects", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "found subjects", response = IdName.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no subject found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "204", description = "no subject found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/names", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<IdName>> findSubjectsNames();
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given id", response = Subject.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found bubject", response = Subject.class),
-			@ApiResponse(code = 204, message = "no subject found", response = Subject.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found bubject"),
+			@ApiResponse(responseCode = "204", description = "no subject found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{subjectId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForOneStudy(returnObject.getBody().getId(), 'CAN_SEE_ALL')")
@@ -105,11 +105,11 @@ public interface SubjectApi {
 
 	// Attention: this method is used by ShanoirUploader!!!
 	@ApiOperation(value = "", notes = "Saves a new subject", response = Subject.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created subject", response = Subject.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Subject.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created subject"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
@@ -120,11 +120,11 @@ public interface SubjectApi {
 	
 	// Attention: this method is used by ShanoirUploader!!!
 	@ApiOperation(value = "", notes = "Updates a subject", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "subject updated", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "subject updated"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{subjectId}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.checkRightOnEverySubjectStudyList(#subject.getSubjectStudyList(), 'CAN_IMPORT'))")
@@ -134,11 +134,11 @@ public interface SubjectApi {
 			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the subjects of a study", response = Subject.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subjects", response = Subject.class),
-			@ApiResponse(code = 204, message = "no subject found", response = Subject.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Subject.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),
+			@ApiResponse(responseCode = "204", description = "no subject found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{studyId}/allSubjects", produces = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -148,11 +148,11 @@ public interface SubjectApi {
 			@ApiParam(value = "preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical);
 
 	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given identifier", response = Subject.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subject", response = SubjectDTO.class),
-			@ApiResponse(code = 204, message = "no subject found", response = SubjectDTO.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = SubjectDTO.class),
-			@ApiResponse(code = 403, message = "forbidden", response = SubjectDTO.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = SubjectDTO.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subject"),
+			@ApiResponse(responseCode = "204", description = "no subject found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/findByIdentifier/{subjectIdentifier}", produces = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")

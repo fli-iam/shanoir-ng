@@ -34,11 +34,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/profiles")
 public interface ProfileApi {
 	@ApiOperation(value = "", notes = "Returns all the profiles", response = Profile.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found profiles", response = Profile.class),
-			@ApiResponse(code = 204, message = "no profile found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found profiles"),
+			@ApiResponse(responseCode = "204", description = "no profile found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/all", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<List<Profile>> findProfiles();

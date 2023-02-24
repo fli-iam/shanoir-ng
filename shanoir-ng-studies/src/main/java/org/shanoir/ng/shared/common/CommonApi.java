@@ -28,11 +28,11 @@ public interface CommonApi {
 
 	@ApiOperation(value = "", notes = "If exists, returns the study name, subject name, center name corresponding to the given ids", response = CommonIdNamesDTO.class, tags = {})
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found elements", response = CommonIdNamesDTO.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = CommonIdNamesDTO.class),
-			@ApiResponse(code = 403, message = "forbidden", response = CommonIdNamesDTO.class),
-			@ApiResponse(code = 404, message = "no element found", response = CommonIdNamesDTO.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = CommonIdNamesDTO.class) })
+			@ApiResponse(responseCode = "200", description = "found elements"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no element found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<CommonIdNamesDTO> findStudySubjectCenterNamesByIds(
