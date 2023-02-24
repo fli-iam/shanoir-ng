@@ -32,15 +32,21 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-23T10:35:29.288Z")
 
@@ -189,7 +195,7 @@ public interface StudyApi {
 			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Download protocol file from a study", tags = {})
+	@Operation(summary = "", description = "Download protocol file from a study")
 	@ApiResponses(value = {
 	        @ApiResponse(responseCode = "200", description = "protocol file"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -242,7 +248,7 @@ public interface StudyApi {
 			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Download DUA of a study", tags = {})
+	@Operation(summary = "", description = "Download DUA of a study")
 	@ApiResponses(value = {
 	        @ApiResponse(responseCode = "200", description = "dua downloaded"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
