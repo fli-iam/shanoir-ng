@@ -22,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,6 +32,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "profile", description = "the profile API")
 @RequestMapping("/profiles")
 public interface ProfileApi {
+
 	@Operation(summary = "", description = "Returns all the profiles")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found profiles"),
 			@ApiResponse(responseCode = "204", description = "no profile found"),
