@@ -33,7 +33,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Tag(name = "profile", description = "the profile API")
 @RequestMapping("/profiles")
 public interface ProfileApi {
-	@ApiOperation(value = "", notes = "Returns all the profiles", response = Profile.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all the profiles")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found profiles"),
 			@ApiResponse(responseCode = "204", description = "no profile found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),

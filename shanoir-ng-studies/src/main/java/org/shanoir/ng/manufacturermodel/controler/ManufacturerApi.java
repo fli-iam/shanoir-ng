@@ -39,7 +39,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/manufacturers")
 public interface ManufacturerApi {
 
-	@ApiOperation(value = "", notes = "If exists, returns the manufacturer corresponding to the given id", response = Manufacturer.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the manufacturer corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found manufacturer"),
 			@ApiResponse(responseCode = "204", description = "no manufacturer found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -50,7 +50,7 @@ public interface ManufacturerApi {
 	ResponseEntity<Manufacturer> findManufacturerById(
 			@ApiParam(value = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId);
 
-	@ApiOperation(value = "", notes = "Returns all the manufacturers", response = Manufacturer.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all the manufacturers")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found manufacturers"),
 			@ApiResponse(responseCode = "204", description = "no manufacturer found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -60,7 +60,7 @@ public interface ManufacturerApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<Manufacturer>> findManufacturers();
 
-	@ApiOperation(value = "", notes = "Saves a new manufacturer", response = Manufacturer.class, tags = {})
+	@Operation(summary = "", description = "Saves a new manufacturer")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created manufacturer"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -73,7 +73,7 @@ public interface ManufacturerApi {
 			@ApiParam(value = "manufacturer to create", required = true) @RequestBody Manufacturer manufacturer,
 			final BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Updates a manufacturer", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Updates a manufacturer")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "manufacturer updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -88,7 +88,7 @@ public interface ManufacturerApi {
 			@ApiParam(value = "manufacturer to update", required = true) @RequestBody Manufacturer manufacturer,
 			BindingResult result) throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "Deletes a manufacturer", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Deletes a manufacturer")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "manufacturer deleted"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),

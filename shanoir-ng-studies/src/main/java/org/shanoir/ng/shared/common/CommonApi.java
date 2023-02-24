@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/common")
 public interface CommonApi {
 
-	@ApiOperation(value = "", notes = "If exists, returns the study name, subject name, center name corresponding to the given ids", response = CommonIdNamesDTO.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the study name, subject name, center name corresponding to the given ids")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found elements"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),

@@ -42,7 +42,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/centers")
 public interface CenterApi {
 
-	@ApiOperation(value = "", notes = "Deletes a center", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Deletes a center")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "center deleted"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -54,7 +54,7 @@ public interface CenterApi {
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "If exists, returns the center corresponding to the given id", response = CenterDTO.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the center corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found center"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -65,7 +65,7 @@ public interface CenterApi {
 	ResponseEntity<CenterDTO> findCenterById(
 			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 
-	@ApiOperation(value = "", notes = "Returns all the centers", response = CenterDTO.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all the centers")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found centers"),
 			@ApiResponse(responseCode = "204", description = "no center found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -75,9 +75,9 @@ public interface CenterApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<CenterDTO>> findCenters();
 
-	@ApiOperation(value = "", notes = "Returns the centers associated to a study", response = Center.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns the centers associated to a study")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found centers", response = IdName.class, responseContainer = "List"),
+			@ApiResponse(responseCode = "200", description = "found centers"),
 			@ApiResponse(responseCode = "204", description = "no center found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -86,9 +86,9 @@ public interface CenterApi {
 	public ResponseEntity<List<CenterDTO>> findCentersByStudy (
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
-	@ApiOperation(value = "", notes = "Returns id and name for all the centers", response = IdName.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns id and name for all the centers")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found centers", response = IdName.class, responseContainer = "List"),
+			@ApiResponse(responseCode = "200", description = "found centers"),
 			@ApiResponse(responseCode = "204", description = "no center found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -96,9 +96,9 @@ public interface CenterApi {
 	@RequestMapping(value = "/names", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<IdName>> findCentersNames();
 	
-	@ApiOperation(value = "", notes = "Returns id and name for all the centers", response = IdName.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns id and name for all the centers")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found centers", response = IdName.class, responseContainer = "List"),
+			@ApiResponse(responseCode = "200", description = "found centers"),
 			@ApiResponse(responseCode = "204", description = "no center found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -107,7 +107,7 @@ public interface CenterApi {
 	ResponseEntity<List<IdName>> findCentersNames(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
-	@ApiOperation(value = "", notes = "Saves a new center", response = CenterDTO.class, tags = {})
+	@Operation(summary = "", description = "Saves a new center")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created center"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -120,7 +120,7 @@ public interface CenterApi {
 			@ApiParam(value = "center to create", required = true) @RequestBody Center center, BindingResult result)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Updates a center", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Updates a center")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "center updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),

@@ -39,7 +39,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/manufacturermodels")
 public interface ManufacturerModelApi {
 
-	@ApiOperation(value = "", notes = "If exists, returns the manufacturer model corresponding to the given id", response = ManufacturerModel.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the manufacturer model corresponding to the given id")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found manufacturer model"),
 			@ApiResponse(responseCode = "204", description = "no manufacturer model found"),
@@ -51,7 +51,7 @@ public interface ManufacturerModelApi {
 	ResponseEntity<ManufacturerModel> findManufacturerModelById(
 			@ApiParam(value = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId);
 
-	@ApiOperation(value = "", notes = "Returns id and name of all the manufacturer models", response = IdName.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns id and name of all the manufacturer models")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found manufacturer models"),
 			@ApiResponse(responseCode = "204", description = "no manufacturer model found"),
@@ -63,7 +63,7 @@ public interface ManufacturerModelApi {
 	ResponseEntity<List<IdName>> findManufacturerModelsNames();
 	
 	
-	@ApiOperation(value = "", notes = "Returns id and name of all the manufacturer models", response = IdName.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns id and name of all the manufacturer models")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found manufacturer models"),
 			@ApiResponse(responseCode = "204", description = "no manufacturer model found"),
@@ -74,7 +74,7 @@ public interface ManufacturerModelApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<IdName>> findCenterManufacturerModelsNames(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 	
-	@ApiOperation(value = "", notes = "Returns all the manufacturer models", response = ManufacturerModel.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all the manufacturer models")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found manufacturer models"),
 			@ApiResponse(responseCode = "204", description = "no manufacturer model found"),
@@ -85,7 +85,7 @@ public interface ManufacturerModelApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<ManufacturerModel>> findManufacturerModels();
 
-	@ApiOperation(value = "", notes = "Saves a new manufacturer model", response = ManufacturerModel.class, tags = {})
+	@Operation(summary = "", description = "Saves a new manufacturer model")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "created manufacturer model"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -99,7 +99,7 @@ public interface ManufacturerModelApi {
 			@ApiParam(value = "manufacturer model to create", required = true) @RequestBody ManufacturerModel manufacturerModel,
 			final BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Updates a manufacturer model", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Updates a manufacturer model")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "manufacturer model updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),

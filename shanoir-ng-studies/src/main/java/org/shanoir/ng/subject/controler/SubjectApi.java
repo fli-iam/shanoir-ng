@@ -48,7 +48,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/subjects")
 public interface SubjectApi {
 
-	@ApiOperation(value = "", notes = "Deletes a subject", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Deletes a subject")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "subject deleted"),
 			@ApiResponse(responseCode = "204", description = "no subject found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -59,7 +59,7 @@ public interface SubjectApi {
 	ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
-	@ApiOperation(value = "", notes = "Returns all the subjects", response = Subject.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all the subjects")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),
 			@ApiResponse(responseCode = "204", description = "no subject found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -70,7 +70,7 @@ public interface SubjectApi {
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SubjectDTO>> findSubjects();
 
-	@ApiOperation(value = "", notes = "Returns the subjects as Pageable with corresponding name", response = Subject.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns the subjects as Pageable with corresponding name")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),
 			@ApiResponse(responseCode = "204", description = "no subject found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -80,9 +80,9 @@ public interface SubjectApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name);
 
-	@ApiOperation(value = "", notes = "Returns id and name for all the subjects", response = IdName.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns id and name for all the subjects")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found subjects", response = IdName.class, responseContainer = "List"),
+			@ApiResponse(responseCode = "200", description = "found subjects"),
 			@ApiResponse(responseCode = "204", description = "no subject found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -91,7 +91,7 @@ public interface SubjectApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<IdName>> findSubjectsNames();
 
-	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given id", response = Subject.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the subject corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found bubject"),
 			@ApiResponse(responseCode = "204", description = "no subject found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -104,7 +104,7 @@ public interface SubjectApi {
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
 	// Attention: this method is used by ShanoirUploader!!!
-	@ApiOperation(value = "", notes = "Saves a new subject", response = Subject.class, tags = {})
+	@Operation(summary = "", description = "Saves a new subject")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created subject"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -119,7 +119,7 @@ public interface SubjectApi {
 			final BindingResult result) throws RestServiceException;
 	
 	// Attention: this method is used by ShanoirUploader!!!
-	@ApiOperation(value = "", notes = "Updates a subject", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Updates a subject")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "subject updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -133,7 +133,7 @@ public interface SubjectApi {
 			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException;
 
-	@ApiOperation(value = "", notes = "If exists, returns the subjects of a study", response = Subject.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the subjects of a study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),
 			@ApiResponse(responseCode = "204", description = "no subject found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -147,7 +147,7 @@ public interface SubjectApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical);
 
-	@ApiOperation(value = "", notes = "If exists, returns the subject corresponding to the given identifier", response = Subject.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the subject corresponding to the given identifier")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subject"),
 			@ApiResponse(responseCode = "204", description = "no subject found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),

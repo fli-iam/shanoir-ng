@@ -57,7 +57,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/studies")
 public interface StudyApi {
 
-	@ApiOperation(value = "", notes = "Deletes a study", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Deletes a study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study deleted"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -68,7 +68,7 @@ public interface StudyApi {
 	ResponseEntity<Void> deleteStudy(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
-	@ApiOperation(value = "", notes = "If exists, returns the studies that the user is allowed to see", response = Study.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the studies that the user is allowed to see")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -79,7 +79,7 @@ public interface StudyApi {
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyDTO>> findStudies();
 
-	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available", response = Study.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the studies that are publicly available")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -88,9 +88,9 @@ public interface StudyApi {
 	@RequestMapping(value = "/public/data", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData();
 
-	@ApiOperation(value = "", notes = "Returns id and name for all the studies", response = IdName.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns id and name for all the studies")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found studies", response = IdName.class, responseContainer = "List"),
+			@ApiResponse(responseCode = "200", description = "found studies"),
 			@ApiResponse(responseCode = "204", description = "no study found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -100,9 +100,9 @@ public interface StudyApi {
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyIdNameDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<IdName>> findStudiesNames() throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Returns id, name and centers for all the studies", response = IdName.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns id, name and centers for all the studies")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found studies", response = IdName.class, responseContainer = "List"),
+			@ApiResponse(responseCode = "200", description = "found studies"),
 			@ApiResponse(responseCode = "204", description = "no study found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -112,7 +112,7 @@ public interface StudyApi {
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyIdNameDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<IdNameCenterStudyDTO>> findStudiesNamesAndCenters() throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "If exists, returns the study corresponding to the given id", response = Study.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the study corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -124,7 +124,7 @@ public interface StudyApi {
 	ResponseEntity<StudyDTO> findStudyById(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
-	@ApiOperation(value = "", notes = "Saves a new study", response = Study.class, tags = {})
+	@Operation(summary = "", description = "Saves a new study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created study"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -137,7 +137,7 @@ public interface StudyApi {
 			@ApiParam(value = "study to create", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Updates a study", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Updates a study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -151,7 +151,7 @@ public interface StudyApi {
 			@ApiParam(value = "study to update", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Get my rights on this study", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Get my rights on this study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "here are your rights"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -163,7 +163,7 @@ public interface StudyApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "Get my rights", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Get my rights")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "here are your rights"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -173,7 +173,7 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Map<Long, List<StudyUserRight>>> rights() throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Know if I'm in one study at least with CAN_IMPORT", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Know if I'm in one study at least with CAN_IMPORT")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = ""),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -183,7 +183,7 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Boolean> hasOneStudyToImport() throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Add protocol file to a study", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Add protocol file to a study")
 	@ApiResponses(value = {
 	        @ApiResponse(responseCode = "200", description = "protocol file"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -211,7 +211,7 @@ public interface StudyApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 	
-	@ApiOperation(value = "", notes = "If one or more exist, return a list of data user agreements (DUAs) waiting for the given user id", response = DataUserAgreement.class, tags = {})
+	@Operation(summary = "", description = "If one or more exist, return a list of data user agreements (DUAs) waiting for the given user id")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found duas"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -223,7 +223,7 @@ public interface StudyApi {
 	ResponseEntity<List<DataUserAgreement>> getDataUserAgreements()
 			throws RestServiceException, IOException;
 	
-	@ApiOperation(value = "", notes = "Updates a data user agreement (DUA)", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Updates a data user agreement (DUA)")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "204", description = "dua updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -236,7 +236,7 @@ public interface StudyApi {
 			@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
 			throws RestServiceException, MicroServiceCommunicationException;
 
-	@ApiOperation(value = "", notes = "Add DUA to a study", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Add DUA to a study")
 	@ApiResponses(value = {
 	        @ApiResponse(responseCode = "200", description = "dua uploaded"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -264,7 +264,7 @@ public interface StudyApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
 
-	@ApiOperation(value = "", notes = "Deletes the DUA of a study", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Deletes the DUA of a study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dua deleted"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -277,7 +277,7 @@ public interface StudyApi {
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws IOException;
 
-	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available for a given user", response = Study.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the studies that are publicly available for a given user")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found studies"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),

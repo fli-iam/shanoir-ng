@@ -41,7 +41,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/subjectStudy")
 public interface SubjectStudyApi {
 	
-	@ApiOperation(value = "", notes = "Updates subject study", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Updates subject study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "subject study updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),

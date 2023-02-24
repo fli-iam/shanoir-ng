@@ -39,7 +39,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/acquisitionequipments")
 public interface AcquisitionEquipmentApi {
 
-	@ApiOperation(value = "", notes = "Deletes an acquisition equipment", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Deletes an acquisition equipment")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "acquisition equipment deleted"),
 			@ApiResponse(responseCode = "404", description = "no acquisition equipment found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -51,7 +51,7 @@ public interface AcquisitionEquipmentApi {
 	ResponseEntity<Void> deleteAcquisitionEquipment(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
 
-	@ApiOperation(value = "", notes = "If exists, returns the acquisition equipment corresponding to the given id", response = AcquisitionEquipment.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the acquisition equipment corresponding to the given id")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found acquisition equipment"),
 			@ApiResponse(responseCode = "204", description = "no acquisition equipment found"),
@@ -63,7 +63,7 @@ public interface AcquisitionEquipmentApi {
 	ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
 			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
 
-	@ApiOperation(value = "", notes = "Returns all the acquisition equipments for a center", response = AcquisitionEquipment.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all the acquisition equipments for a center")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found acquisition equipments"),
 			@ApiResponse(responseCode = "204", description = "no acquisition equipment found"),
@@ -74,7 +74,7 @@ public interface AcquisitionEquipmentApi {
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId);
 	
-	@ApiOperation(value = "", notes = "Returns all the acquisition equipments for a study", response = AcquisitionEquipment.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all the acquisition equipments for a study")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found acquisition equipments"),
 			@ApiResponse(responseCode = "204", description = "no acquisition equipment found"),
@@ -86,7 +86,7 @@ public interface AcquisitionEquipmentApi {
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 	
 	
-	@ApiOperation(value = "", notes = "Returns all the acquisition equipments", response = AcquisitionEquipment.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all the acquisition equipments")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found acquisition equipments"),
 			@ApiResponse(responseCode = "204", description = "no acquisition equipment found"),
@@ -97,7 +97,7 @@ public interface AcquisitionEquipmentApi {
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipments();
 
-	@ApiOperation(value = "", notes = "Saves a new acquisition equipment", response = AcquisitionEquipment.class, tags = {})
+	@Operation(summary = "", description = "Saves a new acquisition equipment")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "created acquisition equipment"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -111,7 +111,7 @@ public interface AcquisitionEquipmentApi {
 			@ApiParam(value = "acquisition equipment to create", required = true) @RequestBody AcquisitionEquipment acquisitionEquipment,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Updates a acquisition equipment", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Updates a acquisition equipment")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "acquisition equipment updated"),
 			@ApiResponse(responseCode = "204", description = "acquisition equipment not found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),

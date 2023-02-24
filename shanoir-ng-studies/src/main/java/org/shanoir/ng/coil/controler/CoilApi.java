@@ -42,7 +42,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/coils")
 public interface CoilApi {
 
-	@ApiOperation(value = "", notes = "Deletes a coil", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Deletes a coil")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "coil deleted"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -54,7 +54,7 @@ public interface CoilApi {
 			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "If exists, returns the coil corresponding to the given id", response = CoilDTO.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the coil corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found coil"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -65,9 +65,9 @@ public interface CoilApi {
 	ResponseEntity<CoilDTO> findCoilById(
 			@ApiParam(value = "id of the coil", required = true) @PathVariable("coilId") Long coilId);
 
-	@ApiOperation(value = "", notes = "Returns all the coils", response = CoilDTO.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all the coils")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found coils", response = CoilDTO.class, responseContainer = "List"),
+			@ApiResponse(responseCode = "200", description = "found coils"),
 			@ApiResponse(responseCode = "204", description = "no coil found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -76,7 +76,7 @@ public interface CoilApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<CoilDTO>> findCoils();
 
-	@ApiOperation(value = "", notes = "Saves a new coil", response = CoilDTO.class, tags = {})
+	@Operation(summary = "", description = "Saves a new coil")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created coil"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
@@ -88,7 +88,7 @@ public interface CoilApi {
 	ResponseEntity<CoilDTO> saveNewCoil(@ApiParam(value = "coil to create", required = true) @Valid @RequestBody Coil coil,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Updates a coil", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Updates a coil")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "coil updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),

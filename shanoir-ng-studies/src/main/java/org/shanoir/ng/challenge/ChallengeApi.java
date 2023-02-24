@@ -21,9 +21,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 public interface ChallengeApi {
 
 	
-	@ApiOperation(value = "", notes = "Returns id and name for all available challenges", response = IdName.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns id and name for all available challenges")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found challenges", response = IdName.class, responseContainer = "List"),
+			@ApiResponse(responseCode = "200", description = "found challenges"),
 			@ApiResponse(responseCode = "204", description = "no challenges found"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
