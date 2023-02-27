@@ -25,12 +25,7 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
-
-import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper;
-import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 
 /**
  * Tests for repository 'Subject'.
@@ -48,16 +43,6 @@ public class SubjectRepositoryTest {
 
 	@Autowired
 	private SubjectRepository subjectRepository;
-
-	/*
-	 * Mocks used to avoid unsatisfied dependency exceptions.
-	 */
-	@MockBean
-	private AuthenticationManager authenticationManager;
-	@MockBean
-	private DocumentationPluginsBootstrapper documentationPluginsBootstrapper;
-	@MockBean
-	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
 
 	@Test
 	public void findAllTest() throws Exception {

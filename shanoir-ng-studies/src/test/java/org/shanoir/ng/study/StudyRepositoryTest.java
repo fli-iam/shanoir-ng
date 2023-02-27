@@ -24,17 +24,11 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.repository.StudyRepository;
-import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
-
-import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper;
-import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 
 
 @WebAppConfiguration
@@ -44,21 +38,8 @@ public class StudyRepositoryTest {
 
 	private static final Long STUDY_TEST_1_ID = 1L;
 
-	/*
-	 * Mocks used to avoid unsatisfied dependency exceptions.
-	 */
-	@MockBean
-	private AuthenticationManager authenticationManager;
-	@MockBean
-	private DocumentationPluginsBootstrapper documentationPluginsBootstrapper;
-	@MockBean
-	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
-
 	@Autowired
 	private StudyRepository studyRepository;
-	
-	@Autowired
-	private StudyUserRepository studyUserRepository;
 
 	@Test
 	public void create() {
