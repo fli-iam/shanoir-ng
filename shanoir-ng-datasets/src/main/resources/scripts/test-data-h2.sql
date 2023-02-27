@@ -47,7 +47,6 @@ CREATE TABLE study_card_condition (
     id bigint(20) NOT NULL AUTO_INCREMENT,
     dicom_tag int(11) DEFAULT NULL,
     operation int(11) NOT NULL,
-    rule_id bigint(20) DEFAULT NULL,
     shanoir_field int(11) DEFAULT NULL,
     scope varchar(65) NOT NULL,
     PRIMARY KEY (id),
@@ -55,13 +54,13 @@ CREATE TABLE study_card_condition (
 );
 
 INSERT INTO study_card_condition
-	(id, shanoir_field, operation, rule_id, scope, dicom_tag)
+	(id, shanoir_field, operation, scope, dicom_tag)
 VALUES 
-	(1,2,4,7,'AcquisitionMetadataConditionOnAcquisition', null),
-	(2,2,4,7,'AcquisitionMetadataConditionOnAcquisition', null),
-	(3,1573009,5,8,'AcquisitionMetadataConditionOnAcquisition', null),
-	(4,1573009,6,8,'AcquisitionMetadataConditionOnAcquisition', null),
-	(5,1573013,6,8,'AcquisitionMetadataConditionOnAcquisition', null);
+	(1,2,4,'AcquisitionMetadataConditionOnAcquisition', null),
+	(2,2,4,'AcquisitionMetadataConditionOnAcquisition', null),
+	(3,1573009,5,'AcquisitionMetadataConditionOnAcquisition', null),
+	(4,1573009,6,'AcquisitionMetadataConditionOnAcquisition', null),
+	(5,1573013,6,'AcquisitionMetadataConditionOnAcquisition', null);
 
 INSERT INTO study_card_condition_values
 	(value, study_card_condition_id)
@@ -75,6 +74,15 @@ VALUES
 	('150',3),
 	('150',4),
 	('781.00',5);
+
+INSERT INTO study_card_condition_join
+	(study_card_rule_id, condition_id) 
+VALUES
+	(7,1),
+	(7,2),
+	(8,3),
+	(8,4),
+	(8,5);
 	
 INSERT INTO subject
 	(id, name)

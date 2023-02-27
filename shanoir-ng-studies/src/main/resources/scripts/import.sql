@@ -21,8 +21,6 @@ INSERT INTO study
 VALUES
 	(1, '\0', NULL, '\0', NULL, 1, 'DemoStudy', '2020-11-02 00:00:00', 1, 3, '\0', 1, 0);
 
-INSERT INTO profile (id, profile_name) VALUES (1, 'Default Profile');
-
 INSERT INTO center(id, country, name, phone_number, postal_code, street, city, website)
 VALUES
 	(1, 'France', 'CHU Rennes', '', '', '', 'Rennes', '');
