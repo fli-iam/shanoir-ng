@@ -36,6 +36,7 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -48,9 +49,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for center controller.
@@ -67,9 +65,7 @@ public class CenterApiControllerTest {
 	private static final String REQUEST_PATH = "/centers";
 	private static final String REQUEST_PATH_FOR_NAMES = REQUEST_PATH + "/names";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-
-	private Gson gson;
-
+	
 	@Autowired
 	private MockMvc mvc;
 
@@ -93,15 +89,12 @@ public class CenterApiControllerTest {
 
 	@BeforeEach
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
 		given(centerMapperMock.centersToCenterDTOs(Mockito.anyList()))
 				.willReturn(Arrays.asList(new CenterDTO()));
 		Center center = new Center();
 		center.setId(Long.valueOf(123));
 		IdName idNameCenter = new IdName(1L, "naIme");
 		given(centerMapperMock.centerToCenterDTO(Mockito.any(Center.class))).willReturn(new CenterDTO());
-
 		doNothing().when(centerServiceMock).deleteById(1L);
 		given(centerServiceMock.findAll()).willReturn(Arrays.asList(center));
 		given(centerServiceMock.findById(1L)).willReturn(Optional.of(center));
@@ -158,7 +151,7 @@ public class CenterApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewCenterTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createCenter())))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createCenter())))
 				.andExpect(status().isOk());
 	}
 
@@ -168,7 +161,7 @@ public class CenterApiControllerTest {
 		Center existingCenter = ModelsUtil.createCenter();
 		existingCenter.setId(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(existingCenter)))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(existingCenter)))
 				.andExpect(status().isNoContent());
 	}
 

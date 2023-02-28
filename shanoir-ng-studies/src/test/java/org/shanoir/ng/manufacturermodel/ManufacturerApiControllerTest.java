@@ -28,6 +28,7 @@ import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerUniqueConstraintManager;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,9 +40,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for manufacturer controller.
@@ -58,8 +56,6 @@ public class ManufacturerApiControllerTest {
 	private static final String REQUEST_PATH = "/manufacturers";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	private Gson gson;
-
 	@Autowired
 	private MockMvc mvc;
 
@@ -73,7 +69,6 @@ public class ManufacturerApiControllerTest {
 	public void setup() {
 		Manufacturer manuf = new Manufacturer();
 		manuf.setId(1L);
-		gson = new GsonBuilder().create();
 		given(manufacturerServiceMock.findAll()).willReturn(Arrays.asList(manuf));
 		given(manufacturerServiceMock.findById(1L)).willReturn(Optional.of(manuf));
 		given(manufacturerServiceMock.create(Mockito.mock(Manufacturer.class))).willReturn(manuf);
@@ -98,7 +93,7 @@ public class ManufacturerApiControllerTest {
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void saveNewManufacturerTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createManufacturer())))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturer())))
 				.andExpect(status().isOk());
 	}
 
@@ -108,7 +103,7 @@ public class ManufacturerApiControllerTest {
 		Manufacturer manuf = ModelsUtil.createManufacturer();
 		manuf.setId(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(manuf)))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(manuf)))
 				.andExpect(status().isNoContent());
 	}
 

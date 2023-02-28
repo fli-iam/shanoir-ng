@@ -32,6 +32,7 @@ import org.shanoir.ng.coil.model.Coil;
 import org.shanoir.ng.coil.service.CoilService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -43,9 +44,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for coil controller.
@@ -62,8 +60,6 @@ public class CoilApiControllerTest {
 
 	private static final String REQUEST_PATH = "/coils";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-
-	private Gson gson;
 
 	@Autowired
 	private MockMvc mvc;
@@ -82,12 +78,9 @@ public class CoilApiControllerTest {
 
 	@BeforeEach
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
 		given(coilMapperMock.coilsToCoilDTOs(Mockito.anyList()))
 				.willReturn(Arrays.asList(new CoilDTO()));
 		given(coilMapperMock.coilToCoilDTO(Mockito.any(Coil.class))).willReturn(new CoilDTO());
-
 		doNothing().when(coilServiceMock).deleteById(1L);
 		given(coilServiceMock.findAll()).willReturn(Arrays.asList(new Coil()));
 		given(coilServiceMock.findById(1L)).willReturn(Optional.of(new Coil()));
@@ -120,7 +113,7 @@ public class CoilApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewCoilTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createCoil())))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createCoil())))
 				.andExpect(status().isOk());
 	}
 
@@ -130,7 +123,7 @@ public class CoilApiControllerTest {
 		Coil coil = ModelsUtil.createCoil();
 		coil.setId(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(coil)))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(coil)))
 				.andExpect(status().isNoContent());
 	}
 
