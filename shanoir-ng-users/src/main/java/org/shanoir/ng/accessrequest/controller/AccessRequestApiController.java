@@ -38,7 +38,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 /**
  * Api for access request, to make a demand on 
@@ -69,7 +69,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 	private static final Logger LOG = LoggerFactory.getLogger(AccessRequestApiController.class);
 
 	public ResponseEntity<AccessRequest> saveNewAccessRequest(
-			@ApiParam(value = "access request to create", required = true) @RequestBody AccessRequest request,
+			@Parameter(name = "access request to create", required = true) @RequestBody AccessRequest request,
 			BindingResult result) throws RestServiceException {
 		// Create a new access request
 		User user = userService.findById(KeycloakUtil.getTokenUserId());
@@ -131,8 +131,8 @@ public class AccessRequestApiController implements AccessRequestApi {
 	}
 
 	public ResponseEntity<Void> resolveNewAccessRequest(
-			@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
-			@ApiParam(value = "Accept or refuse the request", required = true) @RequestBody boolean validation,
+			@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
+			@Parameter(name = "Accept or refuse the request", required = true) @RequestBody boolean validation,
 			BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException {
 		AccessRequest resolvedRequest = accessRequestService.findById(accessRequestId).orElse(null);
 		if (resolvedRequest == null) {
@@ -171,17 +171,17 @@ public class AccessRequestApiController implements AccessRequestApi {
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
-	public ResponseEntity<AccessRequest> getByid(@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException {
+	public ResponseEntity<AccessRequest> getByid(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException {
 		AccessRequest acceReq = this.accessRequestService.findById(accessRequestId).get();
 		return new ResponseEntity<AccessRequest>(acceReq, HttpStatus.OK);
 	}
 
 	public 	ResponseEntity<AccessRequest> inviteUserToStudy(
-			@ApiParam(value = "Study the user is invited in", required = true) 
+			@Parameter(name = "Study the user is invited in", required = true) 
 			@RequestParam(value = "studyId", required = true) Long studyId,
-			@ApiParam(value = "Study name the user is invited in", required = true) 
+			@Parameter(name = "Study name the user is invited in", required = true) 
 			@RequestParam(value = "studyName", required = true) String studyName,
-			@ApiParam(value = "The email of the invited user.") 
+			@Parameter(name = "The email of the invited user.") 
 			@RequestParam(value = "email", required = true) String email) throws RestServiceException, JsonProcessingException, AmqpException {
 
 		// Check if user with such email exists
@@ -212,7 +212,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 	}
 
 	public ResponseEntity<List<AccessRequest>> findAllByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId
 			) throws RestServiceException {
 		
 		return new ResponseEntity<List<AccessRequest>>(this.accessRequestService.findByStudyIdAndStatus(Collections.singletonList(studyId), AccessRequest.ON_DEMAND), HttpStatus.OK);

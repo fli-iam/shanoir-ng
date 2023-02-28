@@ -26,7 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-16T08:28:10.257Z")
 
@@ -39,7 +39,7 @@ public class LastLoginDateApiController extends AbstractUserRequestApiController
 	private static final Logger LOG = LoggerFactory.getLogger(LastLoginDateApiController.class);
 
 	public ResponseEntity<Void> lastLoginDate(
-			@ApiParam(value = "username of user for last login date update", required = true) @RequestBody final String username,
+			@Parameter(name = "username of user for last login date update", required = true) @RequestBody final String username,
 			@Context final HttpServletRequest httpRequest) {
 		try {
 			// Update user login date

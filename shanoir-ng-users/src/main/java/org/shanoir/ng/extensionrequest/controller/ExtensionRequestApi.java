@@ -19,29 +19,29 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-07T15:52:25.736Z")
 
-@Api(value = "extensionrequest", description = "the extensionrequest API")
+@Tag(name = "extensionrequest", description = "the extensionrequest API")
 @RequestMapping("/extensionrequest")
 public interface ExtensionRequestApi {
 
-	@ApiOperation(value = "", notes = "Requests a date extension for current user", response = Void.class, tags = {})
+	@Operation(summary = "", description = "Requests a date extension for current user")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "request ok", response = Void.class),
-			@ApiResponse(code = 400, message = "user not found", response = Void.class),
-			@ApiResponse(code = 406, message = "user enabled or already under extension", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+			@ApiResponse(responseCode = "200", description = "request ok"),
+			@ApiResponse(responseCode = "400", description = "user not found"),
+			@ApiResponse(responseCode = "406", description = "user enabled or already under extension"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<Void> requestExtension(
-			@ApiParam(value = "request motivation", required = true) @RequestBody ExtensionRequestInfo requestInfo);
+			@Parameter(name = "request motivation", required = true) @RequestBody ExtensionRequestInfo requestInfo);
 
 }
