@@ -108,12 +108,12 @@ public class StudyApiControllerTest {
 	private ShanoirEventService eventService;
 
 	@TempDir
-	public File tempFolder;
+	public static File tempFolder;
 	
 	public static String tempFolderPath;
 	
 	@BeforeAll
-	public void beforeAll() {
+	public static void beforeAll() {
 		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
 	    System.setProperty("studies-data", tempFolderPath);
 	}

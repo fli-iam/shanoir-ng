@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -53,6 +52,7 @@ import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -66,7 +66,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author msimon
  * 
  */
-
+@SpringBootTest
 @ActiveProfiles("test")
 public class StudyServiceTest {
 
@@ -103,17 +103,10 @@ public class StudyServiceTest {
 
 	@TempDir
 	public File tempFolder;
-	
-	public static String tempFolderPath;
-
-	@BeforeAll
-	public void beforeAll() {
-		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-	}
 
 	@BeforeEach
 	public void setup() {
-	    ReflectionTestUtils.setField(studyService, "dataDir", this.tempFolderPath);
+	    ReflectionTestUtils.setField(studyService, "dataDir", tempFolder.getAbsolutePath() + "/tmp/");
 
 		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
 		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(ModelsUtil.createStudy()));
@@ -169,7 +162,7 @@ public class StudyServiceTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
 	public void updateTest() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException, IOException {
 		// Also test protocol file path
-		File protocol = new File(tempFolderPath + "study-1/old.txt");
+		File protocol = new File(tempFolder.getAbsolutePath() + "/tmp/study-1/old.txt");
 
 		protocol.getParentFile().mkdirs();
 		protocol.createNewFile();
