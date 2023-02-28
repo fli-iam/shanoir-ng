@@ -23,7 +23,7 @@ import java.util.List;
 
 import javax.json.Json;
 import javax.json.stream.JsonParser;
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;

@@ -19,7 +19,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 
 import javax.annotation.Resource;
-import javax.mail.MessagingException;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
