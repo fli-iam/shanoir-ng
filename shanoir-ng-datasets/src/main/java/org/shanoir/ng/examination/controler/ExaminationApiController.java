@@ -65,7 +65,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class ExaminationApiController implements ExaminationApi {
@@ -99,7 +99,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<Void> deleteExamination(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
+			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
 					throws RestServiceException {
 		try {
 			// Delete extra data
@@ -126,7 +126,7 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<ExaminationDTO> findExaminationById(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
+			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId)
 					throws RestServiceException {
 		Examination examination = examinationService.findById(examinationId);
 		orderDatasetAcquisitions(examination);
@@ -147,7 +147,7 @@ public class ExaminationApiController implements ExaminationApi {
 	
 	@Override
 	public ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
-			@ApiParam(value = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable) {
+			@Parameter(name = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable) {
 		Page<Examination> examinations;
 
 		// Get examinations reachable by connected user
@@ -160,8 +160,8 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
 		
@@ -227,7 +227,7 @@ public class ExaminationApiController implements ExaminationApi {
 	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<ExaminationDTO> saveNewExamination(
-			@ApiParam(value = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
+			@Parameter(name = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException {
 		validate(result);
 		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
@@ -238,8 +238,8 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<Void> updateExamination(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
-			@ApiParam(value = "the examination to update", required = true) @RequestBody @Valid final ExaminationDTO examination,
+			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") final Long examinationId,
+			@Parameter(name = "the examination to update", required = true) @RequestBody @Valid final ExaminationDTO examination,
 			final BindingResult result) throws RestServiceException {
 		/* Update examination in db. */
 		try {
@@ -254,7 +254,7 @@ public class ExaminationApiController implements ExaminationApi {
 	}
 
 	@Override
-	public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+	public ResponseEntity<List<ExaminationDTO>> findExaminationsBySubjectId(@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		final List<Examination> examinations = examinationService.findBySubjectId(subjectId);
 		if (examinations.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -265,8 +265,8 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public ResponseEntity<Void> addExtraData(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
 		if (examinationService.addExtraData(examinationId, file) != null) {
 			return new ResponseEntity<>(HttpStatus.OK);
 		}
@@ -275,9 +275,9 @@ public class ExaminationApiController implements ExaminationApi {
 	
 	@Override
 	public ResponseEntity<Void> createExaminationAndAddExtraData(
-			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
-			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+			@Parameter(name = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
 		
 		Subject subject = subjectRepository.findByName(subjectName);
 		if (subject == null) {
@@ -313,8 +313,8 @@ public class ExaminationApiController implements ExaminationApi {
 
 	@Override
 	public void downloadExtraData(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
-			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
+			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
+			@Parameter(name = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
 		String filePath = this.examinationService.getExtraDataFilePath(examinationId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);

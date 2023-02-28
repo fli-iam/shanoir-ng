@@ -60,7 +60,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
@@ -87,7 +87,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Override
 	public ResponseEntity<Void> createNewDatasetAcquisition(
-			@ApiParam(value = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
+			@Parameter(name = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
 		try {
 			importerService.createAllDatasetAcquisition(importJob, KeycloakUtil.getTokenUserId());
 		} catch (ShanoirException e) {
@@ -99,7 +99,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) {
+	public ResponseEntity<Void> createNewEegDatasetAcquisition(@Parameter(name = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) {
 		importerService.createEegDataset(importJob);
 		importerService.cleanTempFiles(importJob.getWorkFolder());
 		return new ResponseEntity<Void>(HttpStatus.OK);
@@ -133,7 +133,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Override
 	public ResponseEntity<List<DatasetAcquisitionDTO>> findByStudyCard(
-			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
+			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
 		
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByStudyCard(studyCardId);
 		if (daList.isEmpty()) {
@@ -145,7 +145,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Override
 	public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
+			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
 		
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
 		daList.sort(new Comparator<DatasetAcquisition>() {
@@ -165,7 +165,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Override
 	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
-			@ApiParam(value = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
+			@Parameter(name = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
 		
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
 		
@@ -186,7 +186,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Override
 	public ResponseEntity<Void> deleteDatasetAcquisition(
-			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
+			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
 			throws RestServiceException {
 
 		try {
@@ -202,7 +202,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Override
 	public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
-			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId) {
+			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId) {
 		
 		final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
 		if (datasetAcquisition == null) {
@@ -224,8 +224,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Override
 	public ResponseEntity<Void> updateDatasetAcquisition(
-			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-			@ApiParam(value = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition,
+			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+			@Parameter(name = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);

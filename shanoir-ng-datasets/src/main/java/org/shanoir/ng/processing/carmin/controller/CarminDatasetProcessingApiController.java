@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 /**
  * @author KhalilKes
@@ -69,7 +69,7 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
     @Override
     public ResponseEntity<CarminDatasetProcessing> findCarminDatasetProcessingByIdentifier(
-            @ApiParam(value = "id of the dataset processing", required = true) @RequestParam("identifier") String identifier) {
+            @Parameter(name = "id of the dataset processing", required = true) @RequestParam("identifier") String identifier) {
 
         final Optional<CarminDatasetProcessing> carminDatasetProcessing = carminDatasetProcessingService.findByIdentifier(identifier);
         if (!carminDatasetProcessing.isPresent()) {
@@ -81,8 +81,8 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
     @Override
     public ResponseEntity<Void> updateCarminDatasetProcessing(
-            @ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
-            @ApiParam(value = "dataset processing to update", required = true) @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing,
+            @Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
+            @Parameter(name = "dataset processing to update", required = true) @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing,
             final BindingResult result) throws RestServiceException {
 
         validate(result);

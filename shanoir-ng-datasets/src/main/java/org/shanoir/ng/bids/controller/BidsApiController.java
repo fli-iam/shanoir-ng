@@ -35,7 +35,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class BidsApiController implements BidsApi {
@@ -64,16 +64,16 @@ public class BidsApiController implements BidsApi {
 
 	@Override
 	public ResponseEntity<Void> generateBIDSByStudyId(
-    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    		@Parameter(name = "id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@Parameter(name = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
 		bidsService.exportAsBids(studyId, studyName);
 		return ResponseEntity.ok().build();
 	}
 
 	@Override
     public void exportBIDSFile(
-    		@ApiParam(value = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, HttpServletResponse response) throws RestServiceException, IOException {
+    		@Parameter(name = "Id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@Parameter(name = "file path") @Valid @RequestParam(value = "filePath", required = true) String filePath, HttpServletResponse response) throws RestServiceException, IOException {
 		// Check filePath too
 		// /var/datasets-data/bids-data/stud-1_NATIVE
 		if (!filePath.startsWith("/var/datasets-data/bids-data/stud-" + studyId)) {
@@ -136,7 +136,7 @@ public class BidsApiController implements BidsApi {
 
 	@Override
 	public ResponseEntity<BidsElement> getBIDSStructureByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws RestServiceException, IOException {
 
 		BidsElement studyBidsElement = new BidsFolder("Error while retrieving the study bids structure, please reload the page");

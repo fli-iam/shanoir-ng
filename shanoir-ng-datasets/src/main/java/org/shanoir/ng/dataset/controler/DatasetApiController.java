@@ -42,9 +42,6 @@ import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -73,7 +70,6 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -82,7 +78,6 @@ import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -102,7 +97,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriUtils;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @Controller
 public class DatasetApiController implements DatasetApi {
@@ -184,7 +183,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Void> deleteDataset(
-			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId)
+			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId)
 					throws RestServiceException {
 		try {
 			datasetService.deleteById(datasetId);
@@ -199,7 +198,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Void> deleteDatasets(
-			@ApiParam(value = "ids of the datasets", required=true) @Valid
+			@Parameter(name = "ids of the datasets", required=true) @Valid
 			@RequestBody(required = true) List<Long> datasetIds)
 					throws RestServiceException {
 		try {
@@ -212,7 +211,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<DatasetAndProcessingsDTOInterface> findDatasetById(
-			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) {
+			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId) {
 
 		final Dataset dataset = datasetService.findById(datasetId);
 
@@ -232,8 +231,8 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Void> updateDataset(
-			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
-			@ApiParam(value = "study to update", required = true) @Valid @RequestBody final Dataset dataset,
+			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
+			@Parameter(name = "study to update", required = true) @Valid @RequestBody final Dataset dataset,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
@@ -267,7 +266,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@Parameter(name = "id of the subject", required = true) @PathVariable("acquisitionId") Long acquisitionId) {
 		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -277,7 +276,7 @@ public class DatasetApiController implements DatasetApi {
 	}
 	
 	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetsByStudycardId(@ApiParam(value = "id of the studycard", required = true) @PathVariable("studycardId") Long studycardId) {
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByStudycardId(@Parameter(name = "id of the studycard", required = true) @PathVariable("studycardId") Long studycardId) {
 		List<Dataset> datasets = datasetService.findByStudycard(studycardId);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -288,7 +287,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		
 		final List<Examination> examinations = examinationService.findByStudyId(studyId);
 		if (examinations.isEmpty()) {
@@ -308,15 +307,15 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<List<Long>> findDatasetIdsBySubjectIdStudyId(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
 		return new ResponseEntity<>(datasets.stream().map(Dataset::getId).collect(Collectors.toList()), HttpStatus.OK);
 	}
 
 	public ResponseEntity<List<DatasetDTO>> findDatasetsBySubjectIdStudyId(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		List<Dataset> datasets = getBySubjectStudy(subjectId, studyId);
 		return new ResponseEntity<List<DatasetDTO>>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 	}
@@ -338,9 +337,9 @@ public class DatasetApiController implements DatasetApi {
 	
 	@Override
 	public void downloadDatasetById(
-			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
-			@ApiParam(value = "Dowloading nifti, decide the nifti converter id") final Long converterId,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM)
+			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
+			@Parameter(name = "Dowloading nifti, decide the nifti converter id") final Long converterId,
+			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
 			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response)
 					throws RestServiceException, IOException {
 
@@ -462,7 +461,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<String> getDicomMetadataByDatasetId(
-    		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
+    		@Parameter(name = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
 		
 		final Dataset dataset = datasetService.findById(datasetId);
 		List<URL> pathURLs = new ArrayList<>();
@@ -474,7 +473,7 @@ public class DatasetApiController implements DatasetApi {
 		}
 	}
 	
-	public ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) {
+	public ResponseEntity<Void> createProcessedDataset(@Parameter(name = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) {
 		importerService.createProcessedDataset(importJob);
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
 		importerService.cleanTempFiles(originalNiftiName.getParent());
@@ -483,9 +482,9 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public void massiveDownloadByDatasetIds(
-			@ApiParam(value = "ids of the datasets", required=true) @Valid
+			@Parameter(name = "ids of the datasets", required=true) @Valid
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg, BIDS", defaultValue = DCM) @Valid
+			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException {
 		// STEP 0: Check data integrity
 		if (datasetIds == null || datasetIds.isEmpty()) {
@@ -506,9 +505,9 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public void massiveDownloadByStudyId(
-			@ApiParam(value = "id of the study", required=true) @Valid
+			@Parameter(name = "id of the study", required=true) @Valid
 			@RequestParam(value = "studyId", required = true) Long studyId,
-			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg, BIDS", defaultValue = DCM) @Valid
+			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue=DCM) String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
 		// STEP 0: Check data integrity
 		if (studyId == null) {
@@ -780,8 +779,6 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	/**
-=======
->>>>>>> develop
 	 * Zip a single file
 	 * 
 	 * @param sourceFile
@@ -887,13 +884,13 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<ByteArrayResource> downloadStatistics(
-			@ApiParam(value = "Study name including regular expression", required=false) @Valid
+			@Parameter(name = "Study name including regular expression", required=false) @Valid
 			@RequestParam(value = "studyNameInRegExp", required = false) String studyNameInRegExp,
-			@ApiParam(value = "Study name excluding regular expression", required=false) @Valid
+			@Parameter(name = "Study name excluding regular expression", required=false) @Valid
 			@RequestParam(value = "studyNameOutRegExp", required = false) String studyNameOutRegExp,
-			@ApiParam(value = "Subject name including regular expression", required=false) @Valid
+			@Parameter(name = "Subject name including regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameInRegExp", required = false) String subjectNameInRegExp,
-			@ApiParam(value = "Subject name excluding regular expression", required=false) @Valid
+			@Parameter(name = "Subject name excluding regular expression", required=false) @Valid
 			@RequestParam(value = "subjectNameOutRegExp", required = false) String subjectNameOutRegExp
 			) throws RestServiceException, IOException {
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
