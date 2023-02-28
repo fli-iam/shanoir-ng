@@ -58,8 +58,8 @@ public class QualityCardServiceImpl implements QualityCardService {
     }
 
     @Override
-    public QualityCard save(final QualityCard qualityCard) throws MicroServiceCommunicationException {
-        QualityCard savedQualityCard = qualityCardRepository.save(qualityCard);
+    public QualityCard save(final QualityCard card) throws MicroServiceCommunicationException {
+        QualityCard savedQualityCard = qualityCardRepository.save(card);
         return savedQualityCard;
     }
 
@@ -69,10 +69,10 @@ public class QualityCardServiceImpl implements QualityCardService {
     }
 
     @Override
-    public QualityCard update(final QualityCard qualityCard) throws EntityNotFoundException, MicroServiceCommunicationException {
-        final QualityCard qualityCardDb = qualityCardRepository.findById(qualityCard.getId()).orElse(null);
-        if (qualityCardDb == null) throw new EntityNotFoundException(QualityCard.class, qualityCard.getId());
-        updateQualityCardValues(qualityCardDb, qualityCard);
+    public QualityCard update(final QualityCard card) throws EntityNotFoundException, MicroServiceCommunicationException {
+        final QualityCard qualityCardDb = qualityCardRepository.findById(card.getId()).orElse(null);
+        if (qualityCardDb == null) throw new EntityNotFoundException(QualityCard.class, card.getId());
+        updateQualityCardValues(qualityCardDb, card);
         qualityCardRepository.save(qualityCardDb);
         return qualityCardDb;
     }

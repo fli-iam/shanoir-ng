@@ -19,7 +19,7 @@ ALTER TABLE quality_examination_rule ADD CONSTRAINT FK8bavfrsgqwil7aei15l00dg6g 
 -- study_card_condition
 ALTER TABLE study_card_condition MODIFY dicom_tag int(11) NULL;
 ALTER TABLE study_card_condition ADD COLUMN shanoir_field int(11) NULL;
-ALTER TABLE study_card_condition ADD COLUMN scope varchar(63) NOT NULL;
+ALTER TABLE study_card_condition ADD COLUMN scope varchar(31) NOT NULL;
 ALTER TABLE study_card_condition ADD COLUMN cardinality int(11) NULL;
 UPDATE study_card_condition SET scope = 'StudyCardDICOMCondition';
 

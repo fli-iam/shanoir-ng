@@ -29,9 +29,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </span>
 </span>
 <ng-container *ngIf="mode != 'view' && init">
-    <ng-container *ngIf="condition.scope == 'AcquisitionMetadataConditionOnDatasets' 
-            || condition.scope == 'ExaminationMetadataConditionOnAcquisitions' 
-            || condition.scope == 'ExaminationMetadataConditionOnDatasets'">
+    <ng-container *ngIf="condition.scope == 'AcqMetadataCondOnDatasets' 
+            || condition.scope == 'ExamMetadataCondOnAcq' 
+            || condition.scope == 'ExamMetadataCondOnDatasets'">
         <select-box
             class="cardinality-type auto-width"
             [(ngModel)]="cardinalityType"

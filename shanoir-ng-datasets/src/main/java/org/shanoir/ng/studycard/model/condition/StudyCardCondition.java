@@ -45,11 +45,11 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = StudyCardDICOMCondition.class, name = "StudyCardDICOMCondition"),
-    @JsonSubTypes.Type(value = ExaminationMetadataConditionOnDatasets.class, name = "ExaminationMetadataConditionOnDatasets"),
-    @JsonSubTypes.Type(value = ExaminationMetadataConditionOnAcquisitions.class, name = "ExaminationMetadataConditionOnAcquisitions"),
-    @JsonSubTypes.Type(value = DatasetMetadataConditionOnDataset.class, name = "DatasetMetadataConditionOnDataset"),
-    @JsonSubTypes.Type(value = AcquisitionMetadataConditionOnDatasets.class, name = "AcquisitionMetadataConditionOnDatasets"),
-    @JsonSubTypes.Type(value = AcquisitionMetadataConditionOnAcquisition.class, name = "AcquisitionMetadataConditionOnAcquisition")})
+    @JsonSubTypes.Type(value = ExamMetadataCondOnDatasets.class, name = "ExamMetadataCondOnDatasets"),
+    @JsonSubTypes.Type(value = ExamMetadataCondOnAcq.class, name = "ExamMetadataCondOnAcq"),
+    @JsonSubTypes.Type(value = DatasetMetadataCondOnDataset.class, name = "DatasetMetadataCondOnDataset"),
+    @JsonSubTypes.Type(value = AcqMetadataCondOnDatasets.class, name = "AcqMetadataCondOnDatasets"),
+    @JsonSubTypes.Type(value = AcqMetadataCondOnAcq.class, name = "AcqMetadataCondOnAcq")})
 public abstract class StudyCardCondition extends AbstractEntity {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);

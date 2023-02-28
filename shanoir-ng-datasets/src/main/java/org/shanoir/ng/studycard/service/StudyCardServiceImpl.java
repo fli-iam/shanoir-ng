@@ -58,9 +58,9 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
-	public StudyCard save(final StudyCard studyCard) throws MicroServiceCommunicationException {
-		studyCard.setLastEditTimestamp(System.currentTimeMillis());
-		StudyCard savedStudyCard = studyCardRepository.save(studyCard);
+	public StudyCard save(final StudyCard card) throws MicroServiceCommunicationException {
+	    card.setLastEditTimestamp(System.currentTimeMillis());
+		StudyCard savedStudyCard = studyCardRepository.save(card);
 		return savedStudyCard;
 	}
 
@@ -70,10 +70,10 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
-	public StudyCard update(final StudyCard studyCard) throws EntityNotFoundException, MicroServiceCommunicationException {
-		final StudyCard studyCardDb = studyCardRepository.findById(studyCard.getId()).orElse(null);
-		if (studyCardDb == null) throw new EntityNotFoundException(StudyCard.class, studyCard.getId());
-		updateStudyCardValues(studyCardDb, studyCard);
+	public StudyCard update(final StudyCard card) throws EntityNotFoundException, MicroServiceCommunicationException {
+		final StudyCard studyCardDb = studyCardRepository.findById(card.getId()).orElse(null);
+		if (studyCardDb == null) throw new EntityNotFoundException(StudyCard.class, card.getId());
+		updateStudyCardValues(studyCardDb, card);
 		studyCardDb.setLastEditTimestamp(System.currentTimeMillis());
 		studyCardRepository.save(studyCardDb);
 		return studyCardDb;

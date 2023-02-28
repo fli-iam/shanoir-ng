@@ -29,11 +29,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * Condition valid for the given DatasetAcquisition if every of it's Datasets metadata fulfill the condition
  */
 @Entity
-@DiscriminatorValue("DatasetMetadataConditionOnDataset")
-@JsonTypeName("DatasetMetadataConditionOnDataset")
-public class DatasetMetadataConditionOnDataset extends StudyCardMetadataCondition<Dataset>{
+@DiscriminatorValue("DatasetMetadataCondOnDataset")
+@JsonTypeName("DatasetMetadataCondOnDataset")
+public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dataset>{
 	
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetMetadataConditionOnDataset.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetMetadataCondOnDataset.class);
 	
 	@Override
     public DatasetMetadataField getShanoirField() {

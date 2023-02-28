@@ -39,8 +39,8 @@ import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.ExaminationData;
-import org.shanoir.ng.studycard.model.condition.ExaminationMetadataConditionOnAcquisitions;
-import org.shanoir.ng.studycard.model.condition.ExaminationMetadataConditionOnDatasets;
+import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnAcq;
+import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
 import org.slf4j.Logger;
@@ -133,10 +133,10 @@ public class QualityExaminationRule extends AbstractEntity {
             boolean fulfilled = true;
             if (condition instanceof StudyCardDICOMCondition) {
                 fulfilled = ((StudyCardDICOMCondition) condition).fulfilled(dicomAttributes, msg);
-            } else if (condition instanceof ExaminationMetadataConditionOnAcquisitions) {
-                fulfilled = ((ExaminationMetadataConditionOnAcquisitions) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
-            } else if (condition instanceof ExaminationMetadataConditionOnDatasets) {
-                fulfilled = ((ExaminationMetadataConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
+            } else if (condition instanceof ExamMetadataCondOnAcq) {
+                fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
+            } else if (condition instanceof ExamMetadataCondOnDatasets) {
+                fulfilled = ((ExamMetadataCondOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }
@@ -189,9 +189,9 @@ public class QualityExaminationRule extends AbstractEntity {
         private int priority(StudyCardCondition condition) {
             if (condition instanceof StudyCardDICOMCondition) {
                 return 1;
-            } else if (condition instanceof ExaminationMetadataConditionOnAcquisitions) {
+            } else if (condition instanceof ExamMetadataCondOnAcq) {
                 return 3;
-            } else if (condition instanceof ExaminationMetadataConditionOnDatasets) {
+            } else if (condition instanceof ExamMetadataCondOnDatasets) {
                 return 2;
             } else {
                 return 0;

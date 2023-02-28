@@ -21,7 +21,7 @@ import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.studycard.model.assignment.DatasetAssignment;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
-import org.shanoir.ng.studycard.model.condition.DatasetMetadataConditionOnDataset;
+import org.shanoir.ng.studycard.model.condition.DatasetMetadataCondOnDataset;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
 
@@ -47,8 +47,8 @@ public class DatasetRule extends StudyCardRule<Dataset> {
         for (StudyCardCondition condition : getConditions()) {
             if (condition instanceof StudyCardDICOMCondition) {
                 fulfilled &= ((StudyCardDICOMCondition) condition).fulfilled(dicomAttributes);
-            } else if (condition instanceof DatasetMetadataConditionOnDataset) {
-                fulfilled &= ((DatasetMetadataConditionOnDataset) condition).fulfilled(dataset);
+            } else if (condition instanceof DatasetMetadataCondOnDataset) {
+                fulfilled &= ((DatasetMetadataCondOnDataset) condition).fulfilled(dataset);
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }

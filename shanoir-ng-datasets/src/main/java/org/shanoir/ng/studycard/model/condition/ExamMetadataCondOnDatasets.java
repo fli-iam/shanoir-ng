@@ -20,8 +20,9 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 import org.apache.commons.lang3.StringUtils;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
+import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,44 +33,48 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * Condition valid for the given DatasetAcquisition if every of it's Datasets metadata fulfill the condition
  */
 @Entity
-@DiscriminatorValue("ExaminationMetadataConditionOnAcquisitions")
-@JsonTypeName("ExaminationMetadataConditionOnAcquisitions")
-public class ExaminationMetadataConditionOnAcquisitions extends StudyCardMetadataConditionWithCardinality<DatasetAcquisition>{
+@DiscriminatorValue("ExamMetadataCondOnDatasets")
+@JsonTypeName("ExamMetadataCondOnDatasets")
+public class ExamMetadataCondOnDatasets extends StudyCardMetadataConditionWithCardinality<Dataset>{
 	
-	private static final Logger LOG = LoggerFactory.getLogger(ExaminationMetadataConditionOnAcquisitions.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ExamMetadataCondOnDatasets.class);
 
 	@Override
-    public DatasetAcquisitionMetadataField getShanoirField() {
-        return DatasetAcquisitionMetadataField.getEnum(shanoirField);
+    public DatasetMetadataField getShanoirField() {
+        return DatasetMetadataField.getEnum(shanoirField);
     }
 
     @Override // Don't know why eclipse can't take DatasetAcquisitionMetadataField as input type
-    public void setShanoirField(MetadataFieldInterface<DatasetAcquisition>  field) {
+    public void setShanoirField(MetadataFieldInterface<Dataset> field) {
         shanoirField = field.getId();
     }
-    
+	
     public boolean fulfilled(List<DatasetAcquisition> acquisitions) {
         return fulfilled(acquisitions, null);
     }
-	
+    
     public boolean fulfilled(List<DatasetAcquisition> acquisitions, StringBuffer errorMsg) {
         if (acquisitions == null) throw new IllegalArgumentException("datasets can not be null");
-        DatasetAcquisitionMetadataField field = this.getShanoirField();
+        DatasetMetadataField field = this.getShanoirField();
         if (field == null) throw new IllegalArgumentException("field can not be null");
         int nbOk = 0; int total = 0;
         for (DatasetAcquisition acquisition : acquisitions) {
-            total++;
-            String valueFromDb = field.get(acquisition);
-            if (valueFromDb != null) {
-                // get all possible values, that can fulfill the condition
-                for (String value : this.getValues()) {
-                    if (textualCompare(this.getOperation(), valueFromDb, value)) {
-                        LOG.info("condition fulfilled: ds.name=" + valueFromDb + ", value=" + value);
-                        nbOk++;
-                        break;
-                    } 
+            if (acquisition.getDatasets() != null) {
+                for (Dataset dataset : acquisition.getDatasets()) {
+                    total++;
+                    String valueFromDb = field.get(dataset);
+                    if (valueFromDb != null) {
+                        // get all possible values, that can fulfill the condition
+                        for (String value : this.getValues()) {
+                            if (textualCompare(this.getOperation(), valueFromDb, value)) {
+                                LOG.info("condition fulfilled: ds.name=" + valueFromDb + ", value=" + value);
+                                nbOk++;
+                                break;
+                            } 
+                        }
+                    }                
                 }
-            }                
+            }
         }
         boolean complies = cardinalityComplies(nbOk, total);
         if (!complies) {
@@ -84,8 +89,8 @@ public class ExaminationMetadataConditionOnAcquisitions extends StudyCardMetadat
             errorMsg.append("condition [" + toString() + "] succeed");
         }
         return complies;
-    } 
-
+    }
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -98,7 +103,7 @@ public class ExaminationMetadataConditionOnAcquisitions extends StudyCardMetadat
                 .append(getCardinality())
                 .append(" of the ");
         }
-        sb.append("DatasetAcquisition metadata field '").append(getShanoirField().name())
+        sb.append("Dataset metadata field '").append(getShanoirField().name())
             .append("' ").append(getOperation().name())
             .append(" ")
             .append(StringUtils.join(getValues(), " or "));        

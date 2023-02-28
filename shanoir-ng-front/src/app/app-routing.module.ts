@@ -551,6 +551,12 @@ let routes: Routes = [
 		canActivate: [AuthAdminOrExpertGuard],
 	},
     {
+		path: 'study-card/create',
+		component: StudyCardComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+    {
 		path: 'quality-card',
 		redirectTo: 'quality-card/list',
 	},

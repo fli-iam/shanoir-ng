@@ -81,19 +81,19 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             if (this.ruleScope == 'Dataset') {
                 this.conditionTypeOptions = [
                     new Option('StudyCardDICOMCondition', 'the DICOM field'),
-                    new Option('DatasetMetadataConditionOnDataset', 'the dataset field'),
+                    new Option('DatasetMetadataCondOnDataset', 'the dataset field'),
                 ];
             } else if (this.ruleScope == 'DatasetAcquisition') {
                 this.conditionTypeOptions = [
                     new Option('StudyCardDICOMCondition', 'the DICOM field'),
-                    new Option('AcquisitionMetadataConditionOnAcquisition', 'the acquisition field'),
-                    new Option('AcquisitionMetadataConditionOnDatasets', 'the dataset field'),
+                    new Option('AcqMetadataCondOnAcq', 'the acquisition field'),
+                    new Option('AcqMetadataCondOnDatasets', 'the dataset field'),
                 ];
             } else if (this.ruleScope == 'Examination') {
                 this.conditionTypeOptions = [
                     new Option('StudyCardDICOMCondition', 'the DICOM field'),
-                    new Option('ExaminationMetadataConditionOnAcquisitions', 'the acquisition field'),
-                    new Option('ExaminationMetadataConditionOnDatasets', 'the dataset field'),
+                    new Option('ExamMetadataCondOnAcq', 'the acquisition field'),
+                    new Option('ExamMetadataCondOnDatasets', 'the dataset field'),
                 ];
             }
         }

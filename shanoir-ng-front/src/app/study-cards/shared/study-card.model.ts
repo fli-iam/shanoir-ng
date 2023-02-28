@@ -103,7 +103,7 @@ export class DicomTag {
 
 export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'SMALLER_THAN' | 'BIGGER_THAN';
 
-export type ConditionScope = 'StudyCardDICOMCondition' | 'AcquisitionMetadataConditionOnAcquisition' | 'AcquisitionMetadataConditionOnDatasets' | 
-    'DatasetMetadataConditionOnDataset' | 'ExaminationMetadataConditionOnAcquisitions' | 'ExaminationMetadataConditionOnDatasets';
+export type ConditionScope = 'StudyCardDICOMCondition' | 'AcqMetadataCondOnAcq' | 'AcqMetadataCondOnDatasets' | 
+    'DatasetMetadataCondOnDataset' | 'ExamMetadataCondOnAcq' | 'ExamMetadataCondOnDatasets';
 
 export type MetadataFieldScope = 'Dataset' | 'DatasetAcquisition';

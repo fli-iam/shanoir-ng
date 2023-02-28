@@ -23,8 +23,8 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.studycard.model.assignment.DatasetAcquisitionAssignment;
 import org.shanoir.ng.studycard.model.assignment.DatasetAssignment;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
-import org.shanoir.ng.studycard.model.condition.AcquisitionMetadataConditionOnAcquisition;
-import org.shanoir.ng.studycard.model.condition.AcquisitionMetadataConditionOnDatasets;
+import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnAcq;
+import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
 
@@ -50,10 +50,10 @@ public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
         for (StudyCardCondition condition : getConditions()) {
             if (condition instanceof StudyCardDICOMCondition) {
                 fulfilled &= ((StudyCardDICOMCondition) condition).fulfilled(dicomAttributes);
-            } else if (condition instanceof AcquisitionMetadataConditionOnAcquisition) {
-                fulfilled &= ((AcquisitionMetadataConditionOnAcquisition) condition).fulfilled(acquisition);
-            } else if (condition instanceof AcquisitionMetadataConditionOnDatasets) {
-                fulfilled &= ((AcquisitionMetadataConditionOnDatasets) condition).fulfilled(acquisition.getDatasets());
+            } else if (condition instanceof AcqMetadataCondOnAcq) {
+                fulfilled &= ((AcqMetadataCondOnAcq) condition).fulfilled(acquisition);
+            } else if (condition instanceof AcqMetadataCondOnDatasets) {
+                fulfilled &= ((AcqMetadataCondOnDatasets) condition).fulfilled(acquisition.getDatasets());
             } else {
                 throw new IllegalStateException("There might be an unimplemented condition type here. Condition class : " + condition.getClass());
             }

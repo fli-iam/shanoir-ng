@@ -56,11 +56,11 @@ CREATE TABLE study_card_condition (
 INSERT INTO study_card_condition
 	(id, shanoir_field, operation, scope, dicom_tag)
 VALUES 
-	(1,2,4,'AcquisitionMetadataConditionOnAcquisition', null),
-	(2,2,4,'AcquisitionMetadataConditionOnAcquisition', null),
-	(3,1573009,5,'AcquisitionMetadataConditionOnAcquisition', null),
-	(4,1573009,6,'AcquisitionMetadataConditionOnAcquisition', null),
-	(5,1573013,6,'AcquisitionMetadataConditionOnAcquisition', null);
+	(1,2,4,'AcqMetadataCondOnAcq', null),
+	(2,2,4,'AcqMetadataCondOnAcq', null),
+	(3,1573009,5,'AcqMetadataCondOnAcq', null),
+	(4,1573009,6,'AcqMetadataCondOnAcq', null),
+	(5,1573013,6,'AcqMetadataCondOnAcq', null);
 
 INSERT INTO study_card_condition_values
 	(value, study_card_condition_id)
