@@ -19,6 +19,7 @@
  */
 package org.shanoir.ng.solr.service;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,13 +86,13 @@ public class SolrServiceImpl implements SolrService {
 	@Transactional
 	@Override
 	public void addToIndex (final ShanoirSolrDocument document) {
-		solrRepository.save(document);
+		solrRepository.save(document, Duration.ZERO);
 	}
 
 	@Transactional
 	@Override
 	public void addAllToIndex (final List<ShanoirSolrDocument> documents) {
-		solrRepository.saveAll(documents);
+		solrRepository.saveAll(documents, Duration.ZERO);
 	}
 
 	@Transactional
@@ -154,7 +155,7 @@ public class SolrServiceImpl implements SolrService {
 
 		doc.setTags(tags);
 
-		solrRepository.save(doc);
+		solrRepository.save(doc, Duration.ZERO);
 	}
 
 	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas) {
