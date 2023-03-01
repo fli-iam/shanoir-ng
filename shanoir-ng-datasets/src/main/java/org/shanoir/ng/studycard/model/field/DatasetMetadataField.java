@@ -30,9 +30,9 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 	MODALITY_TYPE(1) {
 		@Override
 		public String get(Dataset dataset) {
-			if (dataset.getUpdatedMetadata() == null && dataset.getUpdatedMetadata().getDatasetModalityType() != null) {
+			if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getDatasetModalityType() != null) {
 				return dataset.getUpdatedMetadata().getDatasetModalityType().name();
-			} else if (dataset.getOriginMetadata() == null && dataset.getOriginMetadata().getDatasetModalityType() != null) {
+			} else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getDatasetModalityType() != null) {
                 return dataset.getOriginMetadata().getDatasetModalityType().name();
             }
 			else return null;
@@ -48,9 +48,9 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 	EXPLORED_ENTITY(6) {
 		@Override
 		public String get(Dataset dataset) {
-			if (dataset.getUpdatedMetadata() == null && dataset.getUpdatedMetadata().getExploredEntity() != null) {
+			if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getExploredEntity() != null) {
 				return dataset.getUpdatedMetadata().getExploredEntity().name();
-			} else if (dataset.getOriginMetadata() == null && dataset.getOriginMetadata().getExploredEntity() != null) {
+			} else if (dataset.getOriginMetadata() != null && dataset.getOriginMetadata().getExploredEntity() != null) {
                 return dataset.getOriginMetadata().getExploredEntity().name();
             }
 			return null;
@@ -102,9 +102,9 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 		public String get(Dataset dataset) {
 			if (dataset instanceof MrDataset) {
 				MrDataset mrDataset = (MrDataset) dataset;
-				if (mrDataset.getUpdatedMrMetadata() == null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
+				if (mrDataset.getUpdatedMrMetadata() != null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
 					return mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();	
-				} else if (mrDataset.getOriginMrMetadata() == null && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
+				} else if (mrDataset.getOriginMrMetadata() != null && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
                     return mrDataset.getOriginMrMetadata().getMrDatasetNature().name();   
                 }		
 				return null;
