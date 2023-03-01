@@ -19,19 +19,15 @@ import java.util.List;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for examination.
  *
  * @author ifakhfakh
  */
-public interface ExaminationRepository extends PagingAndSortingRepository<Examination, Long>, ExaminationRepositoryCustom {
-
-
+public interface ExaminationRepository extends PagingAndSortingRepository<Examination, Long>, CrudRepository<Examination, Long>, ExaminationRepositoryCustom {
 
 	/**
 	 * Get a list of examinations for a subject.
