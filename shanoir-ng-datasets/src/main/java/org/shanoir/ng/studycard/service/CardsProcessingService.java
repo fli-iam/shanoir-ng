@@ -76,8 +76,7 @@ public class CardsProcessingService {
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
             if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && studyCard.getRules() != null) {
-                Dataset refDataset = acquisition.getDatasets().get(0);
-                Attributes dicomAttributes = downloader.getDicomAttributesForDataset(refDataset);
+                Attributes dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
                 changeInAtLeastOneAcquisition = studyCard.apply(acquisition, dicomAttributes);
             }
         }
@@ -100,9 +99,9 @@ public class CardsProcessingService {
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
 		    // For now, just take the first DICOM instance
 		    // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
-		    Attributes examinationDicomAttributes = downloader.getDicomAttributesForStudy(study);
 		    QualityCardResult result = new QualityCardResult();
 			for (Examination examination : study.getExaminations()) {
+			    Attributes examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
 				List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 				// today study cards are only used for MR modality
 				acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());

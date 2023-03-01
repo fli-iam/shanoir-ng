@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -257,17 +258,31 @@ public class WADODownloaderService {
     }
     
     public Attributes getDicomAttributesForStudy(Study study) {
+        long ts = new Date().getTime();
         Examination exam = getFirstIfExist(study.getExaminations());
         if (exam == null) return null;
-        DatasetAcquisition acquisition = getFirstIfExist(exam.getDatasetAcquisitions());
+        Attributes result = getDicomAttributesForExamination(exam);
+        LOG.error("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
+        return result;
+    }
+    
+
+    public Attributes getDicomAttributesForExamination(Examination examination) {
+        long ts = new Date().getTime();
+        DatasetAcquisition acquisition = getFirstIfExist(examination.getDatasetAcquisitions());
         if (acquisition == null) return null;
-        return getDicomAttributesForAcquisition(acquisition);
+        Attributes result = getDicomAttributesForAcquisition(acquisition);
+        LOG.error("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
+        return result;
     }
 
     public Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) {
-        Dataset first = getFirstIfExist(acquisition.getDatasets());
-        if (first != null) return getDicomAttributesForDataset(first);
-        else return null;
+        long ts = new Date().getTime();
+        Dataset ds = getFirstIfExist(acquisition.getDatasets());
+        if (ds == null) return null;
+        Attributes result = getDicomAttributesForDataset(ds);
+        LOG.error("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
+        return result;
     }
     
     private String attributesToJSON(Attributes attributes) {
