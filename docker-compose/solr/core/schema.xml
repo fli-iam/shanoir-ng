@@ -449,6 +449,7 @@
   <field name="datasetName" type="lowercase"/>
   <field name="datasetNature" type="lowercase"/>
   <field name="datasetType" type="lowercase"/>
+  <field name="examinationId" type="plong"/>
   <field name="examinationComment" type="lowercase"/>
   <field name="examinationDate" type="pdate"/>
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
