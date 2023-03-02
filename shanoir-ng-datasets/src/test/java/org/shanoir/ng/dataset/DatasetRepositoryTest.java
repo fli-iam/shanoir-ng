@@ -14,33 +14,28 @@
 
 package org.shanoir.ng.dataset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrQualityProcedureType;
 import org.shanoir.ng.dataset.modality.PetDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
-
-import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper;
-import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 
 /**
  * Tests for repository 'dataset'.
@@ -48,7 +43,6 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
 @WebAppConfiguration
 @DataJpaTest
 @ActiveProfiles("test")
@@ -59,11 +53,6 @@ public class DatasetRepositoryTest {
  
 	@MockBean
 	private AuthenticationManager authenticationManager;
-	@MockBean
-	private DocumentationPluginsBootstrapper documentationPluginsBootstrapper;
-	@MockBean
-	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
-	
 	
 	/**
 	 * Test the hierarchy strategy :

@@ -15,15 +15,14 @@
 package org.shanoir.ng.datasetacquisition;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.utils.Utils;
@@ -38,7 +37,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import org.apache.commons.math3.util.Pair;
 
@@ -51,7 +49,7 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
  * @author ifakhfakh
  *
  */
-@RunWith(SpringRunner.class)
+
 @DataJpaTest
 @ActiveProfiles("test")
 public class DatasetAcquisitionRepositoryTest {

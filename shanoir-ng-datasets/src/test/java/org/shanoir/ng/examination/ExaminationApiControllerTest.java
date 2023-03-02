@@ -14,10 +14,10 @@
 
 package org.shanoir.ng.examination;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -28,12 +28,9 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.bids.service.BIDSService;
@@ -47,7 +44,6 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -57,6 +53,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
@@ -64,7 +61,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -78,7 +74,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author ifakhfakh
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = ExaminationApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration()
@@ -86,18 +82,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ActiveProfiles("test")
 public class ExaminationApiControllerTest {
 
-	@ClassRule
-	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	@TempDir
+	public File tempFolder;
 	
-	public static String tempFolderPath;
+	public String tempFolderPath;
 
 	@MockBean
 	private DicomSRImporterService dicomSRImporterService;
 
-	@BeforeClass
-	public static void beforeClass() {
-		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
-
+	@BeforeEach
+	public void beforeClass() {
+		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
 	    System.setProperty("datasets-data", tempFolderPath);
 	}
 
@@ -138,7 +133,7 @@ public class ExaminationApiControllerTest {
 	@Autowired
 	ObjectMapper objectMapper;
 
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException {
 		doNothing().when(examinationServiceMock).deleteById(1L);
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));

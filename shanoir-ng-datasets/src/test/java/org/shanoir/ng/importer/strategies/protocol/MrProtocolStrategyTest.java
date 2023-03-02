@@ -15,10 +15,9 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.io.DicomInputStream;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
@@ -41,7 +40,7 @@ public class MrProtocolStrategyTest {
 	@InjectMocks
 	private MrProtocolStrategy mrProtocolStrategy;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 	}
 	
@@ -50,8 +49,8 @@ public class MrProtocolStrategyTest {
 		Attributes attributes = getAttributesFromFile("/1.3.12.2.1107.5.2.43.166066.2018042412210060639615964");
 		Serie serie = generateSerie(attributes);
 		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(attributes, serie);
-		Assert.assertTrue(mrProtocol.getNumberOfAverages().equals(1));
-		Assert.assertTrue(mrProtocol.getFilters().equals("77"));
+		Assertions.assertTrue(mrProtocol.getNumberOfAverages().equals(1));
+		Assertions.assertTrue(mrProtocol.getFilters().equals("77"));
 	}	
 
 //	@Test

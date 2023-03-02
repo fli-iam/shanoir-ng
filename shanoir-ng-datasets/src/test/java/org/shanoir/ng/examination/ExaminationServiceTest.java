@@ -18,10 +18,9 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -40,7 +39,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Examination service test.
@@ -48,7 +46,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author ifakhfakh
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class ExaminationServiceTest {
@@ -75,7 +73,7 @@ public class ExaminationServiceTest {
 	private SubjectRepository subjectService;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException {
 		// given(examinationRepository.findByStudyIdIn(Mockito.anyListOf(Long.class), Mockito.any(Pageable.class)))
 		// 		.willReturn(Arrays.asList(ModelsUtil.createExamination()));
@@ -95,8 +93,8 @@ public class ExaminationServiceTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void findByIdTest() throws ShanoirException {
 		final Examination examination = examinationService.findById(EXAMINATION_ID);
-		Assert.assertNotNull(examination);
-		Assert.assertTrue(ModelsUtil.EXAMINATION_NOTE.equals(examination.getNote()));
+		Assertions.assertNotNull(examination);
+		Assertions.assertTrue(ModelsUtil.EXAMINATION_NOTE.equals(examination.getNote()));
 	}
 
 	@Test
@@ -112,8 +110,8 @@ public class ExaminationServiceTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void updateTest() throws ShanoirException {
 		final Examination updatedExamination = examinationService.update(createExamination());
-		Assert.assertNotNull(updatedExamination);
-		Assert.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
+		Assertions.assertNotNull(updatedExamination);
+		Assertions.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
 
 		Mockito.verify(examinationRepository, Mockito.times(1)).save(Mockito.any(Examination.class));
 	}
@@ -126,8 +124,8 @@ public class ExaminationServiceTest {
 		updatedExam.setSubject(null);
 		final Examination updatedExamination = examinationService.update(updatedExam);
 
-		Assert.assertNotNull(updatedExamination);
-		Assert.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
+		Assertions.assertNotNull(updatedExamination);
+		Assertions.assertTrue(UPDATED_EXAMINATION_COMMENT.equals(updatedExamination.getComment()));
 		Mockito.verify(examinationRepository, Mockito.times(1)).save(Mockito.any(Examination.class));
 	}
 

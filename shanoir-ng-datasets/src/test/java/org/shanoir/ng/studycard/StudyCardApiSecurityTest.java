@@ -28,9 +28,8 @@ import java.util.Set;
 import jakarta.transaction.Transactional;
 
 import org.apache.commons.math3.util.Pair;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
@@ -60,7 +59,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.google.common.collect.Sets;
 
@@ -70,7 +68,7 @@ import com.google.common.collect.Sets;
  * @author jlouis
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class StudyCardApiSecurityTest {
@@ -111,7 +109,7 @@ public class StudyCardApiSecurityTest {
 //	@MockBean
 //	private WADODownloaderService downloader;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 
 	}
