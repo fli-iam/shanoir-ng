@@ -32,9 +32,8 @@ import java.util.Optional;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
@@ -86,7 +85,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author msimon
  *
  */
-
 @WebMvcTest(controllers = DatasetApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -119,8 +117,8 @@ public class DatasetApiControllerTest {
 	@MockBean(name = "controlerSecurityService")
 	private ControlerSecurityService controlerSecurityService;
 	
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
+    @TempDir
+    public File datasetFile;
 
 	@MockBean
 	private EegDatasetMapper eegDatasetMapper;
@@ -201,9 +199,6 @@ public class DatasetApiControllerTest {
 	public void testMassiveDownloadByStudyIdNifti() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
-		File datasetFile = testFolder.newFile("test.nii");
-		datasetFile.getParentFile().mkdirs();
-		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 
 		// Link it to datasetExpression in a dataset in a study
@@ -248,9 +243,6 @@ public class DatasetApiControllerTest {
 	public void testMassiveDownloadByDatasetsId() throws Exception {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
-		File datasetFile = testFolder.newFile("test.nii");
-		datasetFile.getParentFile().mkdirs();
-		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 
 		// Link it to datasetExpression in a dataset in a study
@@ -361,9 +353,6 @@ public class DatasetApiControllerTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text
-		File datasetFile = testFolder.newFile("test.nii");
-		datasetFile.getParentFile().mkdirs();
-		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 
 		// Link it to datasetExpression in a dataset in a study
