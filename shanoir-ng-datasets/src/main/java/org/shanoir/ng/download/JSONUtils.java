@@ -20,12 +20,8 @@ import java.math.BigInteger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JSONUtils {
-    
-    private static final Logger LOG = LoggerFactory.getLogger(JSONUtils.class);
     
     /**
      * Determine if two JSONObjects are similar.
@@ -59,7 +55,7 @@ public class JSONUtils {
                         return false;
                     }
                 } else if (valueThis instanceof JSONArray) {
-                    if (!(valueOther instanceof JSONObject) || !equals((JSONArray)valueThis, (JSONArray)valueOther)) {
+                    if (!(valueOther instanceof JSONArray) || !equals((JSONArray)valueThis, (JSONArray)valueOther)) {
                         return false;
                     }
                 } else if (valueThis instanceof Number && valueOther instanceof Number) {

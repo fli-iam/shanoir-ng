@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.studycard.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -97,10 +98,10 @@ public class CardsProcessingService {
 		if (study == null ) throw new IllegalArgumentException("study can't be null");
 		if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
-		    // For now, just take the first DICOM instance
-		    // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
 		    QualityCardResult result = new QualityCardResult();
 			for (Examination examination : study.getExaminations()) {
+			    // For now, just take the first DICOM instance
+			    // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
 			    Attributes examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
 				List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
 				// today study cards are only used for MR modality
