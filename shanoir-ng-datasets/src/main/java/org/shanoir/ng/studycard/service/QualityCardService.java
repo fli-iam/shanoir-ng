@@ -14,9 +14,14 @@
 
 package org.shanoir.ng.studycard.service;
 
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.QualityCard;
-import org.springframework.stereotype.Service;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface QualityCardService extends CardService<QualityCard> {
 
+    @Override
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#id, 'CAN_ADMINISTRATE'))")
+    void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
 }
