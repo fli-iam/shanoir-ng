@@ -49,8 +49,7 @@ CREATE TABLE study_card_condition (
     operation int(11) NOT NULL,
     shanoir_field int(11) DEFAULT NULL,
     scope varchar(65) NOT NULL,
-    PRIMARY KEY (id),
-    CONSTRAINT FKpi8v33fmd0wn64e06q8it8pkv FOREIGN KEY (rule_id) REFERENCES study_card_rule (id)
+    PRIMARY KEY (id)
 );
 
 INSERT INTO study_card_condition
