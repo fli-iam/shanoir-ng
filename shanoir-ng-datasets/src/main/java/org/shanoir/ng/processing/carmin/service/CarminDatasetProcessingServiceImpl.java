@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
  * @author KhalilKes
  */
 @Service
-public class CarminDatasetPorcessingServiceImpl extends BasicEntityServiceImpl<CarminDatasetProcessing>
+public class CarminDatasetProcessingServiceImpl extends BasicEntityServiceImpl<CarminDatasetProcessing>
                 implements CarminDatasetProcessingService {
 
         @Autowired

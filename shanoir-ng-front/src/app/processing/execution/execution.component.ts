@@ -215,6 +215,7 @@ export class ExecutionComponent implements OnInit {
         }
       }
     )
+
     /**
      * Init result location
      * The result directory should be dynamic

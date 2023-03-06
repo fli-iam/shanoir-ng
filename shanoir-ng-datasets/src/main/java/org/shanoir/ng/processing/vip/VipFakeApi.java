@@ -32,12 +32,12 @@ public interface VipFakeApi {
     "application/json" })
     public ResponseEntity<Pipeline> getProcessing(@ApiParam(value = "id of the pipeline", required = true) @PathVariable("pipelineId") String pipelineId) throws JsonMappingException, JsonProcessingException;
 
-    @PostMapping(value = "", produces = { "application/json" }, consumes = {
-    "application/json" })
-	public void launchProcessing();
-    
     @PostMapping(value = "/executions", produces = { "application/json" }, consumes = {
     "application/json" })
 	public ResponseEntity<Execution> createExecution(@ApiParam(value = "execution to create", required = true) @RequestBody Execution execution);
+
+    @GetMapping(value = "/executions/{identifier}/summary", produces = { "application/json" }, consumes = {
+    "application/json" })
+	public ResponseEntity<Execution> getExecution(@ApiParam(value = "identifier of the execution", required = true) @PathVariable("identifier") String identifier);
 
 }

@@ -2,8 +2,10 @@ package org.shanoir.ng.processing.vip;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.shanoir.ng.processing.carmin.model.Execution;
+import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,17 +76,17 @@ public class VipFakeApiController implements VipFakeApi {
     }
 
     public ResponseEntity<Execution> createExecution(@ApiParam(value = "execution to create", required = true) @RequestBody Execution execution) {
-    	execution.setIdentifier("localIdentifier");
-    	try {
-			LOG.error("We are saving execution, are we ?" + mapper.writeValueAsString(execution));
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-		}
+    	execution.setIdentifier("localIdentifier" + UUID.randomUUID());
     	return new ResponseEntity<Execution>(execution, HttpStatus.OK);
     }
 
-	public void launchProcessing() {
+	public ResponseEntity<Execution> getExecution(@ApiParam(value = "identifier of the execution", required = true) @PathVariable("identifier") String identifier) {
+		Execution execution = new Execution();
+		execution.setStatus(ExecutionStatus.FINISHED);
+		execution.setIdentifier(identifier);
 
+		execution.setResultsLocation("/tmp/temp/test.tar");
+		return new ResponseEntity<Execution>(execution, HttpStatus.OK);
 	}
 
 }

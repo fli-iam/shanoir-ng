@@ -121,7 +121,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAccountWillExpire", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 
 	}
 
@@ -141,7 +141,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAdminAccountExtensionRequest", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	@Override
@@ -184,7 +184,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyCreateUser", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 
 	}
 
@@ -205,7 +205,7 @@ public class EmailServiceImpl implements EmailService {
 			messageHelper.setText(content, true);
 		};
 		LOG.error("User asked for an account" + user.getUsername());
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 
 	}
 
@@ -223,7 +223,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyUserResetPassword", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	private String build(final String templateFile, final Map<String, Object> variables) {
@@ -250,7 +250,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAdminAccountRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	private void notifyAdminAccountRequestDenied(final User user) {
@@ -267,7 +267,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAdminAccountRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	private void notifyAdminExtensionRequestAccepted(final User user) {
@@ -284,7 +284,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAdminExtensionRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	private void notifyAdminExtensionRequestDenied(final User user) {
@@ -301,7 +301,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyAdminExtensionRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	private void notifyUserAccountRequestAccepted(final User user) {
@@ -317,7 +317,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyUserAccountRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	private void notifyUserAccountRequestDenied(final User user) {
@@ -334,7 +334,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyUserAccountRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	private void notifyUserExtensionRequestAccepted(final User user) {
@@ -351,7 +351,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyUserExtensionRequestAccepted", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	private void notifyUserExtensionRequestDenied(final User user) {
@@ -368,7 +368,7 @@ public class EmailServiceImpl implements EmailService {
 			final String content = build("notifyUserExtensionRequestDenied", variables);
 			messageHelper.setText(content, true);
 		};
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	@Override
@@ -414,7 +414,7 @@ public class EmailServiceImpl implements EmailService {
 			};
 			// Send the message
 			LOG.info("Sending import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
-			mailSender.send(messagePreparator);
+			// mailSender.send(messagePreparator);
 		}
 	}
 
@@ -451,7 +451,7 @@ public class EmailServiceImpl implements EmailService {
 			};
 			// Send the message
 			LOG.info("Sending FAIL import mail to {} for study {}", admin.getUsername(), generatedMail.getStudyId());
-			mailSender.send(messagePreparator);
+			// mailSender.send(messagePreparator);
 		}
 	}
 
@@ -486,7 +486,7 @@ public class EmailServiceImpl implements EmailService {
 				};
 				// Send the message
 				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), email.getStudyId());
-				mailSender.send(messagePreparator);
+				// mailSender.send(messagePreparator);
 			}
         }
 
@@ -507,7 +507,7 @@ public class EmailServiceImpl implements EmailService {
 			};
 			// Send the message
 			LOG.info("Sending user-added mail to {} for study {}", studyUser.getUsername(), email.getStudyId());
-			mailSender.send(messagePreparator);
+			// mailSender.send(messagePreparator);
 		}
 	}
 
@@ -537,7 +537,7 @@ public class EmailServiceImpl implements EmailService {
 				};
 				// Send the message
 				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), createdRequest.getStudyId());
-				mailSender.send(messagePreparator);
+				// mailSender.send(messagePreparator);
 			}
         } else {
         	LOG.error("No admins for this study. This should not happen.");
@@ -578,7 +578,7 @@ public class EmailServiceImpl implements EmailService {
 		};
 		// Send the message
 		LOG.error("User with mail {} invited in study {}", email.getInvitedMail(), email.getStudyId());
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 	/**
@@ -603,7 +603,7 @@ public class EmailServiceImpl implements EmailService {
 		};
 		// Send the message
 		LOG.info("Sending study-users REFUSED mail to {} for study {}", user.getUsername(), refusedRequest.getStudyId());
-		mailSender.send(messagePreparator);
+		// mailSender.send(messagePreparator);
 	}
 
 }
