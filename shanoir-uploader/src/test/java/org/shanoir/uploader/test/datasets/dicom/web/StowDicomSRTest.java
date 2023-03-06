@@ -21,7 +21,7 @@ public class StowDicomSRTest extends AbstractTest {
 		       shUpClient.postDicomSR(file);
 		    }
 		} catch (URISyntaxException e) {
-		    logger.error("Error while reading file", e);
+		    logger.error("Error while reading file", e); 
 		}
 	}
 
