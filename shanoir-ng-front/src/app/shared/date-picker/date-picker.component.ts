@@ -11,25 +11,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import { AfterViewChecked, Component, ElementRef, forwardRef, Input, ViewChild } from '@angular/core';
+import { Component, forwardRef, Input } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErrors } from '@angular/forms';
+
 
 @Component({
     selector: 'datepicker',
     template: `
-        <span>
             <input type="date" 
                 [disabled]="disabled"
-                [ngModel]="convertedDate"
+                [ngModel]="dateString"
                 (ngModelChange)="onModelChange($event)"
-                (inputFieldChanged)="onInputFieldChanged($event)"
-                (inputFocusBlur)="onTouch()"/>
-        </span>
+                (focusout)="onTouch()"/>
     `,
     styles: [
         ':host { display: inline-block; height: 19px; }',
-        ':host:has(input:focus) { border-bottom: 2px solid var(--color-a); }'
+        ':host:has(input:focus) { border-bottom: 2px solid var(--color-a); }',
+        'input[type="date"] { border: none !important; }'
     ],
     providers: [
         {
@@ -38,47 +36,28 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
           multi: true,
         }]   
 })
-export class DatepickerComponent implements ControlValueAccessor, AfterViewChecked {
+export class DatepickerComponent implements ControlValueAccessor {
 
-    private inputFieldContent: string;
-    private lastInputFieldContent: string;
-    convertedDate: Object;
+    dateString: string = '';
     onTouch: () => void;
     private onChange: (value) => void;
     @Input() disabled: boolean = false;
 
-    constructor(private element: ElementRef) { }
+    constructor() { }
 
-    ngAfterViewChecked() {
-        [].slice.call(this.element.nativeElement.getElementsByTagName('button')).forEach(elt => {
-            elt.setAttribute('tabindex', -1);
-        });
+    onModelChange(dateStr: string) {
+        if (this.dateString == dateStr) return;
+        this.dateString = dateStr;
+        if (dateStr == '') this.onChange('invalid');
+        else this.onChange(new Date(dateStr));
+        this.onTouch();
     }
 
-    onInputFieldChanged(event) {
-        this.lastInputFieldContent = this.inputFieldContent;
-        this.inputFieldContent = event.value;
-    }
-
-    onModelChange(event) {
-        setTimeout(() => {
-            if (this.inputFieldContent == this.lastInputFieldContent) return;
-            if (event && event.epoc) {
-                this.onChange(new Date(event.epoc * 1000));
-            } else if (this.inputFieldContent) {
-                this.onChange('invalid');
-            } else {
-                this.onChange(null);
-            }
-            this.onTouch();
-        })
-    }
-
-    writeValue(value: any): void {
+    writeValue(value: Date): void {
         if (value) {
-            this.convertedDate = {jsdate: new Date(value)};
+            this.dateString = this.toDateString(value);
         } else {
-            this.convertedDate = null;
+            this.dateString = null;
         }
     }
     
@@ -104,4 +83,12 @@ export class DatepickerComponent implements ControlValueAccessor, AfterViewCheck
         }
         return null;
     }
+
+    private toDateString(date: Date): string {
+        return date.getFullYear()
+        + '-' 
+        + ('0' + (date.getMonth() + 1)).slice(-2)
+        + '-' 
+        + ('0' + date.getDate()).slice(-2);
+   }
 }
