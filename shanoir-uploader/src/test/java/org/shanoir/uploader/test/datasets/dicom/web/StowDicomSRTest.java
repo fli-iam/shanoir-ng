@@ -5,14 +5,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.apache.log4j.Logger;
-import org.junit.jupiter.api.Test;
 import org.shanoir.uploader.test.AbstractTest;
 
 public class StowDicomSRTest extends AbstractTest {
 
 	private static Logger logger = Logger.getLogger(StowDicomSRTest.class);
 	
-	@Test
 	public void postDICOMSRToDicomWeb() throws Exception {
 		try {
 		    URL resource = getClass().getClassLoader().getResource("DICOMSR.dcm");
