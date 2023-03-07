@@ -423,7 +423,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
               }
             },
             {headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => {
-                this.router.navigate(['/dataset/details/' + item.examination.id]);
+                this.router.navigate(['/dataset/details/' + item.id]);
             }}
         ];
         return columnDefs;
