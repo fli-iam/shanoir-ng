@@ -436,7 +436,9 @@ public class ShanoirUploaderServiceClient {
 				logger.error("Error in uploadDicom: with file (path: "
 						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
 						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
-				throw new Exception("Error in uploadDicom");
+				throw new Exception("Error in uploadDicom: with file (path: "
+						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
+						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
 			}
 		}		
 	}
@@ -612,7 +614,9 @@ public class ShanoirUploaderServiceClient {
 				logger.error("Error in postDicomSR: with file (path: "
 						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
 						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
-				throw new Exception("Error in postDicomSR");
+				throw new Exception("Error in postDicomSR: with file (path: "
+						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
+						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
 			}
 		}		
 	}
