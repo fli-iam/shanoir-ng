@@ -9,11 +9,11 @@ usage:
 
 CAUTION: THIS COMMAND IS DESTRUCTIVE, do not use it on an existing production
 instance. It will overwrite the data hosted in the external volumes declared in
-docker-compose.yml (note: as a safety precaution, the command will fail if
+docker compose.yml (note: as a safety precaution, the command will fail if
 '--clean' or '--force' option is not used).
 
 Options:
---clean		perform a clean deployment (will run 'docker-compose down -v' to destroy all existing volumes)
+--clean		perform a clean deployment (will run 'docker compose down -v' to destroy all existing volumes)
 --force		force deploying over the existing volumes (might be a little faster, use it in dev only)
 --no-deploy	skip the deployment stage
 
@@ -31,7 +31,7 @@ wait_tcp_ready()
 	local container="$1"
 	local tcp_port="$2"
 
-	docker-compose exec -T "$container" bash -c "
+	docker compose exec -T "$container" bash -c "
 	(	set -e
 		while true; do 
 			if true < '/dev/tcp/localhost/$tcp_port' ; then
@@ -96,12 +96,12 @@ RUN apt-get update && apt-get install -qqy --no-install-recommends openjdk-11-jd
 EOF
 	# 2. run the maven build
 	mkdir -p /tmp/home
-	docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
+	docker run --rm -t -i -v "$PWD:/src" -u root -e HOME="/src/tmp/home" \
 		-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository"	\
 		-w /src "$DEV_IMG" sh -c 'cd shanoir-ng-parent && mvn clean install -DskipTests'
 
 	# 3. build the docker images
-	docker-compose build
+	docker compose build
 fi
 
 if [ -n "$deploy" ] ; then
@@ -112,18 +112,18 @@ if [ -n "$deploy" ] ; then
 		# full clean (--clean)
 		# -> destroy all external volumes
 		step "clean"
-		docker-compose down -v
+		docker compose down -v
 	else
 		# overwrite (--force)
 		# -> just remove all existing containers
 		# 
 		# Note: we must ensure that all containers are removed because:
-		# - 'docker-compose run' should not be used when the
+		# - 'docker compose run' should not be used when the
 		#   corresponding service is up
-		# - 'docker-compose logs' may display old logs if the container
+		# - 'docker compose logs' may display old logs if the container
 		#   is not destroyed
 		step "stop shanoir"
-		docker-compose down
+		docker compose down
 	fi
 
 	#
@@ -132,23 +132,24 @@ if [ -n "$deploy" ] ; then
 
 	# 1. database
 	step "init: database"
-	docker-compose up -d database
+	docker compose up -d database
 	wait_tcp_ready database 3306
 
 	# 2. keycloak-database + keycloak
 	if [ -n "$keycloak" ] ; then
 		step "init: keycloak-database"
-		docker-compose up -d keycloak-database
+		docker compose up -d keycloak-database
 		wait_tcp_ready keycloak-database 3306
 		
 		step "init: keycloak"
-		docker-compose run --rm -e SHANOIR_MIGRATION=init keycloak
+		docker compose run --rm -e SHANOIR_MIGRATION=init keycloak
 
 		step "start: keycloak"
-		docker-compose up -d keycloak
+		docker compose up -d keycloak
 		utils/oneshot	'\| *'				\
 				' INFO  \[io.quarkus\] .* Keycloak .* started in [0-9]*'	\
-				-- docker-compose logs --no-color --follow keycloak >/dev/null
+				-- docker compose logs --no-color --pgrp --follow keycloak >/dev/null
+
 	fi
 
 	# 3. infrastructure services: dcm4chee
@@ -157,7 +158,7 @@ if [ -n "$deploy" ] ; then
 		for infra_ms_dcm4chee in ldap dcm4chee-database dcm4chee-arc
 		do
 			step "start: $infra_ms_dcm4chee infrastructure microservices dcm4chee"
-			docker-compose up -d "$infra_ms_dcm4chee"
+			docker compose up -d "$infra_ms_dcm4chee"
 		done
 	fi
 	
@@ -166,7 +167,7 @@ if [ -n "$deploy" ] ; then
 	for infra_ms in rabbitmq preclinical-bruker2dicom solr
 	do
 		step "start: $infra_ms infrastructure microservice"
-		docker-compose up -d "$infra_ms"
+		docker compose up -d "$infra_ms"
 	done
 	
 	# 5. Shanoir-NG microservices
@@ -174,12 +175,15 @@ if [ -n "$deploy" ] ; then
 	for ms in users studies datasets import preclinical 
 	do
 		step "init: $ms microservice"
-		docker-compose run --rm -e SHANOIR_MIGRATION=init "$ms"
+		docker compose run --rm -e SHANOIR_MIGRATION=init "$ms"
 		step "start: $ms microservice"
-		docker-compose up -d "$ms"
+		docker compose up -d "$ms"
 	done
 
 	# 6. nginx
 	step "start: nginx"
-	docker-compose up -d nginx
+	docker compose up -d nginx
+
+	docker compose -f docker-compose.yml -f docker-compose-dev.yml down
+	docker compose -f docker-compose.yml -f docker-compose-dev.yml up
 fi
