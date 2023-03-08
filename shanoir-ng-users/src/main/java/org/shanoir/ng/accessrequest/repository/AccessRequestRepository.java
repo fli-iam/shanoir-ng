@@ -13,4 +13,6 @@ public interface AccessRequestRepository  extends CrudRepository<AccessRequest, 
 
 	List<AccessRequest> findByUserIdAndStudyId(Long userId, Long studyId);
 
+	List<AccessRequest> findByUserId(Long userId);
+
 }

@@ -184,8 +184,12 @@ public class AccessRequestApiController implements AccessRequestApi {
 			@ApiParam(value = "The email of the invited user.") 
 			@RequestParam(value = "email", required = true) String email) throws RestServiceException, JsonProcessingException, AmqpException {
 
-		// Check if user with such email exists
+		// Check if user with such email/username exists
 		Optional<User> user = this.userService.findByEmail(email);
+		
+		if (!user.isPresent()) {
+			user = this.userService.findByUsername(email);
+		}
 
 		// User exists => return an access request to be added
 		if (user.isPresent()) {
