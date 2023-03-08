@@ -27,11 +27,11 @@
     </div>
 </form>
 <button type='button' (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
-    
-<div *ngIf="parametersApplied" class="test-div">
-    <legend> List of datasets selected for the given parameters: </legend>
-    <div *ngFor="let parameter of fileInputs">
-        <div *ngIf="parameter.type == 'File'" class="test-div">
+
+<div *ngIf="parametersApplied" class="block-div">
+<legend> List of datasets selected for the given parameters: </legend>
+    <div *ngFor="let parameter of fileInputs" class="parent-div">
+        <div *ngIf="parameter.type == 'File'" class="file-parameter-div">
             <input type="hidden" [(ngModel)]="datasets[parameter.name]"/>
             <b>{{parameter.name}} :</b>
                <select-box placeholder="Available datasets" (onAddClick)="addDataset($event, parameter.name)" [options]="datasetOptions">
