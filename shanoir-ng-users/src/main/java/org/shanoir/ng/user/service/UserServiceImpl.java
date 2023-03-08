@@ -295,6 +295,8 @@ public class UserServiceImpl implements UserService {
 		accessRequest.setMotivation("User " + user.getFirstName() + " " +user.getLastName() + " created an account to join your study. Associated email: " + user.getEmail());
 		
 		accessRequestRepository.save(accessRequest);
+		
+		emailService.notifyStudyManagerAccessRequest(accessRequest);
 
 		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
 		savedUser.setKeycloakId(keycloakUserId); // Save keycloak id

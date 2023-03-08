@@ -102,11 +102,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.ACCESS_REQUEST_EVENT, "" + createdRequest.getId(), KeycloakUtil.getTokenUserId(), "", 1, createdRequest.getStudyId()));
 
 		// Send notification to study admin
-		try {
-			emailService.notifyStudyManagerAccessRequest(createdRequest);
-		} catch (ShanoirException e) {
-			throw new RestServiceException(e, new ErrorModel(ErrorModelCode.BAD_REQUEST));
-		}
+		emailService.notifyStudyManagerAccessRequest(createdRequest);
 
 		return new ResponseEntity<AccessRequest>(createdRequest, HttpStatus.OK);
 	}
