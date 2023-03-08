@@ -183,7 +183,4 @@ if [ -n "$deploy" ] ; then
 	# 6. nginx
 	step "start: nginx"
 	docker compose up -d nginx
-
-	docker compose -f docker-compose.yml -f docker-compose-dev.yml down
-	docker compose -f docker-compose.yml -f docker-compose-dev.yml up
 fi
