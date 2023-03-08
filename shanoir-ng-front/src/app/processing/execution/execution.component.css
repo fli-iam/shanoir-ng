@@ -16,7 +16,7 @@ div{
 .parent-div { 
 	margin: 8px 0;
     display: inline-block;
-    flex-direction: row;
+    vertical-align: top;
 }
 .block-div { 
     margin: 8px 0;
@@ -26,7 +26,6 @@ div{
 .file-parameter-div { 
     margin: 8px 8px 8px 8px;
     display: block;
-    flex-direction: row;
 }
 
 :host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; border-collapse: collapse; }
