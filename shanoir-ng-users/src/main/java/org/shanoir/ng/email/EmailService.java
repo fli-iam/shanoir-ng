@@ -136,7 +136,7 @@ public interface EmailService {
 	 * @param createdRequest the access request object
 	 * @throws ShanoirException 
 	 */
-	void notifyStudyManagerAccessRequest(AccessRequest createdRequest) throws ShanoirException;
+	void notifyStudyManagerAccessRequest(AccessRequest createdRequest);
 
 	/**
 	 * Notify a user its study request was refused
