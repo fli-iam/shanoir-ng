@@ -29,7 +29,6 @@ import * as AppUtils from '../../utils/app.utils';
 import { StudyUserRight } from './study-user-right.enum';
 import { CenterStudyDTO, PublicStudyDataDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO } from './study.dto';
 import { Study } from './study.model';
-
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
 
