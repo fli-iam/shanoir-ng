@@ -2,26 +2,23 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
-import { ControlValueAccessor, FormBuilder, FormControl, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { Component, EventEmitter, forwardRef, Input, Output, OnInit } from '@angular/core';
+import { ControlValueAccessor, FormBuilder, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StudyService } from '../../studies/shared/study.service';
-import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
-import { ConsoleService } from '../../shared/console/console.service';
-
+import { Location } from '@angular/common';
 import { AccountRequestInfo } from './account-request-info.model';
-import { Study } from '../../studies/shared/study.model';
-
+import { ConfirmDialogService } from 'src/app/shared/components/confirm-dialog/confirm-dialog.service';
 
 @Component ({
     selector: 'account-request-info',
@@ -31,33 +28,35 @@ import { Study } from '../../studies/shared/study.model';
           provide: NG_VALUE_ACCESSOR,
           useExisting: forwardRef(() => AccountRequestInfoComponent),
           multi: true,
-        }]  
+        }]
 })
-export class AccountRequestInfoComponent implements ControlValueAccessor {
+export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit {
 
     @Input() editMode: boolean = false;
     @Output() valid: EventEmitter<boolean> = new EventEmitter();
-    public isChallenge: boolean;
-    info: AccountRequestInfo = new AccountRequestInfo;
+    info: AccountRequestInfo = new AccountRequestInfo();
     form: FormGroup;
     onChange = (_: any) => {};
     onTouch = () => {};
-    public challengeOptions:  Option<number>[];
-    challengeName: string;
+    public studyOptions:  Option<number>[];
+    studyName: string;
+    presetStudyId: boolean
 
     constructor(private formBuilder: FormBuilder,
-                private route: ActivatedRoute,
                 private studyService: StudyService,
-                private consoleService: ConsoleService) {
-        this.isChallenge = this.route.snapshot.data['isChallenge'];
+                private activatedRoute: ActivatedRoute,
+                private location: Location,
+                private confirmDialogService: ConfirmDialogService) {
     }
 
+    setDisabledState?(isDisabled: boolean): void {
+    }
     writeValue(obj: any): void {
-        this.challengeName = null;
-        if (obj.challenge && obj.challenge != this.info.challenge) {
-            this.getStudyName(obj.challenge).then(name => this.challengeName = name);
-        }
         this.info = obj;
+        if (this.activatedRoute.snapshot.params['id'] && this.activatedRoute.snapshot.params['id'] != 0) {
+            this.presetStudyId = true;
+            this.info.studyId = this.activatedRoute.snapshot.params['id'];
+        }
     }
 
     registerOnChange(fn: any): void {
@@ -69,36 +68,39 @@ export class AccountRequestInfoComponent implements ControlValueAccessor {
     }
 
     ngOnInit() {
-        if (this.isChallenge) {
-            this.studyService.getChallenges().then(result => {
-                if (result) {
-                    this.challengeOptions = result.map(element => new Option(element.id, element.name));
+        // If study is preselected (from invitation), do not load available studies
+        if (this.activatedRoute.snapshot.params['id'] && this.activatedRoute.snapshot.params['id'] != 0) {
+            this.presetStudyId = true;
+            this.info.studyId = this.activatedRoute.snapshot.params['id'];
+        } else {
+            this.studyService.getPublicStudiesData().then(result => {
+                if (result && result.length > 0) {
+                    this.studyOptions = result.map(element => new Option(element.id, element.name));
                 } else {
-                    this.challengeOptions = [];
-                    this.consoleService.log('warn', 'No challenges available for the moment. Please retry later.');
+                    this.studyOptions = [];
+                    this.confirmDialogService.error("ERROR","No public studies available for the moment. Please ask a direct link to a study manager to create your account.")
+                    .then(result => this.location.back());
                 }
             });
         }
         this.form = this.formBuilder.group({
             'institution': [this.info.institution, [Validators.required, Validators.maxLength(200)]],
-            'service': [this.info.service, [Validators.required, Validators.maxLength(200)]],
-            'function': [this.info.function, this.isChallenge ? [] :[Validators.required, Validators.maxLength(200)]],
-            'study': [this.info.study, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
-            'contact': [this.info.contact, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
-            'work': [this.info.work, this.isChallenge ? [] : [Validators.required, Validators.maxLength(200)]],
-            'challenge': [this.info.challenge, !this.isChallenge ? [] : [Validators.required]]
+            'function': [this.info.function, [Validators.required, Validators.maxLength(200)]],
+            'contact': [this.info.contact, [Validators.maxLength(200)]],
+            'studyId': [this.info.studyId, [Validators.required]],
+            'studyName': [this.info.studyName]
         });
         this.form.valueChanges.subscribe(() => {
             this.valid.emit(this.form.valid);
         });
     }
 
-    getStudyName(id: number): Promise<string> {
-        return this.studyService.get(id).then(study => study ? study.name : null);
-    }
-
     onInfoChange() {
         this.onChange(this.info);
+    }
+
+    onStudyIdChange(event) {
+        this.info.studyName = event.name;
     }
 
     formErrors(field: string): any {

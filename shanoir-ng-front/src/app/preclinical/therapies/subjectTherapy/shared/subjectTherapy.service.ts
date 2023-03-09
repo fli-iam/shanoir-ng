@@ -34,7 +34,7 @@ export class SubjectTherapyService extends EntityService<SubjectTherapy>{
         const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/${preclinicalSubject.animalSubject.id}/${PreclinicalUtils.PRECLINICAL_THERAPY}${PreclinicalUtils.PRECLINICAL_ALL_URL}`;
         return this.http.get<SubjectTherapy[]>(url)
             .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));
+            .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
     
     getSubjectTherapy(preclinicalSubject: PreclinicalSubject, tid: string): Promise<SubjectTherapy>{
@@ -76,7 +76,7 @@ export class SubjectTherapyService extends EntityService<SubjectTherapy>{
     	const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}${PreclinicalUtils.PRECLINICAL_ALL_URL}/${PreclinicalUtils.PRECLINICAL_THERAPY}/${tid}`;
     	return this.http.get<SubjectTherapy[]>(url)
             .toPromise()
-            .then(entities => entities.map((entity) => this.toRealObject(entity)));
+            .then(entities => entities?.map((entity) => this.toRealObject(entity)) || []);
     }
 
 }

@@ -70,7 +70,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/{examinationId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnStudy(returnObject.getBody().getStudyId(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL')")
 	ResponseEntity<ExaminationDTO> findExaminationById(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId)
 			throws RestServiceException;
@@ -95,6 +95,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/preclinical/{isPreclinical}", produces = { "application/json" })
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<Page<ExaminationDTO>> findPreclinicalExaminations(
 			@ApiParam(value = "preclinical", required = true) @PathVariable("isPreclinical") Boolean isPreclinical, Pageable pageable);
 
@@ -107,6 +108,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/subject/{subjectId}/study/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterSubjectExaminationDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
@@ -133,7 +135,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examinationDTO.getStudyId(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT'))")
 	ResponseEntity<ExaminationDTO> saveNewExamination(
 			@ApiParam(value = "examination to create", required = true) @Valid @RequestBody ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException;
@@ -146,7 +148,7 @@ public interface ExaminationApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PutMapping(value = "/{examinationId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#examination.getStudyId(), 'CAN_IMPORT'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and #examination.getId().equals(#examinationId) and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
 	ResponseEntity<Void> updateExamination(
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "examination to update", required = true) @Valid @RequestBody ExaminationDTO examination,
@@ -166,6 +168,21 @@ public interface ExaminationApi {
 			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId,
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
 
+	@ApiOperation(value = "", notes = "Create an examination and add extra data", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "examination created and data added", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@PostMapping(value = "extra-data-upload/new-exam/subject/{subjectName}/center/{centerId}",
+	produces = { "application/json" },
+    consumes = { "multipart/form-data" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnSubjectName(#subjectName, 'CAN_IMPORT'))")
+	ResponseEntity<Void> createExaminationAndAddExtraData(
+			@ApiParam(value = "name of the subject", required = true) @PathVariable("subjectName") String subjectName,
+			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId,
+			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException;
+	
 	@ApiOperation(value = "", notes = "Download extra data from an examination", tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 204, message = "examination updated"),

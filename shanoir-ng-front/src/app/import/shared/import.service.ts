@@ -31,6 +31,13 @@ export class ImportService {
                 observe: 'events'});
     }
 
+    uploadFileMultiple(formData: FormData, job: ImportJob): Observable<HttpEvent<ImportJob>> {
+           return  this.http.post<ImportJob>(AppUtils.BACKEND_API_UPLOAD_MUTIPLE_DICOM_URL + "study/" + job.studyId + "/studyName/" + job.studyName + "/studyCard/" + job.studyCardId + "/center/" + job.centerId + "/converter/" + job.converterId + "/", formData,
+                {reportProgress: true,
+                observe: 'events'});
+    }
+
+
     uploadEegFile(formData: FormData): Observable<HttpEvent<EegImportJob>> {
         return this.http.post<EegImportJob>(AppUtils.BACKEND_API_UPLOAD_EEG_URL, formData,
         {reportProgress: true,
@@ -52,6 +59,7 @@ export class ImportService {
 
     async startImportJob(importJob: ImportJob): Promise<Object> {
         try {
+            importJob.patients.forEach(patient => patient.subject.subjectStudyList.forEach(subjectStudy => subjectStudy.subject = null));
             return this.http.post(AppUtils.BACKEND_API_UPLOAD_DICOM_START_IMPORT_JOB_URL, JSON.stringify(importJob))
                 .toPromise();
         }

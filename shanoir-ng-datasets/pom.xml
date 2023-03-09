@@ -27,8 +27,8 @@
 	<description>Dataset project for Shanoir NG</description>
 
 	<properties>
+		<dcm4che.version>5.27.0</dcm4che.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
-		<dcm4che.version>5.14.1</dcm4che.version>
 		<solr-spring.version>4.3.8</solr-spring.version>
 	</properties>
 
@@ -89,10 +89,14 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
+		    <groupId>org.dcm4che</groupId>
+		    <artifactId>dcm4che-json</artifactId>
+		    <version>${dcm4che.version}</version>
 		</dependency>
-		<!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
@@ -106,6 +110,12 @@
 			<groupId>org.springframework.data</groupId>
 			<artifactId>spring-data-solr</artifactId>
 			<version>${solr-spring.version}</version>
+		</dependency>
+
+		<dependency>
+   			<groupId>org.apache.commons</groupId>
+   			<artifactId>commons-compress</artifactId>
+   			<version>1.21</version>
 		</dependency>
 	</dependencies>
 

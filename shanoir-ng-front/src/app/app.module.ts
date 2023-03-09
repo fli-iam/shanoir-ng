@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -78,7 +78,9 @@ import { ExaminationService } from './examinations/shared/examination.service';
 import { SubjectExaminationPipe } from './examinations/shared/subject-examination.pipe';
 import { HomeComponent } from './home/home.component';
 import { BidsUploadComponent } from './import/bids/bids-upload.component';
-import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { BasicClinicalContextComponent } from './import/basic-clinical-context/basic-clinical-context.component';
+import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
+import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
@@ -232,6 +234,9 @@ import { DUASigningComponent } from './dua/dua-signing/dua-signing.component';
 import { SolrPagingCriterionComponent } from './solr/criteria/solr.paging-criterion.component';
 import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
+import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
+import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
+import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { SolrTextSearchModeComponent } from './solr/text-search/solr.text-search-mode.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
 import { BloodGasDataFormComponent } from './preclinical/extraData/bloodGasData/add/bloodGasData-form.component';
@@ -241,8 +246,24 @@ import { ConsoleService } from './shared/console/console.service';
 import { ExtraDataService } from './preclinical/extraData/extraData/shared/extradata.service'
 import { TagCreatorComponent } from './tags/tag.creator.component';
 import { TagInputComponent } from './tags/tag.input.component';
+import { StudyDTOService } from './studies/shared/study.dto';
+import { SubjectDTOService } from './subjects/shared/subject.dto';
 import { StudyUserListComponent } from './studies/studyuser/studyuser-list.component';
 import { VarDirective } from './utils/ng-var.directive';
+import { AccessRequestComponent } from './users/access-request/access-request.component';
+import { MultiSelectComponent } from './shared/multi-select/multi-select.component';
+import { MultiSelectTableComponent } from './shared/multi-select-table/multi-select-table.component';
+import { ProcessingComponent } from './processing/processing.component';
+import { PipelinesComponent } from './processing/pipelines/pipelines.component';
+import { CarminClientService } from './carmin/shared/carmin-client.service';
+import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.component';
+import { ExecutionComponent } from './processing/execution/execution.component';
+import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
+import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { WelcomeComponent } from './welcome/welcome.component';
+import {LoginGuard} from "./shared/roles/login-guard";
+import { AccessRequestService } from './users/access-request/access-request.service';
+
 
 @NgModule({
     imports: [
@@ -321,9 +342,11 @@ import { VarDirective } from './utils/ng-var.directive';
         BidsUploadComponent,
         QueryPacsComponent,
         ImportProcessedDatasetComponent,
-        ClinicalContextComponent,
+        BasicClinicalContextComponent,
+        PreClinicalContextComponent,
         EegClinicalContextComponent,
         ProcessedDatasetClinicalContextComponent,
+        PacsClinicalContextComponent,
         SubjectStudyListComponent,
         TableSearchComponent,
         TimesPipe,
@@ -355,7 +378,7 @@ import { VarDirective } from './utils/ng-var.directive';
         AutoAdjustInputComponent,
         SolrSearchComponent,
         CheckboxListComponent,
-    	AnimalSubjectsListComponent,   
+    	AnimalSubjectsListComponent,
     	AnimalSubjectFormComponent,
     	ReferencesListComponent,
     	ReferenceFormComponent,
@@ -381,7 +404,7 @@ import { VarDirective } from './utils/ng-var.directive';
     	AnimalExaminationListComponent,
     	FileUploadComponent,
     	PhysiologicalDataFormComponent,
-    	BloodGasDataFormComponent, 
+    	BloodGasDataFormComponent,
     	BrukerUploadComponent,
         BrukerSelectSeriesComponent,
         LoaderComponent,
@@ -403,6 +426,9 @@ import { VarDirective } from './utils/ng-var.directive';
         EventTypePipe,
         SolrPagingCriterionComponent,
         SolrTextSearchComponent,
+        MetadataComponent,
+        StudyCardApplyComponent,
+        ApplyStudyCardOnComponent,
         SolrTextSearchModeComponent,
         ChallengeBlockComponent,
         TagCreatorComponent,
@@ -411,7 +437,16 @@ import { VarDirective } from './utils/ng-var.directive';
         ConsoleComponent,
         TagInputComponent,
         StudyUserListComponent,
-        VarDirective
+        VarDirective,
+        AccessRequestComponent,
+        MultiSelectComponent,
+        MultiSelectTableComponent,
+        ProcessingComponent,
+        PipelinesComponent,
+        PipelineComponent,
+        ExecutionComponent,
+        CarminDatasetProcessingsComponent,
+        WelcomeComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,
@@ -424,7 +459,7 @@ import { VarDirective } from './utils/ng-var.directive';
     // ],
     providers: [
         // {
-        //     provide: APP_BASE_HREF, 
+        //     provide: APP_BASE_HREF,
         //     useValue: environment.production  ? '/shanoir-ng/' : '/dev/'
         // },
         // AccountEventsService,
@@ -432,9 +467,12 @@ import { VarDirective } from './utils/ng-var.directive';
         AuthAdminGuard,
         AuthAdminOrExpertGuard,
         CanImportFromPACSGuard,
+        LoginGuard,
         CenterService,
         ConfirmDialogService,
         ExaminationService,
+        CarminClientService,
+        CarminDatasetProcessingService,
         {
             provide: ErrorHandler,
             useClass: HandleErrorService
@@ -447,6 +485,7 @@ import { VarDirective } from './utils/ng-var.directive';
         RoleService,
         StudyService,
         CoilService,
+        AccessRequestService,
         // ToolService,
         SubjectService,
         UserService,
@@ -502,6 +541,8 @@ import { VarDirective } from './utils/ng-var.directive';
         KeycloakSessionService,
         ConsoleService,
 		ExtraDataService,
+        StudyDTOService,
+        SubjectDTOService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

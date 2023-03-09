@@ -10,19 +10,28 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM jboss/keycloak:16.1.1
+ARG BASE_IMAGE=quay.io/keycloak/keycloak:20.0.0
 
-COPY themes/. /opt/jboss/keycloak/themes
+#
+# Use builder to integrate custom provider
+#
+FROM $BASE_IMAGE as builder
 
-COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/standalone/deployments/
+COPY shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
 
-COPY cfg/. /opt/jboss/keycloak/
+WORKDIR /opt/keycloak
+RUN /opt/keycloak/bin/kc.sh build
+
+#
+# Create actual image, based on builder before
+#
+FROM $BASE_IMAGE
+
+COPY --from=builder /opt/keycloak/ /opt/keycloak/
+COPY --chown=keycloak themes/. /opt/keycloak/themes
+COPY cfg/. /opt/keycloak/
 
 COPY entrypoint entrypoint_common oneshot /bin/
 
-# unset the env var, so that the default value is set by the entrypoint script
-# (like all other env vars)
-ENV PROXY_ADDRESS_FORWARDING ""
-
-ENTRYPOINT ["/bin/entrypoint", "/opt/jboss/tools/docker-entrypoint.sh", "-b", "0.0.0.0", \
-	"-bmanagement", "0.0.0.0", "-Dkeycloak.profile.feature.scripts=enabled"]
+ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh"]
+CMD ["start"]

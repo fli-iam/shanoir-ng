@@ -17,14 +17,14 @@ package org.shanoir.ng.importer.service;
 import java.io.File;
 import java.util.List;
 
+import org.shanoir.ng.dicom.DIMSEService;
+import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.service.DicomServiceApi;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -52,12 +52,10 @@ public class DicomPersisterService {
 	private boolean dicomWeb;
 
 	@Autowired
-	@Qualifier("stowrs")
-	DicomServiceApi stowRsService;
+	private DIMSEService dimseService;
 
 	@Autowired
-	@Qualifier("cstore")
-	DicomServiceApi cStoreService;
+	private DICOMWebService dicomWebService;
 
 	/**
 	 * This method reads the datasets for each serie from the json (String), gets
@@ -78,9 +76,9 @@ public class DicomPersisterService {
 								File firstDicomFile = new File(firstDatasetFile.getPath());
 								File directoryWithDicomFiles = firstDicomFile.getParentFile();
 								if (dicomWeb) {
-									stowRsService.sendDicomFilesToPacs(directoryWithDicomFiles);
+									dicomWebService.sendDicomFilesToPacs(directoryWithDicomFiles);
 								} else {
-									cStoreService.sendDicomFilesToPacs(directoryWithDicomFiles);
+									dimseService.sendDicomFilesToPacs(directoryWithDicomFiles);
 								}
 							} else {
 								throw new ShanoirException("Send Dicoms to Pacs: DatasetFile with empty path found.");

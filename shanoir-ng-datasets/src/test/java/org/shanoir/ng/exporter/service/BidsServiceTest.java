@@ -18,13 +18,11 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -33,7 +31,6 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,6 +56,9 @@ public class BidsServiceTest {
 
 	@Mock
 	private SubjectStudyRepository subjectStudyRepository;
+
+	@Mock
+	DatasetSecurityService datasetSecurityService;
 
 	@InjectMocks
 	@Spy

@@ -28,6 +28,7 @@ import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.ssl.TLS;
@@ -60,6 +61,12 @@ public class HttpService {
 	private static ServiceConfiguration serviceConfiguration = ServiceConfiguration.getInstance();
 
 	private static final String DEV_LOCAL = "https://shanoir-ng-nginx";
+	
+	private static final String CONTENT_TYPE_MULTIPART = "multipart/related";
+
+	private static final String CONTENT_TYPE_DICOM = "application/dicom";
+
+	private static final String BOUNDARY = "--import_dicom_shanoir--";
 
 	private CloseableHttpClient httpClient;
 	
@@ -116,11 +123,41 @@ public class HttpService {
 			HttpPost httpPost = new HttpPost(url + tempDirId);
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-			// for (Iterator iterator = files.iterator(); iterator.hasNext();) {
-			// File file = (File) iterator.next();
 			builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
-			// }
 			HttpEntity entity = builder.build();
+			httpPost.setEntity(entity);
+			CloseableHttpResponse response = httpClient.execute(httpPost, context);
+			return response;
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+
+	public CloseableHttpResponse postFile(String url, File file) {
+		try {
+			HttpPost httpPost = new HttpPost(url);
+			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
+			HttpEntity entity = builder.build();
+			httpPost.setEntity(entity);
+			CloseableHttpResponse response = httpClient.execute(httpPost, context);
+			return response;
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
+		}
+		return null;
+	}
+	
+	public CloseableHttpResponse postFileMultipartRelated(String url, File file) {
+		try {
+			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create().setBoundary(BOUNDARY);
+			multipartEntityBuilder.addBinaryBody("dcm_upload", file, ContentType.create(CONTENT_TYPE_DICOM), "filename");
+			HttpEntity entity = multipartEntityBuilder.build();
+			HttpPost httpPost = new HttpPost(url);
+			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
+			httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
 			httpPost.setEntity(entity);
 			CloseableHttpResponse response = httpClient.execute(httpPost, context);
 			return response;

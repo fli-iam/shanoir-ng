@@ -11,16 +11,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, forwardRef, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, forwardRef, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { Study } from '../../../studies/shared/study.model';
 import { SubjectStudy } from '../../../subjects/shared/subject-study.model';
 import { Subject } from '../../../subjects/shared/subject.model';
+import { isDarkColor } from '../../../utils/app.utils';
 import { AbstractInput } from '../../form/input.abstract';
 import { Option } from '../../select/select.component';
 import { Mode } from '../entity/entity.component.abstract';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
+import { BrowserPaging } from '../table/browser-paging.model';
+import { FilterablePageable, Page } from '../table/pageable.model';
+import { TableComponent } from '../table/table.component';
+import { ColumnDefinition } from '../table/column.definition.type';
+import { combineLatest, Subscription } from 'rxjs';
+import { Router } from '@angular/router';
+import { Subject as RxjsSubject} from 'rxjs';
 
 @Component({
   selector: 'subject-study-list',
@@ -35,7 +43,7 @@ import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 ]
 })
 
-export class SubjectStudyListComponent extends AbstractInput implements OnChanges {
+export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> implements OnChanges, OnDestroy {
     
     @Input() mode: Mode;
     @Input() subject: Subject;
@@ -45,15 +53,24 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
     hasTags: boolean;
-    warningDisplayed: boolean = false;
+    columnDefs: ColumnDefinition[];
+    @ViewChild('table') table: TableComponent;
+    private subjectOrStudyObs: RxjsSubject <Subject | Study> = new RxjsSubject();
+    private subjectStudyListObs: RxjsSubject<SubjectStudy[]> = new RxjsSubject();
+    private subscriptions: Subscription[] = [];
     
-    constructor(
-            private confirmDialogService: ConfirmDialogService) {
-                super();
+    constructor(private router: Router, private confirmDialogService: ConfirmDialogService) {
+        super();
+        this.subscriptions.push(
+            combineLatest([this.subjectOrStudyObs, this.subjectStudyListObs]).subscribe(() => {
+                this.processHasTags();
+                this.createColumnDefs();
+            })
+        );
     }
 
     get legend(): string {
-        return this.compMode == 'study' ? 'Subjects' : 'Studies';
+        return this.compMode == 'study' ? 'Subject' : 'Study';
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -69,14 +86,69 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
                 }
             }
         }
+        if (changes.subject || changes.study) {
+            this.subjectOrStudyObs.next(changes.subject ? this.subject : this.study);
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
     
     writeValue(obj: any): void {
         super.writeValue(obj);
-        if (this.model) {
-            this.hasTags = !!(this.model as SubjectStudy[]).find(subStu => subStu.study && subStu.study.tags && subStu.study.tags.length > 0);
-        }
+        this.subjectStudyListObs.next(obj);
         this.updateDisabled();
+    }
+
+    getPage(pageable: FilterablePageable): Promise<Page<SubjectStudy>> {
+        return Promise.resolve(new BrowserPaging<SubjectStudy>(this.model, this.columnDefs).getPage(pageable));
+
+    }
+
+    private createColumnDefs() {
+        if (this.compMode == 'study') {
+            this.columnDefs = [{ headerName: 'Subject', field: 'subject.name', defaultSortCol: true }];
+        } else if (this.compMode == 'subject') {
+            this.columnDefs = [{ headerName: 'Study', field: 'study.name', defaultSortCol: true }];
+        }
+        if (this.hasTags) {
+            this.columnDefs.push(
+                { headerName: 'Tags', field: 'tags', editable: true, multi: true, 
+                    possibleValues: (subjectStudy: SubjectStudy) => {
+                        return subjectStudy?.study?.tags?.map(tag => {
+                            let opt = new Option(tag, tag.name);
+                            if (tag.color) {
+                                opt.backgroundColor = tag.color;
+                                opt.color = isDarkColor(tag.color) ? 'white' : 'black';
+                            }
+                            return opt;
+                        });
+                    }
+                }
+            );
+        } 
+        this.columnDefs.push(
+            { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
+            { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', disableSorting: true }
+        );
+        if (this.displaySubjectType) {
+            this.columnDefs.push(
+                { headerName: 'Subject Type', field: 'subjectType', editable: true, possibleValues: [new Option(null, ''), new Option('HEALTHY_VOLUNTEER', 'Healthy Volunteer'), new Option('PATIENT', 'Patient'), new Option('PHANTOM', 'Phantom')] },
+            );
+        }
+        this.columnDefs.push(
+            { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item.subject?.id) }
+        );
+        if (this.mode != 'view') {
+            this.columnDefs.push(
+                { headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeSubjectStudy(item) }
+            );
+        }
+    }
+
+    goToView(id: number): void {
+        this.router.navigate(['/subject/details/' + id]);
     }
 
     private updateDisabled() {
@@ -113,6 +185,7 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         if (this.compMode == "study") {
             let studyCopy: Study = new Study();
             studyCopy.id = this.study.id;
+            studyCopy.tags = this.study.tags;
             newSubjectStudy.study = studyCopy;
             newSubjectStudy.subject = this.selected as Subject;
         }
@@ -124,7 +197,14 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
         }
         this.selected = undefined;
         this.model.push(newSubjectStudy);
+        this.processHasTags();
         this.propagateChange(this.model);
+        this.table.refresh();
+    }
+
+    private processHasTags() {
+        this.hasTags = (!!this.model && !!(this.model as SubjectStudy[]).find(subStu => subStu.study && subStu.study.tags && subStu.study.tags.length > 0))
+                || this.study?.tags?.length > 0;
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy) {
@@ -155,16 +235,8 @@ export class SubjectStudyListComponent extends AbstractInput implements OnChange
                 if (option) option.disabled = false;
             }
         }
+        this.table.refresh();
     }
-
-    getFontColor(colorInp: string): boolean {
-          var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
-          var r = parseInt(color.substring(0, 2), 16); // hexToR
-          var g = parseInt(color.substring(2, 4), 16); // hexToG
-          var b = parseInt(color.substring(4, 6), 16); // hexToB
-          return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
-    }
-
 
     onChange() {
         this.propagateChange(this.model);

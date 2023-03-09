@@ -14,6 +14,10 @@
 
 package org.shanoir.ng.importer.model;
 
+import java.time.LocalDate;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -28,6 +32,18 @@ public class Subject {
 	@JsonProperty("name")
 	private String name;
 
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+	private LocalDate birthDate;
+
+	@JsonProperty("sex")
+	private String sex;
+
+	@JsonProperty("imagedObjectCategory")
+	private Integer imagedObjectCategory;
+
+	@JsonProperty("subjectStudyList")
+	private List<SubjectStudy> subjectStudyList;
+	
 	public long getId() {
 		return id;
 	}
@@ -42,6 +58,50 @@ public class Subject {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public LocalDate getBirthDate() {
+		return birthDate;
+	}
+
+	public void setBirthDate(LocalDate birthDate) {
+		this.birthDate = birthDate;
+	}
+
+	/**
+	 * @return the sex
+	 */
+	public String getSex() {
+		return sex;
+	}
+
+	/**
+	 * @param sex the sex to set
+	 */
+	public void setSex(String sex) {
+		this.sex = sex;
+	}
+
+	/**
+	 * @return the imagedObjectCategory
+	 */
+	public Integer getImagedObjectCategory() {
+		return imagedObjectCategory;
+	}
+
+	/**
+	 * @param imagedObjectCategory the imagedObjectCategory to set
+	 */
+	public void setImagedObjectCategory(Integer imagedObjectCategory) {
+		this.imagedObjectCategory = imagedObjectCategory;
+	}
+
+	public List<SubjectStudy> getSubjectStudyList() {
+		return subjectStudyList;
+	}
+
+	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
+		this.subjectStudyList = subjectStudyList;
 	}
 
 }

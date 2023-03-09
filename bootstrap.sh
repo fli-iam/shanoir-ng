@@ -146,8 +146,8 @@ if [ -n "$deploy" ] ; then
 
 		step "start: keycloak"
 		docker-compose up -d keycloak
-		utils/oneshot	'\| *JBoss Bootstrap Environment'				\
-				' INFO  \[org.jboss.as\] .* Keycloak .* started in [0-9]*ms'	\
+		utils/oneshot	'\| *'				\
+				' INFO  \[io.quarkus\] .* Keycloak .* started in [0-9]*'	\
 				-- docker-compose logs --no-color --follow keycloak >/dev/null
 	fi
 

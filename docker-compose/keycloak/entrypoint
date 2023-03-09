@@ -15,29 +15,42 @@ require  SHANOIR_VIEWER_OHIF_URL_HOST
 
 mkdir -p /tmp/import
 sed "	s/SHANOIR_ADMIN_NAME/$SHANOIR_ADMIN_NAME/g
-	s/SHANOIR_ADMIN_EMAIL/$SHANOIR_ADMIN_EMAIL/g
-	s/SHANOIR_SMTP_HOST/$SHANOIR_SMTP_HOST/g
-	s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g
-	s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
-	s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
-	s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
-"	/opt/jboss/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json
+		s/SHANOIR_ADMIN_EMAIL/$SHANOIR_ADMIN_EMAIL/g
+		s/SHANOIR_SMTP_HOST/$SHANOIR_SMTP_HOST/g
+		s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g
+		s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
+		s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
+		s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
+"		/opt/keycloak/shanoir-ng-realm.json > /tmp/import/shanoir-ng-realm.json
 
+sed -i -E "s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
+sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-theme/login/template.ftl 
 
-export DB_VENDOR="${DB_VENDOR:-mysql}"
-export DB_ADDR="${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}"
-export DB_PORT="${DB_PORT:-3306}"
-export DB_DATABASE="${DB_DATABASE:-keycloak}"
-export DB_USER="${DB_USER:-keycloak}"
-export DB_PASSWORD="${DB_PASSWORD:-password}"
-export PROXY_ADDRESS_FORWARDING="${PROXY_ADDRESS_FORWARDING:-true}"
-# FIXME: how about these ones:
-#	DB_PORT_3306_TCP_ADDR=keycloak-database
-#	DB_PORT_3306_TCP_PORT=3306
+#
+# keycloak options
+# see: https://www.keycloak.org/server/all-config
+#
+export KC_HTTP_RELATIVE_PATH="/auth"
+export KC_PROXY="${KC_PROXY:-edge}"
+export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
+
+# we disable strict hostname checking by default because:
+# - the reverse proxy in production implements this check
+# - since the 'nginx' container does not expose the master realm to the
+#   outside, disabling strict checking allows us to reach the admin console
+#   at http://localhost:8080/auth/admin/
+export KC_HOSTNAME_STRICT="${KC_HOSTNAME_STRICT:false}"
+export KC_HOSTNAME_STRICT_HTTPS="${KC_HOSTNAME_STRICT_HTTPS:false}"
+
+export KC_DB="${DB_VENDOR:-mysql}"
+export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
+export KC_DB_USERNAME="${DB_USER:-keycloak}"
+export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
 
 
 require  SHANOIR_MIGRATION
-oneshot=
+patterns=()
+STARTED_PATTERN=' \[io.quarkus\] \(main\) Keycloak .* started in [0-9.]+*s'
 extra=("-Dms.users.url=http://${SHANOIR_PREFIX}users:9901"
        "-Dallowed.admin.ips=${SHANOIR_ALLOWED_ADMIN_IPS}")
 
@@ -49,8 +62,8 @@ auto|dev)
 	;;
 init)
 	# create the admin account
-	export KEYCLOAK_USER="$SHANOIR_KEYCLOAK_USER"
-	export KEYCLOAK_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
+	export KEYCLOAK_ADMIN="$SHANOIR_KEYCLOAK_USER"
+	export KEYCLOAK_ADMIN_PASSWORD="$SHANOIR_KEYCLOAK_PASSWORD"
 
 	# wipe out the shanoir-ng realm and recreate it
 	extra+=("-Dkeycloak.migration.action=import"
@@ -58,13 +71,18 @@ init)
 		"-Dkeycloak.migration.file=/tmp/import/shanoir-ng-realm.json"
 		"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING")
 
-        # FIXME: should check additional messages:
-        #   "The batch executed successfully",
-        #   "Initializing master realm",
-        #   "Imported realm shanoir-ng",
-        #   "Added user 'admin' to realm 'master'",
-        #   r" INFO  \[org.jboss.as\] .* Keycloak .* started in \d+ms"
-	oneshot=1
+	patterns+=(
+		"KC-SERVICES0030: Full model import requested. Strategy: OVERWRITE_EXISTING"
+		"Full importing from file /tmp/import/shanoir-ng-realm.json"
+		"Realm 'shanoir-ng' imported"
+		"KC-SERVICES0032: Import finished successfully"
+		"$STARTED_PATTERN"
+		# The admin account is created after server is started, thus to avoid a
+		# race condition we need to match a KC-SERVICES0009 (user added to
+		# realm) or a KC-SERVICES0010 (user already exists) before stopping the
+		# server
+		"KC-SERVICES0009|KC-SERVICES0010"
+	)
 	;;
 never)
 	# FIXME: should we provide a facade for these too
@@ -94,7 +112,13 @@ import)
 			"-Dkeycloak.migration.dir='/tmp/import'"
 			"-Dkeycloak.migration.strategy=OVERWRITE_EXISTING"
 		)
-		oneshot=1
+		patterns=(
+			"Importing from directory /tmp/import"
+			"KC-SERVICES0030: Full model import requested. Strategy: OVERWRITE_EXISTING"
+			"Realm 'shanoir-ng' imported"
+			"KC-SERVICES0032: Import finished successfully"
+			"$STARTED_PATTERN"
+		)
 	fi
 	;;
 
@@ -119,7 +143,12 @@ export)
 			"-Dkeycloak.migration.usersExportStrategy=SAME_FILE"
 			"-Dkeycloak.migration.dir='$EXPORT_DIR'"
 		)
-		oneshot=1
+		patterns=(
+			"Exporting into directory /export"
+			"KC-SERVICES0034: Export of realm 'shanoir-ng' requested"
+			"KC-SERVICES0035: Export finished successfully"
+			"$STARTED_PATTERN"
+		)
 	fi
 	;;
 esac
@@ -130,7 +159,7 @@ abort_if_error
 
 
 # run keycloak
-if [ -n "$oneshot" ] ; then
+if [ ${#patterns[@]} -ne 0 ] ; then
 	# oneshot run (launch the server and kill it after startup)
 
 	fifo="`tmp_fifo`"
@@ -138,17 +167,14 @@ if [ -n "$oneshot" ] ; then
 	# filter the output to keep only the interesting messages
 	# (i.e: startup, import/export, warning, errors, ...)
 	sed '	/[0-9] INFO /{
-			/\[org\.jboss\.as\]/p;
-			/\[org\.keycloak\.connections/p
-			/\[org\.keycloak\.exportimport/p
-			/\[org\.keycloak\.services/p
+			/\[org\.keycloak\./p
+			/\[io\.quarkus\]/p
 			d
 		}' <"$fifo" &
-	
-	exec oneshot							\
-		'^ *JBoss Bootstrap Environment'			\
-		' INFO .*org\.jboss\.as.*Keycloak .* started in [0-9]'	\
-		-- env "$@" "${extra[@]}" > "$fifo"
+
+	# run until the server is fully started
+	exec oneshot "${patterns[@]}" -- env "$@" "${extra[@]}" > "$fifo"
+
 else
 	# 'normal' run
 	exec env "$@" "${extra[@]}"

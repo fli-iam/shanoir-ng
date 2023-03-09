@@ -50,6 +50,59 @@ Clone the shanoir-ng repository, the shanoir-downloader/ folder will be empty ; 
 
 Then the shanoir-downloader project can be simply managed as a normal git repo (as if it were a separated project) ; meaning that once your are in the shanoir-downloader/ folder, you can just `git pull` to get the latest changes, and commit some changes.
 
+## Windows User
+* Install Docker Desktop
+    - Install WSL Linux 64bits
+    - Run Docker in admin mode
+    - Delete, if needed, %appData%/Docker/settings.json (Docker will create another one, see https://forums.docker.com/t/solved-docker-failed-to-start-docker-desktop-for-windows/106976/6)
+    
+* Install Java 11
+    - Download and install : https://www.oracle.com/fr/java/technologies/javase/jdk11-archive-downloads.html
+    - Add enviromnent variable : JAVA_HOME = C:\Program Files\Java\jdk-11.0.16
+
+* Install Maven
+    - Download : https://maven.apache.org/download.cgi
+    - Install : https://maven.apache.org/install.html
+    
+* Install NodeJS (+npm)
+    - Download : https://nodejs.org/en/download/
+    
+* Add a repository to maven (your_path_to_apache_folder\apache\conf\settings.xml or mvn help:effective-settings to check path) :
+     <profile>
+     <id>shanoir</id>
+     <repositories>
+       <repository>
+         <id>shanoir-uploader</id>
+         <name>shanoir-uploader-repo</name>
+         <url>http://shanoir.gforge.inria.fr/doku.php?id=intern:shanoiruploader</url>
+       </repository>
+     </repositories>
+   </profile>
+   
+* Configure git to change end of line caracters to windows' instead of linux' :
+    git config --global core.autocrlf input
+    
+    
+* Add this line to C:\Windows\System32\drivers\etc\hosts :
+    127.0.0.1 shanoir-ng-nginx viewer
+    
+* Fork GitHub project
+* Clone
+* Edit .env file and set SHANOIR_MIGRATION=init
+* Run "mvn clean install -DskipTests" in shanoir-ng/shanoir-ng-parent/ folder
+* Run docker-compose up --build in shanoir-ng/
+* Load data manually from Docker Desktop :
+    - Open terminal in database microservice
+    - Run command : mysql -uroot -ppassword
+    - use users;
+    - Copy/paste the content of the scripts (src/main/resources/scripts/import.sql from shanoir-ng/shanoir-ng-datasets/users/import/studies)
+
+
+Shanoir  : https://shanoir-ng-nginx/shanoir-ng/home
+
+Keycloak : http://localhost:8080/auth/admin/master/console/#/realms/shanoir-ng/roles
+
+
 ## DEPLOY
 * Install docker and docker-compose:
     * https://docs.docker.com/install/

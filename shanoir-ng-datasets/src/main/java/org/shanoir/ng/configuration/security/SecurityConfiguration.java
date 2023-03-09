@@ -18,19 +18,20 @@ import org.keycloak.adapters.KeycloakConfigResolver;
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakSecurityComponents;
 import org.keycloak.adapters.springsecurity.config.KeycloakWebSecurityConfigurerAdapter;
+import org.shanoir.ng.dicom.web.StowRSMultipartRelatedRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.test.context.ActiveProfiles;
@@ -53,6 +54,9 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 
 	@Value("${front.server.url}")
 	private String frontServerUrl;
+	
+	@Autowired
+	private StowRSMultipartRelatedRequestFilter multipartRelatedRequestFilter;
 
 	/**
 	 * Registers the KeycloakAuthenticationProvider with the authentication
@@ -81,6 +85,7 @@ public class SecurityConfiguration extends KeycloakWebSecurityConfigurerAdapter 
 			.and()
 			.csrf()
 				.disable()
+			.addFilterAfter(multipartRelatedRequestFilter, FilterSecurityInterceptor.class)
 			.authorizeRequests()
 				.antMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
 				.anyRequest().authenticated();

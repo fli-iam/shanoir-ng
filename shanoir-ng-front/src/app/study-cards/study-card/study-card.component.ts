@@ -23,7 +23,9 @@ import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
+import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
@@ -37,7 +39,8 @@ import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.co
 @Component({
     selector: 'study-card',
     templateUrl: 'study-card.component.html',
-    styleUrls: ['study-card.component.css']
+    styleUrls: ['study-card.component.css'],
+    animations: [slideDown]
 })
 export class StudyCardComponent extends EntityComponent<StudyCard> {
 
@@ -51,6 +54,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     hasAdministrateRightPromise: Promise<boolean>;
     lockStudy: boolean = false;
     @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
+    isAdminOrExpert: boolean;
 
     constructor(
             private route: ActivatedRoute,
@@ -60,11 +64,13 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private niftiConverterService: NiftiConverterService,
             private studyRightsService: StudyRightsService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe,
+            keycloakService: KeycloakService,
             private centerService: CenterService) {
         super(route, 'study-card');
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
+        this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
      }
 
     getService(): EntityService<StudyCard> {
@@ -110,7 +116,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     buildForm(): FormGroup {
         let form: FormGroup = this.formBuilder.group({
-            'name': [this.studyCard.name, [Validators.required, Validators.minLength(2)]],
+            'name': [this.studyCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.studyCard.study, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
             'niftiConverter': [this.studyCard.niftiConverter, [Validators.required]],
@@ -222,6 +228,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         this.form.get('rules').updateValueAndValidity();
     }
 
+    goToApply() {
+        this.router.navigate(['/study-card/apply/' + this.entity.id]);
+    }
+    
     createAcqEq() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {

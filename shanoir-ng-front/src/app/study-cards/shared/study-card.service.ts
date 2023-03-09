@@ -17,7 +17,8 @@ import { Injectable } from '@angular/core';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
-import { StudyCardDTO, StudyCardDTOService } from './study-card.dto';
+import { StudyCardDTOService } from './study-card.dto';
+import { StudyCardDTO } from './study-card.dto.model';
 import { StudyCard } from './study-card.model';
 
 
@@ -55,5 +56,11 @@ export class StudyCardService extends EntityService<StudyCard> {
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });
+    }
+
+    applyStudyCardOn(studyCardId: number, datasetAcquisitionIds: number[]) {
+        return this.http.post<any[]>(this.API_URL + '/apply', JSON.stringify({studyCardId: studyCardId, datasetAcquisitionIds: datasetAcquisitionIds}))
+            .toPromise()
+            .then();
     }
 }

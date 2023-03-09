@@ -13,10 +13,12 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.datasetacquisition.controler.DatasetAcquisitionApiController;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionDatasetsMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.importer.dto.EegImportJob;
+import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -42,6 +44,9 @@ public class DatasetAcquisitionApiControllerTest {
 	@MockBean
 	private ImporterService importerService;
 	
+	@MockBean
+	private DicomSRImporterService dicomSRImporterService;
+	
 	@MockBean 
 	private DatasetAcquisitionService datasetAcquisitionService;
 	
@@ -50,6 +55,9 @@ public class DatasetAcquisitionApiControllerTest {
 	
 	@MockBean
 	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
+	
+	@MockBean
+	private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
 	
 	@Autowired
 	private MockMvc mvc;

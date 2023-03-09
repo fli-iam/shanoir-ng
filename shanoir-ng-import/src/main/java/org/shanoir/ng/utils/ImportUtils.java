@@ -19,21 +19,29 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
 import java.security.SecureRandom;
+import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.shanoir.ng.importer.dto.ExaminationDTO;
+import org.shanoir.ng.importer.model.Subject;
+import org.shanoir.ng.importer.model.SubjectStudy;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
@@ -51,8 +59,6 @@ import com.google.common.io.Files;
  */
 public class ImportUtils {
 
-	private static final String INTO = " into ";
-
 	private static final Logger LOG = LoggerFactory.getLogger(ImportUtils.class);
 
 	private static final String APPLICATION_OCTET_STREAM = "application/octet-stream";
@@ -63,9 +69,9 @@ public class ImportUtils {
 
 	private static final String FILE_POINT = ".";
 
-	private static final String DICOMDIR = "DICOMDIR";
-
 	private static final String UPLOAD_FILE_SUFFIX = ".upload";
+
+	private static final String INTO = " into ";
 
 	private static final SecureRandom RANDOM = new SecureRandom();
 
@@ -173,13 +179,18 @@ public class ImportUtils {
 		if (!destDir.exists()) {
 			destDir.mkdir();
 		}
-		
-		try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath))) {
-			ZipEntry entry = zipIn.getNextEntry();
+
+		try (ZipFile zipFile = new ZipFile(new File(zipFilePath))) {
+			Enumeration<? extends ZipEntry> entries = zipFile.entries();
+
+
 			String directoryFile;
 			String name;
-			// iterates over entries in the .zip file
-			while (entry != null) {
+
+			while (entries.hasMoreElements()) {
+				ZipEntry entry = entries.nextElement();
+				// iterates over entries in the .zip file
+
 				name = entry.getName();
 				String filePath = destDirectory + File.separator + name;
 				if (!entry.isDirectory()) {
@@ -190,14 +201,12 @@ public class ImportUtils {
 					if (directoryFile != null) {
 						createDirectory(destDir, directoryFile);
 					}
-					extractFile(zipIn, filePath);
+					extractFile(entry, zipFile, filePath);
 				} else {
 					// if the entry is a directory, make the directory
 					File dir = new File(filePath);
 					dir.mkdir();
 				}
-				zipIn.closeEntry();
-				entry = zipIn.getNextEntry();
 			}
 		}
 	}
@@ -209,35 +218,35 @@ public class ImportUtils {
 	 * @param zipOut file touget out
 	 * @throws IOException
 	 */
-    public static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut, boolean first) throws IOException {
-        if (fileToZip.isHidden()) {
-            return;
-        }
-        if (fileToZip.isDirectory()) {
-            if (fileName.endsWith("/") && !first) {
-                zipOut.putNextEntry(new ZipEntry(fileName));
-                zipOut.closeEntry();
-            } else if (!first) {
-                zipOut.putNextEntry(new ZipEntry(fileName + "/"));
-                zipOut.closeEntry();
-            }
-            File[] children = fileToZip.listFiles();
-            for (File childFile : children) {
-                zipFile(childFile, (first? "" : fileName + "/") + childFile.getName(), zipOut, false);
-            }
-            return;
-        }
-        FileInputStream fis = new FileInputStream(fileToZip);
-        ZipEntry zipEntry = new ZipEntry(fileName);
-        zipOut.putNextEntry(zipEntry);
-        byte[] bytes = new byte[1024];
-        int length;
-        while ((length = fis.read(bytes)) >= 0) {
-            zipOut.write(bytes, 0, length);
-        }
-        fis.close();
-    }
-   
+	public static void zipFile(File fileToZip, String fileName, ZipOutputStream zipOut, boolean first) throws IOException {
+		if (fileToZip.isHidden()) {
+			return;
+		}
+		if (fileToZip.isDirectory()) {
+			if (fileName.endsWith("/") && !first) {
+				zipOut.putNextEntry(new ZipEntry(fileName));
+				zipOut.closeEntry();
+			} else if (!first) {
+				zipOut.putNextEntry(new ZipEntry(fileName + "/"));
+				zipOut.closeEntry();
+			}
+			File[] children = fileToZip.listFiles();
+			for (File childFile : children) {
+				zipFile(childFile, (first? "" : fileName + "/") + childFile.getName(), zipOut, false);
+			}
+			return;
+		}
+		FileInputStream fis = new FileInputStream(fileToZip);
+		ZipEntry zipEntry = new ZipEntry(fileName);
+		zipOut.putNextEntry(zipEntry);
+		byte[] bytes = new byte[1024];
+		int length;
+		while ((length = fis.read(bytes)) >= 0) {
+			zipOut.write(bytes, 0, length);
+		}
+		fis.close();
+	}
+
 	/**
 	 * Check if sent file is of type .zip.
 	 *
@@ -277,14 +286,16 @@ public class ImportUtils {
 	 * @param filePath
 	 * @throws IOException
 	 */
-	private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-		try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
-			byte[] bytesIn = new byte[BUFFER_SIZE];
-			int read = 0;
-			while ((read = zipIn.read(bytesIn)) != -1) {
-				bos.write(bytesIn, 0, read);
-			}
-		}
+	private static void extractFile(ZipEntry zipIn, ZipFile zipFile, String filePath) throws IOException {
+		
+		try (InputStream in = zipFile.getInputStream(zipIn);
+				BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
+					byte[] bytesIn = new byte[BUFFER_SIZE];
+					int read = 0;
+					while ((read = in.read(bytesIn)) != -1) {
+						bos.write(bytesIn, 0, read);
+					}
+	        }
 	}
 
 	/**
@@ -298,7 +309,7 @@ public class ImportUtils {
 	public static String convertFilePath(final String firstImagePath) {
 		return firstImagePath.replaceAll("\\\\", "/");
 	}
-	
+
 	/**
 	 * List all the folders of the given directory.
 	 *
@@ -320,7 +331,7 @@ public class ImportUtils {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Convert a String with a wildcard to a regular expression.
 	 *
@@ -363,7 +374,7 @@ public class ImportUtils {
 		s.append('$');
 		return s.toString();
 	}
-	
+
 	/**
 	 * copyFiles folder into destination,respecting the hierarchy
 	 * 
@@ -484,7 +495,7 @@ public class ImportUtils {
 		} else if (alphabetList.contains(lastCharacter)) {
 			int index = alphabetList.indexOf(lastCharacter);
 			newName = nameNoExtension.substring(0, nameNoExtension.length() - 1) + alphabetList.get(index + 1)
-					+ extension;
+			+ extension;
 		} else {
 			newName = nameNoExtension + "A" + extension;
 		}
@@ -549,6 +560,70 @@ public class ImportUtils {
 			n = Math.abs(n);
 		}
 		return n;
+	}
+	
+	public static String readableFileSize(long size) {
+		if (size <= 0)
+			return "0";
+		final String[] units = new String[] { "B", "kB", "MB", "GB", "TB" };
+		int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
+		return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + units[digitGroups];
+	}
+
+	// size of directory in bytes
+	public static long getDirectorySize(Path path) {
+		long size = 0;
+		try (Stream<Path> walk = java.nio.file.Files.walk(path)) {
+			size = walk.filter(java.nio.file.Files::isRegularFile).mapToLong(p -> {
+				try {
+					return java.nio.file.Files.size(p);
+				} catch (IOException e) {
+					LOG.error("Failed to get size of %s%n%s", p, e);
+					return 0L;
+				}
+			}).sum();
+		} catch (IOException e) {
+			LOG.error("IO errors %s", e);
+		}
+		return size;
+	}
+
+	/**
+	 * Create an exam from fiew attributes
+	 * @return the created exam
+	 */
+	public static ExaminationDTO createExam(Long studyId, Long centerId, Long subjectId, String comment, LocalDate examDate, String subjectName) {
+		// Create one examination
+		ExaminationDTO examination = new ExaminationDTO();
+		IdName study = new IdName();
+		study.setId(studyId);
+		examination.setStudy(study);
+
+		IdName subj = new IdName();
+		subj.setId(subjectId);
+		subj.setName(subjectName);
+		examination.setSubject(subj);
+
+		IdName center = new IdName();
+		center.setId(centerId);
+		examination.setCenter(center);
+
+		examination.setComment(comment);
+
+		examination.setExaminationDate(examDate);
+		
+		return examination;
+	}
+
+	public static Subject createSubject(String name, LocalDate birthDate, String sex, Integer imagedObjectCategory,
+			List<SubjectStudy> subjectStudyList) {
+		Subject subject = new Subject();
+		subject.setName(name);
+		subject.setBirthDate(birthDate);
+		subject.setSex(sex);
+		subject.setImagedObjectCategory(imagedObjectCategory);
+		subject.setSubjectStudyList(subjectStudyList);
+		return subject;
 	}
 
 }

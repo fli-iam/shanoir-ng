@@ -21,6 +21,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -200,13 +201,23 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Map<Study, Set<Serie>> selectedSeriesByStudy = new HashMap<>();
 		Study selectedStudy = null;
 
-		Calendar calendar = Calendar.getInstance();
+		Date minDate;
+		Date selectedStudyDate = new Date();
 		if (!StringUtils.isBlank(csvImport.getMinDateFilter())) {
-			calendar.set(Integer.valueOf(csvImport.getMinDateFilter()), 0, 1, 0, 0, 0);
+			
+			String[] acceptedFormats = {"yyyy","yyyy-MM-dd","yyyy-MM-dd-HH"};
+			try {
+				minDate = DateUtils.parseDate(csvImport.getMinDateFilter(), acceptedFormats);
+				selectedStudyDate = minDate;
+			} catch (Exception e) {
+				csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.date.format"));
+				return false;
+			}
 		} else {
-			calendar.set(1000, 0, 1, 0, 0, 0);
+			Calendar cal = Calendar.getInstance();
+			cal.set(1000, 0, 1, 0, 0, 0);
+			minDate = cal.getTime();
 		}
-		Date minDate = calendar.getTime();
 
 		for (DicomTreeNode item : media.getTreeNodes().values()) {
 			if (foundPatient) {
@@ -221,12 +232,24 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 					// Select the first study (comparing dates)
 					Study study = (Study) studiesIt.next();
-				// get study date
-					SimpleDateFormat format1 = new SimpleDateFormat("yyyyMMdd");
+					// get study date time
+					String[] acceptedFormats = {
+							"yyyyMMddHHmmSS.FFFFFF",
+							"yyyyMMddHHmmSS.FFFFF",
+							"yyyyMMddHHmmSS.FFFF",
+							"yyyyMMddHHmmSS.FFF",
+							"yyyyMMddHHmmSS.FF",
+							"yyyyMMddHHmmSS.F",
+							"yyyyMMddHHmmSS",
+							"yyyyMMddHHmmS",
+							"yyyyMMddHHmm",
+							"yyyyMMddHHm",
+							"yyyyMMddHH"};
 					Date studyDate = new Date();
 					try {
-						studyDate = format1.parse(study.getDescriptionMap().get("date"));
+						studyDate = DateUtils.parseDate(study.getDescriptionMap().get("date") + study.getDescriptionMap().get("time"), acceptedFormats);
 					} catch (ParseException e) {
+						logger.error("could not consider this study:", e);
 						// Could not get date => skip the study
 						continue;
 					}
@@ -250,6 +273,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 							modelName = serie.getMriInformation().getManufacturersModelName();
 							foundPatient = true;
 							currentDate = studyDate;
+							selectedStudyDate = studyDate;
 						}
 					}
 				}
@@ -320,7 +344,14 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		}
 
 		File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
-		List<String> allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeries, uploadFolder, this.dicomServerClient, null);
+		List<String> allFileNames = null;
+		try {
+			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeries, uploadFolder, this.dicomServerClient, null);
+		} catch (Exception e) {
+			logger.error("Could not copy data from PACS !");
+			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
+			return false;
+		}
 
 		/**
 		 * 5. Fill MRI information into serie from first DICOM file of each serie
@@ -418,7 +449,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Examination examDTO = new Examination();
 		examDTO.setCenterId(centerId);
 		examDTO.setComment(csvImport.getComment());
-		examDTO.setExaminationDate(new Date());
+		examDTO.setExaminationDate(selectedStudyDate);
 		examDTO.setPreclinical(false);
 		examDTO.setStudyId(Long.valueOf(csvImport.getStudyId()));
 		examDTO.setSubjectId(subject.getId());
@@ -436,10 +467,10 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		logger.info("10 Import.json");
 
 		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study2, sc);
+		importJob.setFromCsv(true);
 		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();
-
 		return true;
 	}
 
@@ -453,24 +484,62 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		if (StringUtils.isBlank(searchedElement)) {
 			return false;
 		}
-		if (StringUtils.isBlank(filter) || filter.equals(WILDCARD)) {
+		if (StringUtils.isBlank(filter) || filter.equals("*")) {
 			return true;
 		}
-		String[] filters = filter.split(";");
+		String[] filters;
 		boolean valid = true;
-		for (String filterToApply : filters) {
-			// NB: we choose to use AND instead of OF between filters.
-			// This way we are more restrictive
-			// If you want more acquisitions, you have to duplicate the line in the CSV with other filters
+		// NB: It is possible to have AND ";" filters OR OR ";;" filters but not both at the same time for the moment.
 
-			if (filterToApply.startsWith("!")) {
-				valid =  valid && !filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
-			} else {
-				valid =  valid && filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+		if (filter.contains(";;")) {
+			valid = false;
+			filters = filter.split(";;");
+			for (String filterToApply : filters) {
+				if (filterToApply.startsWith("!")) {
+					valid =  valid || !filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+				} else {
+					valid =  valid || filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+				}
 			}
+			return valid;
+		} else if (filter.contains(";")) {
+			filters = filter.split(";");
+			for (String filterToApply : filters) {
+				if (filterToApply.startsWith("!")) {
+					valid =  valid && !filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+				} else {
+					valid =  valid && filterWildCard(searchedElement, filterToApply.replaceAll("!", ""));
+				}
+			}
+			return valid;
+		} else {
+			if (filter.startsWith("!")) {
+				valid = !filterWildCard(searchedElement, filter.replaceAll("!", ""));
+			} else {
+				valid = filterWildCard(searchedElement, filter.replaceAll("!", ""));
+			}
+			return valid;
 		}
-		return valid;
 	}
+
+	/*
+	@Test
+	public void testSearchField() {
+		assertFalse(searchField("", ""));
+		assertTrue(searchField("tested", ""));
+		assertTrue(searchField("tested", "*"));
+		assertTrue(searchField("tested", "*sted"));
+		assertTrue(searchField("tested", "test*"));
+		assertTrue(searchField("tested", "*est*"));
+		assertFalse(searchField("tested", "*ast*"));
+		assertTrue(searchField("tested", "*st*;*ed"));
+		assertTrue(searchField("tested", "*st*;;*ed"));
+		assertFalse(searchField("tested", "*sta*;*ed"));
+		assertTrue(searchField("tested", "*sta*;;*ed"));
+		assertFalse(searchField("tested", "*sta*;*tad*"));
+		assertFalse(searchField("tested", "*sta*;;*tad*"));
+	}
+	*/
 
 	/**
 	 * Check if filterd elements contains or not the data sent in argument

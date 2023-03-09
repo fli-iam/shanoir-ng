@@ -13,6 +13,7 @@
  */
 
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
+import { ColumnDefinition } from '../column.definition.type';
 import { Filter } from '../pageable.model';
 
 @Component({
@@ -23,7 +24,7 @@ import { Filter } from '../pageable.model';
 
 export class TableSearchComponent implements OnChanges {
 
-    @Input() columnDefs: any[];
+    @Input() columnDefs: ColumnDefinition[];
     @Input() filter: Filter; 
     @Output() filterChange: EventEmitter<Filter> = new EventEmitter<Filter>();
     searchableColumns: any[] = [];
@@ -38,7 +39,7 @@ export class TableSearchComponent implements OnChanges {
         if (!this.columnDefs) return [];
         let cols: any[] = [];
         for (let col of this.columnDefs) {
-            if (col.type != "boolean" && col.type != "button") {
+            if (col.type != "boolean" && col.type != "button" && !col.disableSearch) {
                 cols.push(col);
             }
         }
