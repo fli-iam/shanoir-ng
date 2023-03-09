@@ -303,17 +303,17 @@ public class StudyServiceImpl implements StudyService {
 			for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
 				subjectStudy.setStudy(studyDb);
 			}
+			
+			// Actually delete subjects
+			for (Subject subjectToDelete : toBeDeleted) {
+			    subjectService.deleteById(subjectToDelete.getId());
+			}
 		}
         
 		if (study.getStudyTags() != null) {
 			ListDependencyUpdate.updateWithNoRemove(studyDb.getStudyTags(), study.getStudyTags());
 			for (StudyTag tag : studyDb.getStudyTags()) {
 				tag.setStudy(studyDb);
-			}
-
-			// Actually delete subjects
-			for (Subject subjectToDelete : toBeDeleted) {
-				subjectService.deleteById(subjectToDelete.getId());
 			}
 		}
 
