@@ -198,8 +198,7 @@ export class Step {
     constructor(
             public label: string,
             public route: string,
-            public timestamp: number) {
-    }
+            public timestamp: number) {}
 
     public id = new Date().getTime();
     public subscribers: number = 0;

@@ -46,7 +46,7 @@ wait_mysqld()
 {
 	echo "$HEADER wait mysqld"
 	for i in {30..0} ; do
-		if [ -f /mysql-init-complete ] && $MYSQLADMIN ping ; then
+		if [ -f /var/lib/mysql-files/mysql-init-complete ] && $MYSQLADMIN ping ; then
 			echo "$HEADER wait mysqld done"
 			break
 		fi

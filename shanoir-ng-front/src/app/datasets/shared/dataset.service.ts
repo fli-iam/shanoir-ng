@@ -70,6 +70,11 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
+    getByStudycardId(studycardId: number): Promise<Dataset[]> {
+        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/studycard/' + studycardId)
+            .toPromise()
+            .then(dtos => this.datasetDTOService.toEntityList(dtos));
+}
     getByStudyId(studyId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
                 .toPromise()
@@ -84,7 +89,16 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 .toPromise()
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
-    
+
+    getByIds(ids: Set<number>): Promise<Dataset[]> {
+        const formData: FormData = new FormData();
+        formData.set('datasetIds', Array.from(ids).join(","));
+        
+        return this.http.post<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData)
+            .toPromise()
+            .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
+    }
+
     progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
        switch (event.type) {
             case HttpEventType.Sent:
@@ -155,6 +169,13 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
     download(dataset: Dataset, format: string, converterId: number = null): Promise<void> {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
         return this.downloadFromId(dataset.id, format, converterId);
+    }
+
+    downloadDicomMetadata(datasetId: number): Promise<any> {
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/dicom-metadata/' + datasetId,
+            { responseType: 'json' }
+        ).toPromise();
     }
 
     downloadFromId(datasetId: number, format: string, converterId: number = null): Promise<void> {

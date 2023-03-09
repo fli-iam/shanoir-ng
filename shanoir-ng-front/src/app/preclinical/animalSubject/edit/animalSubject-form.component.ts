@@ -270,7 +270,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.preclinicalSubject.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
-            'name': [this.preclinicalSubject.subject.name, [this.registerOnSubmitValidator('unique', 'name')]],
+            'name': [this.preclinicalSubject.subject.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
             'specie': [this.preclinicalSubject.animalSubject.specie, animal ? [Validators.required] : []],
             'strain': [this.preclinicalSubject.animalSubject.strain, animal ? [Validators.required] : []],
             'biotype': [this.preclinicalSubject.animalSubject.biotype, animal ? [Validators.required] : []],
@@ -290,7 +290,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     onChangeImagedObjectCategory(formGroup: FormGroup){
-        if (this.animalSelected() && this.mode == 'create') {
+        let newCategory: ImagedObjectCategory = formGroup.get('imagedObjectCategory').value;
+        if (newCategory != 'PHANTOM' && newCategory != 'ANATOMICAL_PIECE' && this.mode != 'view') {
             formGroup.get('specie').setValidators([Validators.required]);
             formGroup.get('strain').setValidators([Validators.required]);
             formGroup.get('biotype').setValidators([Validators.required]);
@@ -335,6 +336,10 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 this.chooseRouteAfterSave(this.entity.animalSubject);
                 this.consoleService.log('info', 'Preclinical subject n°' + this.preclinicalSubject.animalSubject.id + ' successfully updated');
                 return this.entity;
+            }).catch(reason => {
+                this.footerState.loading = false;
+                this.catchSavingErrors(reason);
+                return null;
             });
         }else{
             return this.addSubject().then(subject => {
@@ -346,8 +351,11 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 }
                 this.consoleService.log('info', 'New preclinical subject successfully saved with n° ' + this.preclinicalSubject.animalSubject.id);
                 return subject;
-            });
-            
+            }).catch(reason => {
+                this.footerState.loading = false;
+                this.catchSavingErrors(reason);
+                return null;
+            }); 
         }
     }
 

@@ -56,6 +56,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -144,6 +145,9 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private ImporterService importerService;
 	
+	@MockBean
+	private DicomSRImporterService dicomSRImporterService;
+	
 	@Autowired
 	private ObjectMapper mapper;
 
@@ -220,7 +224,6 @@ public class DatasetApiControllerTest {
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
 
-		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
 
 		// WHEN we export all the datasets
@@ -268,7 +271,6 @@ public class DatasetApiControllerTest {
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
 
-		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
 		
 		// WHEN we export all the datasets
@@ -380,7 +382,6 @@ public class DatasetApiControllerTest {
 		expr.setDatasetFiles(Collections.singletonList(dsFile));
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
-		Mockito.when(datasetSecurityService.hasRightOnAtLeastOneDataset(Mockito.anyList(), Mockito.eq("CAN_DOWNLOAD"))).thenReturn(Collections.singletonList(dataset));
 
 		// GIVEN a study with some datasets to export in nii format
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
@@ -395,5 +396,12 @@ public class DatasetApiControllerTest {
 	}
 
 		// THEN we expect a failure
+	}
+
+	@Test
+	public void testCorrectDatasetDownloadName() {
+		// We want to test this code:
+		// datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+		assertEquals("abc_ABC___123.-tru____", "abc ABCé('123.-tru_ç&ù".replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
 	}
 }

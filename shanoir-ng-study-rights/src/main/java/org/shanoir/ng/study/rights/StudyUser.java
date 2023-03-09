@@ -17,9 +17,12 @@ package org.shanoir.ng.study.rights;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -60,6 +63,11 @@ public class StudyUser implements StudyUserInterface {
 	/** User name. Duplicate: master record in ms users. */
 	@NotBlank
 	private String userName;
+
+	@ElementCollection
+	@CollectionTable(name="study_user_center", joinColumns=@JoinColumn(name="study_user_id"))
+	@Column(name = "center_id")
+	private List<Long> centerIds;
 
 	/**
 	 * @return the receiveStudyUserReport
@@ -179,6 +187,15 @@ public class StudyUser implements StudyUserInterface {
 	@Override
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+
+	public List<Long> getCenterIds() {
+		return centerIds;
+	}
+
+	public void setCenterIds(List<Long> centerIds) {
+		this.centerIds = centerIds;
 	}
 
 }

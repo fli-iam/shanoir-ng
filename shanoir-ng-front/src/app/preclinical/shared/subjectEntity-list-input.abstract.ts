@@ -46,6 +46,9 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
     protected abstract getEntity();
  
     protected abstract getEntityList();
+    
+    protected abstract addEntity(subjectEntity: T);
+
 
     protected addToCache(key: string, toBeCached: any) {
         if (!this.breadcrumbsService.currentStep.isPrefilled(key))  {
@@ -100,10 +103,13 @@ export abstract class SubjectAbstractListInput<T extends Entity>  extends Browse
                 this.addToCache(this.getEntityName() + "ToUpdate", subjectEntity);
             }
         }
+        if (subjectEntity) {
+            this.addEntity(subjectEntity);
+        }
         this.onEvent.emit("create");
         this.table.refresh();
     }
-    
+
     protected removeSubjectEntity = (item: T) => {
         const index: number = this.getEntityList().indexOf(item);
         if (index !== -1) {

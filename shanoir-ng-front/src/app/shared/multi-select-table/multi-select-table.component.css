@@ -1,0 +1,7 @@
+:host() { display: inline-block; position: relative; box-sizing: border-box; text-align: left; }
+.block { padding: 1px 5px; border-radius: 10px; border: 1px solid var(--grey); white-space: nowrap; margin-right: 5px; margin-bottom: 3px; vertical-align: middle; display: inline-block;}
+.block i { vertical-align: -1px; }
+.block i, .label { white-space: nowrap; }
+.label { vertical-align: -1px; }
+select-box { width: auto; vertical-align: middle; width: 220px; }
+.remove { cursor: pointer; }

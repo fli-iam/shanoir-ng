@@ -103,8 +103,8 @@ export class UserComponent extends EntityComponent<User> {
     accept(): void {
         this.acceptLoading = true;
         this.userService.confirmAccountRequest(this.id, this.user)
-            .then((user) => {
-                this.consoleService.log('info', 'User "' + user.username + '" saved and confirmed !');
+            .then(() => {
+                this.consoleService.log('info', 'User "' + this.user.username + '" saved and confirmed !');
                 this.goBack();
                 this.acceptLoading = false;
             }).catch(reason => {

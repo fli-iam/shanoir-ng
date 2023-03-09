@@ -36,6 +36,7 @@ import org.shanoir.ng.dataset.modality.CalibrationDataset;
 import org.shanoir.ng.dataset.modality.CtDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.GenericDataset;
+import org.shanoir.ng.dataset.modality.MeasurementDataset;
 import org.shanoir.ng.dataset.modality.MegDataset;
 import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -51,6 +52,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
@@ -80,7 +82,8 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 		@JsonSubTypes.Type(value = SpectDataset.class, name = "Spect"),
 		@JsonSubTypes.Type(value = StatisticalDataset.class, name = "Statistical"),
 		@JsonSubTypes.Type(value = TemplateDataset.class, name = "Template"),
-		@JsonSubTypes.Type(value = BidsDataset.class, name = "BIDS") })
+		@JsonSubTypes.Type(value = BidsDataset.class, name = "BIDS"),
+		@JsonSubTypes.Type(value = MeasurementDataset.class, name = "Measurement") })
 public abstract class Dataset extends AbstractEntity {
 
 	/**
@@ -98,10 +101,12 @@ public abstract class Dataset extends AbstractEntity {
 	private DatasetAcquisition datasetAcquisition;
 
 	/** Dataset expression list. */
+	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "dataset", cascade = CascadeType.ALL)
 	private List<DatasetExpression> datasetExpressions;
 
 	/** Dataset Processing. */
+	@JsonIgnore
 	@ManyToOne(cascade = CascadeType.REMOVE)
 	@JoinColumn(name = "dataset_processing_id")
 	private DatasetProcessing datasetProcessing;
@@ -113,6 +118,7 @@ public abstract class Dataset extends AbstractEntity {
 	private Long groupOfSubjectsId;
 
 	/** Processings for which this dataset is an input. */
+	@JsonIgnore
 	@ManyToMany(mappedBy="inputDatasets")
 	private List<DatasetProcessing> processings;
 
@@ -326,6 +332,17 @@ public abstract class Dataset extends AbstractEntity {
 			return studyId;
 		}
 		return getDatasetAcquisition().getExamination().getStudyId();
+	}
+	
+	/**
+	 * @return the studyId
+	 */
+	@Transient
+	public Long getCenterId() {
+		if (getDatasetAcquisition() == null || getDatasetAcquisition().getExamination() == null) {
+			return studyId;
+		}
+		return getDatasetAcquisition().getExamination().getCenterId();
 	}
 
 	/**

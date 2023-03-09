@@ -204,16 +204,4 @@ public class ExaminationDTO {
 		return null;
 	}
 
-	/**
-	 * Study ID getter.
-	 * @return the study id
-	 */
-	public Long getSubjectId() {
-		if (subject != null) {
-			return subject.getId();
-		}
-		return null;
-	}
-
-
 }

@@ -120,7 +120,7 @@ public interface DatasetProcessingApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(@ApiParam(value = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			BindingResult result) throws RestServiceException;
 
@@ -132,7 +132,7 @@ public interface DatasetProcessingApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PutMapping(value = "/{datasetProcessingId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#datasetProcessingId, #datasetProcessing)")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @controlerSecurityService.idMatches(#datasetProcessingId, #datasetProcessing)")
 	ResponseEntity<Void> updateDatasetProcessing(
 			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
 			@ApiParam(value = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing, BindingResult result)

@@ -25,6 +25,7 @@ import { WindowService } from '../../services/window.service';
 import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
 import { Page, Pageable } from '../table/pageable.model';
 import { TableComponent } from '../table/table.component';
+import { ColumnDefinition } from '..//table/column.definition.type';
 import { Entity, EntityRoutes } from './entity.abstract';
 import { EntityService } from './entity.abstract.service';
 
@@ -32,7 +33,7 @@ import { EntityService } from './entity.abstract.service';
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
 
     abstract table: TableComponent;  
-    columnDefs: any[];
+    columnDefs: ColumnDefinition[];
     customActionDefs: any[];
     protected router: Router;
     protected confirmDialogService: ConfirmDialogService;
@@ -83,7 +84,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         if (options.id != undefined) this.showId = options.id;
     }
 
-    private completeColDefs(): void {
+    protected completeColDefs(): void {
         if (this.edit) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
         }
@@ -107,7 +108,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     }
 
     abstract getPage(pageable: Pageable): Promise<Page<T>>;
-    abstract getColumnDefs(): any[];
+    abstract getColumnDefs(): ColumnDefinition[];
     abstract getCustomActionsDefs(): any[];
 
     public onRowClick(entity: T) {

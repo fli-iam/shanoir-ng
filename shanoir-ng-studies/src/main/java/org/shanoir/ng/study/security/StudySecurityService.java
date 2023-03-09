@@ -26,9 +26,9 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementRepository;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
-import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
@@ -37,6 +37,7 @@ import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class StudySecurityService {
@@ -49,7 +50,7 @@ public class StudySecurityService {
 
 	@Autowired
 	StudyUserRepository studyUserRepository;
-	
+
 	@Autowired
 	DataUserAgreementRepository dataUserAgreementRepository;
 
@@ -475,6 +476,27 @@ public class StudySecurityService {
 			return false;
 		}
 		return studyUser.getStudyUserRights() != null && studyUser.getStudyUserRights().contains(neededRight) && studyUser.isConfirmed();
+	}
+
+	/**
+	 * Filters the centers based on study user limitation.
+	 * @param centers
+	 * @param studyId
+	 * @return
+	 */
+	public boolean filterCenters(List<IdName> centers, Long studyId) {
+		Long userId = KeycloakUtil.getTokenUserId();
+
+		StudyUser su = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+		if (su == null || userId == null) {
+			return false;
+		}
+		if (CollectionUtils.isEmpty(su.getCenters())) {
+			return true;
+		}
+		// Filter only allowed centers.
+		centers.removeIf(center -> !su.getCenterIds().contains(center.getId()));
+		return true;
 	}
 
 }

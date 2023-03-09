@@ -12,11 +12,11 @@ import { KeycloakService } from './app/shared/keycloak/keycloak.service';
 if (environment.production) {
   enableProdMode();
 }
-
-if (window.location.href.endsWith('/account-request') || window.location.href.endsWith('/extension-request') ||  window.location.href.endsWith('/challenge-request')) {
+if (window.location.href == window.origin + '/shanoir-ng/' || window.location.href.endsWith('/welcome')  || window.location.href.endsWith('/account-request') || window.location.href.endsWith('/extension-request') ||  window.location.href.endsWith('/challenge-request')) {
   // Public URL
   platformBrowserDynamic().bootstrapModule(AppModule);
-} else {
+}
+else {
   KeycloakService.init()
     .then(() => {
       platformBrowserDynamic().bootstrapModule(AppModule);
