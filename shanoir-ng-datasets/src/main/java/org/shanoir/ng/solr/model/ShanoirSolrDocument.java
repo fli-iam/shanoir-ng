@@ -61,7 +61,11 @@ public class ShanoirSolrDocument {
 	@Field
 	@Indexed
 	private Date datasetCreationDate;
-	
+
+	@Field
+	@Indexed
+	private Long examinationId;
+
 	@Field
 	@Indexed
 	private String examinationComment;
@@ -107,7 +111,7 @@ public class ShanoirSolrDocument {
 	}
 	
 	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
-			Date datasetCreationDate, String examinationComment, Date examinationDate,
+			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate,
 			String subjectName, String studyName, Long studyId, String centerName, Double sliceThickness,
 			Double pixelBandwidth, Double magneticFieldStrength) {
 		this.id = id;
@@ -116,6 +120,7 @@ public class ShanoirSolrDocument {
 		this.datasetType = datasetType;
 		this.datasetNature = datasetNature;
 		this.datasetCreationDate = datasetCreationDate;
+		this.examinationId = examinationId;
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
 		this.subjectName = subjectName;
@@ -203,6 +208,14 @@ public class ShanoirSolrDocument {
 	 */
 	public void setDatasetCreationDate(Date datasetCreationDate) {
 		this.datasetCreationDate = datasetCreationDate;
+	}
+
+	public Long getExaminationId() {
+		return examinationId;
+	}
+
+	public void setExaminationId(Long examinationId) {
+		this.examinationId = examinationId;
 	}
 
 	/**

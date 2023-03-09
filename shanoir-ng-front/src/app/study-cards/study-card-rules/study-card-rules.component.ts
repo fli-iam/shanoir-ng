@@ -164,7 +164,7 @@ export class StudyCardRulesComponent implements OnChanges, ControlValueAccessor 
     }
 
     setDisabledState?(isDisabled: boolean): void {
-        throw new Error("Method not implemented.");
+        
     }
 
     @HostListener('focusout', ['$event']) 

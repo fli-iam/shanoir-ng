@@ -203,10 +203,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'general'">
-				<legend i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Default access level</legend>
+				<legend i18n="Study detail|Name label@@studyDetailDefaultAccessLevel">Access level</legend>
 				<ol>
 					<li>
-						<label i18n="Study detail|Visible by default label@@studyDetailVisibleByDefault">Visible by default</label>
+						<label i18n="Study detail|Visible by default label@@studyDetailVisibleByDefault">Visible</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<span *ngIf="study.visibleByDefault" class="bool-true"><i class="fas fa-check"></i></span>
@@ -218,7 +218,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
-						<label i18n="Study detail|Data downloadable by default label@@studyDetailDownloadableByDefault">Data downloadable by default</label>
+						<label i18n="Study detail|Data downloadable by default label@@studyDetailDownloadableByDefault">Data accessibility</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								<span *ngIf="study.downloadableByDefault" class="bool-true"><i class="fas fa-check"></i></span>

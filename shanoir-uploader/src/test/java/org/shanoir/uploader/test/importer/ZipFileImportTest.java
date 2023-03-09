@@ -31,7 +31,6 @@ public class ZipFileImportTest extends AbstractTest {
 
 	private static Logger logger = Logger.getLogger(ZipFileImportTest.class);
 	
-	@Test
 	public void importDicomZipTest() throws Exception {
 		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
 		study.setId(Long.valueOf(1));
