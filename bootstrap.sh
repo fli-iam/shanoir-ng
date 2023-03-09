@@ -96,7 +96,7 @@ RUN apt-get update && apt-get install -qqy --no-install-recommends openjdk-11-jd
 EOF
 	# 2. run the maven build
 	mkdir -p /tmp/home
-	docker run --rm -t -i -v "$PWD:/src" -u root -e HOME="/src/tmp/home" \
+	docker run --rm -t -i -v "$PWD:/src" -u "`id -u`:`id -g`" -e HOME="/src/tmp/home" \
 		-e MAVEN_OPTS="-Dmaven.repo.local=/src/tmp/home/.m2/repository"	\
 		-w /src "$DEV_IMG" sh -c 'cd shanoir-ng-parent && mvn clean install -DskipTests'
 
@@ -146,9 +146,9 @@ if [ -n "$deploy" ] ; then
 
 		step "start: keycloak"
 		docker compose up -d keycloak
-		utils/oneshot	'\| *'				\
+		utils/oneshot --pgrp '\| *'				\
 				' INFO  \[io.quarkus\] .* Keycloak .* started in [0-9]*'	\
-				-- docker compose logs --no-color --pgrp --follow keycloak >/dev/null
+				-- docker compose logs --no-color --follow keycloak >/dev/null
 
 	fi
 
