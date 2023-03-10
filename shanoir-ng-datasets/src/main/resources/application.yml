@@ -136,7 +136,7 @@ dcm4chee-arc:
 
 # VIP
 vip:
-  uri: http://192.168.255.18:9090/rest/executions/
+  uri: ${VIP_URL_SCHEME}://${VIP_URL_HOST}/rest/executions/
   upload-folder: /tmp/vip_uploads
   sleep-time: 20000
   file-formats: .nii.gz, .nii
