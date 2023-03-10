@@ -1,11 +1,16 @@
 package org.shanoir.ng.processing.vip;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.aspectj.util.FileUtil;
+import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.model.Execution;
 import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
+import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +33,9 @@ public class VipFakeApiController implements VipFakeApi {
 
 	@Autowired
 	ObjectMapper mapper;
+	
+	@Autowired
+	CarminDatasetProcessingService carminDatasetProcessingService;
 
 	String contentStr;
 	
@@ -80,12 +88,19 @@ public class VipFakeApiController implements VipFakeApi {
     	return new ResponseEntity<Execution>(execution, HttpStatus.OK);
     }
 
-	public ResponseEntity<Execution> getExecution(@ApiParam(value = "identifier of the execution", required = true) @PathVariable("identifier") String identifier) {
+	public ResponseEntity<Execution> getExecution(@ApiParam(value = "identifier of the execution", required = true) @PathVariable("identifier") String identifier) throws IOException {
+		
+		CarminDatasetProcessing processing = carminDatasetProcessingService.findByIdentifier(identifier).get();
+		
 		Execution execution = new Execution();
 		execution.setStatus(ExecutionStatus.FINISHED);
 		execution.setIdentifier(identifier);
-
-		execution.setResultsLocation("/tmp/temp/test.tar");
+		execution.setResultsLocation(processing.getResultsLocation());
+		
+		File fileWhereToCopy = new File("/tmp/temp/" + processing.getResultsLocation());
+		fileWhereToCopy.mkdirs();
+		FileUtil.copyDir(new File("/tmp/temp/result"), fileWhereToCopy);
+		
 		return new ResponseEntity<Execution>(execution, HttpStatus.OK);
 	}
 

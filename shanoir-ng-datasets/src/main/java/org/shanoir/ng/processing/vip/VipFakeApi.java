@@ -1,5 +1,6 @@
 package org.shanoir.ng.processing.vip;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.shanoir.ng.processing.carmin.model.Execution;
@@ -38,6 +39,6 @@ public interface VipFakeApi {
 
     @GetMapping(value = "/executions/{identifier}/summary", produces = { "application/json" }, consumes = {
     "application/json" })
-	public ResponseEntity<Execution> getExecution(@ApiParam(value = "identifier of the execution", required = true) @PathVariable("identifier") String identifier);
+	public ResponseEntity<Execution> getExecution(@ApiParam(value = "identifier of the execution", required = true) @PathVariable("identifier") String identifier) throws IOException;
 
 }

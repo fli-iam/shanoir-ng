@@ -136,7 +136,7 @@ dcm4chee-arc:
 
 # VIP
 vip:
-  uri: http://shanoir-ng-nginx/shanoir-ng/datasets/fakevip/executions;
+  uri: https://shanoir-ng-nginx/shanoir-ng/datasets/fakevip/executions/
   upload-folder: /tmp/temp
   sleep-time: 20000
   file-formats: .nii.gz, .nii

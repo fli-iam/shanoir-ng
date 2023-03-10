@@ -54,6 +54,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * CRON job to request VIP api and create processedDataset
  * 
@@ -103,6 +105,9 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	@Autowired
 	private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
+	@Autowired
+	ObjectMapper mapper;
+
 	@Async
 	@Override
 	@Transactional
@@ -129,8 +134,10 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		while (!stop.get()) {
 
 			// init headers with the active access token
-			HttpHeaders headers = new HttpHeaders();
-			headers.set("Authorization", "Bearer " + this.accessToken);
+			HttpHeaders headers = KeycloakUtil.getKeycloakHeader();
+			//TODO: remove
+			//this.accessToken = KeycloakUtil.getTokenUserId()
+			// headers.set("Authorization", "Bearer " + this.accessToken);
 			HttpEntity entity = new HttpEntity(headers);
 
 			// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
@@ -144,6 +151,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 			try {
 				ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
 				Execution execution = executionResponseEntity.getBody();
+				LOG.error(mapper.writeValueAsString(execution));
 				// init attempts due to successful response
 				attempts = 1;
 				switch (execution.getStatus()) {
@@ -237,9 +245,12 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				cacheFolder.mkdirs();
 			}
 			
+			LOG.error("couccu");
+			
 			// first, find "result" file
 			while ((entry = fin.getNextTarEntry()) != null) {
 				if (this.resultFileName.equals(entry.getName())) {
+					LOG.error("couccu2");
 					// We have the result => Read the file to get the parent datasets
 					/*
 					 {
@@ -250,7 +261,9 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 					*/
 					try {
 						JSONObject obj = new JSONObject(new String(Files.readAllBytes(Paths.get(entry.getFile().getAbsolutePath()))));
-						System.err.println(obj);
+						
+						String datasetValue = (String) obj.get("infile");
+						LOG.error(obj + datasetValue);
 					} catch (Exception e) {
 						LOG.error("Could not read JSON file");
 					}
@@ -261,6 +274,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 				String parsedEntry = entry.getName();
 				LOG.info("tar entry :" + parsedEntry);
+				LOG.error("couccu3");
 
 				if (entry.isDirectory()) {
 					continue;
@@ -374,6 +388,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	 * @return
 	 */
 	private void refreshServiceAccountAccessToken() throws SecurityException {
+		// TODO: Undo
 		//AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
 		this.accessToken = "" + KeycloakUtil.getTokenUserId();
 	}
