@@ -8,6 +8,8 @@ optional SHANOIR_PREFIX
 require  SHANOIR_MIGRATION
 require  SHANOIR_URL_HOST
 require  SHANOIR_URL_SCHEME
+require  VIP_URL_HOST
+require  VIP_URL_SCHEME
 
 handle_microservice_migration
 
