@@ -349,10 +349,15 @@ public class DatasetApiController implements DatasetApi {
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
 
-		String datasetName = "";
-		datasetName += dataset.getId() + "-" + dataset.getName();
+		String subjectName = "unknownSubject";
+		Optional<Subject> subjectOpt = subjectRepo.findById(dataset.getSubjectId());
+		if (subjectOpt.isPresent()) {
+			subjectName = subjectOpt.get().getName();
+		}
+
+		String datasetName = subjectName + "_" + dataset.getId() + "_" + dataset.getName();
 		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
-			datasetName += "-" + dataset.getUpdatedMetadata().getComment();
+			datasetName += "_" + dataset.getUpdatedMetadata().getComment();
 		}
 		// Replace all forbidden characters.
 		datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
@@ -365,14 +370,6 @@ public class DatasetApiController implements DatasetApi {
 		List<URL> pathURLs = new ArrayList<>();
 
 		try {
-			String subjectName = "unknown";
-			Optional<Subject> subjectOpt = subjectRepo.findById(dataset.getSubjectId());
-			if (subjectOpt.isPresent()) {
-				subjectName = subjectOpt.get().getName();
-			}
-			if (subjectName.contains(File.separator)) {
-				subjectName = subjectName.replaceAll(File.separator, "_");
-			}
 
 			if (DCM.equals(format)) {
 				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
