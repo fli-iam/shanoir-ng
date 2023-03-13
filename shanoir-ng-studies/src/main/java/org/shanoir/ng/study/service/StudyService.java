@@ -105,6 +105,13 @@ public interface StudyService {
 	void addStudyUserToStudy(StudyUser studyUser, Study study);
 
 	/**
+	 * Remove a studyUser from a study
+	 * @param studyId
+	 * @param userId
+	 */
+	void removeStudyUserFromStudy(Long studyId, Long userId);
+
+	/**
 	 * Links an examination to a study
 	 * @param examinationId an examination ID
 	 * @param studyId the lionked study ID
