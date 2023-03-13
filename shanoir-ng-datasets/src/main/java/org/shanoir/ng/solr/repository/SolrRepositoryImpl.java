@@ -66,6 +66,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	private static final String DATASET_TYPE_FACET = "datasetType";
 	private static final String DATASET_NATURE_FACET = "datasetNature";
 	private static final String DATASET_CREATION_DATE_FACET = "datasetCreationDate";
+	private static final String EXAMINATION_ID_FACET = "examinationId";
 	private static final String EXAMINATION_COMMENT_FACET = "examinationComment";
 	private static final String EXAMINATION_DATE_FACET = "examinationDate";
 	private static final String SUBJECT_NAME_FACET = "subjectName";
@@ -84,6 +85,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			DATASET_TYPE_FACET,
 			DATASET_NATURE_FACET,
 			DATASET_CREATION_DATE_FACET,
+			EXAMINATION_ID_FACET,
 			EXAMINATION_COMMENT_FACET,
 			EXAMINATION_DATE_FACET,
 			SUBJECT_NAME_FACET,
@@ -299,6 +301,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			solrDoc.setDatasetType((String) document.getFirstValue("datasetType"));
 			solrDoc.setDatasetNature((String) document.getFirstValue("datasetNature"));
 			solrDoc.setDatasetCreationDate((Date) document.getFirstValue("datasetCreationDate"));
+			solrDoc.setExaminationId((Long) document.getFirstValue("examinationId"));
 			solrDoc.setExaminationComment((String) document.getFirstValue("examinationComment"));
 			solrDoc.setExaminationDate((Date) document.getFirstValue("examinationDate"));
 			solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));

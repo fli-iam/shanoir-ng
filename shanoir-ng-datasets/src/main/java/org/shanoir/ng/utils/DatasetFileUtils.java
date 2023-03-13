@@ -1,6 +1,8 @@
 package org.shanoir.ng.utils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FilenameUtils;
+import org.shanoir.ng.dataset.dto.InputDTO;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -8,7 +10,6 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriUtils;
 
 import javax.mail.MessagingException;
@@ -17,18 +18,18 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Stream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import java.util.Map;
 
 public class DatasetFileUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetFileUtils.class);
+
+    public static final String INPUT = "input.json";
 
 
     public static File getUserImportDir(String importDir) {
@@ -64,14 +65,18 @@ public class DatasetFileUtils {
 
     /**
      * Receives a list of URLs containing file:/// urls and copies the files to a folder named workFolder.
+     * Return the list of copied files
+     *
      * @param urls
      * @param workFolder
      * @param subjectName the subjectName
      * @throws IOException
      * @throws MessagingException
+     * @return
      */
-    public static void copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName, boolean keepName) throws IOException {
+    public static List<File> copyNiftiFilesForURLs(final List<URL> urls, final File workFolder, Dataset dataset, Object subjectName, boolean keepName) throws IOException {
         int index = 0;
+        List<File> files = new ArrayList<>();
         for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
             URL url =  iterator.next();
             File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
@@ -117,8 +122,25 @@ public class DatasetFileUtils {
             }
             File destFile = new File(workFolder.getAbsolutePath() + File.separator + fileName);
             Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            files.add(destFile);
             index++;
         }
+        return files;
+    }
+
+    public static void writeInputFileForExport(File tmpDir, Map<Long, List<File>> files2AcquisitionId) throws IOException {
+        InputDTO input = new InputDTO();
+        for (Map.Entry<Long, List<File>> entry : files2AcquisitionId.entrySet()) {
+            InputDTO.InputSerieDTO serie = new InputDTO.InputSerieDTO();
+            serie.setId(entry.getKey());
+            for(File file : entry.getValue()){
+                serie.getFiles().add(file.getAbsolutePath());
+            }
+            input.getSeries().add(serie);
+        }
+
+        String inputPath = tmpDir.getAbsolutePath() + File.separator + INPUT;
+        new ObjectMapper().writerWithDefaultPrettyPrinter().writeValue(Paths.get(inputPath).toFile(), input);
     }
 
 }

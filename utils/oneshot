@@ -11,7 +11,7 @@ set -e
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ] ; then
 	cat <<EOF
-usage:	oneshot PATTERN [PATTERN...] -- COMMAND [ARG1 ...]
+usage:	oneshot [--pgrp] PATTERN [PATTERN...] -- COMMAND [ARG1 ...]
 
 Run a command, monitor its outputs, and kill it after the given patterns have
 been matched.
@@ -29,8 +29,20 @@ termination.
 
 The exit code is the numeber of remaining PATTERNs to be matched (0 if all
 PATTERNs were matched successfully).
+
+With --pgrp, the command is run in a separate session and SIGTERM is sent to
+the whole process group.
 EOF
 	exit 0
+fi
+
+if [ "$1" == "--pgrp" ] ; then
+	shift
+	setsid=setsid
+	kill_cmd() { kill -- "-$1" ; }
+else
+	setsid=
+	kill_cmd() { kill --  "$1" ; }
 fi
 
 patterns=()
@@ -50,9 +62,9 @@ fi
 fifo="`tmp_fifo`"
 trap "rm $fifo" EXIT
 
-exec "$@" >"$fifo" 2>&1 &
+exec $setsid "$@" >"$fifo" 2>&1 &
 pid=$!
-trap "kill $pid" INT TERM
+trap "kill_cmd $pid" INT TERM
 
 # read from the fifo and match each pattern in order
 IFS=
@@ -66,7 +78,7 @@ while read -r line ; do
 	if [[ "$line" =~ ${patterns[-1]} ]] ; then
 		signaled="${#patterns[@]}"
 		echo "  ------------------- sending SIGTERM -----------------------"
-		kill "$pid" || true
+		kill_cmd $pid || true
 		while read -r line ; do
 			echo "$line"
 		done

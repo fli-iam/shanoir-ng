@@ -14,4 +14,4 @@ FROM node:14.15.0-stretch
 
 WORKDIR /app
 
-RUN npm install -g @angular/cli
+RUN npm install -g @angular/cli@11.2.14

@@ -304,9 +304,40 @@ public class AccessRequestApiControllerTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 1)
+	public void inviteExistingUserFromUserNameTest() throws Exception {
+		// We invite an user that exists
+		Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.empty());
+		Mockito.when(this.userService.findByUsername("mail")).thenReturn(Optional.of(user));
+
+		Map<String, Object> theMap = new LinkedHashMap<>();
+		theMap.put("studyId", 1l);
+		theMap.put("studyName", "name");
+		theMap.put("email", "mail");
+
+		MvcResult result = mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.param("studyId", "" + 1l)
+				.param("studyName", "name")
+				.param("email", "mail"))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		AccessRequest request = mapper.readValue(result.getResponse().getContentAsString(), AccessRequest.class);
+		
+		assertEquals(user.getId(), request.getUser().getId());
+		assertEquals("1", ""+request.getStudyId());
+		assertEquals("name", request.getStudyName());
+		assertEquals("From study manager", request.getMotivation());
+		assertEquals(AccessRequest.APPROVED, request.getStatus());
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 1)
 	public void inviteNotExistingUserTest() throws JsonProcessingException, Exception {
 		// We invite an user that does not exists
 		Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.empty());
+		Mockito.when(this.userService.findByUsername("mail")).thenReturn(Optional.empty());
+
 		
 		Map<String, Object> theMap = new LinkedHashMap<>();
 		theMap.put("studyId", 1l);

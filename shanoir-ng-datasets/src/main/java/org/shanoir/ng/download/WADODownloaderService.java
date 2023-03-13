@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -54,7 +55,7 @@ import org.springframework.web.client.RestTemplate;
  * WADO-RS URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.5.html
  * WADO-URI URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.2.html
  * 
- * WADO-RS: http://dcm4chee-arc:8081/dcm4chee-arc/aets/DCM4CHEE/rs/studies/1.4.9.12.22.1.8447.5189520782175635475761938816300281982444
+ * WADO-RS: http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/rs/studies/1.4.9.12.22.1.8447.5189520782175635475761938816300281982444
  * /series/1.4.9.12.22.1.3337.609981376830290333333439326036686033499
  * /instances/1.4.9.12.22.1.3327.13131999371192661094333587030092502791578
  * 
@@ -62,7 +63,7 @@ import org.springframework.web.client.RestTemplate;
  * this class extracts as well the files contained in the response to
  * the file system.
  * 
- * WADO-URI: http://dcm4chee-arc:8081/dcm4chee-arc/aets/DCM4CHEE/wado?requestType=WADO
+ * WADO-URI: http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/wado?requestType=WADO
  * &studyUID=1.4.9.12.22.1.8444.518952078217568647576155668816300281982444
  * &seriesUID=1.4.9.12.22.1.8444.60998137683029030014444439326036686033499
  * &objectUID=1.4.9.12.22.1.8444.1313199937119266109555587030092502791578
@@ -119,16 +120,20 @@ public class WADODownloaderService {
 	/**
 	 * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
 	 * their received dicom files to a folder named workFolder.
-	 * 
+     * Return the list of downloaded files
+	 *
 	 * @param urls
 	 * @param workFolder
 	 * @param subjectName
 	 * @param dataset 
 	 * @throws IOException
 	 * @throws MessagingException
+	 * @return
+	 *
 	 */
-	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
+	public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
 		int i = 0;
+		List<File> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			String url = ((URL) iterator.next()).toString();
 			String instanceUID = null;
@@ -174,12 +179,14 @@ public class WADODownloaderService {
 					}
 					try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 						Files.copy(bIS, extractedDicomFile.toPath());
+						files.add(extractedDicomFile);
 					}
 				} else {
 					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
 				}
 			}
 		}
+		return files;
 	}
 	
 	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {
