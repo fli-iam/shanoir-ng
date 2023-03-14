@@ -1,0 +1,1 @@
+UPDATE mr_protocol_metadata SET parallel_acquisition_technique=6 WHERE parallel_acquisition_technique IS NULL OR parallel_acquisition_technique>6;
