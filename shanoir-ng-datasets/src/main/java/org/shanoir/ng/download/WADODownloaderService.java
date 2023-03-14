@@ -293,7 +293,6 @@ public class WADODownloaderService {
             String json = downloadMetadataFromPACS(urlStr);
             // transform from flat to tree
             try {
-                System.out.println(json);
                 return DicomJsonUtils.inflfateDCM4CheeJSON(json);
                 //tree.put
             } catch (JSONException e) {
