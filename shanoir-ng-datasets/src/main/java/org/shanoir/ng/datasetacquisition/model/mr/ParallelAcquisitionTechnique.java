@@ -44,8 +44,7 @@ public enum ParallelAcquisitionTechnique {
 	MBSENSE(5),
 
 	CSENSE(6),
-
-	// alternative of mSENSE
+	
 	OTHER(7);
 
 	private int id;
