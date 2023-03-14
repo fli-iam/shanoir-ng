@@ -93,7 +93,7 @@ public class CardsProcessingService {
 	 * @throws MicroServiceCommunicationException 
 	 */
 	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard) throws MicroServiceCommunicationException {
-	    if (qualityCard == null) throw new IllegalArgumentException("studycard can't be null");
+	    if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
 		Study study = studyService.findById(qualityCard.getStudyId());
 		if (study == null ) throw new IllegalArgumentException("study can't be null");
 		if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
