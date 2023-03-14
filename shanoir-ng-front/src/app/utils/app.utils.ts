@@ -18,6 +18,7 @@ import { MrDataset } from '../datasets/dataset/mr/dataset.mr.model';
 import { EegDataset } from '../datasets/dataset/eeg/dataset.eeg.model';
 import { Dataset } from '../datasets/shared/dataset.model';
 import { process } from '../process';
+import { environment } from '../../environments/environment';
 
 
 // Base urls
@@ -145,7 +146,7 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
 // carmin
-export const CARMIN_BASE_URL : string = BACKEND_API_URL + "/vip/rest";
+export const CARMIN_BASE_URL : string = environment.vipUrl + "/vip/rest";
 export const BACKEND_API_CARMIN_DATASET_PROCESSING_URL: string = BACKEND_API_DATASET_MS_URL + '/carminDatasetProcessing';
 
 export function hasUniqueError(error: any, fieldName: string): boolean {

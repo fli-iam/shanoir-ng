@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -31,7 +31,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
 
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
     subscribtions: Subscription[] = [];
-    
+
     httpOptions = {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     };
@@ -48,7 +48,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 .toPromise();
     }
 
-    getEntityInstance(entity: Dataset) { 
+    getEntityInstance(entity: Dataset) {
         return DatasetUtils.getDatasetInstance(entity.type);
     }
 
@@ -61,7 +61,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 }
                 return page;
             })
-            .then(this.mapPage); 
+            .then(this.mapPage);
     }
 
     getByAcquisitionId(acquisitionId: number): Promise<Dataset[]> {
@@ -93,7 +93,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
     getByIds(ids: Set<number>): Promise<Dataset[]> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', Array.from(ids).join(","));
-        
+
         return this.http.post<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData)
             .toPromise()
             .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
@@ -117,7 +117,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
-        
+
         let postResponse: Observable<HttpEvent<any>> = this.http.post(
             AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {
                 reportProgress: true,
@@ -151,6 +151,23 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
             })
          );
     }
+
+  public downloadDatasetsByExamination(examinationId: number, format: string, progressBar: LoadingBarComponent) {
+    let params = new HttpParams().set("examinationId", '' + examinationId).set("format", format);
+    this.subscribtions.push(
+      this.http.get(
+        AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination',{
+          reportProgress: true,
+          observe: 'events',
+          responseType: 'blob',
+          params: params
+        }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
+        error =>  {
+          this.errorService. handleError(error);
+          progressBar.progress = 0;
+        })
+    );
+  }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
         let params = new HttpParams().set("studyNameInRegExp", studyNameInRegExp)
@@ -199,8 +216,8 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
 
     exportBIDSBySubjectId(subjectId: number, subjectName: string, studyName: string): void {
         if (!subjectId) throw Error('subject id is required');
-        this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/subjectId/' + subjectId 
-            + '/subjectName/' + subjectName + '/studyName/' + studyName, 
+        this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/subjectId/' + subjectId
+            + '/subjectName/' + subjectName + '/studyName/' + studyName,
             { observe: 'response', responseType: 'blob' }
         ).subscribe(response => {this.downloadIntoBrowser(response);});
     }
@@ -215,7 +232,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         // return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id + '/url/?url=' + url + '&format=' + format);
 
         let httpOptions: any = Object.assign( { responseType: 'text' }, this.httpOptions);
-        
+
         return this.http.post<string>(`${AppUtils.BACKEND_API_DATASET_URL}/prepare-url/${encodeURIComponent(id)}?format=${encodeURIComponent(format)}`, { url: url }, httpOptions);
     }
 
@@ -240,7 +257,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         if (dtos) this.datasetDTOService.toEntityList(dtos, result);
         return Promise.resolve(result);
     }
-    
+
     public stringify(entity: Dataset) {
         let dto = new DatasetDTO(entity);
         return JSON.stringify(dto, (key, value) => {

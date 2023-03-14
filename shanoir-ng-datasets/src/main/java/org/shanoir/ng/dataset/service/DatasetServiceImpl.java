@@ -270,8 +270,13 @@ public class DatasetServiceImpl implements DatasetService {
 			return Utils.toList(repository.findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(studycardId, studyIds));
 		}
 	}
-	
-  @Override
+
+	@Override
+	public List<Dataset> findByExaminationId(Long examinationId) {
+		return Utils.toList(repository.findByDatasetAcquisitionExaminationId(examinationId));
+	}
+
+	@Override
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}

@@ -134,16 +134,20 @@ public class WADODownloaderService {
 	/**
 	 * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
 	 * their received dicom files to a folder named workFolder.
-	 * 
+     * Return the list of downloaded files
+	 *
 	 * @param urls
 	 * @param workFolder
 	 * @param subjectName
 	 * @param dataset 
 	 * @throws IOException
 	 * @throws MessagingException
+	 * @return
+	 *
 	 */
-	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
+	public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
 		int i = 0;
+		List<File> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			String url = ((URL) iterator.next()).toString();
 			String instanceUID = null;
@@ -189,12 +193,14 @@ public class WADODownloaderService {
 					}
 					try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 						Files.copy(bIS, extractedDicomFile.toPath());
+						files.add(extractedDicomFile);
 					}
 				} else {
 					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
 				}
 			}
 		}
+		return files;
 	}
 	
 	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {

@@ -258,6 +258,12 @@ public class DatasetApiSecurityTest {
 		assertAccessDenied(api::massiveDownloadByStudyId, 2L, "file", null);
 		assertAccessDenied(api::massiveDownloadByStudyId, 3L, "file", null);
 		assertAccessDenied(api::massiveDownloadByStudyId, 4L, "file", null);
+
+		//massiveDownloadByExaminationId(Long, String, HttpServletResponse)
+		assertAccessAuthorized(api::massiveDownloadByExaminationId, 1L, "file", null);
+		assertAccessDenied(api::massiveDownloadByExaminationId, 2L, "file", null);
+		assertAccessDenied(api::massiveDownloadByExaminationId, 3L, "file", null);
+		assertAccessDenied(api::massiveDownloadByExaminationId, 4L, "file", null);
 		
 		//downloadStatistics(String, String, String, String)
 		assertAccessDenied(api::downloadStatistics, "", "", "", "");
@@ -411,21 +417,27 @@ public class DatasetApiSecurityTest {
 		// dataset 1
 		Dataset dataset1 = mockDataset(1L, 1L, 1L, 1L, 1L);
 		given(datasetRepository.findById(1L)).willReturn(Optional.of(dataset1));
+		given(datasetRepository.findByDatasetAcquisitionExaminationId(1L)).willReturn(Arrays.asList(new Dataset[]{dataset1}));
 		exam1.setDatasetAcquisitions(Utils.toList(dsAcq1));
 		dsAcq1.setDatasets(Arrays.asList(new Dataset[]{dataset1}));
 		// dataset 2
 		Dataset dataset2 = mockDataset(2L, 2L, 2L, 2L, 3L);
 		given(datasetRepository.findById(2L)).willReturn(Optional.of(dataset2));
+		given(datasetRepository.findByDatasetAcquisitionExaminationId(2L)).willReturn(Arrays.asList(new Dataset[]{dataset2}));
 		exam2.setDatasetAcquisitions(Utils.toList(dsAcq2));
 		dsAcq2.setDatasets(Arrays.asList(new Dataset[]{dataset2}));
 		// dataset 3
 		Dataset dataset3 = mockDataset(3L, 3L, 3L, 3L, 1L);
 		given(datasetRepository.findById(3L)).willReturn(Optional.of(dataset3));
+		given(datasetRepository.findByDatasetAcquisitionExaminationId(3L)).willReturn(Arrays.asList(new Dataset[]{dataset3}));
 		exam3.setDatasetAcquisitions(Utils.toList(dsAcq3));
 		dsAcq3.setDatasets(Arrays.asList(new Dataset[]{dataset3}));
 		// dataset 4
 		Dataset dataset4 = mockDataset(4L, 4L, 4L, 4L, 4L);
+
 		given(datasetRepository.findById(4L)).willReturn(Optional.of(dataset4));
+		given(datasetRepository.findByDatasetAcquisitionExaminationId(4L)).willReturn(Arrays.asList(new Dataset[]{dataset4}));
+
 		exam4.setDatasetAcquisitions(Utils.toList(dsAcq4));
 		dsAcq4.setDatasets(Arrays.asList(new Dataset[]{dataset4}));
 		
