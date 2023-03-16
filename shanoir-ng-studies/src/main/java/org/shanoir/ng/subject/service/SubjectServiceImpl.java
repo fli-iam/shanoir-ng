@@ -315,6 +315,6 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Page<Subject> getFilteredPageByStudies(Pageable page, String name, List<Study> studies) {
 		Iterable<Long> studyIds = studies.stream().map(study -> study.getId()).collect(Collectors.toList());
-		return subjectRepository.findByNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
+		return subjectRepository.findDistinctByNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
 	}
 }
