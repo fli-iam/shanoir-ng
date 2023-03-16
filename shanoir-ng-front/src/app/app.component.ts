@@ -25,6 +25,7 @@ import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm
 import { Router } from '@angular/router';
 import { StudyService } from './studies/shared/study.service';
 import { ConsoleComponent } from './shared/console/console.component';
+import { UserService } from './users/shared/user.service';
 
 
 @Component({
@@ -48,7 +49,8 @@ export class AppComponent {
             private keycloakSessionService: KeycloakSessionService,
             private confirmService: ConfirmDialogService,
             protected router: Router,
-            private studyService: StudyService) {
+            private studyService: StudyService,
+            private userService: UserService) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;        
@@ -57,7 +59,10 @@ export class AppComponent {
     ngOnInit() {
         this.globalService.registerGlobalClick(this.element);
         this.windowService.width = window.innerWidth;
-        if(this.keycloakSessionService.isAuthenticated()) this.duaAlert();        
+        if(this.keycloakSessionService.isAuthenticated()) {
+            this.userService.getAccessRequestsForAdmin();
+            this.duaAlert();
+        }        
     }
 
     @HostListener('window:resize', ['$event'])

@@ -21,10 +21,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</span>
 	</li>
 	<li *ngIf="mode == 'edit' && !studyOptions">
-           <span>Invite a new user using its email or its username.</span>
-           <tool-tip>If an user with such email/username already exists, he will be directly added to the study, otherwise an email with an invitation will be sent.</tool-tip><br/>
-           <input type="text" [(ngModel)]="invitationMail" placeholder="email address">
-           <button type="button" class="invite-button" (click)="inviteUser()">Invite</button><br/>
+           <span>Invite a new user : </span>
+           <input type="text" [(ngModel)]="invitationMail" placeholder="email address / username">
+           <button type="button" class="invite-button right-icon" (click)="inviteUser()">Invite & Add<i class="fa-solid fa-plus"></i></button>
+           <tool-tip>If an user with such email/username already exists, he will be directly added to the study, otherwise an email with an invitation will be sent.</tool-tip>
     </li>
 	<li>
 		<shanoir-table #memberTable
