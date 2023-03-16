@@ -220,7 +220,7 @@ public interface DatasetApi {
 		consumes = { "application/json" },
 		method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
-	ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "co to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException;
+	ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "co to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException, IOException;
 	
     @ApiOperation(value = "", nickname = "massiveDownloadDatasetsByIds", notes = "If exists, returns a zip file of the datasets corresponding to the given ids", response = Resource.class, tags={  })
     @ApiResponses(value = {

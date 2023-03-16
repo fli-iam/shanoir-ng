@@ -466,7 +466,7 @@ public class DatasetApiController implements DatasetApi {
 		}
 	}
 	
-	public ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) {
+	public ResponseEntity<Void> createProcessedDataset(@ApiParam(value = "ProcessedDataset to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws IOException {
 		importerService.createProcessedDataset(importJob);
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
 		importerService.cleanTempFiles(originalNiftiName.getParent());
