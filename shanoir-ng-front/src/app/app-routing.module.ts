@@ -94,6 +94,7 @@ import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-c
 import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
 import {WelcomeComponent} from "./welcome/welcome.component";
 import {LoginGuard} from "./shared/roles/login-guard";
+import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 
 let routes: Routes = [
     {
@@ -802,6 +803,10 @@ let routes: Routes = [
         path: 'access-request/study/:id',
         component: AccessRequestComponent,
         data: { mode: 'create' },
+    },
+    {
+        path: 'access-request/list',
+        component: AccessRequestListComponent
     }
 ];
 

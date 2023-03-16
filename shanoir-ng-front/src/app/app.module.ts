@@ -263,6 +263,7 @@ import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-proce
 import { WelcomeComponent } from './welcome/welcome.component';
 import {LoginGuard} from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
+import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 
 
 @NgModule({
@@ -446,7 +447,8 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         PipelineComponent,
         ExecutionComponent,
         CarminDatasetProcessingsComponent,
-        WelcomeComponent
+        WelcomeComponent,
+        AccessRequestListComponent
     ],
     entryComponents: [
         ConfirmDialogComponent,

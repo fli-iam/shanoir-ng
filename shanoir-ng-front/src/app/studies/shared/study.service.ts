@@ -25,7 +25,7 @@ import {IdName} from '../../shared/models/id-name.model';
 import {SubjectWithSubjectStudy} from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import {StudyUserRight} from './study-user-right.enum';
-import {CenterStudyDTO, PublicStudyDataDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
+import {CenterStudyDTO, PublicStudyData, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
 import {Study} from './study.model';
 import {Profile} from "../../shared/models/profile.model";
 import {saveAs} from "file-saver";
@@ -62,9 +62,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .toPromise();
     }
 
-    getPublicStudiesData(): Promise<PublicStudyDataDTO[]> {
-      return this.http.get<PublicStudyDataDTO[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
-        .toPromise().then((typeResult: PublicStudyDataDTO[]) => {
+    getPublicStudiesData(): Promise<PublicStudyData[]> {
+      return this.http.get<PublicStudyData[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
+        .toPromise().then((typeResult: PublicStudyData[]) => {
           return typeResult;
         });
     }

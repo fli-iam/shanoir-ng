@@ -325,7 +325,7 @@ export class CenterStudyDTO {
     tags: Tag[];
 }
 
-export class PublicStudyDataDTO {
+export class PublicStudyData {
   downloadableByDefault: boolean;
   endDate: Date;
   id: number;
@@ -333,7 +333,7 @@ export class PublicStudyDataDTO {
   nbExaminations: number;
   nbSubjects: number;
   startDate: Date;
-  studyStatus: string;
+  studyStatus: "IN_PROGRESS" | "FINISHED";
   studyType: StudyType;
   description: string;
   studyTags: Tag[];

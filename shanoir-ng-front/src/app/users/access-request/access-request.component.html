@@ -12,11 +12,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2 *ngIf="mode == 'create'" class="header command-zone"i18n="Account request|Title@@accountRequestTitle">Request an access to a new study.</h2>
-<h2 *ngIf="mode == 'edit'" class="header command-zone"i18n="Account request|Title@@accountRequestTitle">Resolve an access request.</h2>
+<h2 *ngIf="mode == 'create'" class="header command-zone">Request An Access</h2>
+<h2 *ngIf="mode == 'edit'" class="header command-zone">Edit Access Request</h2>
+<h2 *ngIf="mode == 'view'" class="header command-zone">Access Request</h2>
 <div #formContainer class="content-component">
     <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
-	    <ol>
+	    <ul>
 	        <li *ngIf="mode == 'create' && !fromStudy">
 	            <label i18n="access request|study label@@study" class="required-label">Study</label>
 	            <span class="right-col">
@@ -33,7 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 >
 	        </li>
 	       <li *ngIf="mode == 'create' && fromStudy">
-	            <span> You have been invited to join a new study on shanoir, please confirm you access request.</span>
+	            <span> You have requested to join a study on shanoir, please add a message for the study administrator and confirm you access request.</span>
 	            <br/>
 	            <br/>
                 <input type = hidden
@@ -69,9 +70,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     {{accessRequest.motivation}}
                 </span>
             </li>
-	    </ol>
-	<button *ngIf="mode == 'view'" (click)="acceptRequest()">Accept</button>
-    <button *ngIf="mode == 'view'" (click)="refuseRequest()">Refuse</button>
+	    </ul>
+        <button type="button" (click)="acceptRequest()" class="accept right-icon">
+            Accept
+            <i class="fa-solid fa-thumbs-up"></i>
+        </button>
+        <button type="button" (click)="refuseRequest()" class="refuse right-icon">
+            Refuse
+            <i class="fa-solid fa-thumbs-down"></i>
+        </button>
     <form-footer
     [state]="footerState"
     (save)="save()"
