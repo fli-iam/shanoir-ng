@@ -258,6 +258,12 @@ public class DatasetApiSecurityTest {
 		assertAccessDenied(api::massiveDownloadByStudyId, 2L, "file", null);
 		assertAccessDenied(api::massiveDownloadByStudyId, 3L, "file", null);
 		assertAccessDenied(api::massiveDownloadByStudyId, 4L, "file", null);
+
+		//massiveDownloadByExaminationId(Long, String, HttpServletResponse)
+		assertAccessAuthorized(api::massiveDownloadByExaminationId, 1L, "file", null);
+		assertAccessDenied(api::massiveDownloadByExaminationId, 2L, "file", null);
+		assertAccessDenied(api::massiveDownloadByExaminationId, 3L, "file", null);
+		assertAccessDenied(api::massiveDownloadByExaminationId, 4L, "file", null);
 		
 		//downloadStatistics(String, String, String, String)
 		assertAccessDenied(api::downloadStatistics, "", "", "", "");
@@ -287,7 +293,7 @@ public class DatasetApiSecurityTest {
 	private Examination mockExam(Long id, Long centerId, Long studyId) {
 		Examination exam = mockExam(id);
 		exam.setCenterId(centerId);
-		exam.setStudyId(studyId);
+		exam.setStudy(mockStudy(studyId));
 		return exam;
 	}
 	
@@ -371,18 +377,18 @@ public class DatasetApiSecurityTest {
 		Examination exam4 = mockExam(4L, 4L, 4L);
 		given(examinationRepository.findById(4L)).willReturn(Optional.of(exam4));
 		// exam 1 & 3 are in study 1 > subject 1 (but in different centers)
-		given(examinationRepository.findBySubjectIdAndStudyId(1L, 1L)).willReturn(Utils.toList(exam1, exam3));
+		given(examinationRepository.findBySubjectIdAndStudy_Id(1L, 1L)).willReturn(Utils.toList(exam1, exam3));
 		given(examinationRepository.findBySubjectId(1L)).willReturn(Utils.toList(exam1, exam3));
 		// exam 2 is in study 2 > subject 2
-		given(examinationRepository.findBySubjectIdAndStudyId(2L, 2L)).willReturn(Utils.toList(exam2));
+		given(examinationRepository.findBySubjectIdAndStudy_Id(2L, 2L)).willReturn(Utils.toList(exam2));
 		given(examinationRepository.findBySubjectId(2L)).willReturn(Utils.toList(exam2));
 		//exam 4 is in study 4 > subject 4
-		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(Utils.toList(exam4));
+		given(examinationRepository.findBySubjectIdAndStudy_Id(4L, 4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
 		//given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Utils.toList(exam1)));
 		
-		given(examinationRepository.findByStudyId(1L)).willReturn(Utils.toList(exam1, exam3));
-		given(examinationRepository.findByStudyId(2L)).willReturn(Utils.toList(exam2));
+		given(examinationRepository.findByStudy_Id(1L)).willReturn(Utils.toList(exam1, exam3));
+		given(examinationRepository.findByStudy_Id(2L)).willReturn(Utils.toList(exam2));
 		
 		
 		DatasetAcquisition dsAcq1 = mockDsAcq(1L, 1L, 1L, 1L);
@@ -411,21 +417,27 @@ public class DatasetApiSecurityTest {
 		// dataset 1
 		Dataset dataset1 = mockDataset(1L, 1L, 1L, 1L, 1L);
 		given(datasetRepository.findById(1L)).willReturn(Optional.of(dataset1));
+		given(datasetRepository.findByDatasetAcquisitionExaminationId(1L)).willReturn(Arrays.asList(new Dataset[]{dataset1}));
 		exam1.setDatasetAcquisitions(Utils.toList(dsAcq1));
 		dsAcq1.setDatasets(Arrays.asList(new Dataset[]{dataset1}));
 		// dataset 2
 		Dataset dataset2 = mockDataset(2L, 2L, 2L, 2L, 3L);
 		given(datasetRepository.findById(2L)).willReturn(Optional.of(dataset2));
+		given(datasetRepository.findByDatasetAcquisitionExaminationId(2L)).willReturn(Arrays.asList(new Dataset[]{dataset2}));
 		exam2.setDatasetAcquisitions(Utils.toList(dsAcq2));
 		dsAcq2.setDatasets(Arrays.asList(new Dataset[]{dataset2}));
 		// dataset 3
 		Dataset dataset3 = mockDataset(3L, 3L, 3L, 3L, 1L);
 		given(datasetRepository.findById(3L)).willReturn(Optional.of(dataset3));
+		given(datasetRepository.findByDatasetAcquisitionExaminationId(3L)).willReturn(Arrays.asList(new Dataset[]{dataset3}));
 		exam3.setDatasetAcquisitions(Utils.toList(dsAcq3));
 		dsAcq3.setDatasets(Arrays.asList(new Dataset[]{dataset3}));
 		// dataset 4
 		Dataset dataset4 = mockDataset(4L, 4L, 4L, 4L, 4L);
+
 		given(datasetRepository.findById(4L)).willReturn(Optional.of(dataset4));
+		given(datasetRepository.findByDatasetAcquisitionExaminationId(4L)).willReturn(Arrays.asList(new Dataset[]{dataset4}));
+
 		exam4.setDatasetAcquisitions(Utils.toList(dsAcq4));
 		dsAcq4.setDatasets(Arrays.asList(new Dataset[]{dataset4}));
 		
@@ -435,7 +447,7 @@ public class DatasetApiSecurityTest {
 		given(rightsRepository.findByUserId(LOGGED_USER_ID)).willReturn(Arrays.asList(new StudyUser[]{su1}));
 		given(datasetRepository.findAll(Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Dataset[]{dataset1, dataset3})));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L, 2L));
-		given(datasetRepository.findByDatasetAcquisitionExaminationStudyIdIn(Arrays.asList(1L, 2L), PageRequest.of(0, 10).getSort())).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset2, dataset3}))));
+		given(datasetRepository.findByDatasetAcquisitionExaminationStudy_IdIn(Arrays.asList(1L, 2L), PageRequest.of(0, 10).getSort())).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset2, dataset3}))));
 		
 		given(datasetRepository.findAllById(Utils.toList(1L))).willReturn(Utils.toList(dataset1));
 		given(datasetRepository.findAllById(Utils.toList(1L, 3L))).willReturn(Utils.toList(dataset1, dataset3));

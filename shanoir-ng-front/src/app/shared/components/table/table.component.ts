@@ -19,7 +19,6 @@ import { ModalComponent } from '../../../shared/components/modal/modal.component
 import { GlobalService } from '../../services/global.service';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
 import * as shajs from 'sha.js';
-import { SolrResultPage } from '../../../solr/solr.document.model';
 import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ColumnDefinition } from './column.definition.type';
@@ -33,7 +32,7 @@ import {isDarkColor} from "../../../utils/app.utils";
     animations: [slideDown]
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
-    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<SolrResultPage>;
+    @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>> | Page<any>;
     @Input() columnDefs: ColumnDefinition[];
     @Input() subRowsDefs: ColumnDefinition[];
     @Input() customActionDefs: any[];
@@ -43,6 +42,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Output() selectionChange: EventEmitter<Set<number>> = new EventEmitter<Set<number>>();
     selectAll: boolean | 'indeterminate' = false;
     @Input() browserSearch: boolean = true;
+    @Input() collapseControls: boolean = false;
     @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
@@ -249,6 +249,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         }
     }
 
+    getCellGraphics(item: any, col: ColumnDefinition): any {
+        if (col.hasOwnProperty("cellGraphics")) {
+            return col["cellGraphics"](item);
+        } else return null;
+    }
+
     /**
      * Test if a cell content is a boolean
      */
@@ -306,32 +312,41 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         return type != null ? "cell-" + type : "";
     }
 
-    goToPage(p: number, forceRefresh: boolean = false): Promise<SolrResultPage> {
+    goToPage(p: number, forceRefresh: boolean = false): Promise<Page<any>> {
         this.currentPage = p;
         this.isLoading = true;
-        return this.getPage(this.getPageable(), forceRefresh).then(page => {
-            this.page = page;
-            this.computeItemVars();
-            this.maxResultsField = page ? page.size : 0;
-            this.computeSelectAll();
-            setTimeout(() => {
-                this.isError = false;
-                this.isLoading = false;
-            }, 200);
-            return page;
-        }).catch(reason => {
-            setTimeout(() => {
-                this.isError = true;
-                this.isLoading = false;
-            }, 200);
-            throw reason;
-        });
+        let getPage: Page<any> | Promise<Page<any>> =  this.getPage(this.getPageable(), forceRefresh)
+        if (getPage instanceof Promise) {
+            return getPage.then(page => {
+                return this.computePage(page);
+            }).catch(reason => {
+                setTimeout(() => {
+                    this.isError = true;
+                    this.isLoading = false;
+                }, 200);
+                throw reason;
+            });
+        } else if (getPage instanceof Page) {
+            return Promise.resolve(this.computePage(getPage));
+        }
+    }
+
+    private computePage(page: Page<any>): Page<any> {
+        this.page = page;
+        this.computeItemVars();
+        this.maxResultsField = page ? page.size : 0;
+        this.computeSelectAll();
+        setTimeout(() => {
+            this.isError = false;
+            this.isLoading = false;
+        }, 200);
+        return page;
     }
 
     /**
      * Call to refresh from outside
      */
-    public refresh(page?: number): Promise<SolrResultPage> {
+    public refresh(page?: number): Promise<Page<any>> {
         if (page == undefined) {
             return this.goToPage(this.currentPage, true);
         } else {

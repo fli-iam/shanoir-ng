@@ -50,6 +50,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() userChange = new EventEmitter();
     @Output() selectOption = new EventEmitter();
     @Output() deSelectOption = new EventEmitter();
+    @Output() onUserClear = new EventEmitter();
     @Input() options: Option<any>[];
     @Input() optionArr: any[];
     @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
@@ -57,8 +58,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public displayedOptions: Option<any>[] = [];
     @ViewChild('input', { static: false }) textInput: ElementRef;
     @ViewChild('hiddenOption', { static: false }) hiddenOption: ElementRef;
-    private inputValue: any;
-    private _selectedOptionIndex: number;
+    inputValue: any;
+    private _selectedOptionIndex: number = null;
     public focusedOptionIndex: number;
     private _firstScrollOptionIndex: number;
     private filteredOptions: FilteredOptions;
@@ -76,6 +77,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() placeholder: string;
     public maxWidth: number;
     public noResult: boolean;
+    @Input() clear: boolean = true;
+    @Input() search: boolean = true;
+    @Input() selectionColor: boolean = false;
 
     @Input() viewDisabled: boolean;
     @Input() viewHidden: boolean;
@@ -204,12 +208,12 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this._selectedOptionIndex = index;
             if (this.selectedOption) {
                 this.inputText = this.selectedOption.label;
-                //this.onChangeCallback(this.selectedOption.value);
-                //this.selectOption.emit(this.selectedOption);
+                this.onChangeCallback(this.selectedOption.value);
+                this.selectOption.emit(this.selectedOption);
             } else {
                 this.inputText = null;
-                //this.onChangeCallback(null);
-                //this.selectOption.emit(null);
+                this.onChangeCallback(null);
+                this.selectOption.emit(null);
             }
             if (previousOption) {
                 this.deSelectOption.emit(previousOption);
@@ -281,6 +285,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             return;
         }
         this.displayedOptions = this.displayableOptions.slice(this.firstScrollOptionIndex, this.firstScrollOptionIndex + this.LIST_LENGTH);
+        this.displayedOptions = this.displayedOptions.sort((a, b) => (a.section > b.section) ? -1 : 1);
         this.noResult = this.displayedOptions.length == 0;
     }
     
@@ -407,7 +412,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             event.preventDefault();
         } else if (' ' == event.key) {
             if (!this.isOpen()) this.open();
-        }  else if (event.keyCode >= 65 && event.keyCode <= 90) {
+        }  else if (this.search && event.keyCode >= 65 && event.keyCode <= 90) {
             if (this.textInput.nativeElement != document.activeElement) {
                 this.inputText = null;
                 this.textInput.nativeElement.focus();
@@ -549,6 +554,11 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
     }
 
+    onClear() {
+        this.onUserClear.emit(this.selectedOption);
+        this.onTypeText(null);
+    }
+
     public onTypeText(text: string) {
         this.unSelectOption();
         this.onChangeCallback(null);
@@ -625,13 +635,23 @@ export class Option<T> {
 
     disabled: boolean = false;
     compatible: boolean = undefined;
-    color: string;
     backgroundColor: string;
       
     constructor(
         public value: T,
         public label: string,
-        public section?: string) {}
+        public section?: string,
+        public color?: string,
+        public awesome?: string) {}
+
+    clone(): Option<T> {
+        let option: Option<T> = new Option(this.value, this.label, this.section);
+        option.disabled = this.disabled;
+        option.compatible = this.compatible;
+        option.color = this.color;
+        option.backgroundColor = this.backgroundColor;
+        return option;
+    }
 }
 
 export class FilteredOptions {

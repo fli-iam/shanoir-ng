@@ -645,7 +645,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         if (!studycard) return false;
         for (let rule of studycard.rules) {
             for (let ass of rule.assignments) {
-                if (ass.field.endsWith('_COIL') && !(ass.value instanceof Coil)) {
+                if (ass.field?.endsWith('_COIL') && !(ass.value instanceof Coil)) {
                     return true;
                 }
             }

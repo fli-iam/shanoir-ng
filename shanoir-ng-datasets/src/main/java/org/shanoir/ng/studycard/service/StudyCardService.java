@@ -22,43 +22,14 @@ import org.shanoir.ng.studycard.model.StudyCard;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-public interface StudyCardService {
-
+public interface StudyCardService extends CardService<StudyCard> {
+	
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
+	List<StudyCard> findStudyCardsByAcqEq (Long acqEqId);
+	
+	@Override
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudyCard(#id, 'CAN_ADMINISTRATE'))")
 	void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
-
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#studyCard.getStudyId(), 'CAN_ADMINISTRATE'))")
-	StudyCard save(StudyCard studyCard) throws MicroServiceCommunicationException;
-	
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnStudyCard(#studyCard, 'CAN_ADMINISTRATE'))")
-	StudyCard update(StudyCard studyCard) throws EntityNotFoundException, MicroServiceCommunicationException;
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
-	List<StudyCard> findAll();
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("returnObject == null || @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
-	StudyCard findById(Long id);
-	
-	/**
-	 * Find template by its id.
-	 *
-	 * @param id template id.
-	 * @return a template or null.
-	 */
-	StudyCard findByName(String name);
-
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
-	List<StudyCard> search(List<Long> studyIdList);
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
-	List<StudyCard> findStudyCardsOfStudy (Long studyId);
-	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject, 'CAN_SEE_ALL')")
-	List<StudyCard> findStudyCardsByAcqEq (Long acqEqId);
 
 }

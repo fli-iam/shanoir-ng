@@ -13,7 +13,7 @@
  */
 
 import { Component, ViewChild, ElementRef, OnChanges, Input} from '@angular/core';
-import { FormGroup,  Validators } from '@angular/forms';
+import { UntypedFormGroup,  Validators } from '@angular/forms';
 import { HttpResponse } from '@angular/common/http';
 
 import { ContrastAgent }    from '../../contrastAgent/shared/contrastAgent.model';
@@ -143,7 +143,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         let numericRegex = /\-?\d*\.?\d{1,2}/;
 
         return this.formBuilder.group({

@@ -39,9 +39,13 @@ public enum ParallelAcquisitionTechnique {
 	
 	// mSENSE
 	M_SENSE(5),
-	
+
 	// alternative of mSENSE
-	MBSENSE(5);
+	MBSENSE(5),
+
+	CSENSE(6),
+	
+	OTHER(7);
 
 	private int id;
 
@@ -66,11 +70,13 @@ public enum ParallelAcquisitionTechnique {
 	 */
 	public static ParallelAcquisitionTechnique getTechnique(final Integer id) {
 		if (id == null) {
-			return null;
+			return OTHER;
 		}
 		for (ParallelAcquisitionTechnique technique : ParallelAcquisitionTechnique.values()) {
 			if (id.equals(technique.getId())) {
 				return technique;
+			} else {
+				return OTHER;
 			}
 		}
 		throw new IllegalArgumentException("No matching parallel acquisition technique for id " + id);
@@ -79,7 +85,7 @@ public enum ParallelAcquisitionTechnique {
 	/**
 	 * Get a parallel acquisition technique by its id.
 	 * 
-	 * @param id
+	 * @param technique
 	 *            technique id.
 	 * @return parallel acquisition technique.
 	 */

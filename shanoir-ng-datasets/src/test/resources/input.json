@@ -1,0 +1,9 @@
+{
+  "series" : [ {
+    "id" : 1,
+    "files" : [ "/path/to/file_1.dcm", "/path/to/file_2.dcm", "/path/to/file_3.dcm" ]
+  }, {
+    "id" : 2,
+    "files" : [ "/path/to/file_4.dcm", "/path/to/file_5.dcm" ]
+  } ]
+}

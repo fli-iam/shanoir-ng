@@ -51,7 +51,6 @@ public class JacksonConfiguration {
 				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-
     /**
      * Allows to configure a {@link JsonSerializer} for pagination.
      *
@@ -71,7 +70,6 @@ public class JacksonConfiguration {
         @Override
         public void serialize(@SuppressWarnings("rawtypes") final Page page, final JsonGenerator jsonGenerator,
                 final SerializerProvider serializers) throws IOException {
-
         	defaultSerializer.serialize(page, jsonGenerator, serializers);
         }
     }
@@ -85,4 +83,5 @@ public class JacksonConfiguration {
             return serializer;
         }
     }
+
 }

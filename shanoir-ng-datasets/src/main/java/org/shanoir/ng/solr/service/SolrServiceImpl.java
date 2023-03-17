@@ -139,7 +139,7 @@ public class SolrServiceImpl implements SolrService {
 		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
 
 		// Get tags
-		List<SubjectStudy> list = subjectStudyRepo.findByStudyIdInAndSubjectIdIn(Collections.singletonList(shanoirMetadata.getStudyId()), Collections.singletonList(shanoirMetadata.getSubjectId()));
+		List<SubjectStudy> list = subjectStudyRepo.findByStudy_IdInAndSubjectIdIn(Collections.singletonList(shanoirMetadata.getStudyId()), Collections.singletonList(shanoirMetadata.getSubjectId()));
 
 		List<String> tags = new ArrayList<>();
 		if (list != null) {
@@ -199,7 +199,7 @@ public class SolrServiceImpl implements SolrService {
 	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
 		return new ShanoirSolrDocument(String.valueOf(shanoirMetadata.getDatasetId()), shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
 				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
-				shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
+				shanoirMetadata.getExaminationId(), shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
 				shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
 				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
 	}

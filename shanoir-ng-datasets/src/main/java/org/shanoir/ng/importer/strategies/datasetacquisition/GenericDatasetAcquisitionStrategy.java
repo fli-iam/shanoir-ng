@@ -18,7 +18,6 @@ import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.studycard.service.StudyCardProcessingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +30,6 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 
 	@Autowired
 	private DicomProcessing dicomProcessing;
-	
-	@Autowired
-	private StudyCardProcessingService studyCardProcessingService;
 	
 	@Autowired
 	private DatasetStrategy<GenericDataset> datasetStrategy;
@@ -73,7 +69,7 @@ public class GenericDatasetAcquisitionStrategy implements DatasetAcquisitionStra
 		datasetAcquisition.setDatasets(genericizedList);
 		
 		if (studyCard != null) {
-			studyCardProcessingService.applyStudyCard(datasetAcquisition, studyCard, dicomAttributes);
+		    studyCard.apply(datasetAcquisition, dicomAttributes);
 		}
 		
 		return datasetAcquisition;

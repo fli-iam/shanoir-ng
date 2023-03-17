@@ -12,12 +12,18 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.studycard.model;
+package org.shanoir.ng.studycard.repository;
 
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import java.util.List;
 
-public interface DatasetFieldUpdater {
-	
-	void update(DatasetAcquisition datasetAcquisition, String updatedValue);
-	
+import org.shanoir.ng.studycard.model.QualityCard;
+import org.springframework.data.repository.CrudRepository;
+
+public interface QualityCardRepository extends CrudRepository<QualityCard, Long> {
+
+    List<QualityCard> findByStudyIdIn(List<Long> studyIdList);
+    
+    QualityCard findByName(String name);
+
+    List<QualityCard> findByStudyId(Long studyId);
 }

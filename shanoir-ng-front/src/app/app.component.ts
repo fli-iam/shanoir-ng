@@ -53,7 +53,7 @@ export class AppComponent {
             private studyService: StudyService) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
-        ServiceLocator.rootViewContainerRef = this.viewContainerRef;        
+        ServiceLocator.rootViewContainerRef = this.viewContainerRef;
     }
 
     ngOnInit() {

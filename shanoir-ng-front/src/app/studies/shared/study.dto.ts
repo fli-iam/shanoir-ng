@@ -196,6 +196,7 @@ export class StudyDTOService {
         } else {
           subjectStudy.tags = [];
         }
+        subjectStudy.qualityTag = subjectStudyDto.qualityTag;
         return subjectStudy;
     }
 

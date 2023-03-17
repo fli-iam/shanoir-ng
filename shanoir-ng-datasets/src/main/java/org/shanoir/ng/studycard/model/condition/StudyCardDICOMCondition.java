@@ -1,0 +1,120 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
+package org.shanoir.ng.studycard.model.condition;
+
+import java.math.BigDecimal;
+
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
+import org.apache.commons.lang3.StringUtils;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.StandardElementDictionary;
+import org.dcm4che3.data.VR;
+import org.shanoir.ng.studycard.model.DicomTagType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+@Entity
+@DiscriminatorValue("StudyCardDICOMCondition")
+@JsonTypeName("StudyCardDICOMCondition")
+public class StudyCardDICOMCondition extends StudyCardCondition {
+	
+    private static final Logger LOG = LoggerFactory.getLogger(StudyCardDICOMCondition.class);
+    
+	private int dicomTag;
+	
+	public Integer getDicomTag() {
+        return dicomTag;
+    }
+
+    public void setDicomTag(Integer dicomTag) {
+        this.dicomTag = dicomTag;
+    }
+    
+    public boolean fulfilled(Attributes dicomAttributes) {
+        return fulfilled(dicomAttributes, null);
+    }
+        
+    public boolean fulfilled(Attributes dicomAttributes, StringBuffer errorMsg) {
+        LOG.info("conditionFulfilled: " + this.getId() + " processing one condition with all its values: ");
+        this.getValues().stream().forEach(s -> LOG.info(s));
+        VR tagVr = StandardElementDictionary.INSTANCE.vrOf(this.getDicomTag());
+        DicomTagType tagType = DicomTagType.valueOf(tagVr);
+        // get all possible values, that can fulfill the condition
+        for (String value : this.getValues()) {
+            if (tagType.isNumerical()) {
+                if (!this.getOperation().isNumerical()) {
+                    throw new IllegalArgumentException("Study card processing : operation " + this.getOperation() + " is not compatible with dicom tag " 
+                            + this.getDicomTag() + " of type " + tagType + "(condition id : " + this.getId() + ")");
+                }
+                BigDecimal scValue = new BigDecimal(value);
+                Integer comparison = null;
+                if (DicomTagType.Float.equals(tagType)) {
+                    Float floatValue = dicomAttributes.getFloat(this.getDicomTag(), Float.MIN_VALUE);          
+                    comparison = BigDecimal.valueOf(floatValue).compareTo(scValue);
+                // There is no dicomAttributes.getLong() !
+                }   else if (DicomTagType.Double.equals(tagType) || DicomTagType.Long.equals(tagType)) {
+                    Double doubleValue = dicomAttributes.getDouble(this.getDicomTag(), Double.MIN_VALUE);          
+                    comparison = BigDecimal.valueOf(doubleValue).compareTo(scValue);
+                } else if (DicomTagType.Integer.equals(tagType)) {
+                    Integer integerValue = dicomAttributes.getInt(this.getDicomTag(), Integer.MIN_VALUE);
+                    comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
+                }
+                if (comparison != null && numericalCompare(this.getOperation(), comparison)) {
+                    errorMsg.append("condition [" + toString() + "] succeed");
+                    return true; // as condition values are combined by OR: return if one is true
+                }
+            } else if (tagType.isTextual()) {
+                if (!this.getOperation().isTextual()) {
+                    throw new IllegalArgumentException("Study card processing : operation " + this.getOperation() + " is not compatible with dicom tag " 
+                            + this.getDicomTag() + " of type " + tagType + "(condition id : " + this.getId() + ")");
+                }   
+                String stringValue = dicomAttributes.getString(this.getDicomTag());
+                if (stringValue == null) {
+                    LOG.warn("Could not find a value in the dicom for the tag " + this.getDicomTag());
+                    errorMsg.append("condition [" + toString() 
+                        + "] failed because no value was found in the dicom for the tag " + this.getDicomTag());
+                    return false;
+                }               
+                if (textualCompare(this.getOperation(), stringValue, value)) {
+                    errorMsg.append("condition [" + toString() + "] succeed");
+                    return true; // as condition values are combined by OR: return if one is true
+                }
+            }
+        }
+        errorMsg.append("condition [" + toString() + "] failed ");
+        return false;
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("DICOM field n°").append(getDicomTagHexString(getDicomTag()))
+            .append(" ").append(getOperation().name())
+            .append(" to ")
+            .append(StringUtils.join(getValues(), " or "));        
+        return sb.toString();
+    }
+    
+    private String getDicomTagHexString(int tag) {
+        String hexStr = Integer.toHexString(tag);
+        hexStr = StringUtils.leftPad(hexStr, 8, "0");
+        hexStr = hexStr.substring(0, 5) + "," + hexStr.substring(5);
+        return hexStr;
+    }
+}
