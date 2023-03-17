@@ -14,7 +14,6 @@
 
 import { SimpleSubject } from "../../subjects/shared/subject.model";
 import { Sex } from "../../subjects/shared/subject.types";
-import {Profile} from "../../shared/models/profile.model";
 
 export class ImportJob {
     fromDicomZip: boolean;
@@ -40,7 +39,7 @@ export class PatientDicom {
     subject: SimpleSubject;
     patientID: string;
     patientName: string;
-    patientBirthDate: Date;
+    patientBirthDate: string;
     patientSex: Sex;
     patientIdentityRemoved: boolean;
     deIdentificationMethod: string;
@@ -61,7 +60,7 @@ export class SerieDicom {
     protocolName: string;
     seriesDescription: string;
     sequenceName:string;
-    seriesDate: Date;
+    seriesDate: string;
     seriesNumber: number;
     numberOfSeriesRelatedInstances: number;
     sopClassUID: string;

@@ -95,6 +95,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	ObjectMapper mapper;
+
+	@Autowired
+	AccessRequestService accessRequestService;
 	
 	@Override
 	public User confirmAccountRequest(final User user) throws EntityNotFoundException, AccountNotOnDemandException {
@@ -135,6 +138,10 @@ public class UserServiceImpl implements UserService {
 		if (user == null) {
 			throw new EntityNotFoundException(User.class, id);
 		}
+		List<AccessRequest> requests = this.accessRequestService.findByUserId(id);
+		for (AccessRequest request : requests) {
+			this.accessRequestService.deleteById(request.getId());
+		}
 		userRepository.deleteById(id);
 		publisher.publishEvent(new UserDeleteEvent(id));
 		
@@ -161,6 +168,12 @@ public class UserServiceImpl implements UserService {
 		}
 		if (user.isAccountRequestDemand() != null && user.isAccountRequestDemand()) {
 			// Remove user
+			//delete associated access requests
+			List<AccessRequest> requests = this.accessRequestService.findByUserId(userId);
+			for (AccessRequest request : requests) {
+				this.accessRequestService.deleteById(request.getId());
+			}
+			
 			userRepository.deleteById(userId);
 			keycloakClient.deleteUser(user.getKeycloakId());
 			// Send emails
@@ -282,6 +295,8 @@ public class UserServiceImpl implements UserService {
 		accessRequest.setMotivation("User " + user.getFirstName() + " " +user.getLastName() + " created an account to join your study. Associated email: " + user.getEmail());
 		
 		accessRequestRepository.save(accessRequest);
+		
+		emailService.notifyStudyManagerAccessRequest(accessRequest);
 
 		final String keycloakUserId = keycloakClient.createUserWithPassword(user, newPassword);
 		savedUser.setKeycloakId(keycloakUserId); // Save keycloak id

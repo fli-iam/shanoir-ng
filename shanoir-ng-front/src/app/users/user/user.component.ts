@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { Role } from '../../roles/role.model';
@@ -126,7 +126,7 @@ export class UserComponent extends EntityComponent<User> {
             });
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         const emailRegex = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$';
         let userForm = this.formBuilder.group({
             'firstName': [this.user.firstName, [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
@@ -135,7 +135,7 @@ export class UserComponent extends EntityComponent<User> {
             'expirationDate': [this.user.expirationDate],
             'extensionMotivation': [this.user.extensionRequestInfo ? this.user.extensionRequestInfo.extensionMotivation : ''],
             'role': [this.user.role, [Validators.required]],
-            'canAccessToDicomAssociation': new FormControl('false'),
+            'canAccessToDicomAssociation': new UntypedFormControl('false'),
             'accountRequestInfo': [this.user.accountRequestInfo]
         });
         if (this.user.extensionRequestDemand) {

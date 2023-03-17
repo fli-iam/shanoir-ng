@@ -13,7 +13,7 @@
  */
 
 import { Component, ViewChild } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Option } from '../../shared/select/select.component';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -209,8 +209,8 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         });
     }
 
-    buildForm(): FormGroup {
-        let formGroup: FormGroup = this.formBuilder.group({
+    buildForm(): UntypedFormGroup {
+        let formGroup: UntypedFormGroup = this.formBuilder.group({
             'study': [{value: this.study?.id, disabled: !!this.prefilledStudy}, Validators.required],
             'subject': [{value: this.subject, disabled: (!!this.prefilledSubject || !this.study)}, Validators.required],
             'processingType': [this.datasetProcessing.datasetProcessingType, Validators.required],

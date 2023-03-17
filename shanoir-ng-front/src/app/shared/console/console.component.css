@@ -1,8 +1,8 @@
-:host() { width: 300px; display: block; position: relative; height: 20px; transition: 1s ease; overflow: hidden; margin-top: -20px; }
-:host().open { height: 128px; }
-:host().deployed { width: 100%; }
+:host { width: 300px; display: block; position: relative; height: 20px; transition: 1s ease; overflow: hidden; margin-top: -20px; }
+:host.open { height: 128px; }
+:host.deployed { width: 100%; }
 .content { transition: 1s ease; position: absolute; left: 0; right: 0; top: 20px; padding: 4px 10px; overflow-x: hidden; overflow-y: auto; background-color: var(--dark-grey); height: 100px; }
-:host():not(.deployed) .content::-webkit-scrollbar { display: none; }
+:host:not(.deployed) .content::-webkit-scrollbar { display: none; }
 
 .error { color: orangered; }
 .warn { color: orange }

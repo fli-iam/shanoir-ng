@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { FormControl, FormGroup, Validators, ValidatorFn } from '@angular/forms';
+import { FormControl, UntypedFormGroup, Validators, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
@@ -74,7 +74,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'name': [this.manufModel.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]],
             'manufacturer': [this.manufModel.manufacturer, Validators.required],

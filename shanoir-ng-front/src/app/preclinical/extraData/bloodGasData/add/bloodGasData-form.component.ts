@@ -13,7 +13,7 @@
  */
 
 import { Component,  Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup} from '@angular/forms';
+import { UntypedFormGroup} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { BloodGasData }    from '../shared/bloodGasData.model';
@@ -89,7 +89,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     	}
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
         });
     }
