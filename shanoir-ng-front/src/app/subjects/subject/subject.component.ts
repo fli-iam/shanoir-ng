@@ -157,7 +157,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     }
 
     private updateFormControl(formGroup: UntypedFormGroup) {
-        if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
+        if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
             formGroup.get('firstName').setValidators(this.nameValidators);
             formGroup.get('lastName').setValidators(this.nameValidators);
             formGroup.get('birthDate').setValidators([Validators.required, DatepickerComponent.validator])
