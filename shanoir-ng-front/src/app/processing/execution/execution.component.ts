@@ -38,6 +38,7 @@ export class ExecutionComponent implements OnInit {
   datasets: { [key: string]: Dataset[] } = {};
   tables = [];
   fileInputs = [];
+  inputDatasets: Dataset[] = [];
 
   constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
     this.breadcrumbsService.nameStep('2. Executions');
@@ -98,9 +99,13 @@ export class ExecutionComponent implements OnInit {
             this.fileInputs.push(parameter);
         }
         let validators: ValidatorFn[] = [];
-        if (!parameter.isOptional && parameter.type != ParameterType.Boolean) validators.push(Validators.required);
+        if (!parameter.isOptional && parameter.type != ParameterType.Boolean && parameter.type != ParameterType.File) {
+          validators.push(Validators.required);
+        }
         let control = new FormControl(parameter.defaultValue, validators);
-        if (parameter.name != "executable") this.executionForm.addControl(parameter.name, control);
+        if (parameter.name != "executable"){
+          this.executionForm.addControl(parameter.name, control);
+        }
       }
     )
   }
@@ -209,6 +214,7 @@ export class ExecutionComponent implements OnInit {
               // TODO the format should be selected depending on the pipeline.
               // File ad md5 values should be selected automcatically depending on the pipeline.
               execution.inputValues[parameter.name].push(`shanoir:/${dataset_name}?format=nii&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`);
+              this.inputDatasets.push(dataset);
           })
        } else {
           execution.inputValues[parameter.name] = this.executionForm.get(parameter.name).value;
@@ -233,14 +239,13 @@ export class ExecutionComponent implements OnInit {
         carminDatasetProcessing.datasetProcessingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
         
         // HOTFIX for circular dataset object issue 
-        this.selectedDatasets.forEach(dataset  => {
+        this.inputDatasets.forEach(dataset  => {
           dataset.study.subjectStudyList = [];
           dataset.study.studyCenterList = [];
           dataset.subject.subjectStudyList = [];
-          this.selectedDatasets.add(dataset);
         })
 
-        carminDatasetProcessing.inputDatasets = Array.from(this.selectedDatasets);
+        carminDatasetProcessing.inputDatasets = Array.from(this.inputDatasets);
 
         this.carminDatasetProcessing.create(carminDatasetProcessing).then(
           (response: CarminDatasetProcessing) => {

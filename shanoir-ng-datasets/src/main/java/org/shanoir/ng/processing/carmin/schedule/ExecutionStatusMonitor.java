@@ -1,12 +1,15 @@
 package org.shanoir.ng.processing.carmin.schedule;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -174,9 +177,12 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 					final Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath());
 
 					stream.filter(matcher::matches)
-					.forEach(zipFile -> decompressTGZ(zipFile.toFile(),
+					.forEach(zipFile -> {
+						LOG.error(zipFile.toString());
+						decompressTGZ(zipFile.toFile(),
 							userImportDir.getAbsoluteFile(),
-							carminDatasetProcessing));
+							carminDatasetProcessing);
+					});
 
 					LOG.info("execution status updated, stopping job...");
 
@@ -245,39 +251,39 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				cacheFolder.mkdirs();
 			}
 			
-			LOG.error("couccu");
+			List<File> niftiFiles = new ArrayList<File>();
 			
-			// first, find "result" file
+			// first, find "result.json" file
 			while ((entry = fin.getNextTarEntry()) != null) {
-				if (this.resultFileName.equals(entry.getName())) {
-					LOG.error("couccu2");
-					// We have the result => Read the file to get the parent datasets
-					/*
-					 {
-						"infile" : ["dateset-id+filename.nii"],
-						"ensemble" : true,
-						"keep_tmp_files" : false
-					}
-					*/
-					try {
-						JSONObject obj = new JSONObject(new String(Files.readAllBytes(Paths.get(entry.getFile().getAbsolutePath()))));
-						
-						String datasetValue = (String) obj.get("infile");
-						LOG.error(obj + datasetValue);
-					} catch (Exception e) {
-						LOG.error("Could not read JSON file");
-					}
-				}
-			}
-
-			while ((entry = fin.getNextTarEntry()) != null) {
-
+				
 				String parsedEntry = entry.getName();
 				LOG.info("tar entry :" + parsedEntry);
-				LOG.error("couccu3");
 
 				if (entry.isDirectory()) {
 					continue;
+				}
+				
+				if (parsedEntry.endsWith(this.resultFileName)) {
+					// We have the result => Read the file to get the parent datasets
+					/*
+					 {
+						"infile" : ["dateset-id+filename.nii"]
+					}
+					*/
+					try {
+						BufferedReader br = null;
+						StringBuilder sb = new StringBuilder();
+					    br = new BufferedReader(new InputStreamReader(fin));
+					    String line;
+					    while ((line = br.readLine()) != null) {
+					        sb.append(line);
+					    }
+						JSONObject obj = new JSONObject(sb.toString());
+						
+						String datasetValue = (String) obj.get("infile");
+					} catch (Exception e) {
+						LOG.error("Could not read JSON file", e);
+					}
 				}
 
 				if (parsedEntry.contains("/")) {
@@ -296,8 +302,9 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				// check all nifti formats
 				for (int i = 0; i < listOfNiftiExt.length; i++) {
 					if (entry.getName().endsWith(listOfNiftiExt[i])) {
+						
 						createProcessedDataset(currentFile, cacheFolder.getAbsolutePath(),
-								carminDatasetProcessing);
+								carminDatasetProcessing, null);
 					}
 				}
 
@@ -314,11 +321,12 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	 * @param carminDatasetProcessing
 	 */
 	private void createProcessedDataset(File niiftiFile, String destDir,
-			CarminDatasetProcessing carminDatasetProcessing) {
+			CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) {
 		File dir = new File(destDir);
 		// create output directory if it doesn't exist
-		if (!dir.exists())
+		if (!dir.exists()) {
 			dir.mkdirs();
+		}
 
 		try {
 			ProcessedDatasetImportJob processedDataset = new ProcessedDatasetImportJob();
@@ -335,8 +343,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 			processedDataset.setStudyId(datasetProcessing.getStudyId());
 			processedDataset.setStudyName(study.getName());
-
-			List<Dataset> inputDatasets = datasetProcessing.getInputDatasets();
 
 			if(inputDatasets.size() != 0) {
 

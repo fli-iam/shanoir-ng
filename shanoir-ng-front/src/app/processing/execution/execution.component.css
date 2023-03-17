@@ -17,6 +17,7 @@ div{
 	margin: 8px 0;
     display: inline-block;
     vertical-align: top;
+    width: 500px;
 }
 .block-div { 
     margin: 8px 0;

@@ -140,7 +140,7 @@ vip:
   upload-folder: /tmp/temp
   sleep-time: 20000
   file-formats: .nii.gz, .nii
-  result-file-name: input_param.json
+  result-file-name: input_params.json
 
 # Service account
 service-account:
