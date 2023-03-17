@@ -102,11 +102,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.ACCESS_REQUEST_EVENT, "" + createdRequest.getId(), KeycloakUtil.getTokenUserId(), "", 1, createdRequest.getStudyId()));
 
 		// Send notification to study admin
-		try {
-			emailService.notifyStudyManagerAccessRequest(createdRequest);
-		} catch (ShanoirException e) {
-			throw new RestServiceException(e, new ErrorModel(ErrorModelCode.BAD_REQUEST));
-		}
+		emailService.notifyStudyManagerAccessRequest(createdRequest);
 
 		return new ResponseEntity<AccessRequest>(createdRequest, HttpStatus.OK);
 	}
@@ -184,8 +180,12 @@ public class AccessRequestApiController implements AccessRequestApi {
 			@ApiParam(value = "The email of the invited user.") 
 			@RequestParam(value = "email", required = true) String email) throws RestServiceException, JsonProcessingException, AmqpException {
 
-		// Check if user with such email exists
+		// Check if user with such email/username exists
 		Optional<User> user = this.userService.findByEmail(email);
+		
+		if (!user.isPresent()) {
+			user = this.userService.findByUsername(email);
+		}
 
 		// User exists => return an access request to be added
 		if (user.isPresent()) {

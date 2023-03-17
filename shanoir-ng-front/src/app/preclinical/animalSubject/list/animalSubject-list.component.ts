@@ -11,23 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import {Component, ViewChild} from '@angular/core'
-
-import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
-import { AnimalSubject } from '../shared/animalSubject.model';
-import { Subject } from '../../../subjects/shared/subject.model';
-import { AnimalSubjectService } from '../shared/animalSubject.service';
-import { TableComponent } from '../../../shared/components/table/table.component';
-import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
-import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
-import { ServiceLocator } from '../../../utils/locator.service';
-import { ShanoirError } from '../../../shared/models/error.model';
-import { resolve } from 'url';
-import { ConsoleService } from '../../../shared/console/console.service';
+import { Component, ViewChild } from '@angular/core';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
+import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
+import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
+import { TableComponent } from '../../../shared/components/table/table.component';
+import { ShanoirError } from '../../../shared/models/error.model';
+import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
+import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
+import { AnimalSubject } from '../shared/animalSubject.model';
+import { AnimalSubjectService } from '../shared/animalSubject.service';
+import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
+
 
 
 @Component({

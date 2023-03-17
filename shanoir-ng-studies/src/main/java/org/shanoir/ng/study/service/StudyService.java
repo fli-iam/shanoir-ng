@@ -55,7 +55,7 @@ public interface StudyService {
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL') or @studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_ADMINISTRATE')")
 	Study findById(Long id);
 
-
+	
 	/**
 	 * Get all the studies
 	 * 

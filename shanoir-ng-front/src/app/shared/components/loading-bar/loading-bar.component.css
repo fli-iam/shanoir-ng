@@ -1,4 +1,4 @@
-:host() { position: relative; display: inline-block; height: 18px; border: 1px solid var(--grey); border-radius: 5px; z-index: 1; }
+:host { position: relative; display: inline-block; height: 18px; border: 1px solid var(--grey); border-radius: 5px; z-index: 1; }
 .inner { float: left; background-color: var(--color-b); display: inline-block; height: 100%; overflow: hidden; /*box-shadow: 0 0 5px 0 var(--shadow-color);*/ }
 .inner.done { background-color: green; border-radius: 5px; }
 .left-text { text-align: center; color: var(--very-light-grey); height: 100%; line-height: 18px; }

@@ -14,25 +14,13 @@
 
 package org.shanoir.ng.studycard.controler;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.lang.reflect.Field;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.json.Json;
-import javax.json.stream.JsonParser;
-import javax.mail.MessagingException;
-
-import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.dcm4che3.json.JSONReader;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
-import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -43,7 +31,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
-import org.shanoir.ng.studycard.service.StudyCardProcessingService;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
 import org.slf4j.Logger;
@@ -55,7 +43,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.client.RestClientException;
 
 import io.swagger.annotations.ApiParam;
 
@@ -73,21 +60,16 @@ public class StudyCardApiController implements StudyCardApi {
 	private StudyCardUniqueConstraintManager uniqueConstraintManager;
 	
 	@Autowired
-	private StudyCardProcessingService studyCardProcessingService;
-	
-	@Autowired
 	private DatasetAcquisitionService datasetAcquisitionService;
-	
+
 	@Autowired
-	private WADODownloaderService downloader;
+	private CardsProcessingService cardProcessingService;
 
 	@Override
 	public ResponseEntity<Void> deleteStudyCard(
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
-		
 		try {
 			studyCardService.deleteById(studyCardId);
-			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (MicroServiceCommunicationException e) {
@@ -111,7 +93,7 @@ public class StudyCardApiController implements StudyCardApi {
 	@Override
 	public ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		final List<StudyCard> studyCards = studyCardService.findStudyCardsOfStudy(studyId);
+		final List<StudyCard> studyCards = studyCardService.findByStudy(studyId);
 		if (studyCards.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -141,9 +123,7 @@ public class StudyCardApiController implements StudyCardApi {
 	public ResponseEntity<StudyCard> saveNewStudyCard(
 			@ApiParam(value = "study Card to create", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException {
-
 		validate(studyCard, result);
-
 		StudyCard createdStudyCard;
 		try {
 			createdStudyCard = studyCardService.save(studyCard);
@@ -170,9 +150,7 @@ public class StudyCardApiController implements StudyCardApi {
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@ApiParam(value = "study card to update", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException {
-
 		validate(studyCard, result);
-
 		try {
 			studyCardService.update(studyCard);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -183,8 +161,6 @@ public class StudyCardApiController implements StudyCardApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
 		}
 	}
-	
-
 	
 	@Override
 	public ResponseEntity<List<DicomTag>> findDicomTags() throws RestServiceException {
@@ -232,7 +208,6 @@ public class StudyCardApiController implements StudyCardApi {
 	@Override
 	public ResponseEntity<Void> applyStudyCard(
 			@ApiParam(value = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException {
-		
 		if (studyCardApplyObject == null 
 				|| studyCardApplyObject.getDatasetAcquisitionIds() == null 
 				|| studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()
@@ -240,35 +215,11 @@ public class StudyCardApiController implements StudyCardApi {
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 		
-		List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
 		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
-		
-		for (DatasetAcquisition acquisition : acquisitions) {
-			if (!acquisition.getDatasets().isEmpty()) {
-				List<URL> urls = new ArrayList<>();
-				try {
-					DatasetUtils.getDatasetFilePathURLs(acquisition.getDatasets().get(0), urls, DatasetExpressionFormat.DICOM);
-					if (!urls.isEmpty()) {
-						String jsonMetadataStr = downloader.downloadDicomMetadataForURL(urls.get(0));
-						JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
-						Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
-						if (dicomAttributes != null) {
-							studyCardProcessingService.applyStudyCard(acquisition, studyCard, dicomAttributes);																
-						} else {
-							LOG.error("Could not apply studycard " + studyCard.getId() + " on dataset acquisition " + acquisition.getId() 
-									+ " : dicom attributes are empty");
-						}
-					} else {
-						LOG.error("Could not apply studycard " + studyCard.getId() + " on dataset acquisition " + acquisition.getId() 
-						+ " : no pacs url for this acquisition");
-					}
-				} catch (IOException | MessagingException | RestClientException e) {
-					throw new RestClientException("Cannot apply study card " + studyCardApplyObject.getStudyCardId() + " on acquisitions " + studyCardApplyObject.getDatasetAcquisitionIds(), e);
-				}
-			}
-		}
-		datasetAcquisitionService.update(acquisitions);
+        LOG.debug("re-apply studycard n° " + studyCard.getId());
+        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
+        cardProcessingService.applyStudyCard(studyCard, acquisitions);
 		return new ResponseEntity<Void>(HttpStatus.OK);
-		
 	}
+
 }

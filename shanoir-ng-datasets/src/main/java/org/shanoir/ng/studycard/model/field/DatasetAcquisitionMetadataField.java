@@ -12,37 +12,40 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.studycard.model;
+package org.shanoir.ng.studycard.model.field;
 
 import org.shanoir.ng.dataset.modality.BidsDataType;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.MrDatasetMetadata;
-import org.shanoir.ng.dataset.modality.MrDatasetNature;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetMetadata;
-import org.shanoir.ng.dataset.model.DatasetModalityType;
-import org.shanoir.ng.dataset.model.ExploredEntity;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.AcquisitionContrast;
 import org.shanoir.ng.datasetacquisition.model.mr.ContrastAgentUsed;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequencePhysics;
 
-public enum AssignmentField implements DatasetFieldUpdater {
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
-	MODALITY_TYPE(1) {
-		@Override
-		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			DatasetModalityType type = DatasetModalityType.valueOf(updatedValue);
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-				dataset.getUpdatedMetadata().setDatasetModalityType(type);
-			}
-		}
-	},
+@JsonTypeName("DatasetAcquisitionMetadataField")
+public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<DatasetAcquisition> {
+
 	PROTOCOL_NAME(2) {
+		@Override
+		public String get(DatasetAcquisition datasetAcquisition) {
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				MrProtocol mrProtocol = mrDsAcq.getMrProtocol();
+				if (mrProtocol != null) {
+					if (mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+						return mrDsAcq.getMrProtocol().getUpdatedMetadata().getName();
+					} else if (mrDsAcq.getMrProtocol().getOriginMetadata() != null) {
+						return mrDsAcq.getMrProtocol().getOriginMetadata().getName();
+					}
+				}
+			}
+			return null;
+		}
+
 		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
@@ -56,6 +59,17 @@ public enum AssignmentField implements DatasetFieldUpdater {
 	},
 	PROTOCOL_COMMENT(3) {
 		@Override
+		public String get(DatasetAcquisition datasetAcquisition) {
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getComment();
+				} 
+			}
+			return null;
+		}
+
+		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
@@ -67,6 +81,19 @@ public enum AssignmentField implements DatasetFieldUpdater {
 		}
 	},
 	TRANSMITTING_COIL(4) {
+		@Override
+		public String get(DatasetAcquisition datasetAcquisition) {
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getTransmittingCoilId() != null) {
+					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getTransmittingCoilId().toString();
+				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getTransmittingCoilId() != null) {
+                    return mrDsAcq.getMrProtocol().getOriginMetadata().getTransmittingCoilId().toString();
+                }
+			}
+			return null;
+		}
+
 		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
@@ -81,6 +108,19 @@ public enum AssignmentField implements DatasetFieldUpdater {
 	},
 	RECEIVING_COIL(5) {
 		@Override
+		public String get(DatasetAcquisition datasetAcquisition) {
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getReceivingCoilId() != null) {
+					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getReceivingCoilId().toString();
+				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getReceivingCoilId() != null) {
+                    return mrDsAcq.getMrProtocol().getOriginMetadata().getReceivingCoilId().toString();
+                }
+			}
+			return null;
+		}
+
+		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
@@ -91,17 +131,20 @@ public enum AssignmentField implements DatasetFieldUpdater {
 			}
 		}
 	},
-	EXPLORED_ENTITY(6) {
-		@Override
-		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			ExploredEntity exploredEntity = ExploredEntity.valueOf(updatedValue);
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-				dataset.getUpdatedMetadata().setExploredEntity(exploredEntity);			
-			}
-		}
-	},
 	ACQUISITION_CONTRAST(7) {
+		@Override
+		public String get(DatasetAcquisition datasetAcquisition) {
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getAcquisitionContrast() != null) {
+					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getAcquisitionContrast().name();
+				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getAcquisitionContrast() != null) {
+                    return mrDsAcq.getMrProtocol().getOriginMetadata().getAcquisitionContrast().name();
+                }
+			}
+			return null;
+		}
+		
 		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
@@ -116,6 +159,17 @@ public enum AssignmentField implements DatasetFieldUpdater {
 	},
 	MR_SEQUENCE_APPLICATION(8) {
 		@Override
+		public String get(DatasetAcquisition datasetAcquisition) {
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceApplication() != null) {
+					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceApplication().name();
+				}
+			}
+			return null;
+		}
+		
+		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
@@ -129,6 +183,17 @@ public enum AssignmentField implements DatasetFieldUpdater {
 	},
 	MR_SEQUENCE_PHYSICS(9) {
 		@Override
+		public String get(DatasetAcquisition datasetAcquisition) {
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequencePhysics().name();
+				}
+			}
+			return null;
+		}
+		
+		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
@@ -140,25 +205,20 @@ public enum AssignmentField implements DatasetFieldUpdater {
 			}
 		}
 	},
-	NAME(10) {
-		@Override
-		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-				dataset.getUpdatedMetadata().setName(updatedValue);			
-			}
-		}
-	},
-	COMMENT(11) {
-		@Override
-		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset.getUpdatedMetadata() == null) dataset.setUpdatedMetadata(new DatasetMetadata());
-				dataset.getUpdatedMetadata().setComment(updatedValue);			
-			}
-		}
-	},
 	MR_SEQUENCE_NAME(12) {
+		@Override
+		public String get(DatasetAcquisition datasetAcquisition) {
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceName();
+				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null) {
+                    return mrDsAcq.getMrProtocol().getOriginMetadata().getMrSequenceName();
+                }
+			}
+			return null;
+		}
+		
 		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
@@ -172,6 +232,19 @@ public enum AssignmentField implements DatasetFieldUpdater {
 	},
 	CONTRAST_AGENT_USED(13) {
 		@Override
+		public String get(DatasetAcquisition datasetAcquisition) {
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getContrastAgentUsed() != null) {
+					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getContrastAgentUsed().name();
+				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null && mrDsAcq.getMrProtocol().getOriginMetadata().getContrastAgentUsed() != null) {
+                    return mrDsAcq.getMrProtocol().getOriginMetadata().getContrastAgentUsed().name();
+                }
+			}
+			return null;
+		}
+		
+		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
@@ -183,22 +256,18 @@ public enum AssignmentField implements DatasetFieldUpdater {
 			}
 		}
 	},
-	MR_DATASET_NATURE(14) {
+	BIDS_DATA_TYPE(15) {
 		@Override
-		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
-			MrDatasetNature nature = MrDatasetNature.valueOf(updatedValue);
-			for (Dataset dataset : datasetAcquisition.getDatasets()) {
-				if (dataset instanceof MrDataset) {
-					MrDataset mrDataset = (MrDataset) dataset;
-					if (mrDataset.getUpdatedMrMetadata() == null) mrDataset.setUpdatedMrMetadata(new MrDatasetMetadata());
-					mrDataset.getUpdatedMrMetadata().setMrDatasetNature(nature);			
-				} else {
-					throw new IllegalArgumentException("dataset should be of type MrDataset");
+		public String get(DatasetAcquisition datasetAcquisition) {
+			if (datasetAcquisition instanceof MrDatasetAcquisition) {
+				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getBidsDataType();
 				}
 			}
+			return null;
 		}
-	},
-	BIDS_DATA_TYPE(15) {
+		
 		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			BidsDataType dataType = BidsDataType.valueOf(updatedValue);
@@ -212,21 +281,38 @@ public enum AssignmentField implements DatasetFieldUpdater {
 		}
 	};
 	
-	private long id;
+	private int id;
 	
-	private AssignmentField(long id) {
+	private DatasetAcquisitionMetadataField(int id) {
 		this.id = id;
 	}
 	
-	public static AssignmentField getEnum(long id) {
-		for (AssignmentField field : AssignmentField.values()) {
+	public static DatasetAcquisitionMetadataField getEnum(int id) {
+		for (DatasetAcquisitionMetadataField field : DatasetAcquisitionMetadataField.values()) {
 			if (field.getId() == id) return field;
 		}
-		throw new IllegalArgumentException(id + " is not a valid AssignmentField id");
+		return null;
 	}
 	
-	public long getId() {
+	@Override
+	public int getId() {
 		return id;
 	}
 
+	public static boolean has(int id) {
+        return getEnum(id) != null;
+    }
+
+	public static boolean has(String name) {
+        return getEnum(name) != null;
+    }
+
+    public static DatasetAcquisitionMetadataField getEnum(String name) {
+        for (DatasetAcquisitionMetadataField f : DatasetAcquisitionMetadataField.values()) {
+            if (f.name().equalsIgnoreCase(name)) {
+                return f;
+            }
+        }
+        return null;
+    }
 }

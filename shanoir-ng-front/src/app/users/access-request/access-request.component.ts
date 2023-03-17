@@ -15,7 +15,7 @@
 import { Component } from '@angular/core';
 import { UserService } from '../shared/user.service'
 import { AccessRequest } from './access-request.model'
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { Option } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -77,7 +77,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
         });
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'motivation': [this.accessRequest.motivation, []],
             'studyId': [this.accessRequest.studyId, []],

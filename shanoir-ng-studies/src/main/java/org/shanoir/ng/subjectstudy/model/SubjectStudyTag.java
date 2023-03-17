@@ -44,7 +44,6 @@ public class SubjectStudyTag {
 	@JoinColumn(name = "subject_study_id", insertable = false, updatable = false, nullable = false)
 	private SubjectStudy subjectStudy;
 
-
 	public Tag getTag() {
 		return tag;
 	}

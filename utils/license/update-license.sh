@@ -75,13 +75,16 @@ build_commented_header " * " "/**" " */"
 add_header_to "*.java" "*.ts" "*.js"
 
 build_commented_header "# "
-add_header_to "*.yml" "*.yaml" "*.properties" "Dockerfile"
+add_header_to "*.yml" "*.yaml" "*.properties" "Dockerfile" "*.sh"
 
 build_commented_header "-- "
 add_header_to "*.sql"
 
 build_commented_header "" "<!--" "-->"
 add_header_to "*.html" "*.xml"
+
+build_commented_header ":: "
+add_header_to "*.bat"
 
 echo -e "\n$newCount license headers added"
 rm -f var/commented_tmp
