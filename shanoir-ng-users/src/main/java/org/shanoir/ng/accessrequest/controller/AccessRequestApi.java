@@ -61,7 +61,7 @@ public interface AccessRequestApi {
 			@ApiParam(value = "Accept or refuse the request", required = true) @RequestBody boolean validation,
 			BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException;
 
-	@ApiOperation(value = "byUser", notes = "Find all the access request managed by the given adminstrator", response = AccessRequest.class, tags = {})
+	@ApiOperation(value = "byAdmin", notes = "Find all the access request managed by the given adminstrator", response = AccessRequest.class, tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
