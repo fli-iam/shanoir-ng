@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
@@ -22,7 +22,7 @@ import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { ConsoleService } from '../../shared/console/console.service';
 
-export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: FormGroup ): ValidationErrors | null => {
+export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFormGroup ): ValidationErrors | null => {
     const hasAtLeastOneNotBlank = group && group.controls && Object.keys(group.controls)
       .some(key => !validator(group.controls[key]) && group.controls[key].value.trim().length != 0);
     return hasAtLeastOneNotBlank ? null : { atLeastOneNotBlank: true };
@@ -38,12 +38,12 @@ export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: FormGroup
 export class QueryPacsComponent{
 
     dicomQuery: DicomQuery = new DicomQuery();
-    form: FormGroup;
+    form: UntypedFormGroup;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private router: Router,
             private importService: ImportService, private importDataService: ImportDataService,
-            private formBuilder: FormBuilder, private consoleService: ConsoleService) {
+            private formBuilder: UntypedFormBuilder, private consoleService: ConsoleService) {
 
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();

@@ -13,7 +13,7 @@
  */
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, FormBuilder } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 
@@ -93,7 +93,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     	}
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'has_heart_rate':[this.physioData.has_heart_rate],
             'has_respiratory_rate':[this.physioData.has_respiratory_rate],
