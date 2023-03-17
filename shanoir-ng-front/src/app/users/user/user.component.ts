@@ -139,7 +139,7 @@ export class UserComponent extends EntityComponent<User> {
         'expirationDate': [this.user.expirationDate],
         'extensionMotivation': [this.user.extensionRequestInfo ? this.user.extensionRequestInfo.extensionMotivation : ''],
         'role': [this.user.role, [Validators.required]],
-        'canAccessToDicomAssociation': new FormControl('false'),
+        'canAccessToDicomAssociation': new UntypedFormControl('false'),
         'accountRequestInfo': [this.user.accountRequestInfo]
       });
       if (this.user.extensionRequestDemand) {
