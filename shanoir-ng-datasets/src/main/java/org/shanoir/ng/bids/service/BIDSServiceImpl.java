@@ -241,7 +241,7 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private List<Subject> getSubjectsForStudy(final Long studyId) throws JsonParseException, JsonMappingException, IOException {
 		// Get the list of subjects
-		List<SubjectStudy> subjectStudies = subjectStudyRepository.findByStudyId(studyId);
+		List<SubjectStudy> subjectStudies = subjectStudyRepository.findByStudy_Id(studyId);
 		return subjectStudies.stream().map(SubjectStudy::getSubject).collect(Collectors.toList());
 	}
 

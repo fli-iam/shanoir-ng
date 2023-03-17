@@ -3,6 +3,7 @@ package org.shanoir.ng.shared.model;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
@@ -11,6 +12,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+
+import org.shanoir.ng.shared.quality.QualityTag;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -23,7 +26,7 @@ public class SubjectStudy {
 	private Long id;
 
 	/** Study. */
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "study_id")
 	@NotNull
 	private Study study;
@@ -39,7 +42,10 @@ public class SubjectStudy {
     @JoinTable( name = "subject_study_tag",
                 joinColumns = @JoinColumn( name = "subject_study_id" ))
 	private List<Tag> tags;
+    
+    private Integer qualityTag;
 
+    
 	/**
 	 * @return the study
 	 */
@@ -97,4 +103,13 @@ public class SubjectStudy {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	public QualityTag getQualityTag() {
+        return QualityTag.get(qualityTag);
+    }
+    
+    public void setQualityTag(QualityTag tag) {
+        this.qualityTag = tag != null ? tag.getId() : null;
+    }
+
 }

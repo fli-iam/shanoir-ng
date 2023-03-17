@@ -259,8 +259,14 @@ import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.comp
 import { ExecutionComponent } from './processing/execution/execution.component';
 import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
 import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { QualityControlComponent } from './quality-control/quality-control.component';
+import { QualityCardService } from './study-cards/shared/quality-card.service';
+import { QualityCardDTOService } from './study-cards/shared/quality-card.dto';
+import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
+import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
+import { QualityCardRuleComponent } from './study-cards/study-card-rules/quality-card-rule.component';
 import { WelcomeComponent } from './welcome/welcome.component';
-import {LoginGuard} from "./shared/roles/login-guard";
+import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
 
 
@@ -444,6 +450,10 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         PipelineComponent,
         ExecutionComponent,
         CarminDatasetProcessingsComponent,
+        QualityControlComponent,
+        QualityCardListComponent,
+        QualityCardComponent,
+        QualityCardRuleComponent,
         WelcomeComponent
     ],
     // Not required anymore with Angular > 9.0
@@ -537,6 +547,8 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         ExtraDataService,
         StudyDTOService,
         SubjectDTOService,
+        QualityCardService,
+        QualityCardDTOService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]

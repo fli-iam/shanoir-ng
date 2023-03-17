@@ -131,13 +131,13 @@ public class ImporterService {
 	private ShanoirEventService eventService;
 
 	@Autowired
-	StudyUserRightsRepository studyUserRightRepo;
+	private StudyUserRightsRepository studyUserRightRepo;
 
 	@Autowired
-	RabbitTemplate rabbitTemplate;
+	private RabbitTemplate rabbitTemplate;
 
 	@Autowired
-	SolrService solrService;
+	private SolrService solrService;
 	
 	@Autowired
 	private ObjectMapper objectMapper;

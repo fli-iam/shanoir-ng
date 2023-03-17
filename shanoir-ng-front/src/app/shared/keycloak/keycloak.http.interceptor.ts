@@ -43,7 +43,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
         }
         // Pass on the cloned request instead of the original request.
         return next.handle(authReq).pipe(catchError((err: HttpErrorResponse): Observable<HttpEvent<any>> => { // return null }
-      // (err: any) => {
+        // (err: any) => {
             if (err instanceof HttpErrorResponse) {
                 if (err.status === 401) {
                     return new Observable((observer) => {

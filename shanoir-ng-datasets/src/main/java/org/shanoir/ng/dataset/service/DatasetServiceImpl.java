@@ -227,7 +227,7 @@ public class DatasetServiceImpl implements DatasetService {
 			}
 			// If yes, get all examinations and filter by centers
 			if (hasRestrictions) {
-				List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable.getSort()));
+				List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudy_IdIn(studyIds, pageable.getSort()));
 				
 				if (CollectionUtils.isEmpty(datasets)) {
 					return new PageImpl<>(datasets);
@@ -244,14 +244,14 @@ public class DatasetServiceImpl implements DatasetService {
 				Page<Dataset> page = new PageImpl<>(datasets, pageable, size);
 				return page;
 			} else {
-				return repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable);
+				return repository.findByDatasetAcquisitionExaminationStudy_IdIn(studyIds, pageable);
 			}
 		}
 	}
 
 	@Override
 	public List<Dataset> findByStudyId(Long studyId) {
-		return Utils.toList(repository.findByDatasetAcquisitionExaminationStudyId(studyId));
+		return Utils.toList(repository.findByDatasetAcquisitionExaminationStudy_Id(studyId));
 	}
 
 	@Override
@@ -267,7 +267,7 @@ public class DatasetServiceImpl implements DatasetService {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			
-			return Utils.toList(repository.findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudyIdIn(studycardId, studyIds));
+			return Utils.toList(repository.findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(studycardId, studyIds));
 		}
 	}
 

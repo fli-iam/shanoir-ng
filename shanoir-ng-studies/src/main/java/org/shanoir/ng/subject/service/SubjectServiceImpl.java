@@ -88,7 +88,8 @@ public class SubjectServiceImpl implements SubjectService {
 	@Autowired
 	private StudyUserRepository studyUserRepository;
 
-	@Autowired SubjectMapper subjectMapper;
+	@Autowired
+	private SubjectMapper subjectMapper;
 	
 	@Autowired
 	private ObjectMapper objectMapper;
