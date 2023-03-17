@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ViewChild } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -120,8 +120,8 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
-        let form: FormGroup = this.formBuilder.group({
+    buildForm(): UntypedFormGroup {
+        let form: UntypedFormGroup = this.formBuilder.group({
             'name': [this.studyCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.studyCard.study, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
@@ -176,7 +176,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             });
     }
 
-    private onStudyChange(study: IdName, form: FormGroup) {
+    private onStudyChange(study: IdName, form: UntypedFormGroup) {
         if (study) {
             this.fetchAcqEq(study.id).then(() => {
                 if (this.studyCard.acquisitionEquipment) {

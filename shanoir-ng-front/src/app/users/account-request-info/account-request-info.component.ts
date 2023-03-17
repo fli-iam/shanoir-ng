@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, forwardRef, Input, Output, OnInit } from '@angular/core';
-import { ControlValueAccessor, FormBuilder, FormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
+import { ControlValueAccessor, UntypedFormBuilder, UntypedFormGroup, NG_VALUE_ACCESSOR, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StudyService } from '../../studies/shared/study.service';
 import { Option } from '../../shared/select/select.component';
@@ -35,14 +35,14 @@ export class AccountRequestInfoComponent implements ControlValueAccessor, OnInit
     @Input() editMode: boolean = false;
     @Output() valid: EventEmitter<boolean> = new EventEmitter();
     info: AccountRequestInfo = new AccountRequestInfo();
-    form: FormGroup;
+    form: UntypedFormGroup;
     onChange = (_: any) => {};
     onTouch = () => {};
     public studyOptions:  Option<number>[];
     studyName: string;
     presetStudyId: boolean
 
-    constructor(private formBuilder: FormBuilder,
+    constructor(private formBuilder: UntypedFormBuilder,
                 private studyService: StudyService,
                 private activatedRoute: ActivatedRoute,
                 private location: Location,

@@ -22,7 +22,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'ng-autosize';
-import { MyDatePickerModule } from 'mydatepicker';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
@@ -278,7 +277,6 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         CommonModule,
         FormsModule,
         HttpClientModule,
-        MyDatePickerModule,
         ReactiveFormsModule,
         NgxJsonViewerModule,
         AppRoutingModule,
@@ -384,34 +382,34 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         AutoAdjustInputComponent,
         SolrSearchComponent,
         CheckboxListComponent,
-    	AnimalSubjectsListComponent,
-    	AnimalSubjectFormComponent,
-    	ReferencesListComponent,
-    	ReferenceFormComponent,
-    	PathologiesListComponent,
-    	PathologyFormComponent,
-    	PathologyModelsListComponent,
-    	PathologyModelFormComponent,
-    	SubjectPathologiesListComponent,
-    	SubjectPathologyFormComponent,
-    	TherapiesListComponent,
-    	TherapyFormComponent,
-    	SubjectTherapiesListComponent,
-    	SubjectTherapyFormComponent,
-    	AnestheticsListComponent,
-    	AnestheticFormComponent,
-    	AnestheticIngredientsListComponent,
-    	AnestheticIngredientFormComponent,
-    	ExaminationAnestheticFormComponent,
-    	ExaminationAnestheticsListComponent,
-    	ContrastAgentsListComponent,
-    	ContrastAgentFormComponent,
-    	AnimalExaminationFormComponent,
-    	AnimalExaminationListComponent,
-    	FileUploadComponent,
-    	PhysiologicalDataFormComponent,
-    	BloodGasDataFormComponent,
-    	BrukerUploadComponent,
+        AnimalSubjectsListComponent,
+        AnimalSubjectFormComponent,
+        ReferencesListComponent,
+        ReferenceFormComponent,
+        PathologiesListComponent,
+        PathologyFormComponent,
+        PathologyModelsListComponent,
+        PathologyModelFormComponent,
+        SubjectPathologiesListComponent,
+        SubjectPathologyFormComponent,
+        TherapiesListComponent,
+        TherapyFormComponent,
+        SubjectTherapiesListComponent,
+        SubjectTherapyFormComponent,
+        AnestheticsListComponent,
+        AnestheticFormComponent,
+        AnestheticIngredientsListComponent,
+        AnestheticIngredientFormComponent,
+        ExaminationAnestheticFormComponent,
+        ExaminationAnestheticsListComponent,
+        ContrastAgentsListComponent,
+        ContrastAgentFormComponent,
+        AnimalExaminationFormComponent,
+        AnimalExaminationListComponent,
+        FileUploadComponent,
+        PhysiologicalDataFormComponent,
+        BloodGasDataFormComponent,
+        BrukerUploadComponent,
         BrukerSelectSeriesComponent,
         LoaderComponent,
         SubjectNodeComponent,
@@ -458,10 +456,6 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         QualityCardRuleComponent,
         WelcomeComponent
     ],
-    entryComponents: [
-        ConfirmDialogComponent,
-        ModalsComponent
-    ],
     // Not required anymore with Angular > 9.0
     // entryComponents: [
     //     ConfirmDialogComponent,
@@ -504,22 +498,22 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         DatasetProcessingService,
         DatasetProcessingPipe,
         MsgBoxService,
-    	PathologyService,
+        PathologyService,
         AnimalSubjectService,
         ReferenceService,
-    	PathologyModelService,
-    	SubjectPathologyService,
-    	TherapyService,
-    	SubjectTherapyService,
-    	AnestheticIngredientService,
-    	ExaminationAnestheticService,
-    	ContrastAgentService,
+        PathologyModelService,
+        SubjectPathologyService,
+        TherapyService,
+        SubjectTherapyService,
+        AnestheticIngredientService,
+        ExaminationAnestheticService,
+        ContrastAgentService,
         AnimalExaminationService,
         AnestheticService,
-    	ImportBrukerService,
-    	EnumUtils,
+        ImportBrukerService,
+        EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
-	    BreadcrumbsService,
+        BreadcrumbsService,
         GlobalService,
         ImportDataService,
         NiftiConverterService,
@@ -550,7 +544,7 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         SubjectStudyPipe,
         KeycloakSessionService,
         ConsoleService,
-		ExtraDataService,
+        ExtraDataService,
         StudyDTOService,
         SubjectDTOService,
         QualityCardService,
@@ -563,5 +557,10 @@ export class AppModule {
 
     constructor(private injector: Injector) {
         ServiceLocator.injector = injector;
+    }
+}
+declare global {
+    interface Navigator {
+        msSaveBlob?: (blob: any, defaultName?: string) => boolean
     }
 }

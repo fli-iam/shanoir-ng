@@ -165,9 +165,9 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
 }
 
 export function browserDownloadFile(blob: Blob, filename: string){
-    if (navigator.msSaveBlob) {
+    if (window.navigator.msSaveBlob) {
         // IE 10+
-        navigator.msSaveBlob(blob, filename);
+        window.navigator.msSaveBlob(blob, filename);
     } else {
         var link = document.createElement('a');
         // Browsers that support HTML5 download attribute

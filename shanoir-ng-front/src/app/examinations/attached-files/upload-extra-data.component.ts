@@ -14,7 +14,7 @@
 
 import { Location } from '@angular/common';
 import { Component, EventEmitter, Input, OnInit, Output, OnChanges, SimpleChanges } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { ConsoleService } from '../../shared/console/console.service';
@@ -29,7 +29,7 @@ import { Option } from '../../shared/select/select.component';
 
 export class UploadExtraDataComponent implements OnInit, OnChanges {
 
-    public uploadExtraDataForm: FormGroup;
+    public uploadExtraDataForm: UntypedFormGroup;
     public mode: "view" | "edit" | "create";
     fileToUpload: File = null;
     @Input() examination: Examination;
@@ -40,7 +40,7 @@ export class UploadExtraDataComponent implements OnInit, OnChanges {
     examinationStudyId = null;
 
     constructor(
-            private fb: FormBuilder, 
+            private fb: UntypedFormBuilder, 
             private location: Location,
             private keycloakService: KeycloakService,
             private examinationService: ExaminationService,

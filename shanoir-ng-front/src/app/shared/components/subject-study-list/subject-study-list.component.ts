@@ -209,7 +209,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         this.model.push(newSubjectStudy);
         this.processHasTags();
         this.propagateChange(this.model);
-        this.table.refresh();
+        this.table?.refresh();
     }
 
     private processHasTags() {
