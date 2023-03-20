@@ -175,6 +175,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
                 });
     }
 
+    deleteUserFromStudy(studyId: number, userId: number): Promise<void> {
+      return this.http.delete<void>(AppUtils.BACKEND_API_STUDY_DELETE_USER + "/" + studyId + "/" + userId)
+        .toPromise();
+    }
+
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');

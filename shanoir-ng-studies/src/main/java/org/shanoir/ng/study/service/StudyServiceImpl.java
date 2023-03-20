@@ -32,6 +32,7 @@ import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -58,6 +59,9 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -107,6 +111,7 @@ public class StudyServiceImpl implements StudyService {
 	
 	@Autowired
 	private ObjectMapper objectMapper;
+
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -556,6 +561,20 @@ public class StudyServiceImpl implements StudyService {
 		List<StudyUser> created = new ArrayList<>();
 		created.add(studyUser);
 		sendStudyUserReport(study, created);
+	}
+
+	@Override
+	public void removeStudyUserFromStudy(Long studyId, Long userId) {
+		StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+		try {
+			List<StudyUserCommand> commands = new ArrayList<>();
+			commands.add(new StudyUserCommand(CommandType.DELETE, studyUser.getId()));
+			this.studyUserCom.broadcast(commands);
+			this.studyUserRepository.delete(studyUser);
+
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Failed to remove studyUser from study: ", e);
+		}
 	}
 
 	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
