@@ -15,7 +15,6 @@
 package org.shanoir.ng.studycard;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
@@ -31,7 +30,7 @@ import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.study.rights.StudyRightsService;
-import org.shanoir.ng.studycard.controler.StudyCardApi;
+import org.shanoir.ng.studycard.controler.StudyCardApiController;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -60,7 +59,7 @@ public class StudyCardSecurityTest {
 	private BindingResult mockBindingResult;
 	
 	@Autowired
-	private StudyCardApi api;
+	private StudyCardApiController  api;
 	
 	@MockBean
 	StudyRightsService commService;

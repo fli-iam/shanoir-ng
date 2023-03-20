@@ -13,7 +13,7 @@
  */
 import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable, OnDestroy } from '@angular/core';
-import { saveAs } from 'file-saver';
+import { saveAs } from 'file-saver-es';
 import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 

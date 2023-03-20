@@ -454,9 +454,8 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<String> getDicomMetadataByDatasetId(
-    		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
-		
-		final Dataset dataset = datasetService.findById(datasetId);
+    		@ApiParam(value = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {	
+		final Dataset dataset = datasetService.findById(datasetId);		
 		List<URL> pathURLs = new ArrayList<>();
 		DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 		if (pathURLs.isEmpty()) {

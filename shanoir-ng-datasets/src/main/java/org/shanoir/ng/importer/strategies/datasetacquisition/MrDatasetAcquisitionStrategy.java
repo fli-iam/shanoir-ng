@@ -40,7 +40,6 @@ import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.studycard.service.StudyCardProcessingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,9 +66,6 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	
 	@Autowired
 	private MrProtocolStrategy mrProtocolStrategy;
-	
-	@Autowired
-	private StudyCardProcessingService studyCardProcessingService;
 	
 	@Autowired
 	private DatasetStrategy<MrDataset> mrDatasetStrategy;
@@ -150,7 +146,7 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		}
 
 		if (studyCard != null) {
-			studyCardProcessingService.applyStudyCard(mrDatasetAcquisition, studyCard, dicomAttributes);
+		    studyCard.apply(mrDatasetAcquisition, dicomAttributes);
 		}
 
 		return mrDatasetAcquisition;

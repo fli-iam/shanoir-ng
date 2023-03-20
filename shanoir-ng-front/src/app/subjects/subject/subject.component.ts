@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
+import { UntypedFormGroup, Validators, AbstractControl, ValidatorFn } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
@@ -115,7 +115,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
@@ -156,8 +156,8 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
       };
     }
 
-    private updateFormControl(formGroup: FormGroup) {
-        if (this.subject.imagedObjectCategory == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
+    private updateFormControl(formGroup: UntypedFormGroup) {
+        if (formGroup.get('imagedObjectCategory').value == ImagedObjectCategory.LIVING_HUMAN_BEING && !this.isAlreadyAnonymized && this.mode == 'create') {
             formGroup.get('firstName').setValidators(this.nameValidators);
             formGroup.get('lastName').setValidators(this.nameValidators);
             formGroup.get('birthDate').setValidators([Validators.required, DatepickerComponent.validator])

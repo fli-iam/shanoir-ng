@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
 import { CarminDatasetProcessing } from 'src/app/carmin/models/CarminDatasetProcessing';
@@ -23,7 +23,7 @@ import { ProcessingService } from '../processing.service';
 export class ExecutionComponent implements OnInit {
 
   pipeline: Pipeline;
-  executionForm: FormGroup;
+  executionForm: UntypedFormGroup;
   selectedDatasets: Set<Dataset>;
   token: String;
   refreshToken: String;
@@ -64,15 +64,15 @@ export class ExecutionComponent implements OnInit {
   }
 
   initExecutionForm() {
-    this.executionForm = new FormGroup({
-      "execution_name": new FormControl('', Validators.required)
+    this.executionForm = new UntypedFormGroup({
+      "execution_name": new UntypedFormControl('', Validators.required)
     });
 
     this.pipeline.parameters.forEach(
       parameter => {
         let validators: ValidatorFn[] = [];
         if (!parameter.isOptional) validators.push(Validators.required);
-        let control = new FormControl(parameter.defaultValue, validators);
+        let control = new UntypedFormControl(parameter.defaultValue, validators);
         if (parameter.name != "executable") this.executionForm.addControl(parameter.name, control);
       }
     )

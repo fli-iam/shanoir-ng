@@ -55,7 +55,7 @@ public interface StudyService {
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL') or @studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_ADMINISTRATE')")
 	Study findById(Long id);
 
-
+	
 	/**
 	 * Get all the studies
 	 * 
@@ -103,6 +103,13 @@ public interface StudyService {
 	 * @param study
 	 */
 	void addStudyUserToStudy(StudyUser studyUser, Study study);
+
+	/**
+	 * Remove a studyUser from a study
+	 * @param studyId
+	 * @param userId
+	 */
+	void removeStudyUserFromStudy(Long studyId, Long userId);
 
 	/**
 	 * Links an examination to a study

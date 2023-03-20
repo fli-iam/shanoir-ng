@@ -21,8 +21,8 @@ export class BrowserPaging<T> {
     private lastSort: Sort;
 
     constructor(
-            private items: T[],
-            private columnDefs: ColumnDefinition[]) {
+            public items: T[],
+            public columnDefs: ColumnDefinition[]) {
         if (!this.items) throw Error('items cannot be null !');
     }
 

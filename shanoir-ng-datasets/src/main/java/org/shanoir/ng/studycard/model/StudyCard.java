@@ -25,25 +25,26 @@ import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
 import javax.persistence.Table;
 
+import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
+import org.shanoir.ng.studycard.model.rule.DatasetAcquisitionRule;
+import org.shanoir.ng.studycard.model.rule.DatasetRule;
+import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-/**
- * Study card.
- *
- * @author msimon
- *
- */
+@SuppressWarnings("deprecation")
 @Entity
 @Table(name = "study_cards")
 @JsonPropertyOrder({ "_links", "id", "name", "isDisabled" })
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class StudyCard extends HalEntity {
+public class StudyCard extends HalEntity implements Card {
 
 	/**
 	 * UID
@@ -70,7 +71,7 @@ public class StudyCard extends HalEntity {
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="study_card_id")
-	private List<StudyCardRule> rules;
+	private List<StudyCardRule<?>> rules;
 	
 	private Long lastEditTimestamp;
 
@@ -122,11 +123,11 @@ public class StudyCard extends HalEntity {
 		this.studyId = studyId;
 	}
 
-	public List<StudyCardRule> getRules() {
+	public List<StudyCardRule<?>> getRules() {
 		return rules;
 	}
 
-	public void setRules(List<StudyCardRule> rules) {
+	public void setRules(List<StudyCardRule<?>> rules) {
 		this.rules = rules;
 	}
 
@@ -138,4 +139,32 @@ public class StudyCard extends HalEntity {
 		this.lastEditTimestamp = lastEditTimestamp;
 	}
 	
+   /**
+    * Application during import, when dicoms are present in tmp directory.
+    * @param acquisition
+    * @param dicomAttributes
+    * @return true if the application had any effect on acquisitions
+    */
+   public boolean apply(DatasetAcquisition acquisition, Attributes dicomAttributes) {
+       boolean changeInAtLeastOneAcquisition = false;
+       if (this.getRules() != null) {
+           for (StudyCardRule<?> rule : this.getRules()) {
+               if (rule instanceof DatasetAcquisitionRule) {
+                   changeInAtLeastOneAcquisition = true;
+                   ((DatasetAcquisitionRule) rule).apply(acquisition, dicomAttributes);
+               } else if (rule instanceof DatasetRule && acquisition.getDatasets() != null) {
+                   for (Dataset dataset : acquisition.getDatasets()) {
+                       changeInAtLeastOneAcquisition = true;
+                       ((DatasetRule) rule).apply(dataset, dicomAttributes);                       
+                   }
+               } else {
+                   throw new IllegalStateException("unknown type of rule");
+               }
+           }
+       }
+       acquisition.setStudyCard(this);
+       acquisition.setStudyCardTimestamp(this.getLastEditTimestamp());
+       return changeInAtLeastOneAcquisition;
+   }
+   
 }
