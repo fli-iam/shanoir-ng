@@ -10,19 +10,24 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -31,6 +36,8 @@ import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.model.Execution;
 import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
+import org.shanoir.ng.processing.carmin.output.DefaultOutputProcessing;
+import org.shanoir.ng.processing.carmin.output.OutputProcessing;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
@@ -67,6 +74,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Service
 public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
+	private static final String DEFAULT_OUTPUT = "default";
+
 	@Value("${vip.uri}")
 	private String VIP_URI;
 
@@ -75,12 +84,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 	@Value("${vip.sleep-time}")
 	private long sleepTime;
-
-	@Value("${vip.file-formats}")
-	private String[] listOfNiftiExt;
-
-	@Value("${vip.result-file-name}")
-	private String resultFileName;
 
 	private ThreadLocal<Boolean> stop = new ThreadLocal<>();
 
@@ -94,22 +97,29 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	private CarminDatasetProcessingService carminDatasetProcessingService;
 
 	@Autowired
-	private DatasetProcessingService datasetProcessingService;
-
-	@Autowired
-	private ImporterService importerService;
-
-	@Autowired
-	private StudyRepository studyRepository;
-
-	@Autowired
-	private SubjectRepository subjectRepository;
-
-	@Autowired
 	private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
 	@Autowired
 	ObjectMapper mapper;
+
+	@Autowired
+	DefaultOutputProcessing defaultOutputProcessing;
+	
+	// Map of output methods to execute.
+    private static Map<String, OutputProcessing> outputProcessingMap;
+
+	@PostConstruct
+	public void Initialize() {
+		// Init output map
+        Map<String, OutputProcessing> aMap =  new HashMap<>();
+        aMap.put(DEFAULT_OUTPUT, defaultOutputProcessing);
+        outputProcessingMap = Collections.unmodifiableMap(aMap);
+        
+		// TODO
+		// Get list of Carmin dataset processing not finished
+		
+		// Create a job for every processing
+	}
 
 	@Async
 	@Override
@@ -176,12 +186,11 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 							.getPathMatcher("glob:**/*.{tgz,tar.gz}");
 					final Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath());
 
+					String outputProcessingKey = StringUtils.isEmpty(carminDatasetProcessing.getOutputProcessing()) ? DEFAULT_OUTPUT : carminDatasetProcessing.getOutputProcessing();
+					
 					stream.filter(matcher::matches)
 					.forEach(zipFile -> {
-						LOG.error(zipFile.toString());
-						decompressTGZ(zipFile.toFile(),
-							userImportDir.getAbsoluteFile(),
-							carminDatasetProcessing);
+						outputProcessingMap.get(outputProcessingKey).manageTarGzResult(zipFile.toFile(), userImportDir.getAbsoluteFile(), carminDatasetProcessing);
 					});
 
 					LOG.info("execution status updated, stopping job...");
@@ -232,161 +241,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				stop.set(true);
 			}
 		}
-	}
-
-	/**
-	 * 
-	 * @param in
-	 * @param out
-	 * @param carminDatasetProcessing
-	 */
-	private void decompressTGZ(File in, File out, CarminDatasetProcessing carminDatasetProcessing) {
-		try (TarArchiveInputStream fin = new TarArchiveInputStream(
-				new GzipCompressorInputStream(new FileInputStream(in)))) {
-			TarArchiveEntry entry;
-
-			File cacheFolder = new File(out.getAbsolutePath() + File.separator + "cache");
-
-			if (!cacheFolder.exists()) {
-				cacheFolder.mkdirs();
-			}
-			
-			List<File> niftiFiles = new ArrayList<File>();
-			
-			// first, find "result.json" file
-			while ((entry = fin.getNextTarEntry()) != null) {
-				
-				String parsedEntry = entry.getName();
-				LOG.info("tar entry :" + parsedEntry);
-
-				if (entry.isDirectory()) {
-					continue;
-				}
-				
-				if (parsedEntry.endsWith(this.resultFileName)) {
-					// We have the result => Read the file to get the parent datasets
-					/*
-					 {
-						"infile" : ["dateset-id+filename.nii"]
-					}
-					*/
-					try {
-						BufferedReader br = null;
-						StringBuilder sb = new StringBuilder();
-					    br = new BufferedReader(new InputStreamReader(fin));
-					    String line;
-					    while ((line = br.readLine()) != null) {
-					        sb.append(line);
-					    }
-						JSONObject obj = new JSONObject(sb.toString());
-						
-						String datasetValue = (String) obj.get("infile");
-					} catch (Exception e) {
-						LOG.error("Could not read JSON file", e);
-					}
-				}
-
-				if (parsedEntry.contains("/")) {
-					parsedEntry = parsedEntry.substring(parsedEntry.lastIndexOf("/") + 1);
-				}
-
-				File currentFile = new File(cacheFolder, parsedEntry);
-				File parent = currentFile.getParentFile();
-
-				if (!parent.exists()) {
-					parent.mkdirs();
-				}
-
-				IOUtils.copy(fin, Files.newOutputStream(currentFile.toPath()));
-
-				// check all nifti formats
-				for (int i = 0; i < listOfNiftiExt.length; i++) {
-					if (entry.getName().endsWith(listOfNiftiExt[i])) {
-						
-						createProcessedDataset(currentFile, cacheFolder.getAbsolutePath(),
-								carminDatasetProcessing, null);
-					}
-				}
-
-			}
-		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-		}
-	}
-
-	/**
-	 *
-	 * @param niiftiFile
-	 * @param destDir
-	 * @param carminDatasetProcessing
-	 */
-	private void createProcessedDataset(File niiftiFile, String destDir,
-			CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) {
-		File dir = new File(destDir);
-		// create output directory if it doesn't exist
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-
-		try {
-			ProcessedDatasetImportJob processedDataset = new ProcessedDatasetImportJob();
-			DatasetProcessing datasetProcessing = datasetProcessingService
-					.findById(carminDatasetProcessing.getId())
-					.orElseThrow(() -> new NotFoundException("datasetProcessing not found"));
-
-			Study study = studyRepository.findById(datasetProcessing.getStudyId())
-					.orElseThrow(() -> new NotFoundException("study not found"));
-
-			processedDataset.setDatasetProcessing(datasetProcessing);
-
-			processedDataset.setProcessedDatasetFilePath(niiftiFile.getAbsolutePath());
-			processedDataset.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
-			processedDataset.setStudyId(datasetProcessing.getStudyId());
-			processedDataset.setStudyName(study.getName());
-
-			if(inputDatasets.size() != 0) {
-
-				List<Long> subjectIds = inputDatasets.stream().map(dataset -> dataset.getSubjectId())
-						.collect(Collectors.toList());
-
-				Predicate<Long> predicate = obj -> Objects.equals(inputDatasets.get(0).getSubjectId(), obj);
-
-				if (subjectIds.stream().allMatch(predicate)) {
-					Subject subject = subjectRepository.findById(inputDatasets.get(0).getSubjectId())
-							.orElseThrow(() -> new NotFoundException("subject not found"));
-
-					processedDataset.setSubjectId(subject.getId());
-					processedDataset.setSubjectName(subject.getName());
-					processedDataset.setDatasetType(inputDatasets.get(0).getType());
-				} else {
-					processedDataset.setDatasetType("Mesh");
-				}
-
-			} else {
-				processedDataset.setDatasetType("Mesh");
-			}
-
-			processedDataset.setProcessedDatasetName(getNameWithoutExtension(niiftiFile.getName())); 
-			importerService.createProcessedDataset(processedDataset);
-
-			deleteCacheDir(Paths.get(destDir));
-
-		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-		}
-
-	}
-
-	private void deleteCacheDir(Path directory) throws IOException {
-		Files.walk(directory)
-		.sorted(Comparator.reverseOrder())
-		.map(Path::toFile)
-		.forEach(File::delete);
-	}
-
-	private String getNameWithoutExtension(String file) {
-		int dotIndex = file.indexOf('.');
-		return (dotIndex == -1) ? file : file.substring(0, dotIndex);
 	}
 
 	/**

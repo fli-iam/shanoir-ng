@@ -237,7 +237,8 @@ export class ExecutionComponent implements OnInit {
         carminDatasetProcessing.comment = execution.identifier;
         carminDatasetProcessing.studyId = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
         carminDatasetProcessing.datasetProcessingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
-        
+        carminDatasetProcessing.outputProcessing = this.pipeline.outputProcessing;
+
         // HOTFIX for circular dataset object issue 
         this.inputDatasets.forEach(dataset  => {
           dataset.study.subjectStudyList = [];
