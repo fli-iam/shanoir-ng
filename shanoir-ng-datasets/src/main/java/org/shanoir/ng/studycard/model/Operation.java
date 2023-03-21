@@ -23,9 +23,7 @@ public enum Operation {
 	SMALLER_THAN(5),
 	BIGGER_THAN(6);
 	
-	
 	private int id;
-
 	
 	private Operation(final int id) {
 		this.id = id;

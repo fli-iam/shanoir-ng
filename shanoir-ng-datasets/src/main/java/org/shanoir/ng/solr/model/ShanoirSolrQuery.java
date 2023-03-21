@@ -32,7 +32,9 @@ public class ShanoirSolrQuery {
 	private Collection<String> studyName;
 	
 	private Collection<String> subjectName;
-	
+
+	private Collection<Long> examinationId;
+
 	private Collection<String> examinationComment;
 	
 	private	Collection<String> datasetName;
@@ -89,6 +91,14 @@ public class ShanoirSolrQuery {
 	 */
 	public void setSubjectName(Collection<String> subjectName) {
 		this.subjectName = subjectName;
+	}
+
+	public Collection<Long> getExaminationId() {
+		return examinationId;
+	}
+
+	public void setExaminationId(Collection<Long> examinationId) {
+		this.examinationId = examinationId;
 	}
 
 	/**

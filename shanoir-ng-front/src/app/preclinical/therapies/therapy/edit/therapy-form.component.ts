@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { slideDown } from '../../../../shared/animations/animations';
@@ -70,7 +70,7 @@ export class TherapyFormComponent extends EntityComponent<Therapy>{
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'name': [this.therapy.name, Validators.required],
             'therapyType': [this.therapy.therapyType, Validators.required],

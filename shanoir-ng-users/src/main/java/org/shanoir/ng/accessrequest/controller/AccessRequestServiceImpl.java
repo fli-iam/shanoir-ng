@@ -55,4 +55,9 @@ public class AccessRequestServiceImpl implements AccessRequestService {
 	public List<AccessRequest> findByUserIdAndStudyId(Long userId, Long studyId) {
 		return this.accessRequestRepository.findByUserIdAndStudyId(userId, studyId);
 	}
+
+	@Override
+	public List<AccessRequest> findByUserId(Long userId) {
+		return this.accessRequestRepository.findByUserId(userId);
+	}
 }

@@ -26,8 +26,9 @@ import {
 
 import { Mode } from '../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../shared/select/select.component';
+import { SuperPromise } from '../../utils/super-promise';
 import { StudyCardAssignment, StudyCardCondition, StudyCardRule } from '../shared/study-card.model';
-import { AssignmentField, StudyCardActionComponent } from './action/action.component';
+import { ShanoirMetadataField, StudyCardActionComponent } from './action/action.component';
 
 
 @Component({
@@ -39,7 +40,9 @@ export class StudyCardRuleComponent implements OnChanges {
 
     @Input() mode: Mode;
     @Input() rule: StudyCardRule;
-    @Input() fields: AssignmentField[];
+    private rulePromise: SuperPromise<StudyCardRule> = new SuperPromise(); 
+    @Input() assignmentFields: ShanoirMetadataField[];
+    @Input() conditionFields: ShanoirMetadataField[];
     @Output() change: EventEmitter<StudyCardRule> = new EventEmitter();
     @Output() moveUp: EventEmitter<void> = new EventEmitter();
     @Output() moveDown: EventEmitter<void> = new EventEmitter();
@@ -49,28 +52,48 @@ export class StudyCardRuleComponent implements OnChanges {
     @ViewChildren(StudyCardActionComponent) assignmentChildren: QueryList<StudyCardActionComponent>;
     touched: boolean = false;
 
-    fieldOptions: Option<string>[];
-    assigmentOptions: Option<any>[];
+    assignmentFieldOptions: Option<string>[];
+    conditionFieldOptions: Option<string>[];
 
     constructor(public elementRef: ElementRef) { }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes.fields) {
-            if (this.fields) {
-                this.fieldOptions = this.fields.map(field => new Option<string>(field.field, field.label));
-            } else {
-                this.fieldOptions = [];
-            }
+        if (changes.rule && this.rule) {
+            this.rulePromise.resolve(this.rule);
+        }
+        if (changes.assignmentFields) {
+            this.rulePromise.then(() => {
+                if (this.assignmentFields) {
+                    this.assignmentFieldOptions = this.assignmentFields
+                        .filter(field => this.rule.scope == 'DatasetAcquisition' || (this.rule.scope == 'Dataset' && field.scope == 'Dataset'))
+                        .map(field => new Option<string>(field.field, field.label, field.scope));
+                } else {
+                    this.assignmentFieldOptions = [];
+                }
+            });
+        }
+        if (changes.conditionFields) {
+            this.rulePromise.then(() => {
+                if (this.conditionFields) {
+                    this.conditionFieldOptions = this.conditionFields
+                        .filter(field => this.rule.scope == 'DatasetAcquisition' || (this.rule.scope == 'Dataset' && field.scope == 'Dataset'))
+                        .map(field => new Option<string>(field.field, field.label, field.scope));
+                } else {
+                    this.conditionFieldOptions = [];
+                }
+            });
         }
     }
 
     addNewCondition() {
-        this.rule.conditions.push(new StudyCardCondition());
+        let cond = new StudyCardCondition('StudyCardDICOMCondition');
+        cond.values = [null];
+        this.rule.conditions.push(cond);
         this.change.emit(this.rule);
     }
 
     addNewAction() {
-        this.rule.assignments.push(new StudyCardAssignment());
+        this.rule.assignments.push(new StudyCardAssignment(this.rule.scope));
         this.change.emit(this.rule);
     }
 
@@ -80,7 +103,7 @@ export class StudyCardRuleComponent implements OnChanges {
     }
     
     deleteAction(index: number) {
-        let fieldOption: Option<string> = this.fieldOptions.find(opt => opt.value === this.rule.assignments[index].field);
+        let fieldOption: Option<string> = this.assignmentFieldOptions.find(opt => opt.value === this.rule.assignments[index].field);
         if (fieldOption) fieldOption.disabled = false;
         this.rule.assignments.splice(index, 1);
         this.change.emit(this.rule);

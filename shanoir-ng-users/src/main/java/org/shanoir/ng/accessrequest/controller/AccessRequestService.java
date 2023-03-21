@@ -5,9 +5,6 @@ import java.util.Optional;
 
 import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface AccessRequestService extends BasicEntityService<AccessRequest>{
 
@@ -22,4 +19,6 @@ public interface AccessRequestService extends BasicEntityService<AccessRequest>{
 	Optional<AccessRequest> findById(Long id);
 
 	List<AccessRequest> findByStudyIdAndStatus(List<Long> studiesId, int status);
+
+	List<AccessRequest> findByUserId(Long userId);
 }

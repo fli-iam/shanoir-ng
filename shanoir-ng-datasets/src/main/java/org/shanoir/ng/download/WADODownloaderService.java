@@ -18,23 +18,38 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
+import javax.json.Json;
+import javax.json.stream.JsonParser;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.json.JSONReader;
+import org.json.JSONException;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetUtils;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.model.Study;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +69,7 @@ import org.springframework.web.client.RestTemplate;
  * WADO-RS URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.5.html
  * WADO-URI URLs are supported: http://dicom.nema.org/DICOM/2013/output/chtml/part18/sect_6.2.html
  * 
- * WADO-RS: http://dcm4chee-arc:8081/dcm4chee-arc/aets/DCM4CHEE/rs/studies/1.4.9.12.22.1.8447.5189520782175635475761938816300281982444
+ * WADO-RS: http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/rs/studies/1.4.9.12.22.1.8447.5189520782175635475761938816300281982444
  * /series/1.4.9.12.22.1.3337.609981376830290333333439326036686033499
  * /instances/1.4.9.12.22.1.3327.13131999371192661094333587030092502791578
  * 
@@ -62,7 +77,7 @@ import org.springframework.web.client.RestTemplate;
  * this class extracts as well the files contained in the response to
  * the file system.
  * 
- * WADO-URI: http://dcm4chee-arc:8081/dcm4chee-arc/aets/DCM4CHEE/wado?requestType=WADO
+ * WADO-URI: http://dcm4chee-arc:8081/dcm4chee-arc/aets/AS_RECEIVED/wado?requestType=WADO
  * &studyUID=1.4.9.12.22.1.8444.518952078217568647576155668816300281982444
  * &seriesUID=1.4.9.12.22.1.8444.60998137683029030014444439326036686033499
  * &objectUID=1.4.9.12.22.1.8444.1313199937119266109555587030092502791578
@@ -119,16 +134,20 @@ public class WADODownloaderService {
 	/**
 	 * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
 	 * their received dicom files to a folder named workFolder.
-	 * 
+     * Return the list of downloaded files
+	 *
 	 * @param urls
 	 * @param workFolder
 	 * @param subjectName
 	 * @param dataset 
 	 * @throws IOException
 	 * @throws MessagingException
+	 * @return
+	 *
 	 */
-	public void downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
+	public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
 		int i = 0;
+		List<File> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			String url = ((URL) iterator.next()).toString();
 			String instanceUID = null;
@@ -174,12 +193,14 @@ public class WADODownloaderService {
 					}
 					try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 						Files.copy(bIS, extractedDicomFile.toPath());
+						files.add(extractedDicomFile);
 					}
 				} else {
 					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
 				}
 			}
 		}
+		return files;
 	}
 	
 	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {
@@ -192,6 +213,100 @@ public class WADODownloaderService {
 			return null;
 		}
 	}
+	
+	public Attributes getDicomAttributesForDataset(Dataset dataset) {
+        List<URL> urls = new ArrayList<>();
+        try {
+            DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
+            if (!urls.isEmpty()) {
+                String jsonMetadataStr = downloadDicomMetadataForURL(urls.get(0));
+                JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
+                Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
+                if (dicomAttributes != null) {
+                    return dicomAttributes;
+                } else {
+                    LOG.error("Could not find dicom attributes for dataset with id: " + dataset.getId());
+                }
+            } else {
+                LOG.error("Could not find dicom attributes for dataset with id: " + dataset.getId()
+                + " : no pacs url for this dataset");
+            }
+        } catch (IOException | MessagingException | RestClientException e) {
+            throw new RestClientException("Can not get dicom attributes for dataset " + dataset.getId(), e);
+        }
+        return null;
+    }	
+    
+    private String getExaminationFirstDatasetUrl(Examination examination) {
+        if (examination != null && examination.getDatasetAcquisitions() != null && !examination.getDatasetAcquisitions().isEmpty()
+                && examination.getDatasetAcquisitions().get(0) != null && examination.getDatasetAcquisitions().get(0).getDatasets() != null
+                && !examination.getDatasetAcquisitions().get(0).getDatasets().isEmpty() 
+                && examination.getDatasetAcquisitions().get(0).getDatasets().get(0) != null) {
+            List<URL> urls = new ArrayList<>();
+            try {
+                DatasetUtils.getDatasetFilePathURLs(examination.getDatasetAcquisitions().get(0).getDatasets().get(0), urls, DatasetExpressionFormat.DICOM);
+                if  (!urls.isEmpty()) {
+                    return urls.get(0).toString();
+                }
+            } catch (MalformedURLException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+    
+    public Attributes getDicomAttributesForStudy(Study study) {
+        long ts = new Date().getTime();
+        Examination exam = getFirstIfExist(study.getExaminations());
+        if (exam == null) return null;
+        Attributes result = getDicomAttributesForExamination(exam);
+        LOG.error("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
+        return result;
+    }
+    
+
+    public Attributes getDicomAttributesForExamination(Examination examination) {
+        long ts = new Date().getTime();
+        DatasetAcquisition acquisition = getFirstIfExist(examination.getDatasetAcquisitions());
+        if (acquisition == null) return null;
+        Attributes result = getDicomAttributesForAcquisition(acquisition);
+        LOG.error("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
+        return result;
+    }
+
+    public Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) {
+        long ts = new Date().getTime();
+        Dataset ds = getFirstIfExist(acquisition.getDatasets());
+        if (ds == null) return null;
+        Attributes result = getDicomAttributesForDataset(ds);
+        LOG.error("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
+        return result;
+    }
+    
+    public String getDicomJson(Examination examination) throws IOException {
+        String urlStr = getExaminationFirstDatasetUrl(examination);
+        if (urlStr != null) {
+            if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURItoWadoRS(urlStr);
+            urlStr = urlStr.split(CONTENT_TYPE)[0];
+            urlStr = urlStr.split("/series/")[0];
+            urlStr = urlStr.concat("/metadata/");
+            String json = downloadMetadataFromPACS(urlStr);
+            // transform from flat to tree
+            try {
+                return DicomJsonUtils.inflfateDCM4CheeJSON(json);
+                //tree.put
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }              
+        return null;
+    }
+    
+    private <T> T getFirstIfExist(List<T> list) {
+        if (list == null || list.size() == 0) return null;
+        else return list.get(0);
+    }
 
 	/**
 	 * The instanceUID (== objectUID) is inside the URL string
@@ -237,7 +352,7 @@ public class WADODownloaderService {
 	}
 	
 	
-	private String downloadMetadataFromPACS(final String url) throws IOException, RestClientException {
+	private String downloadMetadataFromPACS(final String url) throws IOException {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);

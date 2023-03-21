@@ -56,6 +56,10 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  *
@@ -74,6 +78,18 @@ public final class Util {
 
 	/** Time pattern for file system. */
 	public static String TIME_PATTERN_FILE_SYSTEM = "yyyy_MM_dd_HH_mm_ss_SSS";
+	
+	public static ObjectMapper objectMapper = new ObjectMapper();
+	
+	public static ObjectWriter objectWriter;
+	
+	static {
+		objectMapper
+			.registerModule(new JavaTimeModule())
+			.registerModule(new Jdk8Module())
+			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		objectWriter = objectMapper.writer().withDefaultPrettyPrinter();
+	}
 
 	/**
 	 * Convert an array into its string representation.
@@ -317,13 +333,12 @@ public final class Util {
 	 */
 	public static <T> List<T> getMappedList(CloseableHttpResponse response, Class<T> classname) {
 		StringBuffer result = new StringBuffer();
-		ObjectMapper mapper = new ObjectMapper();
 		result = readStringBuffer(response);
 		if (result != null) {
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			try {
-				JavaType type = mapper.getTypeFactory().constructCollectionType(List.class, classname);
-				List<T> myObjects = mapper.readValue(result.toString(), type);
+				JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, classname);
+				List<T> myObjects = objectMapper.readValue(result.toString(), type);
 				return myObjects;
 			} catch (JsonGenerationException e) {
 				logger.error(e.getMessage(), e);
@@ -338,13 +353,12 @@ public final class Util {
 
 	public static <T> T getMappedObject(CloseableHttpResponse response, Class<T> classname) {
 		StringBuffer result = new StringBuffer();
-		ObjectMapper mapper = new ObjectMapper();
 		result = readStringBuffer(response);
 		if (result != null) {
-			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 			try {
-				JavaType type = mapper.constructType(classname);
-				T myObjects = mapper.readValue(result.toString(), type);
+				JavaType type = objectMapper.constructType(classname);
+				T myObjects = objectMapper.readValue(result.toString(), type);
 				return myObjects;
 			} catch (JsonGenerationException e) {
 				logger.error(e.getMessage(), e);

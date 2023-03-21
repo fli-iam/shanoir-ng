@@ -29,7 +29,6 @@ import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
 import org.shanoir.ng.shared.email.StudyInvitationEmail;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
 import org.slf4j.Logger;
@@ -83,6 +82,8 @@ public class EmailServiceImpl implements EmailService {
 	private static final String STUDY_CARD = "study_card";
 
 	private static final String SERIES = "series";
+	
+	private static final String MOTIVATION = "motivation";
 	
 	private static final Logger LOG = LoggerFactory.getLogger(EmailServiceImpl.class);
 	
@@ -512,7 +513,7 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void notifyStudyManagerAccessRequest(AccessRequest createdRequest) throws ShanoirException {
+	public void notifyStudyManagerAccessRequest(AccessRequest createdRequest) {
         // Find requester users
         User user = userRepository.findById(createdRequest.getUser().getId()).orElse(null);
 
@@ -531,6 +532,8 @@ public class EmailServiceImpl implements EmailService {
 					variables.put(LASTNAME, studyAdmin.getLastName());
 					variables.put(EMAIL, user!= null ? user.getEmail(): administratorEmail);
 					variables.put(STUDY_NAME, createdRequest.getStudyName());
+					variables.put(MOTIVATION, createdRequest.getMotivation());
+					variables.put(USERNAME, createdRequest.getUser().getUsername());
 					final String content = build("notifyStudyAdminAccessRequest", variables);
 					LOG.info(content);
 					messageHelper.setText(content, true);
@@ -539,9 +542,6 @@ public class EmailServiceImpl implements EmailService {
 				LOG.info("Sending study-users-added mail to {} for study {}", studyAdmin.getUsername(), createdRequest.getStudyId());
 				// mailSender.send(messagePreparator);
 			}
-        } else {
-        	LOG.error("No admins for this study. This should not happen.");
-        	throw new ShanoirException("No admin could be found fot this study.");
         }
 	}
 	

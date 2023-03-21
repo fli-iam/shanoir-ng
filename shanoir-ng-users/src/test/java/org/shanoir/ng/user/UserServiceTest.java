@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +28,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.shanoir.ng.accessrequest.controller.AccessRequestService;
+import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
@@ -93,6 +96,9 @@ public class UserServiceTest {
 
 	@MockBean
 	private AccessRequestRepository accessRequestRepository;
+	
+	@MockBean
+	private AccessRequestService accessRequestService;
 
 	@Before
 	public void setup() throws SecurityException {
@@ -189,7 +195,11 @@ public class UserServiceTest {
 	@Test
 	@WithMockKeycloakUser(id = 2L, authorities = { "ROLE_ADMIN" })
 	public void deleteByIdTest() throws EntityNotFoundException, ForbiddenException {
+		AccessRequest request = new AccessRequest();
+		request.setId(1L);
+		Mockito.when(accessRequestService.findByUserId(Mockito.anyLong())).thenReturn(Collections.singletonList(request));
 		userService.deleteById(USER_ID);
+		Mockito.verify(accessRequestService, Mockito.times(1)).deleteById(Mockito.anyLong());
 		Mockito.verify(userRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 

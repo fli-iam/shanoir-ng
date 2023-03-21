@@ -52,6 +52,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     public optionList: Option<Subject | Study>[];
     @Input() displaySubjectType: boolean = true;
     hasTags: boolean;
+    hasQualityTags: boolean;
     columnDefs: ColumnDefinition[];
     @ViewChild('table') table: TableComponent;
     private subjectOrStudyObs: RxjsSubject <Subject | Study> = new RxjsSubject();
@@ -113,7 +114,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         }
         if (this.hasTags) {
             this.columnDefs.push(
-                { headerName: 'Tags', field: 'tags', editable: true, multi: true, 
+                { headerName: 'Tags', field: 'tags', editable: true, multi: true,
                     possibleValues: (subjectStudy: SubjectStudy) => {
                         return subjectStudy?.study?.tags?.map(tag => {
                             let opt = new Option(tag, tag.name);
@@ -125,6 +126,15 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
                         });
                     }
                 }
+            );
+        } 
+        if (this.hasQualityTags) {
+            this.columnDefs.push(
+                { headerName: 'Quality', field: 'qualityTag', editable: false, width: '90px', cellGraphics: (item) => {
+                    if (item.qualityTag == 'VALID') return {color: 'green', tag: true, awesome: 'fas fa-check-circle'};
+                    else if (item.qualityTag == 'WARNING') return {color: 'chocolate', tag: true, awesome: 'fas fa-exclamation-triangle'};
+                    else if (item.qualityTag == 'ERROR') return {color: 'red', tag: true, awesome: 'fas fa-times-circle'};
+                }}
             );
         } 
         this.columnDefs.push(
@@ -198,12 +208,13 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         this.model.push(newSubjectStudy);
         this.processHasTags();
         this.propagateChange(this.model);
-        this.table.refresh();
+        this.table?.refresh();
     }
 
     private processHasTags() {
         this.hasTags = (!!this.model && !!(this.model as SubjectStudy[]).find(subStu => subStu.study && subStu.study.tags && subStu.study.tags.length > 0))
                 || this.study?.tags?.length > 0;
+        this.hasQualityTags = (!!this.model && !!(this.model as SubjectStudy[]).find(subStu => !!subStu.qualityTag));
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
