@@ -297,4 +297,15 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetDTO>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
+
+	@ApiOperation(value = "", notes = "If exists, returns the size of the dataset corresponding to the given id", response = Dataset.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "size of the dataset in bytes", response = Long.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/sizeById/{datasetId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDataset(#datasetId, 'CAN_SEE_ALL'))")
+    ResponseEntity<Long> getSizeById(
+			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") Long datasetId);
 }
