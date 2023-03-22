@@ -1,4 +1,4 @@
- :host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; border-collapse: collapse; }
+ :host { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; border-collapse: collapse; }
 .full-row { background-color: var(--color-b); overflow: initial; }
 th,
 caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; }
@@ -38,6 +38,8 @@ th { width: 100%; white-space: normal; position: relative; height: 1px; min-widt
 		th.status-bar .options { border-right: 0; }
 			th.status-bar .options span { padding: 0 10px; white-space: nowrap; }
 				th.status-bar .options span + span { border: 0; border-left: 1px solid var(--grey); }
+	.collapsable { opacity: 0; }
+	.collapsable:hover { opacity: 1; }
 tr { height: 21px; }
 	/* tr.even { background-color: var(--light-grey); }
 	tr.odd { background-color: var(--lighter-grey); } */
@@ -58,7 +60,7 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 	td.loading,
 	td.empty { padding: 20px 20px; text-align: center; }
 	.cell-container:not(.select) { overflow: hidden; text-overflow: ellipsis; }
-	.cell-container.multiselect { white-space: initial; }
+	.cell-container.multiselect, .cell-container.wrap { white-space: initial; }
 	.cell-container:empty:after { content: '.'; visibility: hidden; }
 
 .loader { float: right; border-left: none !important; }

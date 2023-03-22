@@ -85,7 +85,8 @@ public class ImporterService {
 	private ShanoirEventService eventService;
 
 	@Autowired
-	private SolrService solrService;
+  private SolrService solrService;
+
 	@Autowired
 	private ImporterMailService mailService;
 

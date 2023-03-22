@@ -12,38 +12,44 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.studycard.model;
+package org.shanoir.ng.studycard.model.assignment;
 
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
-public class StudyCardAssignment extends AbstractEntity {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
+@JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = DatasetAssignment.class, name = "Dataset"),
+        @JsonSubTypes.Type(value = DatasetAcquisitionAssignment.class, name = "DatasetAcquisition") })
+public abstract class StudyCardAssignment<T> extends AbstractEntity implements StudyCardAssignmentInterface<T> {
 
 	/** UID */
 	private static final long serialVersionUID = 6708188853533591193L;
 
 	/** The dataset field to update. */
 	@NotNull
-	private Long field;
+    protected Long field;
 	
 	/** The value to set. */
 	@NotNull
 	private String value;
-
-	public AssignmentField getField() {
-		if (field == null) return null;
-		else return AssignmentField.getEnum(field);
-	}
-
-	public void setField(AssignmentField field) {
-		this.field = field.getId();
-	}
 
 	public String getValue() {
 		return value;
@@ -52,5 +58,4 @@ public class StudyCardAssignment extends AbstractEntity {
 	public void setValue(String value) {
 		this.value = value;
 	}
-
 }

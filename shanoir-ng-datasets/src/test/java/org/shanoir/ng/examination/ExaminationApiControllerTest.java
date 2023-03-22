@@ -47,6 +47,7 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -163,7 +164,8 @@ public class ExaminationApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void testDeleteExaminationWithExtraData() throws IOException {
 		Examination exam = new Examination();
-		exam.setStudyId(3L);
+		exam.setStudy(new Study());
+		exam.getStudy().setId(3L);
 		exam.setId(1L);
 		given(examinationServiceMock.findById(1L)).willReturn(exam);
 
@@ -220,7 +222,8 @@ public class ExaminationApiControllerTest {
 	public void saveNewExaminationTest() throws Exception {
 		Examination exam = new Examination();
 		exam.setId(123L);
-		exam.setStudyId(3L);
+		exam.setStudy(new Study());
+		exam.getStudy().setId(3L);
 		given(examinationServiceMock.findById(1L)).willReturn(exam);
 		given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
 

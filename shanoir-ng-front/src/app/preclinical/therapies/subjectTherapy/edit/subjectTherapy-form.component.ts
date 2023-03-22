@@ -13,9 +13,8 @@
  */
 
 import { Component, Input, Output, EventEmitter} from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
-// import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
 
 import { SubjectTherapy }    from '../shared/subjectTherapy.model';
 import { SubjectTherapyService } from '../shared/subjectTherapy.service';
@@ -115,7 +114,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         return Promise.resolve();
     }
     
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'id': [this.subjectTherapy.id],
             'therapy': [this.subjectTherapy.therapy, Validators.required],

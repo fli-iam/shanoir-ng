@@ -14,7 +14,7 @@
 
 import { Component,  Input, Output,  EventEmitter  } from '@angular/core';
 import {  ActivatedRoute, ResolveEnd} from '@angular/router';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
@@ -40,7 +40,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     @Input() isStandalone: boolean = false;
     @Input() examination_id: number;
-    @Input() form: FormGroup;
+    @Input() form: UntypedFormGroup;
     @Output() examAnestheticChange = new EventEmitter();
     //examinationAnesthetic : ExaminationAnesthetic;
     anesthetics: Anesthetic[] = [];
@@ -112,7 +112,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'anesthetic': [this.examinationAnesthetic.anesthetic],
             'injectionInterval': [this.examinationAnesthetic.injection_interval],
