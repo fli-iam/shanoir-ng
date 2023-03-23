@@ -43,8 +43,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 @Service
 public class DatasetDownloaderServiceImpl {
+
+	private static final String FAILURES_TXT = "failures.txt";
 
 	private static final String EEG = "eeg";
 
@@ -297,13 +303,14 @@ public class DatasetDownloaderServiceImpl {
 					listOfDatasets.append("(ID = ").append(dataset.getId())
 					.append(") ")
 					.append(dataset.getName())
-					.append(", ");
+					.append("\n");
 				}
-				listOfDatasets.deleteCharAt(listOfDatasets.length() - 1);
-				listOfDatasets.deleteCharAt(listOfDatasets.length() - 1);
-
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieving files for the following datasets: " + listOfDatasets.toString()));
+				
+		        ZipEntry zipEntry = new ZipEntry(FAILURES_TXT);
+		        zipEntry.setTime(System.currentTimeMillis());
+		        zipOutputStream.putNextEntry(zipEntry);
+		        zipOutputStream.write(listOfDatasets.toString().getBytes());
+		        zipOutputStream.closeEntry();
 			}
 
 			if(!files2AcquisitionId.isEmpty()){
