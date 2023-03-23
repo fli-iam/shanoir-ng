@@ -18,7 +18,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,6 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
 import javax.json.Json;
@@ -131,6 +132,104 @@ public class WADODownloaderService {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 	}
 
+	/**
+	 * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
+	 * their received dicom files to a folder named workFolder.
+     * Return the list of downloaded files
+	 *
+	 * @param urls
+	 * @param workFolder
+	 * @param subjectName
+	 * @param dataset 
+	 * @param datasetFilePath 
+	 * @throws IOException
+	 * @throws MessagingException
+	 * @return
+	 *
+	 */
+	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath) throws IOException, MessagingException {
+		int i = 0;
+		List<String> files = new ArrayList<>();
+		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
+			String url = ((URL) iterator.next()).toString();
+			String instanceUID = null;
+			// handle and check at first for WADO-RS URLs by "/instances/"
+			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
+			if (indexInstanceUID > 0) {
+				instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
+				
+				String serieDescription = dataset.getUpdatedMetadata().getName();
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
+				String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+				String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
+				
+				// Replace all forbidden characters.
+				name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+				
+	            // add folder logic if necessary
+	            if (datasetFilePath != null) {
+	            	name = datasetFilePath + File.separator + name;
+	            }
+				
+				byte[] responseBody = downloadFileFromPACS(url);
+				
+			    ZipEntry entry = new ZipEntry(name + DCM);
+			    entry.setSize(responseBody.length);
+			    zipOutputStream.putNextEntry(entry);
+			    zipOutputStream.write(responseBody);
+			    zipOutputStream.closeEntry();
+			    files.add(name+DCM);
+			} else {
+				// handle and check secondly for WADO-URI URLs by "objectUID="
+				// instanceUID == objectUID
+				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
+				if (indexInstanceUID > 0) {
+					instanceUID = extractInstanceUID(url, instanceUID);
+
+					String serieDescription = dataset.getUpdatedMetadata().getName();
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
+					String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+					String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
+					
+					// Replace all forbidden characters.
+					name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
+		            // add folder logic if necessary
+		            if (datasetFilePath != null) {
+		            	name = datasetFilePath + File.separator + name;
+		            }
+
+		            byte[] responseBody = null;
+					try {
+						responseBody = downloadFileFromPACS(url);
+					    ZipEntry entry = new ZipEntry(name + DCM);
+					    entry.setSize(responseBody.length);
+					    zipOutputStream.putNextEntry(entry);
+					    zipOutputStream.write(responseBody);
+					    zipOutputStream.closeEntry();
+					    files.add(name+DCM);
+					} catch (Exception e) {
+					    String error = "An error occured during the download of this .DCM file, please contact a shanoir administrator if necessary.";
+					    byte[] strToBytes = error.getBytes();
+
+					    ZipEntry entry = new ZipEntry(ERROR + i + "_" + name + TXT);
+					    entry.setSize(responseBody.length);
+					    zipOutputStream.putNextEntry(entry);
+					    zipOutputStream.write(strToBytes);
+					    zipOutputStream.closeEntry();
+						
+					    // LOG the error
+					    LOG.error("A dicom file could not be downloaded from the pacs:", e);
+					    continue;
+					}
+				} else {
+					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
+				}
+			}
+		}
+		return files;
+	}
+	
 	/**
 	 * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
 	 * their received dicom files to a folder named workFolder.
@@ -350,8 +449,7 @@ public class WADODownloaderService {
 			throw new IOException("Download did not work: wrong status code received.");
 		}
 	}
-	
-	
+
 	private String downloadMetadataFromPACS(final String url) throws IOException {
 		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
