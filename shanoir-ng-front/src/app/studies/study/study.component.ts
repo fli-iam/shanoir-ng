@@ -247,10 +247,9 @@ export class StudyComponent extends EntityComponent<Study> {
       let totalSize: number = 0;
       for (let ds of datasets) {
         promises.push(this.datasetService.getSizeById(ds.id).then(size => {
-          if (size == null) {
-            return null;
+          if (size != null) {
+            totalSize = totalSize + size;
           }
-          totalSize = totalSize + size;
         }));
       }
       return Promise.all(promises).then( () => {
