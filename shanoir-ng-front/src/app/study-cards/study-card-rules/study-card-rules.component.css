@@ -6,10 +6,13 @@ study-card-rule { text-align: center; padding: 10px 0; border-radius: 2px; trans
 .add:hover { background-color: var(--color-b); color: white; }
 
 .add-container { color: var(--color-b); margin-top: 20px; }
-.add-container span { display: inline-block; margin: 0 35px; }
-.add-container span:hover { cursor: pointer; color: var(--color-b-light2); }
+.add-container > span { display: inline-block; margin: 0 35px; }
+.add-container > span:hover { cursor: pointer; color: var(--color-b-light2); }
 
 .add-container i { font-size: 35px; }
+
+.add-container .dataset .entity { color: seagreen; }
+.add-container .acquisition .entity { color: coral; }
 
 study-card-rule.select-mode:hover { cursor: pointer; background-color: var(--color-b-light); }
 study-card-rule.selected { background-color: var(--color-b-light); }

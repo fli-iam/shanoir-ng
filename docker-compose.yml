@@ -175,6 +175,8 @@ services:
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_MIGRATION
+      - VIP_URL_SCHEME
+      - VIP_URL_HOST
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -317,6 +319,8 @@ services:
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_KEYCLOAK_ADAPTER_MODE
+      - VIP_URL_SCHEME
+      - VIP_URL_HOST
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro

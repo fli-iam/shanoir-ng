@@ -53,7 +53,7 @@ export class AppComponent {
             private userService: UserService) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
-        ServiceLocator.rootViewContainerRef = this.viewContainerRef;        
+        ServiceLocator.rootViewContainerRef = this.viewContainerRef;
     }
 
     ngOnInit() {

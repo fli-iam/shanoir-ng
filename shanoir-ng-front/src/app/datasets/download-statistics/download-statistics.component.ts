@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { DatasetService } from '../shared/dataset.service';
 
@@ -24,11 +24,11 @@ import { DatasetService } from '../shared/dataset.service';
 
 export class DownloadStatisticsComponent{
 
-    public form: FormGroup;
+    public form: UntypedFormGroup;
 
     constructor(private datasetService: DatasetService,
             private breadcrumbsService: BreadcrumbsService, 
-            private formBuilder: FormBuilder) {
+            private formBuilder: UntypedFormBuilder) {
 
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();

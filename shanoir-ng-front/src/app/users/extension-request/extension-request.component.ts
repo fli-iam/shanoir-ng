@@ -14,9 +14,7 @@
 
 import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-
-import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
+import { UntypedFormGroup, UntypedFormBuilder, Validators, FormControl } from '@angular/forms';
 
 import { ExtensionRequestInfo } from './extension-request-info.model';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
@@ -34,7 +32,7 @@ import * as AppUtils from '../../utils/app.utils';
 export class ExtensionRequestComponent implements OnInit, OnDestroy {
     @Output() closing = new EventEmitter();
     public extensionRequestInfo: ExtensionRequestInfo = new ExtensionRequestInfo();
-    extensionRequestForm: FormGroup;
+    extensionRequestForm: UntypedFormGroup;
     isDateValid: boolean = true;
     userId: number;
     selectedDateNormal: string = '';
@@ -43,7 +41,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
     errorMessage: string;
 
     constructor(private router: Router, private route: ActivatedRoute,
-        private userService: UserService, private fb: FormBuilder) {
+        private userService: UserService, private fb: UntypedFormBuilder) {
     }
 
     ngOnInit(): void {

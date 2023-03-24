@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core';
 
 
 @Component({
@@ -26,6 +26,7 @@ export class TooltipComponent {
     opened: boolean = false;
     private opening: boolean = false;
     private closing: boolean = false;
+    @HostBinding('class.large') @Input() large: boolean = false;
 
     onOver() {
         if (!this.opening) {

@@ -88,7 +88,8 @@ public class SubjectServiceImpl implements SubjectService {
 	@Autowired
 	private StudyUserRepository studyUserRepository;
 
-	@Autowired SubjectMapper subjectMapper;
+	@Autowired
+	private SubjectMapper subjectMapper;
 	
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -315,6 +316,6 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Page<Subject> getFilteredPageByStudies(Pageable page, String name, List<Study> studies) {
 		Iterable<Long> studyIds = studies.stream().map(study -> study.getId()).collect(Collectors.toList());
-		return subjectRepository.findByNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
+		return subjectRepository.findDistinctByNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
 	}
 }

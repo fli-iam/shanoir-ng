@@ -13,7 +13,7 @@
  */
 import { formatDate } from '@angular/common';
 import { AfterContentInit, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
@@ -61,7 +61,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectionColumnDefs: ColumnDefinition[];
     customActionDefs: any[];
     selectionCustomActionDefs: any[];
-    form: FormGroup;
+    form: UntypedFormGroup;
     @ViewChild('table', { static: false }) table: TableComponent;
     @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     selectedDatasetIds: Set<number> = new Set();
@@ -78,7 +78,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     private facetPageable: Map<string, FacetPageable>;
 
     constructor(
-            private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder,
+            private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
             private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
@@ -142,7 +142,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.loaded = true;
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],

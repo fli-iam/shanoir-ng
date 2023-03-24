@@ -1,4 +1,4 @@
-:host() { color: var(--very-dark-grey); }
+:host { color: var(--very-dark-grey); }
 
 .logo {text-align: center; opacity: 0.8; }
 

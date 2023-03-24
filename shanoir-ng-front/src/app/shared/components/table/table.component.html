@@ -20,7 +20,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 boolean: isFieldBoolean(col),
                 editable: cellEditable(item, col),
                 possibleValues: (page?._savedContentRendering && page?._savedContentRendering[itemIndex]) ? page._savedContentRendering[itemIndex][colIndex]?.possibleValues : null,
-                cellValue: getCellValue(item, col)
+                cellValue: getCellValue(item, col),
+                cellGraphics: getCellGraphics(item, col)
         } as vars">
             <td
                     *ngIf="!col.hidden"
@@ -28,13 +29,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [class.bool]="vars.boolean"
                     [class.progress]="col.type == 'progress'"
                     [attr.title]="col.tip != undefined ? col.tip : (vars.render.text ? vars.render.text : '')"
-                    [style.color]="vars.render.color"
+                    [style.color]="vars.render?.color"
+                    [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
                     #refTd
                     >
 
-                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi">
+                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi" [class.wrap]="!col.nowrap">
                     <!-- default display -->
-                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi">{{vars.render.text ? vars.render.text : vars.render}}</ng-container>
+                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi">
+                        <span
+                            [style.color]="vars.cellGraphics?.color"
+                            [style.border-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.color : null"
+                            [style.background-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.backgroundColor : null"
+                            [class.block]="vars.cellGraphics?.tag"
+                        >
+                            <i *ngIf="vars.cellGraphics?.awesome" class="{{vars.cellGraphics.awesome}}"></i>
+                            {{vars.render.text ? vars.render.text : vars.render}}
+                        </span>
+                    </ng-container>
 
                     <!-- link -->
                     <a class="link" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi"
@@ -119,7 +131,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 
 <!-- Control bar -->
-<caption class="controls">
+<caption class="controls" *ngIf="selectionAllowed || browserSearch || (customActionDefs?.length > 0)">
     <span *ngIf="selectionAllowed" class="select-ctrl" [class.with-sub]="subRowsDefs">
         <checkbox [(ngModel)]="selectAll" (ngModelChange)="onSelectAllChange()"></checkbox>
     </span>
@@ -161,7 +173,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [class.even]="i%2==0"
     [class.disabled]="rowDisabled(item)"
     [class.edit]="editMode"
-    [class.selected]="(selectionAllowed && isSelected(item)) || selectedId == item.id"
+    [class.selected]="(selectionAllowed && isSelected(item)) || (!!item.id && selectedId == item.id)"
     [class.opened]="subRowsDefs && subRowOpen[i]">
     <td *ngIf="subRowsDefs" class="checkbox-cell deploy-cell">
         <i *ngIf="!subRowOpen[i]" (click)="deploy(i)" class="fa-solid fa-plus"></i>
@@ -191,7 +203,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 </ng-container>
 <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
-<tr *ngIf="items?.length > 0" class="full-row">
+<tr *ngIf="items?.length > 0 && page?.totalPages > 1" class="full-row">
     <th class="pager" [attr.colspan]="nbColumns">
         <shanoir-pager
             [currentPage]="currentPage"
@@ -200,7 +212,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         ></shanoir-pager>
     </th>
 </tr>
-<tr>
+<tr [class.collapsable]="collapseControls">
     <th class="status-bar controls" [attr.colspan]="nbColumns">
         <!-- Nb results per page input -->
         <span class="options">

@@ -100,12 +100,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset class="rules">
-				<legend>Rules</legend>
+				<legend>
+					Rules
+					<tool-tip [large]="true">
+						There are two differents types of rules for a studycard :
+						<ul>
+							<li>
+								<span class="bold">Rules that apply to every dataset of the acquisition :</span>
+								each dataset is checked regarding the conditions of that one rule and updated regarding the assignments of that one rule.
+							</li>
+							<li>
+								<span class="bold">Rules that apply to the acquisition :</span>
+								conditions on the acquisition's metadata can be set as well as the minimal number of datasets that fullfil one given condition,
+								then an assignment is applied to that acquisition.
+							</li>
+						</ul>
+					</tool-tip>
+				</legend>
 				<study-card-rules class="rules" [formGroup]="form"
+					cardType="studycard"
 					formControlName="rules"
 					[(ngModel)]="studyCard.rules" 
 					[mode]="selectMode ? 'select' : mode" 
 					[manufModelId]="studyCard.acquisitionEquipment?.manufacturerModel?.id"
+					[allCoils]="allCoils"
 					[showErrors]="showRulesErrors"
 					(selectedRulesChange)="selectedRules = $event"
 					(importRules)="importRules()">

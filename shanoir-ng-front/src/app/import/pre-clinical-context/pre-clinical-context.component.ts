@@ -126,7 +126,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
         let newSubject = new Subject();
-        newSubject.birthDate = this.patient.patientBirthDate;
+        newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient.patientSex) {
             if (this.patient.patientSex == 'F' || this.patient.patientSex == 'M') {
                 newSubject.sex = this.patient.patientSex;
@@ -158,7 +158,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
-        newExam.examinationDate = this.getFirstSelectedSerie().seriesDate;
+        newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
         newExam.comment = this.getFirstSelectedStudy().studyDescription;
         return newExam;
     }

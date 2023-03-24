@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../../shared/date-picker/date-picker.component';
@@ -36,7 +36,7 @@ export class CommonDatasetComponent implements OnChanges {
 
     @Input() mode: Mode;
     @Input() dataset: Dataset;
-    @Input() parentFormGroup: FormGroup;
+    @Input() parentFormGroup: UntypedFormGroup;
     subjects: Subject[] = [];
     studies: Study[] = [];
     
@@ -47,7 +47,7 @@ export class CommonDatasetComponent implements OnChanges {
     constructor(
             private studyService: StudyService,
             private subjectService: SubjectService,
-            private formBuilder: FormBuilder) {
+            private formBuilder: UntypedFormBuilder) {
 
         this.exploredEntityOptions = ExploredEntity.options;
         this.datasetTypes = DatasetType.options;
@@ -55,9 +55,9 @@ export class CommonDatasetComponent implements OnChanges {
     }
 
     completeForm() {
-        this.parentFormGroup.addControl('subject', new FormControl(this.dataset.subject, [Validators.required]));
-        this.parentFormGroup.addControl('study', new FormControl(this.dataset.study, [Validators.required]));
-        this.parentFormGroup.addControl('creationDate', new FormControl(this.dataset.creationDate, [DatepickerComponent.validator]));
+        this.parentFormGroup.addControl('subject', new UntypedFormControl(this.dataset.subject, [Validators.required]));
+        this.parentFormGroup.addControl('study', new UntypedFormControl(this.dataset.study, [Validators.required]));
+        this.parentFormGroup.addControl('creationDate', new UntypedFormControl(this.dataset.creationDate, [DatepickerComponent.validator]));
     }
 
     ngOnChanges(changes: SimpleChanges) {
