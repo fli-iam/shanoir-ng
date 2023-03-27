@@ -330,15 +330,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'members'">
-			    <span *ngIf="mode == 'edit'">
-			    List of current access requests
-			    </span>
-			    <ul *ngIf="mode == 'edit'">
-			         <li *ngFor="let a of accessRequests">
-                    Request from {{ a.user.username }}: {{a.motivation}}
-                    <span class="link" (click)="goToAccessRequest(a)"><i class="fas fa-external-link-alt"></i></span>
-                    </li>
-			    </ul>
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 				<studyuser-list
 				    formControlName="studyUserList"
@@ -349,6 +340,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[mode]="mode">
 				</studyuser-list>
 			</fieldset>
+			<fieldset *ngIf="keycloakService.isUserAdmin() && accessRequests?.length > 0" class="access-requests">
+				<legend>Pending access requests for this study</legend>
+				<ul>
+					<li *ngFor="let a of accessRequests">
+						<span class="link left-icon" (click)="goToAccessRequest(a)">
+							<i class="fa-solid fa-user-lock"></i>
+							Request from {{a.user.firstName}} {{a.user.lastName}} ({{a.user.username}}), motivation : 
+							<span class="motivation"> {{a.motivation}}</span>
+						</span>
+					</li>
+				</ul>
+      </fieldset>
 			<fieldset [class.hidden]="activeTab != 'quality'" *ngIf="mode == 'view'">
 				<legend>Quality control</legend>
 				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>		

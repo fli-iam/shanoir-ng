@@ -10,7 +10,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM ohif/viewer:v4.12.49.20345 AS viewer
+FROM ohif/viewer:v4.12.32.19362 AS viewer
 
 FROM nginx
 
