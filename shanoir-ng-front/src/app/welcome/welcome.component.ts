@@ -2,7 +2,7 @@ import {Component, OnInit, ViewEncapsulation} from '@angular/core';
 import * as AppUtils from "../utils/app.utils";
 import {ImagesUrlUtil} from "../shared/utils/images-url.util";
 import {StudyService} from "../studies/shared/study.service";
-import {PublicStudyDataDTO} from "../studies/shared/study.dto";
+import {PublicStudyData} from "../studies/shared/study.dto";
 import {StudyType} from "../studies/shared/study-type.enum";
 import {isDarkColor} from "../utils/app.utils";
 
@@ -17,7 +17,7 @@ export class WelcomeComponent implements OnInit {
   public githubLogoUrl: string = ImagesUrlUtil.GITHUB_WHITE_LOGO_PATH;
   public shanoirLogoUrl: string = ImagesUrlUtil.SHANOIR_WHITE_LOGO_PATH;
   public email: string = "mailto:developers_shanoir-request@inria.fr";
-  public studies: PublicStudyDataDTO[] = [];
+  public studies: PublicStudyData[] = [];
   public StudyType = StudyType;
   public show: number = 3;
 

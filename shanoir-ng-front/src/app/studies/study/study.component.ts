@@ -123,6 +123,11 @@ export class StudyComponent extends EntityComponent<Study> {
                 });
             return study;
         });
+        if (this.keycloakService.isUserAdmin()) {
+            this.accessRequestService.findByStudy(this.id).then(accessReqs => {
+                this.accessRequests = accessReqs;
+            });
+        }
         if (this.keycloakService.isUserAdminOrExpert()) {
             return Promise.all([
                 studyPromise,
@@ -153,12 +158,14 @@ export class StudyComponent extends EntityComponent<Study> {
         Promise.all([
             studyPromise,
             this.fetchUsers(),
-            this.accessRequestService.findByStudy(this.id)
-        ]).then(([study, users, accessReqs]) => {
+        ]).then(([study, users]) => {
             Study.completeMembers(study, users);
-            this.accessRequests = accessReqs;
         });
-
+        if (this.keycloakService.isUserAdmin()) {
+            this.accessRequestService.findByStudy(this.id).then(accessReqs => {
+                this.accessRequests = accessReqs;
+            });
+        }
         Promise.all([
             studyPromise,
             this.getCenters()
