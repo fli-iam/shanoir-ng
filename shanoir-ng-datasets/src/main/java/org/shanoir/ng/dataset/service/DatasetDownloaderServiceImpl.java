@@ -43,10 +43,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @Service
 public class DatasetDownloaderServiceImpl {
 
@@ -104,7 +100,7 @@ public class DatasetDownloaderServiceImpl {
 		}
 		// Replace all forbidden characters.
 		datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-		
+
 		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
 		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
 
@@ -120,11 +116,14 @@ public class DatasetDownloaderServiceImpl {
 
 		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 			List<URL> pathURLs = new ArrayList<>();
-			if (DCM.equals(format)) {
+			
+			switch (format) {
+			case DCM:
 				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 				downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, null);
-			} else if (NII.equals(format)) {
-				// Check if we want a specific converter
+				break;
+			case NII:
+				// Check if we want a specific converter -> nifti reconversion
 				if (converterId != null) {
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
 					// Create temporary workfolder with dicom files, to be able to convert them
@@ -137,37 +136,36 @@ public class DatasetDownloaderServiceImpl {
 					if (!result) {
 						throw new RestServiceException(
 								new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-					} else {
-						
-						workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
-						
-						for (File res : workFolder.listFiles()) {
-							if (!res.isDirectory()) {
-								// Then send workFolder to zipOutputFile
-					            FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
-					            ZipEntry zipEntry = new ZipEntry(res.getName());
-					            zipEntry.setSize(fileSystemResource.contentLength());
-					            zipEntry.setTime(System.currentTimeMillis());
-					            zipOutputStream.putNextEntry(zipEntry);
-					            StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
-					            zipOutputStream.closeEntry();
-							}
+					} 
+					workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
+
+					for (File res : workFolder.listFiles()) {
+						if (!res.isDirectory()) {
+							// Then send workFolder to zipOutputFile
+							FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
+							ZipEntry zipEntry = new ZipEntry(res.getName());
+							zipEntry.setSize(fileSystemResource.contentLength());
+							zipEntry.setTime(System.currentTimeMillis());
+							zipOutputStream.putNextEntry(zipEntry);
+							StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
+							zipOutputStream.closeEntry();
 						}
-						
 					}
 				} else  {
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, null);
 				}
-			} else if (EEG.equals(format)) {
+				break;
+			case EEG:
 				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
 				DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, null);
-			} else if (BIDS.equals(format)) {
+				break;
+			case BIDS:
 				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
 				DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, null);
-			} else {
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+				break;
+			default:
+				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 			}
 
 			// Check folder emptiness
@@ -203,7 +201,7 @@ public class DatasetDownloaderServiceImpl {
 		// Add timestamp to get a difference
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		response.setHeader("Content-Disposition", "attachment; filename= " + "Datasets" + formatter.format(new DateTime().toDate()));
-		
+
 		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 
 			for (Dataset dataset : datasets) {
@@ -305,12 +303,12 @@ public class DatasetDownloaderServiceImpl {
 					.append(dataset.getName())
 					.append("\n");
 				}
-				
-		        ZipEntry zipEntry = new ZipEntry(FAILURES_TXT);
-		        zipEntry.setTime(System.currentTimeMillis());
-		        zipOutputStream.putNextEntry(zipEntry);
-		        zipOutputStream.write(listOfDatasets.toString().getBytes());
-		        zipOutputStream.closeEntry();
+
+				ZipEntry zipEntry = new ZipEntry(FAILURES_TXT);
+				zipEntry.setTime(System.currentTimeMillis());
+				zipOutputStream.putNextEntry(zipEntry);
+				zipOutputStream.write(listOfDatasets.toString().getBytes());
+				zipOutputStream.closeEntry();
 			}
 
 			if(!files2AcquisitionId.isEmpty()){
