@@ -226,291 +226,290 @@ public class WADODownloaderService {
 				}
 			}
 		}
+		return files;
 	}
-	return files;
-}
 
-/**
- * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
- * their received dicom files to a folder named workFolder.
- * Return the list of downloaded files
- *
- * @param urls
- * @param workFolder
- * @param subjectName
- * @param dataset 
- * @throws IOException
- * @throws MessagingException
- * @return
- *
- */
-public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
-	int i = 0;
-	List<File> files = new ArrayList<>();
-	for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
-		String url = ((URL) iterator.next()).toString();
-		String instanceUID = null;
-		// handle and check at first for WADO-RS URLs by "/instances/"
-		int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
-		if (indexInstanceUID > 0) {
-			instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
-			byte[] responseBody = downloadFileFromPACS(url);
-			extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
-		} else {
-			// handle and check secondly for WADO-URI URLs by "objectUID="
-			// instanceUID == objectUID
-			indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
+	/**
+	 * This method receives a list of URLs containing WADO-RS or WADO-URI urls and downloads
+	 * their received dicom files to a folder named workFolder.
+	 * Return the list of downloaded files
+	 *
+	 * @param urls
+	 * @param workFolder
+	 * @param subjectName
+	 * @param dataset 
+	 * @throws IOException
+	 * @throws MessagingException
+	 * @return
+	 *
+	 */
+	public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
+		int i = 0;
+		List<File> files = new ArrayList<>();
+		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
+			String url = ((URL) iterator.next()).toString();
+			String instanceUID = null;
+			// handle and check at first for WADO-RS URLs by "/instances/"
+			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
 			if (indexInstanceUID > 0) {
-				instanceUID = extractInstanceUID(url, instanceUID);
-
-				String serieDescription = dataset.getUpdatedMetadata().getName();
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-				String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
-				String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
-
-				// Replace all forbidden characters.
-				name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-
-				File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
-
-				byte[] responseBody = null;
-				try {
-					responseBody = downloadFileFromPACS(url);
-				} catch (Exception e) {
-					// Just insert an error log into the file for missing dicoms.
-					File errorFile = new File(workFolder.getPath() + File.separator + ERROR + i + "_" + name + TXT);
-					i++;
-					errorFile.createNewFile();
-					String error = "An error occured during the download of this .DCM file, please contact a shanoir administrator if necessary.";
-					Path path = Paths.get(errorFile.getAbsolutePath());
-					byte[] strToBytes = error.getBytes();
-					Files.write(path, strToBytes);
-
-					// LOG the error
-					LOG.error("A dicom file could not be downloaded from the pacs:", e);
-					continue;
-				}
-				try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
-					Files.copy(bIS, extractedDicomFile.toPath());
-					files.add(extractedDicomFile);
-				}
+				instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
+				byte[] responseBody = downloadFileFromPACS(url);
+				extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
 			} else {
-				throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
+				// handle and check secondly for WADO-URI URLs by "objectUID="
+				// instanceUID == objectUID
+				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
+				if (indexInstanceUID > 0) {
+					instanceUID = extractInstanceUID(url, instanceUID);
+
+					String serieDescription = dataset.getUpdatedMetadata().getName();
+					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
+					String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+					String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
+
+					// Replace all forbidden characters.
+					name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
+					File extractedDicomFile = new File(workFolder.getPath() + File.separator + name + DCM);
+
+					byte[] responseBody = null;
+					try {
+						responseBody = downloadFileFromPACS(url);
+					} catch (Exception e) {
+						// Just insert an error log into the file for missing dicoms.
+						File errorFile = new File(workFolder.getPath() + File.separator + ERROR + i + "_" + name + TXT);
+						i++;
+						errorFile.createNewFile();
+						String error = "An error occured during the download of this .DCM file, please contact a shanoir administrator if necessary.";
+						Path path = Paths.get(errorFile.getAbsolutePath());
+						byte[] strToBytes = error.getBytes();
+						Files.write(path, strToBytes);
+
+						// LOG the error
+						LOG.error("A dicom file could not be downloaded from the pacs:", e);
+						continue;
+					}
+					try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
+						Files.copy(bIS, extractedDicomFile.toPath());
+						files.add(extractedDicomFile);
+					}
+				} else {
+					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
+				}
 			}
 		}
+		return files;
 	}
-	return files;
-}
 
-public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {
-	if (url != null) {
-		String urlStr = url.toString();
-		if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURItoWadoRS(urlStr);
-		urlStr = urlStr.split(CONTENT_TYPE)[0].concat("/metadata/");
-		return downloadMetadataFromPACS(urlStr);
-	} else {
-		return null;
-	}
-}
-
-public Attributes getDicomAttributesForDataset(Dataset dataset) {
-	List<URL> urls = new ArrayList<>();
-	try {
-		DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
-		if (!urls.isEmpty()) {
-			String jsonMetadataStr = downloadDicomMetadataForURL(urls.get(0));
-			JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
-			Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
-			if (dicomAttributes != null) {
-				return dicomAttributes;
-			} else {
-				LOG.error("Could not find dicom attributes for dataset with id: " + dataset.getId());
-			}
+	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {
+		if (url != null) {
+			String urlStr = url.toString();
+			if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURItoWadoRS(urlStr);
+			urlStr = urlStr.split(CONTENT_TYPE)[0].concat("/metadata/");
+			return downloadMetadataFromPACS(urlStr);
 		} else {
-			LOG.error("Could not find dicom attributes for dataset with id: " + dataset.getId()
-			+ " : no pacs url for this dataset");
-		}
-	} catch (IOException | MessagingException | RestClientException e) {
-		throw new RestClientException("Can not get dicom attributes for dataset " + dataset.getId(), e);
-	}
-	return null;
-}	
-
-private String getExaminationFirstDatasetUrl(Examination examination) {
-	if (examination != null && examination.getDatasetAcquisitions() != null && !examination.getDatasetAcquisitions().isEmpty()
-			&& examination.getDatasetAcquisitions().get(0) != null && examination.getDatasetAcquisitions().get(0).getDatasets() != null
-			&& !examination.getDatasetAcquisitions().get(0).getDatasets().isEmpty() 
-			&& examination.getDatasetAcquisitions().get(0).getDatasets().get(0) != null) {
-		List<URL> urls = new ArrayList<>();
-		try {
-			DatasetUtils.getDatasetFilePathURLs(examination.getDatasetAcquisitions().get(0).getDatasets().get(0), urls, DatasetExpressionFormat.DICOM);
-			if  (!urls.isEmpty()) {
-				return urls.get(0).toString();
-			}
-		} catch (MalformedURLException e) {
 			return null;
 		}
 	}
-	return null;
-}
 
-public Attributes getDicomAttributesForStudy(Study study) {
-	long ts = new Date().getTime();
-	Examination exam = getFirstIfExist(study.getExaminations());
-	if (exam == null) return null;
-	Attributes result = getDicomAttributesForExamination(exam);
-	LOG.error("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
-	return result;
-}
-
-
-public Attributes getDicomAttributesForExamination(Examination examination) {
-	long ts = new Date().getTime();
-	DatasetAcquisition acquisition = getFirstIfExist(examination.getDatasetAcquisitions());
-	if (acquisition == null) return null;
-	Attributes result = getDicomAttributesForAcquisition(acquisition);
-	LOG.error("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
-	return result;
-}
-
-public Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) {
-	long ts = new Date().getTime();
-	Dataset ds = getFirstIfExist(acquisition.getDatasets());
-	if (ds == null) return null;
-	Attributes result = getDicomAttributesForDataset(ds);
-	LOG.error("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
-	return result;
-}
-
-public String getDicomJson(Examination examination) throws IOException {
-	String urlStr = getExaminationFirstDatasetUrl(examination);
-	if (urlStr != null) {
-		if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURItoWadoRS(urlStr);
-		urlStr = urlStr.split(CONTENT_TYPE)[0];
-		urlStr = urlStr.split("/series/")[0];
-		urlStr = urlStr.concat("/metadata/");
-		String json = downloadMetadataFromPACS(urlStr);
-		// transform from flat to tree
+	public Attributes getDicomAttributesForDataset(Dataset dataset) {
+		List<URL> urls = new ArrayList<>();
 		try {
-			return DicomJsonUtils.inflfateDCM4CheeJSON(json);
-			//tree.put
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}              
-	return null;
-}
-
-private <T> T getFirstIfExist(List<T> list) {
-	if (list == null || list.size() == 0) return null;
-	else return list.get(0);
-}
-
-/**
- * The instanceUID (== objectUID) is inside the URL string
- * and has to be extracted to be used.
- * 
- * @param url
- * @param instanceUID
- * @return
- */
-private String extractInstanceUID(String url, String instanceUID) {
-	Pattern p = null;
-	if (url.indexOf(CONTENT_TYPE) != -1) {
-		p = Pattern.compile("objectUID=(\\S+)&contentType");
-	} else {
-		p = Pattern.compile("objectUID=(\\S+)");
-	}
-	Matcher m = p.matcher(url);
-	if (m.find()) {
-		instanceUID = m.group(1);
-	}
-	return instanceUID;
-}
-
-/**
- * This method contacts the PACS with a WADO-RS url and does the actual download.
- * 
- * @param url
- * @param targetFile
- * @return
- * @throws IOException
- */
-private byte[] downloadFileFromPACS(final String url) throws IOException {
-	HttpHeaders headers = new HttpHeaders();
-	headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
-	HttpEntity<String> entity = new HttpEntity<>(headers);
-	ResponseEntity<byte[]> response = restTemplate.exchange(url,
-			HttpMethod.GET, entity, byte[].class, "1");
-	if (response.getStatusCode() == HttpStatus.OK) {
-		return response.getBody();
-	} else {
-		throw new IOException("Download did not work: wrong status code received.");
-	}
-}
-
-private String downloadMetadataFromPACS(final String url) throws IOException {
-	restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
-	HttpHeaders headers = new HttpHeaders();
-	headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
-	HttpEntity<String> entity = new HttpEntity<>(headers);
-	LOG.debug("Download metadata from pacs, url : " + url);
-	ResponseEntity<String> response = restTemplate.exchange(url,
-			HttpMethod.GET, entity,String.class, "1");
-	if (response.getStatusCode() == HttpStatus.OK) {
-		return response.getBody();
-	} else {
-		throw new IOException("Download did not work: wrong status code received.");
-	}
-}
-
-/**
- * This method reads in a file in format MHTML, one representation of a multipart/related response, that is given from
- * a PACS server, that supports WADO-RS requests.
- * 
- * MHTML, short for MIME Encapsulation of Aggregate HTML Documents, is a web page archive format used to combine in a single document
- * the HTML code and its companion resources that are otherwise represented by external links (such as images, Flash animations, Java applets,
- * and audio files). The content of an MHTML file is encoded as if it were an HTML e-mail message, using the MIME type multipart/related.
- * 
- * @param responseBody
- * @param instanceUID
- * @param workFolder
- * @throws FileNotFoundException
- * @throws IOException
- * @throws MessagingException
- */
-private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder)
-		throws IOException, MessagingException {
-	try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
-		ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
-		MimeMultipart multipart = new MimeMultipart(datasource);
-		int count = multipart.getCount();
-		for (int i = 0; i < count; i++) {
-			BodyPart bodyPart = multipart.getBodyPart(i);
-			if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
-				File extractedDicomFile = null;
-				if (count == 1) {
-					extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
+			DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
+			if (!urls.isEmpty()) {
+				String jsonMetadataStr = downloadDicomMetadataForURL(urls.get(0));
+				JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
+				Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
+				if (dicomAttributes != null) {
+					return dicomAttributes;
 				} else {
-					extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + count + DCM);
+					LOG.error("Could not find dicom attributes for dataset with id: " + dataset.getId());
 				}
-				Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
 			} else {
-				throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
+				LOG.error("Could not find dicom attributes for dataset with id: " + dataset.getId()
+				+ " : no pacs url for this dataset");
+			}
+		} catch (IOException | MessagingException | RestClientException e) {
+			throw new RestClientException("Can not get dicom attributes for dataset " + dataset.getId(), e);
+		}
+		return null;
+	}	
+
+	private String getExaminationFirstDatasetUrl(Examination examination) {
+		if (examination != null && examination.getDatasetAcquisitions() != null && !examination.getDatasetAcquisitions().isEmpty()
+				&& examination.getDatasetAcquisitions().get(0) != null && examination.getDatasetAcquisitions().get(0).getDatasets() != null
+				&& !examination.getDatasetAcquisitions().get(0).getDatasets().isEmpty() 
+				&& examination.getDatasetAcquisitions().get(0).getDatasets().get(0) != null) {
+			List<URL> urls = new ArrayList<>();
+			try {
+				DatasetUtils.getDatasetFilePathURLs(examination.getDatasetAcquisitions().get(0).getDatasets().get(0), urls, DatasetExpressionFormat.DICOM);
+				if  (!urls.isEmpty()) {
+					return urls.get(0).toString();
+				}
+			} catch (MalformedURLException e) {
+				return null;
+			}
+		}
+		return null;
+	}
+
+	public Attributes getDicomAttributesForStudy(Study study) {
+		long ts = new Date().getTime();
+		Examination exam = getFirstIfExist(study.getExaminations());
+		if (exam == null) return null;
+		Attributes result = getDicomAttributesForExamination(exam);
+		LOG.error("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		return result;
+	}
+
+
+	public Attributes getDicomAttributesForExamination(Examination examination) {
+		long ts = new Date().getTime();
+		DatasetAcquisition acquisition = getFirstIfExist(examination.getDatasetAcquisitions());
+		if (acquisition == null) return null;
+		Attributes result = getDicomAttributesForAcquisition(acquisition);
+		LOG.error("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		return result;
+	}
+
+	public Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) {
+		long ts = new Date().getTime();
+		Dataset ds = getFirstIfExist(acquisition.getDatasets());
+		if (ds == null) return null;
+		Attributes result = getDicomAttributesForDataset(ds);
+		LOG.error("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		return result;
+	}
+
+	public String getDicomJson(Examination examination) throws IOException {
+		String urlStr = getExaminationFirstDatasetUrl(examination);
+		if (urlStr != null) {
+			if (urlStr.contains(WADO_REQUEST_STUDY_WADO_URI)) urlStr = wadoURItoWadoRS(urlStr);
+			urlStr = urlStr.split(CONTENT_TYPE)[0];
+			urlStr = urlStr.split("/series/")[0];
+			urlStr = urlStr.concat("/metadata/");
+			String json = downloadMetadataFromPACS(urlStr);
+			// transform from flat to tree
+			try {
+				return DicomJsonUtils.inflfateDCM4CheeJSON(json);
+				//tree.put
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}              
+		return null;
+	}
+
+	private <T> T getFirstIfExist(List<T> list) {
+		if (list == null || list.size() == 0) return null;
+		else return list.get(0);
+	}
+
+	/**
+	 * The instanceUID (== objectUID) is inside the URL string
+	 * and has to be extracted to be used.
+	 * 
+	 * @param url
+	 * @param instanceUID
+	 * @return
+	 */
+	private String extractInstanceUID(String url, String instanceUID) {
+		Pattern p = null;
+		if (url.indexOf(CONTENT_TYPE) != -1) {
+			p = Pattern.compile("objectUID=(\\S+)&contentType");
+		} else {
+			p = Pattern.compile("objectUID=(\\S+)");
+		}
+		Matcher m = p.matcher(url);
+		if (m.find()) {
+			instanceUID = m.group(1);
+		}
+		return instanceUID;
+	}
+
+	/**
+	 * This method contacts the PACS with a WADO-RS url and does the actual download.
+	 * 
+	 * @param url
+	 * @param targetFile
+	 * @return
+	 * @throws IOException
+	 */
+	private byte[] downloadFileFromPACS(final String url) throws IOException {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
+		HttpEntity<String> entity = new HttpEntity<>(headers);
+		ResponseEntity<byte[]> response = restTemplate.exchange(url,
+				HttpMethod.GET, entity, byte[].class, "1");
+		if (response.getStatusCode() == HttpStatus.OK) {
+			return response.getBody();
+		} else {
+			throw new IOException("Download did not work: wrong status code received.");
+		}
+	}
+
+	private String downloadMetadataFromPACS(final String url) throws IOException {
+		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
+		HttpEntity<String> entity = new HttpEntity<>(headers);
+		LOG.debug("Download metadata from pacs, url : " + url);
+		ResponseEntity<String> response = restTemplate.exchange(url,
+				HttpMethod.GET, entity,String.class, "1");
+		if (response.getStatusCode() == HttpStatus.OK) {
+			return response.getBody();
+		} else {
+			throw new IOException("Download did not work: wrong status code received.");
+		}
+	}
+
+	/**
+	 * This method reads in a file in format MHTML, one representation of a multipart/related response, that is given from
+	 * a PACS server, that supports WADO-RS requests.
+	 * 
+	 * MHTML, short for MIME Encapsulation of Aggregate HTML Documents, is a web page archive format used to combine in a single document
+	 * the HTML code and its companion resources that are otherwise represented by external links (such as images, Flash animations, Java applets,
+	 * and audio files). The content of an MHTML file is encoded as if it were an HTML e-mail message, using the MIME type multipart/related.
+	 * 
+	 * @param responseBody
+	 * @param instanceUID
+	 * @param workFolder
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws MessagingException
+	 */
+	private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder)
+			throws IOException, MessagingException {
+		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
+			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
+			MimeMultipart multipart = new MimeMultipart(datasource);
+			int count = multipart.getCount();
+			for (int i = 0; i < count; i++) {
+				BodyPart bodyPart = multipart.getBodyPart(i);
+				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
+					File extractedDicomFile = null;
+					if (count == 1) {
+						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
+					} else {
+						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + count + DCM);
+					}
+					Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
+				} else {
+					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
+				}
 			}
 		}
 	}
-}
 
 
-private String wadoURItoWadoRS(String url) {
-	return url
-			.replace("wado?requestType=WADO", "rs")
-			.replace("&studyUID=", "/studies/")
-			.replace("&seriesUID=", "/series/")
-			.replace("&objectUID=", "/instances/")
-			.replace("&contentType=application/dicom&", "");
-}
+	private String wadoURItoWadoRS(String url) {
+		return url
+				.replace("wado?requestType=WADO", "rs")
+				.replace("&studyUID=", "/studies/")
+				.replace("&seriesUID=", "/series/")
+				.replace("&objectUID=", "/instances/")
+				.replace("&contentType=application/dicom&", "");
+	}
 
 }
