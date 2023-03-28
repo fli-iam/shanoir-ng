@@ -131,6 +131,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		stop.set(false);
 
 		String uri = VIP_URI + "/shanoir-ng/datasets/fakevip/executions/" + identifier + "/summary";
+		LOG.error("test" + uri);
 		RestTemplate restTemplate = new RestTemplate();
 
 		// check if the token is initialized

@@ -92,12 +92,14 @@ public class VipFakeApiController implements VipFakeApi {
 		
 		CarminDatasetProcessing processing = carminDatasetProcessingService.findByIdentifier(identifier).get();
 		
+		// Create a tar gz file if not existing:
+		
 		Execution execution = new Execution();
 		execution.setStatus(ExecutionStatus.FINISHED);
 		execution.setIdentifier(identifier);
 		execution.setResultsLocation(processing.getResultsLocation());
 		
-		File fileWhereToCopy = new File("/tmp/temp/" + processing.getResultsLocation());
+		File fileWhereToCopy = new File("/tmp/vip_uploads/" + processing.getResultsLocation());
 		fileWhereToCopy.mkdirs();
 		FileUtil.copyDir(new File("/tmp/temp/result"), fileWhereToCopy);
 		
