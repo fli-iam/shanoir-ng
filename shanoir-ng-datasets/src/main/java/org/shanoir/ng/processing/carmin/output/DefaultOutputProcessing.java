@@ -1,5 +1,7 @@
 package org.shanoir.ng.processing.carmin.output;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,6 +26,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -98,7 +101,7 @@ public class DefaultOutputProcessing extends OutputProcessing {
 				if (parsedEntry.endsWith(this.resultFileName)) {
 					// We have the result => Read the file to get the parent datasets
 					/*
-						 {
+						{
 							"infile" : ["dateset-id+filename.nii"]
 						}
 					 */
@@ -108,22 +111,41 @@ public class DefaultOutputProcessing extends OutputProcessing {
 						br = new BufferedReader(new InputStreamReader(fin));
 						String line;
 						while ((line = br.readLine()) != null) {
-							sb.append(line);
+							// Clean JSON -> to much spaces lead to error from JSON parser
+							sb.append(line.replace(" : ", ":"));
 						}
 						JSONObject obj = new JSONObject(sb.toString());
-
-						// We need to parse file parameters here.
-
-						// Can be "["XXX+filename.nii", "YYY+filename.nii"]"
-						String datasetIdsValue = (String) obj.get("infile");
-						String[] values = datasetIdsValue.split(",");
-						List<Long> datasetIds = new ArrayList<>();
-						for (String value : values) {
-							LOG.error(value);
-							Pattern p = Pattern.compile("\\[?\\\"(\\d+)\\+.*");
-							Matcher m = p.matcher(datasetIdsValue);
-							if (m.matches()) {
-								datasetIds.add(Long.valueOf(m.group(1)));
+						
+						// Iterate over all parameters
+						while (obj.keys().hasNext()) {
+							String key = (String) obj.keys().next();
+							// Can be either 
+							//"["XXX+filename.nii", "YYY+filename.nii"]"
+							// OR
+							// "XXX+filename.nii"
+							List<String> values = new ArrayList<String>();
+							Object datasetIdsValue = (Object) obj.get("infile");
+							if (datasetIdsValue instanceof JSONArray) {
+								// case "["XXX+filename.nii", "YYY+filename.nii"]"
+								JSONArray array = (JSONArray) datasetIdsValue;
+								for (int i =0 ; i < array.length(); i++) {
+									values.add(array.getString(i));
+								}
+							} else {
+								// Case "XXX+filename.nii"
+								String value = (String) datasetIdsValue;
+								values.add(value);
+							}
+							List<Long> datasetIds = new ArrayList<>();
+							for (String value : values) {
+								// Ugly pattern to get dataset id
+								// TODO: check that the "+" is mandatory. What if no ? What if not a file but a number ?
+								Pattern p = Pattern.compile("(\\d+)\\+.*");
+								Matcher m = p.matcher(value);
+								// If there is not match, it's not a file parameter => Do not search dataset
+								if (m.matches()) {
+									datasetIds.add(Long.valueOf(m.group(1)));
+								}
 							}
 						}
 						// get datasets
@@ -174,6 +196,15 @@ public class DefaultOutputProcessing extends OutputProcessing {
 		}
 
 		List<Dataset> outputDatasets = new ArrayList<>();
+		
+		// Create dataset processing
+		DatasetProcessing processing = new DatasetProcessing();
+		processing.setComment(carminDatasetProcessing.getPipelineIdentifier());
+		processing.setInputDatasets(inputDatasets);
+		processing.setProcessingDate(carminDatasetProcessing.getProcessingDate());
+		processing.setStudyId(carminDatasetProcessing.getStudyId());
+		processing.setDatasetProcessingType(carminDatasetProcessing.getDatasetProcessingType());
+		processing = datasetProcessingService.create(processing);
 
 		Study study = studyRepository.findById(carminDatasetProcessing.getStudyId())
 				.orElseThrow(() -> new NotFoundException("study not found"));
@@ -181,7 +212,7 @@ public class DefaultOutputProcessing extends OutputProcessing {
 		for (File niiftiFile : processedFiles) {
 			ProcessedDatasetImportJob processedDataset = new ProcessedDatasetImportJob();
 
-			processedDataset.setDatasetProcessing(carminDatasetProcessing);
+			processedDataset.setDatasetProcessing(processing);
 
 			processedDataset.setProcessedDatasetFilePath(niiftiFile.getAbsolutePath());
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
@@ -213,18 +244,10 @@ public class DefaultOutputProcessing extends OutputProcessing {
 			importerService.createProcessedDataset(processedDataset);
 		}
 
-		// Create dataset processing
-		DatasetProcessing processing = new DatasetProcessing();
-		processing.setComment(carminDatasetProcessing.getPipelineIdentifier());
-		processing.setInputDatasets(inputDatasets);
-		processing.setProcessingDate(carminDatasetProcessing.getProcessingDate());
-		processing.setStudyId(carminDatasetProcessing.getStudyId());
-		processing.setDatasetProcessingType(carminDatasetProcessing.getDatasetProcessingType());
 		processing.setOutputDatasets(outputDatasets);
+		datasetProcessingService.update(processing);
 
-		datasetProcessingService.create(processing);
-
-		// Remove datasets from cuurent Carmin processing
+		// Remove datasets from current Carmin processing
 		carminDatasetProcessing.setInputDatasets(Collections.emptyList());
 		datasetProcessingService.update(carminDatasetProcessing);
 
