@@ -33,6 +33,7 @@ export class Study extends Entity {
     monoCenter: boolean;
     name: string;
     nbExaminations: number;
+    nbSubjects: number;
     nbSujects: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
@@ -45,12 +46,14 @@ export class Study extends Entity {
     subjectStudyList: SubjectStudy[] = [];
     studyUserList: StudyUser[] = [];
     timepoints: Timepoint[];
-    visibleByDefault: boolean;
+    visibleByDefault: boolean = false;
     withExamination: boolean;
     studyCardList: StudyCard[];
     tags: Tag[];
     studyTags: Tag[];
     description: string;
+    accessRequestedByCurrentUser: boolean = false;
+    locked: boolean = false; // current user has no access
 
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);

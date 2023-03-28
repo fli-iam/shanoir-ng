@@ -56,7 +56,7 @@ export class AccessRequestService extends EntityService<AccessRequest> implement
         return this.http.get<AccessRequest[]>(this.API_URL+"/byStudy/" + studyId).toPromise();
     }
 
-    public resolveRequest(id: number, value:boolean): Promise<Object> {
+    public resolveRequest(id: number, value: boolean): Promise<any> {
         return this.http.put(AppUtils.BACKEND_API_ACCESS_REQUEST_RESOLVE + id, "" + value).toPromise();
     }
 

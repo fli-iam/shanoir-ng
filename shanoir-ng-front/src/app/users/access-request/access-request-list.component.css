@@ -1,3 +1,13 @@
+h2 { margin-bottom: 25px; }
+
+form {
+    border: 1px solid var(--grey);
+    padding: 0 20px 8px;
+    border-radius: 3px;
+}
+
+form { margin-bottom: 20px; }
+
 button.accept { background-color: var(--color-c); }
   button.accept:disabled { background-color: var(--grey); } 
   button.accept:active, 

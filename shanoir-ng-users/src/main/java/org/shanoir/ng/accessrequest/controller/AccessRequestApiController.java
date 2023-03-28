@@ -15,9 +15,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -109,15 +107,8 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 	@Override
 	public ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException {
-		// Get all studies I administrate
-		List<Long> studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, KeycloakUtil.getTokenUserId());
-
-		if (CollectionUtils.isEmpty(studiesId)) {
-			return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
-		}
-
 		// Get all access requests
-		List<AccessRequest> accessRequests = this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_DEMAND);
+		List<AccessRequest> accessRequests = this.accessRequestService.findByUserId(KeycloakUtil.getTokenUserId());
 
 		if (CollectionUtils.isEmpty(accessRequests)) {
 			return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
@@ -125,6 +116,25 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 		return new ResponseEntity<List<AccessRequest>>(accessRequests, HttpStatus.OK);
 	}
+	
+	@Override
+    public ResponseEntity<List<AccessRequest>> findAllByAdminId() throws RestServiceException {
+        // Get all studies I administrate
+        List<Long> studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, KeycloakUtil.getTokenUserId());
+
+        if (CollectionUtils.isEmpty(studiesId)) {
+            return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
+        }
+
+        // Get all access requests
+        List<AccessRequest> accessRequests = this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_DEMAND);
+
+        if (CollectionUtils.isEmpty(accessRequests)) {
+            return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
+        }
+
+        return new ResponseEntity<List<AccessRequest>>(accessRequests, HttpStatus.OK);
+    }
 
 	public ResponseEntity<Void> resolveNewAccessRequest(
 			@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
