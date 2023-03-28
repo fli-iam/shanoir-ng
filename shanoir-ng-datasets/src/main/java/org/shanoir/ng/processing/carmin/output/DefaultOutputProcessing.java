@@ -1,7 +1,5 @@
 package org.shanoir.ng.processing.carmin.output;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -115,7 +113,8 @@ public class DefaultOutputProcessing extends OutputProcessing {
 							sb.append(line.replace(" : ", ":"));
 						}
 						JSONObject obj = new JSONObject(sb.toString());
-						
+						List<Long> datasetIds = new ArrayList<>();
+
 						// Iterate over all parameters
 						while (obj.keys().hasNext()) {
 							String key = (String) obj.keys().next();
@@ -136,7 +135,6 @@ public class DefaultOutputProcessing extends OutputProcessing {
 								String value = (String) datasetIdsValue;
 								values.add(value);
 							}
-							List<Long> datasetIds = new ArrayList<>();
 							for (String value : values) {
 								// Ugly pattern to get dataset id
 								// TODO: check that the "+" is mandatory. What if no ? What if not a file but a number ?
