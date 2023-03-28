@@ -51,6 +51,7 @@ import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
 import org.shanoir.ng.user.security.UserPrivacySecurityService;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.service.UserUniqueConstraintManager;
+import org.shanoir.ng.user.service.VIPUserService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -103,6 +104,9 @@ public class UserApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+
+	@MockBean
+	VIPUserService vipUserService;
 
 	@Before
 	public void setup() throws EntityNotFoundException, AccountNotOnDemandException, SecurityException  {

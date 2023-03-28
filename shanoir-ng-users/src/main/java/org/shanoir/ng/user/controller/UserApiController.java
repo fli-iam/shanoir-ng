@@ -171,8 +171,7 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
 		} catch (EntityNotFoundException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "User creation fails on VIP's side"));
+			throw new RuntimeException(e);
 		} catch (MicroServiceCommunicationException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while communicating with VIP"));

@@ -30,6 +30,7 @@ import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.service.UserService;
+import org.shanoir.ng.user.service.VIPUserService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,9 @@ public class AccessRequestApiControllerTest {
 	@MockBean
 	RabbitTemplate rabbitTemplate;
 
+	@MockBean
+	VIPUserService vipUserService;
+	
 	@Autowired
 	ObjectMapper mapper;
 
