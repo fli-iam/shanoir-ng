@@ -280,6 +280,8 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 
+		List<Subject> toBeDeleted = new ArrayList<Subject>();
+
 		if (study.getSubjectStudyList() != null) {
 
 			// Find all ids from new study
@@ -297,17 +299,10 @@ public class StudyServiceImpl implements StudyService {
 				}
 			}
 
-			List<Subject> toBeDeleted = new ArrayList<Subject>();
-
 			for (Subject subject : removed) {
 				if (this.subjectStudyRepository.countBySubject(subject) == 1L) {
 					toBeDeleted.add(subject);
 				}
-			}
-
-			// Actually delete subjects
-			for (Subject subjectToDelete : toBeDeleted) {
-				subjectService.deleteById(subjectToDelete.getId());
 			}
 		}
 
@@ -338,6 +333,11 @@ public class StudyServiceImpl implements StudyService {
 				dbSubjectStudy.setStudy(studyDb);
 			}
 			studyDb = studyRepository.save(studyDb);
+		}
+		
+		// Actually delete subjects
+		for (Subject subjectToDelete : toBeDeleted) {
+			subjectService.deleteById(subjectToDelete.getId());
 		}
 
 		if (studyDb.getTags() != null) {
