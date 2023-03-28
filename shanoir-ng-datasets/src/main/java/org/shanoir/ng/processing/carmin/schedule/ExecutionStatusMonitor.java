@@ -131,7 +131,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		stop.set(false);
 
 		String uri = VIP_URI + "/shanoir-ng/datasets/fakevip/executions/" + identifier + "/summary";
-		LOG.error("test" + uri);
 		RestTemplate restTemplate = new RestTemplate();
 
 		// check if the token is initialized
@@ -165,7 +164,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 			try {
 				ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
 				Execution execution = executionResponseEntity.getBody();
-				LOG.error(mapper.writeValueAsString(execution));
 				// init attempts due to successful response
 				attempts = 1;
 				switch (execution.getStatus()) {
