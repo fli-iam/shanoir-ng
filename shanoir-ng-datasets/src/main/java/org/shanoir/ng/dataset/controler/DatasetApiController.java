@@ -258,14 +258,11 @@ public class DatasetApiController implements DatasetApi {
 	}
 
     @Override
-    public ResponseEntity<Long> getSizeById(Long datasetId) {
-		Long size = 0L;
-        for(DatasetExpression expr : datasetService.findById(datasetId).getDatasetExpressions()){
-			if(expr.getSize() != null){
-				size += expr.getSize();
-			}
-		}
-		return new ResponseEntity<>(size, HttpStatus.OK);
+    public ResponseEntity<Long> getSizeByStudyId(Long studyId) {
+		Long size = datasetService.getSizeByStudyId(studyId);
+
+		return new ResponseEntity<>(Objects.requireNonNullElse(size, 0L), HttpStatus.OK);
+
 	}
 
     @Override

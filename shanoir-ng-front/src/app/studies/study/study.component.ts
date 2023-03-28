@@ -235,26 +235,8 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
   private getTotalSize(id: number): Promise<number> {
-
-    return this.datasetService.getByStudyId(id).then(datasets => {
-
-      let promises: Promise<any>[] = [];
-
-      if(datasets == null || datasets.length == 0){
-        return 0;
-      }
-
-      let totalSize: number = 0;
-      for (let ds of datasets) {
-        promises.push(this.datasetService.getSizeById(ds.id).then(size => {
-          if (size != null) {
-            totalSize = totalSize + size;
-          }
-        }));
-      }
-      return Promise.all(promises).then( () => {
+    return this.datasetService.getSizeByStudyId(id).then(totalSize => {
         return totalSize;
-      });
     });
   }
 
@@ -425,14 +407,10 @@ export class StudyComponent extends EntityComponent<Study> {
 
     studySizeStr(size: number) {
 
-      if(size == null){
-        return "Unknown";
-      }
-
       const base: number = 1024;
       const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-      if(size == 0){
+      if(size == null || size == 0){
         return "0 " + units[0];
       }
 

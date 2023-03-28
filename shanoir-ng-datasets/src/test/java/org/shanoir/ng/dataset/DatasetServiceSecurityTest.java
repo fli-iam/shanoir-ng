@@ -431,7 +431,7 @@ public class DatasetServiceSecurityTest {
 		given(datasetRepository.findAll()).willReturn(Utils.toList(dataset1, dataset2, dataset3, dataset4));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(1L, 2L));
 		given(datasetRepository.findByDatasetAcquisitionExaminationStudy_IdIn(Arrays.asList(1L, 2L), PageRequest.of(0, 10).getSort())).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset2, dataset3}))));
-		given(datasetRepository.findByDatasetAcquisitionExaminationStudy_Id(1L)).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset3}))));
+		given(datasetRepository.findByDatasetAcquisition_Examination_Study_Id(1L)).willReturn(new PageImpl<>((Arrays.asList(new Dataset[]{dataset1, dataset3}))));
 		
 		given(datasetRepository.findAllById(Utils.toList(1L))).willReturn(Utils.toList(dataset1));
 		given(datasetRepository.findAllById(Utils.toList(1L, 3L))).willReturn(Utils.toList(dataset1, dataset3));
