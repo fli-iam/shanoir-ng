@@ -32,7 +32,9 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @ConditionalOnProperty(name = "vip.enabled", havingValue = "true")
 public class VIPUserServiceImpl implements VIPUserService{
-    /**
+    private static final String INRIA_ADMIN_GENERATED = "inria_admin_generated";
+
+	/**
      * Logger
      */
     private static final Logger LOG = LoggerFactory.getLogger(VIPUserServiceImpl.class);
@@ -73,26 +75,24 @@ public class VIPUserServiceImpl implements VIPUserService{
         String comments = "";
         VIPUserLevel userLevel = VIPUserLevel.Beginner;
         CountryCode countryCode = CountryCode.fr;
-        String institution = user.getAccountRequestInfo() == null ? "inria_admin_generated" : user.getAccountRequestInfo().getInstitution();
+        String institution = user.getAccountRequestInfo() == null ? INRIA_ADMIN_GENERATED : user.getAccountRequestInfo().getInstitution();
 
         VIPUser vipUser = new VIPUser(user.getFirstName(), user.getLastName(), user.getEmail(), institution, newPassword, userLevel, countryCode, comments, accountType);
 
         // prepare entity.
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + accessTokenResponse.getToken());
-        HttpEntity entity = new HttpEntity(vipUser, headers);
+        HttpEntity entity = new HttpEntity<>(vipUser, headers);
 
         try {
             restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
             return user;
         }catch (HttpStatusCodeException e) {
             // in case of an error with response payload
-            LOG.error("error while saving vip user with status : {} ,and message : {}", e.getStatusCode(), e.getMessage());
-            throw new MicroServiceCommunicationException("Error while communicating with VIP with status : "+e.getStatusCode()+ ",and message : "+e.getMessage());
+            throw new MicroServiceCommunicationException("Error while communicating with VIP with status : "+e.getStatusCode(), e);
         } catch (RestClientException e) {
             // in case of an error with no response payload
-            LOG.error("there is no response payload while saving vip user");
-            throw new MicroServiceCommunicationException("Error while communicating with VIP with no response payload while saving vip user");
+            throw new MicroServiceCommunicationException("Error while communicating with VIP with no response payload while saving vip user", e);
         }
 
 

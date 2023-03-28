@@ -59,8 +59,6 @@ public class KeycloakServiceAccountUtils {
 
         try{
             ResponseEntity<AccessTokenResponse> response = this.restTemplate.exchange(this.serverUrl, HttpMethod.POST, entity, AccessTokenResponse.class);
-            LOG.info("token retrieved !");
-
             return response.getBody();
         }catch(HttpStatusCodeException e){
             // in case of error with a response payload.
