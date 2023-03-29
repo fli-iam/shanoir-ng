@@ -54,10 +54,9 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 
 		/* Save user in db. */
 		try {
-			getUserService().createAccountRequest(user);
+			User savedUser = getUserService().createAccountRequest(user);
 			if(vipEnabled){
-				// TODO: Is it necessary for neurinfo -> Don't think so.
-				// getVipUserService().createVIPAccountRequest(user);
+				getVipUserService().createVIPAccountRequest(savedUser);
 			}
 		} catch (PasswordPolicyException e) {
 			throw new RestServiceException(
@@ -65,16 +64,10 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 		} catch (SecurityException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
-		}
-		/*
-		catch (EntityNotFoundException e) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in VIP"));
 		} catch (MicroServiceCommunicationException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while communicating with VIP"));
 		}
-		*/
 		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 	 

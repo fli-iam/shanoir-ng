@@ -20,6 +20,5 @@ public interface VIPUserService {
      * @param user the user to create.
      * @return the created user
      */
-    //@PreAuthorize("#user.getId() != null && #user.getRole() != null")
-    User createVIPAccountRequest(User user) throws EntityNotFoundException, SecurityException, MicroServiceCommunicationException, PasswordPolicyException;
+    User createVIPAccountRequest(User user) throws SecurityException, MicroServiceCommunicationException, PasswordPolicyException;
 }

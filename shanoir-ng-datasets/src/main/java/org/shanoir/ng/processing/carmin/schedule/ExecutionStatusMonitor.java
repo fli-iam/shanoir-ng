@@ -1,52 +1,26 @@
 package org.shanoir.ng.processing.carmin.schedule;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
-import javax.ws.rs.NotFoundException;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
-import org.shanoir.ng.importer.service.ImporterService;
+import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.model.Execution;
 import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
 import org.shanoir.ng.processing.carmin.output.DefaultOutputProcessing;
 import org.shanoir.ng.processing.carmin.output.OutputProcessing;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
-import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
-import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.repository.StudyRepository;
-import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
@@ -114,11 +88,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
         Map<String, OutputProcessing> aMap =  new HashMap<>();
         aMap.put(DEFAULT_OUTPUT, defaultOutputProcessing);
         outputProcessingMap = Collections.unmodifiableMap(aMap);
-        
-		// TODO
-		// Get list of Carmin dataset processing not finished
-		
-		// Create a job for every processing
 	}
 
 	@Async
@@ -130,7 +99,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 		stop.set(false);
 
-		String uri = VIP_URI + "/shanoir-ng/datasets/fakevip/executions/" + identifier + "/summary";
+		String uri = VIP_URI + identifier + "/summary";
 		RestTemplate restTemplate = new RestTemplate();
 
 		// check if the token is initialized
@@ -147,10 +116,8 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		while (!stop.get()) {
 
 			// init headers with the active access token
-			HttpHeaders headers = KeycloakUtil.getKeycloakHeader();
-			//TODO: remove
-			//this.accessToken = KeycloakUtil.getTokenUserId()
-			// headers.set("Authorization", "Bearer " + this.accessToken);
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Authorization", "Bearer " + this.accessToken);
 			HttpEntity entity = new HttpEntity(headers);
 
 			// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
@@ -247,8 +214,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	 * @return
 	 */
 	private void refreshServiceAccountAccessToken() throws SecurityException {
-		// TODO: Undo
-		//AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
-		this.accessToken = "" + KeycloakUtil.getTokenUserId();
+		AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
+		this.accessToken = accessTokenResponse.getToken();
 	}
 }

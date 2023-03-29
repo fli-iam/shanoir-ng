@@ -53,15 +53,7 @@ public class VIPUserServiceImpl implements VIPUserService{
 
 
     @Override
-    public User createVIPAccountRequest(final User user) throws EntityNotFoundException, SecurityException, MicroServiceCommunicationException, PasswordPolicyException {
-
-        // Verify if the user is created in SHANOIR DB
-        final boolean userExist = userRepository.existsById(user.getId());
-        if (!userExist) {
-            LOG.error("User with id {} not found", user.getId());
-            throw new EntityNotFoundException(User.class, user.getId());
-        }
-
+    public User createVIPAccountRequest(final User user) throws SecurityException, MicroServiceCommunicationException, PasswordPolicyException {
         AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
 
         /* Password generation */

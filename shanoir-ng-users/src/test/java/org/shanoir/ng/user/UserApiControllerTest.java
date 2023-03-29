@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.user;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -25,17 +24,13 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
-import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
-import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
-import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -68,7 +63,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
  * Unit tests for user controller.
- *
+ *S
  * @author msimon
  *
  */
@@ -106,7 +101,12 @@ public class UserApiControllerTest {
 	private ShanoirEventService eventService;
 
 	@MockBean
-	VIPUserService vipUserService;
+	private VIPUserService vipUserService;
+	
+	@BeforeClass
+	public static void beforeClass() {
+	    System.setProperty("vip.enabled", "false");
+	}
 
 	@Before
 	public void setup() throws EntityNotFoundException, AccountNotOnDemandException, SecurityException  {
