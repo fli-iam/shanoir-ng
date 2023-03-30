@@ -411,7 +411,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Center", field: "centerName"},
             {headerName: "Exam", field: "examinationComment"},
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
-                dateRenderer(params.data.examinationDate);
+                return dateRenderer(params.data.examinationDate);
               }},
             {headerName: "Slice", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
