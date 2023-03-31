@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.datasetacquisition.controler;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -73,7 +74,7 @@ public interface DatasetAcquisitionApi {
         consumes = { "application/json" },
         method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob);
+    ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) throws IOException;
 	
 	@ApiOperation(value = "", notes = "If exists, returns the dataset acquisitions corresponding to the given study card", response = DatasetAcquisition.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found dataset acquisitions", response = DatasetAcquisition.class, responseContainer = "List"),
