@@ -260,11 +260,12 @@ public class DICOMWebService {
 		httpPost.setEntity(entity);
 		try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
 			int code = response.getCode();
-			if (code != HttpStatus.OK.value()) {
+			if (code != HttpStatus.OK.value() && code != HttpStatus.ACCEPTED.value()) {
 				LOG.error("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
+				LOG.error("Associated message: " +  EntityUtils.toString(response.getEntity()));
 				throw new ShanoirException("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
 		}

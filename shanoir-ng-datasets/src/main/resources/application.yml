@@ -126,11 +126,11 @@ dcm4chee-arc:
   # if true: 2) stow-rs used to send dicom files to PACS and 2) generated URLs
   # in db are in WADO-RS format
   # default is true as we want to use new protocols in sh-ng
-  dicom.web: false
+  dicom.web: true
   dicom.c-store.aet.called: DCM4CHEE
   # use "/wado" for dcm4chee2 and "/dcm4chee-arc/aets/AS_RECEIVED/wado" for dcm4chee3
   dicom.wado.uri: /dcm4chee-arc/aets/AS_RECEIVED/wado
-  dicom.web.rs: /dcm4chee-arc/aets/AS_RECEIVED/rs/studies
+  dicom.web.rs: /dcm4chee-arc/aets/DCM4CHEE/rs/studies
   dicom.web.http.client.max.total: 500
   dicom.web.http.client.max.per.route: 500
 
