@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -65,7 +65,7 @@ export class SelectSeriesComponent {
         } else {
             this.detailedSerie = serie;
             setTimeout(() => { // so the details display has no delay
-                if (serie && serie.images) this.initPapaya(serie); 
+                if (serie && serie.images) this.initPapaya(serie);
             });
         }
     }
@@ -105,7 +105,7 @@ export class SelectSeriesComponent {
             });
             if (nbChecked == study.series.length) this.studiesCheckboxes[study.studyInstanceUID] = true;
             else if (nbChecked == 0) this.studiesCheckboxes[study.studyInstanceUID] = false;
-            else this.studiesCheckboxes[study.studyInstanceUID] = 'intederminate';
+            else this.studiesCheckboxes[study.studyInstanceUID] = 'indeterminate';
         }
         this.onPatientUpdate();
     }
@@ -132,14 +132,16 @@ export class SelectSeriesComponent {
 
     get valid(): boolean {
         if (!this.patients || this.patients.length == 0) return false;
+        let studiesNb = 0;
         for (let patient of this.patients) {
             for (let study of patient.studies) {
-                for (let serie of study.series) {
-                    if (serie.selected) return true;
+                if(this.studiesCheckboxes[study.studyInstanceUID] == 'indeterminate' ||
+                  this.studiesCheckboxes[study.studyInstanceUID] == true){
+                  studiesNb += 1;
                 }
             }
         }
-        return false;
+        return studiesNb == 1;
     }
 
     next() {
