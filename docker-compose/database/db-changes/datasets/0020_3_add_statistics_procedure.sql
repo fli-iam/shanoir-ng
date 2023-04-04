@@ -74,4 +74,4 @@ begin
         and study.name not rlike if(studyNameOutRegExp is null or studyNameOutRegExp = '', '^\b\B$', studyNameOutRegExp);
 end //
 
-delimiter;
+delimiter ;
