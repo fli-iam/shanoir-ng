@@ -210,7 +210,7 @@ public class DatasetDownloaderServiceImpl {
 		
 		for (Dataset dataset : datasets) {
 			for (DatasetExpression expression : dataset.getDatasetExpressions()) {
-				size += expression.getSize();
+				size += expression.getSize() != null ? expression.getSize().intValue() : 0;
 			}
 		}
 
