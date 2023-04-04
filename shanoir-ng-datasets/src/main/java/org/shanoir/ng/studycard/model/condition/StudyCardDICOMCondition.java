@@ -15,6 +15,9 @@
 package org.shanoir.ng.studycard.model.condition;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -53,6 +56,11 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
     public boolean fulfilled(Attributes dicomAttributes, StringBuffer errorMsg) {
         LOG.info("conditionFulfilled: " + this.getId() + " processing one condition with all its values: ");
         this.getValues().stream().forEach(s -> LOG.info(s));
+        if (!dicomAttributes.contains(getDicomTag())) {
+            if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                + "] failed because no value was found in the dicom for the tag " + this.getDicomTag());
+            return false;
+        }
         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(this.getDicomTag());
         DicomTagType tagType = DicomTagType.valueOf(tagVr);
         // get all possible values, that can fulfill the condition
@@ -65,15 +73,43 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
                 BigDecimal scValue = new BigDecimal(value);
                 Integer comparison = null;
                 if (DicomTagType.Float.equals(tagType)) {
-                    Float floatValue = dicomAttributes.getFloat(this.getDicomTag(), Float.MIN_VALUE);          
-                    comparison = BigDecimal.valueOf(floatValue).compareTo(scValue);
+                    Float floatValue = dicomAttributes.getFloat(this.getDicomTag(), Float.NaN);
+                    if (floatValue.equals(Float.NaN)) {
+                        if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                            + "] failed because there was a problem when reading the tag " + this.getDicomTag());
+                        return false;
+                    } else comparison = BigDecimal.valueOf(floatValue).compareTo(scValue);
                 // There is no dicomAttributes.getLong() !
-                }   else if (DicomTagType.Double.equals(tagType) || DicomTagType.Long.equals(tagType)) {
-                    Double doubleValue = dicomAttributes.getDouble(this.getDicomTag(), Double.MIN_VALUE);          
-                    comparison = BigDecimal.valueOf(doubleValue).compareTo(scValue);
+                } else if (DicomTagType.Double.equals(tagType) || DicomTagType.Long.equals(tagType)) {
+                    Double doubleValue = dicomAttributes.getDouble(this.getDicomTag(), Double.NaN);
+                    if (doubleValue.equals(Double.NaN)) {
+                        if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                            + "] failed because there was a problem when reading the tag " + this.getDicomTag());
+                        return false;
+                    } else comparison = BigDecimal.valueOf(doubleValue).compareTo(scValue);
                 } else if (DicomTagType.Integer.equals(tagType)) {
                     Integer integerValue = dicomAttributes.getInt(this.getDicomTag(), Integer.MIN_VALUE);
-                    comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
+                    if (integerValue.equals(Integer.MIN_VALUE)) {
+                        if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                            + "] failed because there was a problem when reading the tag " + this.getDicomTag());
+                        return false;
+                    } else comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
+                } else if (DicomTagType.Date.equals(tagType)) {
+                    Date dateValue = dicomAttributes.getDate(this.getDicomTag());
+                    if (dateValue.equals(null)) {
+                        if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                            + "] failed because there was a problem when reading the date tag " + this.getDicomTag());
+                        return false;
+                    } else {
+                        try {
+                            Date scDate = new SimpleDateFormat("yyyyMMdd").parse(value);
+                            comparison = dateValue.compareTo(scDate);
+                        } catch (ParseException e) {
+                            if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                                + "] failed because there was a problem parsing the value as a date");
+                            return false;
+                        }
+                    }
                 }
                 if (comparison != null && numericalCompare(this.getOperation(), comparison)) {
                     if (errorMsg != null) errorMsg.append("condition [" + toString() + "] succeed");
@@ -88,7 +124,7 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
                 if (stringValue == null) {
                     LOG.warn("Could not find a value in the dicom for the tag " + this.getDicomTag());
                     if (errorMsg != null) errorMsg.append("condition [" + toString() 
-                        + "] failed because no value was found in the dicom for the tag " + this.getDicomTag());
+                        + "] failed because there was a problem when reading the tag " + this.getDicomTag());
                     return false;
                 }               
                 if (textualCompare(this.getOperation(), stringValue, value)) {
