@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -87,6 +88,14 @@ public class DatasetDownloaderServiceImpl {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
 		}
+		
+		int size = 0;
+		
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			size += expression.getSize();
+		}
+
+		response.setContentLength(size);
 
 		String subjectName = "unknownSubject";
 		Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
@@ -196,8 +205,18 @@ public class DatasetDownloaderServiceImpl {
 		List<Dataset> failingDatasets = new ArrayList<Dataset>();
 
 		Map<Long, List<String>> files2AcquisitionId = new HashMap<>();
+		
+		int size = 0;
+		
+		for (Dataset dataset : datasets) {
+			for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+				size += expression.getSize();
+			}
+		}
 
 		response.setContentType("application/zip");
+		response.setContentLength(size);
+
 		// Add timestamp to get a difference
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		response.setHeader("Content-Disposition", "attachment;filename=" + "Datasets" + formatter.format(new DateTime().toDate()));
