@@ -24,18 +24,15 @@ import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.ForbiddenException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -48,17 +45,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
 	
-	@Autowired
-	ShanoirEventService eventService;
-
 	@Value("${vip.enabled}")
 	private boolean vipEnabled;
 
 	@Autowired
-	AccessRequestService accessRequestService;
-
-	@Autowired
-	RabbitTemplate rabbitTemplate;
+	private AccessRequestService accessRequestService;
 
 	@Override
 	public ResponseEntity<Void> deleteUser(@PathVariable("userId") final Long userId) throws ForbiddenException {

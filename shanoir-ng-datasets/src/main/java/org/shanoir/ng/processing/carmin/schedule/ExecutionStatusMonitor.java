@@ -74,10 +74,10 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
 	@Autowired
-	ObjectMapper mapper;
+	private ObjectMapper mapper;
 
 	@Autowired
-	DefaultOutputProcessing defaultOutputProcessing;
+	private DefaultOutputProcessing defaultOutputProcessing;
 	
 	// Map of output methods to execute.
     private static Map<String, OutputProcessing> outputProcessingMap;

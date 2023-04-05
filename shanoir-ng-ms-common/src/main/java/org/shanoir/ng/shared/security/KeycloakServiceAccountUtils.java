@@ -60,14 +60,14 @@ public class KeycloakServiceAccountUtils {
         try{
             ResponseEntity<AccessTokenResponse> response = this.restTemplate.exchange(this.serverUrl, HttpMethod.POST, entity, AccessTokenResponse.class);
             return response.getBody();
-        }catch(HttpStatusCodeException e){
+        } catch (HttpStatusCodeException e){
             // in case of error with a response payload.
-            LOG.error("error response, message : {}, {}",e.getStatusCode(), e.getMessage());
+            LOG.error("Unepected error while retrieving access token.",e);
             throw new SecurityException("error response, message : "+ e.getMessage());
         }catch (RestClientException e){
             // in case of an error but no response payload;
-            LOG.error("there is no response payload");
-            throw new SecurityException("No response payload for service account token request");
+            LOG.error("There is no response payload for service account token request", e);
+            throw new SecurityException("No response payload for service account token request", e);
         }
     }
 }

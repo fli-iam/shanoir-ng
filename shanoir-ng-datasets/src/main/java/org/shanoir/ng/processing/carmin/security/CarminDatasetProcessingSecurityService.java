@@ -44,10 +44,7 @@ public class CarminDatasetProcessingSecurityService {
      * @return
      */
     public boolean hasRightOnEveryCarminDatasetProcessing(){
-        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-            return true;
-        }
-        return false;
+        return KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN");
     }
 
     /**

@@ -170,7 +170,6 @@ export class ExecutionComponent implements OnInit {
       }
     )
     this.parametersApplied = true;
-    //document.getElementsByName(parameter.name);
   }
 
   getDatasetsValue(datasets) {
