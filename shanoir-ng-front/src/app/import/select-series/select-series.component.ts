@@ -90,22 +90,30 @@ export class SelectSeriesComponent {
         }
     }
 
-    onStudyCheckChange(checked: boolean, study: StudyDicom) {
-        if (study.series) {
-            study.series.forEach(serie => serie.selected = checked)
-        }
+    onStudyCheckChange(checked: boolean, study: StudyDicom, patient: PatientDicom) {
+        study.selected = checked;
+        if (study.series) study.series.forEach(serie => serie.selected = checked)
+
         this.onPatientUpdate();
     }
 
-    onSerieCheckChange(checked: boolean, study: StudyDicom) {
+    onSerieCheckChange(checked: boolean, study: StudyDicom, patient: PatientDicom) {
+
         if (study.series) {
             let nbChecked: number = 0;
             study.series.forEach(serie => {
                 if (serie.selected) nbChecked++;
             });
-            if (nbChecked == study.series.length) this.studiesCheckboxes[study.studyInstanceUID] = true;
-            else if (nbChecked == 0) this.studiesCheckboxes[study.studyInstanceUID] = false;
-            else this.studiesCheckboxes[study.studyInstanceUID] = 'indeterminate';
+            if (nbChecked == study.series.length) {
+              this.studiesCheckboxes[study.studyInstanceUID] = true;
+              study.selected = true;
+            } else if (nbChecked == 0) {
+              study.selected = false;
+              this.studiesCheckboxes[study.studyInstanceUID] = false;
+            } else {
+              this.studiesCheckboxes[study.studyInstanceUID] = 'indeterminate';
+              study.selected = true;
+            }
         }
         this.onPatientUpdate();
     }
@@ -135,8 +143,7 @@ export class SelectSeriesComponent {
         let studiesNb = 0;
         for (let patient of this.patients) {
             for (let study of patient.studies) {
-                if(this.studiesCheckboxes[study.studyInstanceUID] == 'indeterminate' ||
-                  this.studiesCheckboxes[study.studyInstanceUID] == true){
+                if(study.selected){
                   studiesNb += 1;
                 }
             }
@@ -157,4 +164,5 @@ export class SelectSeriesComponent {
             console.log('patients', this.patients);
         }
     }
+
 }
