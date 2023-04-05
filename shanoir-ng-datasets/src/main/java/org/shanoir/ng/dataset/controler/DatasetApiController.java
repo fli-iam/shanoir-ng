@@ -24,16 +24,11 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -43,7 +38,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -137,7 +131,7 @@ public class DatasetApiController implements DatasetApi {
 	DatasetDownloaderServiceImpl datasetDownloaderService;
 
 	/** Number of downloadable datasets. */
-	private static final int DATASET_LIMIT = 50;
+	private static final int DATASET_LIMIT = 100;
 
 	@PostConstruct
 	private void initialize() {

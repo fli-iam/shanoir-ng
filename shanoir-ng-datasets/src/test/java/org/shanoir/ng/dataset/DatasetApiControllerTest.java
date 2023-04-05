@@ -15,31 +15,21 @@
 package org.shanoir.ng.dataset;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.matchers.JUnitMatchers.containsString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -47,30 +37,24 @@ import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
-import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -158,7 +142,6 @@ public class DatasetApiControllerTest {
 	@Autowired
 	private ObjectMapper mapper;
 
-	private Subject subject = new Subject(3L, "name");
 	private Study study = new Study(1L, "studyName");
 
 	private DatasetAcquisition dsAcq = new MrDatasetAcquisition();
@@ -230,7 +213,7 @@ public class DatasetApiControllerTest {
 	public void testMassiveDownloadByDatasetsIdToMuchIds() {
 		// GIVEN a list of datasets to export
 		StringBuilder strb = new StringBuilder();
-		for (int i = 0; i < 55 ; i++) {
+		for (int i = 0; i < 105 ; i++) {
 			strb.append(i).append(",");
 		}
 		String ids = strb.substring(0, strb.length() -1);
@@ -253,7 +236,7 @@ public class DatasetApiControllerTest {
 		// GIVEN a study with more then 50 datasets to export
 
 		List<Dataset> hugeList = new ArrayList<Dataset>();
-		for (int i = 0; i < 51 ; i++) {
+		for (int i = 0; i < 101 ; i++) {
 			hugeList.add(new MrDataset());
 		}
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(hugeList);
