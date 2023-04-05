@@ -17,9 +17,10 @@ import {
     BrowserPaginEntityListComponent,
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { ShanoirError } from '../../../../shared/models/error.model';
 import { ServiceLocator } from '../../../../utils/locator.service';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { AnestheticType } from '../../../shared/enum/anestheticType';
 import { ModesAware } from '../../../shared/mode/mode.decorator';
@@ -70,31 +71,12 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
         }
     }
     
-    getColumnDefs(): any[] {
-        function checkNullValue(value: any) {
-            if(value){
-                return value;
-            }
-            return '';
-        };
-        function checkNullValueReference(reference: any) {
-            if(reference){
-                return reference.value;
-            }
-            return '';
-        };
-        let colDef: any[] = [
-            {headerName: "Name", field: "name.value", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.name);
-            }},
-            {headerName: "Concentration", field: "concentration", type: "number", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.concentration);
-            }},
-            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.concentration_unit);
-            }}    
-        ];
-        return colDef;       
+    getColumnDefs(): ColumnDefinition[] {
+        return [
+            {headerName: "Name", field: "name.value"},
+            {headerName: "Concentration", field: "concentration", type: "number"},
+            {headerName: "Concentration Unit", field: "concentration_unit.value"}    
+        ];     
     }
 
     getCustomActionsDefs(): any[] {
@@ -140,14 +122,14 @@ export class AnestheticIngredientsListComponent  extends BrowserPaginEntityListC
                     if (res) {
                         this.ingredientsService.deleteAnestheticIngredient(this.anesthetic.id, entity.id).then((response) => {
                             this.getAnestheticIngredient(selectedIngredient)
-                            this.onDelete.next(selectedIngredient);
+                            this.onDelete.next({entity: selectedIngredient});
                             let index = this.anesthetic.ingredients.findIndex(i => i.id === entity.id); //find index in your array
                             this.anesthetic.ingredients.splice(index, 1);
                             this.table.refresh();
-                            this.msgBoxService.log('info', 'The preclinical-anesthetic-ingredient sucessfully deleted');
+                            this.consoleService.log('info', 'The preclinical-anesthetic-ingredient n° ' + entity.id + ' sucessfully deleted');
                         }).catch(reason => {
                             if (reason && reason.error) {
-                                this.onDelete.next(new ShanoirError(reason));
+                                this.onDelete.next({entity: entity, error: new ShanoirError(reason)});
                                 if (reason.error.code != 422) throw Error(reason);
                             }
                         });                    

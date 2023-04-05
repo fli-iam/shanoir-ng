@@ -5,7 +5,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.shanoir.ng.exporter.service.BIDSService;
+import org.shanoir.ng.bids.BidsDeserializer;
+import org.shanoir.ng.bids.controller.BidsApiController;
+import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -36,8 +40,17 @@ public class BidsApiControllerTest {
 	@MockBean
 	BIDSService bidsService;
 
+	@MockBean
+	BidsDeserializer bidsDeserializer;
+	
+	@MockBean
+	StudyRepository studyRepo;
+
 	@Autowired
 	private MockMvc mvc;
+
+	@MockBean
+	private DicomSRImporterService dicomSRImporterService;
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })

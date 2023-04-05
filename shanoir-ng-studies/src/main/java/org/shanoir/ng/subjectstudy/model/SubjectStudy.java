@@ -15,18 +15,21 @@
 package org.shanoir.ng.subjectstudy.model;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.SubjectType;
@@ -70,25 +73,43 @@ public class SubjectStudy extends AbstractEntity {
 	private Integer subjectType;
 
 	/** Tags associated to the subject. */
-    @ManyToMany
-    @JoinTable( name = "subject_study_tag",
-                joinColumns = @JoinColumn( name = "subject_study_id" ))
-	private List<Tag> tags;
+	@OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<SubjectStudyTag> subjectStudyTags;
+	
+	/** StudyCard tags associated to the subject. */
+	private Integer qualityTag;
 
 	/**
 	 * @return the tags
 	 */
 	public List<Tag> getTags() {
-		return tags;
+        if (getSubjectStudyTags() == null) return null;
+        return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
+    }
+	
+	public List<SubjectStudyTag> getSubjectStudyTags() {
+		return subjectStudyTags;
 	}
-
-	/**
-	 * @param tags the tags to set
-	 */
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
+	
+	public QualityTag getQualityTag() {
+		return QualityTag.get(qualityTag);
 	}
+	
+	public void setQualityTag(QualityTag tag) {
+        this.qualityTag = tag != null ? tag.getId() : null;
+    }
 
+	public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
+		if (this.subjectStudyTags != null) {
+			this.subjectStudyTags.clear();
+			if (subjectStudyTags != null) {
+				this.subjectStudyTags.addAll(subjectStudyTags);
+			}			
+		} else {
+			this.subjectStudyTags = subjectStudyTags;
+		}
+	}
+	
 	/**
 	 * @return the physicallyInvolved
 	 */

@@ -46,11 +46,16 @@ RUN apt-get update -qq \
     lib32stdc++6 \
     libtiff5 \
     libglib2.0-0:i386 \
+    locales \
+    locales-all \
     python
 
 # Compile DCM2NIIX from source
 ENV DCMCOMMIT_VERSION=v1.0.20210317
 ENV DCMCOMMIT=1.0.20210317
+ENV LC_ALL fr_FR.UTF-8
+ENV LANG fr_FR.UTF-8
+ENV LANGUAGE fr_FR.UTF-8
 
 WORKDIR /usr/local/
 RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCMCOMMIT_VERSION.zip | bsdtar -xf- -C .
@@ -113,5 +118,5 @@ ADD shanoir-ng-import.jar shanoir-ng-import.jar
 COPY entrypoint entrypoint_common oneshot /bin/
 
 # Use the below line for remote debugging and to active dev profile
-#ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=9913,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-import.jar"]
+#ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=0.0.0.0:9913,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-import.jar"]
 ENTRYPOINT ["/bin/entrypoint", "java", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-jar", "/shanoir-ng-import.jar"]

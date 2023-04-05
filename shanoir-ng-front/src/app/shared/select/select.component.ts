@@ -28,7 +28,7 @@ import {
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { findLastIndex, deepEquals } from '../../utils/app.utils';
+import { findLastIndex, arraysEqual, objectsEqual } from '../../utils/app.utils';
 import { GlobalService } from '../services/global.service';
 
 
@@ -50,6 +50,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Output() userChange = new EventEmitter();
     @Output() selectOption = new EventEmitter();
     @Output() deSelectOption = new EventEmitter();
+    @Output() onUserClear = new EventEmitter();
     @Input() options: Option<any>[];
     @Input() optionArr: any[];
     @Input() optionBuilder: { list: any[], labelField: string, getLabel: (any) => string };
@@ -57,8 +58,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public displayedOptions: Option<any>[] = [];
     @ViewChild('input', { static: false }) textInput: ElementRef;
     @ViewChild('hiddenOption', { static: false }) hiddenOption: ElementRef;
-    private inputValue: any;
-    private _selectedOptionIndex: number;
+    inputValue: any;
+    private _selectedOptionIndex: number = null;
     public focusedOptionIndex: number;
     private _firstScrollOptionIndex: number;
     private filteredOptions: FilteredOptions;
@@ -67,6 +68,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     public way: 'up' | 'down' = 'down';
     public hideToComputeHeight: boolean = false;
     private onTouchedCallback = () => {};
+    @Output() onTouch = new EventEmitter();
     private onChangeCallback = (_: any) => {};
     public inputText: string;
     private _searchText: string = null;
@@ -75,6 +77,9 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() placeholder: string;
     public maxWidth: number;
     public noResult: boolean;
+    @Input() clear: boolean = true;
+    @Input() search: boolean = true;
+    @Input() selectionColor: boolean = false;
 
     @Input() viewDisabled: boolean;
     @Input() viewHidden: boolean;
@@ -100,20 +105,18 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.options && this.options) {
+        if (changes.options && !arraysEqual(changes.options?.currentValue, changes.options?.previousValue)) {
+            if (!this.options) this.options = [];
             this.searchText = null;
+            this.computeDisplayedOptions();
             this.initSelectedOption();
             this.computeMinWidth();
-        } else if (changes.optionArr && this.optionArr) {
+        } else if (changes.optionArr && !arraysEqual(changes.optionArr?.currentValue, changes.optionArr?.previousValue)) {
+            if (!this.optionArr) this.optionArr = [];
             this.searchText = null;
             this.options = [];
             this.optionArr.forEach(item => {
-                let label: string = '';
-                if (this.pipe) label = this.pipe.transform(item);
-                else if (typeof(item) == 'string') label = item;
-                else if (item.label) label = item.label;
-                else if (item.name) label = item.name;
-                else if (item.value) label = item.value;
+                let label: string = this.getLabel(item);
                 let newOption: Option<any> = new Option<any>(item, label);
                 if (item.color) newOption.color = item.color;
                 if (item.backgroundColor) newOption.color = item.backgroundColr;
@@ -121,7 +124,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             });
             this.initSelectedOption();
             this.computeMinWidth();
-        } else if (changes.optionBuilder && this.optionBuilder) {
+        } else if (changes.optionBuilder && this.optionBuilder && changes.optionBuilder.currentValue != changes.optionBuilder.previousValue ) {
             this.searchText = null;
             if (this.optionBuilder.list) {
                 this.options = [];
@@ -139,6 +142,16 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 this.computeMinWidth();
             }
         }
+    }
+
+    private getLabel(item: any): string {
+        let label: string = '';
+        if (this.pipe) label = this.pipe.transform(item);
+        else if (typeof(item) == 'string') label = item;
+        else if (item.label) label = item.label;
+        else if (item.name) label = item.name;
+        else if (item.value) label = item.value;
+        return label;
     }
 
     private initSelectedOption() {
@@ -163,22 +176,25 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     writeValue(value: any): void {
         this.searchText = null;
         this.inputValue = value;
-        if (this.options && value) {
+        if (value && this.options?.length > 0) {
             let index = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, value))
             if (index > -1) {
                 this.selectedOptionIndex = index;
-                return;
+            } else {
+                this.selectedOptionIndex = null;
             }
         } else {
             this.selectedOptionIndex = null;
         }
+        this.inputText = this.selectedOption?.label;
     }
 
     public get selectedOption(): Option<any> {
         return this.options 
             && this.selectedOptionIndex != null 
             && this.selectedOptionIndex != undefined
-            && this.options[this.selectedOptionIndex] ? this.options[this.selectedOptionIndex] : new Option(this.inputValue, this.inputValue);
+            && this.options[this.selectedOptionIndex] ? this.options[this.selectedOptionIndex] : (
+                this.inputValue ? new Option(this.inputValue, this.getLabel(this.inputValue)) : null);
     }
 
     private get selectedOptionIndex(): number {
@@ -192,12 +208,12 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             this._selectedOptionIndex = index;
             if (this.selectedOption) {
                 this.inputText = this.selectedOption.label;
-                //this.onChangeCallback(this.selectedOption.value);
-                //this.selectOption.emit(this.selectedOption);
+                this.onChangeCallback(this.selectedOption.value);
+                this.selectOption.emit(this.selectedOption);
             } else {
                 this.inputText = null;
-                //this.onChangeCallback(null);
-                //this.selectOption.emit(null);
+                this.onChangeCallback(null);
+                this.selectOption.emit(null);
             }
             if (previousOption) {
                 this.deSelectOption.emit(previousOption);
@@ -232,7 +248,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                     }
                 }
             })
-            this.hiddenOption.nativeElement.innerText = maxOption.label;
+            this.hiddenOption.nativeElement.innerText = maxOption?.label;
             this.maxWidth = this.hiddenOption.nativeElement.offsetWidth;
             this.hiddenOption.nativeElement.innerText = '';
         }
@@ -269,6 +285,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             return;
         }
         this.displayedOptions = this.displayableOptions.slice(this.firstScrollOptionIndex, this.firstScrollOptionIndex + this.LIST_LENGTH);
+        this.displayedOptions = this.displayedOptions.sort((a, b) => {
+            if (a.section == b.section) return 0;
+            else return ((a.section || 0) > (b.section || 0)) ? -1 : 1;
+        });
         this.noResult = this.displayedOptions.length == 0;
     }
     
@@ -293,10 +313,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     private valuesEqual(value1, value2) {
-        if (value1 == value2) return true;
-        else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
-        else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
-        else return deepEquals(value1, value2);
+        return objectsEqual(value1, value2);
     }
 
     public open() {
@@ -398,7 +415,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             event.preventDefault();
         } else if (' ' == event.key) {
             if (!this.isOpen()) this.open();
-        }  else if (event.keyCode >= 65 && event.keyCode <= 90) {
+        }  else if (this.search && event.keyCode >= 65 && event.keyCode <= 90) {
             if (this.textInput.nativeElement != document.activeElement) {
                 this.inputText = null;
                 this.textInput.nativeElement.focus();
@@ -540,6 +557,11 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         }
     }
 
+    onClear() {
+        this.onUserClear.emit(this.selectedOption);
+        this.onTypeText(null);
+    }
+
     public onTypeText(text: string) {
         this.unSelectOption();
         this.onChangeCallback(null);
@@ -563,9 +585,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
     @HostListener('focusout', ['$event']) 
     onFocusOut(event: FocusEvent) {
-        if (!this.element.nativeElement.contains(event.relatedTarget)) {
+        if (!this.element.nativeElement.contains(event.relatedTarget) && !this.dragging) {
             this.close();
             this.onTouchedCallback();
+            this.onTouch.emit();
         } 
     }
 
@@ -583,7 +606,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     clickAdd(): void {
-        if(!this.addDisabled && this.selectedOption) this.onAddClick.emit(this.selectedOption.value);
+        if(!this.addDisabled && this.selectedOption && !this.selectedOption.disabled) this.onAddClick.emit(this.selectedOption.value);
     }
 
     setDisabledState(isDisabled: boolean) {
@@ -615,13 +638,23 @@ export class Option<T> {
 
     disabled: boolean = false;
     compatible: boolean = undefined;
-    color: string;
     backgroundColor: string;
       
     constructor(
         public value: T,
         public label: string,
-        public section?: string) {}
+        public section?: string,
+        public color?: string,
+        public awesome?: string) {}
+
+    clone(): Option<T> {
+        let option: Option<T> = new Option(this.value, this.label, this.section);
+        option.disabled = this.disabled;
+        option.compatible = this.compatible;
+        option.color = this.color;
+        option.backgroundColor = this.backgroundColor;
+        return option;
+    }
 }
 
 export class FilteredOptions {

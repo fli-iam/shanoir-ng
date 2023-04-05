@@ -18,6 +18,7 @@ import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquis
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { ShanoirError } from '../../shared/models/error.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
@@ -57,15 +58,15 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
         return this.centerService.getAll(); 
     }
 
-    getColumnDefs() {
-        let columnDefs: any[] = [
+    getColumnDefs(): ColumnDefinition[] {
+        let columnDefs: ColumnDefinition[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true},
             { headerName: "Name", field: "name" },
             { headerName: "Town", field: "city" },
             { headerName: "Country", field: "country" }
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
-            columnDefs.push({ headerName: "", type: "button", awesome: "fa-microscope", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip(item) });
+            columnDefs.push({ headerName: "", type: "button", awesome: "fa-solid fa-microscope", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip(item) });
         }
         return columnDefs;
     }
@@ -85,17 +86,18 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
     private manageDelete() {
         this.subscribtions.push(
             this.onDelete.subscribe(response => {
-                if (response instanceof ShanoirError && response.code == 422) {
-                    let msg: string  = this.buildDeleteErrMsg(response.details.fieldErrors["delete"] || '');
-                    this.msgBoxService.log('warn', msg, 10000); 
+                if (response.error && response.error instanceof ShanoirError && response.error.code == 422) {
+                    let msg: string  = this.buildDeleteErrMsg(response as {entity: Center, error: ShanoirError});
+                    this.consoleService.log('warn', msg);
                 }
             })
         );
     }
 
-    private buildDeleteErrMsg(errDetails: any): string {
+    private buildDeleteErrMsg(response: {entity: Center, error: ShanoirError}): string {
         let isLinkedWithEqpts: boolean = false;
         let isLinkedWithStudies: boolean = false;
+        let errDetails = response.error.details?.fieldErrors["delete"];
         for (var errKey in errDetails) {
             if (errDetails[errKey]["givenValue"] == "acquisitionEquipments") {
                 isLinkedWithEqpts = true;
@@ -104,7 +106,7 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
                 isLinkedWithStudies = true;
             }
         }
-        let msg: string = 'This center cannot be deleted. It is associated with ';
+        let msg: string = 'Center "' + response.entity.name + '" cannot be deleted. It is associated with ';
         if (isLinkedWithEqpts) msg += 'acquisition equipment(s)' ;
         if (isLinkedWithEqpts && isLinkedWithStudies) msg += ' and ';
         if (isLinkedWithStudies) msg += 'study(ies)';

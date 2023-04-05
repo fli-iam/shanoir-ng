@@ -27,7 +27,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgent;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentRepository;
 import org.shanoir.ng.preclinical.contrast_agent.ContrastAgentServiceImpl;
@@ -36,6 +35,8 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ContrastAgentModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.mockito.junit.MockitoJUnitRunner;
+
 
 /**
  * COntrast agents service test.

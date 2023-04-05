@@ -39,13 +39,11 @@ public interface DatasetAcquisitionMapper {
 	List<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(
 			List<DatasetAcquisition> datasetAcquisitions); 
 	
-	
 	public PageImpl<DatasetAcquisitionDTO> datasetAcquisitionsToDatasetAcquisitionDTOs(Page<DatasetAcquisition> page);
 
 	
 	DatasetAcquisitionDTO datasetAcquisitionToDatasetAcquisitionDTO(
 			DatasetAcquisition datasetAcquisition);
-
 	
 	DatasetAcquisition datasetAcquisitionDTOToDatasetAcquisition(DatasetAcquisitionDTO datasetAcquisition);
 	

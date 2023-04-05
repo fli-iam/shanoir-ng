@@ -19,10 +19,12 @@ import java.util.List;
 
 import org.shanoir.ng.groupofsubjects.ExperimentalGroupOfSubjectsMapper;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
+import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.studycenter.StudyCenterMapper;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
+import org.shanoir.ng.tag.model.StudyTagMapper;
 import org.shanoir.ng.tag.model.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -49,6 +51,9 @@ public abstract class StudyDecorator implements StudyMapper {
 	@Autowired
 	private TagMapper tagMapper;
 
+	@Autowired
+	private StudyTagMapper studyTagMapper;
+
 	@Override
 	public List<StudyDTO> studiesToStudyDTOs(final List<Study> studies) {
 		final List<StudyDTO> studyDTOs = new ArrayList<>();
@@ -57,8 +62,8 @@ public abstract class StudyDecorator implements StudyMapper {
 			if (study.getSubjectStudyList() != null) {
 				studyDTO.setNbSujects(study.getSubjectStudyList().size());
 			}
-			if (study.getExaminationIds() != null) {
-				studyDTO.setNbExaminations(study.getExaminationIds().size());
+			if (study.getExaminations() != null) {
+				studyDTO.setNbExaminations(study.getExaminations().size());
 			}
 			studyDTOs.add(studyDTO);
 		}
@@ -75,6 +80,7 @@ public abstract class StudyDecorator implements StudyMapper {
 		final IdNameCenterStudyDTO simpleStudyDTO = delegate.studyToExtendedIdNameDTO(study);
 		simpleStudyDTO.setStudyCenterList(studyCenterMapper.studyCenterListToStudyCenterDTOList(study.getStudyCenterList()));
 		simpleStudyDTO.setTags(tagMapper.tagListToTagDTOList(study.getTags()));
+		simpleStudyDTO.setProfile(study.getProfile());
 		return simpleStudyDTO;
 	}
 	
@@ -110,6 +116,22 @@ public abstract class StudyDecorator implements StudyMapper {
 			}
 		}
 		return studyDTO;
+	}
+
+	@Override
+	public PublicStudyDTO studyToPublicStudyDTO (final Study study) {
+		final PublicStudyDTO publicStudyDTO = delegate.studyToPublicStudyDTO(study);
+
+		if (study.getSubjectStudyList() != null) {
+			publicStudyDTO.setNbSubjects(study.getSubjectStudyList().size());
+		}
+		if (study.getExaminations() != null) {
+			publicStudyDTO.setNbExaminations(study.getExaminations().size());
+		}
+		if (study.getStudyTags() != null) {
+			publicStudyDTO.setStudyTags(studyTagMapper.studyTagListToStudyTagDTOList(study.getStudyTags()));
+		}
+		return publicStudyDTO;
 	}
 }
 

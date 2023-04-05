@@ -20,7 +20,7 @@ import { Study } from '../../studies/shared/study.model';
 import { Subject } from '../../subjects/shared/subject.model';
 import { DatasetType } from './dataset-type.model';
 import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
-
+import { BidsDataType } from '../../enum/bids-data-type.enum';
 
 export abstract class Dataset extends Entity {
     
@@ -48,4 +48,5 @@ export class DatasetMetadata {
     name: string;
     processedDatasetType: ProcessedDatasetType;
     cardinalityOfRelatedSubjects: CardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET;
+	bidsDataType: BidsDataType;
 }

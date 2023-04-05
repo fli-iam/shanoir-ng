@@ -4,6 +4,8 @@ import org.shanoir.uploader.ShUpConfig;
 
 public class StudyCard {
 
+	private Long id;
+	
 	/** The acquisition equipment id. */
 	private Long acquisitionEquipmentId;
 
@@ -105,6 +107,14 @@ public class StudyCard {
 		} else {
 			return displayString;
 		}
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }

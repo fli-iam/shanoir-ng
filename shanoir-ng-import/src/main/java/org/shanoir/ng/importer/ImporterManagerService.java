@@ -34,15 +34,17 @@ import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.ng.importer.model.Subject;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.study.rights.StudyUser;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.shared.email.EmailBase;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.rights.StudyUser;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +77,7 @@ public class ImporterManagerService {
 	/**
 	 * For the moment Spring is not used here to autowire, as we try to keep the
 	 * anonymization project as simple as it is, without Spring annotations, to
-	 * be usable outside a Spring context.
+	 * be usable outside a Spring context, as e.g. in ShanoirUploader.
 	 * Maybe to change and think about deeper afterwards.
 	 */
 	private static final AnonymizationServiceImpl ANONYMIZER = new AnonymizationServiceImpl();
@@ -109,7 +111,6 @@ public class ImporterManagerService {
 	
 	@Async("asyncExecutor")
 	public void manageImportJob(final Long userId, final HttpHeaders keycloakHeaders, final ImportJob importJob) {
-		LOG.info("Starting import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 		importJob.setShanoirEvent(event);
@@ -141,6 +142,7 @@ public class ImporterManagerService {
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
+						
 			event.setMessage("Anonymizing dicom..");
 			eventService.publishEvent(event);
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
@@ -148,23 +150,26 @@ public class ImporterManagerService {
 				// perform anonymization only in case of profile explicitly set
 				if (importJob.getAnonymisationProfileToUse() != null && !importJob.getAnonymisationProfileToUse().isEmpty()) {
 					ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
-					final String subjectName = patient.getSubject().getName();
-					try {
-						ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
-					} catch (Exception e) {
-						LOG.error(e.getMessage(), e);
-						throw new ShanoirException("Error during anonymization.");
+					final Subject subject = patient.getSubject();
+					if (subject != null) {
+						final String subjectName = subject.getName();
+						try {
+							ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
+						} catch (Exception e) {
+							LOG.error(e.getMessage(), e);
+							throw new ShanoirException("Error during anonymization.");
+						}						
+					} else {
+						LOG.error("Error: subject == null in importJob.");
+						throw new ShanoirException("Error: subject == null in importJob.");						
 					}
 				}
 				Long converterId = importJob.getConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
 			}
-	        rabbitTemplate.setBeforePublishPostProcessors(message -> {
-	            message.getMessageProperties().setHeader("x-user-id",
-	            		KeycloakUtil.getTokenUserId());
-	            return message;
-	        });
 			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
+			long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());
+			LOG.info("user=" + KeycloakUtil.getTokenUserName() + ",size=" + ImportUtils.readableFileSize(importJobDirSize) + "," + importJob.toString());
 		} catch (Exception e) {
 			LOG.error("Error during import for study {} and examination {}", importJob.getStudyId(), importJob.getExaminationId(), e);
 			event.setMessage("ERROR while importing data for study " + importJob.getStudyId() + " for examination " + importJob.getExaminationId() + ", please contact an administrator");
@@ -173,7 +178,6 @@ public class ImporterManagerService {
 			eventService.publishEvent(event);
 			sendFailureMail(importJob, userId, e.getMessage());
 		}
-		LOG.info("Finished import job for userId: {} with import job folder: {}", userId, importJob.getWorkFolder());
 	}
 
 	private void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
@@ -211,7 +215,7 @@ public class ImporterManagerService {
 		email.setRecipients(recipients);
 
 		try {
-			rabbitTemplate.convertAndSend(queue, new ObjectMapper().writeValueAsString(email));
+			rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(email));
 		} catch (AmqpException | JsonProcessingException e) {
 			LOG.error("Could not send email for this import. ", e);
 		}

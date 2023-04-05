@@ -1,0 +1,88 @@
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<h2 *ngIf="mode == 'create'" class="header command-zone">Request An Access</h2>
+<h2 *ngIf="mode == 'edit'" class="header command-zone">Edit Access Request</h2>
+<h2 *ngIf="mode == 'view'" class="header command-zone">Access Request</h2>
+<div #formContainer class="content-component">
+    <form *ngIf="form" [formGroup]="form" class="max-content" novalidate>
+	    <ul>
+	        <li *ngIf="mode == 'create' && !fromStudy">
+	            <label i18n="access request|study label@@study" class="required-label">Study</label>
+	            <span class="right-col">
+	            <select-box
+	                    formControlName="studyId"
+	                    [(ngModel)]="accessRequest.studyId" 
+	                    [options]="studyOptions"
+	                    (userChange)="changeStudy($event)">
+	            </select-box>
+	            </span>
+	            <input type="hidden"
+                 formControlName="studyName"
+                 [(ngModel)]="accessRequest.studyName"
+                >
+	        </li>
+	       <li *ngIf="mode == 'create' && fromStudy">
+	            <span> You have requested to join a study on shanoir, please add a message for the study administrator and confirm you access request.</span>
+	            <br/>
+	            <br/>
+                <input type = hidden
+                        formControlName="studyId"
+                        [(ngModel)]="accessRequest.studyId"/>
+                <input type="hidden"
+                 formControlName="studyName"
+                 [(ngModel)]="accessRequest.studyName"
+                >
+            </li>
+	        <li *ngIf="mode == 'view'">
+                <label i18n="access request|user label@@user">User</label>
+                <span class="right-col">
+                    {{accessRequest.user.username}}
+                </span>
+            </li>
+	        <li *ngIf="mode == 'view'">
+	            <label i18n="access request|study label@@study">Study</label>
+                <span class="right-col">
+                    {{accessRequest.studyName}}
+                </span>
+	        </li>
+	        <li *ngIf="mode == 'create'">
+
+	            <label i18n="access request|Motivation label@@motivation" class="required-label">Motivation</label>
+	            <span class="right-col">
+	                <textarea formControlName="motivation" [(ngModel)]="accessRequest.motivation"></textarea>
+	            </span>
+	        </li>
+	        <li *ngIf="mode == 'view'">
+                <label i18n="access request|study label@@study" class="required-label">Motivation</label>
+                <span class="right-col">
+                    {{accessRequest.motivation}}
+                </span>
+            </li>
+	    </ul>
+        <button type="button" (click)="acceptRequest()" class="accept right-icon">
+            Accept
+            <i class="fa-solid fa-thumbs-up"></i>
+        </button>
+        <button type="button" (click)="refuseRequest()" class="refuse right-icon">
+            Refuse
+            <i class="fa-solid fa-thumbs-down"></i>
+        </button>
+    <form-footer
+    [state]="footerState"
+    (save)="save()"
+    (back)="goBack()"
+    ></form-footer>
+    </form>
+</div>

@@ -13,7 +13,7 @@
  */
 
 import { Component, ViewChild, ElementRef, OnChanges, Input} from '@angular/core';
-import { FormGroup,  Validators } from '@angular/forms';
+import { UntypedFormGroup,  Validators } from '@angular/forms';
 import { HttpResponse } from '@angular/common/http';
 
 import { ContrastAgent }    from '../../contrastAgent/shared/contrastAgent.model';
@@ -143,7 +143,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         let numericRegex = /\-?\d*\.?\d{1,2}/;
 
         return this.formBuilder.group({
@@ -343,7 +343,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         if (response.status == 200) {
             AppUtils.browserDownloadFile(response.body, this.getFilename(response));
         } else {
-            this.msgBoxService.log('warn', 'Error: No bruker archive found');
+            this.consoleService.log('warn', 'Error: No bruker archive found for examination n°' + this.examination.id);
         }
     }
 

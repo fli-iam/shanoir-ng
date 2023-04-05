@@ -20,17 +20,24 @@ services:
     build: ./docker-compose/keycloak-database
     environment:
       - MYSQL_DATABASE=keycloak
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
     volumes:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
+    #command: ["start-dev"]   # default is "start" to run in production mode
     environment:
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_ADMIN_NAME
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_SMTP_HOST
       - SHANOIR_MIGRATION
       - SHANOIR_KEYCLOAK_USER
@@ -48,7 +55,7 @@ services:
   #  
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
-    image: rabbitmq:3.7.7-management-alpine
+    image: rabbitmq:3.10.7
     volumes:
       - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
     ports:
@@ -67,6 +74,10 @@ services:
       - ./docker-compose/database/variables.env
     environment:
       - SHANOIR_MIGRATION
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
@@ -80,15 +91,17 @@ services:
     container_name: "${SHANOIR_PREFIX}users"
     build: ./docker-compose/users
     environment:
-      - SHANOIR_URL_HOST
+      - SHANOIR_PREFIX
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
       - SHANOIR_KEYCLOAK_USER
       - SHANOIR_KEYCLOAK_PASSWORD
       - SHANOIR_SMTP_HOST
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_CERTIFICATE
+      - SHANOIR_CERTIFICATE_PEM_CRT
+      - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_MIGRATION
-      - SHANOIR_PREFIX
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java
@@ -107,14 +120,13 @@ services:
     container_name: "${SHANOIR_PREFIX}studies"
     build: ./docker-compose/studies
     environment:
-      - SHANOIR_URL_HOST
-      - SHANOIR_URL_SCHEME
-      - SHANOIR_MIGRATION
       - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
-      - "datasets-data:/var/datasets-data"
       - "studies-data:/var/studies-data"
       - "tmp:/tmp"
     networks:
@@ -133,10 +145,10 @@ services:
     container_name: "${SHANOIR_PREFIX}import"
     build: ./docker-compose/import
     environment:
-      - SHANOIR_URL_HOST
-      - SHANOIR_URL_SCHEME
-      - SHANOIR_MIGRATION
       - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -157,10 +169,14 @@ services:
     container_name: "${SHANOIR_PREFIX}datasets"
     build: ./docker-compose/datasets
     environment:
-      - SHANOIR_URL_HOST
-      - SHANOIR_URL_SCHEME
-      - SHANOIR_MIGRATION
       - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
+      - SHANOIR_MIGRATION
+      - VIP_URL_SCHEME
+      - VIP_URL_HOST
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -180,10 +196,10 @@ services:
     container_name: "${SHANOIR_PREFIX}preclinical"
     build: ./docker-compose/preclinical
     environment:
-      - SHANOIR_URL_HOST
-      - SHANOIR_URL_SCHEME
-      - SHANOIR_MIGRATION
       - SHANOIR_PREFIX
+      - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_MIGRATION
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -192,7 +208,7 @@ services:
     networks:
       - shanoir_ng_network
     ports:
-     - "9909:9909"
+     - "9905:9905"
      - "9915:9915"
     depends_on:
       - "database"
@@ -228,9 +244,11 @@ services:
       - "8983:8983"
   # Backup PACS microservice: dcm4chee 5 arc-light
   #
+  # The config for the dcm4chee containers is derived from this template:
+  # https://github.com/dcm4che-dockerfiles/dcm4chee-arc-psql/blob/master/docker-compose.yml
   ldap:
     container_name: "${SHANOIR_PREFIX}ldap"
-    image: dcm4che/slapd-dcm4chee:2.4.44-13.0
+    image: dcm4che/slapd-dcm4chee:2.6.2-27.0
     logging:
       driver: json-file
       options:
@@ -241,11 +259,11 @@ services:
       - "389:389"
     env_file: ./docker-compose/dcm4chee/variables.env
     volumes:
-      - "dcm4chee-ldap-data:/var/lib/ldap"
-      - "dcm4chee-sldap-data:/etc/ldap/slapd.d"
+      - "dcm4chee-ldap-data:/var/lib/openldap/openldap-data"
+      - "dcm4chee-sldap-data:/etc/openldap/slapd.d"
   dcm4chee-database:
     container_name: "${SHANOIR_PREFIX}dcm4chee-database"
-    image: dcm4che/postgres-dcm4chee:10.0-13
+    image: dcm4che/postgres-dcm4chee:14.4-27
     logging:
       driver: json-file
       options:
@@ -259,7 +277,7 @@ services:
       - "dcm4chee-database-data:/var/lib/postgresql/data"
   dcm4chee-arc:
     container_name: "${SHANOIR_PREFIX}dcm4chee-arc"
-    image: dcm4che/dcm4chee-arc-psql:5.13.0
+    image: dcm4che/dcm4chee-arc-psql:5.27.0
     logging:
       driver: json-file
       options:
@@ -275,7 +293,7 @@ services:
     env_file: ./docker-compose/dcm4chee/variables.env
     environment:
       POSTGRES_HOST: "${SHANOIR_PREFIX}dcm4chee-database"
-      WILDFLY_CHOWN: /opt/wildfly/standalone /storage
+      WILDFLY_CHOWN: /storage
       WILDFLY_WAIT_FOR: "${SHANOIR_PREFIX}ldap:389 ${SHANOIR_PREFIX}dcm4chee-database:5432"
     depends_on:
       - "ldap"
@@ -291,11 +309,18 @@ services:
     build: ./docker-compose/nginx
     environment:
       - SHANOIR_PREFIX
-      - SHANOIR_URL_HOST
       - SHANOIR_URL_SCHEME
+      - SHANOIR_URL_HOST
+      - SHANOIR_VIEWER_OHIF_URL_SCHEME
+      - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_X_FORWARDED
       - SHANOIR_INSTANCE_NAME
       - SHANOIR_INSTANCE_COLOR
+      - SHANOIR_CERTIFICATE_PEM_CRT
+      - SHANOIR_CERTIFICATE_PEM_KEY
+      - SHANOIR_KEYCLOAK_ADAPTER_MODE
+      - VIP_URL_SCHEME
+      - VIP_URL_HOST
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro

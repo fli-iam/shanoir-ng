@@ -13,7 +13,7 @@
  */
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
+import { UntypedFormGroup, FormBuilder } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 
@@ -93,7 +93,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     	}
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'has_heart_rate':[this.physioData.has_heart_rate],
             'has_respiratory_rate':[this.physioData.has_respiratory_rate],
@@ -105,7 +105,7 @@ export class PhysiologicalDataFormComponent extends EntityComponent<Physiologica
     public save(): Promise<PhysiologicalData> {
         return this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_PHYSIO_DATA,this.physioData).then((physioData) => {
             this.chooseRouteAfterSave(this.physioData);
-            this.msgBoxService.log('info', 'The new preclinical-physiogicaldata has been successfully saved under the number ' + physioData.id);
+            this.consoleService.log('info', 'New preclinical physiogicaldata successfully saved with n° ' + physioData.id);
             return physioData;
         });
     }

@@ -57,6 +57,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
 					<li>
+                        <label>Examination</label>
+                        <span class="right-col" [ngSwitch]="mode">
+                            <ng-template [ngSwitchCase]="'view'">
+                                <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
+                                    {{datasetAcquisition.examination?.comment}}
+                                </a> 
+                            </ng-template> 
+                        </span>
+                    </li>
+					<li>
 						<label>Study card</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
@@ -134,7 +144,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<fieldset *ngIf="mode=='view'">
 				<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
 				<dataset-acquisition-node 
-						[input]="breadcrumbsService.currentStep.data.datasetAcquisitionNode ? breadcrumbsService.currentStep.data.datasetAcquisitionNode : datasetAcquisition" 
+						[input]="acquisitionNode" 
 						(nodeInit)="onNodeInit($event)"></dataset-acquisition-node >
 			</fieldset>
 			

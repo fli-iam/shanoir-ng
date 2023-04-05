@@ -21,13 +21,13 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
+import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
@@ -78,6 +78,15 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyDTO>> findStudies();
+
+	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available", response = Study.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Study.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Study.class),
+			@ApiResponse(code = 404, message = "no study found", response = Study.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
+	@RequestMapping(value = "/public/data", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData();
 
 	@ApiOperation(value = "", notes = "Returns id and name for all the studies", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
@@ -201,28 +210,6 @@ public interface StudyApi {
 	void downloadProtocolFile(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
-
-    @ApiOperation(value = "", nickname = "exportBIDSByStudyId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given study id", response = Resource.class, tags={})
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "zip file", response = Resource.class),
-        @ApiResponse(code = 401, message = "unauthorized"),
-        @ApiResponse(code = 403, message = "forbidden"),
-        @ApiResponse(code = 404, message = "no dataset found"),
-        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-    @GetMapping(value = "/exportBIDS/studyId/{studyId}")
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_DOWNLOAD'))")
-    void exportBIDSByStudyId(
-    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId, HttpServletResponse response) throws RestServiceException, IOException;
-
-	@ApiOperation(value = "", nickname = "getBids", notes = "If exists, returns a BIDSElement structure corresponding to the given study id", response = BidsElement.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "BidsElement", response = BidsElement.class),
-			@ApiResponse(code = 401, message = "unauthorized"), @ApiResponse(code = 403, message = "forbidden"),
-			@ApiResponse(code = 404, message = "no dataset found"),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/bidsStructure/studyId/{studyId}", produces = { "application/json" })
-	ResponseEntity<BidsElement> getBIDSStructureByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
-			throws RestServiceException, IOException;
 	
 	@ApiOperation(value = "", notes = "If one or more exist, return a list of data user agreements (DUAs) waiting for the given user id", response = DataUserAgreement.class, tags = {})
 	@ApiResponses(value = {
@@ -289,5 +276,29 @@ public interface StudyApi {
 	ResponseEntity<Void> deleteDataUserAgreement(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
 			throws IOException;
+
+
+	@ApiOperation(value = "", notes = "Deletes the user of a study", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "user removed from study", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study or user found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "studyUser/{studyId}/{userId}", produces = {
+			"application/json" }, method = RequestMethod.DELETE)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> deleteStudyUser(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId)
+			throws IOException;
+
+	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available for a given user", response = Study.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Study.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Study.class),
+			@ApiResponse(code = 404, message = "no study found", response = Study.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
+	@RequestMapping(value = "/public/connected", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<IdName>> findPublicStudiesConnected();
 
 }

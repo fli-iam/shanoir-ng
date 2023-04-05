@@ -11,45 +11,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { Study } from '../../studies/shared/study.model';
+import { SimpleStudy } from '../../studies/shared/study.model';
+import { QualityTag } from '../../study-cards/shared/quality-card.model';
+import { Tag } from '../../tags/tag.model';
 import { Subject } from './subject.model';
 import { SubjectType } from './subject.types';
-import { Id } from '../../shared/models/id.model';
-import { Tag } from '../../tags/tag.model';
+
 
 export class SubjectStudy {
     id: number;
     examinations: SubjectExamination[];
     subject: Subject;
     subjectId: number;
-    study: Study;
+    study: SimpleStudy;
     studyId: number;
     subjectStudyIdentifier: string;
     subjectType: SubjectType;
     physicallyInvolved: boolean;
     tags: Tag[];
-}
-
-export class SubjectStudyDTO {
-    id: number;
-    examinations: number[];
-    subject: Id;
-    study: Id;
-    subjectStudyIdentifier: string;
-    subjectType: SubjectType;
-    physicallyInvolved: boolean;
-    tags: Tag[];
-
-    constructor(subjectStudy: SubjectStudy) {
-        this.id = subjectStudy.id;
-        this.examinations = subjectStudy.examinations ? subjectStudy.examinations.map(exam => exam.id) : null;
-        this.subject = subjectStudy.subject ? new Id(subjectStudy.subject.id) : null;
-        this.study = subjectStudy.study ? new Id(subjectStudy.study.id) : null;
-        this.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
-        this.subjectType = subjectStudy.subjectType;
-        this.physicallyInvolved = subjectStudy.physicallyInvolved;
-        this.tags = subjectStudy.tags;
-    }
+    qualityTag: QualityTag;
 }

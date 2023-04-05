@@ -18,6 +18,7 @@ import java.util.function.Function;
 
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,7 +36,6 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 
 	@Override
 	public PageImpl<ExaminationDTO> examinationsToExaminationDTOs(Page<Examination> page) {
-
 		Page<ExaminationDTO> mappedPage = page.map(new Function<Examination, ExaminationDTO>() {
 			public ExaminationDTO apply(Examination entity) {
 				return examinationToExaminationDTO(entity);
@@ -48,6 +48,14 @@ public abstract class ExaminationDecorator implements ExaminationMapper {
 	public ExaminationDTO examinationToExaminationDTO(Examination examination) {
 		final ExaminationDTO examinationDTO = delegate.examinationToExaminationDTO(examination);
 		return examinationDTO;
+	}
+	
+	@Override
+	public Examination examinationDTOToExamination(ExaminationDTO examinationDTO) {
+	    Examination examination = delegate.examinationDTOToExamination(examinationDTO);
+	    examination.setStudy(new Study());
+	    examination.getStudy().setId(examinationDTO.getStudyId());
+	    return examination;
 	}
 
 }

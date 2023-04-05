@@ -18,14 +18,14 @@ import { DatasetProcessing } from '../../datasets/shared/dataset-processing.mode
 import { Dataset } from '../../datasets/shared/dataset.model';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 
 import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationPipe } from '../shared/examination.pipe';
 import { ExaminationService } from '../shared/examination.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-
+import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'examination-node',
@@ -44,8 +44,10 @@ export class ExaminationNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     datasetIds: number[];
-	hasEEG: boolean = false;
-	hasDicom: boolean = false;
+	  hasEEG: boolean = false;
+	  hasDicom: boolean = false;
+    downloading = false;
+    hasBids: boolean = false;
 
     constructor(
         private router: Router,
@@ -53,7 +55,7 @@ export class ExaminationNodeComponent implements OnChanges {
         private datasetAcquisitionService: DatasetAcquisitionService,
         private examPipe: ExaminationPipe,
         private datasetService: DatasetService,
-        private msgService: MsgBoxService) {
+        private consoleService: ConsoleService) {
     }
     
     ngOnChanges(changes: SimpleChanges): void {
@@ -81,6 +83,10 @@ export class ExaminationNodeComponent implements OnChanges {
 
     showExaminationDetails() {
         this.router.navigate(['/examination/details/' + this.node.id]);
+    }
+    
+    viewExaminationDicoms() {
+        window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.node.id, '_blank');
     }
 
     downloadFile(file) {
@@ -116,7 +122,9 @@ export class ExaminationNodeComponent implements OnChanges {
                         datasetIds.push(ds.id);
 						if (ds.type === 'Eeg') {
 							this.hasEEG = true;
-						} else {
+						} else if (ds.type === 'BIDS') {
+                            this.hasBids = true;
+                        } else {
 							this.hasDicom = true;
 						}
                     });
@@ -127,12 +135,17 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     download(format: string) {
+        if (this.downloading) {
+            return;
+        }
+        this.downloading = true;
         if (this.datasetIds && this.datasetIds.length == 0) return;
         let datasetIdsReady: Promise<void>;
         if (this.node.datasetAcquisitions == 'UNLOADED') {
             datasetIdsReady = this.loadDatasetAcquisitions();
             if (!this.datasetIds || this.datasetIds.length == 0) {
-                this.msgService.log('warn', 'Sorry, no dataset for this examination');
+                this.consoleService.log('warn', 'Sorry, no dataset for examination n°' + this.node?.id);
+                this.downloading = false;
                 return;
             }
         } else {
@@ -140,9 +153,9 @@ export class ExaminationNodeComponent implements OnChanges {
         }
         datasetIdsReady.then(() => {
             this.datasetService.downloadDatasets(this.datasetIds, format, this.progressBar);
+            this.downloading = false;
         });
     }
-
 
     mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(

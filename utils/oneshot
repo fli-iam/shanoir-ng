@@ -11,7 +11,7 @@ set -e
 
 if [ "$1" = "-h" ] || [ "$1" = "--help" ] ; then
 	cat <<EOF
-usage:	oneshot PATTERN [PATTERN...] -- COMMAND [ARG1 ...]
+usage:	oneshot [--pgrp] PATTERN [PATTERN...] -- COMMAND [ARG1 ...]
 
 Run a command, monitor its outputs, and kill it after the given patterns have
 been matched.
@@ -23,11 +23,26 @@ PATTERNs are searched in the combined output (stdout+stderr) of the executed
 process . The ordering is strict: they must be matched in the same order as
 given in the command line.
 
-After the last PATTERN is matched, the oneshot script sends  SIGTERM to the
-process, then wait for its termination and exit with code 0 if all PATTERNs
-have been matched successfully or code 1 otherwise.
+As soon as the last PATTERN is matched (even if the other patterns were not
+matched), the oneshot script sends SIGTERM to the process, then wait for its
+termination.
+
+The exit code is the numeber of remaining PATTERNs to be matched (0 if all
+PATTERNs were matched successfully).
+
+With --pgrp, the command is run in a separate session and SIGTERM is sent to
+the whole process group.
 EOF
 	exit 0
+fi
+
+if [ "$1" == "--pgrp" ] ; then
+	shift
+	setsid=setsid
+	kill_cmd() { kill -- "-$1" ; }
+else
+	setsid=
+	kill_cmd() { kill --  "$1" ; }
 fi
 
 patterns=()
@@ -37,32 +52,56 @@ while [ "$1" != "--" ] ; do
 done
 shift
 
-fifo1="`tmp_fifo`"
-fifo2="`tmp_fifo`"
-
-exec "$@" >"$fifo1" 2>&1 &
-pid=$!
-trap "kill $pid" INT TERM
-
-tee "$fifo2" <"$fifo1" &
-
-set +e
-(	set -e
-	for pattern in "${patterns[@]}"
-	do
-		grep -E -q -m1 -- "$pattern"
-	done
-) <"$fifo2"
-result=$?
-rm "$fifo1" "$fifo2"
-
-if [ "$result" -eq 0 ] ; then
-	# successful
-	echo "  ------------------- sending SIGTERM -------------------"
-	kill "$pid"
+if [ ${#patterns[@]} -eq 0 ] ; then
+	echo "oneshot: error: must provide at least one pattern" >&2
+	exit 100
 fi
 
-wait "$pid"
+# run the command with its outputs redirected to a fifo
+
+fifo="`tmp_fifo`"
+trap "rm $fifo" EXIT
+
+exec $setsid "$@" >"$fifo" 2>&1 &
+pid=$!
+trap "kill_cmd $pid" INT TERM
+
+# read from the fifo and match each pattern in order
+IFS=
+current=0
+signaled=-1
+while read -r line ; do
+	echo "$line"
+	if [[ "$line" =~ ${patterns[$current]} ]] ; then
+		((current++)) || true
+	fi
+	if [[ "$line" =~ ${patterns[-1]} ]] ; then
+		signaled="${#patterns[@]}"
+		echo "  ------------------- sending SIGTERM -----------------------"
+		kill_cmd $pid || true
+		while read -r line ; do
+			echo "$line"
+		done
+		break
+	fi
+done <"$fifo"
+
+# eof
+
+echo "  ------------------- match report --------------------------"
+i=0
+for pattern in "${patterns[@]}" ; do
+	if [ $((i++)) -lt $current ] || [ $i -eq $signaled ] ; then
+		status="\e[32m OK \e[39m"
+	else
+		status="\e[31mFAIL\e[39m"
+	fi
+	echo "  [ `echo -e "$status"` ]  $pattern"
+done
+
+wait "$pid" || true
+
+result=$((${#patterns[@]} - current))
 echo "  ------------------- terminated (exit $result) -------------------"
 exit "$result"
 

@@ -14,7 +14,7 @@
 
 import { Component,  Input, Output,  EventEmitter  } from '@angular/core';
 import {  ActivatedRoute, ResolveEnd} from '@angular/router';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 import { ExaminationAnesthetic }    from '../shared/examinationAnesthetic.model';
 import { ExaminationAnestheticService } from '../shared/examinationAnesthetic.service';
@@ -27,7 +27,7 @@ import { Enum } from "../../../../shared/utils/enum";
 import { EnumUtils } from "../../../shared/enum/enumUtils";
 import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 @Component({
@@ -40,7 +40,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
 
     @Input() isStandalone: boolean = false;
     @Input() examination_id: number;
-    @Input() form: FormGroup;
+    @Input() form: UntypedFormGroup;
     @Output() examAnestheticChange = new EventEmitter();
     //examinationAnesthetic : ExaminationAnesthetic;
     anesthetics: Anesthetic[] = [];
@@ -112,7 +112,7 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'anesthetic': [this.examinationAnesthetic.anesthetic],
             'injectionInterval': [this.examinationAnesthetic.injection_interval],
@@ -192,14 +192,14 @@ export class ExaminationAnestheticFormComponent extends EntityComponent<Examinat
             return this.updateExaminationAnesthetic().then(exam => {
                 this.onSave.next(this.examinationAnesthetic);
                 this.chooseRouteAfterSave(this.entity);
-                this.msgBoxService.log('info', 'The preclinical-examination n°' + this.examinationAnesthetic.id + ' has been successfully updated');
+                this.consoleService.log('info', 'Preclinical examination n°' + this.examinationAnesthetic.id + ' successfully updated');
                 return exam;
             });
         } else {
             return this.addExaminationAnesthetic().then(exam => {
                 this.onSave.next(this.examinationAnesthetic);
                 this.chooseRouteAfterSave(this.entity);
-                this.msgBoxService.log('info', 'The new preclinical-examination has been successfully saved under the number ' + this.examinationAnesthetic.id);
+                this.consoleService.log('info', 'New preclinical examination successfully saved with n°' + this.examinationAnesthetic.id);
                 return exam;
             });
         }

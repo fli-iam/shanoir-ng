@@ -2,6 +2,7 @@ package org.shanoir.uploader.action;
 
 import java.awt.Color;
 import java.io.File;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -10,9 +11,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
-import org.shanoir.dicom.importer.Serie;
-import org.shanoir.dicom.importer.UploadJob;
 import org.shanoir.uploader.ShUpConfig;
+import org.shanoir.uploader.dicom.Serie;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -25,6 +25,7 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
+import org.shanoir.uploader.upload.UploadJob;
 
 /**
  * This class implements the logic when the start import button is clicked.
@@ -111,8 +112,8 @@ public class ImportDialogOpener {
 		String manufacturerModelName = firstSerie.getMriInformation().getManufacturersModelName();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
 		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
-		logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
 		if (studies != null) {
+			logger.info("getStudiesWithStudyCards: " + studies.size() + " studies found.");
 			List<AcquisitionEquipment> acquisitionEquipments = shanoirUploaderServiceClient.findAcquisitionEquipments();
 			logger.info("findAcquisitionEquipments: " + acquisitionEquipments.size() + " equipments found.");
 			List<StudyCard> studyCards = getAllStudyCards(studies);
@@ -139,6 +140,7 @@ public class ImportDialogOpener {
 											String manufacturerModelNameSC = acquisitionEquipment.getManufacturerModel().getName();
 											if (manufacturerSC.compareToIgnoreCase(manufacturer) == 0
 													&& manufacturerModelNameSC.compareToIgnoreCase(manufacturerModelName) == 0
+													&& acquisitionEquipment.getSerialNumber() != null
 													&& acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0) {
 												studyCard.setCompatible(true);
 												compatibleStudyCard = true;
@@ -170,7 +172,7 @@ public class ImportDialogOpener {
 		}
 	}
 
-	private List<StudyCard> getAllStudyCards(List<Study> studies) {
+	private List<StudyCard> getAllStudyCards(List<Study> studies) throws IOException {
 		IdList idList = new IdList();
 		for (Iterator<Study> iterator = studies.iterator(); iterator.hasNext();) {
 			Study study = (Study) iterator.next();

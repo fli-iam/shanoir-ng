@@ -69,9 +69,12 @@ export class ReverseStudyNodeComponent implements OnChanges {
             this.loading = true;
             this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id)
             .then(examinations => {
+                let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                    return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
+                })
                 this.node.examinations = [];
-                if (examinations) {
-                    examinations.forEach(exam => {
+                if (sortedExaminations) {
+                    sortedExaminations.forEach(exam => {
                         (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
                     }); 
                 }
@@ -88,7 +91,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             exam.id,
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            []
+            exam.extraDataFilePathList
         );
     }
     

@@ -14,7 +14,7 @@
 import { Component, HostListener } from '@angular/core';
 
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
-import { Router } from '../../breadcrumbs/router';
+import { Router } from '@angular/router';
 import { slideDown } from '../../shared/animations/animations';
 import * as AppUtils from '../../utils/app.utils';
 import { PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
@@ -143,7 +143,11 @@ export class SelectSeriesComponent {
     }
 
     next() {
-        this.router.navigate(['imports/context']);
+        if (this.breadcrumbsService.findImportMode() == 'PACS') {
+            this.router.navigate(['imports/pacs-context']);
+        } else {
+            this.router.navigate(['imports/context']);
+        }
     }
 
     @HostListener('document:keypress', ['$event']) onKeydownHandler(event: KeyboardEvent) {

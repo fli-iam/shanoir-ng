@@ -1,4 +1,4 @@
-:host() { display: block; }
+:host { display: block; }
 .input-frame { display: inline-block; width: 100%; position: relative; }
 .clear { position: absolute; top: 2px; right: 0px; color: #757575; }
 .expert-mode { margin-top: 10px; }

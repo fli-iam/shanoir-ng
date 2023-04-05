@@ -16,6 +16,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.model';
 import { Option } from '../../../shared/select/select.component';
+import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
     selector: 'mr-dataset-details',
@@ -26,6 +27,7 @@ export class MrDatasetComponent implements OnInit{
 
     @Input() mode: Mode;
     @Input() dataset: MrDataset;
+    @Input() parentFormGroup: UntypedFormGroup;
     // allMrDatasetNatures: any[];
     public natureOptions: Option<MrDatasetNature>[];
     
@@ -39,5 +41,10 @@ export class MrDatasetComponent implements OnInit{
 
     get natureLabel(): string {
         return this.dataset.updatedMrMetadata ? MrDatasetNature.getLabel(this.dataset.updatedMrMetadata.mrDatasetNature) : null;
+    }
+
+    updateForm() {
+        this.parentFormGroup.markAsDirty();
+        this.parentFormGroup.updateValueAndValidity();
     }
 }

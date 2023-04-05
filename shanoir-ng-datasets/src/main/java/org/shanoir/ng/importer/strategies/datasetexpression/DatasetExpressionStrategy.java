@@ -14,15 +14,15 @@
 
 package org.shanoir.ng.importer.strategies.datasetexpression;
 
-import java.net.MalformedURLException;
-
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 
+import java.io.IOException;
+
 public interface DatasetExpressionStrategy {
 	
-	DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws MalformedURLException;
+	DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws IOException;
 
 }

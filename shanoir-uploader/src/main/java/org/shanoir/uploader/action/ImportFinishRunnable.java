@@ -12,15 +12,14 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
-import org.shanoir.dicom.importer.UploadJob;
-import org.shanoir.dicom.importer.UploadJobManager;
-import org.shanoir.dicom.importer.UploadState;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.shanoir.uploader.upload.UploadJob;
+import org.shanoir.uploader.upload.UploadJobManager;
+import org.shanoir.uploader.upload.UploadState;
+import org.shanoir.uploader.utils.Util;
 
 /**
  * This class prepares the upload to a Shanoir server instance,
@@ -69,11 +68,10 @@ public class ImportFinishRunnable implements Runnable {
 			/**
 			 * Write import-job.json to disk
 			 */
-			ObjectMapper objectMapper = new ObjectMapper();
 			try {
 				File importJobJson = new File(uploadFolder, ImportJob.IMPORT_JOB_JSON);
 				importJobJson.createNewFile();
-				objectMapper.writeValue(importJobJson, importJob);
+				Util.objectMapper.writeValue(importJobJson, importJob);
 			} catch (IOException e) {
 				logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
 			}

@@ -22,6 +22,7 @@ import org.shanoir.ng.shared.email.EmailBase;
 import org.shanoir.ng.shared.email.EmailDatasetImportFailed;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.shared.email.EmailStudyUsersAdded;
+import org.shanoir.ng.shared.email.StudyInvitationEmail;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +49,9 @@ public class RabbitMQUserService {
 
 	@Autowired
 	EmailService emailService;
+	
+	@Autowired
+	private ObjectMapper mapper;
 
 	/**
 	 * Receives a shanoirEvent as a json object, thus create a event in the queue
@@ -60,8 +64,6 @@ public class RabbitMQUserService {
 	        	autoDelete = "false", durable = "true", type=ExchangeTypes.TOPIC))
 	)
 	public void receiveEvent(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
 		LOG.info("Receiving event: " + eventAsString);
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
@@ -80,8 +82,6 @@ public class RabbitMQUserService {
 	@RabbitHandler
 	public void receiveImportEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
 		try {
 			EmailDatasetsImported mail = mapper.readValue(generatedMailAsString, EmailDatasetsImported.class);
 			this.emailService.notifyStudyManagerDataImported(mail);
@@ -100,8 +100,6 @@ public class RabbitMQUserService {
 	@RabbitHandler
 	public void receiveImportFailedEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
 		try {
 			EmailDatasetImportFailed mail = mapper.readValue(generatedMailAsString, EmailDatasetImportFailed.class);
 			this.emailService.notifyStudyManagerImportFailure(mail);
@@ -120,8 +118,6 @@ public class RabbitMQUserService {
 	@RabbitHandler
 	public void receiveStudyUserReport(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
 		try {
 			EmailStudyUsersAdded mail = mapper.readValue(generatedMailAsString, EmailStudyUsersAdded.class);
 			this.emailService.notifyStudyManagerStudyUsersAdded(mail);
@@ -130,5 +126,4 @@ public class RabbitMQUserService {
 			throw new AmqpRejectAndDontRequeueException("Something went wrong deserializing the event.", e);
 		}
 	}
-	
 }

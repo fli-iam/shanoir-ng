@@ -11,22 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-
-import {Component, ViewChild} from '@angular/core'
-
-import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
-import { AnimalSubject } from '../shared/animalSubject.model';
-import { Subject } from '../../../subjects/shared/subject.model';
-import { AnimalSubjectService } from '../shared/animalSubject.service';
-import { TableComponent } from '../../../shared/components/table/table.component';
-import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
-import { ServiceLocator } from '../../../utils/locator.service';
-import { ShanoirError } from '../../../shared/models/error.model';
-import { resolve } from 'url';
-import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
+import { Component, ViewChild } from '@angular/core';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+
+import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
+import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
+import { TableComponent } from '../../../shared/components/table/table.component';
+import { ShanoirError } from '../../../shared/models/error.model';
+import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
+import { Subject } from '../../../subjects/shared/subject.model';
 import { SubjectService } from '../../../subjects/shared/subject.service';
+import { AnimalSubject } from '../shared/animalSubject.model';
+import { AnimalSubjectService } from '../shared/animalSubject.service';
+import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
+
 
 
 @Component({
@@ -81,8 +79,8 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
     }
     
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefinition[] {
+        let colDef: ColumnDefinition[] = [
             {headerName: "Common name", field: "subject.name"},
             {headerName: "Imaged object category", field: "subject.imagedObjectCategory", cellRenderer: function (params: any) {
                     let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory>params.data.subject.imagedObjectCategory;
@@ -140,17 +138,18 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                 if (res) {
                     this.animalSubjectService.delete(entity.animalSubject.id).then((res) => {
                         this.subjectService.delete(entity.subject.id).then((res2) => {
+                            this.onDelete.next({entity: entity});
                             const index: number = this.preclinicalSubjects.indexOf(entity);
                             if (index !== -1) {
                                 this.preclinicalSubjects.splice(index);
                             }
                             this.table.refresh();
-                            this.msgBoxService.log('info', 'The preclinical-subject sucessfully deleted');
+                            this.consoleService.log('info', 'The preclinical-subject n°' + entity.id + ' sucessfully deleted');
                         })
                     }
                     ).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({entity: entity, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
                     });                

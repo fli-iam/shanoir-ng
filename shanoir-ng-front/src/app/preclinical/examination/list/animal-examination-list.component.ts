@@ -20,10 +20,11 @@ import { ExtraDataService } from '../../extraData/extraData/shared/extradata.ser
 
 import {  Page, Pageable } from '../../../shared/components/table/pageable.model';
 import { TableComponent } from '../../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
 import { EntityListComponent } from '../../../shared/components/entity/entity-list.component.abstract';
 import { ShanoirError } from '../../../shared/models/error.model';
 import { ServiceLocator } from '../../../utils/locator.service';
-import { MsgBoxService } from '../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 
@@ -54,14 +55,14 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
         return this.examinationService.getPage(pageable, true);
     }
 
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
             }
             return null;
         };
-        let colDef: any[] = [
+        let colDef: ColumnDefinition[] = [
             { headerName: "Examination id", field: "id" },
             {headerName: "Subject", field: "subjectId", cellRenderer: (params: any) => (params.data.subject) ? params.data.subject.name : ""},
             {
@@ -97,12 +98,12 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
             ).then(res => {
                 if (res) {
                     this.getService().delete(selectedExamination.id).then(() => {
-                        this.onDelete.next(selectedExamination);
+                        this.onDelete.next({entity: selectedExamination});
                         this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-examination sucessfully deleted');
+                        this.consoleService.log('info', 'The preclinical-examination n°' + entity.id + ' was sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({entity: selectedExamination, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
                     });                    
@@ -121,7 +122,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     private manageDelete() {
         this.subscribtions.push(
             this.onDelete.subscribe(response => {
-                this.deleteExamination(response.id)
+                this.deleteExamination(response.entity.id)
             })
         );
     }

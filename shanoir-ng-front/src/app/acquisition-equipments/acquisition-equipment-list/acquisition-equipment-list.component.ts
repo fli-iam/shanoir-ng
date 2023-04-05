@@ -18,6 +18,7 @@ import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
@@ -64,7 +65,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
     }
 
     // Grid columns definition
-    getColumnDefs() {
+    getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
@@ -72,7 +73,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
             return null;
         };
 
-        let columnDefs: any = [
+        let columnDefs: ColumnDefinition[] = [
             {
                 headerName: "Acquisition equipment", field: "name", cellRenderer: function (params: any) {
                     let acqEquip: AcquisitionEquipment = params.data;
@@ -101,7 +102,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
             columnDefs.push({
                 headerName: "", 
                 type: "button", 
-                awesome: "fa-magnet", 
+                awesome: "fa-solid fa-magnet", 
                 tip: "Add coil",
                 action: (acqEquip) => this.openCreateCoil(acqEquip)
             });

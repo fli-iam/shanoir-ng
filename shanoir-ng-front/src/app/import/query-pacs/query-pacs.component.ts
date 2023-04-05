@@ -13,16 +13,16 @@
  */
 
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { slideDown } from '../../shared/animations/animations';
 import { DicomQuery, ImportJob } from '../shared/dicom-data.model';
 import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
-import { MsgBoxService } from '../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../shared/console/console.service';
 
-export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: FormGroup ): ValidationErrors | null => {
+export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: UntypedFormGroup ): ValidationErrors | null => {
     const hasAtLeastOneNotBlank = group && group.controls && Object.keys(group.controls)
       .some(key => !validator(group.controls[key]) && group.controls[key].value.trim().length != 0);
     return hasAtLeastOneNotBlank ? null : { atLeastOneNotBlank: true };
@@ -38,12 +38,12 @@ export const atLeastOneNotBlank = (validator: ValidatorFn) => ( group: FormGroup
 export class QueryPacsComponent{
 
     dicomQuery: DicomQuery = new DicomQuery();
-    form: FormGroup;
+    form: UntypedFormGroup;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private router: Router,
             private importService: ImportService, private importDataService: ImportDataService,
-            private formBuilder: FormBuilder, private msgBoxService: MsgBoxService) {
+            private formBuilder: UntypedFormBuilder, private consoleService: ConsoleService) {
 
         setTimeout(() => {
             breadcrumbsService.currentStepAsMilestone();
@@ -60,7 +60,7 @@ export class QueryPacsComponent{
                 this.importDataService.patientList = importJob;
                 this.router.navigate(['imports/series']);
             } else {
-                this.msgBoxService.log('warn', 'Nothing found. Please change your query parameters.'); 
+                this.consoleService.log('warn', 'Nothing found. Please change your query parameters.', ['query : ' + JSON.stringify(this.dicomQuery)]); 
             }
         })
     }

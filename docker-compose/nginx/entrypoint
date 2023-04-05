@@ -4,29 +4,67 @@ set -e
 
 . /bin/entrypoint_common
 
-(
-	require SHANOIR_X_FORWARDED
+
+require SHANOIR_X_FORWARDED
+x_forwarded_headers() {
 	if [ "$SHANOIR_X_FORWARDED" = "generate" ] ; then
 		echo 'proxy_set_header 	X-Forwarded-For $remote_addr;'
 		echo 'proxy_set_header	X-Forwarded-Proto $scheme;'
 	fi
+}
+
+(
+	x_forwarded_headers
+
+	cat /etc/nginx/shanoir.template.conf
 
 	if [ -z "$SHANOIR_DEV" ] ; then
 		cat /etc/nginx/shanoir.template.prod.conf
 	else
 		cat /etc/nginx/shanoir.template.dev.conf
 	fi
-
-	optional SHANOIR_PREFIX
-	sed "s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g" /etc/nginx/shanoir.template.conf
 ) >/etc/nginx/shanoir.conf
 
-require SHANOIR_URL_SCHEME
-require SHANOIR_URL_HOST
-src="/etc/nginx/$SHANOIR_URL_SCHEME.conf"
-dst="/etc/nginx/server.conf"
-sed "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" "$src" > "$dst"
+(
+	x_forwarded_headers
 
+	cat /etc/nginx/viewer/ohif-viewer.template.conf
+
+) >/etc/nginx/ohif-viewer.conf
+
+
+require SHANOIR_URL_HOST
+require SHANOIR_URL_SCHEME
+require SHANOIR_VIEWER_OHIF_URL_HOST
+require SHANOIR_VIEWER_OHIF_URL_SCHEME
+require SHANOIR_CERTIFICATE_PEM_CRT
+require SHANOIR_CERTIFICATE_PEM_KEY
+optional SHANOIR_PREFIX
+require VIP_URL_HOST
+require VIP_URL_SCHEME
+
+if [ "$SHANOIR_CERTIFICATE_PEM_CRT" = none ] && [ "$SHANOIR_CERTIFICATE_PEM_KEY" = none ]
+then
+	cp "/etc/nginx/http.conf" /etc/nginx/server.conf
+else
+	cp "/etc/nginx/https.conf" /etc/nginx/server.conf
+fi
+cp "/etc/nginx/viewer/app-config.js" /etc/nginx/viewer/html/
+
+sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
+	s/SHANOIR_VIEWER_OHIF_URL_SCHEME/$SHANOIR_VIEWER_OHIF_URL_SCHEME/g
+	s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g
+	s/SHANOIR_URL_SCHEME/$SHANOIR_URL_SCHEME/g
+	s/SHANOIR_PREFIX/$SHANOIR_PREFIX/g
+	s/SHANOIR_CERTIFICATE_PEM_CRT/$SHANOIR_CERTIFICATE_PEM_CRT/g
+	s/SHANOIR_CERTIFICATE_PEM_KEY/$SHANOIR_CERTIFICATE_PEM_KEY/g
+	s/VIP_URL_HOST/$VIP_URL_HOST/g
+	s/VIP_URL_SCHEME/$VIP_URL_SCHEME/g
+"	/etc/nginx/server.conf \
+	/etc/nginx/shanoir.conf \
+	/etc/nginx/viewer/html/app-config.js \
+	/etc/nginx/ohif-viewer.conf \
+	/etc/nginx/html/assets/env.js
 
 configure_instance()
 {
@@ -40,12 +78,21 @@ configure_instance()
 	sed -i "s\"SHANOIR_INSTANCE_NAME\"$SHANOIR_INSTANCE_NAME\"g
 		s/SHANOIR_INSTANCE_COLOR/$instance_color/g
 		s/SHANOIR_USER_COLOR/$user_color/g
-		" /etc/nginx/html/assets/css/common.css /etc/nginx/html/styles.*.css
+		" /etc/nginx/html/assets/css/common.css /etc/nginx/html/styles*.css
+}
+
+configure_keycloak_adapter_mode()
+{
+	sed -i "s/'SHANOIR_KEYCLOAK_ADAPTER_MODE'/'$SHANOIR_KEYCLOAK_ADAPTER_MODE'/g
+		" /etc/nginx/html/index.html
 }
 
 optional SHANOIR_INSTANCE_COLOR
 optional SHANOIR_INSTANCE_NAME
 configure_instance
+
+optional SHANOIR_KEYCLOAK_ADAPTER_MODE
+configure_keycloak_adapter_mode
 
 abort_if_error
 

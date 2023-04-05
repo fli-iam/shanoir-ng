@@ -13,7 +13,7 @@
  */
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup,  Validators } from '@angular/forms';
+import { UntypedFormGroup,  Validators } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
 import { ContrastAgent }    from '../shared/contrastAgent.model';
@@ -102,7 +102,7 @@ export class ContrastAgentFormComponent extends EntityComponent<ContrastAgent>{
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'name': [this.agent.name, Validators.required],
             'manufactured_name': [this.agent.manufactured_name],

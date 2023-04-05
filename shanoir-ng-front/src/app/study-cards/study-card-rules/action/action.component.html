@@ -31,7 +31,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (deSelectOption)="onDeSelectFieldOption($event)" 
             [options]="fieldOptions" 
             placeholder="select field"
-            (focusout)="fieldTouched = true">
+            (focusout)="fieldTouched = true"
+            [clear]="false">
     </select-box>
     =
     <auto-ajust-input 
@@ -52,7 +53,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [options]="assigmentOptions" 
             (userChange)="onChangeValue()" 
             [placeholder]="assignment.value"
-            (focusout)="valueTouched = true">
+            (focusout)="valueTouched = true"
+            [clear]="false">
     </select-box>
 </ng-container>
 <span *ngIf="mode != 'view'" class="delete" (click)="delete.emit()"><i class="far fa-times-circle"></i></span>

@@ -30,4 +30,6 @@ public interface AcquisitionEquipmentRepository extends CrudRepository<Acquisiti
 	
 	
 	List<AcquisitionEquipment> findByCenterStudyCenterListStudyId(Long studyId);
+
+	AcquisitionEquipment findBySerialNumber(String serialNumber);
 }

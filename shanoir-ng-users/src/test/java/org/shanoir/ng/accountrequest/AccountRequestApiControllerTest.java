@@ -37,6 +37,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -49,7 +50,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = AccountRequestApiController.class)
+@ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
+//@AutoConfigureMockMvc(addFilters = false)
 public class AccountRequestApiControllerTest {
 
 	private static final String REQUEST_PATH = "/accountrequest";
@@ -84,9 +87,7 @@ public class AccountRequestApiControllerTest {
 		info.setContact("contact");
 		info.setFunction("function");
 		info.setInstitution("institution");
-		info.setService("service");
-		info.setStudy("study");
-		info.setWork("work");
+		info.setStudyId(1L);
 		user.setAccountRequestInfo(info);
 		
 		given(userServiceMock.createAccountRequest(Mockito.mock(User.class))).willReturn(new User());
@@ -106,10 +107,7 @@ public class AccountRequestApiControllerTest {
 		info.setContact("contact");
 		info.setFunction("function");
 		info.setInstitution("institution");
-		info.setChallenge(1L);
-		info.setService("service");
-		info.setStudy("study");
-		info.setWork("work");
+		info.setStudyId(1L);
 		user.setAccountRequestInfo(info);
 
 		given(userServiceMock.createAccountRequest(Mockito.any(User.class))).willReturn(user);

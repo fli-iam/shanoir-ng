@@ -1,4 +1,4 @@
-:host() {
+:host {
     position: relative;
     display: inline-block;
     width: 17px;
@@ -8,15 +8,19 @@
     font-size: 15px;
 }
 
-:host().disabled {
+:host.view {
+    border: none;
+}
+
+:host.disabled {
     opacity: 0.5;
 }
 
-:host():focus {
+:host:focus {
     outline: none;
 }
 
-:host():focus::after {
+:host:focus::after {
     content: "";
     position: absolute;
     top: -2px; right: -2px; bottom: -2px; left: -2px;

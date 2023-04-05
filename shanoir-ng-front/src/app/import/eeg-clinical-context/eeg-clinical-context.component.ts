@@ -12,93 +12,50 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import { BreadcrumbsService, Step } from '../../breadcrumbs/breadcrumbs.service';
-import { Center } from '../../centers/shared/center.model';
-import { CenterService } from '../../centers/shared/center.service';
+import { Step } from '../../breadcrumbs/breadcrumbs.service';
+import { Event } from '../../datasets/dataset/eeg/dataset.eeg.model';
+import { EegDatasetDTO } from '../../datasets/shared/dataset.dto';
 import { CoordSystems } from '../../enum/coord-system.enum';
 import { Examination } from '../../examinations/shared/examination.model';
-import { ExaminationService } from '../../examinations/shared/examination.service';
-import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
-import { SubjectExaminationPipe } from '../../examinations/shared/subject-examination.pipe';
-import { slideDown } from '../../shared/animations/animations';
+import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { IdName } from '../../shared/models/id-name.model';
-import { StudyCenter } from '../../studies/shared/study-center.model';
-import { Study } from '../../studies/shared/study.model';
-import { StudyService } from '../../studies/shared/study.service';
+import { Option } from '../../shared/select/select.component';
 import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { Subject } from '../../subjects/shared/subject.model';
-import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { ContextData, ImportDataService } from '../shared/import.data-service';
-import { Option } from '../../shared/select/select.component';
-import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
-import { Subscription } from 'rxjs';
+import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
+import { EegImportJob } from '../shared/eeg-data.model';
+import { EegContextData } from '../shared/import.data-service';
 
 
 @Component({
     selector: 'eeg-clinical-context',
     templateUrl: 'eeg-clinical-context.component.html',
-    styleUrls: ['eeg-clinical-context.component.css', '../shared/import.step.css'],
-    animations: [slideDown]
+    styleUrls: ['../clinical-context/clinical-context.component.css', '../shared/import.step.css'],
+    animations: [slideDown, preventInitialChildAnimations]
 })
 
-export class EegClinicalContextComponent implements OnInit {
+export class EegClinicalContextComponent extends AbstractClinicalContextComponent implements OnInit {
     
     @ViewChild('eventsTable', { static: false }) table: TableComponent;
     
-    public studies: Study[] = [];
-    public centers: Center[] = [];
-    public acquisitionEquipments: AcquisitionEquipment[] = [];
-    public examinations: SubjectExamination[] = [];
-    public study: Study;
-    public center: Center;
-    public acquisitionEquipment: AcquisitionEquipment;
-    public examination: SubjectExamination;
-    public subjects: SubjectWithSubjectStudy[] = [];
-    public subject: SubjectWithSubjectStudy;
-    public columnDefs: any[];
-    public hasPosition: boolean;
-    openSubjectStudy: boolean = false;
+    columnDefs: ColumnDefinition[];
+    hasPosition: boolean;    
+    coordSystemOptions: Option<CoordSystems>[];
+    coordsystem : string;
+    firstDate: Date;
+    useStudyCard: boolean = false;
     
-    public coordSystemOptions: Option<CoordSystems>[];
-    public coordsystem : string;
-
     private browserPaging: BrowserPaging<EventContext>;
-    private eventsPromise: Promise<any>;
-
-    public subjectTypes: Option<string>[] = [
-        new Option<string>('HEALTHY_VOLUNTEER', 'Healthy Volunteer'),
-        new Option<string>('PATIENT', 'Patient'),
-        new Option<string>('PHANTOM', 'Phantom')
-    ];
-
-    private subscribtions: Subscription[] = [];
     
-    constructor(
-            private studyService: StudyService,
-            private centerService: CenterService,
-            private examinationService: ExaminationService,
-            private router: Router,
-            private breadcrumbsService: BreadcrumbsService,
-            private importDataService: ImportDataService,
-            public acqEqPipe: AcquisitionEquipmentPipe,
-            public subjectExaminationPipe: SubjectExaminationPipe) {
-
+    postConstructor() {
         this.coordSystemOptions = CoordSystems.options;
-
-        // No channels => no import
-        if (!this.importDataService?.eegImportJob?.datasets) {
-            this.router.navigate(['imports'], {replaceUrl: true});
-            return;
-        }
-        breadcrumbsService.nameStep('3. Context');
-        
         // Check for position to know if we have to display systemCoord or not
         this.hasPosition = false;
         for (let dataset of this.importDataService.eegImportJob.datasets) {
@@ -106,63 +63,16 @@ export class EegClinicalContextComponent implements OnInit {
                 this.hasPosition = true;
             }
         }
-        
-        // Initialize studies;
-        Promise.all([this.studyService.getStudyNamesAndCenters(), this.centerService.getAll()])
-        .then(([allStudies, allCenters]) => {
-            this.studies = allStudies;
-            
-            for (let study of allStudies) {
-                for (let studyCenter of study.studyCenterList) {
-                    let center = allCenters.filter(center => center.id === studyCenter.center.id)[0];
-                    if (center) {
-                        studyCenter.center = center;
-                    }
-                }
-            }
-            
-            this.reloadSavedData();
-            this.onContextChange();
-        });
+        this.findEegDate();        
+    }
+
+    protected exitCondition(): boolean {
+        return !this.importDataService?.eegImportJob?.datasets;
     }
     
     ngOnInit(): void {
-        // Init events table
+        super.ngOnInit();
         this.initEventsTable();
-    }
-
-    private reloadSavedData() {
-        if (this.importDataService.contextBackup) {
-            let study = this.importDataService.contextBackup.study;
-            let center = this.importDataService.contextBackup.center;
-            let acquisitionEquipment = this.importDataService.contextBackup.acquisitionEquipment;
-            let subject = this.importDataService.contextBackup.subject;
-            let examination = this.importDataService.contextBackup.examination;
-            if (study) {
-                this.study = study;
-                this.onSelectStudy();
-            }
-            if (center) {
-                this.center = center;
-                this.onSelectCenter();
-            }
-            if (acquisitionEquipment) {
-                // reload acquisition equipments if we just added one acquisitionEquipment
-                if (this.acquisitionEquipments.indexOf(acquisitionEquipment) == -1) {
-                    this.acquisitionEquipments.push(acquisitionEquipment);
-                }
-                this.acquisitionEquipment = acquisitionEquipment;
-                this.onSelectAcquisitonEquipment();
-            }
-            if (subject) {
-                this.subject = subject;
-                this.onSelectSubject();
-            }
-            if (examination) {
-                this.examination = examination;
-                this.onSelectExam();
-            }
-        }
     }
     
     private initEventsTable(): void {
@@ -178,7 +88,11 @@ export class EegClinicalContextComponent implements OnInit {
                     return params.data.number;
             }},
         ]
-        
+        this.browserPaging = new BrowserPaging([], this.columnDefs);
+        this.browserPaging.setItems(this.getEventContexts());
+    }
+
+    private getEventContexts(): EventContext[] {   
         let context = [];
         let contextDict = {};
         for (let dataset of this.importDataService.eegImportJob.datasets) {
@@ -200,221 +114,120 @@ export class EegClinicalContextComponent implements OnInit {
                 }
             }
         }
-
-       this.eventsPromise = Promise.resolve().then(() => {
-            this.browserPaging = new BrowserPaging([], this.columnDefs);
-            this.browserPaging.setItems(context);
-            this.table.refresh();
-        });
+        return context;
     }
 
-   public getPage(pageable: FilterablePageable): Promise<Page<EventContext>> {
-        return new Promise((resolve) => {
-            this.eventsPromise.then(() => {
-                resolve(this.browserPaging.getPage(pageable));
-            });
-        });
-    }
-
-    public onSelectStudy(): void {
-        this.centers = this.acquisitionEquipments = this.subjects = this.examinations = [];
-        this.openSubjectStudy = false;
-        this.center = this.acquisitionEquipment = this.subject = this.examination = null;
-        if (this.study && this.study.id && this.study.studyCenterList) {
-            this.center = this.study.studyCenterList[0].center;
-            this.onSelectCenter();
-            for (let studyCenter of this.study.studyCenterList) {
-                this.centers.push(studyCenter.center);
-            }
-        }
-    }
-
-    public onSelectCenter(): void {
-        this.acquisitionEquipments = this.subjects = this.examinations = [];
-        this.openSubjectStudy = false;
-        this.acquisitionEquipment = this.subject = this.examination = null;
-        if (this.center && this.center.acquisitionEquipments) {
-            this.acquisitionEquipment = this.center.acquisitionEquipments[0];
-            this.onSelectAcquisitonEquipment();
-            this.acquisitionEquipments = this.center.acquisitionEquipments;
-        }
-    }
-
-    public onSelectAcquisitonEquipment(): void {
-        this.subjects = this.examinations = [];
-        this.openSubjectStudy = false;
-        this.subject = this.examination = null;
-        if (this.acquisitionEquipment) {
-            this.studyService
-                .findSubjectsByStudyId(this.study.id)
-                .then(subjects => this.subjects = subjects);
-        }
-    }
-
-    public onSelectSubject(): void {
-        this.examinations = [];
-        this.examination = null;
-        if (this.subject) {
-            this.examinationService
-            .findExaminationsBySubjectAndStudy(this.subject.id, this.study.id)
-            .then(examinations => this.examinations = examinations);
-        }
-    }
-
-    public onSelectExam(): void {
+    public getPage(pageable: FilterablePageable): Promise<Page<EventContext>> {
+        return Promise.resolve(this.browserPaging.getPage(pageable));
     }
 
     public onSelectCoord(): void {
     }
 
-    public onContextChange() {
-        this.importDataService.contextBackup = this.getContext();
-        if (this.valid) {
-            this.importDataService.contextData = this.getContext();
-        }
-    }
-    
-    private getContext(): ContextData {
-        return new ContextData(this.study, null, false, this.center, this.acquisitionEquipment,
+    protected getContext(): EegContextData {
+        return new EegContextData(this.study, null, false, this.center, this.acquisitionEquipment,
             this.subject, this.examination, null, this.coordsystem, null, null, null, null, null, null);
     }
 
-    private getPrefilledCenter(): Center {
-        let studyCenter = new StudyCenter();
-        studyCenter.study = this.study;
-        let newCenter = new Center();
-        newCenter.studyCenterList = [studyCenter];
-        return newCenter;
+    get valid(): boolean {
+        let context = this.getContext();
+        return (
+            !!context.study
+            && !!context.center
+            && !!context.acquisitionEquipment
+            && !!context.subject
+            && !!context.subject?.subjectStudy?.subjectType 
+            && !!context.examination
+            && (!!context.coordinatesSystem || !this.hasPosition)
+        );
     }
 
-    private updateStudyCenter(center: Center): Center {
-        if (!center) return;
-        let studyCenter: StudyCenter = center.studyCenterList[0];
-        this.study.studyCenterList.push(studyCenter);
-        return center;
+    public getNextUrl(): string {
+        return '/imports/eeg';
     }
 
-    public openCreateAcqEqt() {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create']).then(success => {
-            this.breadcrumbsService.currentStep.entity = this.getPrefilledAcqEqt();
-            currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.acquisitionEquipment = (entity as AcquisitionEquipment);
-            });
-        });
+    public importData(): Promise<any> {
+        let importJob = new EegImportJob();
+        importJob.datasets = [];
+        let context = this.importDataService.contextData as EegContextData;
+        let importJobContext = this.importDataService.eegImportJob;
+
+        for (let dataset of importJobContext.datasets) {
+            let datasetToSet = new EegDatasetDTO();
+            datasetToSet.channels = dataset.channels;
+            datasetToSet.name = dataset.name;
+            datasetToSet.files = dataset.files;
+            datasetToSet.events = dataset.events;
+            datasetToSet.samplingFrequency = dataset.samplingFrequency;
+            datasetToSet.channelCount = dataset.channelCount;
+            datasetToSet.coordinatesSystem = context.coordinatesSystem;
+            importJob.datasets.push(datasetToSet);
+        }
+        importJob.subjectId = context.subject.id;
+        importJob.subjectName = context.subject.name;
+        importJob.studyName = context.study.name;
+        importJob.workFolder = importJobContext.workFolder;
+        importJob.examinationId = context.examination.id;
+        importJob.studyId = context.study.id;
+        importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
+        return this.importService.startEegImportJob(importJob);
     }
 
+    protected fillCreateSubjectStep(step: Step) {
+        step.entity = this.getPrefilledSubject();
+        step.data.forceStudy = this.study;
+        step.data.subjectNamePrefix = this.subjectNamePrefix;
+    }
+
+    protected getPrefilledSubject(): Subject {
+        let subjectStudy = new SubjectStudy();
+        subjectStudy.study = this.study;
+        subjectStudy.physicallyInvolved = false;
+        let newSubject = new Subject();
+        newSubject.subjectStudyList = [subjectStudy];
+        newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
+        return newSubject;
+    }
+
+    protected fillCreateExaminationStep(step: Step) {
+        step.entity = this.getPrefilledExam();
+    }
+
+    private getPrefilledExam(): Examination {
+        let newExam = new Examination();
+        newExam.preclinical = true;
+        newExam.hasStudyCenterData = true;
+        newExam.study = new IdName(this.study.id, this.study.name);
+        if (this.center) {
+            newExam.center = new IdName(this.center.id, this.center.name);
+        }
+        newExam.subjectStudy = this.subject;
+        newExam.subject = new Subject();
+        newExam.subject.id = this.subject.id;
+        newExam.subject.name = this.subject.name;
+        newExam.examinationDate = this.firstDate;
+        return newExam;
+    }
+
+    protected fillCreateAcqEqStep(step: Step) {
+        step.entity = this.getPrefilledAcqEqt();
+    }    
+    
     private getPrefilledAcqEqt(): AcquisitionEquipment {
         let acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
         return acqEpt;
     }
 
-    public openCreateSubject = () => {
-        let importStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/subject/create']).then(success => {
-            this.breadcrumbsService.currentStep.entity = this.getPrefilledSubject();
-            importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                this.importDataService.contextBackup.subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
-            });
+    private findEegDate() {
+        this.importDataService.eegImportJob?.datasets?.find(eegds => {
+            let event: Event = eegds.events?.find(event => !!event.date);
+            if (event) {
+                this.firstDate = new Date(event.date);
+                return true;
+            } else return false;
         });
-    }
-
-    private getPrefilledSubject(): Subject {
-        let subjectStudy = new SubjectStudy();
-        subjectStudy.study = this.study;
-        subjectStudy.physicallyInvolved = false;
-        let newSubject = new Subject();
-        newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_HUMAN_BEING;
-        newSubject.subjectStudyList = [subjectStudy];
-        newSubject.birthDate = null;
-        return newSubject;
-    }
-
-    private subjectToSubjectWithSubjectStudy(subject: Subject): SubjectWithSubjectStudy {
-        if (!subject) return;
-        let subjectWithSubjectStudy = new SubjectWithSubjectStudy();
-        subjectWithSubjectStudy.id = subject.id;
-        subjectWithSubjectStudy.name = subject.name;
-        subjectWithSubjectStudy.identifier = subject.identifier;
-        subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
-        return subjectWithSubjectStudy;
-    }
-
-    public openCreateExam = () => {
-        let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/examination/create']).then(success => {
-            this.breadcrumbsService.currentStep.entity = this.getPrefilledExam();
-            this.subscribtions.push(
-                currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.importDataService.contextBackup.examination = this.examToSubjectExam(entity as Examination);
-                }));
-        });
-    }
-
-    private getPrefilledExam(): Examination {
-        let newExam = new Examination();
-        newExam.study = new IdName(this.study.id, this.study.name);
-        newExam.center = new IdName(this.center.id, this.center.name);
-        newExam.subjectStudy = this.subject;
-        newExam.subject = new Subject();
-        newExam.subject.id = this.subject.id;
-        newExam.subject.name = this.subject.name;
-        return newExam;
-    }
-    
-    private examToSubjectExam(examination: Examination): SubjectExamination {
-        if (!examination) return;
-        // Add the new created exam to the select box and select it
-        let subjectExam = new SubjectExamination();
-        subjectExam.id = examination.id;
-        subjectExam.examinationDate = examination.examinationDate;
-        subjectExam.comment = examination.comment;
-        return subjectExam;
-    }
-
-    public showStudyDetails() {
-        window.open('study/details/' + this.study.id, '_blank');
-    }
-
-    public showCenterDetails() {
-        window.open('center/details/' + this.center.id, '_blank');
-    }
-
-    public showAcquistionEquipmentDetails() {
-        window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
-    }
-
-    public showSubjectDetails() {
-        window.open('subject/details/' + this.subject.id, '_blank');
-    }
-
-    public showExaminationDetails() {
-        window.open('examination/details/' + this.examination.id, '_blank');
-    }
-
-    get valid(): boolean {
-        let context = this.getContext();
-        return (
-            context.study != undefined && context.study != null
-            && context.center != undefined && context.center != null
-            && context.acquisitionEquipment != undefined && context.acquisitionEquipment != null
-            && context.subject != undefined && context.subject != null
-            && context.examination != undefined && context.examination != null
-            && context.subject.subjectStudy.subjectType
-            && ((context.coordinatesSystem != undefined && context.coordinatesSystem != null && this.hasPosition) || !(this.hasPosition))
-        );
-    }
-
-    public next() {
-        this.router.navigate(['imports/eegfinish']);
-    }
-    
-    ngOnDestroy() {
-        for(let subscribtion of this.subscribtions) {
-            subscribtion.unsubscribe();
-        }
-    }
+    }    
 }
 
 export class EventContext {

@@ -16,6 +16,7 @@ package org.shanoir.ng.manufacturermodel.controler;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -55,7 +56,9 @@ public class ManufacturerApiController implements ManufacturerApi {
 
 	@Override
 	public ResponseEntity<List<Manufacturer>> findManufacturers() {
-		final List<Manufacturer> manufacturers = manufacturerService.findAll();
+		List<Manufacturer> manufacturers = manufacturerService.findAll();
+		// Remove "unknown" manufacturer
+		manufacturers = manufacturers.stream().filter(manufacturer -> manufacturer.getId() != 0).collect(Collectors.toList());
 		if (manufacturers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -75,7 +78,10 @@ public class ManufacturerApiController implements ManufacturerApi {
 			@RequestBody @Valid final Manufacturer manufacturer, final BindingResult result) throws RestServiceException {
 		
 		validate(manufacturer, result);
-		try {			
+		try {
+			if (manufacturerId.equals(0L)) {
+				throw new EntityNotFoundException("Cannot update unknown manufacturer");
+			}
 			/* Update user in db. */
 			manufacturerService.update(manufacturer);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -88,6 +94,9 @@ public class ManufacturerApiController implements ManufacturerApi {
 	@Override
 	public ResponseEntity<Void> deleteManufacturer(Long manufacturerId) throws RestServiceException {
 		try {
+			if (manufacturerId.equals(0L)) {
+				throw new EntityNotFoundException("Cannot update unknown manufacturer");
+			}
 			manufacturerService.deleteById(manufacturerId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			

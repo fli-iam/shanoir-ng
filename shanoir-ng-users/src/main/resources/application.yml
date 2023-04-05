@@ -27,10 +27,9 @@ spring:
     username: users
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
-    initialization-mode: never
-    data: classpath:/scripts/import.sql
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
@@ -42,6 +41,15 @@ spring:
           charset: UTF-8
         hbm2ddl:
           import_files_sql_extractor: org.hibernate.tool.hbm2ddl.MultipleLinesSqlCommandExtractor
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  sql:
+    init:
+      data-locations: classpath:/scripts/import.sql
+      mode: never
 ##### Others #####
   jackson:
     mapper:
@@ -58,6 +66,8 @@ spring:
     port: 25
     properties:
       mail.smtp.from: do-not-reply@inria.fr
+
+
 front:
   server:
     address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
@@ -102,10 +112,12 @@ logging:
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #
 ######################################
+server:
+  port: 9911
 spring:
   config.activate.on-profile: dev
   datasource:
-    initialization-mode: always
+    url: jdbc:mysql://localhost:3307/users?useLegacyDatetimeCode=false&serverTimezone=Europe/Paris&characterEncoding=utf-8&useSSL=false
   jpa:
     generate-ddl: true
     hibernate:
@@ -113,7 +125,15 @@ spring:
       ddl-auto: create
     # Show or not log for each sql query
     show-sql: true
-
+  main:
+    allow-circular-references: true
+  mvc:
+    pathmatch:
+      matching-strategy: ANT_PATH_MATCHER
+  sql:
+    init:
+      data-locations: classpath:/scripts/import.sql
+      mode: always
 # logging configuration
 logging:
   file:
@@ -128,15 +148,15 @@ spring:
   config.activate.on-profile: test
   main:
     allow-bean-definition-overriding: true
+    allow-circular-references: true
   datasource:
-    url: jdbc:h2:mem:shanoirNgUsers;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:shanoirNgUsers;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
     username: sa
     password: 
     driver-class-name: org.h2.Driver
-    initialization-mode: always
-    data: classpath:/scripts/test-data-h2.sql
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
     generate-ddl: true
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
@@ -146,6 +166,10 @@ spring:
     port: 3025
     protocol: smtp
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+  sql:
+    init:
+      data-locations: classpath:/scripts/test-data-h2.sql
+      mode: always
 front:
   server:
     url: https://shanoir-ng-nginx

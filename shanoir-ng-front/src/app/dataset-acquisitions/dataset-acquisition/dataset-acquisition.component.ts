@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
@@ -37,7 +37,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     public studyCards: StudyCard[];
     public acquisitionEquipments: AcquisitionEquipment[];
-    
+    acquisitionNode: DatasetAcquisition | DatasetAcquisitionNode;
     
     constructor(
             private route: ActivatedRoute,
@@ -53,7 +53,10 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
     
     get datasetAcquisition(): DatasetAcquisition { return this.entity; }
-    set datasetAcquisition(datasetAcquisition: DatasetAcquisition) { this.entity = datasetAcquisition; }
+    set datasetAcquisition(datasetAcquisition: DatasetAcquisition) { 
+        this.acquisitionNode = this.breadcrumbsService.currentStep.data.datasetAcquisitionNode ? this.breadcrumbsService.currentStep.data.datasetAcquisitionNode : datasetAcquisition;
+        this.entity = datasetAcquisition; 
+    }
 
     initView(): Promise<void> {
         return this.datasetAcquisitionService.get(this.id).then(dsAcq => {
@@ -76,7 +79,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'type': [this.datasetAcquisition.type],
             'study-card': [this.datasetAcquisition.studyCard],

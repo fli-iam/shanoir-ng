@@ -55,7 +55,7 @@ public interface StudyService {
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_SEE_ALL') or @studySecurityService.hasRightOnTrustedStudy(returnObject, 'CAN_ADMINISTRATE')")
 	Study findById(Long id);
 
-
+	
 	/**
 	 * Get all the studies
 	 * 
@@ -105,11 +105,19 @@ public interface StudyService {
 	void addStudyUserToStudy(StudyUser studyUser, Study study);
 
 	/**
+	 * Remove a studyUser from a study
+	 * @param studyId
+	 * @param userId
+	 */
+	void removeStudyUserFromStudy(Long studyId, Long userId);
+
+	/**
 	 * Links an examination to a study
 	 * @param examinationId an examination ID
 	 * @param studyId the lionked study ID
+	 * @param centerId 
 	 */
-	void addExaminationToStudy(Long examinationId, Long studyId);
+	void addExaminationToStudy(Long examinationId, Long studyId, Long centerId, Long subjectId);
 
 
 	/**
@@ -129,5 +137,10 @@ public interface StudyService {
 	 * @return the file path of the file
 	 */
 	String getStudyFilePath(Long studyId, String fileName);
+
+	/**
+	 * Returns all public available studies;
+	 */
+	List<Study> findPublicStudies();
 
 }

@@ -17,6 +17,7 @@ package org.shanoir.ng.study.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.studycenter.StudyCenterDTO;
 import org.shanoir.ng.tag.model.TagDTO;
@@ -32,6 +33,8 @@ public class IdNameCenterStudyDTO extends IdName {
 	private List<StudyCenterDTO> studyCenterList;
 	
 	private List<TagDTO> tags;
+
+	private Profile profile;
 
 	/**
 	 * Simple constructor.
@@ -69,4 +72,11 @@ public class IdNameCenterStudyDTO extends IdName {
 		this.tags = tags;
 	}
 
+	public Profile getProfile() {
+		return profile;
+	}
+
+	public void setProfile(Profile profile) {
+		this.profile = profile;
+	}
 }

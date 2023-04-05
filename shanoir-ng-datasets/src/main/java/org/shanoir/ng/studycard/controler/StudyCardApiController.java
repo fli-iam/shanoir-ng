@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -28,8 +30,12 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.model.StudyCardApply;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,20 +50,26 @@ import io.swagger.annotations.ApiParam;
 public class StudyCardApiController implements StudyCardApi {
 
 	private static final String MICROSERVICE_COMMUNICATION_ERROR = "Microservice communication error";
+	
+	private static final Logger LOG = LoggerFactory.getLogger(StudyCardApiController.class);
 
 	@Autowired
 	private StudyCardService studyCardService;
 	
 	@Autowired
 	private StudyCardUniqueConstraintManager uniqueConstraintManager;
+	
+	@Autowired
+	private DatasetAcquisitionService datasetAcquisitionService;
+
+	@Autowired
+	private CardsProcessingService cardProcessingService;
 
 	@Override
 	public ResponseEntity<Void> deleteStudyCard(
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
-		
 		try {
 			studyCardService.deleteById(studyCardId);
-			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} catch (MicroServiceCommunicationException e) {
@@ -81,7 +93,7 @@ public class StudyCardApiController implements StudyCardApi {
 	@Override
 	public ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-		final List<StudyCard> studyCards = studyCardService.findStudyCardsOfStudy(studyId);
+		final List<StudyCard> studyCards = studyCardService.findByStudy(studyId);
 		if (studyCards.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -111,9 +123,7 @@ public class StudyCardApiController implements StudyCardApi {
 	public ResponseEntity<StudyCard> saveNewStudyCard(
 			@ApiParam(value = "study Card to create", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException {
-
 		validate(studyCard, result);
-
 		StudyCard createdStudyCard;
 		try {
 			createdStudyCard = studyCardService.save(studyCard);
@@ -140,9 +150,7 @@ public class StudyCardApiController implements StudyCardApi {
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@ApiParam(value = "study card to update", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException {
-
 		validate(studyCard, result);
-
 		try {
 			studyCardService.update(studyCard);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -153,8 +161,6 @@ public class StudyCardApiController implements StudyCardApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
 		}
 	}
-	
-
 	
 	@Override
 	public ResponseEntity<List<DicomTag>> findDicomTags() throws RestServiceException {
@@ -198,4 +204,22 @@ public class StudyCardApiController implements StudyCardApi {
 			throw new RestServiceException(error);
 		} 
 	}
+	
+	@Override
+	public ResponseEntity<Void> applyStudyCard(
+			@ApiParam(value = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException {
+		if (studyCardApplyObject == null 
+				|| studyCardApplyObject.getDatasetAcquisitionIds() == null 
+				|| studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()
+				|| studyCardApplyObject.getStudyCardId() == null) {
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+		}
+		
+		StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
+        LOG.debug("re-apply studycard n° " + studyCard.getId());
+        List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
+        cardProcessingService.applyStudyCard(studyCard, acquisitions);
+		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
 }

@@ -77,7 +77,7 @@ export abstract class EntityService<T extends Entity> {
     }
 
     protected mapEntityList = (entities: any[], quickResult?: T[]): Promise<T[]> => {
-        return Promise.resolve(entities ? entities.map(entity => this.toRealObject(entity)) : []);
+        return Promise.resolve(entities?.map(entity => this.toRealObject(entity)) || []);
     }
 
     protected mapPage = (page: Page<T>): Promise<Page<T>> => {
@@ -95,7 +95,7 @@ export abstract class EntityService<T extends Entity> {
             // For Date Object, put the json object to a real Date object
             if (String(key).indexOf("Date") > -1 && value) {
                 trueObject[key] = new Date(value);
-            } 
+            }
         });
         return trueObject;
     }

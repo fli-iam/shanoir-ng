@@ -29,6 +29,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.shanoir.ng.accessrequest.controller.AccessRequestService;
+import org.shanoir.ng.accessrequest.repository.AccessRequestRepository;
 import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.shared.core.model.IdList;
@@ -51,12 +53,14 @@ import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.service.UserUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -69,8 +73,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {UserApiController.class, ControlerSecurityService.class, UserPrivacySecurityService.class,
-		IsMeSecurityService.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class})
+		IsMeSecurityService.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class, 
+		AccessRequestService.class})
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 public class UserApiControllerTest {
 
 	private static final String REQUEST_PATH = "/users";
@@ -90,6 +96,12 @@ public class UserApiControllerTest {
 	private UserRepository userRepository;
 
 	@MockBean
+	private RabbitTemplate rabbitTemplate;
+
+	@MockBean
+	private AccessRequestService accessRequestService;
+
+	@MockBean
 	private ShanoirEventService eventService;
 
 	@Before
@@ -102,48 +114,14 @@ public class UserApiControllerTest {
 		given(userService.findById(1L)).willReturn(mockUser);
 		given(userService.findByIds(Arrays.asList(1L))).willReturn(Arrays.asList(new IdName()));
 		given(userService.create(Mockito.mock(User.class))).willReturn(new User());
-		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(Arrays.asList(mockUser));
+		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), (Class) Mockito.any())).willReturn(Arrays.asList(mockUser));
 		given(userRepository.findById(1L)).willReturn(Optional.of(mockUser));
-	}
-
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void confirmAccountRequestTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID + "/confirmaccountrequest")
-				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-				.content(JacksonUtils.serialize(ModelsUtil.createUser(1L)))).andExpect(status().isNoContent());
-	}
-
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void confirmAccountRequestChallengeTest() throws Exception {
-		User user = ModelsUtil.createUser(1L);
-		AccountRequestInfo info = new AccountRequestInfo();
-		info.setChallenge(1L);
-		user.setAccountRequestInfo(info);
-		given(userService.confirmAccountRequest(Mockito.any(User.class))).willReturn(user);
-		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID + "/confirmaccountrequest")
-				.accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-				.content(JacksonUtils.serialize(ModelsUtil.createUser(1L)))).andExpect(status().isNoContent());
-		ArgumentCaptor<ShanoirEvent> eventCaptor = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(eventService).publishEvent(eventCaptor.capture());
-		ShanoirEvent event = eventCaptor.getValue();
-		assertEquals("1", event.getObjectId());
-		assertEquals(user.getId().toString(), event.getUserId().toString());
-		assertEquals(user.getUsername(), event.getMessage());
 	}
 
 	@Test
 	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" }, id = 0)
 	public void deleteUserTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNoContent());
-	}
-
-	@Test
-	@WithMockUser(authorities = { "ROLE_ADMIN" })
-	public void denyAccountRequestTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID + "/denyaccountrequest"))
 				.andExpect(status().isNoContent());
 	}
 
@@ -164,7 +142,7 @@ public class UserApiControllerTest {
 	@Test
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void saveNewUserTest() throws Exception {
-		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.anyObject(), Mockito.any())).willReturn(new ArrayList<User>());
+		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), Mockito.any())).willReturn(new ArrayList<User>());
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createUser())))
 				.andExpect(status().isOk());

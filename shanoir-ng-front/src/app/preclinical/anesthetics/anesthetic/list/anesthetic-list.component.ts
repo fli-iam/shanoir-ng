@@ -17,8 +17,9 @@ import {
     BrowserPaginEntityListComponent,
 } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { AnestheticType } from '../../../shared/enum/anestheticType';
 import { ExaminationAnestheticService } from '../../examination_anesthetic/shared/examinationAnesthetic.service';
@@ -61,25 +62,12 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
         return this.anestheticsService.getAll();
     }
     
-    getColumnDefs(): any[] {
-        function checkNullValue(value: any) {
-            if(value){
-                return value;
-            }
-            return '';
-        };
-        let colDef: any[] = [
-            {headerName: "Name", field: "name", type: "string", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.name);
-            }},
-            {headerName: "Type", field: "anestheticType", type: "Enum", cellRenderer: function (params: any) {
-                return AnestheticType[params.data.anestheticType];
-            }},
-            {headerName: "Comment", field: "comment", type: "string", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.comment);
-            }}    
-        ];
-        return colDef;       
+    getColumnDefs(): ColumnDefinition[] {
+        return [
+            {headerName: "Name", field: "name", type: "string"},
+            {headerName: "Type", field: "anestheticType"},
+            {headerName: "Comment", field: "comment", type: "string"}    
+        ];     
     }
 
     getCustomActionsDefs(): any[] {
@@ -115,12 +103,12 @@ export class AnestheticsListComponent  extends BrowserPaginEntityListComponent<A
             ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
-                        this.onDelete.next(entity);
+                        this.onDelete.next({entity: entity});
                         this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-anesthetic sucessfully deleted');
+                        this.consoleService.log('info', 'Preclinical-anesthetic n°' + entity.id + ' sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({entity: entity, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
                     });                    

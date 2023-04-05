@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, Input, KeyValueDiffer, KeyValueDiffers, ViewChild } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
@@ -265,12 +265,12 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 && this.preclinicalSubject.subject.imagedObjectCategory.toString() != "ANATOMICAL_PIECE");
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         let animal: boolean = this.animalSelected();
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.preclinicalSubject.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
-            'name': [this.preclinicalSubject.subject.name, [this.registerOnSubmitValidator('unique', 'name')]],
+            'name': [this.preclinicalSubject.subject.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
             'specie': [this.preclinicalSubject.animalSubject.specie, animal ? [Validators.required] : []],
             'strain': [this.preclinicalSubject.animalSubject.strain, animal ? [Validators.required] : []],
             'biotype': [this.preclinicalSubject.animalSubject.biotype, animal ? [Validators.required] : []],
@@ -289,8 +289,9 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         return subjectForm;
     }
 
-    onChangeImagedObjectCategory(formGroup: FormGroup){
-        if (this.animalSelected() && this.mode == 'create') {
+    onChangeImagedObjectCategory(formGroup: UntypedFormGroup){
+        let newCategory: ImagedObjectCategory = formGroup.get('imagedObjectCategory').value;
+        if (newCategory != 'PHANTOM' && newCategory != 'ANATOMICAL_PIECE' && this.mode != 'view') {
             formGroup.get('specie').setValidators([Validators.required]);
             formGroup.get('strain').setValidators([Validators.required]);
             formGroup.get('biotype').setValidators([Validators.required]);
@@ -333,8 +334,12 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             return this.updateSubject().then(() => {
                 this.onSave.next(this.preclinicalSubject);
                 this.chooseRouteAfterSave(this.entity.animalSubject);
-                this.msgBoxService.log('info', 'The preclinical-subject n°' + this.preclinicalSubject.animalSubject.id + ' has been successfully updated');
+                this.consoleService.log('info', 'Preclinical subject n°' + this.preclinicalSubject.animalSubject.id + ' successfully updated');
                 return this.entity;
+            }).catch(reason => {
+                this.footerState.loading = false;
+                this.catchSavingErrors(reason);
+                return null;
             });
         }else{
             return this.addSubject().then(subject => {
@@ -344,10 +349,13 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 } else {
                     this.chooseRouteAfterSave(this.preclinicalSubject.animalSubject);
                 }
-                this.msgBoxService.log('info', 'The new preclinical-subject has been successfully saved under the number ' + this.preclinicalSubject.animalSubject.id);
+                this.consoleService.log('info', 'New preclinical subject successfully saved with n° ' + this.preclinicalSubject.animalSubject.id);
                 return subject;
-            });
-            
+            }).catch(reason => {
+                this.footerState.loading = false;
+                this.catchSavingErrors(reason);
+                return null;
+            }); 
         }
     }
 

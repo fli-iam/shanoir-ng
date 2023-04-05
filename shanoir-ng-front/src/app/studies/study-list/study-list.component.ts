@@ -15,11 +15,13 @@ import { Component, ViewChild } from '@angular/core';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { capitalsAndUnderscoresToDisplayable } from '../../utils/app.utils';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { UserService } from '../../users/shared/user.service';
 
 
 @Component({
@@ -33,7 +35,8 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     @ViewChild('table', { static: false }) table: TableComponent;
     
     constructor(
-        private studyService: StudyService) {
+        private studyService: StudyService,
+        private userService: UserService) {
             
         super('study');
     }
@@ -43,11 +46,55 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     getEntities(): Promise<Study[]> {
-        return this.studyService.getAll();
+        let earlyResult: Promise<Study[]> = Promise.all([
+            this.studyService.getAll(),
+            this.studyService.getPublicStudiesData()
+        ]).then(([studies, publicStudies]) => {
+            if (!studies) studies = [];
+            if (!publicStudies) publicStudies = [];
+            studies = studies.concat(publicStudies
+                .filter(publicStudy => !studies.find(s => s.id == publicStudy.id))
+                .map(publicStudy => {
+                    let study: Study = new Study();
+                    study.id = publicStudy.id;
+                    study.downloadableByDefault = publicStudy.downloadableByDefault;
+                    study.endDate = publicStudy.endDate;
+                    study.name = publicStudy.name;
+                    study.nbExaminations = publicStudy.nbExaminations;
+                    study.nbSubjects = publicStudy.nbSubjects;
+                    study.startDate = publicStudy.startDate;
+                    study.studyStatus = publicStudy.studyStatus;
+                    study.studyType = publicStudy.studyType;
+                    study.description = publicStudy.description;
+                    study.studyTags = publicStudy.studyTags;
+                    study.visibleByDefault = true;
+                    study.locked = true;
+                    return study;
+                }));
+            return studies;
+        })
+        Promise.all([
+            earlyResult,
+            this.userService.getAccessRequests()
+        ]).then(([studies, accessRequests]) => {
+            if (accessRequests?.length > 0) {
+                for (let accessRequest of accessRequests) {
+                    if (accessRequest.status == 0) {
+                        studies.find(study => study.id == accessRequest.studyId).accessRequestedByCurrentUser = true;
+                    }
+                }
+            }
+        });
+        return earlyResult;
     }
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefinition[] {
+        let colDef: ColumnDefinition[] = [
+            { headerName: "Public", type: "boolean", awesome: 'fa-solid fa-lock', color: 'var(--color-a)',
+                cellRenderer: ret => {
+                    return (ret.data as Study).visibleByDefault && (ret.data as Study).locked;
+                }
+            },
             { headerName: "Name", field: "name" },
             {
                 headerName: "Status", field: "studyStatus", width: '70px', cellRenderer: function (params: any) {
@@ -92,5 +139,21 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             study.studyUserList && 
             study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
         );
+    }
+
+    goToViewFromEntity(study: Study): void {
+        if (study.visibleByDefault && study.locked && !this.keycloakService.isUserAdmin()) {
+            if (study.accessRequestedByCurrentUser) {
+                this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.');
+            } else {
+                this.confirmDialogService.confirm('Authorization needed', 
+                    'Before accessing this study you have to request an access to its administrator, do you want to proceed ?'
+                ).then(result => {
+                    if (result) this.router.navigate(['/access-request/study/' + study.id]);
+                });
+            }
+        } else {
+            super.goToViewFromEntity(study);
+        }
     }
 }

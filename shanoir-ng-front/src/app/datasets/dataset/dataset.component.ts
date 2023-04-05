@@ -14,7 +14,7 @@
 
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -106,7 +106,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         throw new Error('Cannot create Dataset!');
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({});
     }
 
@@ -170,5 +170,13 @@ export class DatasetComponent extends EntityComponent<Dataset> {
 
     public async hasDeleteRight(): Promise<boolean> {
         return this.keycloakService.isUserAdmin() || this.hasAdministrateRight;
+    }
+
+    downloadMetadata() {
+        this.datasetService.downloadDicomMetadata(this.dataset.id);
+    }
+
+    seeDicomMetadata() {
+        this.router.navigate(['/dataset/details/dicom/' + this.dataset.id]);
     }
 }

@@ -19,36 +19,19 @@ import java.util.List;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
 
 /**
  * Repository for examination.
  *
  * @author ifakhfakh
  */
-public interface ExaminationRepository extends PagingAndSortingRepository<Examination, Long> {
+public interface ExaminationRepository extends PagingAndSortingRepository<Examination, Long>, ExaminationRepositoryCustom {
 
-	/**
-	 * Get a paginated list of examinations for a list of studies.
-	 * 
-	 * @param studyIds
-	 *            list of study ids.
-	 * @param pageable
-	 *            pagination data.
-	 * @return list of examinations.
-	 */
-	Page<Examination> findByStudyIdIn(List<Long> studyIds, Pageable pageable);
 
-	/**
-	 * Get a paginated list of examinations for a list of studies.
-	 * 
-	 * @param studyIds
-	 *            list of study ids.
-	 * @param pageable
-	 *            pagination data.
-	 * @return list of examinations.
-	 */
-	Page<Examination> findByPreclinicalAndStudyIdIn(Boolean preclinical, List<Long> studyIds, Pageable pageable);
 
 	/**
 	 * Get a list of examinations for a subject.
@@ -75,17 +58,8 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 * @param studyId
 	 * @return list of examinations.
 	 */
-	List<Examination> findBySubjectIdAndStudyId(Long subjectId, Long studyId);
+	List<Examination> findBySubjectIdAndStudy_Id(Long subjectId, Long studyId);
 
-	/**
-	 * Get a paginated list of examinations for a list of studies.
-	 * 
-	 * @param studyIds list of study ids.
-	 * @param preclinical preclinical examination
-	 * @param pageable pagination data.
-	 * @return list of examinations.
-	 */
-	Page<Examination> findByStudyIdInAndPreclinical(List<Long> studyIds, boolean preclinical, Pageable pageable);
 	
 	/**
 	 * Get a paginated list of examinations
@@ -105,6 +79,22 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 *            subject id.
 	 * @return list of examinations.
 	 */
-	List<Examination> findByStudyId(Long studyId);
+	List<Examination> findByStudy_Id(Long studyId);
+	
+	/**
+	 * Get all examinations, clinical or preclinical.
+	 * 
+	 * @return list of examinations.
+	 */
+	List<Examination> findAll();
+	
+	/**
+	 * Get all examinations, clinical or preclinical filtered by the patient/subject name.
+	 * 
+	 * @param patientName
+	 * @param pageable
+	 * @return
+	 */
+	Page<Examination> findAllBySubjectName(String patientName, Pageable pageable);
 
 }

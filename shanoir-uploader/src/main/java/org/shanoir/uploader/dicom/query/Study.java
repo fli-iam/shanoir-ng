@@ -14,9 +14,9 @@ import javax.swing.tree.TreeNode;
 
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
-import org.shanoir.dicom.importer.MRI;
-import org.shanoir.dicom.importer.Serie;
-import org.shanoir.dicom.model.DicomTreeNode;
+import org.shanoir.uploader.dicom.DicomTreeNode;
+import org.shanoir.uploader.dicom.MRI;
+import org.shanoir.uploader.dicom.Serie;
 
 /**
  * Study representation from DICOMDIR.
@@ -53,10 +53,11 @@ public class Study implements DicomTreeNode {
 	 * @param description
 	 *            the description
 	 */
-	public Study(final String id, final String date, final String description) {
+	public Study(final String id, final String date, final String time, final String description) {
 		descriptionMap = new HashMap<String, String>();
 		descriptionMap.put("id", id);
 		descriptionMap.put("date", date);
+		descriptionMap.put("time", time);
 		studyDescriptionOverwrite = description;
 		this.relatedSeries = new HashMap<String, DicomTreeNode>();
 	}

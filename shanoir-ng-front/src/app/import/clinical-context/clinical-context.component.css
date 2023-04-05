@@ -15,3 +15,9 @@ legend i { margin-right: 7px; }
 .optional { opacity: 0.6; }
 .warn i { color: orange; }
 a { text-decoration: underline; }
+
+.ct-warn { margin-top: 10px; opacity: 0.7; max-width: 470px; }
+.ct-warn i { color: orangered; }
+
+.global-loading { color: var(--color-b); }
+.global-loading i { font-size: 30px; color: var(--color-b-light2); }

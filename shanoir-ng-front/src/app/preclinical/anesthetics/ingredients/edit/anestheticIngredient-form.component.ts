@@ -13,7 +13,7 @@
  */
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup,  Validators } from '@angular/forms';
+import { UntypedFormGroup,  Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { AnestheticIngredient } from '../shared/anestheticIngredient.model';
@@ -88,7 +88,7 @@ export class AnestheticIngredientFormComponent extends EntityComponent<Anestheti
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'name': [this.ingredient.name, Validators.required],
             'concentration': [this.ingredient.concentration, Validators.required],

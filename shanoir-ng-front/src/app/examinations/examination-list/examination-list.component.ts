@@ -15,10 +15,10 @@ import { Component, ViewChild } from '@angular/core';
 import { EntityListComponent } from '../../shared/components/entity/entity-list.component.abstract';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import { TableComponent } from '../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { StudyService } from '../../studies/shared/study.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -51,14 +51,14 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
         });
     }
 
-    getColumnDefs(): any[] {
+    getColumnDefs(): ColumnDefinition[] {
         function dateRenderer(date: number) {
             if (date) {
                 return new Date(date).toLocaleDateString();
             }
             return null;
         };
-        let colDef: any[] = [
+        let colDef: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {
                 headerName: "Subject", field: "subject.name", orderBy: ['subjectId'], cellRenderer: function (params: any) {
@@ -76,7 +76,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                 route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];
-        return colDef;       
+        return colDef;
     }
 
     getCustomActionsDefs(): any[] {
@@ -85,7 +85,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     getOptions() {
         return {
-            new: false,
+            new: this.keycloakService.isUserAdminOrExpert(),
             view: true, 
             edit: this.keycloakService.isUserAdminOrExpert(), 
             delete: this.keycloakService.isUserAdminOrExpert()
@@ -104,8 +104,9 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
 
     canDelete(exam: Examination): boolean {
         return this.keycloakService.isUserAdmin() || (
-            exam.study &&
-            this.studiesICanAdmin.includes(exam.study.id)
+            exam.study
+            && this.studiesICanAdmin
+            && this.studiesICanAdmin.includes(exam.study.id)
         );
     }
 }

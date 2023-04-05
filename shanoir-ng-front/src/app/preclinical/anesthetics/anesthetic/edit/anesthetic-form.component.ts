@@ -13,7 +13,7 @@
  */
 
 import { Component, ViewChild} from '@angular/core';
-import { Validators, FormGroup } from '@angular/forms';
+import { Validators, UntypedFormGroup } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
 import * as PreclinicalUtils from '../../../utils/preclinical.utils';
@@ -31,6 +31,7 @@ import { EntityComponent } from '../../../../shared/components/entity/entity.com
 import { BrowserPaging } from '../../../../shared/components/table/browser-paging.model';
 import { slideDown } from '../../../../shared/animations/animations';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../../../shared/components/table/pageable.model';
 import { Step } from '../../../../breadcrumbs/breadcrumbs.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -56,7 +57,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     units: Reference[];
 
     private browserPaging: BrowserPaging<AnestheticIngredient>;
-    public columnDefs: any[];
+    public columnDefs: ColumnDefinition[];
     private ingredientsPromise: Promise<any>;
 
     public toggleFormAI: boolean = false;
@@ -142,7 +143,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'name': [this.anesthetic.name],
             'comment': [this.anesthetic.comment],
@@ -160,35 +161,17 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
     }
 
     private createColumnDefs() {
-        function checkNullValueReference(reference: any) {
-            if(reference){
-                return reference.value;
-            }
-            return '';
-        };
-        function checkNullValue(value: any) {
-            if(value){
-                return value;
-            }
-            return '';
-        };
         this.columnDefs = [
-            {headerName: "Name", field: "name.value", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.name);
-            }},
-            {headerName: "Concentration", field: "concentration", type: "number", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.concentration);
-            }},
-            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "reference", cellRenderer: function (params: any) {
-                return checkNullValueReference(params.data.concentration_unit);
-            }}
+            {headerName: "Name", field: "name.value"},
+            {headerName: "Concentration", field: "concentration", type: "number"},
+            {headerName: "Concentration Unit", field: "concentration_unit.value", type: "number"}
         ];
 
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-edit", action: item => this.editIngredient(item) });
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.editIngredient(item) });
         }
         if (this.mode != 'view' && this.keycloakService.isUserAdminOrExpert()) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-trash", action: (item) => this.removeIngredient(item) });
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.removeIngredient(item) });
         }
     }
 
@@ -255,6 +238,8 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
         }else{
             this.toggleFormAI = true;
         }
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
     
     private editIngredient = (item: AnestheticIngredient) => {
@@ -280,10 +265,17 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
             this.anesthetic.ingredients.splice(index, 1);
         }
         this.ingredientsToDelete.push(item);
+        
+        const createIndex: number = this.ingredientsToCreate.indexOf(item);
+        if (createIndex !== -1) {
+            this.ingredientsToCreate.splice(createIndex, 1);
+        }
+
         this.browserPaging.setItems(this.anesthetic.ingredients);
         this.table.refresh();
+        
+        this.form.markAsDirty();
+        this.form.updateValueAndValidity();
     }
 
-    
-    
 }

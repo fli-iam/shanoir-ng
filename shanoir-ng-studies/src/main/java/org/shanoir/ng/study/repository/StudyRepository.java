@@ -22,7 +22,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface StudyRepository extends CrudRepository<Study, Long> {
-
+	
 	/**
 	 * Get all studies
 	 * 
@@ -54,5 +54,11 @@ public interface StudyRepository extends CrudRepository<Study, Long> {
 	 * @return list of studies.
 	 */
 	List<Study> findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(Long userId, Integer studyUseRightId, boolean confirmed);
+
+	/**
+	 * Lists all the publicly available studies.
+	 * @return all the publicly available studies.
+	 */
+	List<Study> findByVisibleByDefaultTrue();
 
 }

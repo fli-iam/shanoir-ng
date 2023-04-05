@@ -1,0 +1,10 @@
+shanoir-table { width: 490px; margin-right: 20px; display: inline-block; }
+.pannel { margin-top: 48px; border: 1px solid var(--grey); padding: 8px 9px; width: 470px; position: relative; background-color: var(--lighter-grey); border-radius: 2px; }
+.right-col label { display: inline-block; }
+label { margin-left: 0px; min-width: 250px; }
+fieldset { margin: 0; }
+fieldset + fieldset { margin-top: 30px; }
+.fix-icon i { margin-left: 4px; }
+.user-icon i { color: var(--color-a-light); }
+.close { position: absolute; display: inline-block; right: 0; top: 0; color: var(--color-a); cursor: pointer; padding: 2px 6px; }
+.invite-button { margin-left: 20px; height: auto; }

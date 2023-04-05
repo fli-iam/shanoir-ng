@@ -16,10 +16,13 @@ package org.shanoir.ng.subject.dto.mapper;
 
 import java.util.List;
 
+import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
+import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
+import org.springframework.data.domain.Page;
 
 /**
  * Mapper for subjects.
@@ -28,11 +31,13 @@ import org.shanoir.ng.subjectstudy.dto.mapper.SubjectStudyMapper;
  *
  */
 @Mapper(componentModel = "spring", uses = { SubjectStudyMapper.class })
+@DecoratedWith(SubjectDecorator.class)
 public interface SubjectMapper {
 
 	SubjectDTO subjectToSubjectDTO(Subject subject);
 
 	List<SubjectDTO> subjectsToSubjectDTOs(List<Subject> subjects);
-	
+
+	PageImpl<SubjectDTO> subjectsToSubjectDTOs(Page<Subject> page);
 
 }

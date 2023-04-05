@@ -19,16 +19,30 @@ import java.util.List;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, DatasetRepositoryCustom {
 
-	Page<Dataset> findByDatasetAcquisitionExaminationStudyIdIn(Iterable<Long> studyIds, Pageable pageable);
+	Page<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Pageable pageable);
 
-	Iterable<Dataset> findByDatasetAcquisitionExaminationStudyId(Long studyId);
+	Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
+
+	Iterable<Dataset> findByDatasetAcquisition_Examination_Study_Id(Long studyId);
 	
 	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
+	
+	Iterable<Dataset> findBydatasetAcquisitionStudyCardId(Long studycardId);
+
+	Iterable<Dataset> findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(Long studycardId, List<Long> studyIds);
 
 	void deleteByIdIn(List<Long> ids);
+
+	Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
+
+	@Query("SELECT SUM(expr.size) FROM DatasetExpression expr " +
+			"WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL")
+	Long getSizeByStudyId(Long studyId);
 
 }

@@ -61,7 +61,11 @@ public class ShanoirSolrDocument {
 	@Field
 	@Indexed
 	private Date datasetCreationDate;
-	
+
+	@Field
+	@Indexed
+	private Long examinationId;
+
 	@Field
 	@Indexed
 	private String examinationComment;
@@ -88,15 +92,15 @@ public class ShanoirSolrDocument {
 	
 	@Field
 	@Indexed
-	private Float sliceThickness;
+	private Double sliceThickness;
 	
 	@Field
 	@Indexed
-	private Float pixelBandwidth;
+	private Double pixelBandwidth;
 	
 	@Field
 	@Indexed
-	private Float magneticFieldStrength;
+	private Double magneticFieldStrength;
 	
 	@Field
 	@Indexed(name="tags", type="string")
@@ -107,15 +111,16 @@ public class ShanoirSolrDocument {
 	}
 	
 	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
-			Date datasetCreationDate, String examinationComment, Date examinationDate,
-			String subjectName, String studyName, Long studyId, String centerName, Float sliceThickness,
-			Float pixelBandwidth, Float magneticFieldStrength) {
+			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate,
+			String subjectName, String studyName, Long studyId, String centerName, Double sliceThickness,
+			Double pixelBandwidth, Double magneticFieldStrength) {
 		this.id = id;
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
 		this.datasetNature = datasetNature;
 		this.datasetCreationDate = datasetCreationDate;
+		this.examinationId = examinationId;
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
 		this.subjectName = subjectName;
@@ -205,6 +210,14 @@ public class ShanoirSolrDocument {
 		this.datasetCreationDate = datasetCreationDate;
 	}
 
+	public Long getExaminationId() {
+		return examinationId;
+	}
+
+	public void setExaminationId(Long examinationId) {
+		this.examinationId = examinationId;
+	}
+
 	/**
 	 * @return the examinationComment
 	 */
@@ -283,27 +296,27 @@ public class ShanoirSolrDocument {
 		this.centerName = centerName;
 	}
 
-	public Float getSliceThickness() {
+	public Double getSliceThickness() {
 		return sliceThickness;
 	}
 
-	public void setSliceThickness(Float sliceThickness) {
+	public void setSliceThickness(Double sliceThickness) {
 		this.sliceThickness = sliceThickness;
 	}
 
-	public Float getPixelBandwidth() {
+	public Double getPixelBandwidth() {
 		return pixelBandwidth;
 	}
 
-	public void setPixelBandwidth(Float pixelBandwidth) {
+	public void setPixelBandwidth(Double pixelBandwidth) {
 		this.pixelBandwidth = pixelBandwidth;
 	}
 
-	public Float getMagneticFieldStrength() {
+	public Double getMagneticFieldStrength() {
 		return magneticFieldStrength;
 	}
 
-	public void setMagneticFieldStrength(Float magneticFieldStrength) {
+	public void setMagneticFieldStrength(Double magneticFieldStrength) {
 		this.magneticFieldStrength = magneticFieldStrength;
 	}
 	

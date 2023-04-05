@@ -50,6 +50,7 @@ public interface StudyCenterMapper {
 	@Mappings({ @Mapping(target = "study.id", source = "study.id"),
 		@Mapping(target = "center.id", source = "center.id"),
 		@Mapping(target = "center.name", source = "center.name"),
+		@Mapping(target = "subjectNamePrefix", source = "subjectNamePrefix"),
 		@Mapping(target = "study.name", source = "study.name")})
 	StudyCenterDTO studyCenterToStudyCenterDTO(StudyCenter studyCenter);
 

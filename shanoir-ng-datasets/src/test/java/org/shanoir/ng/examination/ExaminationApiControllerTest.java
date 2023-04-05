@@ -36,18 +36,22 @@ import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.examination.controler.ExaminationApiController;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.exporter.service.BIDSService;
+import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
+import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +63,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -66,8 +71,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Unit tests for examination controller.
@@ -80,12 +84,16 @@ import com.google.gson.GsonBuilder;
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration()
 @EnableSpringDataWebSupport
+@ActiveProfiles("test")
 public class ExaminationApiControllerTest {
 
 	@ClassRule
 	public static TemporaryFolder tempFolder = new TemporaryFolder();
 	
 	public static String tempFolderPath;
+
+	@MockBean
+	private DicomSRImporterService dicomSRImporterService;
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -98,8 +106,6 @@ public class ExaminationApiControllerTest {
 	private static final String REQUEST_PATH_COUNT = REQUEST_PATH + "/count";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 
-	private Gson gson;
-
 	@Autowired
 	private MockMvc mvc;
 
@@ -108,6 +114,12 @@ public class ExaminationApiControllerTest {
 
 	@MockBean
 	private ExaminationService examinationServiceMock;
+	
+	@MockBean
+	private SubjectRepository subjectRepository;
+	
+	@MockBean
+	private CenterRepository centerRepository;
 
 	@MockBean
 	private Pageable pageable;
@@ -123,11 +135,12 @@ public class ExaminationApiControllerTest {
 
 	@MockBean
 	ExaminationRepository examRepo;
+	
+	@Autowired
+	ObjectMapper objectMapper;
 
 	@Before
 	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
 		doNothing().when(examinationServiceMock).deleteById(1L);
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
 		Examination exam = new Examination();
@@ -151,7 +164,8 @@ public class ExaminationApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void testDeleteExaminationWithExtraData() throws IOException {
 		Examination exam = new Examination();
-		exam.setStudyId(3L);
+		exam.setStudy(new Study());
+		exam.getStudy().setId(3L);
 		exam.setId(1L);
 		given(examinationServiceMock.findById(1L)).willReturn(exam);
 
@@ -199,7 +213,7 @@ public class ExaminationApiControllerTest {
 		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
 
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(PageRequest.of(0, 10))))
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(PageRequest.of(0, 10))))
 		.andExpect(status().isOk());
 	}
 
@@ -207,13 +221,14 @@ public class ExaminationApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewExaminationTest() throws Exception {
 		Examination exam = new Examination();
-		exam.setId(Long.valueOf(123));
-		exam.setStudyId(3L);
+		exam.setId(123L);
+		exam.setStudy(new Study());
+		exam.getStudy().setId(3L);
 		given(examinationServiceMock.findById(1L)).willReturn(exam);
 		given(examinationServiceMock.save(Mockito.any())).willReturn(exam);
 
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination())))
 		.andExpect(status().isOk());
 		
 		// Check event here to verify that the message is well set to event
@@ -222,18 +237,20 @@ public class ExaminationApiControllerTest {
 		
 		ShanoirEvent event = eventCatcher.getValue();
 		assertNotNull(event);
-		assertEquals(exam.getStudyId().toString(), event.getMessage());
+		assertEquals(exam.getStudyId(), event.getStudyId());
 		assertEquals(exam.getId().toString(), event.getObjectId());
+		// This is import, plese keep it, or change RabbitMQStudiesService#linkExamination method
+		assertEquals("centerId:" + exam.getCenterId() + ";subjectId:" + (exam.getSubject() != null ? exam.getSubject().getName() : null), event.getMessage());
+
 		assertEquals(ShanoirEventType.CREATE_EXAMINATION_EVENT, event.getEventType());
 	}
 
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateExaminationTest() throws Exception {
-		given(examinationServiceMock.findById(1L)).willReturn(new Examination());
-
+		given(examinationServiceMock.findById(1L)).willReturn(ModelsUtil.createExamination(1L));
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createExamination())))
+				.contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(ModelsUtil.createExamination(1L))))
 		.andExpect(status().isNoContent());
 	}
 
@@ -249,7 +266,7 @@ public class ExaminationApiControllerTest {
 
 			// WHEN The file is added to the examination
 			mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH + "/extra-data-upload/1").file(file))
-			.andExpect(status().isNotAcceptable());
+			.andExpect(status().isUnprocessableEntity());
 
 			Mockito.verify(examinationServiceMock).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
 

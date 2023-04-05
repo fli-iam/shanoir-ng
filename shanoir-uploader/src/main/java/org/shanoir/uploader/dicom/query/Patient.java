@@ -11,7 +11,7 @@ import javax.swing.tree.TreeNode;
 
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
-import org.shanoir.dicom.model.DicomTreeNode;
+import org.shanoir.uploader.dicom.DicomTreeNode;
 
 /**
  * Patient class from the DICOMDIR.
@@ -243,6 +243,7 @@ public class Patient implements DicomTreeNode {
 		final Study study = new Study(
 				dicomObject.dataset().getString(Tag.StudyInstanceUID),
 				dicomObject.dataset().getString(Tag.StudyDate),
+				dicomObject.dataset().getString(Tag.StudyTime),
 				studyDescriptionFromDicomTags);
 		study.setStudyDescriptionOverwrite(studyDescriptionFromDicomTags);
 		return study;

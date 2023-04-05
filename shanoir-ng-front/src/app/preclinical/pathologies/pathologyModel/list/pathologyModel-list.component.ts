@@ -17,11 +17,12 @@ import {Component,ViewChild} from '@angular/core';
 import { PathologyModel } from '../shared/pathologyModel.model';
 import { PathologyModelService } from '../shared/pathologyModel.service';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { SubjectPathologyService } from '../../subjectPathology/shared/subjectPathology.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
@@ -49,24 +50,16 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
         return this.modelService.getAll();
     }
 
-    getColumnDefs(): any[] {
-        function checkNullValue(value: any) {
-            if(value){
-                return value;
-            }
-            return '';
-        };
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefinition[] {
+        let colDef: ColumnDefinition[] = [
             {headerName: "Name", field: "name"},
             {headerName: "Pathology", field: "pathology.name"},
             {headerName: "Comment", field: "comment"},
-            {headerName: "Specifications file", field: "filename", type: "string", cellRenderer: function (params: any) {
-                return checkNullValue(params.data.filename);
-            }} 
+            {headerName: "Specifications file", field: "filename", type: "string"} 
             
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
-            colDef.push({headerName: "", type: "button", awesome: "fa-download",action: item => this.downloadModelSpecifications(item) });
+            colDef.push({headerName: "", type: "button", awesome: "fa-solid fa-download",action: item => this.downloadModelSpecifications(item) });
         }
         return colDef;       
     }
@@ -131,12 +124,12 @@ export class PathologyModelsListComponent extends BrowserPaginEntityListComponen
             ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
-                        this.onDelete.next(entity);
+                        this.onDelete.next({entity: entity});
                         this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-pathology-model sucessfully deleted');
+                        this.consoleService.log('info', 'The preclinical-pathology-model n° ' + entity.id + ' was sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({entity: entity, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
                     });                    

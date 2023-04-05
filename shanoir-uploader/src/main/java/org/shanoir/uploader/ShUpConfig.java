@@ -14,18 +14,13 @@ import org.shanoir.uploader.utils.Encryption;
  * 
  */
 public class ShUpConfig {
-
-	static {
-//        System.setProperty("com.sun.xml.ws.transport.http.client.HttpTransportPipe.dump", "true");
-//        System.setProperty("com.sun.xml.ws.transport.http.HttpAdapter.dump", "true");
-//        System.setProperty("com.sun.xml.internal.ws.transport.http.client.HttpTransportPipe.dump", "true");
-//        System.setProperty("com.sun.xml.internal.ws.transport.http.HttpAdapter.dump", "true");
-    }
 	
 	/**
 	 * Constants
 	 */
 	public static final String SHANOIR_UPLOADER_VERSION = "v7.0.1";
+	
+	public static final String RELEASE_DATE = "2021-12-15 07:40";
 	
 	public static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 	
@@ -54,6 +49,8 @@ public class ShUpConfig {
 	public static final String LANGUAGE_PROPERTIES = "language.properties";
 
 	public static final String PROXY_PROPERTIES = "proxy.properties";
+	
+	public static final String ENDPOINT_PROPERTIES = "endpoint.properties";
 
 	public static final String DICOM_SERVER_PROPERTIES = "dicom_server.properties";
 	
@@ -93,6 +90,8 @@ public class ShUpConfig {
 	public static File profileDirectory;
 	
 	public static Properties profileProperties = new Properties();
+	
+	public static Properties endpointProperties = new Properties();
 	
 	public static File keycloakJson;
 	

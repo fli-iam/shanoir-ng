@@ -19,10 +19,11 @@ import { TherapyService } from '../shared/therapy.service';
 import { TherapyType } from "../../../shared/enum/therapyType";
 import { SubjectTherapyService } from '../../subjectTherapy/shared/subjectTherapy.service';
 import { TableComponent } from '../../../../shared/components/table/table.component';
+import { ColumnDefinition } from '../../../../shared/components/table/column.definition.type';
 import { BrowserPaginEntityListComponent } from '../../../../shared/components/entity/entity-list.browser.component.abstract';
 import { ServiceLocator } from '../../../../utils/locator.service';
 import { ShanoirError } from '../../../../shared/models/error.model';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
@@ -33,7 +34,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
   styleUrls: ['therapy-list.component.css'], 
   providers: [TherapyService]
 })
-export class TherapiesListComponent  extends BrowserPaginEntityListComponent<Therapy>{
+export class TherapiesListComponent  extends BrowserPaginEntityListComponent<Therapy> {
   @ViewChild('therapiesTable') table: TableComponent;
     
     constructor(
@@ -59,15 +60,14 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
         return this.therapyService.getAll();
     }
 
-    getColumnDefs(): any[] {
-        let colDef: any[] = [
+    getColumnDefs(): ColumnDefinition[] {
+        return [
             {headerName: "Name", field: "name"},
-            {headerName: "Type", field: "therapyType", type: "Enum", cellRenderer: function (params: any) {
+            {headerName: "Type", field: "therapyType", cellRenderer: function (params: any) {
                 return TherapyType[params.data.therapyType];
             }},
             {headerName: "Comment", field: "comment"}   
-        ];
-        return colDef;       
+        ];    
     }
 
     getCustomActionsDefs(): any[] {
@@ -103,12 +103,12 @@ export class TherapiesListComponent  extends BrowserPaginEntityListComponent<The
             ).then(res => {
                 if (res) {
                     this.getService().delete(entity.id).then(() => {
-                        this.onDelete.next(entity);
+                        this.onDelete.next({entity: entity});
                         this.table.refresh();
-                        this.msgBoxService.log('info', 'The preclinical-therapy sucessfully deleted');
+                        this.consoleService.log('info', 'The preclinical-therapy n°' + entity.id + ' was sucessfully deleted');
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next(new ShanoirError(reason));
+                            this.onDelete.next({entity: entity, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
                     });                    

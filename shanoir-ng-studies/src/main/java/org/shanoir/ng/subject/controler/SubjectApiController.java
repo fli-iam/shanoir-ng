@@ -17,7 +17,6 @@ package org.shanoir.ng.subject.controler;
 import java.util.Comparator;
 import java.util.List;
 
-import org.shanoir.ng.bids.service.StudyBIDSService;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -29,6 +28,8 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
@@ -37,6 +38,8 @@ import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -60,16 +63,15 @@ public class SubjectApiController implements SubjectApi {
 	private SubjectUniqueConstraintManager uniqueConstraintManager;
 
 	@Autowired
-	private StudyBIDSService bidsService;
+	private ShanoirEventService eventService;
 
 	@Autowired
-	private ShanoirEventService eventService;
+	private StudyService studyService;
 
 	@Override
 	public ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		try {
-			bidsService.deleteSubjectBids(subjectId);
 			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, subjectId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
@@ -187,5 +189,17 @@ public class SubjectApiController implements SubjectApi {
 					new ErrorDetails(errors));
 			throw new RestServiceException(error);
 		}
+	}
+
+	public ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name) {
+		// Get all allowed studies
+		List<Study> studies = this.studyService.findAll();
+		
+		Page<Subject> subjects = this.subjectService.getFilteredPageByStudies(page, name, studies);
+		
+		if (subjects.getContent().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 }

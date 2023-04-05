@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -19,7 +19,10 @@ import * as AppUtils from '../../utils/app.utils';
 import { User } from '../shared/user.model';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { UserService } from '../shared/user.service'
-import { FormGroup, Validators, FormBuilder, AbstractControl, ValidationErrors } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ConsoleService } from 'src/app/shared/console/console.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'accountRequest',
@@ -28,20 +31,24 @@ import { FormGroup, Validators, FormBuilder, AbstractControl, ValidationErrors }
 })
 
 export class AccountRequestComponent {
-    
+
     public user: User;
-    public form: FormGroup;
+    public form: UntypedFormGroup;
 
     public requestSent: boolean = false;
     public errorOnRequest: boolean = false;
     infoValid: boolean = false;
+    protected router: Router;
 
     language: 'english' | 'french' = 'english';
-    
+
     constructor(
-            private fb: FormBuilder, 
+            private fb: UntypedFormBuilder,
             public userService: UserService,
-            private location: Location) {}
+            private location: Location,
+            private consoleService: ConsoleService,) {
+                this.router = ServiceLocator.injector.get(Router)
+            }
 
     ngOnInit(): void {
         this.user = new User();
@@ -72,20 +79,12 @@ export class AccountRequestComponent {
     }
 
     accountRequest(): void {
-        if (this.user.accountRequestInfo.challenge != null) {
-            // These fields are allowed to be null in case of challenge
-            this.user.accountRequestInfo.contact="";
-            this.user.accountRequestInfo.function="";
-            this.user.accountRequestInfo.work="";
-            this.user.accountRequestInfo.study="";
-        }
-
         this.userService.requestAccount(this.user)
             .then((res) => {
                  this.requestSent = true;
-            }, (err: String) => {
-                if (err.indexOf("email should be unique") != -1) {
-                    console.log('email error')
+            }, (err) => {
+                if (err?.error?.details?.fieldErrors?.email != null) {
+                    this.consoleService.log("error", "An user with this email already exists, please connect with it or use another one.")
                 } else {
                     throw err;
                 }
@@ -93,10 +92,12 @@ export class AccountRequestComponent {
     }
 
     getOut(): void {
-        this.location.back();
+        // Return to welcome page
+        window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
 
     cancelAccountRequest(): void {
+        // Return to welcome page
         window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
     }
 

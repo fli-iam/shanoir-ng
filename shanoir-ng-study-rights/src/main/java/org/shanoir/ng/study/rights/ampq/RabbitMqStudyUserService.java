@@ -15,15 +15,26 @@
 package org.shanoir.ng.study.rights.ampq;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserInterface;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.study.rights.command.StudyUserCommand;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
@@ -34,12 +45,17 @@ public class RabbitMqStudyUserService {
 	
 	@Autowired
 	private StudyUserUpdateService service;
+
+	@Autowired
+	private StudyUserRightsRepository studyUserRightsRepository;
+	
+	@Autowired
+	private ObjectMapper mapper;
 	
     public void receiveMessageImport(String commandArrStr) throws AmqpRejectAndDontRequeueException {
     	StudyUserCommand[] commands;
     	try {
     		LOG.debug("Received study-user commands : {}", commandArrStr);
-			ObjectMapper mapper = new ObjectMapper();
 			
 			SimpleModule module = new SimpleModule();
 			module.addAbstractTypeMapping(StudyUserInterface.class, StudyUser.class);
@@ -50,5 +66,32 @@ public class RabbitMqStudyUserService {
 		} catch (Exception e) {
 			throw new AmqpRejectAndDontRequeueException("Study User Update rejected !!!", e);
 		}
+    }
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE)
+	@RabbitHandler
+	@Transactional    
+	public List<Long> getStudiesICanAdmin(Long userId) {
+    	List<StudyUser> sus = Utils.toList(this.studyUserRightsRepository.findByUserIdAndRight(userId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+    	if (CollectionUtils.isEmpty(sus)) {
+    		return null;
+    	}
+    	return sus.stream().map(studyUser ->
+    		studyUser.getStudyId()
+    	).collect(Collectors.toList());
+    }
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ADMINS_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public List<Long> getStudyAdmins(Long studyId) {
+    	List<StudyUser> admins = Utils.toList(this.studyUserRightsRepository.findByStudyIdAndRight(studyId, StudyUserRight.CAN_ADMINISTRATE.getId()));
+    	System.err.println(admins);
+    	if (CollectionUtils.isEmpty(admins)) {
+    		return null;
+    	}
+    	return admins.stream().map(studyUser ->
+    		studyUser.getUserId()
+    	).collect(Collectors.toList());
     }
 }

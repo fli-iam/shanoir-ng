@@ -8,29 +8,25 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
-import org.shanoir.dicom.importer.UploadJob;
-import org.shanoir.dicom.importer.UploadJobManager;
-import org.shanoir.dicom.importer.UploadState;
-import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
-import org.shanoir.util.ShanoirUtil;
+import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
  * The UploadServiceJob.
@@ -46,6 +42,8 @@ public class UploadServiceJob implements Job {
 	private ShanoirUploaderServiceClient uploadServiceClient;
 
 	private String uploadPercentage = "";
+
+	ObjectMapper objectMapper = new ObjectMapper();
 
 	/**
 	 * The execution method
@@ -68,9 +66,9 @@ public class UploadServiceJob implements Job {
 	 * @param workFolder
 	 */
 	private void processWorkFolder(File workFolder, CurrentNominativeDataController currentNominativeDataController) {
-		final List<File> folders = ShanoirUtil.listFolders(workFolder);
+		final List<File> folders = Util.listFolders(workFolder);
 		logger.debug("Found " + folders.size() + " folders in work folder.");
-		for (Iterator foldersIt = folders.iterator(); foldersIt.hasNext();) {
+		for (Iterator<File> foldersIt = folders.iterator(); foldersIt.hasNext();) {
 			final File folder = (File) foldersIt.next();
 			final File uploadJobFile = new File(folder.getAbsolutePath() + File.separator + UploadJobManager.UPLOAD_JOB_XML);
 			// file could be missing in case of downloadOrCopy ongoing
@@ -95,8 +93,8 @@ public class UploadServiceJob implements Job {
 			final File uploadJobFile, CurrentNominativeDataController currentNominativeDataController) {
 		NominativeDataUploadJobManager nominativeDataUploadJobManager = null;
 		final List<File> filesToTransfer = new ArrayList<File>();
-		final Collection<File> files = ShanoirUtil.listFiles(folder, null, false);
-		for (Iterator filesIt = files.iterator(); filesIt.hasNext();) {
+		final Collection<File> files = Util.listFiles(folder, null, false);
+		for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
 			final File file = (File) filesIt.next();
 			// do not transfer nominativeDataUploadJob as only for display in ShUp
 			if (file.getName().equals(NominativeDataUploadJobManager.NOMINATIVE_DATA_JOB_XML)) {
@@ -105,7 +103,6 @@ public class UploadServiceJob implements Job {
 			// that this file is for sure transferred as the last file to avoid sync problems
 			// on the server, when auto-import starts with still missing files
 			} else if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)
-					|| file.getName().equals(Exchange.SHANOIR_EXCHANGE_JSON)
 					|| file.getName().equals(ImportJob.IMPORT_JOB_JSON)) {
 				// do not add to list
 		    } else {
@@ -145,7 +142,7 @@ public class UploadServiceJob implements Job {
 			String tempDirId = uploadServiceClient.createTempDir();
 			logger.info("Upload: tempDirId for import: " + tempDirId);
 			int i = 0;
-			for (Iterator iterator = allFiles.iterator(); iterator.hasNext();) {
+			for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
 				File file = (File) iterator.next();
 				i++;
 				logger.debug("UploadServiceJob started to upload file: " + file.getName());
@@ -162,21 +159,32 @@ public class UploadServiceJob implements Job {
 			 * Explicitly upload the upload-job.xml as the last file to avoid sync problems on server in case of
 			 * many files have to be uploaded.
 			 */
-			File exchangeJsonFile = new File(folder.getAbsolutePath() + File.separator + ImportJob.IMPORT_JOB_JSON);
-			if (exchangeJsonFile.exists()) {
-				setTempDirIdAndStartImport(tempDirId, exchangeJsonFile);	
+			File importJobJsonFile = new File(folder.getAbsolutePath() + File.separator + ImportJob.IMPORT_JOB_JSON);
+			ImportJob importJob;
+			if (importJobJsonFile.exists()) {
+				importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
+				setTempDirIdAndStartImport(tempDirId, importJob);	
 			} else {
 				throw new Exception(ImportJob.IMPORT_JOB_JSON + " missing in folder.");
 			}
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
 					UploadState.FINISHED_UPLOAD.toString());
 			uploadJob.setUploadState(UploadState.FINISHED_UPLOAD);
-			uploadJob.setUploadDate(ShanoirUtil.formatTimePattern(new Date()));
+			uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 			uploadJobManager.writeUploadJob(uploadJob);
+			
+			// If we are coming from CSV import, delete the data from the work folder (but not the upload files in itself)
+			if (importJob.isFromCsv()) {
+				for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
+					File file = (File) iterator.next();
+					FileUtils.deleteQuietly(file);
+				}
+			}
+
 		} catch (Exception e) {
 			currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.ERROR.toString());
 			uploadJob.setUploadState(UploadState.ERROR);
-			uploadJob.setUploadDate(ShanoirUtil.formatTimePattern(new Date()));
+			uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
 			uploadJobManager.writeUploadJob(uploadJob);
 			logger.error("An error occured during upload : " + e.getMessage());
 		}
@@ -191,13 +199,10 @@ public class UploadServiceJob implements Job {
 	 * @throws JsonProcessingException
 	 * @throws Exception
 	 */
-	private void setTempDirIdAndStartImport(String tempDirId, File importJobJsonFile)
+	private void setTempDirIdAndStartImport(String tempDirId, ImportJob importJob)
 			throws IOException, JsonParseException, JsonMappingException, JsonProcessingException, Exception {
-		ObjectMapper objectMapper = new ObjectMapper();
-		ImportJob importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
 		importJob.setWorkFolder(tempDirId);
-		ObjectWriter ow = objectMapper.writer().withDefaultPrettyPrinter();
-		String importJobJson = ow.writeValueAsString(importJob);
+		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		uploadServiceClient.startImportJob(importJobJson);
 	}
 	

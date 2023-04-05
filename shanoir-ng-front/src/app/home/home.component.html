@@ -27,38 +27,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
    
     <challenge-block *ngFor="let challengeStudy of challengeStudies" [challengeStudy]="challengeStudy">
     </challenge-block>
-
-    <div class="block account-requests" *ngIf="admin">
-        <table><tr>
-            <td class="icon link" routerLink="/user/list">
-                <i class="fas fa-users"></i>
-                <div class="block-title">Manage Users</div>
-            </td>
-            <td *ngIf="accountRequests && accountRequests.length > 0">
-                <div class="pannel">
-                    <div class="pending link" routerLink="/user/list"><em>{{nbAccountRequests}}</em> account requests</div>
-                    <div class="pending link" routerLink="/user/list"><em>{{nbExtensionRequests}}</em> extension requests</div>
-                    <table>
-                        <tr *ngFor="let ar of accountRequests"  [routerLink]="'/user/details/' + ar.id" class="account-request-list link">
-                            <td class="name">{{ar.firstName}} {{ar.lastName}}</td>
-                            <ng-container *ngIf="ar.accountRequestDemand">
-                                <td class="narrow"><i class="fas fa-plus"></i></td>
-                                <td class="narrow">{{ar.creationDate | date: 'dd/MM'}}</td>
-                            </ng-container>
-                            <ng-container *ngIf="ar.extensionRequestDemand">
-                                <td class="narrow"><i class="fas fa-clock"></i></td>
-                                <td class="narrow"></td>
-                            </ng-container>
-                        </tr>
-                    </table>
-                </div>
-            </td>
-        </tr></table>
-    </div>
     <div class="block solr">
         <table><tr>
             <td class="icon link" routerLink="/solr-search">
-                <i class="fas fa-sun"></i>
+                <i class="fa-regular fa-sun"></i>
                 <div class="block-title">Solr Search</div>
             </td>
             <!-- <td>
@@ -71,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </td> -->
         </tr></table>
     </div>
-    <div class="block notifications" *ngIf="notifications && notifications.length > 0">
+    <div class="block notifications" *ngIf="notifications?.length > 0 || accessRequests?.length > 0">
         <table><tr>
             <td class="icon">
                 <i class="far fa-flag"></i>
@@ -83,6 +55,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <tr *ngFor="let notif of notifications" routerLink="/dua" class="notification-list link">
                             <th>DUA to sign</th>
                             <td>{{notif.studyName}}</td>
+                        </tr>
+                        <tr *ngFor="let notif of accessRequests" [routerLink]="'/access-request/details/' + notif.id" class="notification-list link">
+                            <th>Access request</th>
+                            <td>{{notif.user.username}} - {{getStudyName(notif.studyId)}}</td>
                         </tr>
                     </table>
                 </div>
@@ -134,7 +110,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div class="block studies">
         <table><tr>
             <td class="icon link" routerLink="/study/list">
-                <i class="fas fa-folder-open"></i>
+                <i class="fa-regular fa-folder-open"></i>
                 <div class="block-title">My Studies</div>
             </td>
             <td>

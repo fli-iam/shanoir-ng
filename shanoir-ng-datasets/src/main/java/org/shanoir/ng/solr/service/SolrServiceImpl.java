@@ -29,16 +29,19 @@ import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Center;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.model.Tag;
 import org.shanoir.ng.shared.paging.PageImpl;
+import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
-import org.shanoir.ng.solr.model.ShanoirSolrFacet;
+import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
 import org.shanoir.ng.solr.repository.SolrRepository;
+import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
@@ -75,6 +78,9 @@ public class SolrServiceImpl implements SolrService {
 
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepo;
+
+	@Autowired
+	private CenterRepository centerRepository;
 
 	@Transactional
 	@Override
@@ -133,7 +139,7 @@ public class SolrServiceImpl implements SolrService {
 		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
 
 		// Get tags
-		List<SubjectStudy> list = subjectStudyRepo.findByStudyIdInAndSubjectIdIn(Collections.singletonList(shanoirMetadata.getStudyId()), Collections.singletonList(shanoirMetadata.getSubjectId()));
+		List<SubjectStudy> list = subjectStudyRepo.findByStudy_IdInAndSubjectIdIn(Collections.singletonList(shanoirMetadata.getStudyId()), Collections.singletonList(shanoirMetadata.getSubjectId()));
 
 		List<String> tags = new ArrayList<>();
 		if (list != null) {
@@ -193,39 +199,33 @@ public class SolrServiceImpl implements SolrService {
 	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
 		return new ShanoirSolrDocument(String.valueOf(shanoirMetadata.getDatasetId()), shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
 				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
-				shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
+				shanoirMetadata.getExaminationId(), shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
 				shanoirMetadata.getSubjectName(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
 				shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
 	}
 
+	@Transactional
 	@Override
-	public SolrResultPage<ShanoirSolrDocument> findAll(Pageable pageable) {
+	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException {
 		SolrResultPage<ShanoirSolrDocument> result = null;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findAllDocsAndFacets(pageable);
+			result = solrRepository.findByFacetCriteriaForAdmin(query, pageable);
 		} else {
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			if (studyIds.isEmpty()) {
-				return new SolrResultPage<>(Collections.emptyList());
+			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(KeycloakUtil.getTokenUserId()));
+			Map<Long, List<String>> studiesCenter = new HashMap<>();
+			List<Center> centers = Utils.toList(centerRepository.findAll());
+			for(StudyUser su : studyUsers) {
+				studiesCenter.put(su.getStudyId(), su.getCenterIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
 			}
-			result = solrRepository.findByStudyIdIn(studyIds, pageable);
+			result = solrRepository.findByStudyIdInAndFacetCriteria(studiesCenter, query, pageable);
 		}
 		return result;
 	}
-
-	@Transactional
-	@Override
-	public SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrFacet facet, Pageable pageable) throws RestServiceException {
-		SolrResultPage<ShanoirSolrDocument> result = null;
-		pageable = prepareTextFields(pageable);
-		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByFacetCriteria(facet, pageable);
-		} else {
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			result = solrRepository.findByStudyIdInAndFacetCriteria(studyIds, facet, pageable);
-		}
-		return result;
+	
+	private String findCenterName(List<Center> centers, Long id) {
+		List<Center> filteredCenters = centers.stream().filter(centerToFilter -> centerToFilter.getId().equals(id)).collect(Collectors.toList());
+		return filteredCenters.size() > 0 ? filteredCenters.get(0).getName() : null;
 	}
 
 	private Pageable prepareTextFields(Pageable pageable) {

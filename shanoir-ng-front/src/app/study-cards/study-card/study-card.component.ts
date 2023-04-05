@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, ViewChild } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -21,9 +21,13 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
+import { Coil } from '../../coils/shared/coil.model';
+import { CoilService } from '../../coils/shared/coil.service';
 import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { NiftiConverterService } from '../../niftiConverters/nifti.converter.service';
+import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
@@ -32,12 +36,14 @@ import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { StudyCard, StudyCardRule } from '../shared/study-card.model';
 import { StudyCardService } from '../shared/study-card.service';
+import { StudyCardRuleComponent } from '../study-card-rules/study-card-rule.component';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 
 @Component({
     selector: 'study-card',
     templateUrl: 'study-card.component.html',
-    styleUrls: ['study-card.component.css']
+    styleUrls: ['study-card.component.css'],
+    animations: [slideDown]
 })
 export class StudyCardComponent extends EntityComponent<StudyCard> {
 
@@ -51,6 +57,8 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     hasAdministrateRightPromise: Promise<boolean>;
     lockStudy: boolean = false;
     @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
+    isAdminOrExpert: boolean;
+    allCoils: Coil[];
 
     constructor(
             private route: ActivatedRoute,
@@ -60,11 +68,15 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             private niftiConverterService: NiftiConverterService,
             private studyRightsService: StudyRightsService,
             private acqEqptLabelPipe: AcquisitionEquipmentPipe,
-            private centerService: CenterService) {
+            keycloakService: KeycloakService,
+            private centerService: CenterService,
+            coilService: CoilService) {
         super(route, 'study-card');
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
         this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
+        this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
+        coilService.getAll().then(coils => this.allCoils = coils);
      }
 
     getService(): EntityService<StudyCard> {
@@ -108,9 +120,9 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
-        let form: FormGroup = this.formBuilder.group({
-            'name': [this.studyCard.name, [Validators.required, Validators.minLength(2)]],
+    buildForm(): UntypedFormGroup {
+        let form: UntypedFormGroup = this.formBuilder.group({
+            'name': [this.studyCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.studyCard.study, [Validators.required]],
             'acquisitionEquipment': [this.studyCard.acquisitionEquipment, [Validators.required]],
             'niftiConverter': [this.studyCard.niftiConverter, [Validators.required]],
@@ -164,7 +176,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             });
     }
 
-    private onStudyChange(study: IdName, form: FormGroup) {
+    private onStudyChange(study: IdName, form: UntypedFormGroup) {
         if (study) {
             this.fetchAcqEq(study.id).then(() => {
                 if (this.studyCard.acquisitionEquipment) {
@@ -212,7 +224,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     onChangeAcqEq() {
         if (!this.rulesComponent) return;
         this.rulesComponent.ruleElements.forEach(ruleComp => {
-            ruleComp.assignmentChildren.forEach(assComp => {
+            (ruleComp as StudyCardRuleComponent).assignmentChildren.forEach(assComp => {
                 if (assComp.assignment.field.toLowerCase().includes('coil')) {
                     assComp.assignment.value = null
                     assComp.valueTouched = true;
@@ -222,6 +234,10 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         this.form.get('rules').updateValueAndValidity();
     }
 
+    goToApply() {
+        this.router.navigate(['/study-card/apply/' + this.entity.id]);
+    }
+    
     createAcqEq() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {

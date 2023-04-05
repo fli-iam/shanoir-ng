@@ -14,14 +14,15 @@
 
 import { Pageable, Page, Sort, FilterablePageable, Filter } from './pageable.model';
 import { TableComponent } from './table.component';
+import { ColumnDefinition } from './column.definition.type';
 
 export class BrowserPaging<T> {
 
     private lastSort: Sort;
 
     constructor(
-            private items: T[],
-            private columnDefs: any[]) {
+            public items: T[],
+            public columnDefs: ColumnDefinition[]) {
         if (!this.items) throw Error('items cannot be null !');
     }
 
@@ -29,7 +30,7 @@ export class BrowserPaging<T> {
         this.items = items;
     }
     
-    public setColumnDefs(columnDefs: any[]) {
+    public setColumnDefs(columnDefs: ColumnDefinition[]) {
         this.columnDefs = columnDefs;
     }
 
@@ -77,7 +78,7 @@ export class BrowserPaging<T> {
      */
     private sortItemsByCol(items: T[], col: any, asc: boolean): T[] {
         // Some columns are incompatible with sorting
-        if (col["suppressSorting"] || col["type"] == "button") {
+        if (col["disableSorting"] || col["type"] == "button") {
             return;
         }
         // Regarding the data type, we set a neg infinity because unless this, 

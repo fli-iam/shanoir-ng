@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -30,9 +30,8 @@ import { DatasetProcessingListComponent } from './datasets/dataset-processing-li
 import { ExaminationListComponent } from './examinations/examination-list/examination-list.component';
 import { ExaminationComponent } from './examinations/examination/examination.component';
 import { HomeComponent } from './home/home.component';
-import { ClinicalContextComponent } from './import/clinical-context/clinical-context.component';
+import { BasicClinicalContextComponent } from './import/basic-clinical-context/basic-clinical-context.component';
 import { DicomUploadComponent } from './import/dicom-upload/dicom-upload.component';
-import { FinishImportComponent } from './import/finish/finish.component';
 import { ImportComponent } from './import/import.component';
 import { QueryPacsComponent } from './import/query-pacs/query-pacs.component';
 import { ImportProcessedDatasetComponent } from './import/processed-dataset/processed-dataset.component';
@@ -53,13 +52,10 @@ import { EegUploadComponent } from './import/eeg-upload/eeg-upload.component';
 import { BidsUploadComponent } from './import/bids/bids-upload.component';
 import { EegSelectSeriesComponent } from './import/eeg-select-series/eeg-select-series.component';
 import { EegClinicalContextComponent } from './import/eeg-clinical-context/eeg-clinical-context.component';
-import { FinishEegImportComponent } from './import/eeg-finish/eeg-finish.component';
-import { FinishProcessedDatasetImportComponent } from './import/processed-dataset-finish/processed-dataset-finish.component';
 import { InstrumentAssessmentComponent } from './examinations/instrument-assessment/instrument-assessment.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
 import { BrukerUploadComponent } from './preclinical/importBruker/bruker-upload/bruker-upload.component';
 import { BrukerSelectSeriesComponent } from './preclinical/importBruker/select-series/bruker-select-series.component';
-import { BrukerFinishImportComponent } from './preclinical/importBruker/finish/bruker-finish.component';
 import { ContrastAgentsListComponent } from './preclinical/contrastAgent/list/contrastAgent-list.component';
 import { ContrastAgentFormComponent } from './preclinical/contrastAgent/edit/contrastAgent-form.component';
 import { ReferenceFormComponent } from './preclinical/reference/edit/reference-form.component';
@@ -86,11 +82,26 @@ import { SolrSearchComponent } from './solr/solr.search.component';
 import { StudyCardForRulesListComponent } from './study-cards/study-card-list/study-card-list-for-rules.component';
 import { ProcessedDatasetClinicalContextComponent } from './import/processed-dataset-clinical-context/processed-dataset-clinical-context.component';
 import { DUAComponent } from './dua/dua.component';
+import { AccessRequestComponent } from './users/access-request/access-request.component';
+import { ProcessingComponent } from './processing/processing.component';
+import { PipelinesComponent } from './processing/pipelines/pipelines.component';
+import { ExecutionComponent } from './processing/execution/execution.component';
+import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
+import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
+import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
+import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
+import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
+import { WelcomeComponent } from "./welcome/welcome.component";
+import { LoginGuard } from "./shared/roles/login-guard";
+import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
+import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
+import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
 
 let routes: Routes = [
     {
         path: '',
-        redirectTo: '/home',
+        redirectTo: '/welcome',
         pathMatch: 'full'
     }, {
         path: 'dua',
@@ -98,11 +109,13 @@ let routes: Routes = [
     }, {
         path: 'account-request',
         component: AccountRequestComponent,
-        data: {isChallenge: false},
     }, {
-        path: 'challenge-request',
+        path: 'welcome',
+        component: WelcomeComponent,
+        canActivate: [LoginGuard]
+    }, {
+        path: 'account/study/:id/account-request',
         component: AccountRequestComponent,
-        data: {isChallenge: true},
     }, {
         path: 'extension-request',
         component: ExtensionRequestComponent,
@@ -112,6 +125,22 @@ let routes: Routes = [
     }, {
         path: 'solr-search',
         component: SolrSearchComponent
+    },
+    {
+        path: 'carmin-dataset-processings',
+        component: CarminDatasetProcessingsComponent
+    }, {
+        path: 'processing',
+        component: ProcessingComponent,
+        children:[
+            {
+                path: 'pipelines',
+                component: PipelinesComponent
+            }, {
+                path: 'execution',
+                component: ExecutionComponent
+            }
+        ]
     }, {
         path: 'imports',
         component: ImportComponent,
@@ -120,19 +149,19 @@ let routes: Routes = [
                 path: '',
                 pathMatch: 'full',
                 redirectTo: '/home'
-            }, {   
+            }, {
                 path: 'upload',
                 component: DicomUploadComponent,
                 data: {importMode: 'DICOM'}
-            }, {   
+            }, {
                 path: 'bruker',
                 component: BrukerUploadComponent,
                 data: {importMode: 'BRUKER'}
-            }, {   
+            }, {
                 path: 'eeg',
                 component: EegUploadComponent,
                 data: {importMode: 'EEG'}
-            }, {   
+            }, {
                 path: 'bids',
                 component: BidsUploadComponent,
                 data: {importMode: 'BIDS'}
@@ -152,7 +181,13 @@ let routes: Routes = [
                 component: EegSelectSeriesComponent
             }, {
                 path: 'context',
-                component: ClinicalContextComponent
+                component: BasicClinicalContextComponent
+            }, {
+                path: 'pacs-context',
+                component: PacsClinicalContextComponent
+            }, {
+                path: 'preclinical-context',
+                component: PreClinicalContextComponent
             }, {
                 path: 'eegcontext',
                 component: EegClinicalContextComponent
@@ -160,23 +195,11 @@ let routes: Routes = [
                 path: 'processed-dataset-context',
                 component: ProcessedDatasetClinicalContextComponent
             }, {
-                path: 'finish',
-                component: FinishImportComponent
-            }, {
-                path: 'eegfinish',
-                component: FinishEegImportComponent
-            }, {
-                path: 'processed-dataset-finish',
-                component: FinishProcessedDatasetImportComponent
-            }, {
                 path: 'bruker',
                 component: BrukerUploadComponent
             }, {
                 path: 'brukerseries',
                 component: BrukerSelectSeriesComponent
-            }, {
-                path: 'brukerfinish',
-                component: BrukerFinishImportComponent
             }
         ]
     }, {
@@ -195,14 +218,14 @@ let routes: Routes = [
             }
         ]
     },
-        { 
-        path: 'preclinical-contrastagents', 
+        {
+        path: 'preclinical-contrastagents',
         component: ContrastAgentsListComponent
-    },{ 
-        path: 'preclinical-contrastagent', 
+    },{
+        path: 'preclinical-contrastagent',
         component: ContrastAgentFormComponent
-    },{ 
-        path: 'download-statistics', 
+    },{
+        path: 'download-statistics',
         component: DownloadStatisticsComponent
     },
 
@@ -293,6 +316,10 @@ let routes: Routes = [
         path: 'dataset/details/:id',
         component: DatasetComponent,
         data: { mode: 'view' },
+    },
+    {
+        path: 'dataset/details/dicom/:id',
+        component: MetadataComponent
     },
     {
         path: 'dataset/edit/:id',
@@ -502,13 +529,10 @@ let routes: Routes = [
 		component: InstrumentAssessmentComponent,
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
-	},{ 
-        path: 'download-statistics', 
+	},{
+        path: 'download-statistics',
         component: DownloadStatisticsComponent
-    },
-
-
-    {
+    },{
 		path: 'study-card',
 		redirectTo: 'study-card/list',
 	},
@@ -527,9 +551,34 @@ let routes: Routes = [
 		data: { mode: 'edit' },
 		canActivate: [AuthAdminOrExpertGuard],
 	},
-	{
+    {
 		path: 'study-card/create',
 		component: StudyCardComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+    {
+		path: 'quality-card',
+		redirectTo: 'quality-card/list',
+	},
+	{
+		path: 'quality-card/list',
+		component: QualityCardListComponent,
+	},
+	{
+		path: 'quality-card/details/:id',
+		component: QualityCardComponent,
+		data: { mode: 'view' },
+	},
+	{
+		path: 'quality-card/edit/:id',
+		component: QualityCardComponent,
+		data: { mode: 'edit' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
+	{
+		path: 'quality-card/create',
+		component: QualityCardComponent,
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
 	},
@@ -755,8 +804,25 @@ let routes: Routes = [
 		component: AnimalSubjectFormComponent,
 		data: { mode: 'create' }
 	},
-
-
+    {
+        path: 'access-request',
+        component: AccessRequestComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'access-request/details/:id',
+        component: AccessRequestComponent,
+        data: { mode: 'view' },
+    },
+    {
+        path: 'access-request/study/:id',
+        component: AccessRequestComponent,
+        data: { mode: 'create' },
+    },
+    {
+        path: 'access-request/list',
+        component: AccessRequestListComponent
+    }
 ];
 
 @NgModule({

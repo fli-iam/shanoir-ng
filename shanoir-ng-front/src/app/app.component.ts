@@ -12,9 +12,8 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, ViewContainerRef, HostBinding, HostListener } from '@angular/core';
+import { Component, ElementRef, ViewContainerRef, HostBinding, HostListener, ViewChild } from '@angular/core';
 
-import { BreadcrumbsService } from './breadcrumbs/breadcrumbs.service';
 import { ModalService } from './shared/components/modals/modal.service';
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { GlobalService } from './shared/services/global.service';
@@ -23,8 +22,10 @@ import { slideRight, parent, slideMarginLeft } from './shared/animations/animati
 import { WindowService } from './shared/services/window.service';
 import { KeycloakSessionService } from './shared/session/keycloak-session.service';
 import { ConfirmDialogService } from './shared/components/confirm-dialog/confirm-dialog.service';
-import { NavigationEnd, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { StudyService } from './studies/shared/study.service';
+import { ConsoleComponent } from './shared/console/console.component';
+import { UserService } from './users/shared/user.service';
 
 
 @Component({
@@ -37,27 +38,31 @@ import { StudyService } from './studies/shared/study.service';
 export class AppComponent {
 
     @HostBinding('@parent') public menuOpen: boolean = true;
+    @ViewChild('console') consoleComponenent: ConsoleComponent;
 
     constructor(
             public viewContainerRef: ViewContainerRef,
             private modalService: ModalService,
-            private breadcrumbsService: BreadcrumbsService,
             private globalService: GlobalService,
             private windowService: WindowService,
             private element: ElementRef,
             private keycloakSessionService: KeycloakSessionService,
             private confirmService: ConfirmDialogService,
             protected router: Router,
-            private studyService: StudyService) {
+            private studyService: StudyService,
+            private userService: UserService) {
         
         this.modalService.rootViewCRef = this.viewContainerRef;
-        ServiceLocator.rootViewContainerRef = this.viewContainerRef;        
+        ServiceLocator.rootViewContainerRef = this.viewContainerRef;
     }
 
     ngOnInit() {
         this.globalService.registerGlobalClick(this.element);
         this.windowService.width = window.innerWidth;
-        if(this.keycloakSessionService.isAuthenticated()) this.duaAlert();        
+        if(this.keycloakSessionService.isAuthenticated()) {
+            this.userService.getAccessRequestsForAdmin();
+            this.duaAlert();
+        }        
     }
 
     @HostListener('window:resize', ['$event'])

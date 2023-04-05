@@ -13,7 +13,7 @@
  */
 
 import { Component, Input } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
@@ -99,8 +99,8 @@ export class CoilComponent extends EntityComponent<Coil> {
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
-        let form: FormGroup = this.formBuilder.group({
+    buildForm(): UntypedFormGroup {
+        let form: UntypedFormGroup = this.formBuilder.group({
             'name': [this.coil.name, [Validators.required, Validators.minLength(2)]],
             'acquiEquipModel': [{value: this.coil.manufacturerModel, disabled: this.prefilledManuf}, [Validators.required]],
             'center': [{value: this.coil.center, disabled: this.prefilledCenter}, [Validators.required]],
@@ -149,10 +149,15 @@ export class CoilComponent extends EntityComponent<Coil> {
 
     openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/manufacturer-model/create']).then(success => {
+        this.router.navigate(['/acquisition-equipment/create']).then(success => {
+            this.breadcrumbsService.currentStep.addPrefilled('center', this.coil.center);
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
-                    (currentStep.entity as Coil).manufacturerModel = entity as ManufacturerModel;
+                    let currentCoil: Coil = currentStep.entity as Coil;
+                    currentCoil.manufacturerModel = (entity as AcquisitionEquipment).manufacturerModel;
+                    if (currentCoil.center.id == (entity as AcquisitionEquipment).center.id) {
+                        currentCoil.center.acquisitionEquipments.unshift(entity);
+                    }
                 })
             );
         });

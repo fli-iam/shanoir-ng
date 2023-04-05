@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -34,7 +34,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         let authReq: HttpRequest<any> = req.clone();
         // Bearer needed for private URL only (".../accountrequest" is a public URL)
-        if (!req.url.endsWith('/accountrequest') && !req.url.endsWith('/extensionrequest') && !req.url.endsWith('/challenges')) {
+        if (!req.url.endsWith('/accountrequest') && !req.url.endsWith('/extensionrequest') && !req.url.endsWith('/data')) {
             authReq = this.setAuthHeader(authReq);
         }
         // Do not add Content-Type application/json for Form Data
@@ -43,7 +43,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
         }
         // Pass on the cloned request instead of the original request.
         return next.handle(authReq).pipe(catchError((err: HttpErrorResponse): Observable<HttpEvent<any>> => { // return null }
-      // (err: any) => {
+        // (err: any) => {
             if (err instanceof HttpErrorResponse) {
                 if (err.status === 401) {
                     return new Observable((observer) => {
@@ -53,7 +53,7 @@ export class KeycloakHttpInterceptor implements HttpInterceptor {
                             observer.complete();
                         }).catch(() => {
                             this.keycloakService.logout();
-                        });                        
+                        });
                     }).pipe(switchMap(() => {
                         return next.handle(authReq);
                     }))

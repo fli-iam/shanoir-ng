@@ -13,7 +13,7 @@
  */
 
 import { Component,  Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup} from '@angular/forms';
+import { UntypedFormGroup} from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { BloodGasData }    from '../shared/bloodGasData.model';
@@ -25,7 +25,7 @@ import { ModesAware } from "../../../shared/mode/mode.decorator";
 import { slideDown } from '../../../../shared/animations/animations';
 import { EntityComponent } from '../../../../shared/components/entity/entity.component.abstract';
 import { ExtraData } from '../../extraData/shared/extradata.model';
-import { MsgBoxService } from '../../../../shared/msg-box/msg-box.service';
+import { ConsoleService } from '../../../../shared/console/console.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
 
@@ -89,7 +89,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     	}
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
         });
     }
@@ -98,7 +98,7 @@ export class BloodGasDataFormComponent extends EntityComponent<BloodGasData> {
     public save(): Promise<BloodGasData> {
         return this.extradatasService.createExtraData(PreclinicalUtils.PRECLINICAL_BLOODGAS_DATA,this.bloodGasData).then((bloodGasData) => {
             this.chooseRouteAfterSave(this.bloodGasData);
-            this.msgBoxService.log('info', 'The new preclinical-bloodgasdata has been successfully saved under the number ' + bloodGasData.id);
+            this.consoleService.log('info', 'New preclinical bloodgasdata successfully saved with n° ' + bloodGasData.id);
             return bloodGasData;
         });
     }

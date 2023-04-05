@@ -21,13 +21,16 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
+import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionDatasetsMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.DatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
+import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -72,10 +75,16 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	private ImporterService importerService;
 
 	@Autowired
+	private EegImporterService eegImporterService;
+
+	@Autowired
 	private ObjectMapper objectMapper;
 	
 	@Autowired
 	private DatasetAcquisitionMapper dsAcqMapper;
+	
+	@Autowired
+	private DatasetAcquisitionDatasetsMapper dsAcqDsMapper;
 	
 	@Autowired
 	private ExaminationDatasetAcquisitionMapper examDsAcqMapper;
@@ -94,8 +103,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) {
-		importerService.createEegDataset(importJob);
+	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) throws IOException {
+		eegImporterService.createEegDataset(importJob);
 		importerService.cleanTempFiles(importJob.getWorkFolder());
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
@@ -104,10 +113,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@RabbitHandler
 	@Transactional
 	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
-		Long userId = Long.valueOf("" + importJobStr.getMessageProperties().getHeaders().get("x-user-id"));
 		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
-			createAllDatasetAcquisitions(importJob, userId);
+			createAllDatasetAcquisitions(importJob, importJob.getUserId());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new AmqpRejectAndDontRequeueException(e);
@@ -160,6 +168,27 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 	
 	@Override
+	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
+			@ApiParam(value = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
+		
+		List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
+		
+		daList.sort(new Comparator<DatasetAcquisition>() {
+			@Override
+			public int compare(DatasetAcquisition o1, DatasetAcquisition o2) {
+				return o1.getExamination() != null && o2.getExamination() != null 
+						? Long.compare(o1.getExamination().getStudyId(), o2.getExamination().getStudyId())
+						: 0;
+			}
+		});
+		if (daList.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
+		}
+	}
+	
+	@Override
 	public ResponseEntity<Void> deleteDatasetAcquisition(
 			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
 			throws RestServiceException {
@@ -167,9 +196,11 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		try {
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-			
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (ShanoirException e) {
+			LOG.error("Error while deleting dataset acquisition: ", e);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -187,7 +218,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Override
 	public ResponseEntity<Page<DatasetAcquisitionDTO>> findDatasetAcquisitions(final Pageable pageable) throws RestServiceException {
 		Page<DatasetAcquisition> datasetAcquisitions = datasetAcquisitionService.findPage(pageable);
-		if (datasetAcquisitions.getContent().isEmpty()) {
+		if (datasetAcquisitions == null || datasetAcquisitions.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(datasetAcquisitions), HttpStatus.OK);

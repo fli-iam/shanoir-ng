@@ -27,8 +27,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         (userChange)="onSelectStudy(); onContextChange();" 
                         (onViewClick)="showStudyDetails()" 
                         [viewDisabled]="!study" 
-                        [options]="studyOptions">
+                        [options]="studyOptions"
+                        [disabled]="loading">
                 </select-box>
+
             </span>
         </li>
         
@@ -43,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select a subject</label> 
             <span class="right-col">
                 <select-box 
-                        [disabled]="!study" 
+                        [disabled]="loading || !study" 
                         [(ngModel)]="subject" 
                         (userChange)="onSelectSubject(); onContextChange();" 
                         (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
@@ -75,11 +77,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <li>
             <label class="required-label">Name</label>
-            <input required type="text" id="processedDatasetName" [(ngModel)]="processedDatasetName" (userChange)="onContextChange();"/>
+            <input required type="text" id="processedDatasetName" [(ngModel)]="processedDatasetName" (change)="onContextChange()"/>
         </li>
         <li>
             <label>Comment</label>
-            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDatasetComment"/>
+            <input type="text" id="processedDatasetComment" [(ngModel)]="processedDatasetComment" (change)="onContextChange()"/>
         </li>
     </ol>
     <ol *ngIf="subject">
@@ -87,10 +89,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             Dataset processing
             <tool-tip>Select an existing dataset processing or create a new one.</tool-tip>
         </legend>
-
         <li>
-
-
             <label class="required-label">Select a dataset processing</label> 
             <span class="right-col">
                 <select-box [(ngModel)]="datasetProcessing" (userChange)="onContextChange();"
@@ -103,4 +102,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </ol>
 
 </fieldset>
-<button class="next" [disabled]="!valid" (click)="next()">Next</button>
+<button *ngIf="!reloading" class="next alt right-icon" [disabled]="!valid" (click)="next()">Import now<i class="fa-solid fa-flag-checkered"></i></button>

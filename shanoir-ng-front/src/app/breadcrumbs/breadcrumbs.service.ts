@@ -25,7 +25,6 @@ export class BreadcrumbsService {
     public steps: Step[] = [];
     
     private popFoundedStepIndex: number;
-    public replace: boolean = false;
     public currentStepIndex: number;
     private nextLabel: string;
     private nextMilestone: boolean = false;
@@ -54,7 +53,7 @@ export class BreadcrumbsService {
                     return;
                 }
                 const timestamp: number = new Date().getTime();
-                if (this.replace) this.steps.pop();
+                if (this.router.getCurrentNavigation().extras?.replaceUrl) this.steps.pop();
                 if (this.popFoundedStepIndex != undefined && this.popFoundedStepIndex != null && this.popFoundedStepIndex >= 0 && this.popFoundedStepIndex < this.steps.length) {
                     this.focusStep(this.popFoundedStepIndex);
                     this.currentStepIndex = this.popFoundedStepIndex;
@@ -199,8 +198,7 @@ export class Step {
     constructor(
             public label: string,
             public route: string,
-            public timestamp: number) {
-    }
+            public timestamp: number) {}
 
     public id = new Date().getTime();
     public subscribers: number = 0;

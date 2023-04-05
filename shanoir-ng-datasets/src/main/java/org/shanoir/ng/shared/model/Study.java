@@ -25,8 +25,12 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.IdName;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
@@ -37,12 +41,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @Table(name = "study")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Study extends IdName {
-	
-	@Id
-	private Long id;
-	 
-	private String name;
 
+	@Id
+	protected Long id;
+	
+	protected String name;
+	
 	@ManyToMany
 	@JoinTable(name = "related_datasets", joinColumns = @JoinColumn(name = "study_id"), inverseJoinColumns = @JoinColumn(name = "dataset_id"))
 	private List<Dataset> relatedDatasets;
@@ -56,6 +60,11 @@ public class Study extends IdName {
 	/** Relations between the subjects and the studies. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
+	
+	/** Relations between the subjects and the studies. */
+    @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Examination> examinations;
+	
 
 	/**
 	 * @return the tags
@@ -92,8 +101,8 @@ public class Study extends IdName {
 	 * @param name
 	 */
 	public Study(Long id, String name) {
-		this.id = id;
-		this.name = name;
+		this.setId(id);
+		this.setName(name);
 	}
 
 	/**
@@ -109,33 +118,33 @@ public class Study extends IdName {
 	public void setSubjectStudyList(List<SubjectStudy> subjectStudyList) {
 		this.subjectStudyList = subjectStudyList;
 	}
-
-	/**
-	 * @return the id
-	 */
+	
+	@Override
 	public Long getId() {
 		return id;
 	}
 
-	/**
-	 * @param id the id to set
-	 */
+	@Override
 	public void setId(Long id) {
 		this.id = id;
 	}
 
-	/**
-	 * @return the name
-	 */
+	@Override
 	public String getName() {
 		return name;
 	}
 
-	/**
-	 * @param name the name to set
-	 */
+	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
 
+    public List<Examination> getExaminations() {
+        return examinations;
+    }
+
+    public void setExaminations(List<Examination> examinations) {
+        this.examinations = examinations;
+    }
+	
 }

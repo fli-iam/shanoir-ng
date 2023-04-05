@@ -2,21 +2,19 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
 import { Component, OnInit, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { Router, ActivatedRoute, Params } from '@angular/router';
-import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
-
-import { IMyOptions, IMyDateModel, IMyInputFieldChanged } from 'mydatepicker';
+import { UntypedFormGroup, UntypedFormBuilder, Validators, FormControl } from '@angular/forms';
 
 import { ExtensionRequestInfo } from './extension-request-info.model';
 import { KeycloakService } from "../../shared/keycloak/keycloak.service";
@@ -34,7 +32,7 @@ import * as AppUtils from '../../utils/app.utils';
 export class ExtensionRequestComponent implements OnInit, OnDestroy {
     @Output() closing = new EventEmitter();
     public extensionRequestInfo: ExtensionRequestInfo = new ExtensionRequestInfo();
-    extensionRequestForm: FormGroup;
+    extensionRequestForm: UntypedFormGroup;
     isDateValid: boolean = true;
     userId: number;
     selectedDateNormal: string = '';
@@ -43,7 +41,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
     errorMessage: string;
 
     constructor(private router: Router, private route: ActivatedRoute,
-        private userService: UserService, private fb: FormBuilder) {
+        private userService: UserService, private fb: UntypedFormBuilder) {
     }
 
     ngOnInit(): void {
@@ -51,7 +49,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
     }
 
     cancelExtensionRequest(): void {
-        window.location.href = AppUtils.LOGOUT_REDIRECT_URL;
+        window.location.href = AppUtils.LOGIN_REDIRECT_URL;
     }
 
     extensionRequest(): void {
@@ -69,7 +67,7 @@ export class ExtensionRequestComponent implements OnInit, OnDestroy {
                 } else {
                     throw exception;
                 }
-                
+
             });
     }
 

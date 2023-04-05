@@ -21,14 +21,23 @@ export const parent = trigger('parent', [
 export const slideDown = trigger('slideDown', [
     transition(
         ':enter', [
-            style({height: '0', 'min-height': 0, 'padding-bottom': '0', overflow: 'hidden'}),
-            animate('500ms ease-in-out', style({height: '*', 'min-height': '*','padding-bottom': '*', overflow: 'hidden'}))
+            style({height: '0', 'min-height': 0, 'padding-bottom': '0', 'margin-bottom': '0', overflow: 'hidden'}),
+            animate('500ms ease-in-out', style({height: '*', 'min-height': '*','padding-bottom': '*', 'margin-bottom': '*', overflow: 'hidden'}))
         ]
     ),
     transition(
         ':leave', [
-            style({height: '*', 'min-height': '*', 'padding-bottom': '*', overflow: 'hidden'}),
-            animate('500ms ease-in-out', style({height: '0', 'min-height': 0, 'padding-bottom': '0', overflow: 'hidden'}))
+            style({height: '*', 'min-height': '*', 'padding-bottom': '*', 'margin-bottom': '*', overflow: 'hidden'}),
+            animate('500ms ease-in-out', style({height: '0', 'min-height': 0, 'padding-bottom': '0', 'margin-bottom': '0', overflow: 'hidden'}))
+        ]
+    )
+]);
+
+export const disapearUp = trigger('disapearUp', [
+    transition(
+        ':leave', [
+            style({height: '*', 'min-height': '*', 'padding-bottom': '*', 'margin-bottom': '*', overflow: 'hidden'}),
+            animate('500ms ease-in-out', style({height: '0', 'min-height': 0, 'padding-bottom': '0', 'margin-bottom': '0', overflow: 'hidden'}))
         ]
     )
 ]);
@@ -44,6 +53,21 @@ export const slideRight = trigger('slideRight', [
         ':leave', [
             style({width: '*'}),
             animate('500ms ease-in-out', style({width: 0}))
+        ]
+    )
+]);
+
+export const slideLeft = trigger('slideLeft', [
+    transition(
+        ':enter', [
+            style({right: "-600px"}),
+            animate('500ms ease-in-out', style({right: 0}))
+        ]
+    ),
+    transition(
+        ':leave', [
+            style({right: 0}),
+            animate('500ms ease-in-out', style({right: "-600px" }))
         ]
     )
 ]);

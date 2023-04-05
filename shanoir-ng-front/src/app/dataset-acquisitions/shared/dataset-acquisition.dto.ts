@@ -15,10 +15,14 @@ import { Injectable } from '@angular/core';
 
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../../acquisition-equipments/shared/acquisition-equipment.service';
+import { DatasetDTO, DatasetDTOService } from '../../datasets/shared/dataset.dto';
+import { Dataset } from '../../datasets/shared/dataset.model';
+import { DatasetUtils } from '../../datasets/shared/dataset.utils';
 import { ExaminationDTO, ExaminationDTOService } from '../../examinations/shared/examination.dto';
 import { Examination } from '../../examinations/shared/examination.model';
 import { StudyService } from '../../studies/shared/study.service';
-import { StudyCardDTO, StudyCardDTOService } from '../../study-cards/shared/study-card.dto';
+import { StudyCardDTOService } from '../../study-cards/shared/study-card.dto';
+import { StudyCardDTO } from '../../study-cards/shared/study-card.dto.model';
 import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { CtDatasetAcquisition } from '../modality/ct/ct-dataset-acquisition.model';
 import { CtProtocol } from '../modality/ct/ct-protocol.model';
@@ -34,7 +38,8 @@ export class DatasetAcquisitionDTOService {
 
     constructor(
         private acqEqService: AcquisitionEquipmentService,
-        private studyService: StudyService) {}
+        private studyService: StudyService,
+        private datasetDtoService: DatasetDTOService) {}
 
     /**
      * Convert from DatasetAcquisitionDTO to DatasetAcquisition
@@ -58,12 +63,19 @@ export class DatasetAcquisitionDTOService {
      */
     public toDatasetAcquisitions(dtos: DatasetAcquisitionDTO[], result?: DatasetAcquisition[]): Promise<DatasetAcquisition[]>{
         if (!result) result = [];
-        for (let dto of dtos) {
+        for (let dto of dtos ? dtos : []) {
             let entity = DatasetAcquisitionUtils.getNewDAInstance(dto.type);
             DatasetAcquisitionDTOService.mapSyncFields(dto, entity);
             if (dto.acquisitionEquipmentId) {
                 entity.acquisitionEquipment = new AcquisitionEquipment();
                 entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
+            }
+            if ((dto as DatasetAcquisitionDatasetsDTO).datasets) {
+                entity.datasets = (dto as DatasetAcquisitionDatasetsDTO).datasets.map(dsdto => {
+                    let simpleDataset: Dataset = DatasetUtils.getDatasetInstance(dsdto.type);
+                    DatasetDTOService.mapSyncFields(dsdto, simpleDataset);
+                    return simpleDataset;
+                });
             }
             result.push(entity);
         }
@@ -142,7 +154,7 @@ export class DatasetAcquisitionDTO {
     softwareRelease: string;
     sortingIndex: number;
     creationDate: Date;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed' | 'BIDS';
 }
 
 export class MrDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
@@ -164,6 +176,10 @@ export class ProcessedDatasetAcquisitionDTO extends DatasetAcquisitionDTO {
 export class ExaminationDatasetAcquisitionDTO {
     id: number;
     name: string;
-    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed';
+    type: 'Mr' | 'Pet' | 'Ct' | 'Eeg' | 'Generic' | 'Processed' | 'BIDS';
     datasets: any;
+}
+
+export class DatasetAcquisitionDatasetsDTO extends DatasetAcquisitionDTO {
+    datasets: DatasetDTO[];
 }

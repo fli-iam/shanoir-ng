@@ -89,8 +89,6 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 		// Set the study and the subject
 		ctDataset.setSubjectId(importJob.getPatients().get(0).getSubject().getId());
 
-		// Set the modality from dicom fields
-		// TODO  :VERIFY NOT NEEDED ANY MORE ?
 		ctDataset.getOriginMetadata().setDatasetModalityType(DatasetModalityType.CT_DATASET);
 
 		CardinalityOfRelatedSubjects refCardinalityOfRelatedSubjects = null;
@@ -100,9 +98,6 @@ public class CtDatasetStrategy implements DatasetStrategy<CtDataset> {
 			refCardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects.MULTIPLE_SUBJECTS_DATASET;
 		}
 		ctDataset.getOriginMetadata().setCardinalityOfRelatedSubjects(refCardinalityOfRelatedSubjects);
-		
-		
-
 
 		/**
 		 *  The part below will generate automatically the datasetExpression according to :
