@@ -39,6 +39,7 @@ export const BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL: string = '/denyaccountre
 export const BACKEND_API_USER_EXTENSION_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/extensionrequest';
 export const BACKEND_API_USER_ACCESS_REQUEST: string = BACKEND_API_USERS_MS_URL + '/accessrequest';
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_USER: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byUser';
+export const BACKEND_API_USER_ACCESS_REQUEST_BY_ADMIN: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byAdmin';
 export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
 
 
@@ -147,7 +148,8 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
 // carmin
-export const CARMIN_BASE_URL : string = BACKEND_API_URL + "/vip/fakevip";
+export const CARMIN_BASE_URL : string = environment.vipUrl + "/rest";
+
 export const BACKEND_API_CARMIN_DATASET_PROCESSING_URL: string = BACKEND_API_DATASET_MS_URL + '/carminDatasetProcessing';
 
 export function hasUniqueError(error: any, fieldName: string): boolean {

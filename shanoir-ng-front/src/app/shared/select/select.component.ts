@@ -285,7 +285,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             return;
         }
         this.displayedOptions = this.displayableOptions.slice(this.firstScrollOptionIndex, this.firstScrollOptionIndex + this.LIST_LENGTH);
-        this.displayedOptions = this.displayedOptions.sort((a, b) => (a.section > b.section) ? -1 : 1);
+        this.displayedOptions = this.displayedOptions.sort((a, b) => {
+            if (a.section == b.section) return 0;
+            else return ((a.section || 0) > (b.section || 0)) ? -1 : 1;
+        });
         this.noResult = this.displayedOptions.length == 0;
     }
     
