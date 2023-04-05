@@ -184,8 +184,9 @@ public class DefaultOutputProcessing extends OutputProcessing {
 	 * @param destDir the destinatino directory where to create these processed datasets
 	 * @param carminDatasetProcessing The carmin dataset processing created before the execution
 	 * @throws EntityNotFoundException 
+	 * @throws IOException 
 	 */
-	private void createProcessedDatasets(List<File> processedFiles, String destDir, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws EntityNotFoundException {
+	private void createProcessedDatasets(List<File> processedFiles, String destDir, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws EntityNotFoundException, IOException {
 
 		File dir = new File(destDir);
 		// create output directory if it doesn't exist
