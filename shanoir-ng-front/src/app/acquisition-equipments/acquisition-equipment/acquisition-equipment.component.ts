@@ -55,8 +55,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             public manufacturerModelPipe: ManufacturerModelPipe) {
 
         super(route, 'acquisition-equipment');
-        this.centersFromStudyCard = this.router.getCurrentNavigation().extras.state.sc_center;
-
+        let input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['sc_center'] : null;
+        if (input != null) {
+          this.centersFromStudyCard = input;
+        }
     }
 
     getService(): EntityService<AcquisitionEquipment> {
@@ -82,6 +84,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     async initCreate(): Promise<void> {
         this.entity = new AcquisitionEquipment();
+
         if (this.centersFromStudyCard == null) {
           this.centerService.getCentersNames().then(centers => this.centers = centers);
         }
