@@ -30,7 +30,9 @@ sed -i -E "s/SHANOIR_URL_HOST/$SHANOIR_URL_HOST/g" /opt/keycloak/themes/shanoir-
 # keycloak options
 # see: https://www.keycloak.org/server/all-config
 #
-export KC_HTTP_RELATIVE_PATH="/auth"
+# NOTE: options that must also be set at build-time (eg: KC_DB,
+#       KC_HTTP_RELATIVE_PATH) are set in the Dockerfile.
+#
 export KC_PROXY="${KC_PROXY:-edge}"
 export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 
@@ -42,7 +44,6 @@ export KC_SPI_THEME_WELCOME_THEME="shanoir-theme"
 export KC_HOSTNAME_STRICT="${KC_HOSTNAME_STRICT:false}"
 export KC_HOSTNAME_STRICT_HTTPS="${KC_HOSTNAME_STRICT_HTTPS:false}"
 
-export KC_DB="${DB_VENDOR:-mysql}"
 export KC_DB_URL=jdbc:mysql://"${DB_ADDR:-${SHANOIR_PREFIX}keycloak-database}":"${DB_PORT:-3306}"/"${DB_DATABASE:-keycloak}"
 export KC_DB_USERNAME="${DB_USER:-keycloak}"
 export KC_DB_PASSWORD="${DB_PASSWORD:-password}"
