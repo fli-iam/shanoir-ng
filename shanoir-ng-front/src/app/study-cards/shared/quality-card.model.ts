@@ -24,6 +24,7 @@ export class QualityCard extends Entity {
     name: string;
     study: Study;
     rules: QualityCardRule[] = [];
+    toCheckAtImport: boolean = false;
 }
 
 

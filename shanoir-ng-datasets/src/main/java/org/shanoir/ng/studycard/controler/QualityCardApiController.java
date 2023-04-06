@@ -121,7 +121,7 @@ public class QualityCardApiController implements QualityCardApi {
 			final BindingResult result) throws RestServiceException {
 		validate(qualityCard, result);
 		try {
-			qualityCardService.update(qualityCard);
+			QualityCard qc = qualityCardService.update(qualityCard);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

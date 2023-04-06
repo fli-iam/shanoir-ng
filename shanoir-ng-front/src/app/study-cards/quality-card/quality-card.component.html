@@ -55,6 +55,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
+					<li>
+						<label>Auto check at import</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-container *ngIf="mode == 'view'">
+								<span *ngIf="qualityCard.toCheckAtImport" class="bool-true"><i class="fas fa-check"></i></span>
+								<span *ngIf="!qualityCard.toCheckAtImport" class="bool-false"><i class="fas fa-times"></i></span>
+							</ng-container>
+							<ng-container *ngIf="mode != 'view'">
+								<checkbox [(ngModel)]="qualityCard.toCheckAtImport" formControlName="toCheckAtImport"></checkbox>
+							</ng-container>
+						</span>
+					</li>
 				</ol>
 			</fieldset>
 			<fieldset class="rules">

@@ -117,4 +117,8 @@ export class QualityControlComponent implements OnChanges {
     private getReportFileName(qualityCard: QualityCard): string {
         return 'qcReport_' + qualityCard.name + '_' + Date.now().toLocaleString('fr-FR');
     }
+
+    updateQualityCard(qualityCard: QualityCard) {
+        this.qualityCardService.update(qualityCard.id, qualityCard);
+    }
 }

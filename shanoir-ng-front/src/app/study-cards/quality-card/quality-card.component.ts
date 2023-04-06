@@ -81,7 +81,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     initEdit(): Promise<void> {
-        this.hasAdministrateRightPromise = Promise.resolve(false);
+        this.hasAdministrateRightPromise = Promise.resolve(true);
         this.fetchStudies();
         return this.qualityCardService.get(this.id).then(sc => {
             this.qualityCard = sc;
@@ -89,7 +89,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     initCreate(): Promise<void> {
-        this.hasAdministrateRightPromise = Promise.resolve(false);
+        this.hasAdministrateRightPromise = Promise.resolve(true);
         this.fetchStudies().then(() => {
             const studyId: number = parseInt(this.route.snapshot.paramMap.get('studyId'));
             if (studyId) {
@@ -105,6 +105,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         let form: FormGroup = this.formBuilder.group({
             'name': [this.qualityCard.name, [Validators.required, Validators.minLength(2), this.registerOnSubmitValidator('unique', 'name')]],
             'study': [this.qualityCard.study, [Validators.required]],
+            'toCheckAtImport': [this.qualityCard.toCheckAtImport, [Validators.required]],
             'rules': [this.qualityCard.rules, [StudyCardRulesComponent.validator]]
         });
         return form;

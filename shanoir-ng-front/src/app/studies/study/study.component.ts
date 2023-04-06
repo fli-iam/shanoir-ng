@@ -72,6 +72,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     accessRequests: AccessRequest[];
+    isStudyAdmin: boolean;
 
     public openPrefix: boolean = false;
 
@@ -95,6 +96,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
         super(route, 'study');
         this.activeTab = 'general';
+        this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
     }
 
     public get study(): Study { return this.entity; }
@@ -254,12 +256,16 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
-    public async hasEditRight(): Promise<boolean> {
+    public async hasStudyAdminRight(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return true;
         if (!this.study.studyUserList) return false;
         let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
+    public async hasEditRight(): Promise<boolean> {
+        return this.hasStudyAdminRight();
     }
 
     public async hasDeleteRight(): Promise<boolean> {
