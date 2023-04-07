@@ -24,6 +24,7 @@ import { EntityComponent } from '../../shared/components/entity/entity.component
 import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
+import { TableComponent } from '../../shared/components/table/table.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
@@ -34,6 +35,7 @@ import { QualityCard } from '../shared/quality-card.model';
 import { QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
+import * as AppUtils from '../../utils/app.utils';
 
 @Component({
     selector: 'quality-card',
@@ -56,6 +58,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     allCoils: Coil[];
     applying: boolean = false;
     report: BrowserPaging<any>;
+    reportIsTest: boolean;
     reportColumns: ColumnDefinition[] = [
         {headerName: 'Subject Name', field: 'subjectName', width: '20%'},
         {headerName: 'Examination Comment', field: 'examinationComment', width: '25%'},
@@ -158,27 +161,6 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         this.showRulesErrors = !this.showRulesErrors;
     }
 
-    // importRules() {
-    //     let currentStep: Step = this.breadcrumbsService.currentStep;
-    //     this.router.navigate(['/study-card/select-rule/list/' + this.entity.id]).then(success => {
-    //         this.breadcrumbsService.currentStep.label = 'Select study-card';
-    //         this.subscribtions.push(
-    //             currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe((rules: StudyCardRule[]) => {
-    //                 rules.forEach(rule => {
-    //                     this.studyCard.rules.push(rule);
-    //                     let lastIndex: number = this.studyCard.rules.length - 1;
-    //                     currentStep.data.rulesToAnimate.add(lastIndex);
-    //                 });
-    //             })
-    //         );
-    //     });
-    // }
-
-    // clickImportRules() {
-    //     this.breadcrumbsService.currentStep.notifySave(this.selectedRules);
-    //     this.breadcrumbsService.goBack(2);
-    // }
-
     apply() {
         this.confirmService.confirm(
             'Apply Quality Card', 
@@ -189,12 +171,40 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
                 this.report = null;
                 this.qualityCardService.applyOnStudy(this.qualityCard.id).then(result => {
                     this.report = new BrowserPaging(result, this.reportColumns);
+                    this.reportIsTest = false;
                 }).finally(() => this.applying = false);
             }
         });
     }
 
+    test() {
+        this.applying = true;
+        this.report = null;
+        this.qualityCardService.testOnStudy(this.qualityCard.id).then(result => {
+            this.report = new BrowserPaging(result, this.reportColumns);
+            this.reportIsTest = true;
+        }).finally(() => this.applying = false);
+    }
+
+
     getPage(pageable: FilterablePageable): Promise<Page<any>> {
         return Promise.resolve(this.report.getPage(pageable));
+    }
+
+    downloadReport() {
+        if (!this.report) return;
+        let csvStr: string = '';
+        csvStr += this.report.columnDefs.map(col => col.headerName).join(',');
+        for (let entry of this.report.items) {
+            csvStr += '\n' + this.report.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
+        }
+        const csvBlob = new Blob([csvStr], {
+            type: 'text/csv'
+        });
+        AppUtils.browserDownloadFile(csvBlob, this.getReportFileName());
+    }
+
+    private getReportFileName(): string {
+        return 'qcReport_' + this.qualityCard.name + '_' + Date.now().toLocaleString('fr-FR');
     }
 }

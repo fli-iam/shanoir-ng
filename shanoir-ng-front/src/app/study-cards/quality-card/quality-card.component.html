@@ -98,7 +98,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</study-card-rules>
 			</fieldset>
 			<fieldset class="report" *ngIf="report">
-				<legend>Report</legend>
+				<legend>
+					Application Report 
+					<span *ngIf="reportIsTest">(test)</span>
+				</legend>
 				<shanoir-table class="report"
                     [getPage]="getPage.bind(this)"
                     [columnDefs]="reportColumns"
@@ -123,6 +126,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<button 
 						*ngIf="mode == 'view' && isStudyAdmin"
 						type="button"
+						class="right-icon apply test" 
+						(click)="test()" 
+						[disabled]="applying">
+					Test
+                    <i *ngIf="!applying" class="fa-solid fa-play"></i>
+                    <i *ngIf="applying" class="fa fa-cog fa-spin"></i> 
+                </button>
+				<button 
+						*ngIf="mode == 'view' && isStudyAdmin"
+						type="button"
 						class="alt right-icon apply" 
 						(click)="apply()" 
 						[disabled]="applying">
@@ -130,6 +143,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <i *ngIf="!applying" class="fa-solid fa-play"></i>
                     <i *ngIf="applying" class="fa fa-cog fa-spin"></i> 
                 </button>
+				<button *ngIf="report" type="button" class="apply right-icon" (click)="downloadReport()">
+					Download report
+					<i class="fas fa-floppy-disk"></i>
+				</button>
 			</form-footer>
 		</div>
 	</form>
