@@ -19,5 +19,5 @@ ADD COLUMN `pipeline_identifier` varchar(255) DEFAULT NULL,
 ADD COLUMN `results_location` varchar(255) DEFAULT NULL,
 ADD COLUMN `start_date` bigint(20) DEFAULT NULL,
 ADD COLUMN `status` int(11) DEFAULT NULL,
+ADD COLUMN `output_processing` varchar(31) DEFAULT NULL,
 ADD COLUMN `timeout` int(11) DEFAULT NULL;
-

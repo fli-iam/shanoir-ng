@@ -1,5 +1,6 @@
 package org.shanoir.ng.processing.carmin.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
@@ -17,6 +18,9 @@ public interface CarminDatasetProcessingService extends BasicEntityService<Carmi
      */
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #carminDatasetProcessing.getId() == null")
     CarminDatasetProcessing createCarminDatasetProcessing(CarminDatasetProcessing carminDatasetProcessing);
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+    List<CarminDatasetProcessing> findAllAllowed();
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
     Optional<CarminDatasetProcessing> findByIdentifier(String identifier);

@@ -18,6 +18,7 @@ export interface Pipeline {
     identifier: string;
     name: string;
     version: string;
+    outputProcessing?: string;
     description?: string;
     /**
      * true if the user who requested the pipeline can execute it

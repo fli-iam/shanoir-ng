@@ -26,6 +26,7 @@ export class CarminDatasetProcessing extends DatasetProcessing {
     resultsLocation: string;
     startDate?: number;
     endDate?: number;
+    outputProcessing?: string;
 
     constructor(
         identifier?: string,
