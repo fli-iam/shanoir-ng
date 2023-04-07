@@ -57,6 +57,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     isAdminOrExpert: boolean;
     allCoils: Coil[];
     applying: boolean = false;
+    testing: boolean = false;
     report: BrowserPaging<any>;
     reportIsTest: boolean;
     reportColumns: ColumnDefinition[] = [
@@ -178,12 +179,12 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     }
 
     test() {
-        this.applying = true;
+        this.testing = true;
         this.report = null;
         this.qualityCardService.testOnStudy(this.qualityCard.id).then(result => {
             this.report = new BrowserPaging(result, this.reportColumns);
             this.reportIsTest = true;
-        }).finally(() => this.applying = false);
+        }).finally(() => this.testing = false);
     }
 
 
