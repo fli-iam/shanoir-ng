@@ -92,7 +92,7 @@ public class CardsProcessingService {
 	 * @param studyCard
 	 * @throws MicroServiceCommunicationException 
 	 */
-	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard) throws MicroServiceCommunicationException {
+	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws MicroServiceCommunicationException {
 	    if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
 		Study study = studyService.findById(qualityCard.getStudyId());
 		if (study == null ) throw new IllegalArgumentException("study can't be null");
@@ -115,19 +115,20 @@ public class CardsProcessingService {
 				}				
 			};
 			result.removeUnchanged(study);
-			try {
-                subjectStudyService.update(result.getUpdatedSubjectStudies());
-            } catch (EntityNotFoundException e) {
-                throw new IllegalStateException("Could not update subject-studies", e);
-            }
-			List<SubjectStudyQualityTagDTO> subjectStudyTagDTOs = getSubjectStudyTagDTOs(result.getUpdatedSubjectStudies());
-			rabbitSender.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);
+			if (updateTags) {
+			    try {
+			        subjectStudyService.update(result.getUpdatedSubjectStudies());
+			    } catch (EntityNotFoundException e) {
+			        throw new IllegalStateException("Could not update subject-studies", e);
+			    }
+			    List<SubjectStudyQualityTagDTO> subjectStudyTagDTOs = getSubjectStudyTagDTOs(result.getUpdatedSubjectStudies());
+			    rabbitSender.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);			    
+			}
 			return result;
 		} else {
 			throw new RestClientException("Study card used with emtpy rules.");
 		}
 	}
-
 
     private List<SubjectStudyQualityTagDTO> getSubjectStudyTagDTOs(List<SubjectStudy> updatedSubjectStudies) {
         List<SubjectStudyQualityTagDTO> dtos = new ArrayList<>();
