@@ -80,7 +80,6 @@ export class QualityControlComponent implements OnChanges {
                 }).finally(() => this.loading.set(qualityCard.id, false));
             }
         });
-
     }
 
     onMouseOverNbRules(qualityCard: QualityCard, event: any) {

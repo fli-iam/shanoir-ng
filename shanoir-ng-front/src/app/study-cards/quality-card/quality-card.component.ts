@@ -19,7 +19,11 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
 import { slideDown } from '../../shared/animations/animations';
+import { ConfirmDialogService } from '../../shared/components/confirm-dialog/confirm-dialog.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
+import { BrowserPaging } from '../../shared/components/table/browser-paging.model';
+import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { FilterablePageable, Page } from '../../shared/components/table/pageable.model';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
@@ -45,10 +49,19 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     selectMode: boolean;
     selectedRules: StudyCardRule[] = [];
     hasAdministrateRightPromise: Promise<boolean>;
+    isStudyAdmin: boolean;
     lockStudy: boolean = false;
     @ViewChild(StudyCardRulesComponent) rulesComponent: StudyCardRulesComponent;
     isAdminOrExpert: boolean;
     allCoils: Coil[];
+    applying: boolean = false;
+    report: BrowserPaging<any>;
+    reportColumns: ColumnDefinition[] = [
+        {headerName: 'Subject Name', field: 'subjectName', width: 'auto'},
+        {headerName: 'Examination Comment', field: 'examinationComment', width: 'auto'},
+        {headerName: 'Examination Date', field: 'examinationDate', type: 'date', width: 'auto'},
+        {headerName: 'Details', field: 'message', wrap: true, width: 'auto'}
+    ];
 
     constructor(
             private route: ActivatedRoute,
@@ -56,7 +69,8 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             private studyService: StudyService,
             private studyRightsService: StudyRightsService,
             keycloakService: KeycloakService,
-            coilService: CoilService) {
+            coilService: CoilService,
+            private confirmService: ConfirmDialogService) {
         super(route, 'quality-card');
 
         this.mode = this.activatedRoute.snapshot.data['mode'];
@@ -76,20 +90,21 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         let scFetchPromise: Promise<void> = this.qualityCardService.get(this.id).then(sc => {
             this.qualityCard = sc;
         });
-        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy());
+        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res));
         return scFetchPromise;
     }
 
     initEdit(): Promise<void> {
-        this.hasAdministrateRightPromise = Promise.resolve(true);
-        this.fetchStudies();
-        return this.qualityCardService.get(this.id).then(sc => {
+        let scFetchPromise: Promise<void> = this.qualityCardService.get(this.id).then(sc => {
             this.qualityCard = sc;
         });
+        this.hasAdministrateRightPromise = scFetchPromise.then(() => this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res));
+        this.fetchStudies();
+        return scFetchPromise;
     }
 
     initCreate(): Promise<void> {
-        this.hasAdministrateRightPromise = Promise.resolve(true);
+        this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies().then(() => {
             const studyId: number = parseInt(this.route.snapshot.paramMap.get('studyId'));
             if (studyId) {
@@ -99,6 +114,10 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         });
         this.qualityCard = new QualityCard();
         return Promise.resolve();
+    }
+
+    onStudyChange() {
+        this.hasAdministrateRightPromise = this.hasAdminRightsOnStudy().then(res => this.isStudyAdmin = res);
     }
 
     buildForm(): FormGroup {
@@ -160,7 +179,22 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     //     this.breadcrumbsService.goBack(2);
     // }
 
-    goToApply() {
-        this.router.navigate(['/quality-card/apply/' + this.entity.id]);
+    apply() {
+        this.confirmService.confirm(
+            'Apply Quality Card', 
+            `Do you want to apply the quality card named "${this.qualityCard.name}" all over the study "${this.qualityCard.study.name}" ? This would permanentely overwrite previous quality tags for the study's subjects.`
+        ).then(accept => {
+            if (accept) {
+                this.applying = true;
+                this.report = null;
+                this.qualityCardService.applyOnStudy(this.qualityCard.id).then(result => {
+                    this.report = new BrowserPaging(result, this.reportColumns);
+                }).finally(() => this.applying = false);
+            }
+        });
+    }
+
+    getPage(pageable: FilterablePageable): Promise<Page<any>> {
+        return Promise.resolve(this.report.getPage(pageable));
     }
 }
