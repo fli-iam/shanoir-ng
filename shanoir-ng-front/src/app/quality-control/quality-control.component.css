@@ -10,3 +10,5 @@ study-card-rules { position: absolute; top: calc(100% - 1px); left: -1px; border
 table td + td { padding-left: 50px; }
 table { color: var(--dark-grey); }
 checkbox { vertical-align: bottom; margin-left: 5px; }
+.report-cell { max-width: 625px; }
+.report { display: inline-block; }
