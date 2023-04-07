@@ -57,10 +57,10 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     applying: boolean = false;
     report: BrowserPaging<any>;
     reportColumns: ColumnDefinition[] = [
-        {headerName: 'Subject Name', field: 'subjectName', width: 'auto'},
-        {headerName: 'Examination Comment', field: 'examinationComment', width: 'auto'},
-        {headerName: 'Examination Date', field: 'examinationDate', type: 'date', width: 'auto'},
-        {headerName: 'Details', field: 'message', wrap: true, width: 'auto'}
+        {headerName: 'Subject Name', field: 'subjectName', width: '20%'},
+        {headerName: 'Examination Comment', field: 'examinationComment', width: '25%'},
+        {headerName: 'Examination Date', field: 'examinationDate', type: 'date', width: '100px'},
+        {headerName: 'Details', field: 'message', wrap: true}
     ];
 
     constructor(
