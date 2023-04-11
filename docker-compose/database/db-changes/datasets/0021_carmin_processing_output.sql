@@ -11,13 +11,4 @@
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 ALTER TABLE `dataset_processing`
-ADD COLUMN `dtype` varchar(31) NOT NULL,
-ADD COLUMN `end_date` bigint(20) DEFAULT NULL,
-ADD COLUMN `identifier` varchar(255) DEFAULT NULL,
-ADD COLUMN `name` varchar(255) DEFAULT NULL,
-ADD COLUMN `pipeline_identifier` varchar(255) DEFAULT NULL,
-ADD COLUMN `results_location` varchar(255) DEFAULT NULL,
-ADD COLUMN `start_date` bigint(20) DEFAULT NULL,
-ADD COLUMN `status` int(11) DEFAULT NULL,
-ADD COLUMN `output_processing` varchar(31) DEFAULT NULL,
-ADD COLUMN `timeout` int(11) DEFAULT NULL;
+ADD COLUMN `output_processing` varchar(31) DEFAULT NULL;
