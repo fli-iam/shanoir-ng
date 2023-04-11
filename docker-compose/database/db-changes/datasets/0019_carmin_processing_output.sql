@@ -11,7 +11,6 @@
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 ALTER TABLE `dataset_processing`
-ADD COLUMN `dtype` varchar(31) NOT NULL,
 ADD COLUMN `end_date` bigint(20) DEFAULT NULL,
 ADD COLUMN `identifier` varchar(255) DEFAULT NULL,
 ADD COLUMN `name` varchar(255) DEFAULT NULL,
