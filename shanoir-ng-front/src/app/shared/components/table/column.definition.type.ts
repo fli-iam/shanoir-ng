@@ -75,6 +75,8 @@ export type ColumnDefinition = {
     /** css color the the awesome icon */ 
     colorFalse?: string,
 
+    awesomeFunction?: (item: any) => { awesome: `fa${string} fa${string}`, color: string }
+
     /** add a descrption when cursor stands still a few second over the column */
     tip?: string,
 

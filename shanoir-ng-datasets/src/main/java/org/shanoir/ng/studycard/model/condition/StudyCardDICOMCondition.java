@@ -76,7 +76,7 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
                     comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
                 }
                 if (comparison != null && numericalCompare(this.getOperation(), comparison)) {
-                    errorMsg.append("condition [" + toString() + "] succeed");
+                    if (errorMsg != null) errorMsg.append("condition [" + toString() + "] succeed");
                     return true; // as condition values are combined by OR: return if one is true
                 }
             } else if (tagType.isTextual()) {
@@ -87,17 +87,17 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
                 String stringValue = dicomAttributes.getString(this.getDicomTag());
                 if (stringValue == null) {
                     LOG.warn("Could not find a value in the dicom for the tag " + this.getDicomTag());
-                    errorMsg.append("condition [" + toString() 
+                    if (errorMsg != null) errorMsg.append("condition [" + toString() 
                         + "] failed because no value was found in the dicom for the tag " + this.getDicomTag());
                     return false;
                 }               
                 if (textualCompare(this.getOperation(), stringValue, value)) {
-                    errorMsg.append("condition [" + toString() + "] succeed");
+                    if (errorMsg != null) errorMsg.append("condition [" + toString() + "] succeed");
                     return true; // as condition values are combined by OR: return if one is true
                 }
             }
         }
-        errorMsg.append("condition [" + toString() + "] failed ");
+        if (errorMsg != null) errorMsg.append("condition [" + toString() + "] failed ");
         return false;
     }
     

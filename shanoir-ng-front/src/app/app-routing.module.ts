@@ -92,8 +92,9 @@ import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-ca
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
 import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
-import {WelcomeComponent} from "./welcome/welcome.component";
-import {LoginGuard} from "./shared/roles/login-guard";
+import { WelcomeComponent } from "./welcome/welcome.component";
+import { LoginGuard } from "./shared/roles/login-guard";
+import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
 import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
 
@@ -817,6 +818,10 @@ let routes: Routes = [
         path: 'access-request/study/:id',
         component: AccessRequestComponent,
         data: { mode: 'create' },
+    },
+    {
+        path: 'access-request/list',
+        component: AccessRequestListComponent
     }
 ];
 

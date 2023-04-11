@@ -17,11 +17,7 @@ package org.shanoir.ng.importer.service;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.importer.strategies.datasetacquisition.CtDatasetAcquisitionStrategy;
-import org.shanoir.ng.importer.strategies.datasetacquisition.DatasetAcquisitionStrategy;
-import org.shanoir.ng.importer.strategies.datasetacquisition.GenericDatasetAcquisitionStrategy;
-import org.shanoir.ng.importer.strategies.datasetacquisition.MrDatasetAcquisitionStrategy;
-import org.shanoir.ng.importer.strategies.datasetacquisition.PetDatasetAcquisitionStrategy;
+import org.shanoir.ng.importer.strategies.datasetacquisition.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

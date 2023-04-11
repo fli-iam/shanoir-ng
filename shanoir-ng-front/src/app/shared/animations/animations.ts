@@ -33,6 +33,15 @@ export const slideDown = trigger('slideDown', [
     )
 ]);
 
+export const disapearUp = trigger('disapearUp', [
+    transition(
+        ':leave', [
+            style({height: '*', 'min-height': '*', 'padding-bottom': '*', 'margin-bottom': '*', overflow: 'hidden'}),
+            animate('500ms ease-in-out', style({height: '0', 'min-height': 0, 'padding-bottom': '0', 'margin-bottom': '0', overflow: 'hidden'}))
+        ]
+    )
+]);
+
 export const slideRight = trigger('slideRight', [
     transition(
         ':enter', [

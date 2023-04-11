@@ -268,6 +268,7 @@ import { QualityCardRuleComponent } from './study-cards/study-card-rules/quality
 import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
+import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 
 
 @NgModule({
@@ -450,11 +451,12 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         PipelineComponent,
         ExecutionComponent,
         CarminDatasetProcessingsComponent,
+        WelcomeComponent,
+        AccessRequestListComponent,
         QualityControlComponent,
         QualityCardListComponent,
         QualityCardComponent,
-        QualityCardRuleComponent,
-        WelcomeComponent
+        QualityCardRuleComponent
     ],
     // Not required anymore with Angular > 9.0
     // entryComponents: [

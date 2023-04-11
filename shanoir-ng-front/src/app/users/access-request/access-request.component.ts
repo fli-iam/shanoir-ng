@@ -25,7 +25,7 @@ import { AccessRequestService } from './access-request.service';
 import { IdName } from 'src/app/shared/models/id-name.model';
 
 @Component({
-    selector: 'accessRequest',
+    selector: 'access-request',
     templateUrl: 'access-request.component.html',
     styleUrls: ['access-request.component.css']
 })
@@ -100,13 +100,21 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     acceptRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, true).then(value => this.router.navigate(['/study/details/' + this.accessRequest.studyId])).then(() => {
-            window.location.hash="members";
-        });
+        this.accessRequestService.resolveRequest(this.accessRequest.id, true)
+            .then(value => {
+                this.userService.decreaseAccessRequests;
+                this.router.navigate(['/study/details/' + this.accessRequest.studyId])
+            }).then(() => {
+                window.location.hash="members";
+            }
+        );
     }
     
     refuseRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(value => this.goBack());
+        this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(value => {
+            this.userService.decreaseAccessRequests;
+            this.goBack();
+        });
     }
 
     public async hasDeleteRight(): Promise<boolean> {
@@ -118,19 +126,12 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
     
     save(): Promise<AccessRequest> {
-        return super.save().catch(exception => {
-            if (exception?.error?.message) {
-                this.consoleService.log('error', exception.error.message);
-                return null;
-            }
+        return super.save().then(ar => {
+            return ar;
         });
     }
 
     protected chooseRouteAfterSave() {
-        if (this.fromStudy) {
-            this.router.navigate(["/home"]);
-        } else {
-            this.goBack();
-        }
+        this.goBack();
     }
 }
