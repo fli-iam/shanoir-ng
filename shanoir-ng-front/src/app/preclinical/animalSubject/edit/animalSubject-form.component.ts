@@ -343,6 +343,10 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             });
         }else{
             return this.addSubject().then(subject => {
+                if (subject == null) {
+                    this.consoleService.log('error', 'Subject creation failed, please check input fields.');
+                    return;
+                }
                 this.onSave.next(this.preclinicalSubject);
                 if (this.breadcrumbsService.previousStep && this.breadcrumbsService.previousStep.isWaitingFor(this.breadcrumbsService.currentStep)) {
                     this.chooseRouteAfterSave(this.preclinicalSubject.subject);
