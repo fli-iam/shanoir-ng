@@ -25,6 +25,7 @@ body { background-color: var(--color-a); display: table-cell; vertical-align: mi
   #input-error-password-confirm { color: #FF6565; display: block; }
 	.alert { margin-bottom: 15px; color: #FF6565; display: inline-block; }
 	.info { margin-top: 15px; color: #51A3FF; display: inline-block; }
+  input#logout-sessions { margin-right: 4px; vertical-align: -5px; }
 
 @-webkit-keyframes autofill {
 	to {
