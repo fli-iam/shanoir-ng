@@ -68,6 +68,7 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 
 a.link { text-decoration: none; color: inherit; }
 	a.link i { font-size: 9px; vertical-align: 0; margin-left: 5px; color: var(--greyer); }
+	a.link span i { font-size: inherit; vertical-align: 0; margin-left: 0; color: var(--color-b); text-decoration:none; }
 	a.link:hover i,
 	a.link:hover { color: var(--color-a); text-decoration: underline; }
 
