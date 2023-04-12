@@ -66,6 +66,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         {headerName: 'Examination Date', field: 'examinationDate', type: 'date', width: '100px'},
         {headerName: 'Details', field: 'message', wrap: true}
     ];
+    forceStudyId: number;
 
     constructor(
             private route: ActivatedRoute,
@@ -81,6 +82,12 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         this.selectMode = this.mode == 'view' && this.activatedRoute.snapshot.data['select'];
         this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
         coilService.getAll().then(coils => this.allCoils = coils);
+
+        this.subscribtions.push(this.activatedRoute.params.subscribe(
+            params => {
+                this.forceStudyId = +params['studyId'];
+            }
+        ));
      }
 
     getService(): EntityService<QualityCard> {
@@ -110,10 +117,10 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     initCreate(): Promise<void> {
         this.hasAdministrateRightPromise = Promise.resolve(false);
         this.fetchStudies().then(() => {
-            const studyId: number = parseInt(this.route.snapshot.paramMap.get('studyId'));
-            if (studyId) {
+            if (this.forceStudyId) {
                 this.lockStudy = true;
-                this.qualityCard.study = this.studies.find(st => st.id == studyId) as unknown as Study;
+                this.qualityCard.study = this.studies.find(st => st.id == this.forceStudyId) as unknown as Study;
+                this.onStudyChange();
             }
         });
         this.qualityCard = new QualityCard();

@@ -100,5 +100,4 @@ export class AppComponent {
                 if (response == true) this.router.navigate(['/dua']);
             });
     }
-
 }

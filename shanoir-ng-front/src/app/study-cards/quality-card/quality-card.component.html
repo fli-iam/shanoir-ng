@@ -45,12 +45,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label>Study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-							    <a [routerLink]="['/study/details/', qualityCard.study?.id]">
+							    <a [routerLink]="['/study/details/', qualityCard.study?.id]" (click)="breadcrumbsService.markMilestone()">
 								    {{qualityCard.study.name}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="study" [(ngModel)]="qualityCard.study" (userChange)="onStudyChange()" [optionArr]="studies" [disabled]="lockStudy">
+								<select-box [readOnly]="forceStudyId" formControlName="study" [(ngModel)]="qualityCard.study" (userChange)="onStudyChange()" [optionArr]="studies" [disabled]="lockStudy">
 								</select-box>
 							</ng-template>
 						</span>
@@ -72,20 +72,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<fieldset class="rules">
 				<legend>
 					Rules
-					<tool-tip [large]="true">
-						There are tree differents types of rules for a qualitycard :
-						<ul>
-							<li>
-								<span class="bold">Rules that apply to every dataset of every acquisition of the examination :</span>
-								each dataset is checked regarding the conditions of that one rule and updated regarding the assignments of that one rule.
-							</li>
-							<li>
-								<span class="bold">Rules that apply to the acquisition :</span>
-								conditions on the acquisition's metadata can be set as well as the minimal number of datasets that fullfil one given condition,
-								then an assignment is applied to that acquisition.
-							</li>
-						</ul>
-					</tool-tip>
 				</legend>
 				<study-card-rules class="rules" [formGroup]="form"
 					cardType="qualitycard"

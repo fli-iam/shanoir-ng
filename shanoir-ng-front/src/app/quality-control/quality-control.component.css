@@ -12,3 +12,4 @@ table { color: var(--dark-grey); }
 checkbox { vertical-align: bottom; margin-left: 5px; }
 .report-cell { max-width: 625px; }
 .report { display: inline-block; }
+.new { margin-top: 10px; }
