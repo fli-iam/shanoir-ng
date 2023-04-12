@@ -12,7 +12,6 @@
                 <div class="${properties.kcInputWrapperClass!}">
                     <input type="password" id="password-new" name="password-new" class="${properties.kcInputClass!}"
                            autofocus autocomplete="new-password"
-						   style="color: red;"
                            aria-invalid="<#if messagesPerField.existsError('password','password-confirm')>true</#if>"
                            placeholder="${msg('passwordNew')}"
                     />
