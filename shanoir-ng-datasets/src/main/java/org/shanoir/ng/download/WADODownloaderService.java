@@ -358,7 +358,7 @@ public class WADODownloaderService {
 		Examination exam = getFirstIfExist(study.getExaminations());
 		if (exam == null) return null;
 		Attributes result = getDicomAttributesForExamination(exam);
-		LOG.error("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return result;
 	}
 
@@ -368,7 +368,7 @@ public class WADODownloaderService {
 		DatasetAcquisition acquisition = getFirstIfExist(examination.getDatasetAcquisitions());
 		if (acquisition == null) return null;
 		Attributes result = getDicomAttributesForAcquisition(acquisition);
-		LOG.error("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return result;
 	}
 
@@ -377,7 +377,7 @@ public class WADODownloaderService {
 		Dataset ds = getFirstIfExist(acquisition.getDatasets());
 		if (ds == null) return null;
 		Attributes result = getDicomAttributesForDataset(ds);
-		LOG.error("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return result;
 	}
 
