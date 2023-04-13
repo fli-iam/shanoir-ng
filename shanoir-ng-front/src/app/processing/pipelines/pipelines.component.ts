@@ -32,8 +32,17 @@ export class PipelinesComponent implements OnInit {
     )
   }
 
-  selectPipeline(pipeline:Pipeline){
-    this.selectedPipeline = pipeline;
+  selectPipeline(pipeline:Pipeline) {
+    this.descriptionLoading = true;
+    this.carminClientService.getPipeline(pipeline.identifier).subscribe(
+      (pipeline:Pipeline)=>{
+        this.descriptionLoading = false;
+        this.selectedPipeline = pipeline;
+      },
+      (error)=>{
+        console.error(error);
+      }
+    )
   }
 
   choosePipeLine(){
