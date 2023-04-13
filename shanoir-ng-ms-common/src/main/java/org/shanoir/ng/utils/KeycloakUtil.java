@@ -23,7 +23,6 @@ import java.util.Set;
 import org.keycloak.KeycloakPrincipal;
 import org.keycloak.KeycloakSecurityContext;
 import org.keycloak.representations.AccessToken;
-import org.keycloak.util.JsonSerialization;
 import org.shanoir.ng.shared.exception.TokenNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -57,11 +56,6 @@ public final class KeycloakUtil {
 		return accessToken.getRealmAccess().getRoles();
 	}
 	
-	public static String getAccessToken() {
-		final KeycloakSecurityContext context = getKeycloakSecurityContext();
-		return context.getTokenString();
-	}
-
 	/**
 	 * Know if connected user can import from PACS
 	 * 
