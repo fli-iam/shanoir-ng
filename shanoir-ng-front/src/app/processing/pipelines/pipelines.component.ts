@@ -32,7 +32,7 @@ export class PipelinesComponent implements OnInit {
     )
   }
 
-  selectPipeline(pipeline:Pipeline){
+  selectPipeline(pipeline:Pipeline) {
     this.descriptionLoading = true;
     this.carminClientService.getPipeline(pipeline.identifier).subscribe(
       (pipeline:Pipeline)=>{

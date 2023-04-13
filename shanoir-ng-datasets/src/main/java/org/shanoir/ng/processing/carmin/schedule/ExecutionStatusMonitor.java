@@ -63,8 +63,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 	private String identifier;
 
-	private String accessToken = "";
-
 	private static final Logger LOG = LoggerFactory.getLogger(ExecutionStatusMonitor.class);
 
 	@Autowired
@@ -101,11 +99,13 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 		String uri = VIP_URI + identifier + "/summary";
 		RestTemplate restTemplate = new RestTemplate();
+		
+		String token = null;
 
 		// check if the token is initialized
-		if (this.accessToken.isEmpty()) {
+		if (StringUtils.isEmpty(token)) {
 			// refresh the token
-			this.refreshServiceAccountAccessToken();
+			token = this.refreshServiceAccountAccessToken();
 		}
 
 		CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
@@ -117,7 +117,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 			// init headers with the active access token
 			HttpHeaders headers = new HttpHeaders();
-			headers.set("Authorization", "Bearer " + this.accessToken);
+			headers.set("Authorization", "Bearer " + token);
 			HttpEntity entity = new HttpEntity(headers);
 
 			// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
@@ -188,7 +188,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
 					LOG.warn("Unauthorized");
 					LOG.info("Getting new token...");
-					this.refreshServiceAccountAccessToken();
+					token = this.refreshServiceAccountAccessToken();
 					// inc attempts.
 					attempts++;
 				} else {
@@ -213,8 +213,8 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	 * Get token from keycloak service account
 	 * @return
 	 */
-	private void refreshServiceAccountAccessToken() throws SecurityException {
+	private String refreshServiceAccountAccessToken() throws SecurityException {
 		AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
-		this.accessToken = accessTokenResponse.getToken();
+		return accessTokenResponse.getToken();
 	}
 }
