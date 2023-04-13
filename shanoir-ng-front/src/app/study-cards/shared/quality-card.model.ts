@@ -50,9 +50,9 @@ export class QualityCardRule {
 
 export enum QualityTag {
 
-    VALID = 1,
-    WARNING = 2,
-    ERROR = 3
+    VALID = 'VALID',
+    WARNING = 'WARNING',
+    ERROR = 'ERROR'
 
 } export namespace QualityTag {
     

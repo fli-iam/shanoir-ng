@@ -19,6 +19,7 @@ import { SubjectStudyPipe } from '../../subjects/shared/subject-study.pipe';
 import { CenterNode, MemberNode, RightNode, StudyCardNode, StudyNode, SubjectNode, UNLOADED } from '../../tree/tree.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
+import { Tag } from '../../tags/tag.model';
 
 @Component({
     selector: 'study-node',
@@ -48,7 +49,7 @@ export class StudyNodeComponent implements OnChanges {
                 this.node = this.input;
             } else {
                 let subjects: SubjectNode[] = this.input.subjectStudyList.map(subjectStudy => {
-                    return new SubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED);
+                    return new SubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag);
                 });
                 let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {
                     return new CenterNode(studyCenter.center.id, studyCenter.center.name, UNLOADED);
