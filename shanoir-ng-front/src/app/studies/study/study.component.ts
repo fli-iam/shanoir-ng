@@ -96,7 +96,6 @@ export class StudyComponent extends EntityComponent<Study> {
 
         super(route, 'study');
         this.activeTab = 'general';
-        this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
     }
 
     public get study(): Study { return this.entity; }
@@ -130,10 +129,11 @@ export class StudyComponent extends EntityComponent<Study> {
                     return aname.localeCompare(bname);
                 });
 
-
             this.getTotalSize(study.id).then(size => {
               study.size = size;
             });
+
+            this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
             return Promise.resolve(study)
         });
@@ -164,9 +164,11 @@ export class StudyComponent extends EntityComponent<Study> {
               this.study.profile = profile;
             }
 
-          this.getTotalSize(study.id).then(size => {
-            study.size = size;
-          });
+            this.getTotalSize(study.id).then(size => {
+                study.size = size;
+            });
+
+            this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
             return study;
         });
@@ -196,6 +198,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     async initCreate(): Promise<void> {
         this.study = this.newStudy();
+        this.isStudyAdmin = true;
         this.getCenters();
         this.getProfiles();
         this.selectedCenter = null;
@@ -258,7 +261,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     public async hasStudyAdminRight(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return true;
-        if (!this.study.studyUserList) return false;
+        if (!this.study?.studyUserList) return false;
         let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);

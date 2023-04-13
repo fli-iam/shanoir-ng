@@ -121,6 +121,7 @@ public class QualityExaminationRule extends AbstractEntity {
         SubjectStudy subjectStudyCopy = new SubjectStudy();
         subjectStudyCopy.setId(subjectStudy.getId());
         subjectStudyCopy.setQualityTag(getQualityTag());
+        subjectStudyCopy.setStudy(subjectStudy.getStudy());
         return subjectStudyCopy;
     }
 
