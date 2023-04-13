@@ -214,7 +214,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	 * @return
 	 */
 	private String refreshServiceAccountAccessToken() throws SecurityException {
-		//AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
-		return KeycloakUtil.getAccessToken();
+		AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
+		return accessTokenResponse.getToken();
 	}
 }
