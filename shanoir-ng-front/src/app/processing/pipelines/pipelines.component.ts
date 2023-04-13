@@ -55,9 +55,6 @@ export class PipelinesComponent implements OnInit {
             filesParam += 1;
         }
     })
-    
-    
-        
     this.router.navigate(['processing/execution']);
   }
 
