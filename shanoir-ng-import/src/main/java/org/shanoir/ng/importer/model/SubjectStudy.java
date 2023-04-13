@@ -4,11 +4,11 @@ import org.shanoir.ng.shared.core.model.IdName;
 
 public class SubjectStudy {
 
-	private Subject subject;
-	
+	private IdName subject;
+
 	private IdName study;
 
-	public SubjectStudy(Subject subject, IdName study) {
+	public SubjectStudy(IdName subject, IdName study) {
 		this.subject = subject;
 		this.study = study;
 	}
@@ -16,14 +16,14 @@ public class SubjectStudy {
 	/**
 	 * @return the subject
 	 */
-	public Subject getSubject() {
+	public IdName getSubject() {
 		return subject;
 	}
 
 	/**
 	 * @param subject the subject to set
 	 */
-	public void setSubject(Subject subject) {
+	public void setSubject(IdName subject) {
 		this.subject = subject;
 	}
 
@@ -41,5 +41,5 @@ public class SubjectStudy {
 		this.study = study;
 	}
 
-	
+
 }

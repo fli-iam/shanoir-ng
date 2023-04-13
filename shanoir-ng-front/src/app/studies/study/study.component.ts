@@ -41,8 +41,11 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
-import {Profile} from "../../shared/models/profile.model";
+import { Profile } from "../../shared/models/profile.model";
 import { AccessRequest } from 'src/app/users/access-request/access-request.model';
+import { ProcessingService } from 'src/app/processing/processing.service';
+import {Dataset} from "../../datasets/shared/dataset.model";
+import {DatasetService} from "../../datasets/shared/dataset.service";
 
 @Component({
     selector: 'study-detail',
@@ -84,17 +87,20 @@ export class StudyComponent extends EntityComponent<Study> {
             private route: ActivatedRoute,
             private centerService: CenterService,
             private studyService: StudyService,
+            private datasetService: DatasetService,
             private subjectService: SubjectService,
             private userService: UserService,
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
-            private accessRequestService: AccessRequestService) {
+            private accessRequestService: AccessRequestService,
+            private processingService: ProcessingService) {
 
         super(route, 'study');
         this.activeTab = 'general';
     }
 
     public get study(): Study { return this.entity; }
+
     public set study(study: Study) {
         this.studyNode = this.breadcrumbsService.currentStep.data.studyNode ? this.breadcrumbsService.currentStep.data.studyNode : study;
         this.entity = study;
@@ -109,19 +115,27 @@ export class StudyComponent extends EntityComponent<Study> {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
         let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => {
-            this.study = study;
-            if (this.study.profile == null) {
+
+          this.study = study;
+
+          if (study.profile == null) {
                 let pro = new Profile();
                 pro.profileName = "Profile Neurinfo";
-                this.study.profile = pro;
+                study.profile = pro;
             }
-            this.study.subjectStudyList = this.study.subjectStudyList.sort(
+            study.subjectStudyList = study.subjectStudyList.sort(
                 function(a: SubjectStudy, b:SubjectStudy) {
                     let aname = a.subjectStudyIdentifier ? a.subjectStudyIdentifier : a.subject.name;
                     let bname = b.subjectStudyIdentifier ? b.subjectStudyIdentifier : b.subject.name;
                     return aname.localeCompare(bname);
                 });
-            return study;
+
+
+            this.getTotalSize(study.id).then(size => {
+              study.size = size;
+            });
+
+            return Promise.resolve(study)
         });
         if (this.keycloakService.isUserAdmin()) {
             this.accessRequestService.findByStudy(this.id).then(accessReqs => {
@@ -149,6 +163,11 @@ export class StudyComponent extends EntityComponent<Study> {
               profile.profileName = "Profile Neurinfo";
               this.study.profile = profile;
             }
+
+          this.getTotalSize(study.id).then(size => {
+            study.size = size;
+          });
+
             return study;
         });
         this.getSubjects();
@@ -223,6 +242,12 @@ export class StudyComponent extends EntityComponent<Study> {
         });
         return formGroup;
     }
+
+  private getTotalSize(id: number): Promise<number> {
+    return this.datasetService.getSizeByStudyId(id).then(totalSize => {
+        return totalSize;
+    });
+  }
 
     private dateOrdervalidator = (control: AbstractControl): ValidationErrors | null => {
         if (this.study.startDate && this.study.endDate && this.study.startDate >= this.study.endDate) {
@@ -387,6 +412,23 @@ export class StudyComponent extends EntityComponent<Study> {
 
     studyStatusStr(studyStatus: string) {
       return capitalsAndUnderscoresToDisplayable(studyStatus);
+    }
+
+    studySizeStr(size: number) {
+
+      const base: number = 1024;
+      const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+      if(size == null || size == 0){
+        return "0 " + units[0];
+      }
+
+      const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+      let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
+      let unit: string = units[exponent];
+
+      return value + " " + unit;
+
     }
 
     public click() {
@@ -576,6 +618,11 @@ export class StudyComponent extends EntityComponent<Study> {
 
     goToAccessRequest(accessRequest : AccessRequest) {
         this.router.navigate(["/access-request/details/" + accessRequest.id]);
+    }
+
+    goToProcessing() {
+        this.processingService.setDatasets(new Set(this.selectedDatasetIds));
+        this.router.navigate(['/processing']);
     }
 
     reloadSubjectStudies() {

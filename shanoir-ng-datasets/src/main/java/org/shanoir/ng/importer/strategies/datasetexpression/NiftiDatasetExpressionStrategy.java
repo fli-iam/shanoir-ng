@@ -14,13 +14,6 @@
 
 package org.shanoir.ng.importer.strategies.datasetexpression;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.time.LocalDateTime;
-
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -34,6 +27,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDateTime;
 
 @Component
 public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy {
@@ -52,7 +52,7 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 	
 	@Override
 	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
-			ExpressionFormat expressionFormat) {
+			ExpressionFormat expressionFormat) throws IOException {
 		
 		DatasetExpression niftiDatasetExpression = new DatasetExpression();
 		niftiDatasetExpression.setCreationDate(LocalDateTime.now());
@@ -66,60 +66,68 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 			niftiDatasetExpression.setMultiFrame(true);
 			niftiDatasetExpression.setFrameCount(serie.getMultiFrameCount());
 		}
-		
-		if (expressionFormat != null && expressionFormat.getType().equals("nii")) {
 
-			final String subLabel = SUB_PREFIX + importJob.getPatients().get(0).getSubject().getName();
-			// TODO BIDS: Remove ses level if only one examination, add ses level if new examination imported for the same subject
-			final String sesLabel = SES_PREFIX + importJob.getExaminationId();
-			// TODO BIDS: Get data type (anat, func, dwi, fmap, meg and beh) from MrDatasetNature and/or ExploredEntity
-			final String dataTypeLabel = ANAT + "/";
-			
-			final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + dataTypeLabel + File.separator);
-			outDir.mkdirs();
-			int index = 1;
-			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
-
-				File srcFile;
-				srcFile = new File(UriUtils.decode(datasetFile.getPath().replace("file:" , ""), "UTF-8"));
-				
-				// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
-				StringBuilder name = new StringBuilder("");
-				
-				name.append(importJob.getSubjectName()).append("_")
-				.append(serie.getSeriesDescription()).append("_")
-				.append(serie.getSeriesNumber()).append("_")
-				.append(importJob.getProperties().get(ImportJob.INDEX_PROPERTY)).append("_")
-				.append(importJob.getProperties().get(ImportJob.RANK_PROPERTY)).append("_")
-				.append(index);
-				if (srcFile.getName().endsWith(".nii.gz")) {
-					name.append(".nii.gz");
-				} else if (srcFile.getName().endsWith(".nii")) {
-					name.append(".nii");
-				} else {
-					name.append(".").append(FilenameUtils.getExtension(srcFile.getName()));
-				}
-				
-				File destFile = new File(outDir.getAbsolutePath() + File.separator + name.toString());
-				index++;
-
-				Path niftiFinalLocation = null;
-				try {
-					niftiFinalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-				} catch (IOException e) {
-					LOG.error("IOException generating nifti Dataset Expression", e);
-				}
-
-				if (niftiFinalLocation != null) {
-					DatasetFile niftiDatasetFile = new DatasetFile();
-					niftiDatasetFile.setPacs(false);
-					niftiDatasetFile.setPath(niftiFinalLocation.toUri().toString().replaceAll(" ", "%20"));
-					niftiDatasetExpression.getDatasetFiles().add(niftiDatasetFile);
-					niftiDatasetFile.setDatasetExpression(niftiDatasetExpression);
-				}
-				index++;
-			}
+		if (expressionFormat == null || !expressionFormat.getType().equals("nii")) {
+			return niftiDatasetExpression;
 		}
+
+		final String subLabel = SUB_PREFIX + importJob.getPatients().get(0).getSubject().getName();
+		// TODO BIDS: Remove ses level if only one examination, add ses level if new examination imported for the same subject
+		final String sesLabel = SES_PREFIX + importJob.getExaminationId();
+		// TODO BIDS: Get data type (anat, func, dwi, fmap, meg and beh) from MrDatasetNature and/or ExploredEntity
+		final String dataTypeLabel = ANAT + "/";
+
+		final File outDir = new File(niftiStorageDir + File.separator + subLabel + File.separator + sesLabel + File.separator + dataTypeLabel + File.separator);
+		outDir.mkdirs();
+		int index = 1;
+
+		long filesSize = 0L;
+
+		for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
+
+			File srcFile;
+			srcFile = new File(UriUtils.decode(datasetFile.getPath().replace("file:" , ""), "UTF-8"));
+
+			// Theorical file name:  NomSujet_SeriesDescription_SeriesNumberInProtocol_SeriesNumberInSequence.nii
+			StringBuilder name = new StringBuilder("");
+
+			name.append(importJob.getSubjectName()).append("_")
+			.append(serie.getSeriesDescription()).append("_")
+			.append(serie.getSeriesNumber()).append("_")
+			.append(importJob.getProperties().get(ImportJob.INDEX_PROPERTY)).append("_")
+			.append(importJob.getProperties().get(ImportJob.RANK_PROPERTY)).append("_")
+			.append(index);
+			if (srcFile.getName().endsWith(".nii.gz")) {
+				name.append(".nii.gz");
+			} else if (srcFile.getName().endsWith(".nii")) {
+				name.append(".nii");
+			} else {
+				name.append(".").append(FilenameUtils.getExtension(srcFile.getName()));
+			}
+
+			File destFile = new File(outDir.getAbsolutePath() + File.separator + name.toString());
+			index++;
+
+			Path niftiFinalLocation = null;
+			try {
+				niftiFinalLocation = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				LOG.error("IOException generating nifti Dataset Expression", e);
+			}
+
+			if (niftiFinalLocation != null) {
+				DatasetFile niftiDatasetFile = new DatasetFile();
+				niftiDatasetFile.setPacs(false);
+				niftiDatasetFile.setPath(niftiFinalLocation.toUri().toString().replaceAll(" ", "%20"));
+				niftiDatasetExpression.getDatasetFiles().add(niftiDatasetFile);
+				filesSize += Files.size(niftiFinalLocation);
+				niftiDatasetFile.setDatasetExpression(niftiDatasetExpression);
+			}
+			index++;
+		}
+
+		niftiDatasetExpression.setSize(filesSize);
+
 		return niftiDatasetExpression;
 	}
 }

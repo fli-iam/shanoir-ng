@@ -251,7 +251,12 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public List<Dataset> findByStudyId(Long studyId) {
-		return Utils.toList(repository.findByDatasetAcquisitionExaminationStudy_Id(studyId));
+		return Utils.toList(repository.findByDatasetAcquisition_Examination_Study_Id(studyId));
+	}
+
+	@Override
+	public Long getSizeByStudyId(Long studyId) {
+		return repository.getSizeByStudyId(studyId);
 	}
 
 	@Override

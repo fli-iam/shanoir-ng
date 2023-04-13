@@ -20,6 +20,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface DatasetRepository extends PagingAndSortingRepository<Dataset, Long>, DatasetRepositoryCustom {
@@ -28,7 +29,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
 	Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_IdIn(Iterable<Long> studyIds, Sort sort);
 
-	Iterable<Dataset> findByDatasetAcquisitionExaminationStudy_Id(Long studyId);
+	Iterable<Dataset> findByDatasetAcquisition_Examination_Study_Id(Long studyId);
 	
 	Iterable<Dataset> findByDatasetAcquisitionId(Long acquisitionId);
 	
@@ -39,5 +40,9 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	void deleteByIdIn(List<Long> ids);
 
 	Iterable<Dataset> findByDatasetAcquisitionExaminationId(Long examId);
+
+	@Query("SELECT SUM(expr.size) FROM DatasetExpression expr " +
+			"WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL")
+	Long getSizeByStudyId(Long studyId);
 
 }

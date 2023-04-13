@@ -140,7 +140,15 @@ vip:
   upload-folder: /tmp/vip_uploads
   sleep-time: 20000
   file-formats: .nii.gz, .nii
+  result-file-name: input_params.json
 
+# Service account
+service-account:
+  token:
+    uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng/protocol/openid-connect/token
+  client:
+    id: service-account
+    credential-secret: <credential-secret>
 ---
 
 ######################################
