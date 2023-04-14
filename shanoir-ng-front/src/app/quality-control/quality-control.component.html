@@ -56,7 +56,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </td>
         </tr>
         <tr *ngIf="pagings.get(qualityCard.id)">
-            <td colspan="3" class="report-cell"> <!-- TODO : SET TO 4 !!!!!!!!!!!!!!!!!!!!!!! -->
+            <td colspan="3" class="report-cell"> <!-- TODO : SET TO 4 ! !!!!!!!!!!!!!!!!!!!!!! -->
                 <shanoir-table class="report"
                     [getPage]="getPage.get(qualityCard.id).bind(this)"
                     [columnDefs]="columnDefs"
