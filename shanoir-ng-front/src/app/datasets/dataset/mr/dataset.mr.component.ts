@@ -16,7 +16,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { MrDataset, MrDatasetMetadata, MrDatasetNature } from './dataset.mr.model';
 import { Option } from '../../../shared/select/select.component';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
     selector: 'mr-dataset-details',
@@ -27,7 +27,7 @@ export class MrDatasetComponent implements OnInit{
 
     @Input() mode: Mode;
     @Input() dataset: MrDataset;
-    @Input() parentFormGroup: FormGroup;
+    @Input() parentFormGroup: UntypedFormGroup;
     // allMrDatasetNatures: any[];
     public natureOptions: Option<MrDatasetNature>[];
     

@@ -22,6 +22,7 @@ import { ImagesUrlUtil } from '../utils/images-url.util';
 import { VERSION } from '../../../environments/version';
 import { StudyService } from '../../studies/shared/study.service';
 import { environment } from '../../../environments/environment';
+import { UserService } from '../../users/shared/user.service';
 
 
 
@@ -40,13 +41,16 @@ export class SideMenuComponent {
     public state: SideMenuState;
     public VERSION = VERSION;
     private sessionKey: string = KeycloakService.auth.userId + 'menuState';
+    accessRequestsToValidate: number;
+
 
     constructor(
             public keycloakService: KeycloakService, 
             private solrService: SolrService,
             private consoleService: ConsoleService,
             public notificationsService: NotificationsService,
-            private studyService: StudyService) {
+            private studyService: StudyService,
+            private userService: UserService) {
 
         if (KeycloakService.auth.authz && KeycloakService.auth.authz.tokenParsed) {
             this.username = KeycloakService.auth.authz.tokenParsed.name;
@@ -56,6 +60,10 @@ export class SideMenuComponent {
         let storedState = sessionStorage.getItem(this.sessionKey);
         if (storedState) this.state = JSON.parse(storedState) as SideMenuState;
         else this.state = new SideMenuState();
+
+        this.userService.accessRequets.subscribe(nb => {
+            this.accessRequestsToValidate = nb;
+        });
     }
 
     logout(event: Event): void {

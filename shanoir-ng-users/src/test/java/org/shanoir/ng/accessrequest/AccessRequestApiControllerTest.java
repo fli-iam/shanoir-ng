@@ -30,6 +30,7 @@ import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.service.UserService;
+import org.shanoir.ng.user.service.VIPUserService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,9 @@ public class AccessRequestApiControllerTest {
 	@MockBean
 	RabbitTemplate rabbitTemplate;
 
+	@MockBean
+	VIPUserService vipUserService;
+	
 	@Autowired
 	ObjectMapper mapper;
 
@@ -140,7 +144,7 @@ public class AccessRequestApiControllerTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 1)
-	public void findAllByUserIdTest() throws Exception {
+	public void findAllByAdminIdTest() throws Exception {
 		// I get data, but only the one in demand
 		Mockito.when(rabbitTemplate.
 				convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, 1L))
@@ -157,7 +161,7 @@ public class AccessRequestApiControllerTest {
 		.thenReturn(listOfRequests);
 		
 
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byAdmin").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().string(
 						Matchers.allOf(
@@ -166,6 +170,30 @@ public class AccessRequestApiControllerTest {
 						)
 					);
 	}
+	
+	@Test
+    @WithMockKeycloakUser(id = 1)
+    public void findAllByUserIdTest() throws Exception {
+        List<AccessRequest> listOfRequests = new ArrayList<AccessRequest>();
+        listOfRequests.add(createAccessRequest());
+        listOfRequests.add(createAccessRequest());
+        
+        // One is already approved, studyName should not appear
+        listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
+        
+        Mockito.when(this.accessRequestService.findByUserId(Mockito.anyLong()))
+            .thenReturn(listOfRequests);
+        
+
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(content().string(
+                        Matchers.allOf(
+                                Matchers.containsString("name")
+                                )
+                        )
+                    );
+    }
 
 	@Test
 	@WithMockKeycloakUser(id = 1)

@@ -13,7 +13,7 @@
  */
 import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable, OnDestroy } from '@angular/core';
-import { saveAs } from 'file-saver';
+import { saveAs } from 'file-saver-es';
 import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
@@ -79,6 +79,11 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
                 .toPromise()
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
+    }
+
+    getSizeByStudyId(id: number): Promise<number> {
+      return this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/sizeByStudyId/' + id)
+        .toPromise();
     }
 
     getByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<Dataset[]> {

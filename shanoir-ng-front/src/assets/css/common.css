@@ -45,6 +45,7 @@ li { list-style: none; }
 form { margin: 0; }
 select:disabled { opacity: 0.5; }
 a:hover { cursor: pointer; }
+.bold { font-weight: bold; }
 
 
 @-webkit-keyframes autofill {
@@ -99,7 +100,6 @@ form { color: var(--dark-grey); position: relative; }
   form input[readonly],
   form textarea[readonly],
   form select[readonly] { cursor: default; border: none !important; }
-  form input:not([type="checkbox"])::not([type="radio"]):not([type="file"]), form select { height: 20px; }
   form input[type='radio'] { vertical-align: top; height: 14px; }
   form input[type='radio'] + input[type='radio'] { margin-left: 20px; }
   form textarea { resize: vertical; }

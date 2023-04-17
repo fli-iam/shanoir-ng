@@ -35,6 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" skipLocationChange replaceUrl="true">Members</li>
 				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" skipLocationChange replaceUrl="true">Tags</li>
 				<ng-container *ngIf="mode == 'view'">
+					<li [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" skipLocationChange replaceUrl="true">Quality</li>
 					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" skipLocationChange replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" skipLocationChange replaceUrl="true">BIDS</li>
 				</ng-container>
@@ -42,7 +43,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li [class.active]="activeTab == 'tree'" class="disabled" skipLocationChange replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" class="disabled" skipLocationChange replaceUrl="true">BIDS</li>
 				</ng-container>
-
 			</ul>
 
 			<fieldset [class.hidden]="activeTab != 'general'">
@@ -124,6 +124,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-container>
 						</span>
           </li>
+          <li>
+            <label i18n="Study detail|Status label@@studyDetailStatus">Storage volume</label>
+            <span class="right-col" [ngSwitch]="mode">
+								{{ studySizeStr(study.size) }}
+						</span>
+          </li>
+          <li>
 					<li>
 						<label i18n="Study detail|Clinical label@@studyDetailClinical">Is clinical</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -136,18 +143,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</ng-template>
 						</span>
 					</li>
-					<li *ngIf="keycloakService.isUserAdmin()">
-						<label i18n="Study detail|Challenge label@@studyDetailChalenge">Challenge</label>
-						<span class="right-col" [ngSwitch]="mode">
-						<ng-template [ngSwitchCase]="'view'">
-							<span *ngIf="study.challenge" class="bool-true"><i class="fas fa-check"></i></span>
-							<span *ngIf="!study.challenge" class="bool-false"><i class="fas fa-times"></i></span>
-						</ng-template>
-						<ng-template ngSwitchDefault>
-							<checkbox [(ngModel)]="study.challenge" formControlName="challenge"></checkbox>
-						</ng-template>
-						</span>
-					</li>
+          <li *ngIf="keycloakService.isUserAdmin()">
+              <label i18n="Study detail|Challenge label@@studyDetailChalenge">Challenge</label>
+              <span class="right-col" [ngSwitch]="mode">
+                  <ng-template [ngSwitchCase]="'view'">
+                      <span *ngIf="study.challenge" class="bool-true"><i class="fas fa-check"></i></span>
+                      <span *ngIf="!study.challenge" class="bool-false"><i class="fas fa-times"></i></span>
+                  </ng-template>
+                  <ng-template ngSwitchDefault>
+                      <checkbox [(ngModel)]="study.challenge" formControlName="challenge"></checkbox>
+                  </ng-template>
+              </span>
+          </li>
 					<li>
 						<label i18n="Study detail|With examination label@@studyDetailWithExamination">Is with examination</label>
 						<span class="right-col" [ngSwitch]="mode">
@@ -164,7 +171,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'files'">
 				<legend i18n="Study detail|Data User Agreement label@@studyDetailDataUserAgreement">
-					Data User Agreement (DUA)
+					Data user agreement (DUA)
 					<tool-tip class="larger">
 						Adding a data user agreement (DUA) to a study changes the study member experience, for all members.
 						If a DUA is present all members of the study will have to accept the DUA after signing in the next time to Shanoir.
@@ -330,15 +337,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ol>
 			</fieldset>
 			<fieldset [class.hidden]="activeTab != 'members'">
-			    <span *ngIf="mode == 'edit'">
-			    List of current access requests
-			    </span>
-			    <ul *ngIf="mode == 'edit'">
-			         <li *ngFor="let a of accessRequests">
-                    Request from {{ a.user.username }}: {{a.motivation}}
-                    <span class="link" (click)="goToAccessRequest(a)"><i class="fas fa-external-link-alt"></i></span>
-                    </li>
-			    </ul>
 				<legend i18n="Study detail|Study Members@@studyMembers">Study members</legend>
 				<studyuser-list
 				    formControlName="studyUserList"
@@ -348,6 +346,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[study] = "study"
 					[mode]="mode">
 				</studyuser-list>
+			</fieldset>
+			<fieldset *ngIf="keycloakService.isUserAdmin() && accessRequests?.length > 0" class="access-requests">
+				<legend>Pending access requests for this study</legend>
+				<ul>
+					<li *ngFor="let a of accessRequests">
+						<span class="link left-icon" (click)="goToAccessRequest(a)">
+							<i class="fa-solid fa-user-lock"></i>
+							Request from {{a.user.firstName}} {{a.user.lastName}} ({{a.user.username}}), motivation :
+							<span class="motivation"> {{a.motivation}}</span>
+						</span>
+					</li>
+				</ul>
+      </fieldset>
+			<fieldset [class.hidden]="activeTab != 'quality'" *ngIf="mode == 'view'">
+				<legend>Quality control</legend>
+				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>
 			</fieldset>
 			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">
 				<legend>Tree</legend>
@@ -373,6 +387,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(cancel)="goToView()"
 					(back)="goBack()">
 				<dataset-download  *ngIf="mode == 'view' && hasDownloadRights()" [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
+				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="!selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button>
 			</form-footer>
 		</form>
 	</div>

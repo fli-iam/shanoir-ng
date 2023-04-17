@@ -74,14 +74,14 @@ public class StudyCardRepositoryTest {
 			studyCardIt.next();
 			nbStudyCard++;
 		}
-		assertThat(nbStudyCard).isEqualTo(4);
+		assertThat(nbStudyCard).isEqualTo(5);
 	}
 	
 	@Test
 	public void findByStudyIdInTest() throws Exception {
 		List<StudyCard> studyCards = studyCardRepository.findByStudyIdIn(Arrays.asList(STUDY_TEST_1_ID));
 		assertNotNull(studyCards);
-		assertTrue(studyCards.size() == 2);
+		assertTrue(studyCards.size() == 3);
 	}
 	
 	@Test

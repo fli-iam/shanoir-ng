@@ -20,7 +20,6 @@ public class DicomTag {
 	
 	private String label;
 
-	
 	public DicomTag(int code, String label) {
 		super();
 		this.code = code;

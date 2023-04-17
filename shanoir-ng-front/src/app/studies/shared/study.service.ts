@@ -11,24 +11,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {HttpClient, HttpEvent, HttpEventType, HttpResponse} from '@angular/common/http';
-import {Injectable, OnDestroy} from '@angular/core';
-import {Subscription} from 'rxjs';
-import {Observable} from 'rxjs/Observable';
+import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
+import { Injectable, OnDestroy } from '@angular/core';
+import { saveAs } from 'file-saver-es';
+import { Subscription } from 'rxjs';
+import { Observable } from 'rxjs/Observable';
 
-import {BidsElement} from '../../bids/model/bidsElement.model';
-import {DataUserAgreement} from '../../dua/shared/dua.model';
-import {EntityService} from '../../shared/components/entity/entity.abstract.service';
-import {LoadingBarComponent} from '../../shared/components/loading-bar/loading-bar.component';
-import {KeycloakService} from '../../shared/keycloak/keycloak.service';
-import {IdName} from '../../shared/models/id-name.model';
-import {SubjectWithSubjectStudy} from '../../subjects/shared/subject.with.subject-study.model';
+import { BidsElement } from '../../bids/model/bidsElement.model';
+import { DataUserAgreement } from '../../dua/shared/dua.model';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { IdName } from '../../shared/models/id-name.model';
+import { Profile } from '../../shared/models/profile.model';
+import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
-import {StudyUserRight} from './study-user-right.enum';
-import {CenterStudyDTO, PublicStudyDataDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
-import {Study} from './study.model';
-import {Profile} from "../../shared/models/profile.model";
-import {saveAs} from "file-saver";
+import { StudyUserRight } from './study-user-right.enum';
+import { CenterStudyDTO, PublicStudyData, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
+import { Study } from './study.model';
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -62,9 +62,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .toPromise();
     }
 
-    getPublicStudiesData(): Promise<PublicStudyDataDTO[]> {
-      return this.http.get<PublicStudyDataDTO[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
-        .toPromise().then((typeResult: PublicStudyDataDTO[]) => {
+    getPublicStudiesData(): Promise<PublicStudyData[]> {
+      return this.http.get<PublicStudyData[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
+        .toPromise().then((typeResult: PublicStudyData[]) => {
           return typeResult;
         });
     }
@@ -174,6 +174,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
                 .then(() => {
                     this.getMyDUA();
                 });
+    }
+
+    deleteUserFromStudy(studyId: number, userId: number): Promise<void> {
+      return this.http.delete<void>(AppUtils.BACKEND_API_STUDY_DELETE_USER + "/" + studyId + "/" + userId)
+        .toPromise();
     }
 
     private getFilename(response: HttpResponse<any>): string {

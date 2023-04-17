@@ -24,6 +24,8 @@ public class CarminDatasetProcessing extends DatasetProcessing {
 
     private int timeout;
     
+    private String outputProcessing;
+    
     /**
      * the status of the execution
      */
@@ -85,5 +87,11 @@ public class CarminDatasetProcessing extends DatasetProcessing {
     public void setEndDate(Long endDate) {
         this.endDate = endDate;
     }
+	public String getOutputProcessing() {
+		return outputProcessing;
+	}
+	public void setOutputProcessing(String outputProcessing) {
+		this.outputProcessing = outputProcessing;
+	}
     
 }

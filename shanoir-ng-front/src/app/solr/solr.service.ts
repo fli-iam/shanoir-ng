@@ -35,7 +35,10 @@ export class SolrService {
 
     public search(solrReq: SolrRequest, pageable: Pageable): Promise<SolrResultPage> {
         return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(solrReq), { 'params': pageable.toParams() })    
-        .toPromise();
+        .toPromise().then(solrResPage => {
+            solrResPage.content?.forEach(doc => doc.id = parseInt(doc.id as unknown as string));
+            return solrResPage;
+        });
     }
 
     public getFacet(facetName: string, pageable: FacetPageable, mainRequest: SolrRequest): Promise<FacetResultPage> {
@@ -44,7 +47,10 @@ export class SolrService {
         mainRequest.facetPaging = new Map();
         mainRequest.facetPaging.set(facetName, pageable);
         return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(mainRequest), { 'params': fakePageable.toParams() })  
-            .toPromise().then(solrResPage => solrResPage && solrResPage.facetResultPages ? solrResPage.facetResultPages[0] : null);
+            .toPromise().then(solrResPage => {
+                solrResPage.content?.forEach(doc => doc.id = parseInt(doc.id as unknown as string));
+                return solrResPage && solrResPage.facetResultPages ? solrResPage.facetResultPages[0] : null;
+            });
     }
 
     public getByDatasetIds(datasetIds: number[], pageable: Pageable): Promise<Page<SolrDocument>> {
@@ -52,7 +58,7 @@ export class SolrService {
                 JSON.stringify(datasetIds), 
                 { 'params': pageable.toParams() })    
             .toPromise().then(page => {
-                if (page) page.content.forEach(solrDoc => solrDoc.id = solrDoc.datasetId);
+                if (page) page.content.forEach(solrDoc => solrDoc.id = parseInt(solrDoc.datasetId));
                 return page;
             });
     }

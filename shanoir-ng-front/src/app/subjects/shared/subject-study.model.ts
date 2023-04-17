@@ -13,6 +13,7 @@
  */
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import { SimpleStudy } from '../../studies/shared/study.model';
+import { QualityTag } from '../../study-cards/shared/quality-card.model';
 import { Tag } from '../../tags/tag.model';
 import { Subject } from './subject.model';
 import { SubjectType } from './subject.types';
@@ -29,4 +30,5 @@ export class SubjectStudy {
     subjectType: SubjectType;
     physicallyInvolved: boolean;
     tags: Tag[];
+    qualityTag: QualityTag;
 }

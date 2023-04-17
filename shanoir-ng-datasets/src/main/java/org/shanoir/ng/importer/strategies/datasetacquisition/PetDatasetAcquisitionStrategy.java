@@ -33,7 +33,6 @@ import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.PetProtocolStrategy;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.studycard.service.StudyCardProcessingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +57,6 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 	
 	@Autowired
 	private DatasetStrategy<PetDataset> datasetStrategy;
-	
-	@Autowired
-	private StudyCardProcessingService studyCardProcessingService;
 
 	@Autowired
 	private StudyCardRepository studyCardRepository;
@@ -106,7 +102,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 		datasetAcquisition.setDatasets(genericizedList);
 		
 		if (studyCard != null) {
-			studyCardProcessingService.applyStudyCard(datasetAcquisition, studyCard, dicomAttributes);
+		    studyCard.apply(datasetAcquisition, dicomAttributes);
 		}
 		
 		return datasetAcquisition;

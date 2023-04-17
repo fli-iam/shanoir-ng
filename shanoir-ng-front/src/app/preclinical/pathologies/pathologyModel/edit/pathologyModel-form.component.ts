@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import {  Validators, FormGroup } from '@angular/forms';
+import {  Validators, UntypedFormGroup } from '@angular/forms';
 import {  ActivatedRoute } from '@angular/router';
 
 import { PathologyModel }    from '../shared/pathologyModel.model';
@@ -86,7 +86,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
         return Promise.resolve();
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'name': [this.model.name, Validators.required],
             'pathology': [this.model.pathology, Validators.required],

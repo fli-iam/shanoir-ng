@@ -29,7 +29,7 @@ export class SolrDocument {
     subjectName: string;
     studyName: string;
     studyId: string;
-    id: string; // only for the table component..
+    id: number; // only for the table component..
 }
 
 export class SolrRequest {
