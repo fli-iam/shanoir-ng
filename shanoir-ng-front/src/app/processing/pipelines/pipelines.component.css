@@ -3,6 +3,7 @@
 .pipelines{
     display: flex;
 }
+app-pipeline { display: inline-block; }
 .pipeline-description{
     flex:1;
     width: 340px;
