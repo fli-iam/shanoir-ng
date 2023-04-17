@@ -276,6 +276,8 @@ public class HttpService {
 			logger.info("Standard SSLSocketFactory used with CustomHostnameVerifier.");
 		}
 		final HttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+					.setMaxConnTotal(500)
+					.setMaxConnPerRoute(500)
 					.setSSLSocketFactory(sslSocketFactory)
 					.build();
 		if (proxyHost != null && credentialsProvider != null) {
