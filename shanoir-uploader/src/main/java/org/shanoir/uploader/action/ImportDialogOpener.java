@@ -100,7 +100,6 @@ public class ImportDialogOpener {
 
 	/**
 	 * This method calls the backend service and transforms DTO into model objects.
-	 * Maybe this step could be unified.
 	 * 
 	 * @param dicomData
 	 * @param equipmentDicom
@@ -126,34 +125,43 @@ public class ImportDialogOpener {
 					List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
 					for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
 						StudyCard studyCard = (StudyCard) itStudyCards.next();
+						// filter all study cards related to the selected study
 						if (study.getId().equals(studyCard.getStudyId())) {
 							studyCardsStudy.add(studyCard);
 							Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
 							for (Iterator<AcquisitionEquipment> acquisitionEquipmentsIt = acquisitionEquipments.iterator(); acquisitionEquipmentsIt.hasNext();) {
 								AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) acquisitionEquipmentsIt.next();
+								// find the correct equipment
 								if (acquisitionEquipment.getId().equals(acquisitionEquipmentId)) {
 									studyCard.setAcquisitionEquipment(acquisitionEquipment);
-									if (acquisitionEquipment != null && acquisitionEquipment.getManufacturerModel() != null
-											&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null) {
-										if (manufacturer != null && manufacturerModelName != null && deviceSerialNumber != null) {
-											String manufacturerSC = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
-											String manufacturerModelNameSC = acquisitionEquipment.getManufacturerModel().getName();
-											if (manufacturerSC.compareToIgnoreCase(manufacturer) == 0
-													&& manufacturerModelNameSC.compareToIgnoreCase(manufacturerModelName) == 0
-													&& acquisitionEquipment.getSerialNumber() != null
-													&& acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0) {
-												studyCard.setCompatible(true);
-												compatibleStudyCard = true;
-											} else {
-												studyCard.setCompatible(false);
-											}
+									// check if values from server are complete
+									if (acquisitionEquipment != null
+										&& acquisitionEquipment.getManufacturerModel() != null
+										&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null) {
+										// try device serial number match based on number from server
+										if (acquisitionEquipment.getSerialNumber() != null
+											&& acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0) {
+											studyCard.setCompatible(true);
+											compatibleStudyCard = true;
+										// no match with server
 										} else {
-											studyCard.setCompatible(false);
+											// try to match otherwise, server device serial number within DICOM value
+											if (deviceSerialNumber != null && !"".equals(deviceSerialNumber)) {
+												if (deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
+													studyCard.setCompatible(true);
+													compatibleStudyCard = true;
+												} else {
+													studyCard.setCompatible(false);
+												}
+											} else {
+												studyCard.setCompatible(false); // no match, as no value from DICOM
+											}
 										}
+									// set in-compatible in case of missing server values
 									} else {
 										studyCard.setCompatible(false);
 									}								
-									break;
+									break; // correct equipment found, break for-loop acqEquip
 								}
 							}
 						}
