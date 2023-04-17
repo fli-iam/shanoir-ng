@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer.service;
 
+import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.*;
@@ -21,6 +22,7 @@ import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -31,6 +33,9 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
+import org.shanoir.ng.studycard.model.StudyCard;
+import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.shanoir.ng.utils.Utils;
@@ -85,13 +90,21 @@ public class ImporterService {
 	private ShanoirEventService eventService;
 
 	@Autowired
-  private SolrService solrService;
+    private SolrService solrService;
 
 	@Autowired
 	private ImporterMailService mailService;
 
-	private static final String SUBJECT_PREFIX = "sub-";
+    @Autowired
+    private StudyCardRepository studyCardRepository;
 
+    @Autowired
+    private QualityCardService qualityCardRepository;
+
+    @Autowired
+    private DicomProcessing dicomProcessing;
+
+	private static final String SUBJECT_PREFIX = "sub-";
 	
 	private static final String PROCESSED_DATASET_PREFIX = "processed-dataset";
 
@@ -123,6 +136,8 @@ public class ImporterService {
 						for (Serie serie : study.getSeries() ) {
 							if (serie.getSelected() != null && serie.getSelected()) {
 								DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
+								persistAcquisition(acquisition);
+								persistSerieInPacs(serie);
 								if (acquisition != null) {
 									generatedAcquisitions.add(acquisition);
 								}
@@ -187,30 +202,68 @@ public class ImporterService {
 		}
 	}
 	
-	public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob) throws Exception {
+	/**
+	 *  Persist Dicom images in the Shanoir Pacs
+	 * @throws Exception 
+	 */
+	private void persistSerieInPacs(Serie serie) throws Exception {
+	    long startTime = System.currentTimeMillis();
+        dicomPersisterService.persistAllForSerie(serie);
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+        LOG.info("Import of " + serie.getImagesNumber() + " DICOM images into the PACS required "
+                + duration + " millis for serie: " + serie.getSeriesInstanceUID()
+                + "(" + serie.getSeriesDescription() + ")");
+    }
+
+	/**
+	 * Save DatasetAcquisition object in the Shanoir db
+	 */
+    private void persistAcquisition(DatasetAcquisition acquisition) {
+        datasetAcquisitionService.create(acquisition);
+    }
+
+    public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, StudyCard studyCard) throws Exception {
 		if (checkSerieForDicomImages(serie)) {
-			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob);
+		    
+		    // get dicomAttributes
+		    Attributes dicomAttributes = null;
+	        try {
+	            dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced());
+	        } catch (IOException e) {
+	            throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
+	        }
+		    
+	        // generate acquisition
+			DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);			
 			datasetAcquisition.setExamination(examination);
 			// TODO: put studyCard in bruker import
 			if (datasetAcquisition.getAcquisitionEquipmentId() == null) {
 				datasetAcquisition.setAcquisitionEquipmentId(importJob.getAcquisitionEquipmentId());
 			}
-			// Persist Serie in Shanoir DB
-			datasetAcquisitionService.create(datasetAcquisition);
-			long startTime = System.currentTimeMillis();
-			// Persist Dicom images in Shanoir Pacs
-			dicomPersisterService.persistAllForSerie(serie);
-			long endTime = System.currentTimeMillis();
-			long duration = endTime - startTime;
-			LOG.info("Import of " + serie.getImagesNumber() + " DICOM images into the PACS required "
-					+ duration + " millis for serie: " + serie.getSeriesInstanceUID()
-					+ "(" + serie.getSeriesDescription() + ")");
+			
+			// apply study card if needed
+			if (studyCard != null) {
+			    studyCard.apply(datasetAcquisition, null);
+			}
+
 			return datasetAcquisition;
 		} else {
 			LOG.warn("Serie " + serie.getSequenceName() + ", " + serie.getProtocolName() + " found without images. Ignored.");
 		}
 		return null;
 	}
+	
+	private StudyCard getStudyCard(Long studyCardId) {
+        StudyCard studyCard = studyCardRepository.findById(studyCardId).orElse(null);
+        if (studyCard == null) {
+            throw new IllegalArgumentException("No study card found with id " + studyCardId);
+        }
+        if (studyCard.getAcquisitionEquipmentId() == null) {
+            throw new IllegalArgumentException("No acq eq id found for the study card " + studyCardId);
+        }
+        return studyCard;
+    }
 
 	/**
 	 * Added Temporary check on serie in order not to generate dataset acquisition for series without images.

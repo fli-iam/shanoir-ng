@@ -52,7 +52,6 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -110,14 +109,14 @@ public class ImporterManagerService {
 	private String importDir;
 	
 	@Async("asyncExecutor")
-	public void manageImportJob(final Long userId, final HttpHeaders keycloakHeaders, final ImportJob importJob) {
-		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
+	public void manageImportJob(final ImportJob importJob) {
+		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
 		importJob.setShanoirEvent(event);
 		try {
 			// Always create a userId specific folder in the import work folder (the root of everything):
 			// split imports to clearly separate them into separate folders for each user
-			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+			final String userImportDirFilePath = importDir + File.separator + Long.toString(importJob.getUserId());
 			final File userImportDir = new File(userImportDirFilePath);
 			if (!userImportDir.exists()) {
 				userImportDir.mkdirs(); // create if not yet existing, e.g. in case of PACS import
@@ -176,17 +175,17 @@ public class ImporterManagerService {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setProgress(1f);
 			eventService.publishEvent(event);
-			sendFailureMail(importJob, userId, e.getMessage());
+			sendFailureMail(importJob, e.getMessage());
 		}
 	}
 
-	private void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
+	private void sendFailureMail(ImportJob importJob, String errorMessage) {
 		EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
 		generatedMail.setExaminationId(importJob.getExaminationId().toString());
 		generatedMail.setStudyId(importJob.getStudyId().toString());
 		generatedMail.setSubjectName(importJob.getSubjectName());
 		generatedMail.setStudyName(importJob.getStudyName());
-		generatedMail.setUserId(userId);
+		generatedMail.setUserId(importJob.getUserId());
 		
 		generatedMail.setErrorMessage(errorMessage != null ? errorMessage : "An unexpected error occured, please contact Shanoir support.");
 
