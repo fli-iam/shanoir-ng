@@ -197,7 +197,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode == 'view'">
 						<label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
 						<div [hidden]="DUAprogressBar.progress == 0">
-                            <progress-bar #DUAprogressBar [text]="'Preparing download'"></progress-bar>
+                            <progress-bar #DUAprogressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                         </div>
                         <span class="right-col">
 							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
@@ -322,7 +322,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
                     <li *ngIf="mode == 'view'">
                         <div [hidden]="PFprogressBar.progress == 0">
-                            <progress-bar #PFprogressBar [text]="'Preparing download'"></progress-bar>
+                            <progress-bar #PFprogressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                         </div>
                         <span class="right-col">
                             <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
