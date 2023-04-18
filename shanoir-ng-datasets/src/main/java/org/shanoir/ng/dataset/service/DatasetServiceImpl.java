@@ -255,8 +255,8 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Long getSizeByStudyId(Long studyId) {
-		return repository.getSizeByStudyId(studyId);
+	public Long getExpressionSizeByStudyId(Long studyId) {
+		return repository.getExpressionSizeByStudyId(studyId);
 	}
 
 	@Override

@@ -250,4 +250,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             subscribtion.unsubscribe();
         }
     }
+
+  getSizeByStudyId(id: number): Promise<number> {
+    return this.http.get<number>(AppUtils.BACKEND_API_STUDY_URL + '/sizeByStudyId/' + id)
+      .toPromise();
+  }
 }

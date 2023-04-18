@@ -244,8 +244,11 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
   private getTotalSize(id: number): Promise<number> {
-    return this.datasetService.getSizeByStudyId(id).then(totalSize => {
-        return totalSize;
+    return Promise.all([
+      this.studyService.getSizeByStudyId(id),
+      this.datasetService.getSizeByStudyId(id)
+    ]).then(([studySize, datasetSize]) => {
+      return studySize + datasetSize;
     });
   }
 

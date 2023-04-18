@@ -43,6 +43,6 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 
 	@Query("SELECT SUM(expr.size) FROM DatasetExpression expr " +
 			"WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL")
-	Long getSizeByStudyId(Long studyId);
+	Long getExpressionSizeByStudyId(Long studyId);
 
 }
