@@ -62,10 +62,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </td>
         </tr>
-        <tr *ngIf="pagings.get(qualityCard.id)">
+        <tr *ngIf="pagings.get(qualityCard.id)?.items?.length > 0">
             <td colspan="3" class="report-cell"> <!-- TODO : SET TO 4 ! !!!!!!!!!!!!!!!!!!!!!! -->
                 <shanoir-table class="report"
-                    *ngIf="pagings.get(qualityCard.id).items?.length > 0"
                     [getPage]="getPage.get(qualityCard.id).bind(this)"
                     [columnDefs]="columnDefs"
                     [browserSearch]="false"
