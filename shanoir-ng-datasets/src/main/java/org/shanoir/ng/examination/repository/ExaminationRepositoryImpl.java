@@ -74,11 +74,11 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 			subjectNameIndex = nbPreParams;
 			queryEndStr +=  "and ex.subject.name is ?" + subjectNameIndex + " ";
 		} 
-		queryEndStr += "and (ex.studyId in ?1 ";
+		queryEndStr += "and (ex.study.id in ?1 ";
 		
 		int i = nbPreParams + 1;
 		for (@SuppressWarnings("unused") Pair<Long, Long> studyCenter : studyCenterIds) {
-			queryEndStr += "or (ex.studyId = ?" + i + " and ex.centerId = ?" + (i + 1) + ") ";
+			queryEndStr += "or (ex.study.id = ?" + i + " and ex.centerId = ?" + (i + 1) + ") ";
 			i += 2;
 		}
 		queryEndStr += ") ";

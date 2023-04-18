@@ -193,7 +193,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
               progressBar.progress = -1;
               break;
             case HttpEventType.DownloadProgress:
-              progressBar.progress = (event.loaded / event.total);
+              progressBar.progress = event.loaded;
               break;
             case HttpEventType.Response:
                 saveAs(event.body, this.getFilename(event));
