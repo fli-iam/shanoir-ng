@@ -1,16 +1,15 @@
 package org.shanoir.ng.user.service;
 
 import org.keycloak.representations.AccessTokenResponse;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.model.vip.CountryCode;
 import org.shanoir.ng.user.model.vip.VIPUser;
 import org.shanoir.ng.user.model.vip.VIPUserLevel;
 import org.shanoir.ng.user.repository.UserRepository;
-import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +22,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -86,6 +83,7 @@ public class VIPUserServiceImpl implements VIPUserService{
         } catch (Exception e) {
             // Do not fail when an error occures
         	LOG.error("Could not communicate with VIP instance to create user", e);
+        	return user;
         }
     }
 }
