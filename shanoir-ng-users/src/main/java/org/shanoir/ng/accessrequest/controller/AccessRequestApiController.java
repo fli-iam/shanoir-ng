@@ -194,7 +194,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 		Optional<User> user = this.userService.findByEmail(email);
 		
 		if (!user.isPresent()) {
-			user = this.userService.findByUsername(email);
+			user = this.userService.findByUsernameForInvitation(email);
 		}
 
 		// User exists => return an access request to be added
