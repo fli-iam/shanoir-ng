@@ -306,18 +306,18 @@ public class AccessRequestApiControllerTest {
 	@WithMockKeycloakUser(id = 1)
 	public void inviteExistingUserTest() throws Exception {
 		// We invite an user that exists
-		Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.of(user));
+		Mockito.when(this.userService.findByEmail("mail@mail")).thenReturn(Optional.of(user));
 		
 		Map<String, Object> theMap = new LinkedHashMap<>();
 		theMap.put("studyId", 1l);
 		theMap.put("studyName", "name");
-		theMap.put("email", "mail");
+		theMap.put("email", "mail@mail");
 
 		MvcResult result = mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.param("studyId", "" + 1l)
 				.param("studyName", "name")
-				.param("email", "mail"))
+				.param("email", "mail@mail"))
 				.andExpect(status().isOk())
 				.andReturn();
 		
@@ -334,19 +334,18 @@ public class AccessRequestApiControllerTest {
 	@WithMockKeycloakUser(id = 1)
 	public void inviteExistingUserFromUserNameTest() throws Exception {
 		// We invite an user that exists
-		Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.empty());
-		Mockito.when(this.userService.findByUsernameForInvitation("mail")).thenReturn(Optional.of(user));
+		Mockito.when(this.userService.findByUsernameForInvitation("login")).thenReturn(Optional.of(user));
 
 		Map<String, Object> theMap = new LinkedHashMap<>();
 		theMap.put("studyId", 1l);
 		theMap.put("studyName", "name");
-		theMap.put("email", "mail");
+		theMap.put("email", "login");
 
 		MvcResult result = mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.param("studyId", "" + 1l)
 				.param("studyName", "name")
-				.param("email", "mail"))
+				.param("email", "login"))
 				.andExpect(status().isOk())
 				.andReturn();
 		
@@ -361,30 +360,50 @@ public class AccessRequestApiControllerTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 1)
-	public void inviteNotExistingUserTest() throws JsonProcessingException, Exception {
+	public void inviteNotExistingUserMailTest() throws JsonProcessingException, Exception {
 		// We invite an user that does not exists
-		Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.empty());
-		Mockito.when(this.userService.findByUsername("mail")).thenReturn(Optional.empty());
+		Mockito.when(this.userService.findByEmail("mail@mail")).thenReturn(Optional.empty());
+		//Mockito.when(this.userService.findByUsername("mail")).thenReturn(Optional.empty());
 
 		
 		Map<String, Object> theMap = new LinkedHashMap<>();
 		theMap.put("studyId", 1l);
 		theMap.put("studyName", "name");
-		theMap.put("email", "mail");
+		theMap.put("email", "mail@mail");
 		
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.param("studyId", "" + 1l)
 				.param("studyName", "name")
-				.param("email", "mail"))
+				.param("email", "mail@mail"))
 				.andExpect(status().isNoContent());
 		
 		ArgumentCaptor<StudyInvitationEmail> emailCaptor = ArgumentCaptor.forClass(StudyInvitationEmail.class);
 		Mockito.verify(this.emailService).inviteToStudy(emailCaptor.capture());
 		
-		assertEquals("mail", emailCaptor.getValue().getInvitedMail());
+		assertEquals("mail@mail", emailCaptor.getValue().getInvitedMail());
 		assertEquals("1", emailCaptor.getValue().getStudyId());
 		assertEquals("name", emailCaptor.getValue().getStudyName());
+	}
+	
+	@Test
+	@WithMockKeycloakUser(id = 1)
+	public void inviteNotExistingUserLoginTest() throws JsonProcessingException, Exception {
+		// We invite an user that does not exists using its login
+		//Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.empty());
+		Mockito.when(this.userService.findByUsernameForInvitation("login")).thenReturn(Optional.empty());
+
+		Map<String, Object> theMap = new LinkedHashMap<>();
+		theMap.put("studyId", 1l);
+		theMap.put("studyName", "name");
+		theMap.put("email", "login");
+		
+		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.param("studyId", "" + 1l)
+				.param("studyName", "name")
+				.param("email", "login"))
+				.andExpect(status().isBadRequest());
 	}
 
 	@Test
