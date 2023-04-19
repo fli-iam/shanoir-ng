@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
@@ -77,16 +78,14 @@ public class VIPUserServiceImpl implements VIPUserService{
         HttpEntity entity = new HttpEntity<>(vipUser, headers);
 
         try {
-            restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
+            ResponseEntity<Void> response = restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
+            if (response.getStatusCode() != HttpStatus.OK) {
+            	LOG.error("Could not communicate with VIP instance to create user", e);
+            }
             return user;
-        }catch (HttpStatusCodeException e) {
-            // in case of an error with response payload
-            throw new MicroServiceCommunicationException("Error while communicating with VIP with status : "+e.getStatusCode(), e);
-        } catch (RestClientException e) {
-            // in case of an error with no response payload
-            throw new MicroServiceCommunicationException("Error while communicating with VIP with no response payload while saving vip user", e);
+        } catch (Exception e) {
+            // Do not fail when an error occures
+        	LOG.error("Could not communicate with VIP instance to create user", e);
         }
-
-
     }
 }
