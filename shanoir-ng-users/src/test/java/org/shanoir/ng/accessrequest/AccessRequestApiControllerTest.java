@@ -335,7 +335,7 @@ public class AccessRequestApiControllerTest {
 	public void inviteExistingUserFromUserNameTest() throws Exception {
 		// We invite an user that exists
 		Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.empty());
-		Mockito.when(this.userService.findByUsername("mail")).thenReturn(Optional.of(user));
+		Mockito.when(this.userService.findByUsernameForInvitation("mail")).thenReturn(Optional.of(user));
 
 		Map<String, Object> theMap = new LinkedHashMap<>();
 		theMap.put("studyId", 1l);
