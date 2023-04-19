@@ -14,7 +14,7 @@
 import { Location } from '@angular/common';
 
 import { ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild, Directive } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subject, Subscription } from 'rxjs';
 
@@ -41,7 +41,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     footerState: FooterState;
     protected onSave: Subject<any> =  new Subject<any>();
     protected subscribtions: Subscription[] = [];
-    form: FormGroup;
+    form: UntypedFormGroup;
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
     @ViewChild('formContainer', { static: false }) formContainerElement: ElementRef;
@@ -52,7 +52,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private entityRoutes: EntityRoutes;
     protected router: Router;
     private location: Location;
-    protected formBuilder: FormBuilder;
+    protected formBuilder: UntypedFormBuilder;
     public keycloakService: KeycloakService;
     protected consoleService: ConsoleService; 
     public breadcrumbsService: BreadcrumbsService;
@@ -61,7 +61,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     abstract initView(): Promise<void>;
     abstract initEdit(): Promise<void>;
     abstract initCreate(): Promise<void>;
-    abstract buildForm(): FormGroup;
+    abstract buildForm(): UntypedFormGroup;
 
     constructor(
             protected activatedRoute: ActivatedRoute,
@@ -71,7 +71,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
         this.router = ServiceLocator.injector.get(Router);
         this.location = ServiceLocator.injector.get(Location);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
-        this.formBuilder = ServiceLocator.injector.get(FormBuilder);
+        this.formBuilder = ServiceLocator.injector.get(UntypedFormBuilder);
         this.consoleService = ServiceLocator.injector.get(ConsoleService);
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         

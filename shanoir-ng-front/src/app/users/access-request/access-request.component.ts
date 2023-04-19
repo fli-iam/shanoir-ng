@@ -15,7 +15,7 @@
 import { Component } from '@angular/core';
 import { UserService } from '../shared/user.service'
 import { AccessRequest } from './access-request.model'
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { Option } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -25,7 +25,7 @@ import { AccessRequestService } from './access-request.service';
 import { IdName } from 'src/app/shared/models/id-name.model';
 
 @Component({
-    selector: 'accessRequest',
+    selector: 'access-request',
     templateUrl: 'access-request.component.html',
     styleUrls: ['access-request.component.css']
 })
@@ -77,7 +77,7 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
         });
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'motivation': [this.accessRequest.motivation, []],
             'studyId': [this.accessRequest.studyId, []],
@@ -100,13 +100,21 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
 
     acceptRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, true).then(value => this.router.navigate(['/study/details/' + this.accessRequest.studyId])).then(() => {
-            window.location.hash="members";
-        });
+        this.accessRequestService.resolveRequest(this.accessRequest.id, true)
+            .then(value => {
+                this.userService.decreaseAccessRequests;
+                this.router.navigate(['/study/details/' + this.accessRequest.studyId])
+            }).then(() => {
+                window.location.hash="members";
+            }
+        );
     }
     
     refuseRequest() {
-        this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(value => this.goBack());
+        this.accessRequestService.resolveRequest(this.accessRequest.id, false).then(value => {
+            this.userService.decreaseAccessRequests;
+            this.goBack();
+        });
     }
 
     public async hasDeleteRight(): Promise<boolean> {
@@ -118,19 +126,12 @@ export class AccessRequestComponent extends EntityComponent<AccessRequest> {
     }
     
     save(): Promise<AccessRequest> {
-        return super.save().catch(exception => {
-            if (exception?.error?.message) {
-                this.consoleService.log('error', exception.error.message);
-                return null;
-            }
+        return super.save().then(ar => {
+            return ar;
         });
     }
 
     protected chooseRouteAfterSave() {
-        if (this.fromStudy) {
-            this.router.navigate(["/home"]);
-        } else {
-            this.goBack();
-        }
+        this.goBack();
     }
 }

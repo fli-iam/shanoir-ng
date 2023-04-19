@@ -49,6 +49,8 @@ import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.rights.command.CommandType;
+import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
@@ -370,11 +372,12 @@ public class StudyApiController implements StudyApi {
 			response.flushBuffer();
 		}
 	}
-		
+
 	@Override
 	public ResponseEntity<Void> deleteDataUserAgreement (
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
 		Study study = studyService.findById(studyId);
+
 		if (study.getDataUserAgreementPaths() == null || study.getDataUserAgreementPaths().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -384,6 +387,19 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		Files.delete(Paths.get(filePath));
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Void> deleteStudyUser (
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "id of the userId", required = true) @PathVariable("userId") Long userId) throws IOException {
+		studyService.removeStudyUserFromStudy(studyId, userId);
+		List<StudyUserRight> surList = studyUserService.getRightsForStudy(studyId);
+
+		if (surList.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 

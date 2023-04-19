@@ -1,47 +1,45 @@
 package org.shanoir.ng.processing.carmin.schedule;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
-import javax.ws.rs.NotFoundException;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.compress.utils.IOUtils;
-import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
-import org.shanoir.ng.importer.service.ImporterService;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang3.StringUtils;
+import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
-import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
-import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
-import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.processing.service.DatasetProcessingService;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.processing.carmin.model.Execution;
-import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.repository.StudyRepository;
-import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
+import org.shanoir.ng.processing.carmin.output.DefaultOutputProcessing;
+import org.shanoir.ng.processing.carmin.output.OutputProcessing;
+import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * CRON job to request VIP api and create processedDataset
  * 
@@ -50,235 +48,173 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
-    @Value("${vip.uri}")
-    private String VIP_URI;
+	private static final String DEFAULT_OUTPUT = "default";
 
-    @Value("${vip.upload-folder}")
-    private String importDir;
+	@Value("${vip.uri}")
+	private String VIP_URI;
 
-    @Value("${vip.sleep-time}")
-    private long sleepTime;
+	@Value("${vip.upload-folder}")
+	private String importDir;
 
-    @Value("${vip.file-formats}")
-    private String[] listOfNiftiExt;
+	@Value("${vip.sleep-time}")
+	private long sleepTime;
 
-    private boolean stop;
+	private ThreadLocal<Boolean> stop = new ThreadLocal<>();
 
-    private String identifier;
+	private String identifier;
 
-    private static final Logger LOG = LoggerFactory.getLogger(ExecutionStatusMonitor.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ExecutionStatusMonitor.class);
 
-    @Autowired
-    private CarminDatasetProcessingService carminDatasetProcessingService;
+	@Autowired
+	private CarminDatasetProcessingService carminDatasetProcessingService;
 
-    @Autowired
-    private DatasetProcessingService datasetProcessingService;
+	@Autowired
+	private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
-    @Autowired
-    private ImporterService importerService;
+	@Autowired
+	private ObjectMapper mapper;
 
-    @Autowired
-    private StudyRepository studyRepository;
+	@Autowired
+	private DefaultOutputProcessing defaultOutputProcessing;
+	
+	// Map of output methods to execute.
+    private static Map<String, OutputProcessing> outputProcessingMap;
 
-    @Autowired
-    private SubjectRepository subjectRepository;
+	@PostConstruct
+	public void Initialize() {
+		// Init output map
+        Map<String, OutputProcessing> aMap =  new HashMap<>();
+        aMap.put(DEFAULT_OUTPUT, defaultOutputProcessing);
+        outputProcessingMap = Collections.unmodifiableMap(aMap);
+	}
 
-    @Async
-    @Override
-    @Transactional
-    public void startJob(String identifier) {
+	@Async
+	@Override
+	@Transactional
+	public void startJob(String identifier) throws EntityNotFoundException, SecurityException {
+		int attempts = 1;
+		this.identifier = identifier;
 
-        this.identifier = identifier;
-        this.stop = false;
+		stop.set(false);
 
-        String uri = VIP_URI + identifier + "/summary";
-        RestTemplate restTemplate = new RestTemplate();
+		String uri = VIP_URI + identifier + "/summary";
+		RestTemplate restTemplate = new RestTemplate();
+		
+		String token = null;
 
-        while (!stop) {
-            Execution execution = restTemplate.getForObject(uri, Execution.class);
-            try {
-                CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
-                        .findByIdentifier(this.identifier)
-                        .orElseThrow(() -> new EntityNotFoundException(
-                                "entity not found with identifier :" + this.identifier));
+		// check if the token is initialized
+		if (StringUtils.isEmpty(token)) {
+			// refresh the token
+			token = this.refreshServiceAccountAccessToken();
+		}
 
-                switch (execution.getStatus()) {
-                    case FINISHED:
-                        /**
-                         * updates the status and finish the job
-                         */
+		CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
+				.findByIdentifier(this.identifier)
+				.orElseThrow(() -> new EntityNotFoundException(
+						"entity not found with identifier :" + this.identifier));
 
-                        carminDatasetProcessing.setStatus(ExecutionStatus.FINISHED);
+		while (!stop.get()) {
 
-                        this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
+			// init headers with the active access token
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Authorization", "Bearer " + token);
+			HttpEntity entity = new HttpEntity(headers);
 
-                        // untar the .tgz files
-                        final File userImportDir = new File(
-                                this.importDir + File.separator +
-                                        carminDatasetProcessing.getResultsLocation());
+			// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
+			if(attempts >= 3){
+				LOG.error("failed to get execution details in {} attempts.", attempts);
+				LOG.error("Stopping the thread...");
+				stop.set(true);
+				break;
+			}
 
-                        final PathMatcher matcher = userImportDir.toPath().getFileSystem()
-                                .getPathMatcher("glob:**/*.tgz");
-                        final Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath());
+			try {
+				ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
+				Execution execution = executionResponseEntity.getBody();
+				// init attempts due to successful response
+				attempts = 1;
+				switch (execution.getStatus()) {
+				case FINISHED:
+					/**
+					 * updates the status and finish the job
+					 */
 
-                        stream.filter(matcher::matches)
-                                .forEach(zipFile -> decompressTGZ(zipFile.toFile(),
-                                        userImportDir.getAbsoluteFile(),
-                                        carminDatasetProcessing));
+					carminDatasetProcessing.setStatus(ExecutionStatus.FINISHED);
 
-                        LOG.info("execution status updated stopping job...");
+					this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
 
-                        stop = true;
+					// untar the .tgz files
+					final File userImportDir = new File(
+							this.importDir + File.separator +
+							carminDatasetProcessing.getResultsLocation());
 
-                        break;
+					final PathMatcher matcher = userImportDir.toPath().getFileSystem()
+							.getPathMatcher("glob:**/*.{tgz,tar.gz}");
+					final Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath());
 
-                    case UNKOWN:
-                    case EXECUTION_FAILED:
-                    case KILLED:
+					String outputProcessingKey = StringUtils.isEmpty(carminDatasetProcessing.getOutputProcessing()) ? DEFAULT_OUTPUT : carminDatasetProcessing.getOutputProcessing();
+					
+					stream.filter(matcher::matches)
+					.forEach(zipFile -> {
+						outputProcessingMap.get(outputProcessingKey).manageTarGzResult(zipFile.toFile(), userImportDir.getAbsoluteFile(), carminDatasetProcessing);
+					});
 
-                        carminDatasetProcessing.setStatus(execution.getStatus());
-                        this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
-                        LOG.info("execution status updated stopping job...");
+					LOG.info("execution status updated, stopping job...");
 
-                        stop = true;
-                        break;
+					stop.set(true);
+					break;
 
-                    case RUNNING:
-                        Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
-                        break;
+				case UNKOWN:
+				case EXECUTION_FAILED:
+				case KILLED:
 
-                    default:
-                        this.stop = true;
-                        break;
+					carminDatasetProcessing.setStatus(execution.getStatus());
+					this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
+					LOG.info("execution status updated, stopping job...");
 
-                }
+					stop.set(true);
+					break;
 
-            } catch (InterruptedException e) {
-                LOG.error("sleep thread exception :", e);
-                e.getMessage();
-            } catch (EntityNotFoundException e) {
-                LOG.error("entity not found :", e);
-                e.getMessage();
-            } catch (IOException e) {
-                LOG.error("file exception :", e);
-                e.getMessage();
-            }
+				case RUNNING:
+					Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
+					break;
 
-        }
-    }
+				default:
+					stop.set(true);
+					break;
+				}
+			} catch (HttpStatusCodeException e) {
+				// in case of an error with response payload
+				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+					LOG.warn("Unauthorized");
+					LOG.info("Getting new token...");
+					token = this.refreshServiceAccountAccessToken();
+					// inc attempts.
+					attempts++;
+				} else {
+					LOG.error("error while getting execution info with status : {} ,and message :", e.getStatusCode(), e.getMessage());
+					stop.set(true);
+				}
+			} catch (RestClientException e) {
+				// in case of an error with no response payload
+				LOG.error("there is no response payload while getting execution info", e);
+				stop.set(true);
+			} catch (InterruptedException e) {
+				LOG.error("sleep thread exception :", e);
+				stop.set(true);
+			} catch (IOException e) {
+				LOG.error("file exception :", e);
+				stop.set(true);
+			}
+		}
+	}
 
-    /**
-     * 
-     * @param in
-     * @param out
-     * @param carminDatasetProcessing
-     */
-    private void decompressTGZ(File in, File out, CarminDatasetProcessing carminDatasetProcessing) {
-        try (TarArchiveInputStream fin = new TarArchiveInputStream(
-                new GzipCompressorInputStream(new FileInputStream(in)))) {
-            TarArchiveEntry entry;
-            while ((entry = fin.getNextTarEntry()) != null) {
-                if (entry.isDirectory()) {
-                    continue;
-                }
-
-                File cacheFolder = new File(out.getAbsolutePath() + File.separator + "cache");
-                if (!cacheFolder.exists()) {
-                    cacheFolder.mkdirs();
-                }
-
-                File currentFile = new File(cacheFolder, entry.getName());
-
-                IOUtils.copy(fin, new FileOutputStream(currentFile));
-
-                // check all nifti formats
-                for (int i = 0; i < listOfNiftiExt.length; i++) {
-                    if (entry.getName().endsWith(listOfNiftiExt[i])) {
-                        createProcessedDataset(currentFile, cacheFolder.getAbsolutePath(),
-                                carminDatasetProcessing);
-                    }
-                }
-
-            }
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    /**
-     *
-     * @param niiftiFile
-     * @param destDir
-     * @param carminDatasetProcessing
-     */
-    private void createProcessedDataset(File niiftiFile, String destDir,
-            CarminDatasetProcessing carminDatasetProcessing) {
-        File dir = new File(destDir);
-        // create output directory if it doesn't exist
-        if (!dir.exists())
-            dir.mkdirs();
-
-        try {
-            ProcessedDatasetImportJob processedDataset = new ProcessedDatasetImportJob();
-            DatasetProcessing datasetProcessing = datasetProcessingService
-                    .findById(carminDatasetProcessing.getId())
-                    .orElseThrow(() -> new NotFoundException("datasetProcessing not found"));
-
-            Study study = studyRepository.findById(datasetProcessing.getStudyId())
-                    .orElseThrow(() -> new NotFoundException("study not found"));
-
-            processedDataset.setDatasetProcessing(datasetProcessing);
-
-            processedDataset.setProcessedDatasetFilePath(niiftiFile.getAbsolutePath());
-            processedDataset.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
-            processedDataset.setStudyId(datasetProcessing.getStudyId());
-            processedDataset.setStudyName(study.getName());
-
-            List<Dataset> inputDatasets = datasetProcessing.getInputDatasets();
-
-            if(inputDatasets.size() != 0) {
-                
-                List<Long> subjectIds = inputDatasets.stream().map(dataset -> dataset.getSubjectId())
-                    .collect(Collectors.toList());
-             
-                Predicate<Long> predicate = obj -> Objects.equals(inputDatasets.get(0).getSubjectId(), obj);
-
-                if (subjectIds.stream().allMatch(predicate)) {
-                    Subject subject = subjectRepository.findById(inputDatasets.get(0).getSubjectId())
-                        .orElseThrow(() -> new NotFoundException("subject not found"));
-
-                    processedDataset.setSubjectId(subject.getId());
-                    processedDataset.setSubjectName(subject.getName());
-                    processedDataset.setDatasetType(inputDatasets.get(0).getType());
-                } else {
-                    processedDataset.setDatasetType("Mesh");
-                }
-
-            } else {
-                processedDataset.setDatasetType("Mesh");
-            }
-            
-            processedDataset.setProcessedDatasetName(getNameWithoutExtension(niiftiFile.getName())); 
-            importerService.createProcessedDataset(processedDataset);
-
-            deleteCacheDir(Paths.get(destDir));
-
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
-
-    }
-
-    private void deleteCacheDir(Path directory) throws IOException {
-        Files.walk(directory)
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
-    }
-
-    private String getNameWithoutExtension(String file) {
-        int dotIndex = file.indexOf('.');
-        return (dotIndex == -1) ? file : file.substring(0, dotIndex);
-    }
-
+	/**
+	 * Get token from keycloak service account
+	 * @return
+	 */
+	private String refreshServiceAccountAccessToken() throws SecurityException {
+		AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
+		return accessTokenResponse.getToken();
+	}
 }

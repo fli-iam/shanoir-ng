@@ -14,11 +14,6 @@
 
 package org.shanoir.ng.importer.strategies.datasetexpression;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.LocalDateTime;
-
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -34,6 +29,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 
 @Component
 public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy {
@@ -63,7 +64,7 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 	private String dicomWebRS;
 
 	@Override
-	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws MalformedURLException {
+	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob, ExpressionFormat expressionFormat) throws IOException {
 		DatasetExpression pacsDatasetExpression = new DatasetExpression();
 		pacsDatasetExpression.setCreationDate(LocalDateTime.now());
 		pacsDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.DICOM);
@@ -73,71 +74,89 @@ public class DicomDatasetExpressionStrategy implements DatasetExpressionStrategy
 			pacsDatasetExpression.setFrameCount(serie.getMultiFrameCount());
 		}
 
-		if (expressionFormat != null && expressionFormat.getType().equals("dcm")) {
-			for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
-				LocalDateTime contentTime = null;
-				LocalDateTime acquisitionTime = null;
-				Attributes dicomAttributes = null;
-				try {
-					dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile, serie.getIsEnhanced());
-				} catch (IOException e) {
-					LOG.error(e.getMessage(), e);
-				}
-				DatasetFile pacsDatasetFile = new DatasetFile();
-				pacsDatasetFile.setPacs(true);
-
-				final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
-				final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
-				final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
-				final StringBuffer wadoStrBuf = new StringBuffer();
-				wadoStrBuf.append(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePortWeb);
-				// Use WADO-RS if true, WADO-URI if otherwise
-				if (dicomWeb) {
-					wadoStrBuf.append(dicomWebRS + "/" + studyInstanceUID
-							+ "/series/" + seriesInstanceUID + "/instances/" + sOPInstanceUID);
-				} else {
-					wadoStrBuf.append(dicomWADOURI + "?requestType=WADO&studyUID="
-							+ studyInstanceUID + "&seriesUID=" + seriesInstanceUID + "&objectUID=" + sOPInstanceUID
-							+ "&contentType=application/dicom");
-				}
-				URL wadoURL = new URL(wadoStrBuf.toString());
-				pacsDatasetFile.setPath(wadoURL.toString());
-				
-				pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
-				pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
-
-				// calculate the acquisition duration for this acquisition
-				acquisitionTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.AcquisitionTime));
-				contentTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.ContentTime));
-				if (acquisitionTime != null) {
-					if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
-						pacsDatasetExpression.setLastImageAcquisitionTime(acquisitionTime);
-					}
-					if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
-						pacsDatasetExpression.setFirstImageAcquisitionTime(acquisitionTime);
-					}
-					if (acquisitionTime.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
-						pacsDatasetExpression.setLastImageAcquisitionTime(acquisitionTime);
-					} else if (acquisitionTime.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
-						pacsDatasetExpression.setFirstImageAcquisitionTime(acquisitionTime);
-					}
-				}
-				if (contentTime != null) {
-					if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
-						pacsDatasetExpression.setLastImageAcquisitionTime(contentTime);
-					}
-					if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
-						pacsDatasetExpression.setFirstImageAcquisitionTime(contentTime);
-					}
-					if (contentTime.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
-						pacsDatasetExpression.setLastImageAcquisitionTime(contentTime);
-					} else if (contentTime.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
-						pacsDatasetExpression.setFirstImageAcquisitionTime(contentTime);
-					}
-				}
-			}
+		if (expressionFormat == null || !expressionFormat.getType().equals("dcm")) {
+			return pacsDatasetExpression;
 		}
+
+		long filesSize = 0L;
+
+		for (org.shanoir.ng.importer.dto.DatasetFile datasetFile : expressionFormat.getDatasetFiles()) {
+			LocalDateTime contentTime;
+			LocalDateTime acquisitionTime;
+			Attributes dicomAttributes;
+
+			try {
+				dicomAttributes = dicomProcessing.getDicomObjectAttributes(datasetFile, serie.getIsEnhanced());
+			} catch (IOException e) {
+				LOG.error("Error while reading DICOM attributes from file.", e);
+				throw e;
+			}
+
+			DatasetFile pacsDatasetFile = new DatasetFile();
+			pacsDatasetFile.setPacs(true);
+
+			filesSize += Files.size(Paths.get(datasetFile.getPath()));
+
+			final String studyInstanceUID = dicomAttributes.getString(Tag.StudyInstanceUID);
+			final String seriesInstanceUID = dicomAttributes.getString(Tag.SeriesInstanceUID);
+			final String sOPInstanceUID = dicomAttributes.getString(Tag.SOPInstanceUID);
+			final StringBuilder wadoStrBuf = new StringBuilder();
+
+			wadoStrBuf.append(dcm4cheeProtocol).append(dcm4cheeHost).append(":").append(dcm4cheePortWeb);
+			// Use WADO-RS if true, WADO-URI if otherwise
+			if (dicomWeb) {
+				wadoStrBuf.append(dicomWebRS)
+						.append("/")
+						.append(studyInstanceUID)
+						.append("/series/")
+						.append(seriesInstanceUID)
+						.append("/instances/")
+						.append(sOPInstanceUID);
+			} else {
+				wadoStrBuf.append(dicomWADOURI)
+						.append("?requestType=WADO&studyUID=")
+						.append(studyInstanceUID).append("&seriesUID=")
+						.append(seriesInstanceUID).append("&objectUID=")
+						.append(sOPInstanceUID)
+						.append("&contentType=application/dicom");
+			}
+
+			URL wadoURL = new URL(wadoStrBuf.toString());
+			pacsDatasetFile.setPath(wadoURL.toString());
+
+			pacsDatasetExpression.getDatasetFiles().add(pacsDatasetFile);
+			pacsDatasetFile.setDatasetExpression(pacsDatasetExpression);
+
+			// calculate the acquisition duration for this acquisition
+			acquisitionTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.AcquisitionTime));
+			contentTime = DateTimeUtils.dateToLocalDateTime(dicomAttributes.getDate(Tag.ContentTime));
+
+			this.setAcquistionDuration(pacsDatasetExpression, acquisitionTime);
+
+			this.setAcquistionDuration(pacsDatasetExpression, contentTime);
+		}
+
+		pacsDatasetExpression.setSize(filesSize);
 		return pacsDatasetExpression;
+	}
+
+	private void setAcquistionDuration(DatasetExpression pacsDatasetExpression, LocalDateTime time) {
+
+		if (time == null) {
+			return;
+		}
+
+		if (pacsDatasetExpression.getLastImageAcquisitionTime() == null) {
+			pacsDatasetExpression.setLastImageAcquisitionTime(time);
+		}
+		if (pacsDatasetExpression.getFirstImageAcquisitionTime() == null) {
+			pacsDatasetExpression.setFirstImageAcquisitionTime(time);
+		}
+		if (time.isAfter(pacsDatasetExpression.getLastImageAcquisitionTime())) {
+			pacsDatasetExpression.setLastImageAcquisitionTime(time);
+		} else if (time.isBefore(pacsDatasetExpression.getFirstImageAcquisitionTime())) {
+			pacsDatasetExpression.setFirstImageAcquisitionTime(time);
+		}
 	}
 
 }

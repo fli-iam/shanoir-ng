@@ -1,0 +1,9 @@
+button.accept { background-color: var(--color-c); }
+  button.accept:disabled { background-color: var(--grey); } 
+  button.accept:active, 
+  button.accept:enabled:hover { opacity: 0.5; }
+
+button.refuse { background-color: var(--color-error); }
+  button.refuse:disabled { background-color: var(--grey); } 
+  button.refuse:active, 
+  button.refuse:enabled:hover { opacity: 0.5; }

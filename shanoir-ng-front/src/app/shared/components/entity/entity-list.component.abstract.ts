@@ -89,7 +89,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
         }
         if (this.view) {
-            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item.id) });
+            this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToViewFromEntity(item) });
         }
         if (this.delete) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
@@ -112,7 +112,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     abstract getCustomActionsDefs(): any[];
 
     public onRowClick(entity: T) {
-        this.goToView(entity.id);
+        this.goToViewFromEntity(entity);
     }
 
     protected openDeleteConfirmDialog = (entity: T) => {
@@ -159,6 +159,12 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
      */
     protected canDelete(item: T): boolean {
         return true;
+    }
+
+    goToViewFromEntity(item: T): void {
+        if (item?.id) {
+            this.router.navigate([this.entityRoutes.getRouteToView(item.id)]);
+        }
     }
 
     goToView(id: number): void {

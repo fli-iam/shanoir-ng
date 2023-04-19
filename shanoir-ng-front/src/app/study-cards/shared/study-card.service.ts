@@ -21,7 +21,6 @@ import { StudyCardDTOService } from './study-card.dto';
 import { StudyCardDTO } from './study-card.dto.model';
 import { StudyCard } from './study-card.model';
 
-
 @Injectable()
 export class StudyCardService extends EntityService<StudyCard> {
 
@@ -58,9 +57,15 @@ export class StudyCardService extends EntityService<StudyCard> {
         });
     }
 
-    applyStudyCardOn(studyCardId: number, datasetAcquisitionIds: number[]) {
+    applyStudyCardOn(studyCardId: number, datasetAcquisitionIds: number[]): Promise<any> {
         return this.http.post<any[]>(this.API_URL + '/apply', JSON.stringify({studyCardId: studyCardId, datasetAcquisitionIds: datasetAcquisitionIds}))
             .toPromise()
             .then();
     }
+    
+    applyStudyCardOnStudy(studyCardId: number): Promise<any> {
+        return this.http.get<any[]>(this.API_URL + '/apply-quality-card/' + studyCardId)
+            .toPromise();
+    }
+
 }

@@ -186,7 +186,7 @@ public class ExaminationApiController implements ExaminationApi {
 			Set<Examination> examsToKeep = new HashSet<>();
 			Set<DatasetAcquisition> acqToKeep = new HashSet<>();
 			
-			// Clean these examinations / dataset Acquisition from unecessary datasets
+			// Clean these examinations / dataset Acquisition from unnecessary datasets
 			for (Examination exam :relatedExams) {
 				for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
 					List<Dataset> current = new ArrayList<>();
@@ -230,7 +230,7 @@ public class ExaminationApiController implements ExaminationApi {
 			@ApiParam(value = "the examination to create", required = true) @RequestBody @Valid final ExaminationDTO examinationDTO,
 			final BindingResult result) throws RestServiceException {
 		validate(result);
-		final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
+        final Examination createdExamination = examinationService.save(examinationMapper.examinationDTOToExamination(examinationDTO));
 		// NB: Message as centerId / subjectId is important in RabbitMQStudiesService
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, createdExamination.getId().toString(), KeycloakUtil.getTokenUserId(), "centerId:" + createdExamination.getCenterId() + ";subjectId:" + (createdExamination.getSubject() != null ? createdExamination.getSubject().getId() : null), ShanoirEvent.SUCCESS, createdExamination.getStudyId()));
 		return new ResponseEntity<>(examinationMapper.examinationToExaminationDTO(createdExamination), HttpStatus.OK);
@@ -294,7 +294,7 @@ public class ExaminationApiController implements ExaminationApi {
 		examination.setComment(file.getOriginalFilename());
 		examination.setCenterId(centerId);
 		examination.setSubject(subject);
-		examination.setStudyId(subject.getSubjectStudyList().get(0).getStudy().getId());
+		examination.setStudy(subject.getSubjectStudyList().get(0).getStudy());
 		examination.setExaminationDate(LocalDate.now());
 		List<String> pathList = new ArrayList<>();
 		pathList.add(file.getOriginalFilename());

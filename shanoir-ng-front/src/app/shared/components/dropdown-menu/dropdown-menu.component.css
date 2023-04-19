@@ -1,5 +1,5 @@
-:host() { color: var(--dark-grey); position: absolute; top: 0; z-index: 10; margin-left: -5px; }
-:host().opened { z-index: 20; }
+:host { color: var(--dark-grey); position: absolute; top: 0; z-index: 10; margin-left: -5px; }
+:host.opened { z-index: 20; }
 li { display: inline-block; padding: 0; height: 20px; min-height: 0; }
 li .label { cursor: pointer; display: flex; margin: 0; text-decoration: none; padding: 0px 5px; }
 li .label:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-a); }
@@ -15,5 +15,5 @@ li .label:hover { cursor: pointer; color: var(--very-light-grey); background-col
 
 .plus { padding: 0 5px; text-align: center; font-size: 10px; cursor: pointer; color: var(--color-b-light2); }
 
-:host()::ng-deep menu-item:first-child { margin-top: 0 !important; }
-:host()::ng-deep menu-item:last-child { margin-bottom: 0 !important; }
+:host::ng-deep menu-item:first-child { margin-top: 0 !important; }
+:host::ng-deep menu-item:last-child { margin-bottom: 0 !important; }

@@ -22,7 +22,6 @@ public class StudyCardApply {
 	
 	private List<Long> datasetAcquisitionIds;
 
-	
 	public Long getStudyCardId() {
 		return studyCardId;
 	}

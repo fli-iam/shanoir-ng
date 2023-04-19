@@ -48,8 +48,10 @@ import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.studyexamination.StudyExamination;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.model.SubjectStudyTag;
+import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.tag.model.StudyTag;
 import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -83,7 +85,7 @@ public class StudyServiceImpl implements StudyService {
 
 	@Autowired
 	private StudyRepository studyRepository;
-	
+
 	@Autowired
 	private CenterRepository centerRepository;
 
@@ -104,9 +106,16 @@ public class StudyServiceImpl implements StudyService {
 
 	@Value("${studies-data}")
 	private String dataDir;
-	
+
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	@Autowired
+	private SubjectService subjectService;
+
+	@Autowired
+	private SubjectStudyRepository subjectStudyRepository;
+
 
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
@@ -169,13 +178,13 @@ public class StudyServiceImpl implements StudyService {
 				studyUser.setStudy(study);
 			}
 		}
-		
+
 		List<SubjectStudy> subjectStudyListSave = new ArrayList<SubjectStudy>(study.getSubjectStudyList());
 		Map<Long, List<SubjectStudyTag>> subjectStudyTagSave = new HashMap<>();
 		study.setSubjectStudyList(null);
 		Study studyDb = studyRepository.save(study);
 		//studyDb.setSubjectStudyList(new ArrayList<SubjectStudy>());
-		
+
 		if (subjectStudyListSave != null) {
 			updateTags(subjectStudyListSave, studyDb.getTags());
 			//ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), subjectStudyListSave);
@@ -183,7 +192,7 @@ public class StudyServiceImpl implements StudyService {
 			for (SubjectStudy subjectStudy : subjectStudyListSave) {
 				SubjectStudy newSubjectStudy = new SubjectStudy();
 				newSubjectStudy.setPhysicallyInvolved(subjectStudy.isPhysicallyInvolved());
- 				newSubjectStudy.setSubject(subjectStudy.getSubject());
+				newSubjectStudy.setSubject(subjectStudy.getSubject());
 				newSubjectStudy.setSubjectStudyIdentifier(subjectStudy.getSubjectStudyIdentifier());
 				newSubjectStudy.setSubjectType(subjectStudy.getSubjectType());
 				newSubjectStudy.setStudy(studyDb);
@@ -192,7 +201,7 @@ public class StudyServiceImpl implements StudyService {
 				studyDb.getSubjectStudyList().add(newSubjectStudy);
 			}
 			studyDb = studyRepository.save(studyDb);
-			
+
 			for (SubjectStudy subjectStudy : studyDb.getSubjectStudyList()) {
 				subjectStudy.setSubjectStudyTags(subjectStudyTagSave.get(subjectStudy.getSubject().getId()));
 				for (SubjectStudyTag ssTag : subjectStudy.getSubjectStudyTags()) {
@@ -201,7 +210,7 @@ public class StudyServiceImpl implements StudyService {
 			}
 			studyDb = studyRepository.save(studyDb);
 		}
-		
+
 		updateStudyName(studyMapper.studyToStudyDTO(studyDb));
 
 		if (studyDb.getStudyUserList() != null) {
@@ -218,7 +227,7 @@ public class StudyServiceImpl implements StudyService {
 			} catch (MicroServiceCommunicationException e) {
 				LOG.error("Could not transmit study-user create info through RabbitMQ", e);
 			}
-			
+
 			// Use newly created study "studyDb" to decide, to send email to which user
 			sendStudyUserReport(studyDb, studyDb.getStudyUserList());
 		}
@@ -229,10 +238,10 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public Study update(Study study) throws EntityNotFoundException, MicroServiceCommunicationException {
 		Study studyDb = studyRepository.findById(study.getId()).orElse(null);
-		
+
 		List<Long> tagsToDelete = getTagsToDelete(study, studyDb);
 		List<Long> studyTagsToDelete = getStudyTagsToDelete(study, studyDb);
-		
+
 		if (studyDb == null) {
 			throw new EntityNotFoundException(Study.class, study.getId());
 		}
@@ -271,6 +280,32 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 
+		List<Subject> toBeDeleted = new ArrayList<Subject>();
+
+		if (study.getSubjectStudyList() != null) {
+
+			// Find all ids from new study
+			Set<Long> updatedIds = new HashSet<>();
+			for (SubjectStudy entity : study.getSubjectStudyList()) {
+				updatedIds.add(entity.getId());
+			}
+
+			// Find deleted subject study so we can eventualy delete subjects
+			List<Subject> removed = new ArrayList<Subject>();
+
+			for (SubjectStudy subjectStudyDb : studyDb.getSubjectStudyList()) {
+				if(!updatedIds.contains(subjectStudyDb.getId())) {
+					removed.add(subjectStudyDb.getSubject());
+				}
+			}
+
+			for (Subject subject : removed) {
+				if (this.subjectStudyRepository.countBySubject(subject) == 1L) {
+					toBeDeleted.add(subject);
+				}
+			}
+		}
+
 		if (studyDb.getProtocolFilePaths() != null) {
 			for (String filePath : studyDb.getProtocolFilePaths()) {
 				if (!study.getProtocolFilePaths().contains(filePath)) {
@@ -282,7 +317,7 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		studyDb.setProtocolFilePaths(study.getProtocolFilePaths());
-		
+
 		updateStudyUsers(studyDb, study);
 
 		if (study.getDataUserAgreementPaths() != null) { // do this after updateStudyUsers
@@ -299,6 +334,11 @@ public class StudyServiceImpl implements StudyService {
 			}
 			studyDb = studyRepository.save(studyDb);
 		}
+		
+		// Actually delete subjects
+		for (Subject subjectToDelete : toBeDeleted) {
+			subjectService.deleteById(subjectToDelete.getId());
+		}
 
 		if (studyDb.getTags() != null) {
 			studyDb.getTags().removeIf(tag -> tagsToDelete.contains(tag.getId()));
@@ -313,7 +353,7 @@ public class StudyServiceImpl implements StudyService {
 
 		return studyDb;
 	}
-	
+
 	/**
 	 * For each subject study tag of study, set the fresh tag id by looking into studyDb tags, 
 	 * then update db subject study tags lists with the given study
@@ -432,7 +472,7 @@ public class StudyServiceImpl implements StudyService {
 					// existing DUA removed from study
 					if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
 						su.setConfirmed(true); // without DUA all StudyUser are confirmed, set back to true, if false
-												// before
+						// before
 						dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb,
 								su.getUserId());
 					}
@@ -551,11 +591,25 @@ public class StudyServiceImpl implements StudyService {
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not transmit study-user create info through RabbitMQ", e);
 		}
-		
+
 		// Use study "study" to decide, to send email to which user
 		List<StudyUser> created = new ArrayList<>();
 		created.add(studyUser);
 		sendStudyUserReport(study, created);
+	}
+
+	@Override
+	public void removeStudyUserFromStudy(Long studyId, Long userId) {
+		StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
+		try {
+			List<StudyUserCommand> commands = new ArrayList<>();
+			commands.add(new StudyUserCommand(CommandType.DELETE, studyUser.getId()));
+			this.studyUserCom.broadcast(commands);
+			this.studyUserRepository.delete(studyUser);
+
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Failed to remove studyUser from study: ", e);
+		}
 	}
 
 	private boolean updateStudyName(StudyDTO study) throws MicroServiceCommunicationException {
