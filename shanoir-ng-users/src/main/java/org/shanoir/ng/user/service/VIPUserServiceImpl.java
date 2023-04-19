@@ -80,7 +80,7 @@ public class VIPUserServiceImpl implements VIPUserService{
         try {
             ResponseEntity<Void> response = restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
             if (response.getStatusCode() != HttpStatus.OK) {
-            	LOG.error("Could not communicate with VIP instance to create user", e);
+            	LOG.error("Could not communicate with VIP instance to create user. Http response: ", response.getStatusCode());
             }
             return user;
         } catch (Exception e) {
