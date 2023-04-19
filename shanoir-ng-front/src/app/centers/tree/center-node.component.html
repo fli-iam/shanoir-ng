@@ -15,18 +15,19 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node
         *ngIf="node"
         [class.selected]="this.menuOpened"
-        [label]="node.label" 
+        [label]="node.label"
         awesome="fa-regular fa-hospital"
         (firstOpen)="loadEquipments()"
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
-        [hasChildren]="hasChildren()">
+        [hasChildren]="hasChildren()"
+        [title]="node.title">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showDetails()"></menu-item>
     </dropdown-menu>
 
-    <ng-container *ngIf="node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any('UNLOADED')"> 
+    <ng-container *ngIf="node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any('UNLOADED')">
             <equipment-node
                     node
                     *ngFor="let acquisitionEquipment of node.acquisitionEquipments"

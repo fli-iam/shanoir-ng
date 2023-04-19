@@ -2,31 +2,42 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient } from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 
-import { Page } from '../table/pageable.model';
-import { Entity } from './entity.abstract';
-
+import {Page} from '../table/pageable.model';
+import {Entity, EntityRoutes} from './entity.abstract';
+import {ConfirmDialogService} from "../confirm-dialog/confirm-dialog.service";
+import {ConsoleService} from "../../console/console.service";
+import {Router} from "@angular/router";
+import {Location} from "@angular/common";
+import {UntypedFormBuilder} from "@angular/forms";
+import {KeycloakService} from "../../keycloak/keycloak.service";
+import {ServiceLocator} from "../../../utils/locator.service";
 
 
 export abstract class EntityService<T extends Entity> {
-    
+
     abstract API_URL: string;
 
     abstract getEntityInstance(entity?: T): T;
 
+    protected confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
+    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+
     // protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
-    constructor(protected http: HttpClient) {}
+    constructor(
+        protected http: HttpClient) {
+    }
 
     getAll(): Promise<T[]> {
         return this.http.get<any[]>(this.API_URL)
@@ -35,7 +46,7 @@ export abstract class EntityService<T extends Entity> {
     }
 
     getAllAdvanced(): { quick: Promise<T[]>, complete: Promise<T[]> } {
-        let res = { quick: null, complete: null };
+        let res = {quick: null, complete: null};
         res.complete = new Promise((resolve, reject) => {
             res.quick = this.http.get<any[]>(this.API_URL)
                 .toPromise()
@@ -44,7 +55,7 @@ export abstract class EntityService<T extends Entity> {
                     let mapPromise = this.mapEntityList(all, quickRes);
                     res.complete = mapPromise
                     resolve(mapPromise);
-                    return quickRes;                   
+                    return quickRes;
                 }).catch(reason => reject(reason));
         });
         return res;
@@ -53,6 +64,39 @@ export abstract class EntityService<T extends Entity> {
     delete(id: number): Promise<void> {
         return this.http.delete<void>(this.API_URL + '/' + id)
             .toPromise();
+    }
+
+    deleteWithConfirmDialog(name: string, entity: Entity): Promise<Boolean> {
+        return this.confirmDialogService
+            .confirm(
+                'Delete ' + name,
+                'Are you sure you want to delete the ' + name
+                + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
+            ).then(res => {
+                if (res) {
+                    this.delete(entity.id).then(() => {
+                        this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
+                        return true;
+                    }).catch(reason => {
+                        if (reason && reason.error) {
+                            if (reason.error.code != 422) {
+                                throw Error(reason);
+                            } else {
+                                this.consoleService.log('warn', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.');
+                            }
+                        } else if (reason && reason.status) {
+                            if (reason.status != 422) {
+                                throw Error(reason);
+                            } else {
+                                this.consoleService.log('warn', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.');
+                            }
+                        } else {
+                            console.error(reason);
+                        }
+                    });
+                }
+                return false;
+            })
     }
 
     get(id: number): Promise<T> {
@@ -85,7 +129,7 @@ export abstract class EntityService<T extends Entity> {
         return this.mapEntityList(page.content).then(entities => {
             page.content = entities;
             return page;
-        });            
+        });
     }
 
     protected toRealObject(entity: T): T {
@@ -106,7 +150,9 @@ export abstract class EntityService<T extends Entity> {
         });
     }
 
-    protected getIgnoreList() { return ['_links']; }
+    protected getIgnoreList() {
+        return ['_links'];
+    }
 
     protected customReplacer = (key, value, entity) => {
         if (this.getIgnoreList().indexOf(key) > -1) return undefined;
@@ -115,10 +161,10 @@ export abstract class EntityService<T extends Entity> {
     }
 
     private datePattern(date: Date): string {
-         return date.getFullYear()
-         + '-' 
-         + ('0' + (date.getMonth() + 1)).slice(-2)
-         + '-' 
-         + ('0' + date.getDate()).slice(-2);
+        return date.getFullYear()
+            + '-'
+            + ('0' + (date.getMonth() + 1)).slice(-2)
+            + '-'
+            + ('0' + date.getDate()).slice(-2);
     }
 }
