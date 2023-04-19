@@ -1,16 +1,15 @@
 package org.shanoir.ng.user.service;
 
 import org.keycloak.representations.AccessTokenResponse;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.model.vip.CountryCode;
 import org.shanoir.ng.user.model.vip.VIPUser;
 import org.shanoir.ng.user.model.vip.VIPUserLevel;
 import org.shanoir.ng.user.repository.UserRepository;
-import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.PasswordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +19,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -77,16 +75,15 @@ public class VIPUserServiceImpl implements VIPUserService{
         HttpEntity entity = new HttpEntity<>(vipUser, headers);
 
         try {
-            restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
+            ResponseEntity<Void> response = restTemplate.exchange(this.vip_uri, HttpMethod.POST, entity, Void.class);
+            if (response.getStatusCode() != HttpStatus.OK) {
+            	LOG.error("Could not communicate with VIP instance to create user. Http response: ", response.getStatusCode());
+            }
             return user;
-        }catch (HttpStatusCodeException e) {
-            // in case of an error with response payload
-            throw new MicroServiceCommunicationException("Error while communicating with VIP with status : "+e.getStatusCode(), e);
-        } catch (RestClientException e) {
-            // in case of an error with no response payload
-            throw new MicroServiceCommunicationException("Error while communicating with VIP with no response payload while saving vip user", e);
+        } catch (Exception e) {
+            // Do not fail when an error occures
+        	LOG.error("Could not communicate with VIP instance to create user", e);
+        	return user;
         }
-
-
     }
 }
