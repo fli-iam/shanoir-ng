@@ -104,6 +104,8 @@ public class ImportDialog extends JDialog {
 	public JLabel mriManufacturerText;
 	public JLabel mriManufacturersModelNameLabel;
 	public JLabel mriManufacturersModelNameText;
+	public JLabel mriMagneticFieldStrengthLabel;
+	public JLabel mriMagneticFieldStrengthText;
 	public JLabel mriDeviceSerialNumberLabel;
 	public JLabel mriDeviceSerialNumberText;
 
@@ -262,6 +264,27 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 1;
 		container.add(mriManufacturersModelNameText, importDialogGBC);
 		
+		mriMagneticFieldStrengthLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.magnetic.field.strength"));
+		mriMagneticFieldStrengthLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		mriMagneticFieldStrengthLabel.setFont(font);
+		importDialogGBC.weightx = 0.2;
+		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
+		importDialogGBC.insets = new Insets(5, 5, 5, 5);
+		importDialogGBC.gridx = 0;
+		importDialogGBC.gridy = 5;
+		importDialogGBC.gridwidth = 2;
+		container.add(mriMagneticFieldStrengthLabel, importDialogGBC);
+
+		mriMagneticFieldStrengthText = new JLabel("");
+		mriMagneticFieldStrengthText.setFont(font);
+		importDialogGBC.weightx = 0.2;
+		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
+		importDialogGBC.insets = new Insets(5, 5, 5, 5);
+		importDialogGBC.gridx = 2;
+		importDialogGBC.gridy = 5;
+		importDialogGBC.gridwidth = 1;
+		container.add(mriMagneticFieldStrengthText, importDialogGBC);
+		
 		mriDeviceSerialNumberLabel = new JLabel(resourceBundle.getString("shanoir.uploader.import.dicom.device.serial.number"));
 		mriDeviceSerialNumberLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		mriDeviceSerialNumberLabel.setFont(font);
@@ -269,7 +292,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 0;
-		importDialogGBC.gridy = 5;
+		importDialogGBC.gridy = 6;
 		importDialogGBC.gridwidth = 2;
 		container.add(mriDeviceSerialNumberLabel, importDialogGBC);
 
@@ -279,7 +302,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.fill = GridBagConstraints.HORIZONTAL;
 		importDialogGBC.insets = new Insets(5, 5, 5, 5);
 		importDialogGBC.gridx = 2;
-		importDialogGBC.gridy = 5;
+		importDialogGBC.gridy = 6;
 		importDialogGBC.gridwidth = 1;
 		container.add(mriDeviceSerialNumberText, importDialogGBC);
 

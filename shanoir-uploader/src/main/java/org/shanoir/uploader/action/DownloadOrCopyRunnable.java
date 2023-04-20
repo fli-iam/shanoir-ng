@@ -64,7 +64,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 		
 		/**
 		 * 2. Fill MRI information into serie from first DICOM file of each serie
-		 * This has already been done for CD/DVD import, but not yet here for PACS
+		 * This has already been done for CD/DVD import, but not yet here for PACS.
 		 */
 		for (Iterator iterator = selectedSeries.iterator(); iterator.hasNext();) {
 			Serie serie = (Serie) iterator.next();

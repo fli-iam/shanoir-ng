@@ -299,6 +299,7 @@ public class Study implements DicomTreeNode {
 		mri.setStationName(dicomObject.dataset().getString(Tag.StationName));
 		mri.setManufacturer(dicomObject.dataset().getString(Tag.Manufacturer));
 		mri.setManufacturersModelName(dicomObject.dataset().getString(Tag.ManufacturerModelName));
+		mri.setMagneticFieldStrength(dicomObject.dataset().getString(Tag.MagneticFieldStrength));
 		mri.setDeviceSerialNumber(dicomObject.dataset().getString(Tag.DeviceSerialNumber));
 		serie.setMriInformation(mri);
 		

@@ -491,6 +491,7 @@ public final class Util {
 						mriInformation.setStationName(dcmObj.getString(Tag.StationName));
 						mriInformation.setManufacturer(dcmObj.getString(Tag.Manufacturer));
 						mriInformation.setManufacturersModelName(dcmObj.getString(Tag.ManufacturerModelName));
+						mriInformation.setMagneticFieldStrength(dcmObj.getString(Tag.MagneticFieldStrength));
 						mriInformation.setDeviceSerialNumber(dcmObj.getString(Tag.DeviceSerialNumber));
 					} catch (IOException e) {
 						logger.error(e.getMessage(), e);
