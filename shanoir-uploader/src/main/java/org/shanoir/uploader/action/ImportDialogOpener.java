@@ -134,28 +134,23 @@ public class ImportDialogOpener {
 								// find the correct equipment
 								if (acquisitionEquipment.getId().equals(acquisitionEquipmentId)) {
 									studyCard.setAcquisitionEquipment(acquisitionEquipment);
-									// check if values from server are complete
+									// check if values from server are complete, no sense for comparison if no serial number on server
 									if (acquisitionEquipment != null
 										&& acquisitionEquipment.getManufacturerModel() != null
-										&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null) {
-										// try device serial number match based on number from server
-										if (acquisitionEquipment.getSerialNumber() != null
-											&& acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0) {
-											studyCard.setCompatible(true);
-											compatibleStudyCard = true;
+										&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null
+										&& acquisitionEquipment.getSerialNumber() != null) {
+										// check if values are present in DICOM
+										if (deviceSerialNumber != null && !"".equals(deviceSerialNumber)) {
+											if (acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0
+												|| deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
+												studyCard.setCompatible(true);
+												compatibleStudyCard = true;
+											} else {
+												studyCard.setCompatible(false);
+											}
 										// no match with server
 										} else {
-											// try to match otherwise, server device serial number within DICOM value
-											if (deviceSerialNumber != null && !"".equals(deviceSerialNumber)) {
-												if (deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
-													studyCard.setCompatible(true);
-													compatibleStudyCard = true;
-												} else {
-													studyCard.setCompatible(false);
-												}
-											} else {
-												studyCard.setCompatible(false); // no match, as no value from DICOM
-											}
+											studyCard.setCompatible(false); // no match, as no value from DICOM or from server exists
 										}
 									// set in-compatible in case of missing server values
 									} else {
