@@ -51,12 +51,12 @@ export class CarminClientService {
    * The successful response must contain the execution identifier. If the status “Initializing” is returned, playExecution must be called to start the execution.
    * @param body Execution
    */
-  public createExecution(execution: Execution ): Observable<Execution> {
+  public createExecution(execution: Execution ): Promise<Execution> {
     
     if (execution === null || execution === undefined) {
       throw new Error('Required parameter execution was null or undefined when calling createExecution.');
     }
-    return this.httpClient.post<Execution>(`${this.basePath}/executions`,execution);
+    return this.httpClient.post<Execution>(`${this.basePath}/executions`,execution).toPromise();
   }
 
   

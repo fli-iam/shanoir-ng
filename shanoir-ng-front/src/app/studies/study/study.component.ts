@@ -43,6 +43,7 @@ import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import { Profile } from "../../shared/models/profile.model";
 import { AccessRequest } from 'src/app/users/access-request/access-request.model';
+import { ProcessingService } from 'src/app/processing/processing.service';
 import {Dataset} from "../../datasets/shared/dataset.model";
 import {DatasetService} from "../../datasets/shared/dataset.service";
 
@@ -92,7 +93,8 @@ export class StudyComponent extends EntityComponent<Study> {
             private userService: UserService,
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
-            private accessRequestService: AccessRequestService) {
+            private accessRequestService: AccessRequestService,
+            private processingService: ProcessingService) {
 
         super(route, 'study');
         this.activeTab = 'general';
@@ -625,6 +627,11 @@ export class StudyComponent extends EntityComponent<Study> {
 
     goToAccessRequest(accessRequest : AccessRequest) {
         this.router.navigate(["/access-request/details/" + accessRequest.id]);
+    }
+
+    goToProcessing() {
+        this.processingService.setDatasets(new Set(this.selectedDatasetIds));
+        this.router.navigate(['/processing']);
     }
 
     reloadSubjectStudies() {

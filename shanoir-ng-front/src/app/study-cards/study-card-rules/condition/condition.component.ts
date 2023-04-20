@@ -198,7 +198,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.condition.values = [null];
             if (value.endsWith('OnDataset') || value.endsWith('OnDatasets')) {
                 this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'Dataset');
-            } else if (value.endsWith('OnAcquisition') || value.endsWith('OnAcquisitions')) {
+            } else if (value.endsWith('OnAcq') || value.endsWith('OnAcq')) {
                 this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'DatasetAcquisition');
             } else {
                 this.fieldOptions.forEach(opt => opt.disabled = false);
