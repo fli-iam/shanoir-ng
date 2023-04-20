@@ -15,14 +15,9 @@
 package org.shanoir.ng.study.service;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.transaction.Transactional;
 
@@ -669,5 +664,29 @@ public class StudyServiceImpl implements StudyService {
 	@Override
 	public List<Study> findPublicStudies() {
 		return this.studyRepository.findByVisibleByDefaultTrue();
+	}
+
+	@Override
+	public Long getStudyFilesSize(Long studyId){
+		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
+		if (studyOpt.isEmpty()) {
+			return 0L;
+		}
+		Study study = studyOpt.get();
+		List<String> paths = Stream.of(study.getDataUserAgreementPaths(), study.getProtocolFilePaths())
+				.flatMap(Collection::stream)
+				.collect(Collectors.toList());
+
+		long size = 0L;
+
+		for (String path : paths) {
+			File f = new File(this.getStudyFilePath(studyId, path));
+			if(f.exists()){
+				size += f.length();
+			}
+		}
+
+		return size;
+
 	}
 }

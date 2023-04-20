@@ -126,9 +126,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
           </li>
           <li>
             <label i18n="Study detail|Status label@@studyDetailStatus">Storage volume</label>
-            <span class="right-col" [ngSwitch]="mode">
-								{{ studySizeStr(study.size) }}
-						</span>
+            <span class="right-col" *ngIf="!uploading">
+				{{ studySizeStr(study.size) }}
+			</span>
+			<span class="right-col" *ngIf="uploading">
+				<i class="fas fa-spinner fa-pulse"></i>
+			</span>
           </li>
           <li>
 					<li>
