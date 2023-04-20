@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -38,13 +38,14 @@ export class ReverseSubjectNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
+    @Input() mode: string;
 
     constructor(
             private examinationService: ExaminationService,
             private router: Router,
             private examPipe: ExaminationPipe) {
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof ReverseSubjectNode) {
@@ -53,11 +54,12 @@ export class ReverseSubjectNodeComponent implements OnChanges {
                 this.node  = new ReverseSubjectNode(
                     this.input.id,
                     this.input.name,
-                    this.input.subjectStudyList.map(subjectStudy => this.mapStudy(subjectStudy.study)));
+                    this.input.subjectStudyList.map(subjectStudy => this.mapStudy(subjectStudy.study)),
+                    this.mode);
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/subject/details/' + this.node.id;
-        } 
+        }
     }
 
     private mapStudy(study: SimpleStudy): ReverseStudyNode {
@@ -66,19 +68,21 @@ export class ReverseSubjectNodeComponent implements OnChanges {
                 study.id,
                 study.name,
                 this.input.subjectStudyList[this.input.subjectStudyList.findIndex(element => element.study.id == study.id)].tags,
-                UNLOADED
+                UNLOADED,
+                this.mode
             );
         } else {
             return new ReverseStudyNode(
                 study.id,
                 study.name,
                 [],
-                UNLOADED
+                UNLOADED,
+                this.mode
             );
         }
     }
-    
-    
+
+
     hasChildren(): boolean | 'unknown' {
         if (!this.node.studies) return false;
         else if (this.node.studies == 'UNLOADED') return 'unknown';

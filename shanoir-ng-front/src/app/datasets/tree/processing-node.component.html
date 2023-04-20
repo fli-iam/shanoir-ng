@@ -19,7 +19,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [(opened)]="node.open"
         (labelClick)="toggleMenu()"
         [hasChildren]="hasChildren()"
-        [title]="node.title">
+        [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showProcessingDetails()"></menu-item>

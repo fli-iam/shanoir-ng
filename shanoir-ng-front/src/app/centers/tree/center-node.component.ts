@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -38,7 +38,7 @@ export class CenterNodeComponent implements OnChanges {
         private centerService: CenterService,
         private acquisitionEquipmentPipe: AcquisitionEquipmentPipe) {
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof CenterNode) {
@@ -65,12 +65,23 @@ export class CenterNodeComponent implements OnChanges {
             center =>  {
                 if (center) {
                     this.node.acquisitionEquipments = center.acquisitionEquipments.map(
-                            acqEq => new AcquisitionEquipmentNode(acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED'));
+                            acqEq => new AcquisitionEquipmentNode(acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.node.mode));
                 }
                 this.loading = false;
                 this.node.open = true;
             }).catch(() => {
                 this.loading = false;
             });
+    }
+
+    deleteCenter() {
+        this.centerService.get(this.node.id).then(entity => {
+            this.centerService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
+                if (deleted) {
+                    this.node = null;
+                    this.selectedChange.emit();
+                }
+            });
+        })
     }
 }

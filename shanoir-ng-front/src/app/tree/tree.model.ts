@@ -21,6 +21,7 @@ interface ShanoirNode {
     id: number;
     label: string;
     title: string;
+    mode: string;
 }
 
 export type UNLOADED = 'UNLOADED';
@@ -35,7 +36,8 @@ export class StudyNode implements ShanoirNode {
         public subjects: SubjectNode[] | UNLOADED,
         public centers: CenterNode[] | UNLOADED,
         public studyCards: StudyCardNode[] | UNLOADED,
-        public members: MemberNode[] | UNLOADED
+        public members: MemberNode[] | UNLOADED,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -53,7 +55,8 @@ export class SubjectNode implements ShanoirNode {
         public id: number,
         public label: string,
         public tags: Tag[],
-        public examinations: ExaminationNode[] | UNLOADED
+        public examinations: ExaminationNode[] | UNLOADED,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -67,7 +70,8 @@ export class ExaminationNode implements ShanoirNode {
         public id: number,
         public label: string,
         public datasetAcquisitions: DatasetAcquisitionNode[] | UNLOADED,
-        public extraDataFilePathList: string[] | UNLOADED
+        public extraDataFilePathList: string[] | UNLOADED,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -81,7 +85,8 @@ export class DatasetAcquisitionNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
-        public datasets: DatasetNode[] | UNLOADED
+        public datasets: DatasetNode[] | UNLOADED,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -96,7 +101,8 @@ export class DatasetNode implements ShanoirNode {
         public label: string,
         public type: string,
         public processings: ProcessingNode[] | UNLOADED,
-        public processed: boolean
+        public processed: boolean,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -112,7 +118,8 @@ export class ProcessingNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
-        public datasets: DatasetNode[] | UNLOADED
+        public datasets: DatasetNode[] | UNLOADED,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -125,7 +132,8 @@ export class CenterNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
-        public acquisitionEquipments: AcquisitionEquipmentNode[] | UNLOADED
+        public acquisitionEquipments: AcquisitionEquipmentNode[] | UNLOADED,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -138,7 +146,8 @@ export class AcquisitionEquipmentNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
-        public studyCards: StudyCardNode[] | UNLOADED
+        public studyCards: StudyCardNode[] | UNLOADED,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -151,6 +160,7 @@ export class StudyCardNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -163,7 +173,8 @@ export class MemberNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
-        public rights: RightNode[] | UNLOADED
+        public rights: RightNode[] | UNLOADED,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -175,7 +186,8 @@ export class RightNode implements ShanoirNode {
 
     constructor(
         public id: number,
-        public label: string
+        public label: string,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -188,7 +200,8 @@ export class ReverseSubjectNode implements ShanoirNode {
     constructor(
         public id: number,
         public label: string,
-        public studies: ReverseStudyNode[] | UNLOADED
+        public studies: ReverseStudyNode[] | UNLOADED,
+        public mode: string
     ) {}
 
     public open: boolean = false;
@@ -202,7 +215,8 @@ export class ReverseStudyNode implements ShanoirNode {
         public id: number,
         public label: string,
         public tags: Tag[],
-        public examinations: ExaminationNode[] | UNLOADED
+        public examinations: ExaminationNode[] | UNLOADED,
+        public mode: string
     ) {}
 
     public open: boolean = false;

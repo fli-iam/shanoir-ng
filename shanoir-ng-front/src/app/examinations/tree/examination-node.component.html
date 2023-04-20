@@ -24,16 +24,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="menuOpened = !menuOpened"
         (firstOpen)="firstOpen()"
         [hasChildren]="hasChildren()"
-        [title]="node.title">
+        [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
-        <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showExaminationDetails()"></menu-item>
-        <menu-item label="View in OHIF..." awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>
-        <menu-item *ngIf="hasEEG && datasetIds && datasetIds.length != 0" label="Download all EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
-        <menu-item *ngIf="hasBids && datasetIds && datasetIds.length != 0" label="Download all BIDS" awesome="fas fa-download" (click)="download('BIDS')"></menu-item>
-        <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0) || downloading" label="Download all DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
-        <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0) || downloading" label="Download all Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
-        <menu-item label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteExamination()"></menu-item>
+        <menu-item *ngIf="node.mode == 'view'" label="Details..." awesome="fa-regular fa-eye" (click)="showExaminationDetails()"></menu-item>
+        <menu-item *ngIf="node.mode == 'view'" label="View in OHIF..." awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>
+        <menu-item *ngIf="node.mode == 'view' && hasEEG && datasetIds && datasetIds.length != 0" label="Download all EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
+        <menu-item *ngIf="node.mode == 'view' && hasBids && datasetIds && datasetIds.length != 0" label="Download all BIDS" awesome="fas fa-download" (click)="download('BIDS')"></menu-item>
+        <menu-item *ngIf="node.mode == 'view'" [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0) || downloading" label="Download all DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
+        <menu-item *ngIf="node.mode == 'view'" [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0) || downloading" label="Download all Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
+        <menu-item *ngIf="node.mode == 'view'"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteExamination()"></menu-item>
     </dropdown-menu>
 
     <ng-container *ngIf="node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any('UNLOADED')">

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -47,7 +47,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             private examinationService: ExaminationService,
             private examPipe: ExaminationPipe) {
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof ReverseStudyNode) {
@@ -57,7 +57,8 @@ export class ReverseStudyNodeComponent implements OnChanges {
                         this.input.id,
                         this.input.name,
                         [],
-                        UNLOADED);
+                        UNLOADED,
+                    this.node.mode);
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/study/details/' + this.node.id;
@@ -76,7 +77,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
                 if (sortedExaminations) {
                     sortedExaminations.forEach(exam => {
                         (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
-                    }); 
+                    });
                 }
                 this.loading = false;
                 this.node.open = true;
@@ -85,39 +86,43 @@ export class ReverseStudyNodeComponent implements OnChanges {
             });
         }
     }
-    
+
     private mapExamNode(exam: SubjectExamination): ExaminationNode {
         return new ExaminationNode(
             exam.id,
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            exam.extraDataFilePathList
+            exam.extraDataFilePathList,
+            this.node.mode
         );
     }
-    
+
     private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
             dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : []
+            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
+            this.node.mode
         );
     }
-    
+
     private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
             dataset.id,
             dataset.name,
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed
+            processed,
+            this.node.mode
         );
     }
-    
+
     private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : []
+            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
+            this.node.mode
         );
     }
 

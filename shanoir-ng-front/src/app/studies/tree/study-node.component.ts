@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -37,41 +37,46 @@ export class StudyNodeComponent implements OnChanges {
     showDetails: boolean;
     @Input() hasBox: boolean = false;
 
+    @Input() mode: string;
+
     constructor(
             private router: Router,
             private subjectStudyPipe: SubjectStudyPipe,
             private studyCardService: StudyCardService) {}
-    
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['input']) {
-            if (this.input instanceof StudyNode) {
-                this.node = this.input;
-            } else {
-                let subjects: SubjectNode[] = this.input.subjectStudyList.map(subjectStudy => {
-                    return new SubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED);
-                });
-                let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {
-                    return new CenterNode(studyCenter.center.id, studyCenter.center.name, UNLOADED);
-                });
-                let members: MemberNode[] = this.input.studyUserList.map(studyUser => {
-                    let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(null, StudyUserRight.getLabel(suRight)));
-                    return new MemberNode(studyUser.userId, studyUser.userName, rights);
-                });
-				members.sort((a:MemberNode, b:MemberNode) => {
-					return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
-				})
 
-                this.node = new StudyNode(
-                        this.input.id,
-                        this.input.name,
-                        subjects,
-                        centers,
-                        UNLOADED,
-                        members);  // members    
-            }
-            this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != '/study/details/' + this.node.id;
+    ngOnChanges(changes: SimpleChanges): void {
+        if (!changes['input']) {
+            return;
         }
+
+        if (this.input instanceof StudyNode) {
+            this.node = this.input;
+        } else {
+            let subjects: SubjectNode[] = this.input.subjectStudyList.map(subjectStudy => {
+                return new SubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, this.mode);
+            });
+            let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {
+                return new CenterNode(studyCenter.center.id, studyCenter.center.name, UNLOADED, this.mode);
+            });
+            let members: MemberNode[] = this.input.studyUserList.map(studyUser => {
+                let rights: RightNode[] = studyUser.studyUserRights.map(suRight => new RightNode(null, StudyUserRight.getLabel(suRight), this.mode));
+                return new MemberNode(studyUser.userId, studyUser.userName, rights, this.mode);
+            });
+            members.sort((a: MemberNode, b: MemberNode) => {
+                return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
+            })
+
+            this.node = new StudyNode(
+                this.input.id,
+                this.input.name,
+                subjects,
+                centers,
+                UNLOADED,
+                members,
+                this.mode);  // members
+        }
+        this.nodeInit.emit(this.node);
+        this.showDetails = this.router.url != '/study/details/' + this.node.id;
     }
 
     showStudyDetails() {
@@ -89,7 +94,7 @@ export class StudyNodeComponent implements OnChanges {
             this.studyCardsLoading = true;
             this.studyCardService.getAllForStudy(this.node.id).then(studyCards => {
                 if (studyCards) {
-                   this.node.studyCards = studyCards.map(studyCard => new StudyCardNode(studyCard.id, studyCard.name));
+                   this.node.studyCards = studyCards.map(studyCard => new StudyCardNode(studyCard.id, studyCard.name, this.node.mode));
                 } else this.node.studyCards = [];
                 this.studyCardsLoading = false;
                 this.node.studycardsOpen = true;

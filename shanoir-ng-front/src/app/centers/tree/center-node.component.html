@@ -21,10 +21,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
         [hasChildren]="hasChildren()"
-        [title]="node.title">
+        [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-        <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showDetails()"></menu-item>
+        <menu-item *ngIf="node.mode == 'view'"  label="Details..." awesome="fa-regular fa-eye" (click)="showDetails()"></menu-item>
+        <menu-item *ngIf="node.mode == 'view'"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteCenter()"></menu-item>
     </dropdown-menu>
 
     <ng-container *ngIf="node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any('UNLOADED')">

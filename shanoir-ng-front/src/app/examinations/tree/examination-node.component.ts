@@ -48,6 +48,7 @@ export class ExaminationNodeComponent implements OnChanges {
     hasDicom: boolean = false;
     downloading = false;
     hasBids: boolean = false;
+    @Input() mode: string;
 
     constructor(
         private router: Router,
@@ -68,7 +69,8 @@ export class ExaminationNodeComponent implements OnChanges {
                     this.input.id,
                     this.examPipe.transform(this.input),
                     'UNLOADED',
-                    this.input.extraDataFilePathList);
+                    this.input.extraDataFilePathList,
+                    this.mode);
             }
             this.nodeInit.emit(this.node);
         }
@@ -163,7 +165,8 @@ export class ExaminationNodeComponent implements OnChanges {
         return new DatasetAcquisitionNode(
             dsAcq.id,
             dsAcq.name,
-            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : []
+            dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
+            this.node.mode
         );
     }
 
@@ -173,7 +176,8 @@ export class ExaminationNodeComponent implements OnChanges {
             dataset.name,
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed
+            processed,
+            this.node.mode
         );
     }
 
@@ -181,7 +185,8 @@ export class ExaminationNodeComponent implements OnChanges {
         return new ProcessingNode(
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : []
+            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
+            this.node.mode
         );
     }
 

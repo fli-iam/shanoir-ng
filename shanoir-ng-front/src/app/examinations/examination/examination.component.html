@@ -173,6 +173,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
 				<examination-node
 						[input]="examNode"
+                        [mode]="mode"
 						(nodeInit)="onExaminationNodeInit($event)"></examination-node>
 			</fieldset>
 			<form-footer
