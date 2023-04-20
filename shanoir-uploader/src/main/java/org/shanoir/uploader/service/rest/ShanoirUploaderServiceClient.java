@@ -239,11 +239,11 @@ public class ShanoirUploaderServiceClient {
 						if (newAccessToken != null) {
 							ShUpOnloadConfig.setTokenString(newAccessToken);
 						} else {
-							logger.info("ERROR: with access token refresh.");
+							logger.error("ERROR: with access token refresh.");
 						}
-						logger.info("Access token has been refreshed.");
+						logger.debug("Access token has been refreshed.");
 					} else {
-						logger.info("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
+						logger.error("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
 					}
 				}
 			} catch (Exception e) {
