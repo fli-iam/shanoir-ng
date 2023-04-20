@@ -48,7 +48,7 @@ public class UploadJobManager {
 	 */
 	public UploadJobManager(final File uploadJobFile) {
 		this.uploadJobFile = uploadJobFile;
-		logger.info("UploadJobManager initialized with file: "
+		logger.debug("UploadJobManager initialized with file: "
 			+ this.uploadJobFile.getAbsolutePath());
 	}
 	
