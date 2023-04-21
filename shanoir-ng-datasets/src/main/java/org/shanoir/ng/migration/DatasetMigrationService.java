@@ -38,12 +38,13 @@ import org.shanoir.ng.shared.model.DiffusionGradient;
 import org.shanoir.ng.shared.model.EchoTime;
 import org.shanoir.ng.shared.model.InversionTime;
 import org.shanoir.ng.shared.model.RepetitionTime;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.model.StudyCardAssignment;
-import org.shanoir.ng.studycard.model.StudyCardCondition;
-import org.shanoir.ng.studycard.model.StudyCardRule;
+import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
+import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
+import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -179,7 +180,7 @@ public class DatasetMigrationService {
 		job.getLogging().add("Examination migration");
 
 		// Migrate all examinations
-		List<Examination> examinations = examRepository.findByStudyId(job.getOldStudyId());
+		List<Examination> examinations = examRepository.findByStudy_Id(job.getOldStudyId());
 		
 		float percentage = 1f / (float) examinations.size();;
 		
@@ -212,9 +213,9 @@ public class DatasetMigrationService {
 		if (sc.getAcquisitionEquipmentId() != null) {
 			sc.setAcquisitionEquipmentId(job.getEquipmentMap().get(sc.getAcquisitionEquipmentId()));
 		}
-		for (StudyCardRule oldRule : sc.getRules()) {
+		for (StudyCardRule<?> oldRule : sc.getRules()) {
 			oldRule.setId(null);
-			for (StudyCardAssignment assignment : oldRule.getAssignments()) {
+			for (StudyCardAssignment<?> assignment : oldRule.getAssignments()) {
 				assignment.setId(null);
 			}
 			for (StudyCardCondition condition : oldRule.getConditions()) {
@@ -243,7 +244,8 @@ public class DatasetMigrationService {
 		exam.setCenterId(job.getCentersMap().get(exam.getCenterId()));
 		IdName subject = job.getSubjectsMap().get(exam.getSubject().getId());
 		exam.setSubject(new Subject(subject.getId(), subject.getName()));
-		exam.setStudyId(job.getStudy().getId());
+		exam.setStudy(new Study(job.getStudy().getId(), job.getStudy().getName()));
+
 
 		// We just remove these elements that are not pertinent
 		exam.setInstrumentBasedAssessmentList(null);
@@ -291,7 +293,7 @@ public class DatasetMigrationService {
 		}
 		Examination examDto = new Examination();
 		examDto.setId(examId);
-		examDto.setStudyId(job.getStudy().getId());
+		examDto.setStudy(new Study(job.getStudy().getId(), job.getStudy().getName()));
 		acq.setExamination(examDto);
 		if (acq.getStudyCard() != null) {
 			StudyCard scDto = new StudyCard();
@@ -350,7 +352,7 @@ public class DatasetMigrationService {
 		DatasetAcquisition acqDTO = new MrDatasetAcquisition();
 		acqDTO.setId(acq.getId());
 		Examination examDTO = new Examination();
-		examDTO.setStudyId(job.getStudy().getId());
+		examDTO.setStudy(new Study(job.getStudy().getId(), job.getStudy().getName()));
 		acqDTO.setExamination(examDTO);
 		ds.setDatasetAcquisition(acqDTO);
 

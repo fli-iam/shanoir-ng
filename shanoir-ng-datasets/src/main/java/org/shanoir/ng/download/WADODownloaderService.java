@@ -246,14 +246,13 @@ public class WADODownloaderService {
 		List<File> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			String url = iterator.next().toString();
-			files.addAll(downloadDicomFilesForURL(url, workFolder, subjectName, dataset, index));
+			files.add(new File(downloadDicomFilesForURL(url, workFolder, subjectName, dataset, index)));
 			index++;
 		}
 		return files;
 	}
-	
-	public List<File> downloadDicomFilesForURL(String url, final File workFolder, String subjectName, Dataset dataset, int index) throws IOException, MessagingException {
-		List<File> files = new ArrayList<>();
+
+	public String downloadDicomFilesForURL(String url, final File workFolder, String subjectName, Dataset dataset, int index) throws IOException, MessagingException {
 		String instanceUID = null;
 
 		// Handle and check at first for WADO-RS URLs by "/instances/"
@@ -303,18 +302,17 @@ public class WADODownloaderService {
 
 					// LOG the error
 					LOG.error("A dicom file could not be downloaded from the pacs:", e);
-					files.add(errorFile);
-					return files;
+					return errorFile.getAbsolutePath();
 				}
 				try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 					Files.copy(bIS, extractedDicomFile.toPath());
-					files.add(extractedDicomFile);
+					extractedDicomFile.getAbsolutePath();
 				}
 			} else {
 				throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
 			}
 		}
-		return files;
+		return null;
 	}
 
 	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {
