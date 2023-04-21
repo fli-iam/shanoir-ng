@@ -21,4 +21,5 @@ export class AccessRequest extends Entity {
     studyName: string;
     user: User;
     motivation: string;
+    status: number;
 }

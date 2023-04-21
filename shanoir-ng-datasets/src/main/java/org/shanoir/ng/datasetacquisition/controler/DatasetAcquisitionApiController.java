@@ -30,6 +30,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
+import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -74,6 +75,9 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	private ImporterService importerService;
 
 	@Autowired
+	private EegImporterService eegImporterService;
+
+	@Autowired
 	private ObjectMapper objectMapper;
 
 	@Autowired
@@ -99,8 +103,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
 	@Override
-	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) {
-		importerService.createEegDataset(importJob);
+	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) throws IOException {
+		eegImporterService.createEegDataset(importJob);
 		importerService.cleanTempFiles(importJob.getWorkFolder());
 		return new ResponseEntity<>(HttpStatus.OK);
 	}

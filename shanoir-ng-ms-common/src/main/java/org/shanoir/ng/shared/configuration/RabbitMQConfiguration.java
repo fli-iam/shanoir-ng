@@ -38,7 +38,7 @@ public class RabbitMQConfiguration {
 	/** Queue used to import datasets IMPORT => DATASET. */
 	public static final String IMPORTER_QUEUE_DATASET = "importer-queue-dataset";
 
-	/** User delete event to notify to studies.  To be overriden by an event ?*/
+	/** User delete event to notify to studies. To be overriden by an event ?*/
 	public static final String MS_USERS_TO_MS_STUDIES_USER_DELETE = "ms_users_to_ms_studies_user_delete";
 
 	/** Queue for all shanoir events. */
@@ -76,6 +76,9 @@ public class RabbitMQConfiguration {
 	
 	/** Create a subject study for a given subject and study. */
 	public static final String DATASET_SUBJECT_STUDY_QUEUE = "dataset-subject-study-queue";
+	
+	/** Create tags on subject-study via quality control using study cards: ms datasets -> ms studies */
+	public static final String STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG = "studies-subject-study-study-card-tag";
 
 	/** Delete subject => Delete associated examination / datasets. */
 	public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
@@ -133,7 +136,7 @@ public class RabbitMQConfiguration {
 
 	/** Queue to create get equipment ID from code. */
 	public static final String ACQUISITION_EQUIPEMENT_CODE_QUEUE = "acquisition-equipment-code-queue";
-	
+
 	/** Queue to get the study card from a equipment code. */
 	public static final String IMPORT_STUDY_CARD_QUEUE="import-study-card-queue";
 
@@ -195,10 +198,7 @@ public class RabbitMQConfiguration {
 	/** Exchange to notify when a user / study is update / deleted. */
 	public static final String STUDY_USER_EXCHANGE = "study-user-exchange";
 
-
-
-
-    @Bean
+	@Bean
     public static Queue getMSUsersToMSStudiesUserDelete() {
     		return new Queue(MS_USERS_TO_MS_STUDIES_USER_DELETE, true);
     }
@@ -221,76 +221,6 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue studyUserDatasetQueue() {
 		return new Queue(STUDY_USER_QUEUE_DATASET, true);
-	}
-
-	@Bean
-	public static Queue acqEqptQueueOut() {
-		return new Queue(ACQ_EQPT_QUEUE_NAME_OUT, true);
-	}
-
-	@Bean
-	public static Queue centerQueueOut() {
-		return new Queue(CENTER_QUEUE_NAME_OUT, true);
-	}
-	
-	@Bean
-	public static Queue coilQueueOut() {
-		return new Queue(COIL_QUEUE_NAME_OUT, true);
-	}
-
-	@Bean
-	public static Queue deleteAcqEqptQueueOut() {
-		return new Queue(DELETE_ACQ_EQPT_QUEUE_NAME_OUT, true);
-	}
-
-	@Bean
-	public static Queue deleteCenterQueueOut() {
-		return new Queue(DELETE_CENTER_QUEUE_NAME_OUT, true);
-	}
-	
-	@Bean
-	public static Queue deleteCoilQueueOut() {
-		return new Queue(DELETE_COIL_QUEUE_NAME_OUT, true);
-	}
-    
-	@Bean
-	public static Queue manufacturerModelQueueOut() {
-		return new Queue(MANUFACTURER_MODEL_QUEUE_NAME_OUT, true);
-	}
-
-	@Bean
-	public static Queue manufacturerQueueOut() {
-		return new Queue(MANUFACTURER_QUEUE_NAME_OUT, true);
-	}
-
-	@Bean
-	public static Queue studyQueueIn() {
-		return new Queue(STUDY_QUEUE_NAME_IN, true);
-	}
-
-	@Bean
-	public static Queue studyQueueDeleteIn() {
-		return new Queue(STUDY_DELETE_QUEUE_NAME_IN, true);
-	}
-
-	@Bean
-	public static Queue studyQueueOut() {
-		return new Queue(STUDY_QUEUE_NAME_OUT, true);
-	}
-
-	@Bean
-	public static Queue subjectRPCQueueOut() {
-		return new Queue(SUBJECT_RPC_QUEUE_OUT, true);
-	}
-
-	@Bean
-	public static Queue subjectRPCQueueIn() {
-		return new Queue(SUBJECT_RPC_QUEUE_IN, true);
-	}
-
-	@Bean
-	public static Queue subjectQueueOut() {
-		return new Queue(SUBJECT_QUEUE_OUT, true);
 	}
 
 	@Bean
@@ -317,6 +247,11 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
+	public static Queue studiesSubjectStudyStudyCardTagQueue() {
+		return new Queue(STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, true);
+	}
+	
+	@Bean
 	public static Queue importerQueue() {
 		return new Queue(IMPORTER_QUEUE_DATASET, true);
 	}
@@ -335,7 +270,6 @@ public class RabbitMQConfiguration {
 	public FanoutExchange fanoutSubjectExchange() {
 	    return new FanoutExchange(STUDY_USER_EXCHANGE, true, false);
 	}
-
 
 	@Bean
 	public static Queue studyNameUpdateQueue() {
@@ -475,5 +409,4 @@ public class RabbitMQConfiguration {
 	public static Queue studyMigrationLoggingQueue() {
 		return new Queue(STUDY_MIGRATION_LOGGING_QUEUE, true);
 	}
-	
 }

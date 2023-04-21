@@ -75,6 +75,8 @@ export type ColumnDefinition = {
     /** css color the the awesome icon */ 
     colorFalse?: string,
 
+    awesomeFunction?: (item: any) => { awesome: `fa${string} fa${string}`, color: string }
+
     /** add a descrption when cursor stands still a few second over the column */
     tip?: string,
 
@@ -83,4 +85,10 @@ export type ColumnDefinition = {
 
     /** field edition callback */
     onEdit?: (item: any, fieldValue: any) => void,
+
+    /** custom graphics of the cell */
+    cellGraphics?: (item) => {color?: string, backgroundColor?: string, tag?: boolean, awesome?: string}
+
+    /** enable text wrapping for this column */
+    wrap?: boolean;
 }

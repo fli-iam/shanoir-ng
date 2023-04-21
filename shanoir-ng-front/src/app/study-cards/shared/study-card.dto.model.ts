@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Coil } from '../../coils/shared/coil.model';
-import { Operation, StudyCard } from './study-card.model';
+import { MetadataFieldScope, ConditionScope, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
 
 
 export class StudyCardDTO {
@@ -29,49 +29,53 @@ export class StudyCardDTO {
             this.id = studyCard.id;
             this.name = studyCard.name;
             this.studyId = studyCard.study ? studyCard.study.id : null;
-            this.acquisitionEquipmentId = studyCard.acquisitionEquipment.id;
+            this.acquisitionEquipmentId = studyCard.acquisitionEquipment?.id;
             this.niftiConverterId = studyCard.niftiConverter.id;
-            this.rules = studyCard.rules.map(rule => {
-                let ruleDTO: StudyCardRuleDTO = new StudyCardRuleDTO();
-                ruleDTO.conditions = rule.conditions.map(cond => {
-                    let condDTO: StudyCardConditionDTO = new StudyCardConditionDTO();
-                    condDTO.dicomTag = cond.dicomTag ? cond.dicomTag.code : null;
-                    condDTO.dicomValue = cond.dicomValue;
-                    condDTO.operation = cond.operation;
-                    return condDTO;
-                });
-                ruleDTO.assignments = rule.assignments.map(ass => {
-                    let assDTO: StudyCardAssignmentDTO = new StudyCardAssignmentDTO();
-                    assDTO.field = ass.field;
-                    if (ass.value instanceof Coil) {
-                        assDTO.value = (ass.value as Coil).id.toString();
-                    } else {
-                        assDTO.value = ass.value as string;
-                    }
-                    return assDTO;
-                });
-                return ruleDTO;
-            });
+            this.rules = studyCard.rules.map(rule => new StudyCardRuleDTO(rule));
         }
     }
 }
 
 export class StudyCardRuleDTO {
-
+    constructor(rule: StudyCardRule) {
+        this.scope = rule.scope;
+        this.conditions = rule.conditions.map(cond => new StudyCardConditionDTO(cond));
+        this.assignments = rule.assignments.map(ass => new StudyCardAssignmentDTO(ass));
+    }
+    scope: MetadataFieldScope;
     assignments: StudyCardAssignmentDTO[];
     conditions: StudyCardConditionDTO[];
-
 }
 
 export class StudyCardConditionDTO {
-
+    scope: ConditionScope;
+    shanoirField: string;
     dicomTag: number;
-	dicomValue: string;
-	operation: Operation;
-}
+    operation: Operation;
+    values: string[];
+    cardinality: number;
 
+    constructor(condition: StudyCardCondition) {
+        this.scope = condition.scope;
+        this.shanoirField = condition.shanoirField;
+        this.dicomTag = condition.dicomTag?.code;
+        this.operation = condition.operation;
+        this.values = condition.values;
+        this.cardinality = condition.cardinality;
+    }
+}
 export class StudyCardAssignmentDTO {
-    
+    scope: MetadataFieldScope;
     field: string;
-	value: string;
+    value: string;
+
+    constructor(assignment: StudyCardAssignment) {
+        this.scope = assignment.scope;
+        this.field = assignment.field;
+        if (assignment.value instanceof Coil) {
+            this.value = (assignment.value as Coil).id.toString();
+        } else {
+            this.value = assignment.value as string;
+        }
+    }
 }

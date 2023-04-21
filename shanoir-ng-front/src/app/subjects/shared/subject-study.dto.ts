@@ -14,6 +14,7 @@
 import { IdName } from '../../shared/models/id-name.model';
 import { Id } from '../../shared/models/id.model';
 import { SimpleStudyDTO } from '../../studies/shared/study.dto.model';
+import { QualityTag } from '../../study-cards/shared/quality-card.model';
 import { SubjectStudyTagDTO, Tag } from '../../tags/tag.model';
 import { SubjectStudy } from './subject-study.model';
 import { SubjectType } from './subject.types';
@@ -29,6 +30,7 @@ export class SubjectStudyDTO {
     physicallyInvolved: boolean;
     subjectStudyTags: SubjectStudyTagDTO[];
     tags: Tag[];
+    qualityTag: QualityTag;
 
     constructor(subjectStudy: SubjectStudy) {
         this.id = subjectStudy.id;
@@ -39,5 +41,6 @@ export class SubjectStudyDTO {
         this.subjectType = subjectStudy.subjectType;
         this.physicallyInvolved = subjectStudy.physicallyInvolved;
         this.subjectStudyTags = subjectStudy.tags ? subjectStudy.tags.map(tag => new SubjectStudyTagDTO(new Id(this.id), tag)) : null;
+        this.qualityTag = subjectStudy.qualityTag;
     }
 }

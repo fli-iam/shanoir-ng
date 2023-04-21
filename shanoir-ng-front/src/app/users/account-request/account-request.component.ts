@@ -19,7 +19,7 @@ import * as AppUtils from '../../utils/app.utils';
 import { User } from '../shared/user.model';
 import { AccountRequestInfo } from '../account-request-info/account-request-info.model';
 import { UserService } from '../shared/user.service'
-import { FormGroup, Validators, FormBuilder, AbstractControl, ValidationErrors } from '@angular/forms';
+import { UntypedFormGroup, Validators, UntypedFormBuilder, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ConsoleService } from 'src/app/shared/console/console.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
 import { Router } from '@angular/router';
@@ -33,7 +33,7 @@ import { Router } from '@angular/router';
 export class AccountRequestComponent {
 
     public user: User;
-    public form: FormGroup;
+    public form: UntypedFormGroup;
 
     public requestSent: boolean = false;
     public errorOnRequest: boolean = false;
@@ -43,7 +43,7 @@ export class AccountRequestComponent {
     language: 'english' | 'french' = 'english';
 
     constructor(
-            private fb: FormBuilder,
+            private fb: UntypedFormBuilder,
             public userService: UserService,
             private location: Location,
             private consoleService: ConsoleService,) {

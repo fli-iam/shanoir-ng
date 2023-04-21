@@ -15,9 +15,7 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.ErrorModelCode;
 import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -102,26 +100,15 @@ public class AccessRequestApiController implements AccessRequestApi {
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.ACCESS_REQUEST_EVENT, "" + createdRequest.getId(), KeycloakUtil.getTokenUserId(), "", 1, createdRequest.getStudyId()));
 
 		// Send notification to study admin
-		try {
-			emailService.notifyStudyManagerAccessRequest(createdRequest);
-		} catch (ShanoirException e) {
-			throw new RestServiceException(e, new ErrorModel(ErrorModelCode.BAD_REQUEST));
-		}
+		emailService.notifyStudyManagerAccessRequest(createdRequest);
 
 		return new ResponseEntity<AccessRequest>(createdRequest, HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException {
-		// Get all studies I administrate
-		List<Long> studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, KeycloakUtil.getTokenUserId());
-
-		if (CollectionUtils.isEmpty(studiesId)) {
-			return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
-		}
-
 		// Get all access requests
-		List<AccessRequest> accessRequests = this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_DEMAND);
+		List<AccessRequest> accessRequests = this.accessRequestService.findByUserId(KeycloakUtil.getTokenUserId());
 
 		if (CollectionUtils.isEmpty(accessRequests)) {
 			return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
@@ -129,6 +116,25 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 		return new ResponseEntity<List<AccessRequest>>(accessRequests, HttpStatus.OK);
 	}
+	
+	@Override
+    public ResponseEntity<List<AccessRequest>> findAllByAdminId() throws RestServiceException {
+        // Get all studies I administrate
+        List<Long> studiesId = (List<Long>) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, KeycloakUtil.getTokenUserId());
+
+        if (CollectionUtils.isEmpty(studiesId)) {
+            return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
+        }
+
+        // Get all access requests
+        List<AccessRequest> accessRequests = this.accessRequestService.findByStudyIdAndStatus(studiesId, AccessRequest.ON_DEMAND);
+
+        if (CollectionUtils.isEmpty(accessRequests)) {
+            return new ResponseEntity<List<AccessRequest>>(HttpStatus.NO_CONTENT);
+        }
+
+        return new ResponseEntity<List<AccessRequest>>(accessRequests, HttpStatus.OK);
+    }
 
 	public ResponseEntity<Void> resolveNewAccessRequest(
 			@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
@@ -148,7 +154,7 @@ public class AccessRequestApiController implements AccessRequestApi {
 
 		if (validation) {
 			// if there is an account request, accept it.
-			if (resolvedRequest.getUser().isAccountRequestDemand()) {
+			if (resolvedRequest.getUser().isAccountRequestDemand() != null && resolvedRequest.getUser().isAccountRequestDemand()) {
 				this.userService.confirmAccountRequest(resolvedRequest.getUser());
 			}
 			// Update study to add a new user
@@ -184,8 +190,12 @@ public class AccessRequestApiController implements AccessRequestApi {
 			@ApiParam(value = "The email of the invited user.") 
 			@RequestParam(value = "email", required = true) String email) throws RestServiceException, JsonProcessingException, AmqpException {
 
-		// Check if user with such email exists
+		// Check if user with such email/username exists
 		Optional<User> user = this.userService.findByEmail(email);
+		
+		if (!user.isPresent()) {
+			user = this.userService.findByUsername(email);
+		}
 
 		// User exists => return an access request to be added
 		if (user.isPresent()) {

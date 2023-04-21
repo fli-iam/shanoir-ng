@@ -241,7 +241,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 
 	/**
-	 * Extract from the bvec and bval files the diffusion gradients and fullfill
+	 * Extract from the bvec and bval files the diffusion gradients and fulfill
 	 * the mr protocol.
 	 *
 	 * @param mrProtocol

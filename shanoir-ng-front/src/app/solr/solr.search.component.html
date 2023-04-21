@@ -173,7 +173,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
 
         <div [hidden]="progressBar.progress == 0">
-            <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
+            <progress-bar #progressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
         </div>
 
         <div class="tabs">

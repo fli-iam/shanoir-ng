@@ -1,4 +1,4 @@
-:host() { color: var(--very-dark-grey); }
+:host { color: var(--very-dark-grey); }
 
 .logo {text-align: center; opacity: 0.8; }
 
@@ -44,8 +44,8 @@
 .notifications { border-color: crimson; }
 .notifications .icon { background-color: crimson; }
 .notification-list:hover { color: crimson; }
-.notification-list th { width: 73px; }
 .notification-list td { max-width: 102px; overflow: hidden; }
+.notifications .pannel tr + tr { border-top: 1px solid var(--grey); }
 
 .studies { border-color: blue; }
 .studies th { line-height: 30px; }

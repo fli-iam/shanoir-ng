@@ -18,6 +18,7 @@ import { MrDataset } from '../datasets/dataset/mr/dataset.mr.model';
 import { EegDataset } from '../datasets/dataset/eeg/dataset.eeg.model';
 import { Dataset } from '../datasets/shared/dataset.model';
 import { process } from '../process';
+import { environment } from '../../environments/environment';
 
 
 // Base urls
@@ -38,6 +39,7 @@ export const BACKEND_API_USER_DENY_ACCOUNT_REQUEST_URL: string = '/denyaccountre
 export const BACKEND_API_USER_EXTENSION_REQUEST_URL: string = BACKEND_API_USERS_MS_URL + '/extensionrequest';
 export const BACKEND_API_USER_ACCESS_REQUEST: string = BACKEND_API_USERS_MS_URL + '/accessrequest';
 export const BACKEND_API_USER_ACCESS_REQUEST_BY_USER: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byUser';
+export const BACKEND_API_USER_ACCESS_REQUEST_BY_ADMIN: string = BACKEND_API_USERS_MS_URL + '/accessrequest/byAdmin';
 export const BACKEND_API_ACCESS_REQUEST_RESOLVE: string = BACKEND_API_USERS_MS_URL + '/accessrequest/resolve/';
 
 
@@ -55,6 +57,7 @@ export const BACKEND_API_CENTER_STUDY_URL: string = BACKEND_API_CENTER_URL + '/s
 // Studies http api
 export const BACKEND_API_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/studies';
 export const BACKEND_API_STUDY_ALL_NAMES_URL: string = BACKEND_API_STUDY_URL + '/names';
+export const BACKEND_API_STUDY_DELETE_USER: string = BACKEND_API_STUDY_URL + '/studyUser';
 export const BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL: string = BACKEND_API_STUDY_URL + '/namesAndCenters';
 export const BACKEND_API_STUDY_RIGHTS: string = BACKEND_API_STUDY_URL + '/rights';
 export const BACKEND_API_STUDY_HAS_ONE_STUDY_TO_IMPORT: string = BACKEND_API_STUDY_URL + '/hasOneStudy';
@@ -136,6 +139,7 @@ export const BACKEND_API_UPLOAD_EEG_START_IMPORT_JOB_URL: string = BACKEND_API_I
 export const BACKEND_API_GET_DICOM_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/get_dicom/';
 export const BACKEND_API_QUERY_PACS: string = BACKEND_API_IMPORT_MS_URL + '/importer/query_pacs/';
 export const BACKEND_API_STUDY_CARD_URL: string = BACKEND_API_DATASET_MS_URL + '/studycards';
+export const BACKEND_API_QUALITY_CARD_URL: string = BACKEND_API_DATASET_MS_URL + '/qualitycards';
 export const BACKEND_API_UPLOAD_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/upload_eeg/';
 export const BACKEND_API_ANALYSE_EEG_URL: string = BACKEND_API_IMPORT_MS_URL + '/importer/start_analysis_eeg_job/';
 export const BACKEND_API_UPLOAD_BIDS_URL: string = BACKEND_API_IMPORT_MS_URL + '/bidsImporter/';
@@ -148,7 +152,8 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
 // carmin
-export const CARMIN_BASE_URL : string = BACKEND_API_URL + "/vip/rest";
+export const CARMIN_BASE_URL : string = environment.vipUrl + "/rest";
+
 export const BACKEND_API_CARMIN_DATASET_PROCESSING_URL: string = BACKEND_API_DATASET_MS_URL + '/carminDatasetProcessing';
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
@@ -167,9 +172,9 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
 }
 
 export function browserDownloadFile(blob: Blob, filename: string){
-    if (navigator.msSaveBlob) {
+    if (window.navigator.msSaveBlob) {
         // IE 10+
-        navigator.msSaveBlob(blob, filename);
+        window.navigator.msSaveBlob(blob, filename);
     } else {
         var link = document.createElement('a');
         // Browsers that support HTML5 download attribute

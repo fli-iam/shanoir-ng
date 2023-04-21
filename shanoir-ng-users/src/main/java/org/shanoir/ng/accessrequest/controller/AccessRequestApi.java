@@ -61,16 +61,27 @@ public interface AccessRequestApi {
 			@ApiParam(value = "Accept or refuse the request", required = true) @RequestBody boolean validation,
 			BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException;
 
-	@ApiOperation(value = "byUser", notes = "Find all the access request for the given user", response = AccessRequest.class, tags = {})
+	@ApiOperation(value = "byAdmin", notes = "Find all the access request managed by the given adminstrator", response = AccessRequest.class, tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
 			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
 			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
-	@GetMapping(value = "byUser", produces = { "application/json" }, consumes = {
+	@GetMapping(value = "byAdmin", produces = { "application/json" }, consumes = {
 			"application/json" })
-	ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException;
+	ResponseEntity<List<AccessRequest>> findAllByAdminId() throws RestServiceException;
+	
+	@ApiOperation(value = "byUser", notes = "Find all the access request by the given user", response = AccessRequest.class, tags = {})
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
+            @ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
+            @ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
+            @ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
+            @ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
+    @GetMapping(value = "byUser", produces = { "application/json" }, consumes = {
+            "application/json" })
+    ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException;
 
 	@ApiOperation(value = "byStudy", notes = "Find all the access request for the given study", response = AccessRequest.class, tags = {})
 	@ApiResponses(value = {

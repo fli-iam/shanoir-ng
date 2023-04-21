@@ -30,6 +30,7 @@ import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.service.UserService;
+import org.shanoir.ng.user.service.VIPUserService;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,9 @@ public class AccessRequestApiControllerTest {
 	@MockBean
 	RabbitTemplate rabbitTemplate;
 
+	@MockBean
+	VIPUserService vipUserService;
+	
 	@Autowired
 	ObjectMapper mapper;
 
@@ -140,7 +144,7 @@ public class AccessRequestApiControllerTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 1)
-	public void findAllByUserIdTest() throws Exception {
+	public void findAllByAdminIdTest() throws Exception {
 		// I get data, but only the one in demand
 		Mockito.when(rabbitTemplate.
 				convertSendAndReceive(RabbitMQConfiguration.STUDY_I_CAN_ADMIN_QUEUE, 1L))
@@ -157,7 +161,7 @@ public class AccessRequestApiControllerTest {
 		.thenReturn(listOfRequests);
 		
 
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byAdmin").accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().string(
 						Matchers.allOf(
@@ -166,6 +170,30 @@ public class AccessRequestApiControllerTest {
 						)
 					);
 	}
+	
+	@Test
+    @WithMockKeycloakUser(id = 1)
+    public void findAllByUserIdTest() throws Exception {
+        List<AccessRequest> listOfRequests = new ArrayList<AccessRequest>();
+        listOfRequests.add(createAccessRequest());
+        listOfRequests.add(createAccessRequest());
+        
+        // One is already approved, studyName should not appear
+        listOfRequests.get(0).setStatus(AccessRequest.APPROVED);
+        
+        Mockito.when(this.accessRequestService.findByUserId(Mockito.anyLong()))
+            .thenReturn(listOfRequests);
+        
+
+        mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/byUser").accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk()).andExpect(content().string(
+                        Matchers.allOf(
+                                Matchers.containsString("name")
+                                )
+                        )
+                    );
+    }
 
 	@Test
 	@WithMockKeycloakUser(id = 1)
@@ -304,9 +332,40 @@ public class AccessRequestApiControllerTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 1)
+	public void inviteExistingUserFromUserNameTest() throws Exception {
+		// We invite an user that exists
+		Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.empty());
+		Mockito.when(this.userService.findByUsername("mail")).thenReturn(Optional.of(user));
+
+		Map<String, Object> theMap = new LinkedHashMap<>();
+		theMap.put("studyId", 1l);
+		theMap.put("studyName", "name");
+		theMap.put("email", "mail");
+
+		MvcResult result = mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH + "/invitation/").accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON)
+				.param("studyId", "" + 1l)
+				.param("studyName", "name")
+				.param("email", "mail"))
+				.andExpect(status().isOk())
+				.andReturn();
+		
+		AccessRequest request = mapper.readValue(result.getResponse().getContentAsString(), AccessRequest.class);
+		
+		assertEquals(user.getId(), request.getUser().getId());
+		assertEquals("1", ""+request.getStudyId());
+		assertEquals("name", request.getStudyName());
+		assertEquals("From study manager", request.getMotivation());
+		assertEquals(AccessRequest.APPROVED, request.getStatus());
+	}
+
+	@Test
+	@WithMockKeycloakUser(id = 1)
 	public void inviteNotExistingUserTest() throws JsonProcessingException, Exception {
 		// We invite an user that does not exists
 		Mockito.when(this.userService.findByEmail("mail")).thenReturn(Optional.empty());
+		Mockito.when(this.userService.findByUsername("mail")).thenReturn(Optional.empty());
+
 		
 		Map<String, Object> theMap = new LinkedHashMap<>();
 		theMap.put("studyId", 1l);

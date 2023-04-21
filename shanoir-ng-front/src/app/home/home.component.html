@@ -43,7 +43,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </td> -->
         </tr></table>
     </div>
-    <div class="block notifications" *ngIf="notifications && notifications.length > 0">
+    <div class="block notifications" *ngIf="notifications?.length > 0 || accessRequests?.length > 0">
         <table><tr>
             <td class="icon">
                 <i class="far fa-flag"></i>
@@ -56,31 +56,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <th>DUA to sign</th>
                             <td>{{notif.studyName}}</td>
                         </tr>
-                    </table>
-                </div>
-            </td>
-        </tr></table>        
-    </div>
-    <div class="block access-requests" *ngIf="accessRequests && nbAccessRequest > 0">
-        <table><tr>
-            <td class="icon">
-                <i class="far fa-flag"></i>
-                <div class="block-title">Access request</div>
-            </td>
-            <td>
-                <div class="pannel">
-                    <table>
-                        <tr>
-                        <td>
-                        <b>UserName</b>
-                        </td>
-                        <td>
-                        <b>Study</b>
-                        </td>
-                        </tr>
                         <tr *ngFor="let notif of accessRequests" [routerLink]="'/access-request/details/' + notif.id" class="notification-list link">
-                            <td>{{notif.user.username}}</td>
-                            <td>{{getStudyName(notif.studyId)}}</td>
+                            <th>Access request</th>
+                            <td>{{notif.user.username}} - {{getStudyName(notif.studyId)}}</td>
                         </tr>
                     </table>
                 </div>
