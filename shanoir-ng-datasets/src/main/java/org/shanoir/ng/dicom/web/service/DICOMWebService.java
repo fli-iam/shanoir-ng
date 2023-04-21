@@ -81,8 +81,8 @@ public class DICOMWebService {
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
 	
-	@Value("${dcm4chee-arc.dicom.web.rs.download}")
-	private String dicomWebRSDownload;
+	@Value("${dcm4chee-arc.dicom.web.rs.upload}")
+	private String dicomWebRSUpload;
 	
 	@Value("${dcm4chee-arc.dicom.web.http.client.max.total}")
 	private int dicomWebHttpClientMaxTotal;
@@ -258,7 +258,7 @@ public class DICOMWebService {
 	}
 
 	private void sendMultipartRequest(HttpEntity entity) throws ShanoirException {
-		HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRSDownload);
+		HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRSUpload);
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
 		httpPost.setEntity(entity);
 		try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
