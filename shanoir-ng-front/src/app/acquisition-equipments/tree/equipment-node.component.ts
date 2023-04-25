@@ -17,6 +17,7 @@ import { Router } from '@angular/router';
 import { AcquisitionEquipmentNode, UNLOADED } from '../../tree/tree.model';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import {AcquisitionEquipmentService} from "../shared/acquisition-equipment.service";
+import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 
 
 @Component({
@@ -28,6 +29,8 @@ export class EquipmentNodeComponent implements OnChanges {
 
     @Input() input: AcquisitionEquipmentNode | AcquisitionEquipment;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
+    @Output() onEquipmentDelete: EventEmitter<void> = new EventEmitter();
+
     node: AcquisitionEquipmentNode;
     loading: boolean = false;
     menuOpened: boolean = false;
@@ -55,8 +58,7 @@ export class EquipmentNodeComponent implements OnChanges {
         this.equipmentService.get(this.node.id).then(entity => {
             this.equipmentService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.node = null;
-                    this.selectedChange.emit();
+                    this.onEquipmentDelete.emit();
                 }
             });
         })

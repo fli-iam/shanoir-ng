@@ -38,7 +38,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
     loading: boolean = false;
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
-    @Input() mode: string;
+    @Output() onAcquisitionDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
         private router: Router,
@@ -52,7 +52,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
                 this.node = this.input;
             } else {
                 let label: string = 'Dataset Acquisition n° ' + this.input.id;
-                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED,this.mode);
+                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED,false);
             }
         }
     }
@@ -82,7 +82,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,
-            this.node.mode
+            this.node.canDelete
         );
     }
 
@@ -91,7 +91,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.mode
+            this.node.canDelete
         );
     }
 
@@ -99,10 +99,13 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
         this.datasetAcquisitionService.get(this.node.id).then(entity => {
             this.datasetAcquisitionService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.node = null;
-                    this.selectedChange.emit();
+                    this.onAcquisitionDelete.emit();
                 }
             });
         })
+    }
+
+    onDatasetDelete(index: number) {
+        (this.node.datasets as DatasetNode[]).splice(index, 1) ;
     }
 }

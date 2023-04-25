@@ -14,7 +14,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { DatasetNode, UNLOADED } from '../../tree/tree.model';
+import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 
@@ -33,6 +33,7 @@ export class DatasetNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     @Input() related: boolean = false;
+    @Output() onDatasetDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
         private router: Router,
@@ -75,10 +76,13 @@ export class DatasetNodeComponent implements OnChanges {
         this.datasetService.get(this.node.id).then(entity => {
             this.datasetService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.node = null;
-                    this.selectedChange.emit();
+                    this.onDatasetDelete.emit();
                 }
             });
         })
+    }
+
+    onProcessingDelete(index: number) {
+        (this.node.processings as ProcessingNode[]).splice(index, 1) ;
     }
 }

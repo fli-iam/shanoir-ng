@@ -15,9 +15,10 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { Router } from '@angular/router';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
-import { AcquisitionEquipmentNode, CenterNode, UNLOADED } from '../../tree/tree.model';
+import {AcquisitionEquipmentNode, CenterNode, DatasetNode, UNLOADED} from '../../tree/tree.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 
 
 @Component({
@@ -36,7 +37,8 @@ export class CenterNodeComponent implements OnChanges {
     constructor(
         private router: Router,
         private centerService: CenterService,
-        private acquisitionEquipmentPipe: AcquisitionEquipmentPipe) {
+        private acquisitionEquipmentPipe: AcquisitionEquipmentPipe,
+        private keycloakService: KeycloakService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -65,7 +67,7 @@ export class CenterNodeComponent implements OnChanges {
             center =>  {
                 if (center) {
                     this.node.acquisitionEquipments = center.acquisitionEquipments.map(
-                            acqEq => new AcquisitionEquipmentNode(acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.node.mode));
+                            acqEq => new AcquisitionEquipmentNode(acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.keycloakService.isUserAdminOrExpert()));
                 }
                 this.loading = false;
                 this.node.open = true;
@@ -74,14 +76,7 @@ export class CenterNodeComponent implements OnChanges {
             });
     }
 
-    deleteCenter() {
-        this.centerService.get(this.node.id).then(entity => {
-            this.centerService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
-                if (deleted) {
-                    this.node = null;
-                    this.selectedChange.emit();
-                }
-            });
-        })
+    onEquipmentDelete(index: number) {
+        (this.node.acquisitionEquipments as AcquisitionEquipmentNode[]).splice(index, 1) ;
     }
 }

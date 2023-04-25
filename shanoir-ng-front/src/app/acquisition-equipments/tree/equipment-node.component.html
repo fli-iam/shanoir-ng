@@ -23,7 +23,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-        <menu-item *ngIf="node.mode == 'view'"  label="Details..." awesome="fa-regular fa-eye" (click)="showDetails()"></menu-item>
-        <menu-item *ngIf="node.mode == 'view'"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteEquipment()"></menu-item>
+        <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showDetails()"></menu-item>
+        <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteEquipment()"></menu-item>
     </dropdown-menu>
 </node>

@@ -67,7 +67,7 @@ export class SubjectNodeComponent implements OnChanges {
                     this.input.name,
                     [],
                     UNLOADED,
-                    this.node.mode);
+                    false);
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/subject/details/' + this.node.id;
@@ -102,7 +102,7 @@ export class SubjectNodeComponent implements OnChanges {
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
             exam.extraDataFilePathList,
-            this.node.mode
+            this.node.canDeleteChildren
         );
     }
 
@@ -111,7 +111,7 @@ export class SubjectNodeComponent implements OnChanges {
             dsAcq.id,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
-            this.node.mode
+            this.node.canDeleteChildren
         );
     }
 
@@ -122,7 +122,7 @@ export class SubjectNodeComponent implements OnChanges {
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,
-            this.node.mode
+            this.node.canDeleteChildren
         );
     }
 
@@ -131,7 +131,7 @@ export class SubjectNodeComponent implements OnChanges {
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.mode
+            this.node.canDeleteChildren
         );
     }
 
@@ -148,15 +148,7 @@ export class SubjectNodeComponent implements OnChanges {
     collapseAll() {
     }
 
-    deleteSubject() {
-        this.subjectService.get(this.node.id).then(entity => {
-            this.subjectService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
-                if (deleted) {
-                    this.node = null;
-                    this.selectedChange.emit();
-                    this.nodeInit.emit();
-                }
-            });
-        })
+    onExaminationDelete(index: number) {
+        (this.node.examinations as ExaminationNode[]).splice(index, 1) ;
     }
 }

@@ -368,8 +368,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<study-node [input]="studyNode"
 						(selectedChange)="onTreeSelectedChange($event)"
 						(nodeInit)="onStudyNodeInit($event)"
-						[hasBox]="true"
-                        [mode]="mode">
+						[hasBox]="true">
 				</study-node>
 			</fieldset>
             <fieldset [class.hidden]="activeTab != 'tags'" *ngIf="mode != 'view' || (study.studyTags && study.studyTags.length > 0)">

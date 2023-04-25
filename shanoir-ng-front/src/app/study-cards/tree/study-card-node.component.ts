@@ -28,6 +28,7 @@ export class StudyCardNodeComponent implements OnChanges {
 
     @Input() input: StudyCardNode | StudyCard;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
+    @Output() onCardDelete: EventEmitter<void> = new EventEmitter();
     node: StudyCardNode;
     loading: boolean = false;
     menuOpened: boolean = false;
@@ -55,8 +56,7 @@ export class StudyCardNodeComponent implements OnChanges {
         this.cardService.get(this.node.id).then(entity => {
             this.cardService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.node = null;
-                    this.selectedChange.emit();
+                    this.onCardDelete.emit();
                 }
             });
         })

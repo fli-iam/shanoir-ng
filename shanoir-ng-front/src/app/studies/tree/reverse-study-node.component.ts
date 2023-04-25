@@ -23,6 +23,9 @@ import { ExaminationService } from '../../examinations/shared/examination.servic
 import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
 import { DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode, ReverseStudyNode, UNLOADED } from '../../tree/tree.model';
 import { Study } from '../shared/study.model';
+import {KeycloakService} from "../../shared/keycloak/keycloak.service";
+import {StudyRightsService} from "../shared/study-rights.service";
+import {StudyUserRight} from "../shared/study-user-right.enum";
 
 @Component({
     selector: 'reverse-study-node',
@@ -41,28 +44,37 @@ export class ReverseStudyNodeComponent implements OnChanges {
     studyCardsLoading: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
+    private canAdmin: boolean = false;
 
     constructor(
             private router: Router,
             private examinationService: ExaminationService,
-            private examPipe: ExaminationPipe) {
+            private examPipe: ExaminationPipe,
+            private keycloakService: KeycloakService,
+            private studyRightsService: StudyRightsService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['input']) {
+        if (!changes['input']) {
+            return;
+        }
+
+        this.studyRightsService.getMyRightsForStudy(this.input.id).then(rights => {
+            this.canAdmin = this.keycloakService.isUserAdmin()
+                || (this.keycloakService.isUserExpert() && rights.includes(StudyUserRight.CAN_ADMINISTRATE));
+
             if (this.input instanceof ReverseStudyNode) {
                 this.node = this.input;
             } else {
                 this.node = new ReverseStudyNode(
-                        this.input.id,
-                        this.input.name,
-                        [],
-                        UNLOADED,
-                    this.node.mode);
+                    this.input.id,
+                    this.input.name,
+                    [],
+                    UNLOADED);
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/study/details/' + this.node.id;
-        }
+        });
     }
 
     loadExaminations() {
@@ -93,7 +105,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
             exam.extraDataFilePathList,
-            this.node.mode
+            this.canAdmin
         );
     }
 
@@ -102,7 +114,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             dsAcq.id,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
-            this.node.mode
+            this.canAdmin
         );
     }
 
@@ -113,7 +125,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,
-            this.node.mode
+            this.canAdmin
         );
     }
 
@@ -122,7 +134,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.mode
+            this.canAdmin
         );
     }
 

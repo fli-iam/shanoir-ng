@@ -37,6 +37,7 @@ export class ExaminationNodeComponent implements OnChanges {
     @Input() input: ExaminationNode | Examination;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
+    @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
     node: ExaminationNode;
@@ -48,7 +49,6 @@ export class ExaminationNodeComponent implements OnChanges {
     hasDicom: boolean = false;
     downloading = false;
     hasBids: boolean = false;
-    @Input() mode: string;
 
     constructor(
         private router: Router,
@@ -70,7 +70,7 @@ export class ExaminationNodeComponent implements OnChanges {
                     this.examPipe.transform(this.input),
                     'UNLOADED',
                     this.input.extraDataFilePathList,
-                    this.mode);
+                    false);
             }
             this.nodeInit.emit(this.node);
         }
@@ -166,7 +166,7 @@ export class ExaminationNodeComponent implements OnChanges {
             dsAcq.id,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
-            this.node.mode
+            this.node.canDelete
         );
     }
 
@@ -177,7 +177,7 @@ export class ExaminationNodeComponent implements OnChanges {
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
             processed,
-            this.node.mode
+            this.node.canDelete
         );
     }
 
@@ -186,7 +186,7 @@ export class ExaminationNodeComponent implements OnChanges {
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
-            this.node.mode
+            this.node.canDelete
         );
     }
 
@@ -194,11 +194,15 @@ export class ExaminationNodeComponent implements OnChanges {
         this.examinationService.get(this.node.id).then(entity => {
             this.examinationService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    this.node = null;
-                    this.selectedChange.emit();
-                    this.nodeInit.emit();
+                    console.log("DELETED !")
+                    this.onExaminationDelete.emit();
                 }
             });
         })
+    }
+
+
+    onAcquisitionDelete(index: number) {
+        (this.node.datasetAcquisitions as DatasetAcquisitionNode[]).splice(index, 1) ;
     }
 }

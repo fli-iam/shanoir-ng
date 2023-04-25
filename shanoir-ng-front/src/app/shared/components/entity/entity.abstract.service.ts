@@ -66,7 +66,7 @@ export abstract class EntityService<T extends Entity> {
             .toPromise();
     }
 
-    deleteWithConfirmDialog(name: string, entity: Entity): Promise<Boolean> {
+    deleteWithConfirmDialog(name: string, entity: Entity): Promise<boolean> {
         return this.confirmDialogService
             .confirm(
                 'Delete ' + name,
@@ -74,7 +74,7 @@ export abstract class EntityService<T extends Entity> {
                 + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
             ).then(res => {
                 if (res) {
-                    this.delete(entity.id).then(() => {
+                    return this.delete(entity.id).then(() => {
                         this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
                         return true;
                     }).catch(reason => {
@@ -93,6 +93,7 @@ export abstract class EntityService<T extends Entity> {
                         } else {
                             console.error(reason);
                         }
+                        return false;
                     });
                 }
                 return false;

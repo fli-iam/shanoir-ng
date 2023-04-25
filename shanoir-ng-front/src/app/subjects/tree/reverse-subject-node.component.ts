@@ -38,7 +38,6 @@ export class ReverseSubjectNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
-    @Input() mode: string;
 
     constructor(
             private examinationService: ExaminationService,
@@ -54,8 +53,7 @@ export class ReverseSubjectNodeComponent implements OnChanges {
                 this.node  = new ReverseSubjectNode(
                     this.input.id,
                     this.input.name,
-                    this.input.subjectStudyList.map(subjectStudy => this.mapStudy(subjectStudy.study)),
-                    this.mode);
+                    this.input.subjectStudyList.map(subjectStudy => this.mapStudy(subjectStudy.study)));
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/subject/details/' + this.node.id;
@@ -68,16 +66,14 @@ export class ReverseSubjectNodeComponent implements OnChanges {
                 study.id,
                 study.name,
                 this.input.subjectStudyList[this.input.subjectStudyList.findIndex(element => element.study.id == study.id)].tags,
-                UNLOADED,
-                this.mode
+                UNLOADED
             );
         } else {
             return new ReverseStudyNode(
                 study.id,
                 study.name,
                 [],
-                UNLOADED,
-                this.mode
+                UNLOADED
             );
         }
     }
