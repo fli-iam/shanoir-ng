@@ -32,7 +32,7 @@ private int cardinality;
     protected boolean cardinalityComplies(int nbOk, int total) {
         if (getCardinality() == -1) return total == nbOk;
         if (getCardinality() == 0) return 0 == nbOk;
-        else return nbOk >= cardinality;
+        else return nbOk >= getCardinality();
     } 
     
 }

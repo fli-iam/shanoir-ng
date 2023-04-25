@@ -101,6 +101,7 @@ public class CardsProcessingService {
 		if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
 		    QualityCardResult result = new QualityCardResult();
+		    resetSubjectStudies(result, study);
 			for (Examination examination : study.getExaminations()) {
 			    // For now, just take the first DICOM instance
 			    // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
@@ -124,7 +125,7 @@ public class CardsProcessingService {
                     result.add(resultEntry);
                 }
 			};
-			result.removeUnchanged(study);
+			//result.removeUnchanged(study);
 			if (updateTags) {
 			    try {
 			        subjectStudyService.update(result.getUpdatedSubjectStudies());
@@ -140,7 +141,15 @@ public class CardsProcessingService {
 		}
 	}
 	
-	private QualityCardResultEntry initResult(Examination examination) {
+	private void resetSubjectStudies(QualityCardResult result, Study study) {
+        if (study != null && study.getSubjectStudyList() != null) {
+            for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+                subjectStudy.setQualityTag(null);
+            }
+        }
+    }
+
+    private QualityCardResultEntry initResult(Examination examination) {
         QualityCardResultEntry result = new QualityCardResultEntry();
         result.setSubjectName(examination.getSubject().getName());
         result.setExaminationDate(examination.getExaminationDate());
