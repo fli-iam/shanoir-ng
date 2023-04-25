@@ -64,7 +64,7 @@ begin
         left join studies.manufacturer as manufacturer on (manufacturer.id = manufacturer_model.manufacturer_id)
         left join examination on (examination.id = dataset_acquisition.examination_id)
         left join studies.subject as subject on (subject.id = dataset.subject_id)
-        left join studies.study as study on (study.id = dataset.study_id)
+        left join studies.study as study on (study.id = examination.study_id)
         left join studies.center as center on (center.id = examination.center_id)
         left join studies.pseudonymus_hash_values as pseudonymus_hash_values on (pseudonymus_hash_values.id = subject.pseudonymus_hash_values_id)
 
