@@ -32,12 +32,12 @@ public class DicomProcessing {
 			Attributes datasetAttributes;
 			if (isEnhancedMR != null && isEnhancedMR) {
 				// In case of Enhanced MR, we need to the pixel data in order to use Dcm4chee emf extract method.
-				datasetAttributes = dIS.readDataset(-1, -1);
+				datasetAttributes = dIS.readDataset(-1);
 			} else {
 				// Else we do not load the picture in Ram for faster performance.
-				datasetAttributes = dIS.readDataset(-1, Tag.PixelData);
+				datasetAttributes = dIS.readDataset(Tag.PixelData);
 			}
-			
+			dIS.close();
 			return datasetAttributes;
 		}
 	}

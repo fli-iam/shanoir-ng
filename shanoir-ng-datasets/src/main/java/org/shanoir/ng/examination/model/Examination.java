@@ -15,6 +15,7 @@
 package org.shanoir.ng.examination.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -188,6 +189,12 @@ public class Examination extends HalEntity {
 	public void setDatasetAcquisitions(List<DatasetAcquisition> datasetAcquisitions) {
 		this.datasetAcquisitions = datasetAcquisitions;
 	}
+	
+
+    public void addDatasetAcquisitions(DatasetAcquisition acquisition) {
+        if (getDatasetAcquisitions() == null) setDatasetAcquisitions(new ArrayList<>());
+        getDatasetAcquisitions().add(acquisition);
+    }
 
 	/**
 	 * @return the examinationDate

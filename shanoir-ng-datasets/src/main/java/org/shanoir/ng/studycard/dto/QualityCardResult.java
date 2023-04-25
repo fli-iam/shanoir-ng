@@ -19,6 +19,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.quality.QualityTag;
 
 /**
  * This class contains the result of an application of a study card
@@ -72,6 +73,24 @@ public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
                 && updated.getQualityTag().equals(original.getQualityTag())
              );
         }
+    }
+
+    public void merge(QualityCardResult result) {
+        this.addAll(result);
+        if (result.getUpdatedSubjectStudies() != null) {
+            for (SubjectStudy subjectStudy : result.getUpdatedSubjectStudies()) {
+                this.addUpdatedSubjectStudy(subjectStudy);
+            }
+        }
+    }
+
+    public boolean hasError() {
+        for (QualityCardResultEntry entry : this) {
+            if (QualityTag.ERROR.equals(entry.getTagSet())) {
+                return true;
+            }
+        }
+        return false;
     }
     
 }

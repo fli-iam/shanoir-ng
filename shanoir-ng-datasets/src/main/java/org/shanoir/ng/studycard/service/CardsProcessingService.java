@@ -33,6 +33,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.quality.SubjectStudyQualityTagDTO;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectStudyService;
@@ -120,6 +121,7 @@ public class CardsProcessingService {
                     long ts = new Date().getTime();
                     LOG.warn("Examination" + examination.getId() + " metadata could not be retreived from the Shanoir pacs (ts:" + ts + ")");
                     QualityCardResultEntry resultEntry = initResult(examination);
+                    resultEntry.setTagSet(QualityTag.ERROR);
                     resultEntry.setMessage("Examination " + examination.getId() + " could not be checked because its metadata could not be retreived from the Shanoir pacs (ts:" + ts + ")");
                     result.add(resultEntry);
                 }

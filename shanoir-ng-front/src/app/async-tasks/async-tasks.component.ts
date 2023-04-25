@@ -83,7 +83,7 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
         return [
             { headerName: 'Message', field: 'message', width: '100%', type:'link',
 				route: (task: Task) => {
-                    if (task.eventType === 'importDataset.event') {
+                    if (task.eventType === 'importDataset.event' && task.status != -1) {
                         if (task.message.lastIndexOf('in examination ') != -1) {
                             return '/examination/details/' + task.message.slice(task.message.lastIndexOf('in examination ') + ('in examination '.length));
                         } else if (task.message.lastIndexOf('for examination ') != -1) {

@@ -67,5 +67,9 @@ public class Study {
 	public void setSeries(List<Serie> series) {
 		this.series = series;
 	}
+	
+	public DatasetFile getFirstDatasetFileForCurrentStudy() {
+        return getSeries().get(0).getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
+    }
 
 }

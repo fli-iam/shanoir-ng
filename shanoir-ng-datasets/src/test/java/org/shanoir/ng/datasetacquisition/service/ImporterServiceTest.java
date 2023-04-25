@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.dcm4che3.data.Attributes;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -144,7 +145,7 @@ public class ImporterServiceTest {
 		examination.setExaminationDate(LocalDate.now());
 		when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
-		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq);
+		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob, new Attributes())).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
 		
 		// WHEN we treat this importjob

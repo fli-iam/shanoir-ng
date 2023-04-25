@@ -121,6 +121,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		try {
 			createAllDatasetAcquisitions(importJob, importJob.getUserId());
 		} catch (Exception e) {
+		    LOG.error("#############################################################################, b");
 			LOG.error(e.getMessage(), e);
 			throw new AmqpRejectAndDontRequeueException(e);
 		} finally {

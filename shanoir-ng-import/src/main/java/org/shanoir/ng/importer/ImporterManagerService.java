@@ -170,6 +170,7 @@ public class ImporterManagerService {
 			long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());
 			LOG.info("user=" + KeycloakUtil.getTokenUserName() + ",size=" + ImportUtils.readableFileSize(importJobDirSize) + "," + importJob.toString());
 		} catch (Exception e) {
+		    LOG.error("########################################################### ");
 			LOG.error("Error during import for study {} and examination {}", importJob.getStudyId(), importJob.getExaminationId(), e);
 			event.setMessage("ERROR while importing data for study " + importJob.getStudyId() + " for examination " + importJob.getExaminationId() + ", please contact an administrator");
 			event.setStatus(ShanoirEvent.ERROR);

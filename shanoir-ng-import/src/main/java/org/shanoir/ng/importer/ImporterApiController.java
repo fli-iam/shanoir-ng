@@ -762,7 +762,7 @@ public class ImporterApiController implements ImporterApi {
 			// handle creation of study and study cards later here
 		}
 		final Long userId = KeycloakUtil.getTokenUserId();
-		importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
+		importerManagerService.manageImportJob(importJob);
 		return null;
 	}
 
