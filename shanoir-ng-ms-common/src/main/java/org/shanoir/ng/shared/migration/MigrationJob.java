@@ -21,6 +21,8 @@ public class MigrationJob {
 	private Map<Long, IdName> subjectsMap;
 
 	private Map<Long, Long> studyCardsMap;
+	
+	private Map<Long, Long> qualityCardmap;
 
 	private Map<Long, Long> centersMap;
 
@@ -157,6 +159,14 @@ public class MigrationJob {
 
 	public void setLogging(List<String> logging) {
 		this.logging = logging;
+	}
+
+	public Map<Long, Long> getQualityCardmap() {
+		return qualityCardmap;
+	}
+
+	public void setQualityCardmap(Map<Long, Long> qualityCardmap) {
+		this.qualityCardmap = qualityCardmap;
 	}
 	
 }

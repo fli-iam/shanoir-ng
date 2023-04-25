@@ -11,6 +11,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.migration.DistantKeycloakConfigurationService;
+import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,8 @@ public class DistantDatasetShanoirService {
 
 	private static final String CREATE_STUDY_CARD = "/shanoir-ng/datasets/studycards/";
 
+	private static final String CREATE_QUALITY_CARD = "/shanoir-ng/datasets/qualitycards/";
+	
 	private static final String CREATE_DATASET_ACQUISITION = "/shanoir-ng/datasets/datasetacquisition/new";
 
 	private static final String CREATE_DATASET = "/shanoir-ng/datasets/datasets/new";
@@ -132,6 +135,19 @@ public class DistantDatasetShanoirService {
 		}
 	}
 
+	public QualityCard createQualityCard(QualityCard qc) throws ShanoirException {
+		try {
+			ResponseEntity<QualityCard> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_QUALITY_CARD), HttpMethod.POST, new HttpEntity<>(qc, getHeader()), QualityCard.class);
+			if (HttpStatus.OK.equals(response.getStatusCode())) {
+				return response.getBody();
+			} else {
+				throw new ShanoirException("Could not create a new distant qualityCard {} {}" + response.getStatusCode() + response.getBody());
+			}
+		} catch (Exception e) {
+			throw new ShanoirException("Could not create a new distant qualityCard: ", e);
+		}
+	}
+
 	public DatasetAcquisition createAcquisition(DatasetAcquisition acq) throws ShanoirException {
 		try {
 			ResponseEntity<DatasetAcquisition> response = this.distantKeycloak.getRestTemplate().exchange(getURI(CREATE_DATASET_ACQUISITION), HttpMethod.POST, new HttpEntity<>(acq, getHeader()), DatasetAcquisition.class);
@@ -198,5 +214,4 @@ public class DistantDatasetShanoirService {
 	public URI getURI(String apiHeader) throws URISyntaxException {
 		return new URI(distantKeycloak.getServer() + apiHeader);
 	}
-
 }

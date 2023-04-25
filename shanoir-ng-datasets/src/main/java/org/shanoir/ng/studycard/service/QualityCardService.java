@@ -24,4 +24,5 @@ public interface QualityCardService extends CardService<QualityCard> {
     @Override
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#id, 'CAN_ADMINISTRATE'))")
     void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
+
 }

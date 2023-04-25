@@ -41,11 +41,14 @@ import org.shanoir.ng.shared.model.RepetitionTime;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
+import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.studycard.service.QualityCardService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -87,7 +90,10 @@ public class DatasetMigrationService {
 
 	@Autowired
 	private StudyCardRepository studyCardService;
-
+	
+	@Autowired
+	private QualityCardService qualityCardService;
+	
 	@Autowired
 	private DistantKeycloakConfigurationService distantKeycloakConfigurationService;
 
@@ -177,6 +183,18 @@ public class DatasetMigrationService {
 		job.setStudyCardsMap(studyCardsMap);
 		job.getLogging().add("Study card migration - success");
 
+		// Migrate all quality cards
+		job.getLogging().add("Quality card migration");
+		List<QualityCard> qualityCards = qualityCardService.findByStudy(job.getOldStudyId());
+		Map<Long, Long> qualityCardmap = new HashMap<>();
+		for (QualityCard qc : qualityCards) {
+			long oldId = qc.getId();
+			qc = moveQualityCard(qc, job);
+			qualityCardmap.put(oldId, qc.getId());
+		}
+		job.setQualityCardmap(studyCardsMap);
+		job.getLogging().add("Quality card migration - success");
+
 		job.getLogging().add("Examination migration");
 
 		// Migrate all examinations
@@ -225,6 +243,21 @@ public class DatasetMigrationService {
 		entityManager.detach(sc);
 		sc = distantShanoir.createStudyCard(sc);
 		return sc;
+	}
+
+	private QualityCard moveQualityCard(QualityCard qc, MigrationJob job) throws ShanoirException {
+		qc.setId(null);
+		qc.setStudyId(job.getStudy().getId());
+
+		for (QualityExaminationRule oldRule : qc.getRules()) {
+			oldRule.setId(null);
+			for (StudyCardCondition condition : oldRule.getConditions()) {
+				condition.setId(null);
+			}
+		}
+		entityManager.detach(qc);
+		qc = distantShanoir.createQualityCard(qc);
+		return qc;
 	}
 
 	/**
