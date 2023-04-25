@@ -50,7 +50,7 @@ public class ShanoirExec {
 	@Value("${ms.url.dicom2nifti}")
 	private String dicomifierMsUrl;
 
-	@Value("${shanoir.conversion.converters.mriConverter}")
+	@Value("${shanoir.conversion.converters.mriconverter}")
 	private String mriConverterPath;
 	
 	@Autowired
@@ -631,16 +631,28 @@ public class ShanoirExec {
 	public String mriConverter(String inputFolder, String outputFolder) {
 		String logs = "mriConverter: ";
 		StringBuffer buffer = new StringBuffer();
-		//java -classpath MRIFileManager/MRIManager.jar DicomToNifti inputFolder outputFolder PatientName/StudyName/CreationDate-SeqNumber-Protocol-SequenceName-AcquisitionTime [ExportOptions]00000
-		buffer.append("java -classpath ")
+		
+		// We force the dataset0 folder here as MRIConverter does not search recursively in the files..
+		if (!inputFolder.contains("dataset")) {
+			inputFolder = inputFolder.concat("/dataset0");
+		}
+		
+		// java -classpath MRIManager.jar DicomToNifti Subject4/ /tmp/ "PatientName-SerialNumber-Protocol" "[ExportOptions] 00000"
+		buffer.append("java")
+			.append(" ")
+			.append("-classpath")
+			.append(" ")
 			.append(mriConverterPath)
-			.append(" DicomToNifti ")
+			.append(" ")
+			.append("DicomToNifti")
+			.append(" ")
 			.append(inputFolder)
 			.append(" ")
 			.append(outputFolder)
-			.append(" PatientName/StudyName/CreationDate-SeqNumber-Protocol-SequenceName-AcquisitionTime [ExportOptions]00000");
-		
-		LOG.error("COUCOUCUUUUUUUUUUUUUUUUUUUUUU" + buffer.toString());
+			.append(" ")
+			.append("PatientName-SerialNumber-SequenceName")
+			.append(" ")
+			.append("[ExportOptions]00000");
 		
 		logs.concat(buffer.toString());
 		
