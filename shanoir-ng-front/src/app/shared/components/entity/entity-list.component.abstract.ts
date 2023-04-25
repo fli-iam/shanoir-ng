@@ -88,9 +88,6 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         if (this.edit) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-edit", action: item => this.goToEdit(item.id), condition: item => this.canEdit(item) });
         }
-        if (this.view) {
-          this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-eye", route: item => this.entityRoutes.getRouteToView(item.id) });
-        }
         if (this.delete) {
             this.columnDefs.push({ headerName: "", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.openDeleteConfirmDialog(item) , condition: item => this.canDelete(item)});
         }

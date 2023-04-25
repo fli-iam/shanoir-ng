@@ -41,6 +41,8 @@ import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/datase
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import {environment} from "../../environments/environment";
 import {DatasetType} from "../datasets/shared/dataset-type.model";
+import {Dataset} from "../datasets/shared/dataset.model";
+import {Study} from "../studies/shared/study.model";
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -406,9 +408,15 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Creation", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
-            {headerName: "Study", field: "studyName"},
-            {headerName: "Subject", field: "subjectName"},
-            {headerName: "Center", field: "centerName"},
+            {headerName: "Study", field: "studyName",
+              route: item => '/study/details/' + item.studyId
+            },
+            {headerName: "Subject", field: "subjectName",
+              route: item => '/subject/details/' + item.subjectId
+            },
+            {headerName: "Center", field: "centerName",
+              route: item => '/center/details/' + item.centerId
+            },
             {headerName: "Exam", field: "examinationComment"},
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
                 return dateRenderer(params.data.examinationDate);
@@ -421,10 +429,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
               action: item => {
                 window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + item.examinationId, '_blank');
               }
-            },
-            {headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => {
-                this.router.navigate(['/dataset/details/' + item.id]);
-            }}
+            }
         ];
         return columnDefs;
     }

@@ -23,6 +23,7 @@ import { slideDown } from '../../animations/animations';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ColumnDefinition } from './column.definition.type';
 import {isDarkColor} from "../../../utils/app.utils";
+import {Router} from "@angular/router";
 
 @Component({
     selector: 'shanoir-table',
@@ -68,11 +69,13 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     nbColumns: number;
     expended: boolean[] = [];
     subRowOpen: any = {};
+    path: string;
 
     constructor(
             private elementRef: ElementRef,
             private breadcrumbsService: BreadcrumbsService,
-            private globalClickService: GlobalService) {
+            private globalClickService: GlobalService,
+            protected router: Router ) {
         this.maxResultsField = this.maxResults;
     }
 
@@ -119,6 +122,32 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 }
             });
         });
+    }
+
+    newTabRouting(col, item): string {
+      this.path = this.router.url;
+
+      if (!this.editMode) {
+        // case of study-list, subject-list, examination-list, datasetacquisition-list
+        if (col.type != "button" && this.router.url.endsWith('list') ) {
+          this.path = this.path.replace("list", "");
+          return this.path + 'details/'+ item.id
+        }
+        // case of solr search
+        else if (this.router.url.endsWith('solr-search')) {
+          return '/dataset/details/' + item.datasetId;
+        }
+        // case of study edit, subject tab
+        else if (!this.router.url.endsWith('list') && this.router.url.includes('study') && this.router.url.includes('#subject') && item.subject) {
+          return '/subject/details/' + item.subject.id;
+        }
+        // case of subject edit, studies which contains current subject
+        else if (!this.router.url.endsWith('list') && !this.router.url.includes('study') && this.router.url.includes('subject') && item.study) {
+          return '/study/details/' + item.study.id;
+        } else {
+          return null;
+        }
+      }
     }
 
     private checkCompactMode() {
