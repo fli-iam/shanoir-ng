@@ -62,7 +62,7 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 	.cell-container:not(.select) { overflow: hidden; text-overflow: ellipsis; }
 	.cell-container.multiselect, .cell-container.wrap { white-space: initial; width: auto; height: 100%; }
 	/*.cell-container:empty:after { content: '.'; visibility: hidden; }*/
-  .cell-new-tab { line-height:21px; height: inherit; display: block; text-decoration: none; color: black; }
+  .cell-new-tab { line-height:21px; height: inherit; display: block; text-decoration: none; color: black; width: auto; }
 
 .loader { float: right; border-left: none !important; }
 	.loader img { margin-left: 5px; vertical-align: -1; height: 10px; }

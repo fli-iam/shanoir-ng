@@ -49,7 +49,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </a>
 
                         <!-- link -->
-                        <a [routerLink]="newTabRouting(col, item)" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi" class="cell-container-a">
+                        <a [routerLink]="newTabRouting(col, item)" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi" class="cell-new-tab">
                           <a class="link" [routerLink]="vars.route" routerLinkActive="active">{{vars.render.text ? vars.render.text : vars.render}}
                               <i *ngIf="!col.awesome" class="fas fa-external-link-alt"></i>
                               <span *ngIf="col.awesome" class="awesome"><i *ngIf="col.awesome" [class]="col.awesome"></i></span>
@@ -57,7 +57,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </a>
 
                         <!--  -->
-                        <a [routerLink]="newTabRouting(col, item)" *ngIf="!editMode && col.multi"  class="cell-container-a">
+                        <a [routerLink]="newTabRouting(col, item)" *ngIf="!editMode && col.multi"  class="cell-new-tab">
                             <span *ngFor="let oneVal of getFieldRawValue(item, col['field'])" class="block" [style.color]="oneVal.backgroundColor" [style.background-color]="oneVal.color" [class.dark]="getFontColor(oneVal.color)">
                                 <span class="label">
                                     {{oneVal.label ? oneVal.label : (oneVal.name ? oneVal.name : oneVal)}}
@@ -66,7 +66,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </a>
 
                         <!-- display a boolean -->
-                        <a [routerLink]="newTabRouting(col, item)" *ngIf="vars.boolean && (!editMode || !vars.editable)"  class="cell-container-a">
+                        <a [routerLink]="newTabRouting(col, item)" *ngIf="vars.boolean && (!editMode || !vars.editable)"  class="cell-new-tab">
                             <span *ngIf="vars.cellValue == true && !col.awesome && !col.awesomeFalse" class="bool-true"><i class="fas fa-check"></i></span>
                             <span *ngIf="vars.cellValue == false && !col.awesome && !col.awesomeFalse" class="bool-false"><i class="fas fa-times"></i></span>
                             <span *ngIf="vars.cellValue == true && col.awesome" class="bool-true"><i [class]="col.awesome" [style.color]="col.color"></i></span>
