@@ -5,8 +5,11 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.SecurityException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
@@ -40,7 +43,7 @@ public interface CarminDatasetProcessingApi {
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
         ResponseEntity<CarminDatasetProcessing> saveNewCarminDatasetProcessing(
                         @ApiParam(value = "carmin dataset processing to create", required = true) @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing,
-                        BindingResult result) throws RestServiceException;
+                        BindingResult result) throws RestServiceException, EntityNotFoundException, SecurityException;
 
         @ApiOperation(value = "", notes = "If exists, returns the carmin dataset processing corresponding to the given id", response = CarminDatasetProcessing.class, tags = {})
         @ApiResponses(value = {
@@ -91,4 +94,17 @@ public interface CarminDatasetProcessingApi {
                         @ApiParam(value = "carmin dataset processing to update", required = true) @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing,
                         BindingResult result)
                         throws RestServiceException;
+
+        @ApiOperation(value = "", notes = "Returns all the carmin dataset processings with given study and subject", response = DatasetProcessingDTO.class, responseContainer = "List", tags = {})
+        @ApiResponses(value = {
+                @ApiResponse(code = 200, message = "found carmin dataset processings", response = DatasetProcessingDTO.class, responseContainer = "List"),
+                @ApiResponse(code = 204, message = "no dataset processing found", response = Void.class),
+                @ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+                @ApiResponse(code = 403, message = "forbidden", response = Void.class),
+                @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+        @GetMapping(value = "/study/{studyId}/subject/{subjectId}", produces = { "application/json" })
+        @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+        ResponseEntity<List<CarminDatasetProcessing>> findCarminDatasetProcessingsByStudyIdAndSubjectId(
+                @ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+                @ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 }

@@ -36,6 +36,7 @@ export class ImportJob {
 }
 
 export class PatientDicom {
+
     subject: SimpleSubject;
     patientID: string;
     patientName: string;
@@ -51,6 +52,8 @@ export class StudyDicom {
     studyDescription: string;
     studyDate: Date;
     series: SerieDicom[];
+
+    selected: boolean;
 }
 
 export class SerieDicom {

@@ -71,11 +71,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
 	    </ul>
-        <button type="button" (click)="acceptRequest()" class="accept right-icon">
+        <button *ngIf="mode == 'view'" type="button" (click)="acceptRequest()" class="accept right-icon">
             Accept
             <i class="fa-solid fa-thumbs-up"></i>
         </button>
-        <button type="button" (click)="refuseRequest()" class="refuse right-icon">
+        <button *ngIf="mode == 'view'" type="button" (click)="refuseRequest()" class="refuse right-icon">
             Refuse
             <i class="fa-solid fa-thumbs-down"></i>
         </button>

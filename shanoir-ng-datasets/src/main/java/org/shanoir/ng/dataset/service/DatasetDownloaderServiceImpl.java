@@ -112,7 +112,7 @@ public class DatasetDownloaderServiceImpl {
 		String zipFileName = datasetName + "_" + format + ZIP;
 
 		response.setContentType("application/zip");
-		response.setHeader("Content-Disposition", "attachment; filename=" + zipFileName);
+		response.setHeader("Content-Disposition", "attachment;filename=" + zipFileName);
 
 		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 			List<URL> pathURLs = new ArrayList<>();
@@ -200,7 +200,7 @@ public class DatasetDownloaderServiceImpl {
 		response.setContentType("application/zip");
 		// Add timestamp to get a difference
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-		response.setHeader("Content-Disposition", "attachment; filename= " + "Datasets" + formatter.format(new DateTime().toDate()));
+		response.setHeader("Content-Disposition", "attachment;filename=" + "Datasets" + formatter.format(new DateTime().toDate()));
 
 		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 

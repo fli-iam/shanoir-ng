@@ -187,14 +187,18 @@ public class AccessRequestApiController implements AccessRequestApi {
 			@RequestParam(value = "studyId", required = true) Long studyId,
 			@ApiParam(value = "Study name the user is invited in", required = true) 
 			@RequestParam(value = "studyName", required = true) String studyName,
-			@ApiParam(value = "The email of the invited user.") 
-			@RequestParam(value = "email", required = true) String email) throws RestServiceException, JsonProcessingException, AmqpException {
+			@ApiParam(value = "The email or login of the invited user.") 
+			@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException {
 
-		// Check if user with such email/username exists
-		Optional<User> user = this.userService.findByEmail(email);
-		
-		if (!user.isPresent()) {
-			user = this.userService.findByUsername(email);
+		boolean isEmail = emailOrLogin.contains("@");
+
+		Optional<User> user;
+
+		if (isEmail) {
+			// Check if user with such email/username exists
+			user = this.userService.findByEmail(emailOrLogin);
+		} else {
+			user = this.userService.findByUsernameForInvitation(emailOrLogin);
 		}
 
 		// User exists => return an access request to be added
@@ -209,16 +213,17 @@ public class AccessRequestApiController implements AccessRequestApi {
 			return new ResponseEntity<AccessRequest>(request, HttpStatus.OK);
 		}
 
-		// Otherwise, send a mail to the new user
-		StudyInvitationEmail mail = new StudyInvitationEmail();
-		mail.setInvitedMail(email);
-		mail.setStudyId(studyId.toString());
-		mail.setStudyName(studyName);
-
-		// User does not exists, just send an email
-		this.emailService.inviteToStudy(mail);
-
-		return new ResponseEntity<AccessRequest>(HttpStatus.NO_CONTENT);
+		// Otherwise, send a mail to the new user if we have a mail in entry
+		if (isEmail) {
+			StudyInvitationEmail mail = new StudyInvitationEmail();
+			mail.setInvitedMail(emailOrLogin);
+			mail.setStudyId(studyId.toString());
+			mail.setStudyName(studyName);
+			
+			this.emailService.inviteToStudy(mail);
+			return new ResponseEntity<AccessRequest>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<AccessRequest>(HttpStatus.BAD_REQUEST);
 	}
 
 	public ResponseEntity<List<AccessRequest>> findAllByStudyId(

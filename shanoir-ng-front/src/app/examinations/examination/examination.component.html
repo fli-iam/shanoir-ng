@@ -187,7 +187,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<button *ngIf="mode == 'view' && hasDownloadRight && hasDicom" [disabled]="progressBar.progress != 0 || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download DICOM<i class="fas fa-download"></i></button>
 				<button *ngIf="mode == 'view' && hasDownloadRight && hasDicom" [disabled]="progressBar.progress != 0 || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download NIfTI<i class="fas fa-download"></i></button>
                 <div [hidden]="progressBar.progress == 0">
-                    <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
+                    <progress-bar #progressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                 </div>
 			</form-footer>
 		</div>

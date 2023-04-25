@@ -251,7 +251,7 @@ public class ImporterService {
 	 * Create a processed dataset dataset associated with a dataset processing.
 	 * @param importJob the import job from importer MS.
 	 */
-	public void createProcessedDataset(final ProcessedDatasetImportJob importJob) throws IOException {
+	public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws IOException {
 
 		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
 		eventService.publishEvent(event);
@@ -261,7 +261,7 @@ public class ImporterService {
 			event.setMessage("Dataset processing missing.");
 			event.setProgress(1f);
 			eventService.publishEvent(event);
-			return;
+			return null;
 		}
 		
 		// Metadata
@@ -385,6 +385,9 @@ public class ImporterService {
 					+ dataset.getId());
 			event.setProgress(1f);
 			eventService.publishEvent(event);
+			
+			return dataset;
+			
 		} catch (Exception e) {
 			LOG.error("Error while importing processed dataset: ", e);
 			event.setStatus(ShanoirEvent.ERROR);

@@ -76,7 +76,7 @@ export class ExaminationService extends EntityService<Examination> implements On
               progressBar.progress = -1;
               break;
             case HttpEventType.DownloadProgress:
-              progressBar.progress = (event.loaded / event.total);
+              progressBar.progress = event.loaded;
               break;
             case HttpEventType.Response:
                 saveAs(event.body, this.getFilename(event));

@@ -142,7 +142,9 @@ public interface ExaminationService {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examination.getId(), 'CAN_IMPORT'))")
 	Examination update(Examination examination) throws EntityNotFoundException, ShanoirException;
 
-	/**
+    Long getExtraDataSizeByStudyid(Long studyId);
+
+    /**
 	 * Add an extra data file to examination
 	 * @param examinationId the examination ID
 	 * @param file the file to add
