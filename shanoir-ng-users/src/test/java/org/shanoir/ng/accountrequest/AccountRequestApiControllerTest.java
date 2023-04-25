@@ -18,6 +18,7 @@ import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -52,7 +53,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @WebMvcTest(controllers = AccountRequestApiController.class)
 @ActiveProfiles("test")
 @AutoConfigureMockMvc(addFilters = false)
-//@AutoConfigureMockMvc(addFilters = false)
 public class AccountRequestApiControllerTest {
 
 	private static final String REQUEST_PATH = "/accountrequest";
@@ -72,6 +72,11 @@ public class AccountRequestApiControllerTest {
 	@MockBean
 	private UserUniqueConstraintManager uniqueConstraintManager;
 
+	@BeforeClass
+	public static void beforeClass() {
+	    System.setProperty("vip.enabled", "false");
+	}
+	
 	@Before
 	public void setup() throws SecurityException {
 		given(fieldEditionSecurityManager.validate(Mockito.any(User.class))).willReturn(new FieldErrorMap());

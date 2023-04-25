@@ -126,9 +126,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
           </li>
           <li>
             <label i18n="Study detail|Status label@@studyDetailStatus">Storage volume</label>
-            <span class="right-col" [ngSwitch]="mode">
-								{{ studySizeStr(study.size) }}
-						</span>
+            <span class="right-col" *ngIf="!uploading">
+				{{ studySizeStr(study.size) }}
+			</span>
+			<span class="right-col" *ngIf="uploading">
+				<i class="fas fa-spinner fa-pulse"></i>
+			</span>
           </li>
           <li>
 					<li>
@@ -197,7 +200,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngIf="mode == 'view'">
 						<label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
 						<div [hidden]="DUAprogressBar.progress == 0">
-                            <progress-bar #DUAprogressBar [text]="'Preparing download'"></progress-bar>
+                            <progress-bar #DUAprogressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                         </div>
                         <span class="right-col">
 							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
@@ -322,7 +325,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
                     <li *ngIf="mode == 'view'">
                         <div [hidden]="PFprogressBar.progress == 0">
-                            <progress-bar #PFprogressBar [text]="'Preparing download'"></progress-bar>
+                            <progress-bar #PFprogressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                         </div>
                         <span class="right-col">
                             <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
@@ -387,6 +390,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(cancel)="goToView()"
 					(back)="goBack()">
 				<dataset-download  *ngIf="mode == 'view' && hasDownloadRights()" [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
+				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="!selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button> 
 			</form-footer>
 		</form>
 	</div>

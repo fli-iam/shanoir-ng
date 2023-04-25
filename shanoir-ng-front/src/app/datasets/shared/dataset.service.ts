@@ -110,7 +110,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
               progressBar.progress = -1;
               break;
             case HttpEventType.DownloadProgress:
-              progressBar.progress = (event.loaded / event.total);
+              progressBar.progress = event.loaded;
               break;
             case HttpEventType.Response:
                 progressBar.progress = 0;
