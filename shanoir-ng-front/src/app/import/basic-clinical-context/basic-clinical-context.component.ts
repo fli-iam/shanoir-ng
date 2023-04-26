@@ -37,7 +37,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     patient: PatientDicom;
 
     postConstructor() {
-        this.patient = this.importDataService.patients[0];
+        this.patient = this.getFirstSelectedPatient();
         this.modality = this.getFirstSelectedSerie().modality.toString();
         this.useStudyCard = this.modality.toUpperCase() == "MR";
     }
@@ -170,22 +170,29 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return names;
     }
 
-    protected getFirstSelectedSerie(): SerieDicom {
-        if (!this.patient) return null;
-        for (let study of this.patient.studies) {
-            for (let serie of study.series) {
-                if (serie.selected) return serie;
-            }
-        }
+  protected getFirstSelectedPatient(): PatientDicom {
+       for(let patient of this.importDataService.patients){
+         for(let study of patient.studies){
+           if (study.selected) return patient;
+         }
+       }
        return null;
-    }
+  }
+
+  protected getFirstSelectedSerie(): SerieDicom {
+      if (!this.patient) return null;
+      for (let study of this.patient.studies) {
+          for (let serie of study.series) {
+              if (serie.selected) return serie;
+          }
+      }
+     return null;
+  }
 
     protected getFirstSelectedStudy(): StudyDicom {
         if (!this.patient) return null;
         for (let study of this.patient.studies) {
-            for (let serie of study.series) {
-                if (serie.selected) return study;
-            }
+            if(study.selected) return study;
         }
        return null;
     }

@@ -32,13 +32,12 @@ export class PipelinesComponent implements OnInit {
     )
   }
 
-  selectPipeline(pipeline:Pipeline){
+  selectPipeline(pipeline:Pipeline) {
     this.descriptionLoading = true;
     this.carminClientService.getPipeline(pipeline.identifier).subscribe(
       (pipeline:Pipeline)=>{
         this.descriptionLoading = false;
         this.selectedPipeline = pipeline;
-        console.log(pipeline);
       },
       (error)=>{
         console.error(error);
@@ -48,6 +47,14 @@ export class PipelinesComponent implements OnInit {
 
   choosePipeLine(){
     this.processingService.setPipeline(this.selectedPipeline);
+    let filesParam = 0;
+    let datsetNumbers = this.processingService.selectedDatasetsValue?.size;
+    // Here we are going to calculate the number of possible executions in parralel
+    this.selectedPipeline.parameters?.forEach(parameter => {
+        if (parameter.type == 'File') {
+            filesParam += 1;
+        }
+    })
     this.router.navigate(['processing/execution']);
   }
 

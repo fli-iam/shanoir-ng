@@ -1,7 +1,7 @@
 <button type="button" (click)="prepareDownloadAll()" [disabled]="progressBar.progress != 0" class="right-icon">Download all datasets<i class="fas fa-download"></i></button>
 <button type="button" (click)="prepareDownloadSelected()" [disabled]="progressBar.progress != 0 || !datasetIds || datasetIds.length <= 0" class="right-icon">Download selected datasets<i class="fas fa-download"></i></button> 
 <div [hidden]="progressBar.progress == 0">
-    <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
+    <progress-bar #progressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
 </div>
 <app-modal #downloadDialog >
     <div class="main">

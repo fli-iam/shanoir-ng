@@ -49,8 +49,6 @@ import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.study.rights.command.CommandType;
-import org.shanoir.ng.study.rights.command.StudyUserCommand;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
@@ -198,6 +196,11 @@ public class StudyApiController implements StudyApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", e));
 		}
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Long> getStudyFilesSize(@PathVariable("studyId") final Long studyId) {
+		return new ResponseEntity<>(studyService.getStudyFilesSize(studyId), HttpStatus.OK);
 	}
 
 	@Override
