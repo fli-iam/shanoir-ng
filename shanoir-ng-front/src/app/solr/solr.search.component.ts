@@ -417,7 +417,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Center", field: "centerName",
               route: item => '/center/details/' + item.centerId
             },
-            {headerName: "Exam", field: "examinationComment"},
+            {headerName: "Exam", field: "examinationComment",
+                route: item => '/examination/details/' + item.examinationId
+            },
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
                 return dateRenderer(params.data.examinationDate);
               }},
