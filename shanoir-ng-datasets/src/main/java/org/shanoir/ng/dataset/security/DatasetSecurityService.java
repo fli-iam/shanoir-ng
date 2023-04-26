@@ -32,6 +32,7 @@ import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.dicom.web.StudyInstanceUIDHandler;
+import org.shanoir.ng.examination.controler.ExaminationApiController;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
@@ -49,6 +50,8 @@ import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -84,6 +87,9 @@ public class DatasetSecurityService {
 	
 	@Autowired
 	private StudyInstanceUIDHandler studyInstanceUIDHandler;
+	
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetSecurityService.class);
+
 
 	/**
 	 * Check that the connected user has the given right for the given study.
@@ -93,12 +99,18 @@ public class DatasetSecurityService {
 	 * @return true or false
 	 */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
+    	LOG.error("1" + studyId + rightStr);
+    	
     	if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
 			return true;
 		}
+    	LOG.error("2" + studyId + rightStr);
+
     	if (studyId == null) {
 			return false;
 		}
+    	LOG.error("3" + studyId + rightStr);
+
         return commService.hasRightOnStudy(studyId, rightStr);
     }
     
@@ -797,13 +809,21 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterExaminationList(List<Examination> list, String rightStr) {
+    	LOG.error("6" + list + rightStr);
+
     	Set<Examination> toRemove = new HashSet<>();
     	list.forEach((Examination exam) -> {
+        	LOG.error("7" + exam);
+
         	if (!this.hasRightOnStudyCenter(exam.getCenterId(), exam.getStudyId(), rightStr)) {
+            	LOG.error("8 - wermove" + exam);
+
         		toRemove.add(exam);
         	}
     	});
     	list.removeAll(toRemove);
+    	LOG.error("9");
+
     	return true;
     }
     

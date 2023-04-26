@@ -18,9 +18,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -31,7 +34,8 @@ public class StudyRightsService {
 	@Autowired
 	private StudyUserRightsRepository repo;
 	
-	
+	private static final Logger LOG = LoggerFactory.getLogger(StudyRightsService.class);
+
 	/**
 	 * Check that the connected user has the given right for the given study.
 	 * 
@@ -41,10 +45,17 @@ public class StudyRightsService {
 	 */
     public boolean hasRightOnStudy(Long studyId, String rightStr) {
 		Long userId = KeycloakUtil.getTokenUserId();
+    	LOG.error("4" + studyId + rightStr + userId);
+
 		if (userId == null) {
 			throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
 		}
+    	LOG.error("5" + studyId + rightStr + userId);
+
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
+
+    	LOG.error("5" + studyId + rightStr + userId + founded + founded.getStudyUserRights() + founded.isConfirmed());
+
 		return
 				founded != null
 				&& founded.getStudyUserRights() != null
