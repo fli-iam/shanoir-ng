@@ -25,6 +25,7 @@ export class LoadingBarComponent {
 
     @Input() progress: number = 0;
     @Input() text: string = "";
+    @Input() unknownDownload: boolean = false;
     @Input() width: number = 200;
 
     @HostBinding('style.width') get pixelWidth() {
@@ -35,7 +36,26 @@ export class LoadingBarComponent {
         if (this.progress === -1 && this.text) {
             return this.text;
         }
+        if (this.unknownDownload) {
+            return this.studySizeStr(this.progress);
+        }
         return Math.floor(this.progress * 100) + "%";
+    }
+
+    studySizeStr(size: number) {
+
+      const base: number = 1024;
+      const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+      if(size == null || size == 0){
+        return "0 " + units[0];
+      }
+
+      const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+      let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
+      let unit: string = units[exponent];
+
+      return value + " " + unit;
     }
 
     onResized(event) {

@@ -111,6 +111,15 @@ public interface UserService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT') and @isMeSecurityService.isMe(#username))")
 	Optional<User> findByUsername(String username);
+	
+	/**
+	 * Find user by its username.
+	 *
+	 * @param username the username.
+	 * @return a user or null.
+	 */
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('USER', 'EXPERT'))")
+	Optional<User> findByUsernameForInvitation(String username);
 
 	/**
 	 * Find users that will soon expire and have not yet received the first notification.

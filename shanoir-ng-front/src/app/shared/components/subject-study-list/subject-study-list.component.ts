@@ -28,6 +28,8 @@ import { ColumnDefinition } from '../table/column.definition.type';
 import { combineLatest, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { Subject as RxjsSubject} from 'rxjs';
+import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
+
 
 @Component({
   selector: 'subject-study-list',
@@ -58,8 +60,10 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     private subjectOrStudyObs: RxjsSubject <Subject | Study> = new RxjsSubject();
     private subjectStudyListObs: RxjsSubject<SubjectStudy[]> = new RxjsSubject();
     private subscriptions: Subscription[] = [];
-
-    constructor(private router: Router) {
+    private warningDisplayed: boolean = false;
+    
+    constructor(private router: Router,
+        private confirmDialogService: ConfirmDialogService) {
         super();
         this.subscriptions.push(
             combineLatest([this.subjectOrStudyObs, this.subjectStudyListObs]).subscribe(() => {
@@ -104,7 +108,6 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
 
     getPage(pageable: FilterablePageable): Promise<Page<SubjectStudy>> {
         return Promise.resolve(new BrowserPaging<SubjectStudy>(this.model, this.columnDefs).getPage(pageable));
-
     }
 
     private createColumnDefs() {
@@ -226,6 +229,21 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
+        if (!this.warningDisplayed) {
+            this.confirmDialogService.confirm('Deleting subject', 
+            'Warning: If this subject is only linked to this study, it will be completely deleted from the database.')
+            .then(userChoice => {
+                if (userChoice) {
+                    this.removeSubjectStudyOk(subjectStudy);
+                    this.warningDisplayed = true;
+                }
+            });
+        } else {
+            this.removeSubjectStudyOk(subjectStudy);
+        }
+    }
+
+    removeSubjectStudyOk(subjectStudy: SubjectStudy):void {
         const index: number = this.model.indexOf(subjectStudy);
         if (index > -1) {
             this.model.splice(index, 1);

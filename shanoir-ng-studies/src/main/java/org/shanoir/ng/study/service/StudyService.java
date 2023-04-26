@@ -143,4 +143,5 @@ public interface StudyService {
 	 */
 	List<Study> findPublicStudies();
 
+    Long getStudyFilesSize(Long studyId);
 }

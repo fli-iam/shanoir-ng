@@ -25,9 +25,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -43,7 +40,6 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -137,7 +133,7 @@ public class DatasetApiController implements DatasetApi {
 	DatasetDownloaderServiceImpl datasetDownloaderService;
 
 	/** Number of downloadable datasets. */
-	private static final int DATASET_LIMIT = 50;
+	private static final int DATASET_LIMIT = 500;
 
 	@PostConstruct
 	private void initialize() {
@@ -231,9 +227,15 @@ public class DatasetApiController implements DatasetApi {
 
     @Override
     public ResponseEntity<Long> getSizeByStudyId(Long studyId) {
-		Long size = datasetService.getSizeByStudyId(studyId);
+		Long size = datasetService.getExpressionSizeByStudyId(studyId);
 
-		return new ResponseEntity<>(Objects.requireNonNullElse(size, 0L), HttpStatus.OK);
+		if(size == null){
+			size = 0L;
+		}
+
+		size += examinationService.getExtraDataSizeByStudyid(studyId);
+
+		return new ResponseEntity<>(size, HttpStatus.OK);
 
 	}
 
