@@ -194,7 +194,6 @@ export class ExaminationNodeComponent implements OnChanges {
         this.examinationService.get(this.node.id).then(entity => {
             this.examinationService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
                 if (deleted) {
-                    console.log("DELETED !")
                     this.onExaminationDelete.emit();
                 }
             });
