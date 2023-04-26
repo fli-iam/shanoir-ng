@@ -163,6 +163,7 @@ public class ExaminationApiController implements ExaminationApi {
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 
+		LOG.error("subjectId: " + subjectId + " studyId " + studyId);
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
 		
 		// Load study-dataset association (dataset database)
