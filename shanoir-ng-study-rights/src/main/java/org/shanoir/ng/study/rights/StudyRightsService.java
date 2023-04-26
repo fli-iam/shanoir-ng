@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
