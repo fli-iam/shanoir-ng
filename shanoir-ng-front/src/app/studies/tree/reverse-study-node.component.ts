@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -41,13 +41,14 @@ export class ReverseStudyNodeComponent implements OnChanges {
     studyCardsLoading: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
+    detailsPath: string = '/study/details/';
 
     constructor(
             private router: Router,
             private examinationService: ExaminationService,
             private examPipe: ExaminationPipe) {
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof ReverseStudyNode) {
@@ -76,7 +77,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
                 if (sortedExaminations) {
                     sortedExaminations.forEach(exam => {
                         (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
-                    }); 
+                    });
                 }
                 this.loading = false;
                 this.node.open = true;
@@ -85,7 +86,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             });
         }
     }
-    
+
     private mapExamNode(exam: SubjectExamination): ExaminationNode {
         return new ExaminationNode(
             exam.id,
@@ -94,7 +95,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             exam.extraDataFilePathList
         );
     }
-    
+
     private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
@@ -102,7 +103,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : []
         );
     }
-    
+
     private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
             dataset.id,
@@ -112,7 +113,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
             processed
         );
     }
-    
+
     private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
             processing.id,
@@ -122,7 +123,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
     }
 
     showStudyDetails() {
-        this.router.navigate(['/study/details/' + this.node.id]);
+        this.router.navigate([this.detailsPath + this.node.id]);
     }
 
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {

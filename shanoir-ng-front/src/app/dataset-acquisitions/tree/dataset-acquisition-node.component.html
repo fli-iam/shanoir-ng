@@ -17,21 +17,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [class.selected]="this.menuOpened"
         [label]="node.label"
         [clickable] = "this.node.id != null"
-        awesome="fas fa-procedures" 
+        awesome="fas fa-procedures"
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
         [hasChildren]="hasChildren()"
         (firstOpen)="loadDatasets()">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
+      <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
         <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showDetails()"></menu-item>
-    </dropdown-menu>   
+      </a>
+    </dropdown-menu>
 
-    <ng-container *ngIf="node.open && node.datasets && node.datasets != $any('UNLOADED')"> 
+    <ng-container *ngIf="node.open && node.datasets && node.datasets != $any('UNLOADED')">
 
-            <dataset-node 
+            <dataset-node
                 node
-                *ngFor="let dsNode of node.datasets" 
+                *ngFor="let dsNode of node.datasets"
                 [input]="dsNode"
                 [related]="node.id == null"
                 (selectedChange)="selectedChange.emit()"

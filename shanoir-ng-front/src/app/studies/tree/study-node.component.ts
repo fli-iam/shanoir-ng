@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -36,12 +36,13 @@ export class StudyNodeComponent implements OnChanges {
     studyCardsLoading: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
+    detailsPath: string = '/study/details/';
 
     constructor(
             private router: Router,
             private subjectStudyPipe: SubjectStudyPipe,
             private studyCardService: StudyCardService) {}
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof StudyNode) {
@@ -67,15 +68,15 @@ export class StudyNodeComponent implements OnChanges {
                         subjects,
                         centers,
                         UNLOADED,
-                        members);  // members    
+                        members);  // members
             }
             this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != '/study/details/' + this.node.id;
+            this.showDetails = this.router.url != this.detailsPath  + this.node.id;
         }
     }
 
     showStudyDetails() {
-        this.router.navigate(['/study/details/' + this.node.id]);
+        this.router.navigate([this.detailsPath + this.node.id]);
     }
 
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {

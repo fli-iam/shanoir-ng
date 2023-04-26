@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -48,13 +48,14 @@ export class SubjectNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
+    detailsPath: string = "/subject/details/";
 
     constructor(
             private examinationService: ExaminationService,
             private router: Router,
             private examPipe: ExaminationPipe) {
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof SubjectNode) {
@@ -67,10 +68,10 @@ export class SubjectNodeComponent implements OnChanges {
                     UNLOADED);
             }
             this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != '/subject/details/' + this.node.id;
-        } 
+            this.showDetails = this.router.url != this.detailsPath + this.node.id;
+        }
     }
-    
+
     loadExaminations() {
         if (this.node.examinations == UNLOADED) {
             this.loading = true;
@@ -83,7 +84,7 @@ export class SubjectNodeComponent implements OnChanges {
                 if (sortedExaminations) {
                     sortedExaminations.forEach(exam => {
                         (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
-                    }); 
+                    });
                 }
                 this.loading = false;
                 this.node.open = true;
@@ -92,7 +93,7 @@ export class SubjectNodeComponent implements OnChanges {
             });
         }
     }
-    
+
     private mapExamNode(exam: SubjectExamination): ExaminationNode {
         return new ExaminationNode(
             exam.id,
@@ -101,7 +102,7 @@ export class SubjectNodeComponent implements OnChanges {
             exam.extraDataFilePathList
         );
     }
-    
+
     private mapAcquisitionNode(dsAcq: DatasetAcquisition): DatasetAcquisitionNode {
         return new DatasetAcquisitionNode(
             dsAcq.id,
@@ -109,7 +110,7 @@ export class SubjectNodeComponent implements OnChanges {
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
         );
     }
-    
+
     private mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
             dataset.id,
@@ -119,7 +120,7 @@ export class SubjectNodeComponent implements OnChanges {
             processed
         );
     }
-    
+
     private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
             processing.id,
@@ -127,7 +128,7 @@ export class SubjectNodeComponent implements OnChanges {
             processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : []
         );
     }
-    
+
     hasChildren(): boolean | 'unknown' {
         if (!this.node.examinations) return false;
         else if (this.node.examinations == (UNLOADED as any)) return 'unknown';
@@ -135,7 +136,7 @@ export class SubjectNodeComponent implements OnChanges {
     }
 
     showSubjectDetails() {
-        this.router.navigate(['/subject/details/' + this.node.id]);
+        this.router.navigate([this.detailsPath + this.node.id]);
     }
 
     collapseAll() {

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -48,6 +48,7 @@ export class ExaminationNodeComponent implements OnChanges {
 	  hasDicom: boolean = false;
     downloading = false;
     hasBids: boolean = false;
+    detailsPath: string = '/examination/details/';
 
     constructor(
         private router: Router,
@@ -57,7 +58,7 @@ export class ExaminationNodeComponent implements OnChanges {
         private datasetService: DatasetService,
         private consoleService: ConsoleService) {
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof ExaminationNode) {
@@ -65,7 +66,7 @@ export class ExaminationNodeComponent implements OnChanges {
                 if (this.input.datasetAcquisitions != 'UNLOADED') this.fetchDatasetIds(this.input.datasetAcquisitions);
             } else {
                 this.node = new ExaminationNode(
-                        this.input.id, 
+                        this.input.id,
                         this.examPipe.transform(this.input),
                         'UNLOADED',
                         this.input.extraDataFilePathList);
@@ -77,14 +78,14 @@ export class ExaminationNodeComponent implements OnChanges {
     hasChildren(): boolean | 'unknown' {
         if (!this.node.datasetAcquisitions && !this.node.extraDataFilePathList) return false;
         else if (this.node.datasetAcquisitions == 'UNLOADED' || this.node.extraDataFilePathList == 'UNLOADED') return 'unknown';
-        else return (this.node.datasetAcquisitions && this.node.datasetAcquisitions.length > 0) 
+        else return (this.node.datasetAcquisitions && this.node.datasetAcquisitions.length > 0)
                 ||  (this.node.extraDataFilePathList && this.node.extraDataFilePathList.length > 0) ;
     }
 
     showExaminationDetails() {
-        this.router.navigate(['/examination/details/' + this.node.id]);
+        this.router.navigate([this.detailsPath + this.node.id]);
     }
-    
+
     viewExaminationDicoms() {
         window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.node.id, '_blank');
     }
@@ -106,10 +107,10 @@ export class ExaminationNodeComponent implements OnChanges {
             this.node.datasetAcquisitions = dsAcqs.map(dsAcq => this.mapAcquisitionNode(dsAcq));
             this.fetchDatasetIds(this.node.datasetAcquisitions);
             this.nodeInit.emit(this.node);
-            this.loading = false; 
+            this.loading = false;
         }).catch((reason) => { this.loading = false; });
     }
-    
+
     fetchDatasetIds(datasetAcquisitions: DatasetAcquisitionNode[]) {
         let datasetIds: number[] = [];
         if (datasetAcquisitions) {
@@ -164,7 +165,7 @@ export class ExaminationNodeComponent implements OnChanges {
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : []
         );
     }
-    
+
     mapDatasetNode(dataset: Dataset, processed: boolean): DatasetNode {
         return new DatasetNode(
             dataset.id,
@@ -174,7 +175,7 @@ export class ExaminationNodeComponent implements OnChanges {
             processed
         );
     }
-    
+
     mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
             processing.id,
