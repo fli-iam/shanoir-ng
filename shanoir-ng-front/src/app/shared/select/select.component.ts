@@ -631,6 +631,31 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         else if (this.options) return this.options;
         else return null;
     }
+
+    opened: boolean = false;
+    private opening: boolean = false;
+    private closing: boolean = false;
+    showCenterName() {
+      if (!this.opening) {
+        this.closing = false;
+        this.opening = true;
+        setTimeout(() =>  {
+          if (this.opening)
+            this.opened = true;
+        }, 500);
+      }
+    }
+
+    hideCenterName() {
+      if (!this.closing) {
+        this.closing = true;
+        this.opening = false;
+        setTimeout(() =>  {
+          if (this.closing)
+            this.opened = false;
+        }, 500);
+      }
+    }
 }
 
 

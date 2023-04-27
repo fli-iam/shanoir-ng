@@ -16,9 +16,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span class="frame" *ngIf="!compactMode">
         <span class="input-container left-icon" [style.color]="selectionColor ? selectedOption?.color : null">
             <span  *ngIf="selectedOption?.awesome"><i class="{{selectedOption?.awesome}}"></i></span>
-            <span class="fake-input">
+<!--            <span class="fake-input">
                 {{inputText ? inputText : (placeholder ? placeholder : 'Select an option...')}}
-            </span>
+            </span>-->
             <input #input
                 *ngIf="options?.length > 0"
                 type="text"
@@ -30,8 +30,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [placeholder]="placeholder ? placeholder : 'Select an option...'"
                 (click)="isOpen() ? close() : open()"
                 (focus)="onInputFocus()"
-                [readOnly]="!search">
+                [readOnly]="!search"
+                (mouseleave)="hideCenterName()" (mouseover)="showCenterName()">
+
         </span>
+        <div class="content"
+             *ngIf="opened && selectedOption && selectedOption.label.length > 20">
+            {{ selectedOption?.label }}
+        </div>
         <span *ngIf="options?.length == 0" class="label empty">Empty list</span>
         <span class="commands">
             <span class="clear button" *ngIf="inputText && clear" (click)="onClear()"><i class="fas fa-times"></i></span>
