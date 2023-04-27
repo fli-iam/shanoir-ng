@@ -168,7 +168,7 @@ public class ExaminationApiController implements ExaminationApi {
 	public ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@RequestParam(value = "include related examination", defaultValue = "false") boolean withRelated) {
+			@RequestParam(value = "include related examination", defaultValue = "false") @PathVariable("withRelated") boolean withRelated) {
 
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
 
