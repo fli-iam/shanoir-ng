@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -51,6 +52,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +65,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.annotations.ApiParam;
@@ -85,10 +88,13 @@ public class ExaminationApiController implements ExaminationApi {
 	private CenterRepository centerRepository;
 
 	@Autowired
-	ShanoirEventService eventService;
+	private ShanoirEventService eventService;
 
 	@Autowired
-	StudyRepository studyRepository;
+	private StudyRepository studyRepository;
+
+	@Autowired
+	private StudyRightsService rightsService;
 
 	private final HttpServletRequest request;
 
@@ -161,60 +167,15 @@ public class ExaminationApiController implements ExaminationApi {
 	@Override
 	public ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@RequestParam(value = "include related examination", defaultValue = "false") boolean withRelated) {
 
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
-		
-		// Load study-dataset association (dataset database)
-		Study study = studyRepository.findById(studyId).orElse(null);
-		
-		List<Dataset> relatedDatasets = study.getRelatedDatasets();
-		if (relatedDatasets != null && !relatedDatasets.isEmpty()) {
-			List<Examination> relatedExams = new ArrayList<>();
-			Set<Long> studyIds = new HashSet<>();
 
-			// Get every other study linked using the datasets
-			for (Dataset dataset : relatedDatasets) {
-				studyIds.add(dataset.getStudyId());
-			}
-
-			// Load examinations linked to the study of the datasets
-			for (Long relatedStudyId : studyIds) {
-				relatedExams.addAll(examinationService.findBySubjectIdStudyId(subjectId, relatedStudyId));
-			}
-			
-			Set<Examination> examsToKeep = new HashSet<>();
-			Set<DatasetAcquisition> acqToKeep = new HashSet<>();
-			
-			// Clean these examinations / dataset Acquisition from unnecessary datasets
-			for (Examination exam :relatedExams) {
-				for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
-					List<Dataset> current = new ArrayList<>();
-					for (Dataset ds : relatedDatasets) {
-						if (acq.getDatasets().contains(ds)) {
-							examsToKeep.add(exam);
-							exam.setId(null);
-							acqToKeep.add(acq);
-							acq.setId(null);
-							current.add(ds);
-						}
-					}
-					// update datasets
-					acq.setDatasets(current);
-				}
-			}
-			// Clean examinations from useless acquisitions
-			for (Examination exam : examsToKeep) {
-				List<DatasetAcquisition> current = new ArrayList<>();
-				for (DatasetAcquisition acq : acqToKeep) {
-					if (acq.getExamination().equals(exam)) {
-						current.add(acq);
-					}
-				}
-				exam.setDatasetAcquisitions(current);
-			}
-			examinations.addAll(examsToKeep);
+		if(withRelated){
+			examinations.addAll(this.getRelatedExaminations(studyId, subjectId));
 		}
+
 		for (Examination exam : examinations) {
 			orderDatasetAcquisitions(exam);
 		}
@@ -222,6 +183,62 @@ public class ExaminationApiController implements ExaminationApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(examinationMapper.examinationsToSubjectExaminationDTOs(examinations), HttpStatus.OK);
+	}
+
+	private Set<Examination> getRelatedExaminations(Long studyId, Long subjectId){
+		// Load study-dataset association (dataset database)
+		Study study = studyRepository.findById(studyId).orElse(null);
+
+		List<Dataset> relatedDatasets = study != null ? study.getRelatedDatasets() : null;
+
+		if (relatedDatasets == null || relatedDatasets.isEmpty()) {
+			return new HashSet<>();
+		}
+
+		List<Examination> relatedExams = new ArrayList<>();
+
+		Set<Long> studyIds = relatedDatasets.stream().map(Dataset::getStudyId).collect(Collectors.toSet());
+
+		// Get every other study linked using the datasets
+
+		// Load examinations linked to the study of the datasets
+		for (Long relatedStudyId : studyIds) {
+			if(rightsService.hasRightOnStudy(relatedStudyId, "CAN_SEE_ALL")){
+				relatedExams.addAll(examinationService.findBySubjectIdStudyId(subjectId, relatedStudyId));
+			}
+		}
+
+		Set<Examination> examsToKeep = new HashSet<>();
+		Set<DatasetAcquisition> acqToKeep = new HashSet<>();
+
+		// Clean these examinations / dataset Acquisition from unnecessary datasets
+		for (Examination exam : relatedExams) {
+			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
+				List<Dataset> current = new ArrayList<>();
+				for (Dataset ds : relatedDatasets) {
+					if (acq.getDatasets().contains(ds)) {
+						examsToKeep.add(exam);
+						exam.setId(null);
+						acqToKeep.add(acq);
+						acq.setId(null);
+						current.add(ds);
+					}
+				}
+				// update datasets
+				acq.setDatasets(current);
+			}
+		}
+		// Clean examinations from useless acquisitions
+		for (Examination exam : examsToKeep) {
+			List<DatasetAcquisition> current = new ArrayList<>();
+			for (DatasetAcquisition acq : acqToKeep) {
+				if (acq.getExamination().equals(exam)) {
+					current.add(acq);
+				}
+			}
+			exam.setDatasetAcquisitions(current);
+		}
+		return examsToKeep;
 	}
 
 	// Attention: this method is used by ShanoirUploader!!!
