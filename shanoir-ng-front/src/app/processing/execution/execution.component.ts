@@ -207,7 +207,7 @@ export class ExecutionComponent implements OnInit {
     onSubmitExecutionForm() {
         let execution: Execution = new Execution();
 
-        execution.name = this.executionForm.get("execution_name").value;
+        execution.name = this.cleanExecutionName(this.executionForm.get("execution_name").value);
         execution.pipelineIdentifier = this.pipeline.identifier;
         execution.timeout = 20;
         execution.inputValues = {};
@@ -298,9 +298,13 @@ export class ExecutionComponent implements OnInit {
     }
 
     getDefaultExecutionName(): string {
-        return this.pipeline.name
+        return this.cleanExecutionName(this.pipeline.name
         + "_" + this.pipeline.version
-        + "_" + formatDate(new Date(), 'dd-MM-YYYY_HH:mm:ss', 'en-US');
+        + "_" + formatDate(new Date(), 'dd-MM-YYYY_HHmmss', 'en-US'));
 
+    }
+
+    private cleanExecutionName(name: string): string {
+        return name.replace(/[^0-9A-Za-z_-]/g, '_')
     }
 }
