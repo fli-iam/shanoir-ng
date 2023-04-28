@@ -194,4 +194,5 @@ public interface SubjectService {
 	 */
 	Page<Subject> getFilteredPageByStudies(Pageable page, String name, List<Study> studies);
 
+	List<Subject> findByPreclinical(boolean preclinical);
 }

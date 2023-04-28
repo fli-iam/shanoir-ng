@@ -68,7 +68,10 @@ public interface SubjectApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<SubjectDTO>> findSubjects();
+	ResponseEntity<List<SubjectDTO>> findSubjects(
+			@RequestParam(value = "include preclinical subject", required = false, defaultValue = "true") @PathVariable("preclinical") boolean preclinical,
+			@RequestParam(value = "include clinical subject", required = false, defaultValue = "true") @PathVariable("clinical") boolean clinical);
+
 
 	@ApiOperation(value = "", notes = "Returns the subjects as Pageable with corresponding name", response = Subject.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subjects", response = Subject.class),

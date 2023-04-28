@@ -2,35 +2,34 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import {Component, ViewChild} from '@angular/core';
+import {EntityService} from 'src/app/shared/components/entity/entity.abstract.service';
 
-import { BrowserPaginEntityListComponent } from '../../../shared/components/entity/entity-list.browser.component.abstract';
-import { ColumnDefinition } from '../../../shared/components/table/column.definition.type';
-import { TableComponent } from '../../../shared/components/table/table.component';
-import { ShanoirError } from '../../../shared/models/error.model';
-import { ImagedObjectCategory } from '../../../subjects/shared/imaged-object-category.enum';
-import { Subject } from '../../../subjects/shared/subject.model';
-import { SubjectService } from '../../../subjects/shared/subject.service';
-import { AnimalSubject } from '../shared/animalSubject.model';
-import { AnimalSubjectService } from '../shared/animalSubject.service';
-import { PreclinicalSubject } from '../shared/preclinicalSubject.model';
-
+import {
+    BrowserPaginEntityListComponent
+} from '../../../shared/components/entity/entity-list.browser.component.abstract';
+import {ColumnDefinition} from '../../../shared/components/table/column.definition.type';
+import {TableComponent} from '../../../shared/components/table/table.component';
+import {ShanoirError} from '../../../shared/models/error.model';
+import {ImagedObjectCategory} from '../../../subjects/shared/imaged-object-category.enum';
+import {SubjectService} from '../../../subjects/shared/subject.service';
+import {AnimalSubjectService} from '../shared/animalSubject.service';
+import {PreclinicalSubject} from '../shared/preclinicalSubject.model';
 
 
 @Component({
   selector: 'animalSubject-list',
   templateUrl:'animalSubject-list.component.html',
-  styleUrls: ['animalSubject-list.component.css'], 
+  styleUrls: ['animalSubject-list.component.css'],
   providers: [AnimalSubjectService]
 })
 export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponent<PreclinicalSubject>{
@@ -38,15 +37,13 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
     @ViewChild('preclinicalSubjectsTable', { static: false }) table: TableComponent;
 
     public preclinicalSubjects: PreclinicalSubject[];
-    public animalSubjects: AnimalSubject[];
-    public subjects: Subject[];
 
     constructor(
         private animalSubjectService: AnimalSubjectService,
         private subjectService: SubjectService) {
             super('preclinical-subject');
     }
-    
+
     getService(): EntityService<PreclinicalSubject> {
         return this.animalSubjectService;
     }
@@ -54,30 +51,30 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
     getEntities(): Promise<PreclinicalSubject[]> {
         return new  Promise<PreclinicalSubject[]>(resolve => {
             this.preclinicalSubjects = [];
-            this.animalSubjects = [];
-            this.subjects = [];
+
             Promise.all([
-                this.subjectService.getAll(),
+                this.subjectService.getPreclinicalSubjects(),
                 this.animalSubjectService.getAnimalSubjects()
             ]).then(([subjects, animalSubjects]) => {
-                this.subjects = subjects;
-                this.animalSubjects = animalSubjects;
-                if (this.animalSubjects){
-                    for (let s of this.animalSubjects){
+                if (animalSubjects && subjects){
+                    for (let s of animalSubjects){
                         let preSubject: PreclinicalSubject = new PreclinicalSubject();
                         preSubject.animalSubject = s;
                         preSubject.id = s.id;
-                        preSubject.subject = this.getSubjectWithId(s.subjectId);
-                        if (preSubject.subject) {
-                            this.preclinicalSubjects.push(preSubject);
+                        for(let sub of subjects){
+                            if(sub.id == preSubject.animalSubject.subjectId){
+                                preSubject.subject = sub;
+                                this.preclinicalSubjects.push(preSubject);
+                                break;
+                            }
                         }
                     }
                 }
-                resolve(this.preclinicalSubjects);
-            });
+            })
+            resolve(this.preclinicalSubjects);
         });
     }
-    
+
 
     getColumnDefs(): ColumnDefinition[] {
         let colDef: ColumnDefinition[] = [
@@ -100,9 +97,9 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
             {headerName: "Strain", field: "animalSubject.strain.value"},
             {headerName: "Biological type", field: "animalSubject.biotype.value"},
             {headerName: "Provider", field: "animalSubject.provider.value"},
-            {headerName: "Stabulation", field: "animalSubject.stabulation.value"} 
+            {headerName: "Stabulation", field: "animalSubject.stabulation.value"}
         ];
-        return colDef;       
+        return colDef;
     }
 
     getCustomActionsDefs(): any[] {
@@ -112,23 +109,12 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
     getOptions() {
         return {
             new: false,
-            view: true, 
-            edit: this.keycloakService.isUserAdminOrExpert(), 
+            view: true,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
 
-
-    getSubjectWithId(subjectId: number): Subject {
-    	if (this.subjects){
-    		for (let s of this.subjects){
-    			if (s.id == subjectId){
-    				return s;
-    			}
-    		}
-    	}
-    }
-    
     protected openDeleteConfirmDialog = (entity: PreclinicalSubject) => {
         if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
@@ -152,12 +138,12 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                             this.onDelete.next({entity: entity, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
-                    });                
+                    });
                 }
             }
         )
     }
 
-    
-    
+
+
 }
