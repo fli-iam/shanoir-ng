@@ -69,6 +69,10 @@ public class StudyCardApiController implements StudyCardApi {
 	public ResponseEntity<Void> deleteStudyCard(
 			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
 		try {
+			// Will violate integrity constraint
+			if(datasetAcquisitionService.existsByStudyCardId(studyCardId)){
+				return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+			}
 			studyCardService.deleteById(studyCardId);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -180,4 +180,9 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS));
 	}
 
+    @Override
+    public boolean existsByStudyCardId(Long studyCardId) {
+		return repository.existsByStudyCard_Id(studyCardId);
+    }
+
 }
