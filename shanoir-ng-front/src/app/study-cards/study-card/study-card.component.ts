@@ -240,7 +240,8 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     createAcqEq() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
-        this.router.navigate(['/acquisition-equipment/create'], {state: {sc_center: this.centers}}).then(success => {
+        this.breadcrumbsService.currentStep.addPrefilled("sc_center", this.centers);
+        this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     (currentStep.entity as StudyCard).acquisitionEquipment = entity as AcquisitionEquipment;

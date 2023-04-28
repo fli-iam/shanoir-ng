@@ -55,10 +55,8 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             public manufacturerModelPipe: ManufacturerModelPipe) {
 
         super(route, 'acquisition-equipment');
-        let input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['sc_center'] : null;
-        if (input != null) {
-          this.centersFromStudyCard = input;
-        }
+
+        this.centersFromStudyCard = this.breadcrumbsService.currentStep.getPrefilledValue('sc_center');
     }
 
     getService(): EntityService<AcquisitionEquipment> {
