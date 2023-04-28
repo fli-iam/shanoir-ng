@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -32,7 +32,7 @@ import { EntityService } from './entity.abstract.service';
 @Directive()
 export abstract class EntityListComponent<T extends Entity> implements OnDestroy {
 
-    abstract table: TableComponent;  
+    abstract table: TableComponent;
     columnDefs: ColumnDefinition[];
     customActionDefs: any[];
     protected router: Router;
@@ -57,7 +57,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
 
     constructor(
             protected readonly ROUTING_NAME: string) {
-        
+
         this.entityRoutes = new EntityRoutes(ROUTING_NAME);
         this.router = ServiceLocator.injector.get(Router);
         this.confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
@@ -65,7 +65,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.breadcrumbsService = ServiceLocator.injector.get(BreadcrumbsService);
         this.keycloakService = ServiceLocator.injector.get(KeycloakService);
         this.windowService = ServiceLocator.injector.get(WindowService);
-        
+
         this.computeOptions();
         this.columnDefs = this.getColumnDefs();
         this.completeColDefs();
@@ -118,8 +118,8 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     protected openDeleteConfirmDialog = (entity: T) => {
         this.confirmDialogService
             .confirm(
-                'Delete ' + this.ROUTING_NAME, 
-                'Are you sure you want to delete the ' + this.ROUTING_NAME 
+                'Delete ' + this.ROUTING_NAME,
+                'Are you sure you want to delete the ' + this.ROUTING_NAME
                 + (entity['name'] ? ' "' + entity['name'] + '"' : ' with id n° ' + entity.id) + ' ?'
             ).then(res => {
                 if (res) {
@@ -130,12 +130,21 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                         });
                     }).catch(reason => {
                         if (reason && reason.error) {
-                            this.onDelete.next({error: new ShanoirError(reason), entity: entity});
-                            if (reason.error.code != 422) throw Error(reason);
+                            if (reason.error.code != 422) {
+                                throw Error(reason);
+                            } else {
+                                this.consoleService.log('warn', 'The ' + this.ROUTING_NAME + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.');
+                            }
+                        } else if (reason && reason.status) {
+                            if (reason.status != 422) {
+                                throw Error(reason);
+                            } else {
+                                this.consoleService.log('warn', 'The ' + this.ROUTING_NAME + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.');
+                            }
                         } else {
                             console.error(reason);
                         }
-                    });                    
+                    });
                 }
             })
     }
