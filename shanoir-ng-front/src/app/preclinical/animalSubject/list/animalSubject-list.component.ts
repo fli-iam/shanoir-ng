@@ -49,37 +49,35 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
     }
 
     getEntities(): Promise<PreclinicalSubject[]> {
-        return new Promise<PreclinicalSubject[]>(resolve => {
 
-            this.preclinicalSubjects = [];
+        this.preclinicalSubjects = [];
 
-            this.subjectService.getPreclinicalSubjects().then(subjects => {
+        return this.subjectService.getPreclinicalSubjects().then(subjects => {
 
-                if (!subjects) {
+            if (!subjects) {
+                return;
+            }
+
+            const subMap = new Map();
+            for (let sub of subjects) {
+                subMap.set(sub.id, sub);
+            }
+
+            return this.animalSubjectService.getAnimalSubjectsBySubjectIds(Array.from(subMap.keys())).then(animalSubjects => {
+
+                if (!animalSubjects) {
                     return;
                 }
 
-                const subMap = new Map();
-                for (let sub of subjects) {
-                    subMap.set(sub.id, sub);
+                for (let aSub of animalSubjects){
+                    let preSubject: PreclinicalSubject = new PreclinicalSubject();
+                    preSubject.animalSubject = aSub;
+                    preSubject.id = aSub.id;
+                    preSubject.subject = subMap.get(preSubject.animalSubject.subjectId);
+                    this.preclinicalSubjects.push(preSubject);
                 }
-
-                this.animalSubjectService.getAnimalSubjectsBySubjectIds(Array.from(subMap.keys())).then(animalSubjects => {
-
-                    if (!animalSubjects) {
-                        return;
-                    }
-
-                    for (let aSub of animalSubjects){
-                        let preSubject: PreclinicalSubject = new PreclinicalSubject();
-                        preSubject.animalSubject = aSub;
-                        preSubject.id = aSub.id;
-                        preSubject.subject = subMap.get(preSubject.animalSubject.subjectId);
-                        this.preclinicalSubjects.push(preSubject);
-                    }
-                    });
-                });
-            resolve(this.preclinicalSubjects);
+                return this.preclinicalSubjects;
+            });
         });
     }
 
