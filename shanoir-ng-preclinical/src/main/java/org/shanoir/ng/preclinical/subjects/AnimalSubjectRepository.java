@@ -22,4 +22,5 @@ public interface AnimalSubjectRepository extends CrudRepository<AnimalSubject, L
 
 	List<AnimalSubject> findBySubjectId(Long id);
 
+    List<AnimalSubject> findBySubjectIdIn(List<Long> subjectIds);
 }

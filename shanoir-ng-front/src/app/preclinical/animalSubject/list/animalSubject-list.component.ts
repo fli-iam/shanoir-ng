@@ -49,28 +49,36 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
     }
 
     getEntities(): Promise<PreclinicalSubject[]> {
-        return new  Promise<PreclinicalSubject[]>(resolve => {
+        return new Promise<PreclinicalSubject[]>(resolve => {
+
             this.preclinicalSubjects = [];
 
-            Promise.all([
-                this.subjectService.getPreclinicalSubjects(),
-                this.animalSubjectService.getAnimalSubjects()
-            ]).then(([subjects, animalSubjects]) => {
-                if (animalSubjects && subjects){
-                    for (let s of animalSubjects){
-                        let preSubject: PreclinicalSubject = new PreclinicalSubject();
-                        preSubject.animalSubject = s;
-                        preSubject.id = s.id;
-                        for(let sub of subjects){
-                            if(sub.id == preSubject.animalSubject.subjectId){
-                                preSubject.subject = sub;
-                                this.preclinicalSubjects.push(preSubject);
-                                break;
-                            }
-                        }
-                    }
+            this.subjectService.getPreclinicalSubjects().then(subjects => {
+
+                if (!subjects) {
+                    return;
                 }
-            })
+
+                const subMap = new Map();
+                for (let sub of subjects) {
+                    subMap.set(sub.id, sub);
+                }
+
+                this.animalSubjectService.getAnimalSubjectsBySubjectIds(Array.from(subMap.keys())).then(animalSubjects => {
+
+                    if (!animalSubjects) {
+                        return;
+                    }
+
+                    for (let aSub of animalSubjects){
+                        let preSubject: PreclinicalSubject = new PreclinicalSubject();
+                        preSubject.animalSubject = aSub;
+                        preSubject.id = aSub.id;
+                        preSubject.subject = subMap.get(preSubject.animalSubject.subjectId);
+                        this.preclinicalSubjects.push(preSubject);
+                    }
+                    });
+                });
             resolve(this.preclinicalSubjects);
         });
     }
