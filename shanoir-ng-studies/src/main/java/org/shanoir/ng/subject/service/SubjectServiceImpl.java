@@ -328,6 +328,9 @@ public class SubjectServiceImpl implements SubjectService {
 
 	@Override
 	public List<Subject> findByPreclinical(boolean preclinical) {
-		return subjectRepository.findByPreclinical(preclinical);
+		if(preclinical){
+			return subjectRepository.findByPreclinicalTrue();
+		}
+		return subjectRepository.findByPreclinicalFalse();
 	}
 }
