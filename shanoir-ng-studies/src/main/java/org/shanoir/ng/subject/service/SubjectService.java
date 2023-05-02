@@ -194,5 +194,7 @@ public interface SubjectService {
 	 */
 	Page<Subject> getFilteredPageByStudies(Pageable page, String name, List<Study> studies);
 
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Subject> findByPreclinical(boolean preclinical);
 }
