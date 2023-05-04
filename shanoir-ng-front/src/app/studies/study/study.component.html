@@ -356,7 +356,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li *ngFor="let a of accessRequests">
 						<span class="link left-icon" (click)="goToAccessRequest(a)">
 							<i class="fa-solid fa-user-lock"></i>
-							Request from {{a.user.firstName}} {{a.user.lastName}} ({{a.user.username}}), motivation : 
+							Request from {{a.user.firstName}} {{a.user.lastName}} ({{a.user.username}}), motivation :
 							<span class="motivation"> {{a.motivation}}</span>
 						</span>
 					</li>
@@ -364,9 +364,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
       </fieldset>
 			<fieldset [class.hidden]="activeTab != 'quality'" *ngIf="mode == 'view'">
 				<legend>Quality control</legend>
-				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>		
+				<quality-control [studyId]="study.id" (tagUpdate)="reloadSubjectStudies()"></quality-control>
 			</fieldset>
-			<fieldset *ngIf="mode == 'view'" [class.hidden]="activeTab != 'tree'">
+			<fieldset [class.hidden]="activeTab != 'tree'" *ngIf="mode != 'create'">
 				<legend>Tree</legend>
 				<study-node [input]="studyNode"
 						(selectedChange)="onTreeSelectedChange($event)"
@@ -390,7 +390,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(cancel)="goToView()"
 					(back)="goBack()">
 				<dataset-download  *ngIf="mode == 'view' && hasDownloadRights()" [studyId]="id" [datasetIds]="selectedDatasetIds"></dataset-download>
-				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="!selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button> 
+				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="mode != 'view' || !selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button>
 			</form-footer>
 		</form>
 	</div>
