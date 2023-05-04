@@ -57,16 +57,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 					<li>
 						<label>Center(s)</label>
-            <span class="right-col" *ngIf="studyCard.study" [ngSwitch]="mode">
-              <ng-template [ngSwitchCase]="'view'">
-                {{studyCard.acquisitionEquipment.center.name}}
+						<span class="right-col" *ngIf="studyCard.study" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{studyCard.acquisitionEquipment?.center?.name}}
 							</ng-template>
-              <ng-template ngSwitchDefault>
-                <span class="center" *ngFor="let center of centers">
-                  {{center.name}}
-                </span>
-              </ng-template>
-            </span>
+							<ng-template ngSwitchDefault>
+								<span class="center" *ngFor="let center of centers">
+									{{center.name}}
+								</span>
+							</ng-template>
+						</span>
 					</li>
 					<li>
 						<label>Acquisition equipment</label>
