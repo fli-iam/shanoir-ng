@@ -55,7 +55,7 @@ export class SubjectNode implements ShanoirNode {
         public label: string,
         public tags: Tag[],
         public examinations: ExaminationNode[] | UNLOADED,
-        public qualityTag?: QualityTag,
+        public qualityTag: QualityTag,
         public canDeleteChildren: boolean
     ) {
         if (!tags) tags = [];
