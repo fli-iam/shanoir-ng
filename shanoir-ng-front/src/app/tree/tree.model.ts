@@ -14,6 +14,7 @@ import { ExaminationPipe } from "../examinations/shared/examination.pipe";
  */
 
 import { SubjectExamination } from "../examinations/shared/subject-examination.model";
+import { QualityTag } from "../study-cards/shared/quality-card.model";
 import { Tag } from '../tags/tag.model';
 
 interface ShanoirNode {
@@ -51,8 +52,26 @@ export class SubjectNode implements ShanoirNode {
         public id: number,
         public label: string,
         public tags: Tag[],
-        public examinations: ExaminationNode[] | UNLOADED
-    ) {}
+        public examinations: ExaminationNode[] | UNLOADED,
+        public qualityTag?: QualityTag
+    ) {
+        if (!tags) tags = [];
+        if (qualityTag) {
+            let tag: Tag = new Tag();
+            tag.id = -1;
+            if (qualityTag == QualityTag.VALID) {
+                tag.name = 'Valid';
+                tag.color = 'green';
+            } else if (qualityTag == QualityTag.WARNING) {
+                tag.name = 'Warning';
+                tag.color = 'chocolate';
+            } else if (qualityTag == QualityTag.ERROR) {
+                tag.name = 'Error';
+                tag.color = 'red';
+            }
+            tags.unshift(tag);            
+        }
+    }
         
     public open: boolean = false;
 }

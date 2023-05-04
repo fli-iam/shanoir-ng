@@ -37,7 +37,7 @@ import org.shanoir.ng.shared.model.SubjectStudy;
  */
 public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
     
-    private List<SubjectStudy> updatedSubjectStudies;
+    private List<SubjectStudy> updatedSubjectStudies = new ArrayList<>();
     
     public List<SubjectStudy> getUpdatedSubjectStudies() {
         return updatedSubjectStudies;
