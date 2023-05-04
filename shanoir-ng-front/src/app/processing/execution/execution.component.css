@@ -7,29 +7,29 @@ label{
 }
 div{
     margin: 8px 0;
-    display: flex; 
+    display: flex;
 }
 .dataset-id{
     display: inline !important;
     color: var(--color-a);
 }
-.parent-div { 
+.parent-div {
 	margin: 8px 0;
     display: inline-block;
     vertical-align: top;
     width: 500px;
 }
-.block-div { 
+.block-div {
     margin: 8px 0;
     display: block;
 }
 
-.file-parameter-div { 
+.file-parameter-div {
     margin: 8px 8px 8px 8px;
     display: block;
 }
 
-:host() { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; border-collapse: collapse; }
+:host { display: table; border-spacing: 0; table-layout: fixed; width: 100%; border-top: 0; border-collapse: collapse; }
 .full-row { background-color: var(--color-b); overflow: initial; }
 th,
 caption { padding: 4px 5px; background-color: var(--color-b); color: var(--very-light-grey); font-weight: normal; white-space: nowrap; text-overflow: ellipsis; }

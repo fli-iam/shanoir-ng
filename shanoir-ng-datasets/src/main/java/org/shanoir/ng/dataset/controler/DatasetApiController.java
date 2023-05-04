@@ -133,7 +133,7 @@ public class DatasetApiController implements DatasetApi {
 	DatasetDownloaderServiceImpl datasetDownloaderService;
 
 	/** Number of downloadable datasets. */
-	private static final int DATASET_LIMIT = 50;
+	private static final int DATASET_LIMIT = 500;
 
 	@PostConstruct
 	private void initialize() {

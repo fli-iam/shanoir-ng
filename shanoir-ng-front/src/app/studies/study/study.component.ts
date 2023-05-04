@@ -66,6 +66,7 @@ export class StudyComponent extends EntityComponent<Study> {
     selectedCenter: IdName;
     users: User[] = [];
     studyNode: Study | StudyNode;
+    uploading: boolean = false;
 
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
@@ -73,6 +74,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     accessRequests: AccessRequest[];
+    isStudyAdmin: boolean;
 
     public openPrefix: boolean = false;
 
@@ -130,10 +132,11 @@ export class StudyComponent extends EntityComponent<Study> {
                     return aname.localeCompare(bname);
                 });
 
-
             this.getTotalSize(study.id).then(size => {
-              study.size = size;
+                study.size = size;
             });
+
+            this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
             return Promise.resolve(study)
         });
@@ -164,9 +167,11 @@ export class StudyComponent extends EntityComponent<Study> {
               this.study.profile = profile;
             }
 
-          this.getTotalSize(study.id).then(size => {
-            study.size = size;
-          });
+            this.getTotalSize(study.id).then(size => {
+                study.size = size;
+            });
+
+            this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
             return study;
         });
@@ -196,6 +201,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     async initCreate(): Promise<void> {
         this.study = this.newStudy();
+        this.isStudyAdmin = true;
         this.getCenters();
         this.getProfiles();
         this.selectedCenter = null;
@@ -243,14 +249,23 @@ export class StudyComponent extends EntityComponent<Study> {
         return formGroup;
     }
 
-  private getTotalSize(id: number): Promise<number> {
-    return Promise.all([
-      this.studyService.getSizeByStudyId(id),
-      this.datasetService.getSizeByStudyId(id)
-    ]).then(([studySize, datasetSize]) => {
-      return studySize + datasetSize;
-    });
-  }
+    private getTotalSize(id: number): Promise<number> {
+        let waitUploads: Promise<void> = this.studyService.fileUploadings.has(id)
+            ? this.studyService.fileUploadings.get(id)
+            : Promise.resolve(); 
+        
+        this.uploading = true;
+        return waitUploads.then(() => {
+            return Promise.all([
+                this.studyService.getSizeByStudyId(id),
+                this.datasetService.getSizeByStudyId(id)
+            ]).then(([studySize, datasetSize]) => {
+                return studySize + datasetSize;
+            });
+        }).finally(() => {
+            this.uploading = false;
+        });
+    }
 
     private dateOrdervalidator = (control: AbstractControl): ValidationErrors | null => {
         if (this.study.startDate && this.study.endDate && this.study.startDate >= this.study.endDate) {
@@ -259,12 +274,16 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
-    public async hasEditRight(): Promise<boolean> {
+    public async hasStudyAdminRight(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return true;
-        if (!this.study.studyUserList) return false;
+        if (!this.study?.studyUserList) return false;
         let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
+    public async hasEditRight(): Promise<boolean> {
+        return this.hasStudyAdminRight();
     }
 
     public async hasDeleteRight(): Promise<boolean> {
@@ -521,14 +540,14 @@ export class StudyComponent extends EntityComponent<Study> {
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
                 for (let file of this.protocolFiles) {
-                    this.studyService.uploadFile(file, this.entity.id, 'protocol-file').toPromise();
+                    this.studyService.uploadFile(file, this.entity.id, 'protocol-file');
                 }
             }
             if (this.dataUserAgreement) {
-                this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua').toPromise()
-                .catch(error => {
-                    this.dataUserAgreement = null;
-                });
+                this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua')
+                    .catch(error => {
+                        this.dataUserAgreement = null;
+                    });
             }
             return result;
         }).then(study => {

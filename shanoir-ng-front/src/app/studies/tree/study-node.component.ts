@@ -28,8 +28,9 @@ import {
 } from '../../tree/tree.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
-import {StudyRightsService} from "../shared/study-rights.service";
-import {KeycloakService} from "../../shared/keycloak/keycloak.service";
+import { StudyRightsService } from "../shared/study-rights.service";
+import { KeycloakService } from "../../shared/keycloak/keycloak.service";
+import { Tag } from '../../tags/tag.model';
 
 @Component({
     selector: 'study-node',
@@ -69,7 +70,7 @@ export class StudyNodeComponent implements OnChanges {
                 this.node = this.input;
             } else {
                 let subjects: SubjectNode[] = this.input.subjectStudyList.map(subjectStudy => {
-                    return new SubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, this.canAdmin);
+                    return new SubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
                 });
                 let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {
                     return new CenterNode(studyCenter.center.id, studyCenter.center.name, UNLOADED);

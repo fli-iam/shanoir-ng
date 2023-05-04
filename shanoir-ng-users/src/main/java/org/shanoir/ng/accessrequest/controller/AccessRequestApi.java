@@ -120,6 +120,6 @@ public interface AccessRequestApi {
 			@RequestParam(value = "studyId", required = true) Long studyId,
 			@ApiParam(value = "Study name the user is invited in", required = true) 
 			@RequestParam(value = "studyName", required = true) String studyName,
-			@ApiParam(value = "The email of the invited user.") 
-    		@RequestParam(value = "email", required = true) String email) throws RestServiceException, JsonProcessingException, AmqpException;
+			@ApiParam(value = "The email or login of the invited user.") 
+    		@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException;
 }
