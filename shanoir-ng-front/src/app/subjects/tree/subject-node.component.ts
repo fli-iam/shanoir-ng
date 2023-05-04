@@ -11,16 +11,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import { Router } from '@angular/router';
+import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
+import {Router} from '@angular/router';
 
-import { DatasetAcquisition } from '../../dataset-acquisitions/shared/dataset-acquisition.model';
-import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
-import { Dataset } from '../../datasets/shared/dataset.model';
-import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
-import { ExaminationPipe } from '../../examinations/shared/examination.pipe';
-import { ExaminationService } from '../../examinations/shared/examination.service';
-import { SubjectExamination } from '../../examinations/shared/subject-examination.model';
+import {DatasetAcquisition} from '../../dataset-acquisitions/shared/dataset-acquisition.model';
+import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
+import {Dataset} from '../../datasets/shared/dataset.model';
+import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
+import {ExaminationPipe} from '../../examinations/shared/examination.pipe';
+import {ExaminationService} from '../../examinations/shared/examination.service';
+import {SubjectExamination} from '../../examinations/shared/subject-examination.model';
 import {
     DatasetAcquisitionNode,
     DatasetNode,
@@ -29,7 +29,8 @@ import {
     SubjectNode,
     UNLOADED,
 } from '../../tree/tree.model';
-import { Subject } from '../shared/subject.model';
+import {Subject} from '../shared/subject.model';
+import {SubjectService} from "../shared/subject.service";
 
 
 @Component({
@@ -50,9 +51,10 @@ export class SubjectNodeComponent implements OnChanges {
     @Input() hasBox: boolean = false;
 
     constructor(
-            private examinationService: ExaminationService,
-            private router: Router,
-            private examPipe: ExaminationPipe) {
+        private examinationService: ExaminationService,
+        private subjectService: SubjectService,
+        private router: Router,
+        private examPipe: ExaminationPipe) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -60,11 +62,13 @@ export class SubjectNodeComponent implements OnChanges {
             if (this.input instanceof SubjectNode) {
                 this.node = this.input;
             } else {
-                this.node  = new SubjectNode(
+                this.node = new SubjectNode(
                     this.input.id,
                     this.input.name,
                     [],
-                    UNLOADED);
+                    UNLOADED,
+                    null,
+                    false);
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/subject/details/' + this.node.id;
@@ -75,19 +79,19 @@ export class SubjectNodeComponent implements OnChanges {
         if (this.node.examinations == UNLOADED) {
             this.loading = true;
             this.examinationService.findExaminationsBySubjectAndStudy(this.node.id, this.studyId)
-            .then(examinations => {
-                let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
-                    return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
-                })
-                this.node.examinations = [];
-                if (sortedExaminations) {
-                    sortedExaminations.forEach(exam => {
-                        (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
-                    });
-                }
-                this.loading = false;
-                this.node.open = true;
-            }).catch(() => {
+                .then(examinations => {
+                    let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
+                        return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();
+                    })
+                    this.node.examinations = [];
+                    if (sortedExaminations) {
+                        sortedExaminations.forEach(exam => {
+                            (this.node.examinations as ExaminationNode[]).push(this.mapExamNode(exam));
+                        });
+                    }
+                    this.loading = false;
+                    this.node.open = true;
+                }).catch(() => {
                 this.loading = false;
             });
         }
@@ -98,7 +102,8 @@ export class SubjectNodeComponent implements OnChanges {
             exam.id,
             this.examPipe.transform(exam),
             exam.datasetAcquisitions ? exam.datasetAcquisitions.map(dsAcq => this.mapAcquisitionNode(dsAcq)) : [],
-            exam.extraDataFilePathList
+            exam.extraDataFilePathList,
+            this.node.canDeleteChildren
         );
     }
 
@@ -107,6 +112,7 @@ export class SubjectNodeComponent implements OnChanges {
             dsAcq.id,
             dsAcq.name,
             dsAcq.datasets ? dsAcq.datasets.map(ds => this.mapDatasetNode(ds, false)) : [],
+            this.node.canDeleteChildren
         );
     }
 
@@ -116,7 +122,8 @@ export class SubjectNodeComponent implements OnChanges {
             dataset.name,
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed
+            processed,
+            this.node.canDeleteChildren
         );
     }
 
@@ -124,7 +131,8 @@ export class SubjectNodeComponent implements OnChanges {
         return new ProcessingNode(
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : []
+            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
+            this.node.canDeleteChildren
         );
     }
 
@@ -139,5 +147,9 @@ export class SubjectNodeComponent implements OnChanges {
     }
 
     collapseAll() {
+    }
+
+    onExaminationDelete(index: number) {
+        (this.node.examinations as ExaminationNode[]).splice(index, 1) ;
     }
 }

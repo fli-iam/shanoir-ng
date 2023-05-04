@@ -16,14 +16,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         *ngIf="node"
         [class.selected]="this.menuOpened"
         [label]="node.label"
-        awesome="fas fa-camera" 
+        awesome="fas fa-camera"
         [(opened)]="node.open"
         (labelClick)="toggleMenu()"
         [dataLoading]="loading"
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
         (chkbxChange)="selectedChange.emit()"
-        [hasChildren]="hasChildren()">
+        [hasChildren]="hasChildren()"
+        [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <menu-item *ngIf="!related" label="Details..." awesome="fa-regular fa-eye" (click)="showDatasetDetails()"></menu-item>

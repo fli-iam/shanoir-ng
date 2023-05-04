@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -20,6 +20,7 @@ import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
 import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
+import {DatasetAcquisitionService} from "../shared/dataset-acquisition.service";
 
 
 
@@ -37,10 +38,12 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
     loading: boolean = false;
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
+    @Output() onAcquisitionDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
         private router: Router,
-        private datasetService: DatasetService) {
+        private datasetService: DatasetService,
+        private datasetAcquisitionService: DatasetAcquisitionService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -49,11 +52,11 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
                 this.node = this.input;
             } else {
                 let label: string = 'Dataset Acquisition n° ' + this.input.id;
-                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED);
+                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED,false);
             }
         }
     }
-   
+
     hasChildren(): boolean | 'unknown' {
         if (!this.node.datasets) return false;
         else if (this.node.datasets == 'UNLOADED') return 'unknown';
@@ -78,15 +81,31 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
             dataset.name,
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed
+            processed,
+            this.node.canDelete
         );
     }
-    
+
     private mapProcessingNode(processing: DatasetProcessing): ProcessingNode {
         return new ProcessingNode(
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : []
+            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
+            this.node.canDelete
         );
+    }
+
+    deleteAcquisition() {
+        this.datasetAcquisitionService.get(this.node.id).then(entity => {
+            this.datasetAcquisitionService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
+                if (deleted) {
+                    this.onAcquisitionDelete.emit();
+                }
+            });
+        })
+    }
+
+    onDatasetDelete(index: number) {
+        (this.node.datasets as DatasetNode[]).splice(index, 1) ;
     }
 }
