@@ -67,6 +67,7 @@ export class SubjectNodeComponent implements OnChanges {
                     this.input.name,
                     [],
                     UNLOADED,
+                    null,
                     false);
             }
             this.nodeInit.emit(this.node);
