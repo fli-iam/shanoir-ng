@@ -109,7 +109,7 @@ public class CardsProcessingService {
                     Attributes examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
                     List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
                     // today study cards are only used for MR modality
-                    acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
+                    // acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(acquisitions)) {
                         LOG.info(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
                         LOG.info(qualityCard.getRules().size() + " rules found for study card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
