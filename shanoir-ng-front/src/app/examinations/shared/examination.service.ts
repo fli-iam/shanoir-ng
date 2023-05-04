@@ -40,11 +40,10 @@ export class ExaminationService extends EntityService<Examination> implements On
 
     getEntityInstance() { return new Examination(); }
 
-    findExaminationsBySubjectAndStudy(subjectId: number, studyId: number, withRelated: boolean = false): Promise<SubjectExamination[]> {
+    findExaminationsBySubjectAndStudy(subjectId: number, studyId: number): Promise<SubjectExamination[]> {
         let url = AppUtils.BACKEND_API_EXAMINATION_URL
             + '/subject/' + subjectId
             + '/study/' + studyId
-            + '?withRelated=' + withRelated;
 
         return this.http.get<SubjectExamination[]>(url)
             .toPromise();

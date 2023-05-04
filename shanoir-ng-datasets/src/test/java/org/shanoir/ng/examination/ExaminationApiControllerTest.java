@@ -141,9 +141,6 @@ public class ExaminationApiControllerTest {
 	@Autowired
 	ObjectMapper objectMapper;
 
-	@MockBean
-	StudyRightsService studyRightsService;
-
 	@Before
 	public void setup() throws ShanoirException {
 		doNothing().when(examinationServiceMock).deleteById(1L);

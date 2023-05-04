@@ -105,7 +105,7 @@ public class ExaminationApiSecurityTest {
 		assertAccessDenied(api::deleteExamination, 1L);
 		assertAccessDenied(api::findExaminationById, 1L);
 		assertAccessDenied(api::findExaminations, PageRequest.of(0, 10));
-		assertAccessDenied((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId, true), 1L, 1L);
+		assertAccessDenied((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);
 		assertAccessDenied(api::findExaminationsBySubjectId, 1L);
 		assertAccessDenied(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
 		assertAccessDenied(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult);
@@ -129,7 +129,7 @@ public class ExaminationApiSecurityTest {
 		assertAccessAuthorized(api::deleteExamination, 1L);
 		assertAccessAuthorized(api::findExaminationById, 1L);
 		assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10));
-		assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId, true), 1L, 1L);
+		assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);
 		assertAccessAuthorized(api::findExaminationsBySubjectId, 1L);
 		assertAccessAuthorized(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
 		assertAccessAuthorized(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult);
@@ -245,15 +245,15 @@ public class ExaminationApiSecurityTest {
 		assertAccessAuthorized(api::findPreclinicalExaminations, false, PageRequest.of(0, 10));
 		
 		// findExaminationsBySubjectIdStudyId(Long, Long)
-		assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId, true), 1L, 1L);
+		assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);
 		try {
 			// either the access is denied or the body is empty, both are fine
-			ResponseEntity<List<SubjectExaminationDTO>> examsOfSubject2LStudy2L = api.findExaminationsBySubjectIdStudyId(2L,  2L, true);
+			ResponseEntity<List<SubjectExaminationDTO>> examsOfSubject2LStudy2L = api.findExaminationsBySubjectIdStudyId(2L,  2L);
 			assertThat(examsOfSubject2LStudy2L.getBody() == null || examsOfSubject2LStudy2L.getBody().isEmpty());
 		} catch (AccessDeniedException e) { /* good */ }
-		assertAccessDenied((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId, true), 4L, 4L);
+		assertAccessDenied((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 4L, 4L);
 		// check access denied to exam 3
-		List<SubjectExaminationDTO> examList1 = api.findExaminationsBySubjectIdStudyId(1L,  1L, true).getBody();
+		List<SubjectExaminationDTO> examList1 = api.findExaminationsBySubjectIdStudyId(1L,  1L).getBody();
 		assertThat(examList1.size()).isEqualTo(1);
 		assertThat(examList1.get(0).getId()).isEqualTo(1L);
 		

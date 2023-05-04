@@ -67,7 +67,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
     loadExaminations() {
         if (this.node.examinations == UNLOADED) {
             this.loading = true;
-            this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id, true)
+            this.examinationService.findExaminationsBySubjectAndStudy(this.subjectId, this.node.id)
             .then(examinations => {
                 let sortedExaminations = examinations.sort((a: SubjectExamination, b: SubjectExamination) => {
                     return (new Date(a.examinationDate)).getTime() - (new Date(b.examinationDate)).getTime();

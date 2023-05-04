@@ -52,7 +52,7 @@ export class StudyTreeComponent {
     getSubjectDetails(component: TreeNodeComponent) {
         component.dataLoading = true;
         let subjectStudy: SubjectStudy = component.nodeParams;
-        this.examinationService.findExaminationsBySubjectAndStudy(subjectStudy.subject.id, this.study.id, true)
+        this.examinationService.findExaminationsBySubjectAndStudy(subjectStudy.subject.id, this.study.id)
             .then(examinations => {
                 if (examinations) {
                     subjectStudy.examinations = examinations;
