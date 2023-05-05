@@ -26,13 +26,13 @@ jobs:
         java-version: 11
     - name: Create directory /shanoir-ng-logs
       run: sudo mkdir -m777 /var/log/shanoir-ng-logs
-    - name: Cache Maven
+    - name: Maven cache
       uses: actions/cache@v3
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-maven-
-    - name: Cache Npm
+    - name: npm cache
       uses: actions/cache@v3
       with:
         path: ~/.npm
