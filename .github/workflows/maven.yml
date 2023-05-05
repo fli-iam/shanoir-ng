@@ -26,6 +26,12 @@ jobs:
         java-version: 11
     - name: Create directory /shanoir-ng-logs
       run: sudo mkdir -m777 /var/log/shanoir-ng-logs
+    - uses: actions/cache@v1
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
     - name: Build with Maven
       run: mvn -f ./shanoir-ng-parent/pom.xml install
       env:
