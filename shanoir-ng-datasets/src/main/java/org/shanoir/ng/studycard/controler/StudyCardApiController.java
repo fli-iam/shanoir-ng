@@ -215,7 +215,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> applyStudyCard(
-            @ApiParam(value = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException {
+            @ApiParam(value = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException {
         if (studyCardApplyObject == null
                 || studyCardApplyObject.getDatasetAcquisitionIds() == null
                 || studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()

@@ -159,6 +159,6 @@ public interface StudyCardApi {
             "application/json"}, method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDatasetAcquisition(#studyCardApplyObject.datasetAcquisitionIds, 'CAN_ADMINISTRATE'))")
     ResponseEntity<Void> applyStudyCard(
-            @ApiParam(value = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException;
+            @ApiParam(value = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException, PacsException;
 
 }
