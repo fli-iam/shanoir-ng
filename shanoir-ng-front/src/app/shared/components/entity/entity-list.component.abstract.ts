@@ -129,15 +129,15 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                             this.consoleService.log('info', 'The ' + this.ROUTING_NAME + ' n°' + entity.id + ' sucessfully deleted');
                         });
                     }).catch(reason => {
-                        if(!reason){
+                        if (!reason){
                             return;
                         }
                         if (reason instanceof ShanoirError && reason.code == 422) {
                             let warn = 'The ' + this.ROUTING_NAME + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
-                            if(reason.message){
+                            if (reason.message){
                                 warn = warn + ' ' + reason.message;
                             }
-                            this.consoleService.log('warn', warn)
+                            this.consoleService.log('warn', warn, [reason.details]);
                             return;
                         } else if (reason.error){
                             this.onDelete.next({error: new ShanoirError(reason), entity: entity});
