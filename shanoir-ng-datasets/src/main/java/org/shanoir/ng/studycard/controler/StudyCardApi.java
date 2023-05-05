@@ -17,6 +17,7 @@ package org.shanoir.ng.studycard.controler;
 import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdList;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;

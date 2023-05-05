@@ -44,10 +44,10 @@ export class QualityControlComponent implements OnChanges {
     getPage: Map<number, (FilterablePageable) => Promise<Page<any>>> = new Map();
     loading: Map<number, boolean> = new Map();
     columnDefs: ColumnDefinition[] = [
-        {headerName: 'Subject Name', field: 'subjectName'},
-        {headerName: 'Examination Comment', field: 'examinationComment'},
-        {headerName: 'Examination Date', field: 'examinationDate', type: 'date'},
-        {headerName: 'Details', field: 'message', wrap: true}
+        {headerName: 'Subject Name', field: 'subjectName', width: 'auto'},
+        {headerName: 'Examination Comment', field: 'examinationComment', width: 'auto'},
+        {headerName: 'Examination Date', field: 'examinationDate', type: 'date', width: 'auto'},
+        {headerName: 'Details', field: 'message', wrap: true, width: 'auto'}
     ];
     
     constructor(
@@ -80,7 +80,6 @@ export class QualityControlComponent implements OnChanges {
                 }).finally(() => this.loading.set(qualityCard.id, false));
             }
         });
-
     }
 
     onMouseOverNbRules(qualityCard: QualityCard, event: any) {
@@ -116,5 +115,9 @@ export class QualityControlComponent implements OnChanges {
 
     private getReportFileName(qualityCard: QualityCard): string {
         return 'qcReport_' + qualityCard.name + '_' + Date.now().toLocaleString('fr-FR');
+    }
+
+    updateQualityCard(qualityCard: QualityCard) {
+        this.qualityCardService.update(qualityCard.id, qualityCard);
     }
 }
