@@ -27,19 +27,17 @@ jobs:
     - name: Create directory /shanoir-ng-logs
       run: sudo mkdir -m777 /var/log/shanoir-ng-logs
     - name: Cache Maven
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-        ${{ runner.os }}-maven-
+        restore-keys: ${{ runner.os }}-maven-
     - name: Cache Npm
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       with:
         path: ~/.npm
         key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-        ${{ runner.os }}-npm-
+        restore-keys: ${{ runner.os }}-npm-
     - name: Build with Maven
       run: mvn -f ./shanoir-ng-parent/pom.xml install
       env:
