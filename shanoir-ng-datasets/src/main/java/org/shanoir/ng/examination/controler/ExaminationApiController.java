@@ -78,12 +78,6 @@ public class ExaminationApiController implements ExaminationApi {
 	@Autowired
 	private ShanoirEventService eventService;
 
-	@Autowired
-	private StudyRepository studyRepository;
-
-	@Autowired
-	private StudyRightsService rightsService;
-
 	private final HttpServletRequest request;
 
 	@org.springframework.beans.factory.annotation.Autowired
