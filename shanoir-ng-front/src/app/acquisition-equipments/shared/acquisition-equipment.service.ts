@@ -44,19 +44,20 @@ export class AcquisitionEquipmentService extends EntityService<AcquisitionEquipm
             .then(this.mapEntityList);
     }
 
-
-
     delete(id: number): Promise<void> {
 
         return this.http.get<StudyCard[]>(AppUtils.BACKEND_API_STUDY_CARD_URL + '/byAcqEq/' + id).toPromise().then(cards => {
-
-            if(cards && cards.length > 0){
-                throw new ShanoirError({error: {code: 422, message: 'This acquisition-equipment is linked to at least study card n°' + cards[0].id + '.'}});
+            if (cards?.length == 1){
+                throw new ShanoirError({error: {code: 422, message: 'This acquisition-equipment is linked to the study card n°' + cards[0].id + '.'}});
+            } else if (cards?.length > 1){
+                throw new ShanoirError({error: {
+                    code: 422, 
+                    message: 'This acquisition-equipment is linked to ' + cards.length + ' study cards, more info in the details.',
+                    details: 'Study cards : ' + cards.map(card => card.id).join(', ')
+                }});
             }
-
             return super.delete(id);
         })
-
 
     }
 }
