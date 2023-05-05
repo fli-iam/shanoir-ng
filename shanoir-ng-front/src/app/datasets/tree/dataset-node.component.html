@@ -16,14 +16,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         *ngIf="node"
         [class.selected]="this.menuOpened"
         [label]="node.label"
-        awesome="fas fa-camera" 
+        awesome="fas fa-camera"
         [(opened)]="node.open"
         (labelClick)="toggleMenu()"
         [dataLoading]="loading"
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
         (chkbxChange)="selectedChange.emit()"
-        [hasChildren]="hasChildren()">
+        [hasChildren]="hasChildren()"
+        [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <menu-item *ngIf="!related" label="Details..." awesome="fa-regular fa-eye" (click)="showDatasetDetails()"></menu-item>
@@ -31,15 +32,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <menu-item *ngIf="node.type != 'Eeg' && node.type != 'BIDS'" [disabled]="loading" label="Download as Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
         <menu-item *ngIf="node.type == 'Eeg'" [disabled]="loading" label="Download as EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
         <menu-item *ngIf="node.type == 'BIDS'" [disabled]="loading" label="Download BIDS" awesome="fas fa-download" (click)="download('BIDS')"></menu-item>
+        <menu-item *ngIf="this.node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
     </dropdown-menu>
 
-    <ng-container *ngIf="node.open && node.processings && node.processings != $any('UNLOADED')"> 
+    <ng-container *ngIf="node.open && node.processings && node.processings != $any('UNLOADED')">
         <processing-node
                 node
-                *ngFor="let processing of node.processings"
+                *ngFor="let processing of node.processings; let i = index"
                 [input]="processing"
                 (selectedChange)="selectedChange.emit()"
-                [hasBox]="hasBox">
+                [hasBox]="hasBox"
+                (onProcessingDelete)="onProcessingDelete(i)"
+        >
         </processing-node>
 
     </ng-container>

@@ -39,9 +39,11 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     public manufModels: ManufacturerModel[];
     public centers: IdName[];
+    public centersFromStudyCard;
     public datasetModalityTypeStr: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
+
 
     get acqEquip(): AcquisitionEquipment { return this.entity; }
     set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
@@ -80,11 +82,18 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     async initCreate(): Promise<void> {
         this.entity = new AcquisitionEquipment();
-        this.centerService.getCentersNames().then(centers => this.centers = centers);
+        this.prefill();
+        if (this.centersFromStudyCard == null) {
+            this.centerService.getCentersNames().then(centers => this.centers = centers);
+        }
+        else {
+            this.centers = this.centersFromStudyCard;
+        }
         this.getManufModels();
     }
 
     private prefill() {
+        this.centersFromStudyCard = this.breadcrumbsService.currentStep.getPrefilledValue('sc_center');
         this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
         if (this.nonEditableCenter) {
             this.acqEquip.center = this.breadcrumbsService.currentStep.getPrefilledValue('center');
@@ -103,7 +112,6 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     buildForm(): UntypedFormGroup {
-        this.prefill();
         let form: UntypedFormGroup = this.formBuilder.group({
             'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -62,7 +62,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
 
     constructor(
             private route: ActivatedRoute,
-            private studyCardService: StudyCardService, 
+            private studyCardService: StudyCardService,
             private studyService: StudyService,
             private acqEqService: AcquisitionEquipmentService,
             private niftiConverterService: NiftiConverterService,
@@ -151,7 +151,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             });
         }
     }
-    
+
     private fetchStudies(): Promise<void | IdName[]> {
         return this.studyService.findStudyIdNamesIcanAdmin()
             .then(studies => this.studies = studies);
@@ -237,10 +237,14 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
     goToApply() {
         this.router.navigate(['/study-card/apply/' + this.entity.id]);
     }
-    
+
     createAcqEq() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
+            this.breadcrumbsService.currentStep.addPrefilled("sc_center", this.centers);
+            if (this.centers.length == 1) {
+                this.breadcrumbsService.currentStep.addPrefilled('center', this.centers[0]);
+            }
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     (currentStep.entity as StudyCard).acquisitionEquipment = entity as AcquisitionEquipment;
