@@ -28,6 +28,7 @@ import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
+import {StudyCardService} from "../../study-cards/shared/study-card.service";
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -52,6 +53,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
             private acqEquipService: AcquisitionEquipmentService,
             private manufModelService: ManufacturerModelService,
             private centerService: CenterService,
+            private studyCardService: StudyCardService,
             public manufacturerModelPipe: ManufacturerModelPipe) {
 
         super(route, 'acquisition-equipment');
