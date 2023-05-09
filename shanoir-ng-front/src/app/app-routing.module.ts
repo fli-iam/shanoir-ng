@@ -582,6 +582,12 @@ let routes: Routes = [
 		data: { mode: 'create' },
 		canActivate: [AuthAdminOrExpertGuard],
 	},
+    {
+		path: 'quality-card/create/for-study/:studyId',
+		component: QualityCardComponent,
+		data: { mode: 'create' },
+		canActivate: [AuthAdminOrExpertGuard],
+	},
 	{
 		path: 'dataset-acquisition',
 		redirectTo: 'dataset-acquisition/list',

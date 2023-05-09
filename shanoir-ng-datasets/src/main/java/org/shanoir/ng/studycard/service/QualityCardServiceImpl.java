@@ -89,6 +89,7 @@ public class QualityCardServiceImpl implements QualityCardService {
         qualityCardDb.setName(qualityCard.getName());
         qualityCardDb.setId(qualityCard.getId());
         qualityCardDb.setStudyId(qualityCard.getStudyId());
+        qualityCardDb.setToCheckAtImport(qualityCard.isToCheckAtImport());
         if (qualityCardDb.getRules() == null) qualityCardDb.setRules(new ArrayList<QualityExaminationRule>());
         else qualityCardDb.getRules().clear();
         if (qualityCard.getRules() != null) qualityCardDb.getRules().addAll(qualityCard.getRules());

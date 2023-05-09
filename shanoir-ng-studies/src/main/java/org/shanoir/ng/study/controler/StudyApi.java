@@ -137,6 +137,16 @@ public interface StudyApi {
 			@ApiParam(value = "study to create", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
 
+	@ApiOperation(value = "", notes = "If exists, returns the size of the study files corresponding to the given id", response = Long.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Size of the study files in bytes", response = Long.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/sizeByStudyId/{studyId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	ResponseEntity<Long> getStudyFilesSize(@PathVariable("studyId") Long studyId);
+
 	@ApiOperation(value = "", notes = "Updates a study", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "study updated", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
