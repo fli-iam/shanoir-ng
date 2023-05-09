@@ -94,7 +94,7 @@ export class StudyNodeComponent implements OnChanges {
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != this.detailsPath  + this.node.id;
-        }
+        })
     }
 
     showStudyDetails() {
