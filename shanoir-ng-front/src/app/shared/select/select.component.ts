@@ -12,6 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {
+    AfterViewInit,
     Component,
     ElementRef,
     EventEmitter,
@@ -45,7 +46,7 @@ import { GlobalService } from '../services/global.service';
         }]   
 })
 
-export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges {
+export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnChanges, AfterViewInit {
 
     @Output() userChange = new EventEmitter();
     @Output() selectOption = new EventEmitter();
@@ -97,6 +98,10 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     constructor(
             private element: ElementRef, 
             private globalService: GlobalService) {}
+
+    ngAfterViewInit(): void {
+        this.computeMinWidth();
+    }
 
     ngOnDestroy() {
         this.unsubscribeToGlobalClick();
@@ -237,7 +242,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     private computeMinWidth() {
         let maxOption: Option<any>;
         let maxWidth: number = 0;
-        if (this.displayableOptions && this.displayableOptions.length > 0 && this.hiddenOption) {
+        if (this.displayableOptions && (this.displayableOptions.length > 0) && this.hiddenOption) {
             this.displayableOptions.forEach(opt => {
                 if (!maxOption || !maxOption.label || !opt.label || opt.label.length > maxOption.label.length - (maxOption.label.length * 0.1)) {
                     this.hiddenOption.nativeElement.innerText = opt.label;
@@ -249,7 +254,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 }
             })
             this.hiddenOption.nativeElement.innerText = maxOption?.label;
-            this.maxWidth = this.hiddenOption.nativeElement.offsetWidth;
+            this.maxWidth = maxWidth;
             this.hiddenOption.nativeElement.innerText = '';
         }
     }

@@ -21,6 +21,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 /**
  * Repository for Subject.
  * 
@@ -69,4 +71,5 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	 */
 	Iterable<Subject> findBySubjectStudyListStudyIdIn(Iterable<Long> studyIds);
 
+	List<Subject> findByPreclinical(boolean preclinical);
 }

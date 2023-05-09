@@ -20,7 +20,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (firstOpen)="loadEquipments()"
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
-        [hasChildren]="hasChildren()">
+        [hasChildren]="hasChildren()"
+        [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
@@ -31,8 +32,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <ng-container *ngIf="node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any('UNLOADED')">
             <equipment-node
                     node
-                    *ngFor="let acquisitionEquipment of node.acquisitionEquipments"
-                    [input]="acquisitionEquipment">
+                    *ngFor="let acquisitionEquipment of node.acquisitionEquipments; let i = index"
+                    [input]="acquisitionEquipment"
+                    (onEquipmentDelete)="onEquipmentDelete(i)">
             </equipment-node>
     </ng-container>
 </node>

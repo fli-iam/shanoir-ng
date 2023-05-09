@@ -12,15 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.preclinical.subjects;
+package org.shanoir.ng.shared.exception;
 
-import java.util.List;
+/**
+ * SecurityException exception.
+ * 
+ * @author jlouis
+ *
+ */
+public class PacsException extends ShanoirException {
 
-import org.springframework.data.repository.CrudRepository;
+	private static final long serialVersionUID = -1545868693201382850L;
 
-public interface AnimalSubjectRepository extends CrudRepository<AnimalSubject, Long>, AnimalSubjectRepositoryCustom {
+	public PacsException(String message) {
+		super(message);
+	}
+	
+	public PacsException(String message, Exception cause) {
+		super(message, cause);
+	}
 
-	List<AnimalSubject> findBySubjectId(Long id);
-
-    List<AnimalSubject> findBySubjectIdIn(List<Long> subjectIds);
 }

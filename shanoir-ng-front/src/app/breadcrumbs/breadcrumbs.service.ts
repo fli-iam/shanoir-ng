@@ -46,8 +46,11 @@ export class BreadcrumbsService {
             // this.saveSession();
         });
 
-        router.events.subscribe( (event: Event) => {
-            if (event instanceof NavigationEnd) {
+        router.events.subscribe(event => {
+            if (event instanceof NavigationEnd
+                    // navigating inside a page is not changing page
+                    && event.url?.split('#')[0] != this.currentStep?.route?.split('#')[0]) { 
+
                 if(this.ignoreNavigationEnd) {
                     this.ignoreNavigationEnd = false;
                     return;

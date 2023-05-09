@@ -20,6 +20,7 @@ import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
 import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
+import {DatasetAcquisitionService} from "../shared/dataset-acquisition.service";
 
 
 
@@ -38,10 +39,12 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     detailsPath: string = '/dataset-acquisition/details/';
+    @Output() onAcquisitionDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
         private router: Router,
-        private datasetService: DatasetService) {
+        private datasetService: DatasetService,
+        private datasetAcquisitionService: DatasetAcquisitionService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -50,7 +53,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
                 this.node = this.input;
             } else {
                 let label: string = 'Dataset Acquisition n° ' + this.input.id;
-                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED);
+                this.node = new DatasetAcquisitionNode(this.input.id, label, UNLOADED,false);
             }
         }
     }
@@ -79,7 +82,8 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
             dataset.name,
             dataset.type,
             dataset.processings ? dataset.processings.map(proc => this.mapProcessingNode(proc)) : [],
-            processed
+            processed,
+            this.node.canDelete
         );
     }
 
@@ -87,7 +91,22 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
         return new ProcessingNode(
             processing.id,
             DatasetProcessingType.getLabel(processing.datasetProcessingType),
-            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : []
+            processing.outputDatasets ? processing.outputDatasets.map(ds => this.mapDatasetNode(ds, true)) : [],
+            this.node.canDelete
         );
+    }
+
+    deleteAcquisition() {
+        this.datasetAcquisitionService.get(this.node.id).then(entity => {
+            this.datasetAcquisitionService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
+                if (deleted) {
+                    this.onAcquisitionDelete.emit();
+                }
+            });
+        })
+    }
+
+    onDatasetDelete(index: number) {
+        (this.node.datasets as DatasetNode[]).splice(index, 1) ;
     }
 }

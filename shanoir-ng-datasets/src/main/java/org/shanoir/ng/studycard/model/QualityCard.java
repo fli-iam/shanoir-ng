@@ -23,6 +23,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.PostLoad;
+import javax.validation.constraints.NotNull;
 
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
@@ -56,6 +57,9 @@ public class QualityCard extends HalEntity implements Card {
 
 	/** The study for which is defined the study card. */
 	private Long studyId;
+	
+	@NotNull
+	private boolean toCheckAtImport;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="quality_card_id")
@@ -107,5 +111,13 @@ public class QualityCard extends HalEntity implements Card {
             }
         }
         return result;
+    }
+
+    public boolean isToCheckAtImport() {
+        return toCheckAtImport;
+    }
+
+    public void setToCheckAtImport(boolean toCheckAtImport) {
+        this.toCheckAtImport = toCheckAtImport;
     }
 }

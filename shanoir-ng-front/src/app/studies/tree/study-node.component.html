@@ -42,7 +42,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [input]="subject"
                     [studyId]="node.id"
                     (selectedChange)="selectedChange.emit(node)"
-                    [hasBox]="hasBox">
+                    [hasBox]="hasBox"
+            >
             </subject-node>
         </ng-container>
 
@@ -77,8 +78,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
         <ng-container *ngIf="node.studycardsOpen && node.studyCards && node.studyCards != $any('UNLOADED')">
             <studycard-node
-                    *ngFor="let studycard of node.studyCards"
-                    [input]="studycard">
+                    *ngFor="let studycard of node.studyCards;let i = index"
+                    [input]="studycard"
+                    (onCardDelete)="onCardDelete(i)"
+            >
             </studycard-node>
         </ng-container>
 

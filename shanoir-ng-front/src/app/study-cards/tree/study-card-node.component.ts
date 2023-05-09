@@ -16,6 +16,7 @@ import { Router } from '@angular/router';
 
 import { StudyCardNode } from '../../tree/tree.model';
 import { StudyCard } from '../shared/study-card.model';
+import {StudyCardService} from "../shared/study-card.service";
 
 
 @Component({
@@ -27,13 +28,15 @@ export class StudyCardNodeComponent implements OnChanges {
 
     @Input() input: StudyCardNode | StudyCard;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
+    @Output() onCardDelete: EventEmitter<void> = new EventEmitter();
     node: StudyCardNode;
     loading: boolean = false;
     menuOpened: boolean = false;
     detailsPath: string = '/study-card/details/';
 
     constructor(
-        private router: Router) {
+        private router: Router,
+        private cardService: StudyCardService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -48,5 +51,15 @@ export class StudyCardNodeComponent implements OnChanges {
 
     showDetails() {
         this.router.navigate([this.detailsPath + this.node.id]);
+    }
+
+    deleteStudyCard() {
+        this.cardService.get(this.node.id).then(entity => {
+            this.cardService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
+                if (deleted) {
+                    this.onCardDelete.emit();
+                }
+            });
+        })
     }
 }

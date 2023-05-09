@@ -14,7 +14,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { DatasetNode, UNLOADED } from '../../tree/tree.model';
+import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 
@@ -34,6 +34,7 @@ export class SimpleDatasetNodeComponent implements OnChanges {
     @Input() hasBox: boolean = false;
     @Input() related: boolean = false;
     detailsPath: string = '/dataset/details/';
+    @Output() onSimpleDatasetDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
         private router: Router,
@@ -67,5 +68,18 @@ export class SimpleDatasetNodeComponent implements OnChanges {
         if (!this.node.processings) return false;
         else if (this.node.processings == 'UNLOADED') return 'unknown';
         else return this.node.processings.length > 0;
+    }
+
+    deleteDataset() {
+        this.datasetService.get(this.node.id).then(entity => {
+            this.datasetService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
+                if (deleted) {
+                    this.onSimpleDatasetDelete.emit();
+                }
+            });
+        })
+    }
+    onProcessingDelete(index: number) {
+        (this.node.processings as ProcessingNode[]).splice(index, 1) ;
     }
 }

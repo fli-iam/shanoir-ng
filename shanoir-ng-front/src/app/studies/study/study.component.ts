@@ -74,6 +74,7 @@ export class StudyComponent extends EntityComponent<Study> {
     public selectedDatasetIds: number[];
     protected hasDownloadRight: boolean;
     accessRequests: AccessRequest[];
+    isStudyAdmin: boolean;
 
     public openPrefix: boolean = false;
 
@@ -131,10 +132,11 @@ export class StudyComponent extends EntityComponent<Study> {
                     return aname.localeCompare(bname);
                 });
 
-
             this.getTotalSize(study.id).then(size => {
                 study.size = size;
             });
+
+            this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
             return Promise.resolve(study)
         });
@@ -165,9 +167,11 @@ export class StudyComponent extends EntityComponent<Study> {
               this.study.profile = profile;
             }
 
-          this.getTotalSize(study.id).then(size => {
-            study.size = size;
-          });
+            this.getTotalSize(study.id).then(size => {
+                study.size = size;
+            });
+
+            this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
             return study;
         });
@@ -197,6 +201,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
     async initCreate(): Promise<void> {
         this.study = this.newStudy();
+        this.isStudyAdmin = true;
         this.getCenters();
         this.getProfiles();
         this.selectedCenter = null;
@@ -269,12 +274,16 @@ export class StudyComponent extends EntityComponent<Study> {
         return null;
     }
 
-    public async hasEditRight(): Promise<boolean> {
+    public async hasStudyAdminRight(): Promise<boolean> {
         if (this.keycloakService.isUserAdmin()) return true;
-        if (!this.study.studyUserList) return false;
+        if (!this.study?.studyUserList) return false;
         let studyUser: StudyUser = this.study.studyUserList.filter(su => su.userId == KeycloakService.auth.userId)[0];
         if (!studyUser) return false;
         return studyUser.studyUserRights && studyUser.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE);
+    }
+
+    public async hasEditRight(): Promise<boolean> {
+        return this.hasStudyAdminRight();
     }
 
     public async hasDeleteRight(): Promise<boolean> {

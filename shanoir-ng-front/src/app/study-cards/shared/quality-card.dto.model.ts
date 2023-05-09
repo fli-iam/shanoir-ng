@@ -21,6 +21,7 @@ export class QualityCardDTO {
     name: string;
     studyId: number;
     rules: QualityCardRuleDTO[];
+    toCheckAtImport: boolean = false;
 
     constructor(qualityCard?: QualityCard) {
         if (qualityCard) {
@@ -33,6 +34,7 @@ export class QualityCardDTO {
                 ruleDTO.qualityTag = rule.tag;
                 return ruleDTO;
             });
+            this.toCheckAtImport = qualityCard.toCheckAtImport;
         }
     }
 }

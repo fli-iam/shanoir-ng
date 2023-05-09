@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasChildren]="hasChildren()"
         (labelClick)="menuOpened = !menuOpened"
         [dataLoading]="loading"
-        title="subject">
+        [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">

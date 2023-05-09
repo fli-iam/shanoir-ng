@@ -23,7 +23,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasBox]="hasBox"
         [(ngModel)]="node.selected"
         (chkbxChange)="selectedChange.emit()"
-        [hasChildren]="hasChildren()">
+        [hasChildren]="hasChildren()"
+        [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
         <a [routerLink]="this.detailsPath + this.node.id">

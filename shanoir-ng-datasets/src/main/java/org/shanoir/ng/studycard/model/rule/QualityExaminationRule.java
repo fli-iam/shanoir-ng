@@ -121,6 +121,7 @@ public class QualityExaminationRule extends AbstractEntity {
         SubjectStudy subjectStudyCopy = new SubjectStudy();
         subjectStudyCopy.setId(subjectStudy.getId());
         subjectStudyCopy.setQualityTag(getQualityTag());
+        subjectStudyCopy.setStudy(subjectStudy.getStudy());
         return subjectStudyCopy;
     }
 
@@ -160,14 +161,14 @@ public class QualityExaminationRule extends AbstractEntity {
     }
     
     private ExaminationData convert(Examination examination) {
-        // Keep only MR acquisitions
         if (examination == null) throw new IllegalArgumentException("examination can't be null");
         if (examination.getDatasetAcquisitions() == null) throw new IllegalArgumentException("examination acquisitions can't be null");
         if (examination.getStudy() == null) throw new IllegalArgumentException("study can't be null");
         if (examination.getStudy().getSubjectStudyList() == null) throw new IllegalArgumentException("subjectStudyList can't be null");
-        List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions().stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
+        // Keep only MR acquisitions
+        // List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions().stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
         ExaminationData examData = new ExaminationData();
-        examData.setDatasetAcquisitions(acquisitions);
+        examData.setDatasetAcquisitions(examination.getDatasetAcquisitions());
         examData.setExaminationComment(examination.getComment());
         examData.setExaminationDate(examination.getExaminationDate());
         examData.setSubjectName(examination.getSubject().getName());
