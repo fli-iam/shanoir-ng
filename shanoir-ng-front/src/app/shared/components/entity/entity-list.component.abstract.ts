@@ -133,20 +133,25 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
                             return;
                         }
                         if (reason instanceof ShanoirError && reason.code == 422) {
-                            let warn = 'The ' + this.ROUTING_NAME + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
-                            if (reason.message){
-                                warn = warn + ' ' + reason.message;
-                            }
-                            this.consoleService.log('warn', warn, [reason.details]);
+                            this.dealWithDeleteError(reason, entity);
                             return;
                         } else if (reason.error){
-                            this.onDelete.next({error: new ShanoirError(reason), entity: entity});
+                            this.dealWithDeleteError(new ShanoirError(reason), entity);
                             return;
                         }
                         throw Error(reason);
                     });
                 }
             })
+    }
+
+    private dealWithDeleteError(error: ShanoirError, entity: any) {
+        let warn = 'The ' + this.ROUTING_NAME + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
+        if (error.message){
+            warn = warn + ' ' + error.message;
+        }
+        this.consoleService.log('warn', warn, [error.details]);
+        this.onDelete.next({error: error, entity: entity});
     }
 
     /**
