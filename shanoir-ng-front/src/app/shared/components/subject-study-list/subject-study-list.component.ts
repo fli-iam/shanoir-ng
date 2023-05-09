@@ -61,7 +61,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     private subjectStudyListObs: RxjsSubject<SubjectStudy[]> = new RxjsSubject();
     private subscriptions: Subscription[] = [];
     private warningDisplayed: boolean = false;
-    
+
     constructor(private router: Router,
         private confirmDialogService: ConfirmDialogService) {
         super();
@@ -161,14 +161,23 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     }
 
     goToView(item): void {
-      // case of study details > subject tab > open subject details
-      if (this.router.url.includes('study') && this.router.url.includes('#subject')) {
-        this.router.navigate(['/subject/details/' + item.subject?.id]);
-      }
-      // case of subject details > edit > open study details
-      else if (!this.router.url.includes('study') && this.router.url.includes('subject')) {
-        this.router.navigate(['/study/details/' + item.study?.id]);
-      }
+        // case of study details > subject tab > open subject details
+        if (this.compMode == 'study') {
+            this.router.navigate(['/subject/details/' + item.subject?.id]);
+        }
+        // case of subject details > edit > open study details
+        else if (this.compMode == 'subject') {
+            this.router.navigate(['/study/details/' + item.study?.id]);
+        }
+    }
+
+    rowClick(item): string {
+        if (this.compMode == 'study') {
+            return '/subject/details/' + item.subject?.id;
+        }
+        else if (this.compMode == 'subject') {
+            return '/study/details/' + item.study?.id;
+        }
     }
 
     private updateDisabled() {
@@ -230,7 +239,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
         if (!this.warningDisplayed) {
-            this.confirmDialogService.confirm('Deleting subject', 
+            this.confirmDialogService.confirm('Deleting subject',
             'Warning: If this subject is only linked to this study, it will be completely deleted from the database.')
             .then(userChoice => {
                 if (userChoice) {

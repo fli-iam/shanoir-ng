@@ -180,6 +180,10 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.router.navigate([this.entityRoutes.getRouteToList()]);
     }
 
+    rowClick(item): string {
+        return this.entityRoutes.getRouteToView(item.id);
+    }
+
     dateRenderer(date: number): string {
         if (date) {
             return new Date(date).toLocaleDateString();

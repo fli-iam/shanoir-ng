@@ -409,13 +409,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Creation", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
             {headerName: "Study", field: "studyName",
-              route: item => '/study/details/' + item.studyId
+                route: item => '/study/details/' + item.studyId
             },
             {headerName: "Subject", field: "subjectName",
-              route: item => '/subject/details/' + item.subjectId
+                route: item => '/subject/details/' + item.subjectId
             },
             {headerName: "Center", field: "centerName",
-              route: item => '/center/details/' + item.centerId
+                route: item => '/center/details/' + item.centerId
             },
             {headerName: "Exam", field: "examinationComment",
                 route: item => '/examination/details/' + item.examinationId
@@ -500,8 +500,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selectedDatasetIds = selection;
     }
 
-    onRowClick(solrRequest: any) {
-        this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
+    rowClick(item): string {
+        return '/dataset/details/' + item.datasetId;
     }
 
     getSelectedPage(pageable: Pageable): Promise<Page<any>> {

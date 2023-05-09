@@ -34,6 +34,7 @@ import {Router} from "@angular/router";
 })
 export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() getPage: (pageable: Pageable, forceRefresh: boolean) => Promise<Page<any>> | Page<any>;
+    @Input() rowRoute: (item: any) => string;
     @Input() columnDefs: ColumnDefinition[];
     @Input() subRowsDefs: ColumnDefinition[];
     @Input() customActionDefs: any[];
@@ -122,32 +123,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 }
             });
         });
-    }
-
-    newTabRouting(col, item): string {
-      this.path = this.router.url;
-
-      if (!this.editMode) {
-        // case of study-list, subject-list, examination-list, datasetacquisition-list
-        if (col.type != "button" && this.router.url.endsWith('list') ) {
-          this.path = this.path.replace("list", "");
-          return this.path + 'details/'+ item.id
-        }
-        // case of solr search
-        else if (this.router.url.endsWith('solr-search')) {
-          return '/dataset/details/' + item.datasetId;
-        }
-        // case of study edit, subject tab
-        else if (!this.router.url.endsWith('list') && this.router.url.includes('study') && this.router.url.includes('#subject') && item.subject) {
-          return '/subject/details/' + item.subject.id;
-        }
-        // case of subject edit, studies which contains current subject
-        else if (!this.router.url.endsWith('list') && !this.router.url.includes('study') && this.router.url.includes('subject') && item.study) {
-          return '/study/details/' + item.study.id;
-        } else {
-          return null;
-        }
-      }
     }
 
     private checkCompactMode() {

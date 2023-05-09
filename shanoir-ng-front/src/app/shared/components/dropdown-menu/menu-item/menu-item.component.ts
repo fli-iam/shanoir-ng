@@ -115,8 +115,4 @@ export class MenuItemComponent {
     public cascadingClose() {
         if (this.parent) this.parent.cascadingClose();
     }
-
-    newTab() {
-      console.log("new tab");
-    }
 }
