@@ -81,7 +81,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span *ngIf="vars.cellValue == true && !col.awesome && !col.awesomeFalse" class="bool-true"><i class="fas fa-check"></i></span>
                         <span *ngIf="vars.cellValue == false && !col.awesome && !col.awesomeFalse" class="bool-false"><i class="fas fa-times"></i></span>
                         <span *ngIf="vars.cellValue == true && col.awesome" class="bool-true"><i [class]="col.awesome" [style.color]="col.color"></i></span>
-                        <span *ngIf="!vars.cellValue && col.awesomeFalse" class="bool-false"><i [class]="col.awesomeFalse" [style.color]="col.colorFalse"></i></span>
+                        <span *ngIf="vars.cellValue == false && col.awesomeFalse" class="bool-false"><i [class]="col.awesomeFalse" [style.color]="col.colorFalse"></i></span>
                     </ng-container>
 
                     <!-- editable boolean -->
