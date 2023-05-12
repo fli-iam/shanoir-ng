@@ -69,7 +69,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                     return dateRenderer(params.data.examinationDate);
                 }, width: "100px"
             },{
-                headerName: "Research study", field: "study.name", orderBy: ['studyId'],
+                headerName: "Research study", field: "study.name",
                 route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null
             },{
                 headerName: "Center", field: "center.name", orderBy: ['centerId'],
