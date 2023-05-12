@@ -60,11 +60,12 @@ public class ImportDialogOpener {
 			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
 			List<Examination> examinationDTOs = getExaminations(subject);
 			// init components of GUI and listeners
-			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate);
+			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate, importStudyCardFilterDocumentListener);
 			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
-					importStudyAndStudyCardCBIL, importFinishAL);
+					importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
 			// update import dialog with items from server
 			updateImportDialogForSubject(subject); // this has to be done after init of dialog
 			updateImportDialogForNewExamFields(studyDate, uploadJob.getStudyDescription());
@@ -213,7 +214,7 @@ public class ImportDialogOpener {
 			}
 			if (!firstCompatibleStudyFound) {
 				// this selectItem adds study cards to the stuyCardCB in case of no
-				// compatible study found, see ImportStudyAndStudyCardCBItemListenerNG
+				// compatible study found, see ImportStudyAndStudyCardCBItemListener
 				Study firstStudy = studiesWithStudyCards.get(0);
 				importDialog.studyCB.setSelectedItem(firstStudy);
 				if (firstStudy.getStudyCards() != null && !firstStudy.getStudyCards().isEmpty()) {
