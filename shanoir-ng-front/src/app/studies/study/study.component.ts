@@ -66,6 +66,7 @@ export class StudyComponent extends EntityComponent<Study> {
     selectedCenter: IdName;
     users: User[] = [];
     studyNode: Study | StudyNode;
+    uploading: boolean = false;
 
     protected protocolFiles: File[];
     protected dataUserAgreement: File;
@@ -132,7 +133,7 @@ export class StudyComponent extends EntityComponent<Study> {
                 });
 
             this.getTotalSize(study.id).then(size => {
-              study.size = size;
+                study.size = size;
             });
 
             this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
@@ -248,11 +249,23 @@ export class StudyComponent extends EntityComponent<Study> {
         return formGroup;
     }
 
-  private getTotalSize(id: number): Promise<number> {
-    return this.datasetService.getSizeByStudyId(id).then(totalSize => {
-        return totalSize;
-    });
-  }
+    private getTotalSize(id: number): Promise<number> {
+        let waitUploads: Promise<void> = this.studyService.fileUploadings.has(id)
+            ? this.studyService.fileUploadings.get(id)
+            : Promise.resolve(); 
+        
+        this.uploading = true;
+        return waitUploads.then(() => {
+            return Promise.all([
+                this.studyService.getSizeByStudyId(id),
+                this.datasetService.getSizeByStudyId(id)
+            ]).then(([studySize, datasetSize]) => {
+                return studySize + datasetSize;
+            });
+        }).finally(() => {
+            this.uploading = false;
+        });
+    }
 
     private dateOrdervalidator = (control: AbstractControl): ValidationErrors | null => {
         if (this.study.startDate && this.study.endDate && this.study.startDate >= this.study.endDate) {
@@ -527,14 +540,14 @@ export class StudyComponent extends EntityComponent<Study> {
             // Once the study is saved, save associated file if changed
             if (this.protocolFiles.length > 0) {
                 for (let file of this.protocolFiles) {
-                    this.studyService.uploadFile(file, this.entity.id, 'protocol-file').toPromise();
+                    this.studyService.uploadFile(file, this.entity.id, 'protocol-file');
                 }
             }
             if (this.dataUserAgreement) {
-                this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua').toPromise()
-                .catch(error => {
-                    this.dataUserAgreement = null;
-                });
+                this.studyService.uploadFile(this.dataUserAgreement, this.entity.id, 'dua')
+                    .catch(error => {
+                        this.dataUserAgreement = null;
+                    });
             }
             return result;
         }).then(study => {

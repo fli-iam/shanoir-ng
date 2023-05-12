@@ -217,6 +217,11 @@ public class UserServiceImpl implements UserService {
 	public Optional<User> findByUsername(final String username) {
 		return userRepository.findByUsername(username);
 	}
+
+	@Override
+	public Optional<User> findByUsernameForInvitation(final String username) {
+		return userRepository.findByUsername(username);
+	}
 	
 	@Override
 	public List<User> getUsersToReceiveFirstExpirationNotification() {

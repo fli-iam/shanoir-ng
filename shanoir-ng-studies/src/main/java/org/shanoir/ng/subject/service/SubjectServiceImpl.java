@@ -325,4 +325,9 @@ public class SubjectServiceImpl implements SubjectService {
 		Iterable<Long> studyIds = studies.stream().map(study -> study.getId()).collect(Collectors.toList());
 		return subjectRepository.findDistinctByNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
 	}
+
+	@Override
+	public List<Subject> findByPreclinical(boolean preclinical) {
+		return subjectRepository.findByPreclinical(preclinical);
+	}
 }

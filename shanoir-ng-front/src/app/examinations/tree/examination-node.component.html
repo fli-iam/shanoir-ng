@@ -18,12 +18,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         *ngIf="node"
         [class.selected]="this.menuOpened"
         [clickable] = "this.node.id != null"
-        [label]="node.label" 
-        awesome="fas fa-stethoscope" 
+        [label]="node.label"
+        awesome="fas fa-stethoscope"
         [(opened)]="node.open"
         (labelClick)="menuOpened = !menuOpened"
         (firstOpen)="firstOpen()"
-        [hasChildren]="hasChildren()">
+        [hasChildren]="hasChildren()"
+        [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
         <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showExaminationDetails()"></menu-item>
@@ -32,29 +33,32 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <menu-item *ngIf="hasBids && datasetIds && datasetIds.length != 0" label="Download all BIDS" awesome="fas fa-download" (click)="download('BIDS')"></menu-item>
         <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0) || downloading" label="Download all DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
         <menu-item [disabled]="!hasDicom || (datasetIds && datasetIds.length == 0) || downloading" label="Download all Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
+        <menu-item *ngIf="node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteExamination()"></menu-item>
     </dropdown-menu>
 
-    <ng-container *ngIf="node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any('UNLOADED')"> 
+    <ng-container *ngIf="node.open && node.datasetAcquisitions && node.datasetAcquisitions != $any('UNLOADED')">
         <dataset-acquisition-node
                 node
-                *ngFor="let datasetAcq of node.datasetAcquisitions"
+                *ngFor="let datasetAcq of node.datasetAcquisitions; let i = index"
                 [input]="datasetAcq"
                 (selectedChange)="selectedChange.emit()"
-                [hasBox]="hasBox">
+                [hasBox]="hasBox"
+                (onAcquisitionDelete)="onAcquisitionDelete(i)"
+        >
         </dataset-acquisition-node>
     </ng-container>
 
-    <node 
+    <node
             *ngIf="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
             label="Extra data files"
             awesome="fa-regular fa-folder-open"
             [hasChildren]="!!node.extraDataFilePathList && node.extraDataFilePathList != $any('UNLOADED') && node.extraDataFilePathList.length > 0"
             [(opened)]="node.extraDataOpen">
-        <node 
-                *ngFor="let file of node.extraDataFilePathList" 
-                label="{{file}}" 
-                awesome="fas fa-file" 
-                [buttonPicto]="'fas fa-download'" 
+        <node
+                *ngFor="let file of node.extraDataFilePathList"
+                label="{{file}}"
+                awesome="fas fa-file"
+                [buttonPicto]="'fas fa-download'"
                 (buttonClick)=downloadFile(file)
                 [hasChildren]="false">
         </node>

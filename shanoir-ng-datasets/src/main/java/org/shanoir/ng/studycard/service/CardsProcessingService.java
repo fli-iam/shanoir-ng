@@ -102,6 +102,7 @@ public class CardsProcessingService {
 		if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
 		    QualityCardResult result = new QualityCardResult();
+		    resetSubjectStudies(result, study);
 			for (Examination examination : study.getExaminations()) {
 			    // For now, just take the first DICOM instance
 			    // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
@@ -109,7 +110,7 @@ public class CardsProcessingService {
                     Attributes examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
                     List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
                     // today study cards are only used for MR modality
-                    acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
+                    // acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
                     if (CollectionUtils.isNotEmpty(acquisitions)) {
                         LOG.info(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
                         LOG.info(qualityCard.getRules().size() + " rules found for study card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
@@ -126,7 +127,7 @@ public class CardsProcessingService {
                     result.add(resultEntry);
                 }
 			};
-			result.removeUnchanged(study);
+			//result.removeUnchanged(study);
 			if (updateTags) {
 			    try {
 			        subjectStudyService.update(result.getUpdatedSubjectStudies());
@@ -142,7 +143,15 @@ public class CardsProcessingService {
 		}
 	}
 	
-	private QualityCardResultEntry initResult(Examination examination) {
+	private void resetSubjectStudies(QualityCardResult result, Study study) {
+        if (study != null && study.getSubjectStudyList() != null) {
+            for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+                subjectStudy.setQualityTag(null);
+            }
+        }
+    }
+
+    private QualityCardResultEntry initResult(Examination examination) {
         QualityCardResultEntry result = new QualityCardResultEntry();
         result.setSubjectName(examination.getSubject().getName());
         result.setExaminationDate(examination.getExaminationDate());
