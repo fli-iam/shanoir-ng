@@ -9,9 +9,7 @@ This is important, that all scripts .sh or .bat find the correct version to star
 the correct folder.
 
 ####### Delivery of new Executable Jar version #############
-1) Remove the 2 system path libraries lines from the pom.xml dependencies
-as they should not be contained in the assembly.
-2) Build latest version for delivery using the below mvn command:
+Build latest version for delivery using the below mvn command:
 Use "mvn clean compile assembly:single", to create one big jar containing everything
 
 ####### Complete your Maven repository #######

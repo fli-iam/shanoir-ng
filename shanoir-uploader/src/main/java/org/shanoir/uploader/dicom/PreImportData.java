@@ -1,6 +1,6 @@
 package org.shanoir.uploader.dicom;
 
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(propOrder = { "autoImportEnable", "study", "studycard", "subjectId", "examinationId" })
 public class PreImportData {

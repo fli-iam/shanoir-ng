@@ -1,6 +1,6 @@
 package org.shanoir.uploader.dicom;
 
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlType;
 
 @XmlType(propOrder = { "id", "name" })
 public class StudyCard {
