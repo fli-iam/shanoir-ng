@@ -138,11 +138,6 @@ export class ReverseStudyNodeComponent implements OnChanges {
             this.canAdmin
         );
     }
-
-    showStudyDetails() {
-        this.router.navigate([this.detailsPath + this.node.id]);
-    }
-
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
         if (!dependencyArr) return false;
         else if (dependencyArr == UNLOADED) return 'unknown';

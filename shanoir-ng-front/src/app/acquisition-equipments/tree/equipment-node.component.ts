@@ -51,10 +51,6 @@ export class EquipmentNodeComponent implements OnChanges {
         }
     }
 
-    showDetails() {
-        this.router.navigate(['/acquisition-equipment/details/' + this.node.id]);
-    }
-
     deleteEquipment() {
         this.equipmentService.get(this.node.id).then(entity => {
             this.equipmentService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {

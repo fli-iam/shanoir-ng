@@ -63,10 +63,6 @@ export class DatasetNodeComponent implements OnChanges {
         this.datasetService.downloadFromId(this.node.id, format).then(() => this.loading = false);
     }
 
-    showDatasetDetails() {
-        this.router.navigate([this.detailsPath + this.node.id])
-    }
-
     hasChildren(): boolean | 'unknown' {
         if (!this.node.processings) return false;
         else if (this.node.processings == 'UNLOADED') return 'unknown';

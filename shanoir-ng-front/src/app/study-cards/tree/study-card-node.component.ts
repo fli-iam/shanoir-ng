@@ -49,10 +49,6 @@ export class StudyCardNodeComponent implements OnChanges {
         }
     }
 
-    showDetails() {
-        this.router.navigate([this.detailsPath + this.node.id]);
-    }
-
     deleteStudyCard() {
         this.cardService.get(this.node.id).then(entity => {
             this.cardService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {

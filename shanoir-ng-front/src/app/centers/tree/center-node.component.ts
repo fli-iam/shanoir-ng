@@ -58,10 +58,6 @@ export class CenterNodeComponent implements OnChanges {
         else return this.node.acquisitionEquipments.length > 0;
     }
 
-    showDetails() {
-        this.router.navigate([this.detailsPath + this.node.id]);
-    }
-
     loadEquipments() {
         this.loading = true;
         this.centerService.get(this.node.id).then(

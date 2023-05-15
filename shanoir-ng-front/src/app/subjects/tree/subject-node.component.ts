@@ -143,10 +143,6 @@ export class SubjectNodeComponent implements OnChanges {
         else return this.node.examinations.length > 0;
     }
 
-    showSubjectDetails() {
-        this.router.navigate([this.detailsPath + this.node.id]);
-    }
-
     collapseAll() {
     }
 

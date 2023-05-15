@@ -86,10 +86,6 @@ export class ReverseSubjectNodeComponent implements OnChanges {
         else return this.node.studies.length > 0;
     }
 
-    showSubjectDetails() {
-        this.router.navigate([this.detailsPath + this.node.id]);
-    }
-
     collapseAll() {
     }
 }

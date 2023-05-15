@@ -63,11 +63,6 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
         else if (this.node.datasets == 'UNLOADED') return 'unknown';
         else return this.node.datasets.length > 0;
     }
-
-    showDetails() {
-        this.router.navigate([this.detailsPath + this.node.id]);
-    }
-
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {

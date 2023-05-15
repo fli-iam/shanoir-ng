@@ -96,11 +96,6 @@ export class StudyNodeComponent implements OnChanges {
             this.showDetails = this.router.url != this.detailsPath  + this.node.id;
         })
     }
-
-    showStudyDetails() {
-        this.router.navigate([this.detailsPath + this.node.id]);
-    }
-
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
         if (!dependencyArr) return false;
         else if (dependencyArr == UNLOADED) return 'unknown';

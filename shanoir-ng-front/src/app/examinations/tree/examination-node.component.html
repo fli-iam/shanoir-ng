@@ -28,7 +28,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened && this.node.id != null">
         <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
-          <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showExaminationDetails()"></menu-item>
+          <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
         <menu-item label="View in OHIF..." awesome="fa-regular fa-eye" (click)="viewExaminationDicoms()"></menu-item>
         <menu-item *ngIf="hasEEG && datasetIds && datasetIds.length != 0" label="Download all EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
