@@ -1105,16 +1105,16 @@
       "clientId": "service-account",
       "name": "service-account",
       "description": "",
-      "rootUrl": "https://shanoir-qualif.irisa.fr",
+      "rootUrl": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST",
       "adminUrl": "",
       "baseUrl": "",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
-      "secret": "**********",
+      "secret": "VIP_CLIENT_SECRET",
       "redirectUris": [
-        "https://shanoir-qualif.irisa.fr/*"
+        "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
