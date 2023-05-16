@@ -17,6 +17,7 @@ package org.shanoir.ng.importer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -72,45 +73,41 @@ public class CarminDataApiController implements CarminDataApi {
             throws RestServiceException {
 
         String completePath = extractPathFromRequest(httpServletRequest);
-        LOG.info(completePath);
-
         Path path = new Path();
 
         try {
 
-            // creates file from the base64 string
             String[] pathItems = completePath.split("/");
-            String uploadFileName = pathItems[pathItems.length - 1];
+
+            String filename = pathItems[pathItems.length - 1];
 
             // create unique user directory from the completePath
-            final String userImportDirFilePath = importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator
-                    + pathItems[1] + File.separator
-                    + pathItems[2];
-
-            final File userImportDir = new File(userImportDirFilePath);
-            if (!userImportDir.exists()) {
-                userImportDir.mkdirs();
+            String importDirPath = importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator
+                    + String.join(File.separator, Arrays.copyOf(pathItems, pathItems.length - 1));
+            File importDir = new File(importDirPath);
+            if (!importDir.exists()) {
+                importDir.mkdirs();
             }
 
             // upload the result in the folder
-            File destinationUploadFile = new File(userImportDir.getAbsolutePath(), uploadFileName);
+            File resultFile = new File(importDir.getAbsolutePath(), filename);
             byte[] bytes = Base64.decodeBase64(body.getBase64Content());
-            FileUtils.writeByteArrayToFile(destinationUploadFile, bytes);
+            FileUtils.writeByteArrayToFile(resultFile, bytes);
 
-            path.setPlatformPath(userImportDir.getAbsolutePath());
+            path.setPlatformPath(importDir.getAbsolutePath());
             path.setIsDirectory(true);
             // sum of the size of all files within the directory
-            long size = Files.walk(userImportDir.toPath()).mapToLong(p -> p.toFile().length()).sum();
+            long size = Files.walk(importDir.toPath()).mapToLong(p -> p.toFile().length()).sum();
             path.setSize(size);
             path.setLastModificationDate(new Date().getTime());
 
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("I/O error while uploading [{}]", completePath, e);
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
         }
 
-        return new ResponseEntity<Path>(path, HttpStatus.CREATED);
+        return new ResponseEntity<>(path, HttpStatus.CREATED);
     }
 
     @Override
@@ -123,7 +120,7 @@ public class CarminDataApiController implements CarminDataApi {
         final File fileToDelete = new File(userImportDirFilePath);
         Utils.deleteFolder(fileToDelete);
 
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
