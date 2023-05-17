@@ -85,6 +85,14 @@
         "clientRole": false,
         "containerId": "shanoir-ng",
         "attributes": {}
+      },
+      {
+        "id": "a3899932-0518-41bc-9ccf-a5dbcb588916",
+        "name": "SERVICE",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "shanoir-ng",
+        "attributes": {}
       }
     ],
     "client": {

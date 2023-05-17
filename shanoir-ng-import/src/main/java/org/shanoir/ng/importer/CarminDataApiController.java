@@ -74,7 +74,7 @@ public class CarminDataApiController implements CarminDataApi {
 
         String completePath = getImportPathFromRequest(httpServletRequest);
         String filename = FilenameUtils.getName(completePath);
-        
+
         String importDirPath = completePath.replace(filename, "");
 
         Path path = new Path();
