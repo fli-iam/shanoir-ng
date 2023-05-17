@@ -52,7 +52,7 @@ public class CarminDataApiController implements CarminDataApi {
 
     private static final String VIP_UPLOAD_FOLDER = "vip_uploads";
     private static final String ERROR_WHILE_SAVING_UPLOADED_FILE = "Error while saving uploaded file.";
-    private static final String PATH_PREFIX = "/carmin-data/path/";
+    private static final String PATH_PREFIX = "/carmin-data/";
 
     private static final Logger LOG = LoggerFactory.getLogger(CarminDataApiController.class);
 
@@ -72,34 +72,31 @@ public class CarminDataApiController implements CarminDataApi {
             @ApiParam(value = "") @Valid @RequestBody UploadData body)
             throws RestServiceException {
 
-        String completePath = getImportPathFromRequest(httpServletRequest);
-        String filename = FilenameUtils.getName(completePath);
-
-        String importDirPath = completePath.replace(filename, "");
+        String importPath = getImportPathFromRequest(httpServletRequest);
 
         Path path = new Path();
 
         try {
 
-            File importDir = new File(importDirPath);
-            if (!importDir.exists()) {
-                importDir.mkdirs();
+            File resultFile = new File(importPath);
+            File resultDir = resultFile.getParentFile();
+
+            if (!resultDir.exists()) {
+                resultDir.mkdirs();
             }
 
-            // upload the result in the folder
-            File resultFile = new File(importDir.getAbsolutePath(), filename);
             byte[] bytes = Base64.decodeBase64(body.getBase64Content());
             FileUtils.writeByteArrayToFile(resultFile, bytes);
 
-            path.setPlatformPath(importDir.getAbsolutePath());
+            path.setPlatformPath(resultDir.getAbsolutePath());
             path.setIsDirectory(true);
             // sum of the size of all files within the directory
-            long size = Files.walk(importDir.toPath()).mapToLong(p -> p.toFile().length()).sum();
+            long size = Files.walk(resultDir.toPath()).mapToLong(p -> p.toFile().length()).sum();
             path.setSize(size);
             path.setLastModificationDate(new Date().getTime());
 
         } catch (IOException e) {
-            LOG.error("I/O error while uploading [{}]", completePath, e);
+            LOG.error("I/O error while uploading [{}]", importPath, e);
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
         }
@@ -125,7 +122,7 @@ public class CarminDataApiController implements CarminDataApi {
      */
     private String getImportPathFromRequest(HttpServletRequest request) {
         String decodedUri = UriUtils.decode(request.getRequestURI(), "UTF-8");
-        return importDir + File.separator + VIP_UPLOAD_FOLDER +  decodedUri.replace(PATH_PREFIX, "");
+        return importDir + File.separator + VIP_UPLOAD_FOLDER + decodedUri.replace(PATH_PREFIX, "");
     }
 
 }
