@@ -17,7 +17,6 @@ package org.shanoir.ng.importer;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +24,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.importer.model.carmin.Path;
 import org.shanoir.ng.importer.model.carmin.UploadData;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -72,18 +72,15 @@ public class CarminDataApiController implements CarminDataApi {
             @ApiParam(value = "") @Valid @RequestBody UploadData body)
             throws RestServiceException {
 
-        String completePath = extractPathFromRequest(httpServletRequest);
+        String completePath = getImportPathFromRequest(httpServletRequest);
+        String filename = FilenameUtils.getName(completePath);
+        
+        String importDirPath = completePath.replace(filename, "");
+
         Path path = new Path();
 
         try {
 
-            String[] pathItems = completePath.split("/");
-
-            String filename = pathItems[pathItems.length - 1];
-
-            // create unique user directory from the completePath
-            String importDirPath = importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator
-                    + String.join(File.separator, Arrays.copyOf(pathItems, pathItems.length - 1));
             File importDir = new File(importDirPath);
             if (!importDir.exists()) {
                 importDir.mkdirs();
@@ -112,10 +109,7 @@ public class CarminDataApiController implements CarminDataApi {
 
     @Override
     public ResponseEntity<Void> deletePath() {
-        String completePath = extractPathFromRequest(httpServletRequest);
-        LOG.info(completePath);
-
-        final String userImportDirFilePath = importDir + File.separator + VIP_UPLOAD_FOLDER + completePath;
+        String userImportDirFilePath = getImportPathFromRequest(httpServletRequest);
 
         final File fileToDelete = new File(userImportDirFilePath);
         Utils.deleteFolder(fileToDelete);
@@ -129,11 +123,9 @@ public class CarminDataApiController implements CarminDataApi {
      * @param request
      * @return
      */
-    private String extractPathFromRequest(HttpServletRequest request) {
+    private String getImportPathFromRequest(HttpServletRequest request) {
         String decodedUri = UriUtils.decode(request.getRequestURI(), "UTF-8");
-        int index = decodedUri.indexOf(PATH_PREFIX);
-
-        return decodedUri.substring(index + PATH_PREFIX.length() - 1);
+        return importDir + File.separator + VIP_UPLOAD_FOLDER +  decodedUri.replace(PATH_PREFIX, "");
     }
 
 }
