@@ -73,7 +73,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span *ngIf="vars.cellValue == true && col.awesome" class="bool-true"><i [class]="col.awesome" [style.color]="col.color"></i></span>
                         <span *ngIf="!vars.cellValue && col.awesomeFalse" class="bool-false"><i [class]="col.awesomeFalse" [style.color]="col.colorFalse"></i></span>
                     </a>
-
+                    </ng-container>
                 </div>
 
                 <!-- editable boolean -->

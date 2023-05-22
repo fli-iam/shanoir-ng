@@ -85,6 +85,10 @@ configure_keycloak_adapter_mode()
 {
 	sed -i "s/'SHANOIR_KEYCLOAK_ADAPTER_MODE'/'$SHANOIR_KEYCLOAK_ADAPTER_MODE'/g
 		" /etc/nginx/html/index.html
+	sed -i "s/'SHANOIR_URL_SCHEME'/'$SHANOIR_URL_SCHEME'/g
+		" /etc/nginx/html/index.html
+	sed -i "s/'SHANOIR_URL_HOST'/'$SHANOIR_URL_HOST'/g
+		" /etc/nginx/html/index.html
 }
 
 optional SHANOIR_INSTANCE_COLOR

@@ -25,6 +25,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequencePhysics;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.google.common.primitives.Longs;
 
 @JsonTypeName("DatasetAcquisitionMetadataField")
 public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<DatasetAcquisition> {
@@ -97,9 +98,12 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
-				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
-				if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
-				mrDsAcq.getMrProtocol().getUpdatedMetadata().setTransmittingCoilId(Long.parseLong(updatedValue));
+			    Long longUpdatedValue = Longs.tryParse(updatedValue);
+			    if (longUpdatedValue != null) {
+			        MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+			        if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
+			        mrDsAcq.getMrProtocol().getUpdatedMetadata().setTransmittingCoilId(longUpdatedValue);			        
+			    }
 			} else {
 				throw new IllegalArgumentException("datasetAcquisition should be of type MrDatasetAcquisition");
 			}
@@ -123,9 +127,12 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
-				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
-				if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
-				mrDsAcq.getMrProtocol().getUpdatedMetadata().setReceivingCoilId(Long.parseLong(updatedValue));
+			    Long longUpdatedValue = Longs.tryParse(updatedValue);
+                if (longUpdatedValue != null) {
+                    MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
+                    if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
+                    mrDsAcq.getMrProtocol().getUpdatedMetadata().setReceivingCoilId(longUpdatedValue);                    
+                }
 			} else {
 				throw new IllegalArgumentException("datasetAcquisition should be of type MrDatasetAcquisition");
 			}

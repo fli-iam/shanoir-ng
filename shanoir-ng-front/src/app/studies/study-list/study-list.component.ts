@@ -90,7 +90,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
     getColumnDefs(): ColumnDefinition[] {
         let colDef: ColumnDefinition[] = [
-            { headerName: "Public", type: "boolean", awesome: 'fa-solid fa-lock', color: 'var(--color-a)',
+            { headerName: "", type: "boolean", awesome: 'fa-solid fa-lock', awesomeFalse: 'fa-solid fa-lock-open', color: 'var(--color-a)', colorFalse: 'var(--color-a)',
                 cellRenderer: ret => {
                     return (ret.data as Study).visibleByDefault && (ret.data as Study).locked;
                 }
