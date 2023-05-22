@@ -48,7 +48,7 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.examination.model.Examination;
@@ -66,7 +66,9 @@ import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.studycard.model.QualityException;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.QualityCardService;
@@ -106,7 +108,7 @@ public class ImporterService {
 	private DatasetService datasetService;
 
 	@Autowired
-	private DatasetAcquisitionService datasetAcquisitionService;
+	private DatasetAcquisitionRepository datasetAcquisitionRepository;
 
 	@Autowired
 	private DicomPersisterService dicomPersisterService;
@@ -145,7 +147,6 @@ public class ImporterService {
     }
 
 	public void createAllDatasetAcquisition(ImportJob importJob, Long userId) throws ShanoirException {
-	    LOG.error("#############################################################################, c");
 		LOG.info("createAllDatasetAcquisition: " + this + " instances: " + getInstancesCreated());
 		ShanoirEvent event = importJob.getShanoirEvent();
 		event.setMessage("Creating datasets...");
@@ -157,36 +158,26 @@ public class ImporterService {
 			if (examination != null) {
 			    // generate acquisitions
 			    generatedAcquisitions = generateAcquisitions(examination, importJob, event);
-
-				// Quality check
-				QualityCardResult qualityResult = checkQuality(examination, importJob);                
-				
+			    for (DatasetAcquisition acquisition : generatedAcquisitions) {
+			        examination.getDatasetAcquisitions().addAll(generatedAcquisitions); // change to set() ?
+                }
+			   	// Quality check
+				QualityCardResult qualityResult = checkQuality(examination, importJob);                				
 				// Has quality check passed ?
 				if (qualityResult.hasError()) {
-				    LOG.error("#############################################################################, d");
-				    throw new ShanoirException("Import rejected, quality checks didn't pass for examination " + examination.getId());
+				    throw new QualityException(examination, qualityResult);
 				} else { // Then do the import
-				    LOG.error("#############################################################################, e");
-				    examinationRepository.save(examination);
-				    
-				    
-				    // DEBUG : CHECK ACQ HAVE IDS HERE
-				    for (DatasetAcquisition acquisition : generatedAcquisitions) {
-                        System.out.println("#################################### " + acquisition.getId());
-                    }   
-				    
-				    
+				    datasetAcquisitionRepository.saveAll(generatedAcquisitions);
 				    try {
 				        persistPatientInPacs(importJob.getPatients(), event);
 				    } catch (Exception e) { // if error in pacs
-				        // revert
+				        // revert dataset acquisitions
 				        for (DatasetAcquisition acquisition : generatedAcquisitions) {
-				            datasetAcquisitionService.deleteById(acquisition.getId());
+				            datasetAcquisitionRepository.deleteById(acquisition.getId());
 				        }
-				        throw new ShanoirException("Error while saving data in pacs, the import is canceled acquisitions were not saved");
+				        throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved");
 				    }
 				}	
-				
 			} else {
 				throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
 			}
@@ -225,19 +216,48 @@ public class ImporterService {
 			// Send success mail
 			mailService.sendImportEmail(importJob, userId, examination, generatedAcquisitions);
 
-		} catch (Exception e) {
-		    LOG.error("######################################### 2222");
+		} catch (QualityException e) {
+		    String msg = buildErrorMessage(e);
 			event.setStatus(ShanoirEvent.ERROR);
-			event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
+			event.setMessage(msg);
 			event.setProgress(1f);
 			eventService.publishEvent(event);
-			LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e);
-			
+			LOG.warn(msg, e);	
 			// Send mail
-			mailService.sendFailureMail(importJob, userId, e.getMessage());
-			
-			throw new ShanoirException(event.getMessage(), e);
-		}
+			mailService.sendFailureMail(importJob, userId, msg);
+			throw new ShanoirException(msg, e);
+		} catch (Exception e) {
+            event.setStatus(ShanoirEvent.ERROR);
+            event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
+            event.setProgress(1f);
+            eventService.publishEvent(event);
+            LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e); 
+            // Send mail
+            mailService.sendFailureMail(importJob, userId, e.getMessage());
+            throw new ShanoirException(event.getMessage(), e);
+        }
+	}
+	
+	private String buildErrorMessage(QualityException e) {
+	    StringBuilder sb = new StringBuilder();
+	    sb.append("Quality checks didn't pass at import.");
+	    sb.append("\n");
+	    sb.append("Study : ")
+	        .append(e.getExamination().getStudy().getName())
+	        .append(" (").append(e.getExamination().getStudy().getId()).append(")");
+	    sb.append("\n");
+        sb.append("Subject : ")
+            .append(e.getExamination().getSubject().getName())
+            .append(" (").append(e.getExamination().getSubject().getId()).append(")");
+        sb.append("\n");
+        sb.append("Examination : ")
+            .append(e.getExamination().getComment())
+            .append(" (").append(e.getExamination().getId()).append(")");
+	    for (QualityCardResultEntry qcResult : e.getQualityResult()) {
+	        sb.append("\n- ");
+	        sb.append(qcResult.getMessage());
+	    }
+	    return sb.toString();
 	}
 	
 	private Set<DatasetAcquisition> generateAcquisitions(Examination examination, ImportJob importJob, ShanoirEvent event) throws Exception {
@@ -344,13 +364,6 @@ public class ImporterService {
             }
         }           
 	}
-
-	/**
-	 * Save DatasetAcquisition object in the Shanoir db
-	 */
-    private void persistAcquisition(DatasetAcquisition acquisition) {
-        datasetAcquisitionService.create(acquisition);
-    }
 
     public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, Attributes dicomAttributes) throws Exception {
 		if (checkSerieForDicomImages(serie)) {

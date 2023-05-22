@@ -115,15 +115,13 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@Transactional
 	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
 	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
-		
-	    
 	    ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
 			createAllDatasetAcquisitions(importJob, importJob.getUserId());
 		} catch (Exception e) {
-		    LOG.error("#############################################################################, b");
 			LOG.error(e.getMessage(), e);
 			throw new AmqpRejectAndDontRequeueException(e);
+			// finally is called even if we throw an exception here
 		} finally {
 			// if the json could not be parsed, no way to know workFolder
 			// so better to throw the exception, as no possibility to clean
