@@ -13,25 +13,31 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="root" [class.disabled]="disabled" *ngIf="!readOnly">
-    <span class="frame" *ngIf="!compactMode"> 
+    <span class="frame" *ngIf="!compactMode">
         <span class="input-container left-icon" [style.color]="selectionColor ? selectedOption?.color : null">
             <span  *ngIf="selectedOption?.awesome"><i class="{{selectedOption?.awesome}}"></i></span>
-            <span class="fake-input">
+<!--            <span class="fake-input">
                 {{inputText ? inputText : (placeholder ? placeholder : 'Select an option...')}}
-            </span>
+            </span>-->
             <input #input
                 *ngIf="options?.length > 0"
-                type="text" 
-                tabindex="-1" 
-                class="label" 
+                type="text"
+                tabindex="-1"
+                class="label"
                 [class.icon]="selectedOption?.awesome"
-                [ngModel]="inputText" 
-                (ngModelChange)="onTypeText($event)" 
-                [placeholder]="placeholder ? placeholder : 'Select an option...'" 
+                [ngModel]="inputText"
+                (ngModelChange)="onTypeText($event)"
+                [placeholder]="placeholder ? placeholder : 'Select an option...'"
                 (click)="isOpen() ? close() : open()"
                 (focus)="onInputFocus()"
-                [readOnly]="!search">
+                [readOnly]="!search"
+                (mouseleave)="hideCenterName()" (mouseover)="showCenterName()">
+
         </span>
+        <div class="content"
+             *ngIf="opened && selectedOption && selectedOption.label.length > 20">
+            {{ selectedOption?.label }}
+        </div>
         <span *ngIf="options?.length == 0" class="label empty">Empty list</span>
         <span class="commands">
             <span class="clear button" *ngIf="inputText && clear" (click)="onClear()"><i class="fas fa-times"></i></span>
@@ -46,13 +52,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <span class="open button compact-button" (click)="isOpen() ? close() : open()"><i class="fas fa-plus"></i></span>
         </span>
     </span>
-    <div *ngIf="displayedOptions?.length > 0" 
-            [class.hidden-list]="hideToComputeHeight" 
-            class="list" 
-            [class.down]="way=='down'" 
-            [class.up]="way=='up'" 
-            (wheel)="onWheel($event)" 
-            [class.scrollable]="scrollable" 
+    <div *ngIf="displayedOptions?.length > 0"
+            [class.hidden-list]="hideToComputeHeight"
+            class="list"
+            [class.down]="way=='down'"
+            [class.up]="way=='up'"
+            (wheel)="onWheel($event)"
+            [class.scrollable]="scrollable"
             [style.width]="maxWidth + 'px'"
             (mouseleave)="focusedOptionIndex = null"
             (dragover)="allowDrop($event)"
@@ -63,10 +69,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     {{option.section}}
                 </span>
             </div>
-            <div class="option" 
-                    (click)="onUserSelectedOption(option)" 
-                    [class.selected]="isOptionSelected(option)" 
-                    [class.disabled]="option.disabled" 
+            <div class="option"
+                    (click)="onUserSelectedOption(option)"
+                    [class.selected]="isOptionSelected(option)"
+                    [class.disabled]="option.disabled"
                     [class.compatible]="option.compatible"
                     [class.not-compatible]="option.compatible != undefined && !option.compatible"
                     [class.focused]="i == focusedOptionIndex"
@@ -79,8 +85,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
         </ng-container>
         <div *ngIf="scrollable" class="scrollbar">
-            <div class="top-scroll-button" 
-                    (mousedown)="scrollButtonOn('up')" 
+            <div class="top-scroll-button"
+                    (mousedown)="scrollButtonOn('up')"
                     (mouseup)="scrollButtonOff()"
                     (mouseleave)="scrollButtonOff()"
                 ><i class="fas fa-chevron-up"></i></div>
@@ -88,7 +94,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <div class="lift" [style.top.px]="liftHeight" draggable="true" (dragstart)="onDragStart($event)"></div>
             </div>
             <div class="bottom-scroll-button"
-                    (mousedown)="scrollButtonOn('down')" 
+                    (mousedown)="scrollButtonOn('down')"
                     (mouseup)="scrollButtonOff()"
                     (mouseleave)="scrollButtonOff()"
                 ><i class="fas fa-chevron-down"></i></div>
