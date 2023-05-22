@@ -44,6 +44,8 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
+import javax.validation.Valid;
+
 @Api(value = "subject")
 @RequestMapping("/subjects")
 public interface SubjectApi {
@@ -68,7 +70,12 @@ public interface SubjectApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<SubjectDTO>> findSubjects();
+	ResponseEntity<List<SubjectDTO>> findSubjects(
+			@ApiParam(value = "Include preclinical subject", allowableValues = "true, false", defaultValue = "true") @Valid
+			@RequestParam(value = "preclinical", required = false, defaultValue = "true") boolean preclinical,
+			@ApiParam(value = "Include non-preclinical subject", allowableValues = "true, false", defaultValue = "true") @Valid
+			@RequestParam(value = "clinical", required = false, defaultValue = "true") boolean clinical);
+
 
 	@ApiOperation(value = "", notes = "Returns the subjects as Pageable with corresponding name", response = Subject.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subjects", response = Subject.class),

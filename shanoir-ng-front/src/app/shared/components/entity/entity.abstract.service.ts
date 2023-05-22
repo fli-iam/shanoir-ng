@@ -22,6 +22,7 @@ import {Location} from "@angular/common";
 import {UntypedFormBuilder} from "@angular/forms";
 import {KeycloakService} from "../../keycloak/keycloak.service";
 import {ServiceLocator} from "../../../utils/locator.service";
+import {ShanoirError} from "../../models/error.model";
 
 
 export abstract class EntityService<T extends Entity> {
@@ -78,22 +79,23 @@ export abstract class EntityService<T extends Entity> {
                         this.consoleService.log('info', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' was sucessfully deleted');
                         return true;
                     }).catch(reason => {
-                        if (reason && reason.error) {
-                            if (reason.error.code != 422) {
-                                throw Error(reason);
-                            } else {
-                                this.consoleService.log('warn', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.');
-                            }
-                        } else if (reason && reason.status) {
-                            if (reason.status != 422) {
-                                throw Error(reason);
-                            } else {
-                                this.consoleService.log('warn', 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.');
-                            }
-                        } else {
-                            console.error(reason);
+                        if(!reason){
+                            return;
                         }
-                        return false;
+                        let warn = 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
+                        if((reason.error && reason.error.code == 422)
+                            || reason.status == 422){
+                            this.consoleService.log('warn', warn);
+                            return false;
+                        }
+                        if(reason instanceof ShanoirError && reason.code == 422){
+                            if(reason.message){
+                                warn = warn + ' ' + reason.message;
+                            }
+                            this.consoleService.log('warn', warn);
+                            return false;
+                        }
+                        throw Error(reason);
                     });
                 }
                 return false;
