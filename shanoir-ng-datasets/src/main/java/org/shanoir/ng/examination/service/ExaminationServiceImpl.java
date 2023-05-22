@@ -256,6 +256,23 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
+	public Long getExtraDataSizeByStudyid(Long studyId){
+
+		List<Examination> exams = this.findByStudyId(studyId);
+
+		long size = 0L;
+		for(Examination exam : exams){
+			for(String path : exam.getExtraDataFilePathList()){
+				File f = new File(this.getExtraDataFilePath(exam.getId(), path));
+				if(f.exists()){
+					size += f.length();
+				}
+			}
+		}
+		return size;
+	}
+
+	@Override
 	public String addExtraData(final Long examinationId, final MultipartFile file) {
 		String filePath = getExtraDataFilePath(examinationId, file.getOriginalFilename());
 		File fileToCreate = new File(filePath);

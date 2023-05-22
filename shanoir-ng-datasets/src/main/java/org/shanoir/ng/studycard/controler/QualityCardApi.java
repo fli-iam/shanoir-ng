@@ -125,4 +125,17 @@ public interface QualityCardApi {
 	ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
 		@ApiParam(value = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
 	
+	@ApiOperation(value = "", notes = "Test a quality card on a study for quality control", response = Void.class, tags = {})
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "applied a quality card on its study for quality control", response = Void.class),
+        @ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+        @ApiResponse(code = 403, message = "forbidden", response = Void.class),
+        @ApiResponse(code = 422, message = "bad parameters", response = Void.class),
+        @ApiResponse(code = 500, message = "unexpected error", response = Void.class)
+    })
+    @RequestMapping(value = "/test/{qualityCardId}", method = RequestMethod.GET)
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnQualityCard(#qualityCardId, 'CAN_ADMINISTRATE'))")
+    ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+        @ApiParam(value = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException;
+	
 }

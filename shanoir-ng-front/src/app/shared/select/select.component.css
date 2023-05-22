@@ -40,7 +40,6 @@
     color: var(--very-dark-grey);
     position: absolute;
     z-index: 1000;
-    max-height: 320px;
     min-width: 216px;
     min-height: 20px;
     border: 1px solid var(--grey);

@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li>
 						<label>Name</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">	
+							<ng-template [ngSwitchCase]="'view'">
 								{{studyCard.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -57,10 +57,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 					<li>
 						<label>Center(s)</label>
-						<span class="right-col" *ngIf="studyCard.study">
-							<span class="center" *ngFor="let center of centers">
-								{{center.name}}
-							</span>
+						<span class="right-col" *ngIf="studyCard.study" [ngSwitch]="mode">
+							<ng-template [ngSwitchCase]="'view'">
+								{{studyCard.acquisitionEquipment?.center?.name}}
+							</ng-template>
+							<ng-template ngSwitchDefault>
+								<span class="center" *ngFor="let center of centers">
+									{{center.name}}
+								</span>
+							</ng-template>
 						</span>
 					</li>
 					<li>
@@ -70,11 +75,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							    <a [routerLink]="['/acquisition-equipment/details/', studyCard.acquisitionEquipment?.id]">
 								    {{studyCard.acquisitionEquipment | acqEqptLabel}}
 								</a>
-							</ng-template> 
+							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="acquisitionEquipment" 
-										[(ngModel)]="studyCard.acquisitionEquipment" 
-										(userChange)="onChangeAcqEq()" 
+								<select-box formControlName="acquisitionEquipment"
+										[(ngModel)]="studyCard.acquisitionEquipment"
+										(userChange)="onChangeAcqEq()"
 										[options]="acquisitionEquipments"
 										(onNewClick)="createAcqEq()">
 								</select-box>
@@ -90,7 +95,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{studyCard.niftiConverter.name}}
-							</ng-template> 
+							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select-box formControlName="niftiConverter" [(ngModel)]="studyCard.niftiConverter" [optionArr]="niftiConverters">
 								</select-box>
@@ -120,8 +125,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<study-card-rules class="rules" [formGroup]="form"
 					cardType="studycard"
 					formControlName="rules"
-					[(ngModel)]="studyCard.rules" 
-					[mode]="selectMode ? 'select' : mode" 
+					[(ngModel)]="studyCard.rules"
+					[mode]="selectMode ? 'select' : mode"
 					[manufModelId]="studyCard.acquisitionEquipment?.manufacturerModel?.id"
 					[allCoils]="allCoils"
 					[showErrors]="showRulesErrors"
@@ -137,21 +142,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(cancel)="goToView()"
 				(back)="goBack()">
 				<button *ngIf="mode != 'view'"
-						type="button" 
-						class="Button right-icon show-errors" 
+						type="button"
+						class="Button right-icon show-errors"
 						(click)="onShowErrors()"
 						[disabled]="footerState.valid || showRulesErrors || studyCard.rules?.length == 0">
 					Show all errors<i class="fas fa-bug"></i>
 				</button>
-				<button *ngIf="selectMode" 
-						class="Button right-icon" 
-						(click)="clickImportRules()" 
+				<button *ngIf="selectMode"
+						class="Button right-icon"
+						(click)="clickImportRules()"
 						[disabled]="selectedRules.length <= 0">
 					Import selected rules<i class="fas fa-file-import"></i>
 				</button>
 				<button *ngIf="mode == 'view' && isAdminOrExpert"
-						type="button" 
-						class="Button right-icon" 
+						type="button"
+						class="Button right-icon"
 						(click)="goToApply()">
 					Reapply study card<i class="fas fa-cogs"></i>
 				</button>

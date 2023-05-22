@@ -10,12 +10,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-ARG BASE_IMAGE=quay.io/keycloak/keycloak:20.0.0
+FROM quay.io/keycloak/keycloak:20.0.0 as base_image
+
+# keycloak options (https://www.keycloak.org/server/all-config)
+#
+# Here we list only the variables that need to be set at both runtime *and* at
+# buildtime ("kc.sh build"). If they do not have the same values then the
+# quarkus image has to be rebuilt at runtime, which delays container startup
+# with a message like: "(Quarkus augmentation completed in 180315ms)"
+#
+# The relevant variables can be listed with: /opt/keycloak/bin/kc.sh show-config
+#
+# All other variables are set in the entrypoint.
+ENV KC_DB="mysql" \
+    KC_HTTP_RELATIVE_PATH="/auth"
 
 #
 # Use builder to integrate custom provider
 #
-FROM $BASE_IMAGE as builder
+FROM base_image as builder
 
 COPY shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
 
@@ -25,7 +38,7 @@ RUN /opt/keycloak/bin/kc.sh build
 #
 # Create actual image, based on builder before
 #
-FROM $BASE_IMAGE
+FROM base_image
 
 COPY --from=builder /opt/keycloak/ /opt/keycloak/
 COPY --chown=keycloak themes/. /opt/keycloak/themes

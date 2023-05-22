@@ -27,6 +27,7 @@ import { StudyService } from 'src/app/studies/shared/study.service';
 import {Study} from "../../studies/shared/study.model";
 import {AccessRequest} from "../access-request/access-request.model";
 import {FooterState} from "../../shared/components/form-footer/footer-state.model";
+import {environment} from "../../../environments/environment";
 
 
 @Component({
@@ -186,4 +187,13 @@ export class UserComponent extends EntityComponent<User> {
         return null;
       });
     }
+
+  changePassword() {
+      window.open("https://shanoir-ng-nginx/auth/realms/shanoir-ng/protocol/openid-connect/auth?client_id=shanoir-ng-front" +
+        "&redirect_uri=https%3A%2F%2Fshanoir-ng-nginx%2Fshanoir-ng%2Fhome" +
+        "&response_mode=fragment" +
+        "&response_type=code" +
+        "&scope=openid" +
+        "&kc_action=UPDATE_PASSWORD","_self");
+  }
 }

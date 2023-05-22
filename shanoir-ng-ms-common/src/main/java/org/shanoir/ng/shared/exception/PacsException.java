@@ -12,30 +12,24 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.subjectstudy.repository;
-
-import java.util.List;
-
-import org.shanoir.ng.study.model.Study;
-import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subjectstudy.model.SubjectStudy;
-import org.springframework.data.repository.CrudRepository;
+package org.shanoir.ng.shared.exception;
 
 /**
- * Repository for Subject.
+ * SecurityException exception.
+ * 
+ * @author jlouis
  *
- * @author msimon
  */
-public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Long> {
+public class PacsException extends ShanoirException {
 
-	/**
-	 * Find template by data.
-	 *
-	 * @param data
-	 *            data.
-	 * @return a template.
-	 */
-	List<SubjectStudy> findByStudy(Study study);
+	private static final long serialVersionUID = -1545868693201382850L;
 
-	long countBySubject(Subject subject);
+	public PacsException(String message) {
+		super(message);
+	}
+	
+	public PacsException(String message, Exception cause) {
+		super(message, cause);
+	}
+
 }

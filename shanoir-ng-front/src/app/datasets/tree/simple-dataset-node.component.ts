@@ -2,19 +2,19 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { DatasetNode, UNLOADED } from '../../tree/tree.model';
+import {DatasetNode, ProcessingNode, UNLOADED} from '../../tree/tree.model';
 import { Dataset } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 
@@ -33,12 +33,13 @@ export class SimpleDatasetNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     @Input() related: boolean = false;
+    @Output() onSimpleDatasetDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
         private router: Router,
         private datasetService: DatasetService) {
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof DatasetNode) {
@@ -66,5 +67,18 @@ export class SimpleDatasetNodeComponent implements OnChanges {
         if (!this.node.processings) return false;
         else if (this.node.processings == 'UNLOADED') return 'unknown';
         else return this.node.processings.length > 0;
-    } 
+    }
+
+    deleteDataset() {
+        this.datasetService.get(this.node.id).then(entity => {
+            this.datasetService.deleteWithConfirmDialog(this.node.title, entity).then(deleted => {
+                if (deleted) {
+                    this.onSimpleDatasetDelete.emit();
+                }
+            });
+        })
+    }
+    onProcessingDelete(index: number) {
+        (this.node.processings as ProcessingNode[]).splice(index, 1) ;
+    }
 }

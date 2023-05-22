@@ -97,7 +97,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
 					</li>
 					<li class="info" *ngIf="subjectNamePrefix && !subject.name?.startsWith(subjectNamePrefix) && mode != 'view'" @slideDown>
-						<span class="icon"><i class="fas fa-info-circle"></i></span>This study is configured to use prefixes for subject names, here the prefix is <b>{{subjectNamePrefix}}</b>. 
+						<span class="icon"><i class="fas fa-info-circle"></i></span>This study is configured to use prefixes for subject names, here the prefix is <b>{{subjectNamePrefix}}</b>.
 						However the prefix is optional and if you know what you are doing please just ignore this message.
 					</li>
 					<div *ngIf="humanSelected()" [@slideDown]="humanSelected()">
@@ -178,7 +178,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset *ngIf="mode=='view'">
 				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Tree</legend>
-				<reverse-subject-node [input]="subjectNode" 
+				<reverse-subject-node [input]="subjectNode"
 						(nodeInit)="onSubjectNodeInit($event)"></reverse-subject-node>
 			</fieldset>
 			<form-footer

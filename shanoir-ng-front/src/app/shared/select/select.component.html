@@ -59,12 +59,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             [class.up]="way=='up'"
             (wheel)="onWheel($event)"
             [class.scrollable]="scrollable"
-            [style.width]="maxWidth"
+            [style.width]="maxWidth + 'px'"
             (mouseleave)="focusedOptionIndex = null"
             (dragover)="allowDrop($event)"
             (dragend)="dragging = false">
         <ng-container *ngFor="let option of displayedOptions; let i = index">
-            <div class="section" *ngIf="(i == 0 && option.section) || displayedOptions[i-1]?.section != option.section">
+            <div class="section option" *ngIf="(i == 0 && option.section) || displayedOptions[i-1]?.section != option.section">
                 <span class="inner-option left-icon">
                     {{option.section}}
                 </span>

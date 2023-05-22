@@ -152,6 +152,15 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	}
 
 	@Override
+	public ResponseEntity<List<AnimalSubject>> findAnimalSubjectsBySubjectIds(List<Long> subjectIds) {
+		List<AnimalSubject> subjects = subjectService.findBySubjectIdIn(subjectIds);
+		if (subjects.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(subjects, HttpStatus.OK);
+	}
+
+	@Override
 	public ResponseEntity<Void> updateAnimalSubject(
 			@ApiParam(value = "ID of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
 			@ApiParam(value = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubject animalSubject,

@@ -18,16 +18,12 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -88,6 +84,15 @@ public interface AnimalSubjectApi {
 			@ApiResponse(code = 500, message = "Unexpected error", response = AnimalSubject.class) })
 	@GetMapping(value = "/all", produces = { "application/json" })
 	ResponseEntity<List<AnimalSubject>> getAnimalSubjects();
+
+	@ApiOperation(value = "", notes = "If exists, returns the animal subjects corresponding to the given subjects ids", response = List.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "An array of Preclinical AnimalSubject", response = AnimalSubject.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@PostMapping(value = "/allBySubjectId", produces = { "application/json" })
+	ResponseEntity<List<AnimalSubject>> findAnimalSubjectsBySubjectIds(
+			@RequestParam(value = "subjectIds", required = true) List<Long> subjectIds);
 
 	@ApiOperation(value = "Update an existing animalSubject", notes = "", response = Void.class, tags = {
 			"AnimalSubject", })
