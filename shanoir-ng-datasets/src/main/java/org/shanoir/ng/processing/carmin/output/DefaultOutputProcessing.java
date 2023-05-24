@@ -20,7 +20,6 @@ import javax.ws.rs.NotFoundException;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +47,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class DefaultOutputProcessing extends OutputProcessing {
 
+	public static final String JSON_INFILE = "infile";
 	@Value("${vip.result-file-name}")
 	private String resultFileName;
 
@@ -117,7 +117,6 @@ public class DefaultOutputProcessing extends OutputProcessing {
 					}
 
 				} else {
-
 					// For all other files that are not a result.json or a folder, create a processed dataset and a dataset processing
 					outputFiles.add(currentFile);
 				}
@@ -144,35 +143,35 @@ public class DefaultOutputProcessing extends OutputProcessing {
 
 		List<Long> datasetIds = new ArrayList<>();
 
-		// Iterate over all parameters
-		while (json.keys().hasNext()) {
-			// Can be either
-			//"["XXX+filename.nii", "YYY+filename.nii"]"
-			// OR
-			// "XXX+filename.nii"
-			List<String> filenames = new ArrayList<>();
-			Object infiles = json.get("infile");
-			if (infiles instanceof JSONArray) {
-				// case "["XXX+filename.nii", "YYY+filename.nii"]"
-				JSONArray array = (JSONArray) infiles;
-				for (int i=0 ; i < array.length(); i++) {
-					filenames.add(array.getString(i));
-				}
-			} else {
-				// Case "XXX+filename.nii"
-				String value = (String) infiles;
-				filenames.add(value);
-			}
+		List<String> filenames = new ArrayList<>();
 
-			for (String name : filenames) {
-				// Ugly pattern to get dataset id
-				// TODO: check that the "+" is mandatory. What if no ? What if not a file but a number ?
-				Pattern p = Pattern.compile("id\\+(\\d+)\\+.*");
-				Matcher m = p.matcher(name);
-				// If there is not match, it's not a file parameter => Do not search dataset
-				if (m.matches()) {
-					datasetIds.add(Long.valueOf(m.group(1)));
-				}
+		if(!json.has(JSON_INFILE)){
+			LOG.error("No key [{}] found in [{}]", JSON_INFILE, resultJson.getAbsolutePath());
+			return new ArrayList<>();
+		}
+
+		Object infiles = json.get(JSON_INFILE);
+
+		if (infiles instanceof JSONArray) {
+			// case "["id+XXX+filename.nii", "YYY+filename.nii"]"
+			JSONArray array = (JSONArray) infiles;
+			for (int i=0 ; i < array.length(); i++) {
+				filenames.add(array.getString(i));
+			}
+		} else {
+			// Case "id+XXX+filename.nii"
+			String value = (String) infiles;
+			filenames.add(value);
+		}
+
+		for (String name : filenames) {
+			// Ugly pattern to get dataset id
+			// TODO: check that the "+" is mandatory. What if no ? What if not a file but a number ?
+			Pattern p = Pattern.compile("id\\+(\\d+)\\+.*");
+			Matcher m = p.matcher(name);
+			// If there is not match, it's not a file parameter => Do not search dataset
+			if (m.matches()) {
+				datasetIds.add(Long.valueOf(m.group(1)));
 			}
 		}
 
