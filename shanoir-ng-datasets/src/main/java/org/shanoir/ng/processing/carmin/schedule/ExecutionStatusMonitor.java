@@ -114,14 +114,14 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				.orElseThrow(() -> new EntityNotFoundException(
 						"Processing [" + this.identifier + "] not found"));
 
-		String execLabel = "[" + processing.getPipelineIdentifier() + "][" + processing.getPipelineIdentifier() + "]";
+		String execLabel = "VIP Execution [" + processing.getPipelineIdentifier() + "][" + processing.getIdentifier() + "]";
 
 
 		ShanoirEvent event = new ShanoirEvent(
 				ShanoirEventType.IMPORT_DATASET_EVENT,
 				processing.getId().toString(),
 				KeycloakUtil.getTokenUserId(),
-				"VIP pipeline execution " + execLabel + " : running.",
+				execLabel + " : " + ExecutionStatus.RUNNING,
 				ShanoirEvent.IN_PROGRESS);
 		eventService.publishEvent(event);
 
@@ -138,7 +138,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				LOG.error(msg);
 				LOG.error("Stopping the thread...");
 				stop.set(true);
-				event.setMessage("VIP pipeline execution " + execLabel + " : " + msg);
+				event.setMessage(execLabel + " : " + msg);
 				event.setStatus(ShanoirEvent.ERROR);
 				eventService.publishEvent(event);
 				break;
@@ -156,9 +156,9 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 					this.carminDatasetProcessingService.updateCarminDatasetProcessing(processing);
 
-					LOG.info("Execution [{}] status is [{}].", execLabel, ExecutionStatus.FINISHED);
+					LOG.info("{} status is [{}].", execLabel, ExecutionStatus.FINISHED);
 
-					event.setMessage("VIP pipeline execution " + execLabel + " : finished. Processing imported results...");
+					event.setMessage(execLabel + " : Finished. Processing imported results...");
 					eventService.publishEvent(event);
 
 					// untar the .tgz files
@@ -190,7 +190,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 					stop.set(true);
 
-					event.setMessage("VIP pipeline execution " + execLabel + " : finished.");
+					event.setMessage(execLabel + " : Finished.");
 					event.setStatus(ShanoirEvent.SUCCESS);
 					event.setProgress(1f);
 					eventService.publishEvent(event);
@@ -201,9 +201,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				case EXECUTION_FAILED:
 				case KILLED:
 
-					String msg = "Execution " + execLabel + " status is " + execution.getStatus() + ". Results won't be processed.";
-
-					LOG.warn(msg);
+					LOG.warn("{} status is [{}]", execLabel, execution.getStatus().getRestLabel());
 
 					processing.setStatus(execution.getStatus());
 					this.carminDatasetProcessingService.updateCarminDatasetProcessing(processing);
@@ -212,7 +210,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 					stop.set(true);
 
-					event.setMessage("VIP pipeline execution " + execLabel + " : "  + msg);
+					event.setMessage(execLabel + " : "  + execution.getStatus().getRestLabel());
 					event.setStatus(ShanoirEvent.ERROR);
 					eventService.publishEvent(event);
 
