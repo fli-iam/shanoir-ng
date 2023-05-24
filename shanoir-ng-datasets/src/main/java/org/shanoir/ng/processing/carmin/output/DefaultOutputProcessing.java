@@ -23,9 +23,12 @@ import javax.ws.rs.NotFoundException;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import org.shanoir.ng.dataset.modality.MeshDataset;
 import org.shanoir.ng.dataset.modality.ProcessedDatasetType;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
@@ -73,6 +76,9 @@ public class DefaultOutputProcessing extends OutputProcessing {
 
 	@Override
 	public void manageTarGzResult(File in, File parent, CarminDatasetProcessing processing) {
+
+		LOG.info("Processing result file [{}]...", in.getAbsolutePath());
+
 		try (TarArchiveInputStream fin = new TarArchiveInputStream(
 				new GzipCompressorInputStream(new FileInputStream(in)))) {
 			TarArchiveEntry entry;
@@ -90,77 +96,29 @@ public class DefaultOutputProcessing extends OutputProcessing {
 			while ((entry = fin.getNextTarEntry()) != null) {
 
 				String parsedEntry = entry.getName();
-				LOG.info("Tar entry :" + parsedEntry);
+				LOG.info("Tar entry [{}]", parsedEntry);
 
 				if (entry.isDirectory()) {
 					continue;
 				}
 
 				if (parsedEntry.endsWith(this.resultFileName)) {
-					// We have the result => Read the file to get the parent datasets
-					/*
-						{
-							"infile" : ["dateset-id+filename.nii"]
-						}
-					 */
-					try {
-						BufferedReader br = null;
-						StringBuilder sb = new StringBuilder();
-						br = new BufferedReader(new InputStreamReader(fin));
-						String line;
-						while ((line = br.readLine()) != null) {
-							// Clean JSON -> to much spaces lead to error from JSON parser
-							sb.append(line.replace(" : ", ":"));
-						}
-						JSONObject obj = new JSONObject(sb.toString());
-						List<Long> datasetIds = new ArrayList<>();
 
-						// Iterate over all parameters
-						while (obj.keys().hasNext()) {
-							String key = (String) obj.keys().next();
-							// Can be either 
-							//"["XXX+filename.nii", "YYY+filename.nii"]"
-							// OR
-							// "XXX+filename.nii"
-							List<String> values = new ArrayList<String>();
-							Object datasetIdsValue = (Object) obj.get("infile");
-							if (datasetIdsValue instanceof JSONArray) {
-								// case "["XXX+filename.nii", "YYY+filename.nii"]"
-								JSONArray array = (JSONArray) datasetIdsValue;
-								for (int i =0 ; i < array.length(); i++) {
-									values.add(array.getString(i));
-								}
-							} else {
-								// Case "XXX+filename.nii"
-								String value = (String) datasetIdsValue;
-								values.add(value);
-							}
-							for (String value : values) {
-								// Ugly pattern to get dataset id
-								// TODO: check that the "+" is mandatory. What if no ? What if not a file but a number ?
-								Pattern p = Pattern.compile("(\\d+)\\+.*");
-								Matcher m = p.matcher(value);
-								// If there is not match, it's not a file parameter => Do not search dataset
-								if (m.matches()) {
-									datasetIds.add(Long.valueOf(m.group(1)));
-								}
-							}
+					LOG.info("Processing result JSON [{}]...", parsedEntry);
+					try {
+						inputDatasets = this.getDatasetsFromResultJSON(parsedEntry, fin);
+
+						if(inputDatasets.isEmpty()){
+							LOG.warn("No datasets found in result JSON [{}].", parsedEntry);
 						}
-						// get datasets
-						inputDatasets = datasetService.findByIdIn(datasetIds);
-						LOG.error("datasets" + datasetIds);
 
 					} catch (Exception e) {
-						LOG.error("Could not read JSON file", e);
+						LOG.error("Could not read result JSON file", e);
 					}
+
 				} else {
 
-					if (parsedEntry.contains("/")) {
-						parsedEntry = parsedEntry.substring(parsedEntry.lastIndexOf("/") + 1);
-					}
-
-					File currentFile = new File(cacheFolder, parsedEntry);
-					File parentOfCurrent = currentFile.getParentFile();
+					File currentFile = new File(cacheFolder, Paths.get(parsedEntry).getFileName().toString());
 
 					if (!parent.exists()) {
 						parent.mkdirs();
@@ -172,10 +130,64 @@ public class DefaultOutputProcessing extends OutputProcessing {
 					outputFiles.add(currentFile);
 				}
 			}
+
+			if(outputFiles.isEmpty()){
+				LOG.warn("No processable file found in Tar result.");
+			}
+
 			this.createProcessedDatasets(outputFiles, cacheFolder.getAbsolutePath(), processing, inputDatasets);
+
 		} catch (Exception e) {
 			LOG.error("An error occured while extracting result from tar.gz file: ", e);
 		}
+	}
+
+
+	private List<Dataset> getDatasetsFromResultJSON(String parsedEntry,TarArchiveInputStream fin) throws IOException, JSONException {
+		BufferedReader br = null;
+		StringBuilder sb = new StringBuilder();
+		br = new BufferedReader(new InputStreamReader(fin));
+		String line;
+		while ((line = br.readLine()) != null) {
+			// Clean JSON -> to much spaces lead to error from JSON parser
+			sb.append(line.replace(" : ", ":"));
+		}
+		JSONObject json = new JSONObject(sb.toString());
+		List<Long> datasetIds = new ArrayList<>();
+
+		// Iterate over all parameters
+		while (json.keys().hasNext()) {
+			// Can be either
+			//"["XXX+filename.nii", "YYY+filename.nii"]"
+			// OR
+			// "XXX+filename.nii"
+			List<String> filenames = new ArrayList<>();
+			Object infiles = json.get("infile");
+			if (infiles instanceof JSONArray) {
+				// case "["XXX+filename.nii", "YYY+filename.nii"]"
+				JSONArray array = (JSONArray) infiles;
+				for (int i=0 ; i < array.length(); i++) {
+					filenames.add(array.getString(i));
+				}
+			} else {
+				// Case "XXX+filename.nii"
+				String value = (String) infiles;
+				filenames.add(value);
+			}
+
+			for (String name : filenames) {
+				// Ugly pattern to get dataset id
+				// TODO: check that the "+" is mandatory. What if no ? What if not a file but a number ?
+				Pattern p = Pattern.compile("id\\+(\\d+)\\+.*");
+				Matcher m = p.matcher(name);
+				// If there is not match, it's not a file parameter => Do not search dataset
+				if (m.matches()) {
+					datasetIds.add(Long.valueOf(m.group(1)));
+				}
+			}
+		}
+		// get datasets
+		return datasetService.findByIdIn(datasetIds);
 	}
 
 	/**
@@ -206,9 +218,12 @@ public class DefaultOutputProcessing extends OutputProcessing {
 		processing = datasetProcessingService.create(processing);
 
 		Study study = studyRepository.findById(carminDatasetProcessing.getStudyId())
-				.orElseThrow(() -> new NotFoundException("study not found"));
+				.orElseThrow(() -> new NotFoundException("Study [" + carminDatasetProcessing.getStudyId() + "] not found."));
 
 		for (File niiftiFile : processedFiles) {
+
+			LOG.info("Processing [{}]...", niiftiFile.getAbsolutePath());
+
 			ProcessedDatasetImportJob processedDataset = new ProcessedDatasetImportJob();
 
 			processedDataset.setDatasetProcessing(processing);
@@ -220,27 +235,30 @@ public class DefaultOutputProcessing extends OutputProcessing {
 
 			if(inputDatasets.size() != 0) {
 
-				List<Long> subjectIds = inputDatasets.stream().map(dataset -> dataset.getSubjectId()).collect(Collectors.toList());
+				List<Long> subjectIds = inputDatasets.stream().map(Dataset::getSubjectId).collect(Collectors.toList());
 
 				Predicate<Long> predicate = obj -> Objects.equals(inputDatasets.get(0).getSubjectId(), obj);
 
 				if (subjectIds.stream().allMatch(predicate)) {
 					Subject subject = subjectRepository.findById(inputDatasets.get(0).getSubjectId())
-							.orElseThrow(() -> new NotFoundException("subject not found"));
+							.orElseThrow(() -> new NotFoundException("Subject [" + inputDatasets.get(0).getSubjectId() + "] not found"));
 
 					processedDataset.setSubjectId(subject.getId());
 					processedDataset.setSubjectName(subject.getName());
 					processedDataset.setDatasetType(inputDatasets.get(0).getType());
 				} else {
-					processedDataset.setDatasetType("Mesh");
+					processedDataset.setDatasetType(MeshDataset.datasetType);
 				}
 			} else {
 				// default ?
-				processedDataset.setDatasetType("Mesh");
+				processedDataset.setDatasetType(MeshDataset.datasetType);
 			}
 
 			processedDataset.setProcessedDatasetName(getNameWithoutExtension(niiftiFile.getName())); 
 			importerService.createProcessedDataset(processedDataset);
+
+			LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), niiftiFile.getAbsolutePath());
+
 		}
 
 		processing.setOutputDatasets(outputDatasets);

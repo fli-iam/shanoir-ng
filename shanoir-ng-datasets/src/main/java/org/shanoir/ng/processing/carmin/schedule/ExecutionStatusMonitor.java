@@ -99,19 +99,14 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 		String uri = VIP_URI + identifier + "/summary";
 		RestTemplate restTemplate = new RestTemplate();
-		
-		String token = null;
 
-		// check if the token is initialized
-		if (StringUtils.isEmpty(token)) {
-			// refresh the token
-			token = this.refreshServiceAccountAccessToken();
-		}
+		// refresh the token
+		String token = this.refreshServiceAccountAccessToken();
 
 		CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
 				.findByIdentifier(this.identifier)
 				.orElseThrow(() -> new EntityNotFoundException(
-						"entity not found with identifier :" + this.identifier));
+						"Processing [" + this.identifier + "] not found"));
 
 		while (!stop.get()) {
 
@@ -122,7 +117,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 			// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
 			if(attempts >= 3){
-				LOG.error("failed to get execution details in {} attempts.", attempts);
+				LOG.error("Failed to get execution details from VIP in {} attempts.", attempts);
 				LOG.error("Stopping the thread...");
 				stop.set(true);
 				break;
@@ -135,31 +130,40 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				attempts = 1;
 				switch (execution.getStatus()) {
 				case FINISHED:
-					/**
-					 * updates the status and finish the job
-					 */
 
 					carminDatasetProcessing.setStatus(ExecutionStatus.FINISHED);
 
 					this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
+
+					LOG.info("Execution [{}] status is [{}].", execution.getIdentifier(), ExecutionStatus.FINISHED);
+
 
 					// untar the .tgz files
 					final File userImportDir = new File(
 							this.importDir + File.separator +
 							carminDatasetProcessing.getResultsLocation());
 
+					LOG.info("Processing result in import dir [{}]...", userImportDir.getAbsolutePath());
+
 					final PathMatcher matcher = userImportDir.toPath().getFileSystem()
 							.getPathMatcher("glob:**/*.{tgz,tar.gz}");
-					final Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath());
-
 					String outputProcessingKey = StringUtils.isEmpty(carminDatasetProcessing.getOutputProcessing()) ? DEFAULT_OUTPUT : carminDatasetProcessing.getOutputProcessing();
-					
-					stream.filter(matcher::matches)
-					.forEach(zipFile -> {
-						outputProcessingMap.get(outputProcessingKey).manageTarGzResult(zipFile.toFile(), userImportDir.getAbsoluteFile(), carminDatasetProcessing);
-					});
 
-					LOG.info("execution status updated, stopping job...");
+
+					try (Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath())) {
+
+						stream.filter(matcher::matches)
+								.forEach(zipFile -> {
+									outputProcessingMap.get(outputProcessingKey).manageTarGzResult(zipFile.toFile(), userImportDir.getAbsoluteFile(), carminDatasetProcessing);
+								});
+
+					} catch (IOException e) {
+						LOG.error("I/O error while listing files in import dir.", e);
+						stop.set(true);
+						break;
+					}
+
+					LOG.info("Execution status updated, stopping job...");
 
 					stop.set(true);
 					break;
@@ -168,9 +172,12 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				case EXECUTION_FAILED:
 				case KILLED:
 
+					LOG.warn("Execution [{}] status is [{}]. Results won't be processed.", execution.getIdentifier(), execution.getStatus());
+
 					carminDatasetProcessing.setStatus(execution.getStatus());
 					this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
-					LOG.info("execution status updated, stopping job...");
+
+					LOG.info("Execution status updated, stopping job...");
 
 					stop.set(true);
 					break;
@@ -178,7 +185,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				case RUNNING:
 					Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
 					break;
-
 				default:
 					stop.set(true);
 					break;
@@ -186,24 +192,20 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 			} catch (HttpStatusCodeException e) {
 				// in case of an error with response payload
 				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-					LOG.warn("Unauthorized");
-					LOG.info("Getting new token...");
+					LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
 					token = this.refreshServiceAccountAccessToken();
 					// inc attempts.
 					attempts++;
 				} else {
-					LOG.error("error while getting execution info with status : {} ,and message :", e.getStatusCode(), e.getMessage());
+					LOG.error("Error while retrieving execution infos from VIP." , e);
 					stop.set(true);
 				}
 			} catch (RestClientException e) {
 				// in case of an error with no response payload
-				LOG.error("there is no response payload while getting execution info", e);
+				LOG.error("No response payload in execution infos from VIP", e);
 				stop.set(true);
 			} catch (InterruptedException e) {
-				LOG.error("sleep thread exception :", e);
-				stop.set(true);
-			} catch (IOException e) {
-				LOG.error("file exception :", e);
+				LOG.error("Thread exception", e);
 				stop.set(true);
 			}
 		}
