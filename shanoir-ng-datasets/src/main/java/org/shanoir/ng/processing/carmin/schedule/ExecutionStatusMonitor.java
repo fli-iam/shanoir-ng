@@ -121,8 +121,9 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				ShanoirEventType.IMPORT_DATASET_EVENT,
 				processing.getId().toString(),
 				KeycloakUtil.getTokenUserId(),
-				execLabel + " : " + ExecutionStatus.RUNNING,
-				ShanoirEvent.IN_PROGRESS);
+				execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel(),
+				ShanoirEvent.IN_PROGRESS,
+				0.5f);
 		eventService.publishEvent(event);
 
 		while (!stop.get()) {
@@ -156,7 +157,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 					this.carminDatasetProcessingService.updateCarminDatasetProcessing(processing);
 
-					LOG.info("{} status is [{}].", execLabel, ExecutionStatus.FINISHED);
+					LOG.info("{} status is [{}].", execLabel, ExecutionStatus.FINISHED.getRestLabel());
 
 					event.setMessage(execLabel + " : Finished. Processing imported results...");
 					eventService.publishEvent(event);
@@ -212,6 +213,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 					event.setMessage(execLabel + " : "  + execution.getStatus().getRestLabel());
 					event.setStatus(ShanoirEvent.ERROR);
+					event.setProgress(1f);
 					eventService.publishEvent(event);
 
 					break;
