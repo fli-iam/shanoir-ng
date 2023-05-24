@@ -1,10 +1,7 @@
 package org.shanoir.ng.processing.carmin.output;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -102,11 +99,14 @@ public class DefaultOutputProcessing extends OutputProcessing {
 					continue;
 				}
 
+				File currentFile = new File(cacheFolder, Paths.get(parsedEntry).getFileName().toString());
+				IOUtils.copy(fin, Files.newOutputStream(currentFile.toPath()));
+
 				if (parsedEntry.endsWith(this.resultFileName)) {
 
 					LOG.info("Processing result JSON [{}]...", parsedEntry);
 					try {
-						inputDatasets = this.getDatasetsFromResultJSON(parsedEntry, fin);
+						inputDatasets = this.getDatasetsFromResultJSON(currentFile);
 
 						if(inputDatasets.isEmpty()){
 							LOG.warn("No datasets found in result JSON [{}].", parsedEntry);
@@ -118,14 +118,6 @@ public class DefaultOutputProcessing extends OutputProcessing {
 
 				} else {
 
-					File currentFile = new File(cacheFolder, Paths.get(parsedEntry).getFileName().toString());
-
-					if (!parent.exists()) {
-						parent.mkdirs();
-					}
-
-					IOUtils.copy(fin, Files.newOutputStream(currentFile.toPath()));
-
 					// For all other files that are not a result.json or a folder, create a processed dataset and a dataset processing
 					outputFiles.add(currentFile);
 				}
@@ -135,7 +127,9 @@ public class DefaultOutputProcessing extends OutputProcessing {
 				LOG.warn("No processable file found in Tar result.");
 			}
 
-			this.createProcessedDatasets(outputFiles, cacheFolder.getAbsolutePath(), processing, inputDatasets);
+			this.createProcessedDatasets(outputFiles, processing, inputDatasets);
+
+			this.deleteCacheDir(Paths.get(cacheFolder.getAbsolutePath()));
 
 		} catch (Exception e) {
 			LOG.error("An error occured while extracting result from tar.gz file: ", e);
@@ -143,16 +137,11 @@ public class DefaultOutputProcessing extends OutputProcessing {
 	}
 
 
-	private List<Dataset> getDatasetsFromResultJSON(String parsedEntry,TarArchiveInputStream fin) throws IOException, JSONException {
-		BufferedReader br = null;
-		StringBuilder sb = new StringBuilder();
-		br = new BufferedReader(new InputStreamReader(fin));
-		String line;
-		while ((line = br.readLine()) != null) {
-			// Clean JSON -> to much spaces lead to error from JSON parser
-			sb.append(line.replace(" : ", ":"));
-		}
-		JSONObject json = new JSONObject(sb.toString());
+	private List<Dataset> getDatasetsFromResultJSON(File resultJson) throws IOException, JSONException {
+
+		InputStream is = new FileInputStream(resultJson);
+		JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
+
 		List<Long> datasetIds = new ArrayList<>();
 
 		// Iterate over all parameters
@@ -186,25 +175,18 @@ public class DefaultOutputProcessing extends OutputProcessing {
 				}
 			}
 		}
-		// get datasets
+
 		return datasetService.findByIdIn(datasetIds);
 	}
 
 	/**
 	 * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.
 	 * @param processedFiles the list of files to treat as processed files
-	 * @param destDir the destinatino directory where to create these processed datasets
 	 * @param carminDatasetProcessing The carmin dataset processing created before the execution
 	 * @throws EntityNotFoundException 
 	 * @throws IOException 
 	 */
-	private void createProcessedDatasets(List<File> processedFiles, String destDir, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws EntityNotFoundException, IOException {
-
-		File dir = new File(destDir);
-		// create output directory if it doesn't exist
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
+	private void createProcessedDatasets(List<File> processedFiles, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws EntityNotFoundException, IOException {
 
 		List<Dataset> outputDatasets = new ArrayList<>();
 		
@@ -268,7 +250,6 @@ public class DefaultOutputProcessing extends OutputProcessing {
 		carminDatasetProcessing.setInputDatasets(Collections.emptyList());
 		datasetProcessingService.update(carminDatasetProcessing);
 
-		deleteCacheDir(Paths.get(destDir));
 	}
 
 	private void deleteCacheDir(Path directory) {
@@ -278,7 +259,7 @@ public class DefaultOutputProcessing extends OutputProcessing {
 			.map(Path::toFile)
 			.forEach(File::delete);
 		} catch (IOException e) {
-
+			LOG.error("I/O error while deleting cache dir [{}]", directory.toString());
 		}
 	}
 
