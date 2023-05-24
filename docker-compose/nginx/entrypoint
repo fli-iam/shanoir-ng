@@ -64,6 +64,7 @@ sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 	/etc/nginx/shanoir.conf \
 	/etc/nginx/viewer/html/app-config.js \
 	/etc/nginx/ohif-viewer.conf \
+	/etc/nginx/html/index.html \
 	/etc/nginx/html/assets/env.js
 
 configure_instance()
@@ -84,10 +85,6 @@ configure_instance()
 configure_keycloak_adapter_mode()
 {
 	sed -i "s/'SHANOIR_KEYCLOAK_ADAPTER_MODE'/'$SHANOIR_KEYCLOAK_ADAPTER_MODE'/g
-		" /etc/nginx/html/index.html
-	sed -i "s/'SHANOIR_URL_SCHEME'/'$SHANOIR_URL_SCHEME'/g
-		" /etc/nginx/html/index.html
-	sed -i "s/'SHANOIR_URL_HOST'/'$SHANOIR_URL_HOST'/g
 		" /etc/nginx/html/index.html
 }
 
