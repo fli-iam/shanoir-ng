@@ -114,7 +114,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				.orElseThrow(() -> new EntityNotFoundException(
 						"Processing [" + this.identifier + "] not found"));
 
-		String execLabel = "VIP Execution [" + processing.getPipelineIdentifier() + "][" + processing.getIdentifier() + "]";
+		String execLabel = "VIP Execution [" + processing.getName() + "]";
 
 
 		ShanoirEvent event = new ShanoirEvent(
@@ -139,9 +139,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				LOG.error(msg);
 				LOG.error("Stopping the thread...");
 				stop.set(true);
-				event.setMessage(execLabel + " : " + msg);
-				event.setStatus(ShanoirEvent.ERROR);
-				eventService.publishEvent(event);
+				this.setJobInError(event, execLabel + " : " + msg);
 				break;
 			}
 
@@ -157,8 +155,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 					this.carminDatasetProcessingService.updateCarminDatasetProcessing(processing);
 
-					LOG.info("{} status is [{}].", execLabel, ExecutionStatus.FINISHED.getRestLabel());
-
+					LOG.info("{} status is [{}]", execLabel, ExecutionStatus.FINISHED.getRestLabel());
 					event.setMessage(execLabel + " : Finished. Processing imported results...");
 					eventService.publishEvent(event);
 
@@ -167,7 +164,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 							this.importDir + File.separator +
 							processing.getResultsLocation());
 
-					LOG.info("Processing result in import dir [{}]...", userImportDir.getAbsolutePath());
+					LOG.info("Processing result in import directory [{}]...", userImportDir.getAbsolutePath());
 
 					final PathMatcher matcher = userImportDir.toPath().getFileSystem()
 							.getPathMatcher("glob:**/*.{tgz,tar.gz}");
@@ -182,7 +179,11 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 								});
 
 					} catch (IOException e) {
-						LOG.error("I/O error while listing files in import dir.", e);
+
+						String msg = "I/O error while listing files in import directory";
+						LOG.error(msg, e);
+						this.setJobInError(event, execLabel + " : " + msg);
+
 						stop.set(true);
 						break;
 					}
@@ -191,7 +192,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 					stop.set(true);
 
-					event.setMessage(execLabel + " : Finished.");
+					event.setMessage(execLabel + " : Finished");
 					event.setStatus(ShanoirEvent.SUCCESS);
 					event.setProgress(1f);
 					eventService.publishEvent(event);
@@ -211,10 +212,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 					stop.set(true);
 
-					event.setMessage(execLabel + " : "  + execution.getStatus().getRestLabel());
-					event.setStatus(ShanoirEvent.ERROR);
-					event.setProgress(1f);
-					eventService.publishEvent(event);
+					this.setJobInError(event, execLabel + " : "  + execution.getStatus().getRestLabel());
 
 					break;
 
@@ -233,15 +231,26 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 					// inc attempts.
 					attempts++;
 				} else {
-					LOG.error("Error while retrieving execution infos from VIP." , e);
+
+					String msg = "Failed to get execution details from VIP in " + attempts + " attempts";
+					LOG.error(msg , e);
+					this.setJobInError(event, execLabel + " : " + msg);
+
 					stop.set(true);
 				}
 			} catch (RestClientException e) {
 				// in case of an error with no response payload
-				LOG.error("No response payload in execution infos from VIP", e);
+				String msg = "No response payload in execution infos from VIP";
+				LOG.error(msg, e);
+				this.setJobInError(event, execLabel + " : " + msg);
+
 				stop.set(true);
 			} catch (InterruptedException e) {
-				LOG.error("Thread exception", e);
+
+				String msg = "Thread exception";
+				LOG.error(msg, e);
+				this.setJobInError(event, execLabel + " : " + msg);
+
 				stop.set(true);
 			}
 		}
@@ -254,5 +263,12 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	private String refreshServiceAccountAccessToken() throws SecurityException {
 		AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
 		return accessTokenResponse.getToken();
+	}
+
+	private void setJobInError(ShanoirEvent event, String msg){
+		event.setMessage(msg);
+		event.setStatus(ShanoirEvent.ERROR);
+		event.setProgress(1f);
+		eventService.publishEvent(event);
 	}
 }
