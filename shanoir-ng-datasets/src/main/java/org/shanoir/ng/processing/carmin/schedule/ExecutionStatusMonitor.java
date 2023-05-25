@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.PathMatcher;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -126,6 +127,8 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				0.5f);
 		eventService.publishEvent(event);
 
+		processing.setProcessingDate(LocalDate.ofEpochDay(processing.getStartDate()));
+
 		while (!stop.get()) {
 
 			// init headers with the active access token
@@ -170,6 +173,8 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 							.getPathMatcher("glob:**/*.{tgz,tar.gz}");
 					String outputProcessingKey = StringUtils.isEmpty(processing.getOutputProcessing()) ? DEFAULT_OUTPUT : processing.getOutputProcessing();
 
+
+					processing.setProcessingDate(LocalDate.ofEpochDay(processing.getEndDate()));
 
 					try (Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath())) {
 
