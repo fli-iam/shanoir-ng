@@ -37,7 +37,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<label>Research study</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
-							{{study?.name}}
+                            <a [routerLink]="['/study/details/', study?.id]">
+                                {{study?.name}}
+                            </a>
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<select-box formControlName="study" [(ngModel)]="study" [options]="studyOptions" (userChange)="onStudyChange()"></select-box>
