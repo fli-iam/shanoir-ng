@@ -217,7 +217,8 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 					stop.set(true);
 
-					this.setJobInError(event, execLabel + " : "  + execution.getStatus().getRestLabel());
+					this.setJobInError(event, execLabel + " : "  + execution.getStatus().getRestLabel()
+							+ (execution.getErrorCode() != null ? " (Error code : " + execution.getErrorCode() + ")" : ""));
 
 					break;
 
