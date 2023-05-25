@@ -127,7 +127,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				0.5f);
 		eventService.publishEvent(event);
 
-		processing.setProcessingDate(LocalDate.ofEpochDay(processing.getStartDate()));
+		processing.setProcessingDate(LocalDate.now());
 
 		while (!stop.get()) {
 
@@ -174,7 +174,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 					String outputProcessingKey = StringUtils.isEmpty(processing.getOutputProcessing()) ? DEFAULT_OUTPUT : processing.getOutputProcessing();
 
 
-					processing.setProcessingDate(LocalDate.ofEpochDay(processing.getEndDate()));
+					processing.setProcessingDate(LocalDate.now());
 
 					try (Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath())) {
 
