@@ -3,7 +3,6 @@ package org.shanoir.uploader.action;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.DefaultListModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -35,17 +34,11 @@ public class ImportStudyCardFilterDocumentListener implements DocumentListener {
 	}
 
 	private void filter() {
+		mainWindow.importDialog.studyCardCB.removeAllItems();
 		String filter = mainWindow.importDialog.studyCardFilterTextField.getText();
-		DefaultListModel<StudyCard> model = (DefaultListModel<StudyCard>) mainWindow.importDialog.studyCardCB.getModel();
 		for (StudyCard studyCard : defaultStudyCards) {
-            if (!studyCard.getName().contains(filter)) {
-                if (model.contains(studyCard)) {
-                    model.removeElement(studyCard);
-                }
-            } else {
-                if (!model.contains(studyCard)) {
-                    model.addElement(studyCard);
-                }
+            if (studyCard.toString().contains(filter)) {
+            	mainWindow.importDialog.studyCardCB.addItem(studyCard);
             }
         }
 	}

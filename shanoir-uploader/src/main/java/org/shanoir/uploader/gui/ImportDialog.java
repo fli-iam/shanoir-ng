@@ -403,7 +403,7 @@ public class ImportDialog extends JDialog {
 		importDialogGBC.gridwidth = 1;
 		importDialogGBC.gridheight = 1;
 		container.add(studyCardFilterTextField, importDialogGBC);
-//		studyCardFilterTextField.getDocument().addDocumentListener(studyCardFilterItemListener);
+		studyCardFilterTextField.getDocument().addDocumentListener(studyCardFilterItemListener);
 
 		/**
 		 * Subject
