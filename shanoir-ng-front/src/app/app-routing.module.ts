@@ -97,7 +97,7 @@ import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
 import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
-import { ImportEndComponent } from './import/end/import-end.component';
+import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 
 let routes: Routes = [
     {
@@ -201,12 +201,12 @@ let routes: Routes = [
             }, {
                 path: 'brukerseries',
                 component: BrukerSelectSeriesComponent
-            }, {
-                path: 'end',
-                component: ImportEndComponent
             }
         ]
     }, {
+        path: 'task/status/:ts',
+        component: TaskStatusComponent
+    }, {    
         path: 'task',
         component: AsyncTasksComponent
     }, {

@@ -253,6 +253,8 @@ public class ImporterService {
         sb.append("Examination : ")
             .append(e.getExamination().getComment())
             .append(" (").append(e.getExamination().getId()).append(")");
+        sb.append("\n");
+        sb.append("Examination : ");
 	    for (QualityCardResultEntry qcResult : e.getQualityResult()) {
 	        sb.append("\n- ");
 	        sb.append(qcResult.getMessage());

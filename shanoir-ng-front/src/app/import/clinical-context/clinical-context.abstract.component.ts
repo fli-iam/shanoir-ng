@@ -634,13 +634,13 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             .updateSubjectStudyValues(context.subject.subjectStudy)
             .then(() => {
                 let that = this;
-                this.importData()
+                this.importData(this.stepTs)
                     .then(() => {
                         this.importDataService.reset();
                         setTimeout(() => {
                             that.consoleService.log('info', 'Import successfully started for subject "' + that.subject.name + '" in study "' + that.study.name + '"');
                         }, 0);
-                        this.router.navigate(['import/end']);
+                        this.router.navigate(['imports/end/' + this.stepTs]);
                     }).catch(error => {
                         throw error;
                     });
@@ -649,7 +649,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             });
     }
 
-    abstract importData(): Promise<any>;
+    abstract importData(timestamp: number): Promise<any>;
 
     private hasCoilToUpdate(studycard: StudyCard): boolean {
         if (!studycard) return false;

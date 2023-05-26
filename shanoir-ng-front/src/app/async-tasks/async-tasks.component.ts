@@ -39,6 +39,8 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
             private taskService: TaskService,
             private notificationsService: NotificationsService) {
         super('task');
+        notificationsService.nbNew = 0;
+        notificationsService.nbNewError = 0;
     }
 
     ngAfterViewInit(): void {

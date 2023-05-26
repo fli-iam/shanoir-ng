@@ -12,8 +12,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="header command-zone">Import started</div>
-<div class="global-loading left-icon">
-    <i class="fa fa-cog fa-spin"></i>
-    Please wait ...
-</div>
+<h2>Task Status</h2>
+
+<progress-bar [progress]="currentImportTask?.progress"></progress-bar>
+<code *ngFor="let line of currentImportTask?.message.split('\n')" [class.tab]="line.startsWith('- ')">
+    {{line}}
+</code>

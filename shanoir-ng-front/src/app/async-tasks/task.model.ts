@@ -13,6 +13,7 @@
  */
 
 import { Entity } from '../shared/components/entity/entity.abstract';
+import { camelToSpaces } from '../utils/app.utils';
 
 export class Task extends Entity {
 
@@ -22,6 +23,17 @@ export class Task extends Entity {
     status: number;
     message: string;
     progress: number;
-    eventType: string;
+    _eventType: string;
+    eventLabel: string;
     objectId: number;
+    timestamp: number;
+
+    set eventType(eventType: string) {
+        this._eventType = eventType;
+        this.eventLabel = camelToSpaces(this.eventType.replace('.event', ''));
+    }
+
+    get eventType(): string {
+        return this._eventType;
+    }
 }

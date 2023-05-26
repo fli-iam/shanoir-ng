@@ -15,15 +15,16 @@
 .user-logo i:not(.warning) { height: 40px; width: 40px; font-size: 40px; color: var(--color-b-light); }
 
 a i { margin-left: 7px; }
-a { color: var(--grey); }
-a:hover, a:active { color: white; }
+a { color: inherit; }
+a:hover, a:active { color: inherit; }
 
 .menu-list { margin-top: 20px; min-width: 300px; }
 .menu-list li { font-size: 16px; padding: 5px 10px; }
 .menu-list li:not(.single-task):hover,
 .menu-list .sub-menu li:not(.single-task):hover { background-color: var(--color-b); cursor: pointer; }
 .menu-list .sub-menu li.single-task:hover { cursor: default; }
-.menu-list li > i { margin-left: 6px; width: 30px; }
+.menu-list li > i, .menu-list li > a i { margin-left: 6px; width: 30px; }
+.menu-list a { text-decoration: none; }
 .menu-list .sub-menu { background-color: var(--color-a-light); overflow: hidden; }
 .menu-list .sub-menu li { font-size: 12px; background-color: var(--color-a-light); padding-left: 30px; }
 .menu-list .single-task { color: var(--color-b-light); font-size: 10px !important; }
@@ -33,8 +34,6 @@ a:hover, a:active { color: white; }
 .notif { font-size: 10px; }
 
 .instance, .user, .logo, .menu-list, .bottom-info { float: right; }
-
-progress-bar { width: 100px; }
 
 .bottom-info { min-width: 300px; font-size: 10px; flex: 1 1 auto; justify-content: flex-end; flex-direction: column; display: flex; text-align: center; color: var(--greyer); margin-bottom: 10px; }
 .bottom-info a { color: inherit; }
@@ -69,3 +68,15 @@ progress-bar { width: 100px; }
         display: inline-block; transform: skewX(-45deg); z-index: -1; }
     .instance-frame, .instance-frame::after, .instance-frame::before { background-color: var(--instance-color); border-radius: 2px; }
     .instance-name::after { content: var(--instance-name); }
+
+progress-bar { background-color: var(--color-b-light); height: 14px; border: 1px solid var(--color-b-light2); vertical-align: -2px; margin-left: 12px; width: 160px; font-size: 10px; }
+progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
+.sub-menu progress-bar { width: 100px; height: 12px; font-size: 10px; }
+.sub-menu progress-bar >>> .inner { background-color: #b1a9bf }
+.sub-menu progress-bar >>> .text, .sub-menu progress-bar >>> .left-text { line-height: 12px; }
+
+.jobs { }
+
+.notif { font-size: 10px; color: skyblue; vertical-align: 1px; margin-left: 8px; }
+.notif i { margin-right: 5px; width: auto !important; }
+.notif.error { color: #ff5050; }

@@ -23,10 +23,9 @@ import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 @Injectable()
 export class NotificationsService {
   
-    public nbProcess: number = 0;
-    public nbDone: number = 0;
+    public nbNew: number = 0;
+    public nbNewError: number = 0;
     protected tasks: Task[] = [];
-    public tasksDone: Task[] = [];
     public tasksInProgress: Task[] = [];
     protected isLoading = false;
     protected source;
@@ -36,7 +35,7 @@ export class NotificationsService {
         this.connect();
     }
 
-    private refresh(items = []) {
+    private refresh(items: Task[] = []) {
         this.isLoading = true;
         if (items.length == 0) {
             this.taskService.getTasks().then(itemsGot => {
@@ -47,30 +46,48 @@ export class NotificationsService {
             });
             return;
         }
-
         this.tasks = items;
-        this.nbProcess = 0;
-        this.nbDone = 0;
-        this.tasksDone = [];
-        this.tasksInProgress = []
+        this.updateStatusVars(items);
+        this.isLoading = false;
+    }
+
+    updateStatusVars(items: Task[]) {
+        let tmpFreshTasksDone = [];
+        let tmpTasksInProgress = []
         for (let task of this.tasks) {
-            if (task.status == 1) {
-                this.tasksDone.push(task);
-                this.nbDone +=1;
-            } else {
-                this.tasksInProgress.push(task);
-                 this.nbProcess +=1;
+            if (task.status == -1) {
+                let freshError: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
+                if (freshError) {
+                    this.nbNewError++;
+                    tmpTasksInProgress.push(task);
+                    // remove after 10s
+                    setTimeout(() => this.tasksInProgress = this.tasksInProgress.filter(tip => {
+                        return tip.id != task.id
+                    }), 10000);
+                }
+            } else if (task.status == 1) {
+                let freshDone: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
+                if (freshDone) {
+                    this.nbNew++;
+                    tmpTasksInProgress.push(task);
+                    // remove after 10s
+                    setTimeout(() => this.tasksInProgress = this.tasksInProgress.filter(tip => {
+                        return tip.id != task.id
+                    }), 10000);
+                }
+            } else if (task.status == 2) {
+                tmpTasksInProgress.push(task);
             }
         }
-        this.isLoading = false;
+        this.tasksInProgress = tmpTasksInProgress;
     }
 
     private connect() {
         this.keycloakService.getToken().then(token => {
             this.source = new EventSourcePolyfill(AppUtils.BACKEND_API_UPDATE_TASKS_URL, {
-                  headers: {
-                    'Authorization': "Bearer " + token
-                  }
+                    headers: {
+                        'Authorization': "Bearer " + token
+                    }
                 });
             this.source.addEventListener('message', message => {
                 if (message.data !== "{}") {
