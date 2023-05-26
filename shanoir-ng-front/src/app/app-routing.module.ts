@@ -562,6 +562,15 @@ let routes: Routes = [
 		canActivate: [AuthAdminOrExpertGuard],
 	},
     {
+		path: 'study-card/apply/:id',
+		component: StudyCardApplyComponent,
+        canActivate: [AuthAdminOrExpertGuard],
+	},{
+		path: 'study-card/apply-on-datasets',
+		component: ApplyStudyCardOnComponent,
+        canActivate: [AuthAdminOrExpertGuard],
+	},
+    {
 		path: 'quality-card',
 		redirectTo: 'quality-card/list',
 	},

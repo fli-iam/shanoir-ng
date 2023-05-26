@@ -264,15 +264,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 						<span *ngIf="mode == 'view'" class="left-col">
 						    <p><b>Centers</b></p>
-						    <ol *ngFor="let studyCenter of study.studyCenterList; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
-                                <li class="center-list">- {{studyCenter.center.name}}<span *ngIf="studyCenter.subjectNamePrefix">: {{studyCenter.subjectNamePrefix}}</span></li>
-                            </ol>
+						    <ol *ngFor="let studyCenter of study.studyCenterList;">
+								<li class="center-list">- {{studyCenter.center.name}}<span *ngIf="studyCenter.subjectNamePrefix">: {{studyCenter.subjectNamePrefix}}</span></li>
+							</ol>
 						</span>
 					</li>
 					<li *ngIf="mode != 'view'">
 						<label i18n="Study detail|List of centers label@@studyDetailCentersAndPI">Center</label>
 						<span class="right-col">
-							<select-box [ngModel]="selectedCenter" [ngModelOptions]="{standalone: true}" (userChange)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()" [options]="centerOptions">
+							<select-box formControlName="studyCenter" [ngModel]="selectedCenter" (userChange)="onCenterChange($event)" placeholder="Select a center ..." (onAddClick)="onCenterAdd()" [addDisabled]="!enableAddIcon()" [options]="centerOptions">
 							</select-box>
 							<label *ngIf="hasError('studyCenterList', ['required'])" class="form-validation-alert right-col">At least one center is required !</label>
 						</span>
