@@ -266,8 +266,9 @@ public class BidsImporterService {
 		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
 		
 		event.setStatus(ShanoirEvent.SUCCESS);
-		event.setMessage("(" + importJob.getStudyId() + ")"
-				+": Successfully created datasets for subject " + importJob.getSubjectName()
+
+		event.setMessage(importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")"
+				+" : Successfully created datasets for subject " + importJob.getSubjectName()
 				+ " in examination " + examination.getId());
 		event.setProgress(1f);
 		eventService.publishEvent(event);
