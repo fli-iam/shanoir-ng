@@ -129,12 +129,18 @@ public class ImporterManagerService {
 			if (importJob.isFromPacs()) {
 				importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
 				// at first all dicom files arrive normally in /tmp/shanoir-dcmrcv (see config DicomStoreSCPServer)
+				event.setMessage("Downloading DICOM files from PACS...");
+				eventService.publishEvent(event);
 				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients);
 				// convert instances to images, as already done after zip file upload
+				event.setMessage("Creating images and analyzing DICOM files...");
+				eventService.publishEvent(event);
 				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true);
 			} else if (importJob.isFromShanoirUploader()) {
 				importJobDir = new File(importJob.getWorkFolder());
 				// convert instances to images, as already done after zip file upload
+				event.setMessage("Creating images and analyzing DICOM files...");
+				eventService.publishEvent(event);
 				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
 			} else if (importJob.isFromDicomZip()) {
 				// images creation and analyze of dicom files has been done after upload already
@@ -143,7 +149,8 @@ public class ImporterManagerService {
 				throw new ShanoirException("Unsupported type of import.");
 			}
 						
-			event.setMessage("Anonymizing dicom..");
+			event.setMessage("Anonymizing DICOM files...");
+			event.setProgress(0.25F);
 			eventService.publishEvent(event);
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = patientsIt.next();
@@ -190,7 +197,7 @@ public class ImporterManagerService {
 		
 		generatedMail.setErrorMessage(errorMessage != null ? errorMessage : "An unexpected error occured, please contact Shanoir support.");
 
-		sendMail(importJob, generatedMail, RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE);
+		sendMail(importJob, generatedMail);
 	}
 
 	/**
@@ -198,7 +205,7 @@ public class ImporterManagerService {
 	 * @param job the imprt job
 	 * @param email the recipients
 	 */
-	private void sendMail(ImportJob job, EmailBase email, String queue) {
+	private void sendMail(ImportJob job, EmailBase email) {
 		List<Long> recipients = new ArrayList<>();
 
 		// Get all recpients
@@ -215,7 +222,7 @@ public class ImporterManagerService {
 		email.setRecipients(recipients);
 
 		try {
-			rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(email));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE, objectMapper.writeValueAsString(email));
 		} catch (AmqpException | JsonProcessingException e) {
 			LOG.error("Could not send email for this import. ", e);
 		}
