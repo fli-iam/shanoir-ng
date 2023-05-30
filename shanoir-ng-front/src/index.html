@@ -16,16 +16,6 @@
     <!-- Load environment variables: required to pass e.g. viewerUrl -->
     <script defer type="text/javascript" src="assets/env.js"></script>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-
-    <script>
-        $.get( "assets/datacatalog.json", function( data ) {
-            $( "<script/>", {
-                "type": "application/ld+json",
-                "html": JSON.stringify(data)
-            }).appendTo( "head" );
-        });
-    </script>
 </head>
 
 <body>
