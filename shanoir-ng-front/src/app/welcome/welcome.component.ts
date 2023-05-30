@@ -81,7 +81,7 @@ export class WelcomeComponent implements OnInit {
             }
         `;
 
-        this._renderer2.appendChild(this._document.body, script);
+        this._renderer2.appendChild(this._document.head, script);
 	}
 
 	private fetchStudies() {
