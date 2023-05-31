@@ -1,4 +1,5 @@
 import {
+    AfterViewInit,
     Component,
     ElementRef,
     HostListener,
@@ -39,27 +40,65 @@ export class WelcomeComponent implements OnInit {
 	) { }
 
 	ngOnInit(): void {
-		this.fetchStudies();
+        this.fetchStudies();
+    }
 
+    addSchemaToDOM(): void {
         let script = this._renderer2.createElement('script');
         script.type = `application/ld+json`;
+
+        let datasetStr: string = "";
+
+        this.studies.forEach( study => {
+
+            // keywords handling
+            let keywords: string = "";
+            study.studyTags.forEach( tag => {
+                if (tag != null) {
+                    keywords += "\"" + tag.name + "\"";
+                }
+                if (tag.id != study.studyTags[study.studyTags.length - 1].id) {
+                    keywords += ", ";
+                }
+            })
+
+            // datasets handling
+            if (study != null) {
+                datasetStr += `
+                    {
+                        "@context": "https://schema.org",
+                        "@type": "Dataset",
+                        "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
+                        "name": "` + study.name + `",
+                        "description": "` + study.description + `",
+                        "keywords": [
+                            ` + keywords + `
+                        ]
+                    }`
+            }
+            if (study != this.studies[this.studies.length - 1]) {
+                datasetStr += ", ";
+            }
+        })
+
+        // schema.org DataCatalog + Datasets
         script.text = `
-            {
-                "@context": "http://schema.org",
-                "@id": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST",
-                "@type": "DataCatalog",
-                "dct:conformsTo": "https://bioschemas.org/profiles/DataCatalog/0.3-RELEASE-2019_07_01",
-                "description": "Shanoir-NG (SHAring NeurOImaging Resources, Next Generation) is a web platform (open-source) for clinical and preclinical research, designed to import, share, archive, search and visualize all kind of medical imaging data (BIDS, MR, CT, PT, EEG, Bruker). Its origin goes back to neuroimaging, but its usage is now open for all kind of organs. It provides a user-friendly, secure web access and offers an intuitive workflow to facilitate the collecting and retrieving of imaging data from multiple sources and a wizzard to make the completion of metadata easy. Shanoir-NG comes along with many features such as pseudonymization of data for all imports, automatic NIfTI conversion and support for multi-centres clinical studies.",
-                "keywords": [
+        {
+            "@context": "http://schema.org",
+            "@id": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST",
+            "@type": "DataCatalog",
+            "dct:conformsTo": "https://bioschemas.org/profiles/DataCatalog/0.3-RELEASE-2019_07_01",
+            "description": "Shanoir-NG (SHAring NeurOImaging Resources, Next Generation) is a web platform (open-source) for clinical and preclinical research, designed to import, share, archive, search and visualize all kind of medical imaging data (BIDS, MR, CT, PT, EEG, Bruker). Its origin goes back to neuroimaging, but its usage is now open for all kind of organs. It provides a user-friendly, secure web access and offers an intuitive workflow to facilitate the collecting and retrieving of imaging data from multiple sources and a wizzard to make the completion of metadata easy. Shanoir-NG comes along with many features such as pseudonymization of data for all imports, automatic NIfTI conversion and support for multi-centres clinical studies.",
+            "keywords": [
                 "Medical Imaging",
                 "Neuroimaging",
                 "Neuroinformatics",
                 "MRI",
                 "Research"
             ],
-                "license": "https://www.gnu.org/licenses/gpl-3.0.en.html",
-                "name": "Shanoir",
-                "provider": [
+            "license": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+            "name": "Shanoir",
+            "provider": [
                 {
                     "@context": "http://schema.org",
                     "@type": "Organization",
@@ -77,9 +116,12 @@ export class WelcomeComponent implements OnInit {
                     "url": "https://inria.fr"
                 }
             ],
-                "url": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST"
-            }
-        `;
+            "dataset": [`
+                + datasetStr + `
+            ],
+
+            "url": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST"
+        }`;
 
         this._renderer2.appendChild(this._document.head, script);
 	}
@@ -92,6 +134,7 @@ export class WelcomeComponent implements OnInit {
 				// return new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
 				return (b.nbExaminations) - (a.nbExaminations);
 			})
+            this.addSchemaToDOM();
 		});
 	}
 
