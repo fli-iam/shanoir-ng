@@ -237,7 +237,6 @@ export class StudyComponent extends EntityComponent<Study> {
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
-            'studyCenter': [this.study.studyCenterList, [Validators.required]],
             'studyCenterList': [this.study.studyCenterList, [this.validateCenter]],
             'subjectStudyList': [this.study.subjectStudyList],
             'tags': [this.study.tags],
@@ -345,17 +344,11 @@ export class StudyComponent extends EntityComponent<Study> {
 
     /** Center section management  **/
     onMonoMultiChange() {
-      if (this.study.monoCenter) {
-        this.centerOptions.forEach(option => option.disabled = false);
-      }
-      if (this.study.monoCenter && this.study.studyCenterList.length >= 1) {
-          this.study.studyCenterList = [this.study.studyCenterList[0]];
-          let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
-          if (option) this.selectedCenter = option.value;
-      }
-      if (!this.study.monoCenter) {
-        this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
-      }
+        if (this.study.monoCenter && this.study.studyCenterList.length >= 1) {
+            this.study.studyCenterList = [this.study.studyCenterList[0]];
+            let option = this.centerOptions.find(option => option.value.id == this.study.studyCenterList[0].center.id);
+            if (option) this.selectedCenter = option.value;
+        }
     }
 
     goToCenter(id: number) {
@@ -370,9 +363,7 @@ export class StudyComponent extends EntityComponent<Study> {
             studyCenter.center.name = this.selectedCenter.name;
             this.study.studyCenterList.push(studyCenter);
             this.study.studyCenterList = [...this.study.studyCenterList];
-            if (!this.study.monoCenter) {
-              this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
-            }
+            this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
         }
         this.form.get('studyCenterList').markAsDirty();
         this.form.get('studyCenterList').updateValueAndValidity();
@@ -383,9 +374,6 @@ export class StudyComponent extends EntityComponent<Study> {
       if (this.study.monoCenter) {
         this.study.studyCenterList = []
         this.onCenterAdd();
-      }
-      if (!this.study.monoCenter) {
-        this.centerOptions.forEach(option => option.disabled = this.study.studyCenterList.findIndex(studyCenter => studyCenter.center.id == option.value.id) != -1);
       }
     }
 
