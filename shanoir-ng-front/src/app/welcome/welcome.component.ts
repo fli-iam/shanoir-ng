@@ -48,6 +48,7 @@ export class WelcomeComponent implements OnInit {
         script.type = `application/ld+json`;
 
         let datasetStr: string = "";
+        let shanoirUrl: string = window.location.protocol + "//" + window.location.hostname;
 
         this.studies.forEach( study => {
 
@@ -77,7 +78,7 @@ export class WelcomeComponent implements OnInit {
                     }`
             }
             if (study != this.studies[this.studies.length - 1]) {
-                datasetStr += ", ";
+                datasetStr += ",";
             }
         })
 
@@ -85,7 +86,7 @@ export class WelcomeComponent implements OnInit {
         script.text = `
         {
             "@context": "http://schema.org",
-            "@id": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST",
+            "@id": "` + shanoirUrl + `",
             "@type": "DataCatalog",
             "dct:conformsTo": "https://bioschemas.org/profiles/DataCatalog/0.3-RELEASE-2019_07_01",
             "description": "Shanoir-NG (SHAring NeurOImaging Resources, Next Generation) is a web platform (open-source) for clinical and preclinical research, designed to import, share, archive, search and visualize all kind of medical imaging data (BIDS, MR, CT, PT, EEG, Bruker). Its origin goes back to neuroimaging, but its usage is now open for all kind of organs. It provides a user-friendly, secure web access and offers an intuitive workflow to facilitate the collecting and retrieving of imaging data from multiple sources and a wizzard to make the completion of metadata easy. Shanoir-NG comes along with many features such as pseudonymization of data for all imports, automatic NIfTI conversion and support for multi-centres clinical studies.",
@@ -120,7 +121,7 @@ export class WelcomeComponent implements OnInit {
                 + datasetStr + `
             ],
 
-            "url": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST"
+            "url": "` + shanoirUrl + `"
         }`;
 
         this._renderer2.appendChild(this._document.head, script);
