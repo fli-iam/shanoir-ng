@@ -28,20 +28,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 
 			<ul class="tabs">
-				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" [fragment]="'general'" skipLocationChange replaceUrl="true">General</li>
-				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" skipLocationChange replaceUrl="true">Files</li>
-				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" skipLocationChange replaceUrl="true">Subjects</li>
-				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" skipLocationChange replaceUrl="true">Centers</li>
-				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" skipLocationChange replaceUrl="true">Members</li>
-				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" skipLocationChange replaceUrl="true">Tags</li>
+				<li [class.active]="activeTab == 'general'" [routerLink]="'.'" fragment="general" replaceUrl="true">General</li>
+				<li [class.active]="activeTab == 'files'" [routerLink]="'.'" [fragment]="'files'" replaceUrl="true">Files</li>
+				<li [class.active]="activeTab == 'subjects'" [routerLink]="'.'" [fragment]="'subjects'" replaceUrl="true">Subjects</li>
+				<li [class.active]="activeTab == 'centers'" [routerLink]="'.'" [fragment]="'centers'" replaceUrl="true">Centers</li>
+				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" replaceUrl="true">Members</li>
+				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">Tags</li>
 				<ng-container *ngIf="mode == 'view'">
-					<li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" skipLocationChange replaceUrl="true">Quality</li>				
-					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" skipLocationChange replaceUrl="true">Tree</li>
-					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" skipLocationChange replaceUrl="true">BIDS</li>
+					<li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>				
+					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" replaceUrl="true">Tree</li>
+					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" replaceUrl="true">BIDS</li>
 				</ng-container>
 				<ng-container *ngIf="mode != 'view'">
-					<li [class.active]="activeTab == 'tree'" class="disabled" skipLocationChange replaceUrl="true">Tree</li>
-					<li [class.active]="activeTab == 'bids'" class="disabled" skipLocationChange replaceUrl="true">BIDS</li>
+					<li [class.active]="activeTab == 'tree'" class="disabled" replaceUrl="true">Tree</li>
+					<li [class.active]="activeTab == 'bids'" class="disabled" replaceUrl="true">BIDS</li>
 				</ng-container>
 			</ul>
 
