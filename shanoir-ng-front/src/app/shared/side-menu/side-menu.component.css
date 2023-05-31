@@ -77,6 +77,6 @@ progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
 
 .jobs { }
 
-.notif { font-size: 10px; color: skyblue; vertical-align: 1px; margin-left: 8px; }
+.notif { font-size: 10px; color: #00ff44; vertical-align: 1px; margin-left: 8px; font-weight: bold; }
 .notif i { margin-right: 5px; width: auto !important; }
-.notif.error { color: #ff5050; }
+.notif.error { color: #ff1900; }
