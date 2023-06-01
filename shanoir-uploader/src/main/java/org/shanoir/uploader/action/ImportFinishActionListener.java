@@ -74,6 +74,9 @@ public class ImportFinishActionListener implements ActionListener {
 		final Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
 		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
 		if (study == null || study.getId() == null || studyCard == null || studyCard.getName() == null) {
+			JOptionPane.showMessageDialog(mainWindow.frame,
+					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
+					"Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		if (ShUpConfig.isModeSubjectCommonNameManual()) {
