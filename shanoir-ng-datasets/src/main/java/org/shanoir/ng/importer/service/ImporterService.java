@@ -120,9 +120,13 @@ public class ImporterService {
 				for (Patient patient : importJob.getPatients()) {
 					for (Study study : patient.getStudies()) {
 						float progress = 0.5f;
+
+						int nbSeries = study.getSeries().size();
+						int cpt = 1;
+
 						for (Serie serie : study.getSeries() ) {
 							if (serie.getSelected() != null && serie.getSelected()) {
-								event.setMessage("Creating datasets for serie " + serie.getProtocolName()+ " of examination " + importJob.getExaminationId());
+								event.setMessage("Creating datasets for serie [" + serie.getProtocolName() + "] (" + cpt + "/" + nbSeries + ") of examination [" + importJob.getExaminationId() + "]...");
 								eventService.publishEvent(event);
 								DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
 								if (acquisition != null) {
@@ -132,6 +136,7 @@ public class ImporterService {
 								event.setProgress(progress);
 								rank++;
 							}
+							cpt++;
 						}
 					}
 				}

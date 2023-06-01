@@ -94,14 +94,17 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				Study study = studiesIt.next();
 				// serie level
 				List<Serie> series = study.getSeries();
+				int nbSeries = series.size();
+				int cpt = 1;
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
 					if(event != null){
-						event.setMessage("Creating images and analyzing DICOM files for serie [" + serie.getProtocolName() + "]...");
+						event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] " + cpt + "/" + nbSeries + ")");
 						eventService.publishEvent(event);
 					}
 					filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
 					getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
+					cpt++;
 				}
 			}
 		}

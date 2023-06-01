@@ -272,9 +272,11 @@ public class ImporterManagerService {
 			for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 				Study study = studiesIt.next();
 				List<Serie> series = study.getSeries();
+				int nbSeries = series.size();
+				int cpt = 1;
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
-					event.setMessage("Downloading DICOM files from PACS for serie [" + serie.getProtocolName() + "]...");
+					event.setMessage("Downloading DICOM files from PACS for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")");
 					eventService.publishEvent(event);
 
 					queryPACSService.queryCMOVE(serie);
@@ -298,6 +300,7 @@ public class ImporterManagerService {
 							throw new ShanoirException("Error while creating serie id folder: file to copy does not exist.");
 						}
 					}
+					cpt++;
 				}
 			}
 		}

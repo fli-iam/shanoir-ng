@@ -167,12 +167,14 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			List<Serie> series = study.getSeries();
 			float progress = 0;
 
+			int nbSeries = series.size();
+			int cpt = 1;
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = seriesIt.next();
 
 				progress = progress + (0.5f / series.size());
 				importJob.getShanoirEvent().setProgress(progress);
-				importJob.getShanoirEvent().setMessage("Converting to NIFTI for serie [" + serie.getProtocolName() + "]");
+				importJob.getShanoirEvent().setMessage("Converting to NIFTI for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")...");
 				shanoirEventService.publishEvent(importJob.getShanoirEvent());
 
 				if (serie.getSelected()) {
@@ -195,6 +197,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					serie.getImages().clear();
 					serie.getNonImages().clear();
 				}
+				cpt++;
 			}
 		}
 	}
