@@ -129,19 +129,13 @@ public class ImporterManagerService {
 			if (importJob.isFromPacs()) {
 				importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
 				// at first all dicom files arrive normally in /tmp/shanoir-dcmrcv (see config DicomStoreSCPServer)
-				event.setMessage("Downloading DICOM files from PACS...");
-				eventService.publishEvent(event);
-				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients);
+				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients, event);
 				// convert instances to images, as already done after zip file upload
-				event.setMessage("Creating images and analyzing DICOM files...");
-				eventService.publishEvent(event);
-				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true);
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true, event);
 			} else if (importJob.isFromShanoirUploader()) {
 				importJobDir = new File(importJob.getWorkFolder());
 				// convert instances to images, as already done after zip file upload
-				event.setMessage("Creating images and analyzing DICOM files...");
-				eventService.publishEvent(event);
-				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, event);
 			} else if (importJob.isFromDicomZip()) {
 				// images creation and analyze of dicom files has been done after upload already
 				importJobDir = new File(importJob.getWorkFolder());
@@ -149,26 +143,31 @@ public class ImporterManagerService {
 				throw new ShanoirException("Unsupported type of import.");
 			}
 						
-			event.setMessage("Anonymizing DICOM files...");
 			event.setProgress(0.25F);
 			eventService.publishEvent(event);
+
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = patientsIt.next();
 				// perform anonymization only in case of profile explicitly set
 				if (importJob.getAnonymisationProfileToUse() != null && !importJob.getAnonymisationProfileToUse().isEmpty()) {
 					ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
 					final Subject subject = patient.getSubject();
-					if (subject != null) {
-						final String subjectName = subject.getName();
-						try {
-							ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
-						} catch (Exception e) {
-							LOG.error(e.getMessage(), e);
-							throw new ShanoirException("Error during anonymization.");
-						}						
-					} else {
+
+					if (subject == null) {
 						LOG.error("Error: subject == null in importJob.");
-						throw new ShanoirException("Error: subject == null in importJob.");						
+						throw new ShanoirException("Error: subject == null in importJob.");
+					}
+
+					final String subjectName = subject.getName();
+
+					event.setMessage("Anonymizing DICOM files for subject [" + subjectName + "]...");
+					eventService.publishEvent(event);
+
+					try {
+						ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
+					} catch (Exception e) {
+						LOG.error(e.getMessage(), e);
+						throw new ShanoirException("Error during anonymization.");
 					}
 				}
 				Long converterId = importJob.getConverterId();
@@ -266,7 +265,7 @@ public class ImporterManagerService {
 	 * @param patients
 	 * @throws ShanoirException
 	 */
-	private void downloadAndMoveDicomFilesToImportJobDir(final File importJobDir, List<Patient> patients) throws ShanoirException {
+	private void downloadAndMoveDicomFilesToImportJobDir(final File importJobDir, List<Patient> patients, ShanoirEvent event) throws ShanoirException {
 		for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 			Patient patient = patientsIt.next();
 			List<Study> studies = patient.getStudies();
@@ -275,9 +274,13 @@ public class ImporterManagerService {
 				List<Serie> series = study.getSeries();
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
+					event.setMessage("Downloading DICOM files from PACS for serie [" + serie.getProtocolName() + "]...");
+					eventService.publishEvent(event);
+
 					queryPACSService.queryCMOVE(serie);
 					String serieID = serie.getSeriesInstanceUID();
 					File serieIDFolderDir = new File(importJobDir + File.separator + serieID);
+
 					if(!serieIDFolderDir.exists()) {
 						serieIDFolderDir.mkdirs();
 					} else {

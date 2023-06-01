@@ -172,7 +172,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 				progress = progress + (0.5f / series.size());
 				importJob.getShanoirEvent().setProgress(progress);
-				importJob.getShanoirEvent().setMessage("Converting to nifti, serie: " + serie.getProtocolName());
+				importJob.getShanoirEvent().setMessage("Converting to NIFTI for serie [" + serie.getProtocolName() + "]");
 				shanoirEventService.publishEvent(importJob.getShanoirEvent());
 
 				if (serie.getSelected()) {
