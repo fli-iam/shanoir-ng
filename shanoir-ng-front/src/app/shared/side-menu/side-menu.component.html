@@ -49,7 +49,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/access-request/list" routerLinkActive="active"><i class="fa-solid fa-user-lock"></i>Access Requests<span class="counter">{{accessRequestsToValidate}}</span></li>
     </div>
     <li>
-        <a routerLink="/task" routerLinkActive="active">
+        <a routerLink="/task" routerLinkActive="active" class="menu-link">
             <i class="fas fa-tasks"></i>Jobs
             <span *ngIf="!state.jobsOpened && notificationsService.tasksInProgress.length > 0 && notificationsService.totalProgress() < 1">
                 <progress-bar [progress]="notificationsService.totalProgress()" [width]="70"></progress-bar>
@@ -59,7 +59,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 {{notificationsService.nbNew}}
             </span>
             <span *ngIf="notificationsService.nbNewError" class="notif error">
-                <i class="fa-solid fa-xmark"></i>
+                <i class="fa-solid fa-triangle-exclamation"></i>
                 {{notificationsService.nbNewError}}
             </span>
         </a>
@@ -135,7 +135,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </ul>
 
 <div class="bottom-info">
-    <div>{{VERSION.raw}}</div>
+    <div><a href="https://github.com/fli-iam/shanoir-ng/commit/{{VERSION.hash?.substring(1)}}" target="_blank" [style.text-decoration]="'none'">{{VERSION.raw}}</a></div>
     <div>Copyright (C) 2009-2023 Inria</div>
-    <div><a href="https://www.inria.fr/">https://www.inria.fr/</a></div>
+    <div><a href="https://www.inria.fr/" target="_blank">https://www.inria.fr/</a></div>
 </div>

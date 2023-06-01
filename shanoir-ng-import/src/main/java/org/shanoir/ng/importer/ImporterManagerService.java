@@ -174,7 +174,7 @@ public class ImporterManagerService {
 			LOG.error("Error during import for study {} and examination {}", importJob.getStudyId(), importJob.getExaminationId(), e);
 			event.setMessage("ERROR while importing data for study " + importJob.getStudyId() + " for examination " + importJob.getExaminationId() + ", please contact an administrator");
 			event.setStatus(ShanoirEvent.ERROR);
-			event.setProgress(1f);
+			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			sendFailureMail(importJob, e.getMessage());
 		}

@@ -12,9 +12,49 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<h2>Task Status</h2>
-
-<progress-bar [progress]="currentImportTask?.progress"></progress-bar>
-<code *ngFor="let line of currentImportTask?.message.split('\n')" [class.tab]="line.startsWith('- ')">
-    {{line}}
-</code>
+<form>
+    <fieldset>
+        <legend>Details</legend>
+        <ol>
+            <li>
+                <label>Id</label>
+                <span class="right-col">{{task.id}}</span>
+            </li>
+            <li>
+                <label>Label</label>
+                <span class="right-col">{{task.eventLabel}}</span>
+            </li>
+            <li>
+                <label>Status</label>
+                <span class="right-col"><progress-bar [progress]="task?.progress"></progress-bar></span>
+            </li>
+            <li class="message-li">
+                <label>Last message</label>
+                <span class="right-col">
+                    <div class="message">
+                        <code *ngFor="let line of task?.message.split('\n')" [class.tab]="line.startsWith('- ')">
+                            {{line}}
+                        </code>
+                    </div>
+                </span>
+            </li>
+            <li *ngIf="task.route">
+                <label>Link</label>
+                <span class="right-col left-icon">
+                    <a [routerLink]="task.route">
+                        <i class="fa-solid fa-link"></i>
+                        {{task.route}}
+                    </a>
+                </span>
+            </li>
+            <li>
+                <label>Creation</label>
+                <span class="right-col">{{task.creationDate | date: 'dd/MM/yyyy HH:mm:ss'}}</span>
+            </li>
+            <li>
+                <label>Last update</label>
+                <span class="right-col">{{task.lastUpdate | date: 'dd/MM/yyyy HH:mm:ss'}}</span>
+            </li>
+        </ol>
+    </fieldset>
+</form>

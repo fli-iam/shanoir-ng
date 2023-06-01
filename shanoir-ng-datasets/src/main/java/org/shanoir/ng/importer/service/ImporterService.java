@@ -220,7 +220,7 @@ public class ImporterService {
 		    String msg = buildErrorMessage(e);
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage(msg);
-			event.setProgress(1f);
+			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			LOG.warn(msg, e);	
 			// Send mail
@@ -229,7 +229,7 @@ public class ImporterService {
 		} catch (Exception e) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("Unexpected error during the import: " + e.getMessage() + ", please contact an administrator.");
-            event.setProgress(1f);
+            event.setProgress(-1f);
             eventService.publishEvent(event);
             LOG.error("Error during import for exam: {} : {}", importJob.getExaminationId(), e); 
             // Send mail
@@ -440,7 +440,7 @@ public class ImporterService {
 		if (importJob == null || importJob.getDatasetProcessing() == null) {
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("Dataset processing missing.");
-			event.setProgress(1f);
+			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			return null;
 		}
@@ -573,7 +573,7 @@ public class ImporterService {
 			LOG.error("Error while importing processed dataset: ", e);
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage("Unexpected error during the import of the processed dataset: " + e.getMessage() + ", please contact an administrator.");
-			event.setProgress(1f);
+			event.setProgress(-1f);
 			eventService.publishEvent(event);
 			throw e;
 		}

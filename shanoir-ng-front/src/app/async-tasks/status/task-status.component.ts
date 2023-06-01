@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { NotificationsService } from '../../shared/notifications/notifications.service';
@@ -24,35 +24,25 @@ import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
     templateUrl: 'task-status.component.html',
     styleUrls: ['task-status.component.css'],
 })
-export class TaskStatusComponent implements OnInit, OnDestroy {
+export class TaskStatusComponent implements OnDestroy, OnChanges {
 
     importTs: number;
     protected subscribtions: Subscription[] = [];
-    currentImportTask: Task;
+    @Input() task: Task;
 
     constructor(
-        private notificationsService: NotificationsService,
-        private activatedRoute: ActivatedRoute,
-        private breadcrumbsService: BreadcrumbsService
-    ) {
-        setTimeout(() => {
-            breadcrumbsService.currentStepAsMilestone();
-            breadcrumbsService.currentStep.label = 'Task Status';
-        });
+        private notificationsService: NotificationsService
+    ) { }
 
-        this.subscribtions.push(
-            this.notificationsService.getNotifications().subscribe(tasks => {
-                this.currentImportTask = tasks.find(task => task.timestamp == this.importTs);
-            })
-        );
-    }
 
-    ngOnInit(): void {
-        this.subscribtions.push(this.activatedRoute.params.subscribe( 
-            params => {
-                this.importTs = +params['ts'];
-            }
-        ));
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes.task && this.task) {
+            this.subscribtions.push(
+                this.notificationsService.getNotifications().subscribe(tasks => {
+                    this.task = tasks.find(task => task.id == this.task.id);
+                })
+            );
+        } 
     }
 
     ngOnDestroy() {
