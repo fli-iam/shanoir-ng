@@ -203,11 +203,11 @@ public class SubjectApiController implements SubjectApi {
 		}
 	}
 
-	public ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name) {
+	public ResponseEntity<Page<SubjectDTO>> findClinicalSubjectsPageByName(Pageable page, String name) {
 		// Get all allowed studies
 		List<Study> studies = this.studyService.findAll();
 		
-		Page<Subject> subjects = this.subjectService.getFilteredPageByStudies(page, name, studies);
+		Page<Subject> subjects = this.subjectService.getClinicalFilteredPageByStudies(page, name, studies);
 		
 		if (subjects.getContent().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

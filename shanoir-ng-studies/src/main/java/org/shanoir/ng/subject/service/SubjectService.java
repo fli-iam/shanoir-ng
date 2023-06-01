@@ -186,13 +186,13 @@ public interface SubjectService {
 
 
 	/**
-	 * Returns a filtered page by name.
+	 * Returns a filtered page by clinical subject name.
 	 * @param page pageable
 	 * @param name the subject name filter
 	 * @param studies the list of allowed studies
-	 * @return the list of subject as page
+	 * @return the list of clinical subject as page
 	 */
-	Page<Subject> getFilteredPageByStudies(Pageable page, String name, List<Study> studies);
+	Page<Subject> getClinicalFilteredPageByStudies(Pageable page, String name, List<Study> studies);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
