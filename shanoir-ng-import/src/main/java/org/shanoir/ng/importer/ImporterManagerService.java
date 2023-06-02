@@ -271,7 +271,7 @@ public class ImporterManagerService {
 			List<Study> studies = patient.getStudies();
 			for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 				Study study = studiesIt.next();
-				List<Serie> series = study.getSeries();
+				List<Serie> series = study.getSelectedSeries();
 				int nbSeries = series.size();
 				int cpt = 1;
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
