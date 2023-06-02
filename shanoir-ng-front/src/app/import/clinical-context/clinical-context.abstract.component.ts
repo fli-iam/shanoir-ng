@@ -640,7 +640,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
                         setTimeout(() => {
                             that.consoleService.log('info', 'Import successfully started for subject "' + that.subject.name + '" in study "' + that.study.name + '"');
                         }, 0);
-                        this.getNextUrl();
+                        this.router.navigate([this.getNextUrl()]);
                     }).catch(error => {
                         throw error;
                     });

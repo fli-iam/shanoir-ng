@@ -27,6 +27,7 @@ export class NotificationsService {
     public nbNewError: number = 0;
     protected tasks: Task[] = [];
     public tasksInProgress: Task[] = [];
+    public freshCompletedTasks: Task[] = [];
     protected isLoading = false;
     protected source;
     private tasksSubject: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]);
@@ -47,33 +48,32 @@ export class NotificationsService {
             return;
         }
         this.tasks = items;
-        this.updateStatusVars(items);
+        this.updateStatusVars();
         this.isLoading = false;
     }
 
-    updateStatusVars(items: Task[]) {
-        let tmpFreshTasksDone = [];
-        let tmpTasksInProgress = []
+    updateStatusVars() {
+        let tmpTasksInProgress = [];
         for (let task of this.tasks) {
             if (task.status == -1) {
                 let freshError: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
                 if (freshError) {
                     this.nbNewError++;
-                    tmpTasksInProgress.push(task);
-                    // remove after 10s
-                    setTimeout(() => this.tasksInProgress = this.tasksInProgress.filter(tip => {
-                        return tip.id != task.id
-                    }), 10000);
+                    this.freshCompletedTasks.push(task);
+                    // remove after 30s
+                    setTimeout(() => {
+                        this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
+                    }, 30000);
                 }
             } else if (task.status == 1) {
                 let freshDone: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
                 if (freshDone) {
                     this.nbNew++;
-                    tmpTasksInProgress.push(task);
-                    // remove after 10s
-                    setTimeout(() => this.tasksInProgress = this.tasksInProgress.filter(tip => {
-                        return tip.id != task.id
-                    }), 10000);
+                    this.freshCompletedTasks.push(task);
+                    // remove after 30s
+                    setTimeout(() => {
+                        this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
+                    }, 30000);
                 }
             } else if (task.status == 2) {
                 tmpTasksInProgress.push(task);
