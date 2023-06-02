@@ -33,6 +33,7 @@ export class SimpleDatasetNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     @Input() related: boolean = false;
+    detailsPath: string = '/dataset/details/';
     @Output() onSimpleDatasetDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
@@ -60,7 +61,7 @@ export class SimpleDatasetNodeComponent implements OnChanges {
     }
 
     showDatasetDetails() {
-        this.router.navigate(['/dataset/details/' + this.node.id])
+        this.router.navigate([this.detailsPath + this.node.id])
     }
 
     hasChildren(): boolean | 'unknown' {
