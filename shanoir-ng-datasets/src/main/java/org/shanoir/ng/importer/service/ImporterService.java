@@ -158,9 +158,7 @@ public class ImporterService {
 			if (examination != null) {
 			    // generate acquisitions
 			    generatedAcquisitions = generateAcquisitions(examination, importJob, event);
-			    for (DatasetAcquisition acquisition : generatedAcquisitions) {
-			        examination.getDatasetAcquisitions().addAll(generatedAcquisitions); // change to set() ?
-                }
+				examination.getDatasetAcquisitions().addAll(generatedAcquisitions); // change to set() ?
 			   	// Quality check
 				QualityCardResult qualityResult = checkQuality(examination, importJob);                				
 				// Has quality check passed ?
