@@ -160,14 +160,14 @@ public class ImporterManagerService {
 
 					final String subjectName = subject.getName();
 
-					event.setMessage("Anonymizing DICOM files for subject [" + subjectName + "]...");
+					event.setMessage("Pseudonymizing DICOM files for subject [" + subjectName + "]...");
 					eventService.publishEvent(event);
 
 					try {
 						ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
 					} catch (Exception e) {
 						LOG.error(e.getMessage(), e);
-						throw new ShanoirException("Error during anonymization.");
+						throw new ShanoirException("Error during pseudonymization.");
 					}
 				}
 				Long converterId = importJob.getConverterId();
@@ -307,7 +307,7 @@ public class ImporterManagerService {
 	}
 
 	/**
-	 * Using Java HashSet here to avoid duplicate files for anonymization.
+	 * Using Java HashSet here to avoid duplicate files for Pseudonymization.
 	 * For performance reasons already init with 5000 buckets, assuming,
 	 * that we will normally never have more than 5000 files to process.
 	 * Maybe to be evaluated later with more bigger imports.
