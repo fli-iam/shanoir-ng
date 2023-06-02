@@ -217,7 +217,7 @@ public class ImporterService {
 			mailService.sendImportEmail(importJob, userId, examination, generatedAcquisitions);
 
 		} catch (QualityException e) {
-		    String msg = buildErrorMessage(e);
+		    String msg = e.buildErrorMessage();
 			event.setStatus(ShanoirEvent.ERROR);
 			event.setMessage(msg);
 			event.setProgress(-1f);
@@ -236,30 +236,6 @@ public class ImporterService {
             mailService.sendFailureMail(importJob, userId, e.getMessage());
             throw new ShanoirException(event.getMessage(), e);
         }
-	}
-	
-	private String buildErrorMessage(QualityException e) {
-	    StringBuilder sb = new StringBuilder();
-	    sb.append("Quality checks didn't pass at import.");
-	    sb.append("\n");
-	    sb.append("Study : ")
-	        .append(e.getExamination().getStudy().getName())
-	        .append(" (").append(e.getExamination().getStudy().getId()).append(")");
-	    sb.append("\n");
-        sb.append("Subject : ")
-            .append(e.getExamination().getSubject().getName())
-            .append(" (").append(e.getExamination().getSubject().getId()).append(")");
-        sb.append("\n");
-        sb.append("Examination : ")
-            .append(e.getExamination().getComment())
-            .append(" (").append(e.getExamination().getId()).append(")");
-        sb.append("\n");
-        sb.append("Examination : ");
-	    for (QualityCardResultEntry qcResult : e.getQualityResult()) {
-	        sb.append("\n- ");
-	        sb.append(qcResult.getMessage());
-	    }
-	    return sb.toString();
 	}
 	
 	private Set<DatasetAcquisition> generateAcquisitions(Examination examination, ImportJob importJob, ShanoirEvent event) throws Exception {

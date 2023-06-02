@@ -16,6 +16,7 @@ package org.shanoir.ng.studycard.model;
 
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 
 /**
  * Shanoir Quality Check Exception.
@@ -54,5 +55,29 @@ public class QualityException extends Exception {
 
     public void setQualityResult(QualityCardResult qualityResult) {
         this.qualityResult = qualityResult;
+    }
+
+    public String buildErrorMessage() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Quality checks didn't pass at import.");
+        sb.append("\n");
+        sb.append("Study : ")
+            .append(this.getExamination().getStudy().getName())
+            .append(" (").append(this.getExamination().getStudy().getId()).append(")");
+        sb.append("\n");
+        sb.append("Subject : ")
+            .append(this.getExamination().getSubject().getName())
+            .append(" (").append(this.getExamination().getSubject().getId()).append(")");
+        sb.append("\n");
+        sb.append("Examination : ")
+            .append(this.getExamination().getComment())
+            .append(" (").append(this.getExamination().getId()).append(")");
+        sb.append("\n");
+        sb.append("Examination : ");
+        for (QualityCardResultEntry qcResult : this.getQualityResult()) {
+            sb.append("\n- ");
+            sb.append(qcResult.getMessage());
+        }
+        return sb.toString();
     }
 }
