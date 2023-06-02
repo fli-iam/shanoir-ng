@@ -33,6 +33,7 @@ export class DatasetNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     @Input() related: boolean = false;
+    detailsPath: string = '/dataset/details/';
     @Output() onDatasetDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
@@ -60,10 +61,6 @@ export class DatasetNodeComponent implements OnChanges {
         }
         this.loading = true;
         this.datasetService.downloadFromId(this.node.id, format).then(() => this.loading = false);
-    }
-
-    showDatasetDetails() {
-        this.router.navigate(['/dataset/details/' + this.node.id])
     }
 
     hasChildren(): boolean | 'unknown' {

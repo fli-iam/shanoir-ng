@@ -34,6 +34,7 @@ export class EquipmentNodeComponent implements OnChanges {
     node: AcquisitionEquipmentNode;
     loading: boolean = false;
     menuOpened: boolean = false;
+    detailsPath: string = '/acquisition-equipment/details/';
 
     constructor(
         private router: Router,
@@ -48,10 +49,6 @@ export class EquipmentNodeComponent implements OnChanges {
                 throw new Error('not implemented yet');
             }
         }
-    }
-
-    showDetails() {
-        this.router.navigate(['/acquisition-equipment/details/' + this.node.id]);
     }
 
     deleteEquipment() {
