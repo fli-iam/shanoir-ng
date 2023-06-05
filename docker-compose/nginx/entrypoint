@@ -64,7 +64,6 @@ sed -i "s/SHANOIR_VIEWER_OHIF_URL_HOST/$SHANOIR_VIEWER_OHIF_URL_HOST/g
 	/etc/nginx/shanoir.conf \
 	/etc/nginx/viewer/html/app-config.js \
 	/etc/nginx/ohif-viewer.conf \
-	/etc/nginx/html/index.html \
 	/etc/nginx/html/assets/env.js
 
 configure_instance()
