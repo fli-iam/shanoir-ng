@@ -38,6 +38,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
     loading: boolean = false;
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
+    detailsPath: string = '/dataset-acquisition/details/';
     @Output() onAcquisitionDelete: EventEmitter<void> = new EventEmitter();
 
     constructor(
@@ -62,11 +63,6 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
         else if (this.node.datasets == 'UNLOADED') return 'unknown';
         else return this.node.datasets.length > 0;
     }
-
-    showDetails() {
-        this.router.navigate(['/dataset-acquisition/details/' + this.node.id]);
-    }
-
     loadDatasets() {
         if (this.node.datasets == UNLOADED) {
             this.datasetService.getByAcquisitionId(this.node.id).then(datasets => {

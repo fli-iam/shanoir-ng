@@ -15,20 +15,22 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node
         *ngIf="node"
         [class.selected]="isAdmin && this.menuOpened"
-        [label]="node.label" 
+        [label]="node.label"
         awesome="far fa-user"
         [(opened)]="node.open"
         (labelClick)="menuOpened = isAdmin && !menuOpened"
         [hasChildren]="hasChildren()">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="isAdmin">
-        <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showDetails()"></menu-item>
+        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+            <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+        </a>
     </dropdown-menu>
 
-    <ng-container *ngIf="node.open && node.rights && node.rights != $any('UNLOADED')"> 
+    <ng-container *ngIf="node.open && node.rights && node.rights != $any('UNLOADED')">
             <node
                     *ngFor="let right of node.rights"
-                    [label]="right.label" 
+                    [label]="right.label"
                     awesome="fas fa-medal"
                     [hasChildren]="false">
             </node>

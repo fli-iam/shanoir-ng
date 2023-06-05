@@ -49,6 +49,7 @@ export class SubjectNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
+    detailsPath: string = "/subject/details/";
 
     constructor(
         private examinationService: ExaminationService,
@@ -71,7 +72,7 @@ export class SubjectNodeComponent implements OnChanges {
                     false);
             }
             this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != '/subject/details/' + this.node.id;
+            this.showDetails = this.router.url != this.detailsPath + this.node.id;
         }
     }
 
@@ -140,10 +141,6 @@ export class SubjectNodeComponent implements OnChanges {
         if (!this.node.examinations) return false;
         else if (this.node.examinations == (UNLOADED as any)) return 'unknown';
         else return this.node.examinations.length > 0;
-    }
-
-    showSubjectDetails() {
-        this.router.navigate(['/subject/details/' + this.node.id]);
     }
 
     collapseAll() {

@@ -38,6 +38,7 @@ export class ReverseSubjectNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
+    detailsPath: string = '/subject/details/';
 
     constructor(
             private examinationService: ExaminationService,
@@ -83,10 +84,6 @@ export class ReverseSubjectNodeComponent implements OnChanges {
         if (!this.node.studies) return false;
         else if (this.node.studies == 'UNLOADED') return 'unknown';
         else return this.node.studies.length > 0;
-    }
-
-    showSubjectDetails() {
-        this.router.navigate(['/subject/details/' + this.node.id]);
     }
 
     collapseAll() {

@@ -222,7 +222,7 @@ public class ImporterApiController implements ImporterApi {
 			 * 3. STEP: split instances into non-images and images and get additional meta-data
 			 * from first dicom file of each serie, meta-data missing in dicomdir.
 			 */
-			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
+			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, null);
 
 			/**
 			 * . STEP: create ImportJob
