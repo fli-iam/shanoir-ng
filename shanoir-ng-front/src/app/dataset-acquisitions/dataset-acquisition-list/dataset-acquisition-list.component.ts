@@ -59,17 +59,17 @@ export class DatasetAcquisitionListComponent extends EntityListComponent<Dataset
     getColumnDefs(): ColumnDefinition[] {
         let colDef: ColumnDefinition[] = [
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
-            { headerName: 'Type', field: 'type', width: '22px'},
+            { headerName: 'Type', field: 'type', width: '22px', disableSorting: true},
             { headerName: "Acquisition Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
                 cellRenderer: (params: any) => this.transformAcqEq(params.data.acquisitionEquipment),
                 route: (dsAcq: DatasetAcquisition) => '/acquisition-equipment/details/' + dsAcq.acquisitionEquipment?.id
             },
-            { headerName: "Study", field: "examination.study.name", defaultField: 'examination.study.id', orderBy: ['examination.studyId'],
+            { headerName: "Study", field: "examination.study.name", defaultField: 'examination.study.id', orderBy: ['examination.study.name'],
 				route: (dsAcq: DatasetAcquisition) => '/study/details/' + dsAcq.examination.study.id},
             { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
                 return this.dateRenderer(params.data.examination.examinationDate);
             }},    
-            { headerName: "Center", field: "acquisitionEquipment.center.name", disableSorting: true,
+            { headerName: "Center", field: "acquisitionEquipment.center.name", orderBy: ['examination.centerId'],
 				route: (dsAcq: DatasetAcquisition) => (dsAcq.acquisitionEquipment && dsAcq.acquisitionEquipment.center) ? '/center/details/' + dsAcq.acquisitionEquipment?.center.id : null
 			},
             { headerName: "StudyCard", field: "studyCard.name",
