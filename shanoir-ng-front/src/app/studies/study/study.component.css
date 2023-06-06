@@ -43,3 +43,4 @@ textarea { resize : both; }
 .motivation { color: var(--color-c); }
 .access-requests .link i { color: var(--color-a); }
 .access-requests .link:hover { opacity: 0.5; }
+.hidden-tab { position: fixed; opacity: 0 !important; top: -1000%; left: -1000%; }

@@ -44,6 +44,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
     studyCardsLoading: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
+    detailsPath: string = '/study/details/';
     private canAdmin: boolean = false;
 
     constructor(
@@ -137,11 +138,6 @@ export class ReverseStudyNodeComponent implements OnChanges {
             this.canAdmin
         );
     }
-
-    showStudyDetails() {
-        this.router.navigate(['/study/details/' + this.node.id]);
-    }
-
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
         if (!dependencyArr) return false;
         else if (dependencyArr == UNLOADED) return 'unknown';

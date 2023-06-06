@@ -33,6 +33,7 @@ export class CenterNodeComponent implements OnChanges {
     node: CenterNode;
     loading: boolean = false;
     menuOpened: boolean = false;
+    detailsPath: string = '/center/details/';
 
     constructor(
         private router: Router,
@@ -55,10 +56,6 @@ export class CenterNodeComponent implements OnChanges {
         if (!this.node.acquisitionEquipments) return false;
         else if (this.node.acquisitionEquipments == 'UNLOADED') return 'unknown';
         else return this.node.acquisitionEquipments.length > 0;
-    }
-
-    showDetails() {
-        this.router.navigate(['/center/details/' + this.node.id]);
     }
 
     loadEquipments() {
