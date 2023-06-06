@@ -17,7 +17,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [class.selected]="this.menuOpened"
         [label]="node.label"
         [tags]="node.tags"
-        awesome="fas fa-user-injured"
+        [awesome]="node.awesome"
         (firstOpen)="loadExaminations()"
         [(opened)]="node.open"
         [hasChildren]="hasChildren()"

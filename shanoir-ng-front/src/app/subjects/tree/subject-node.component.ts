@@ -26,8 +26,8 @@ import {
     DatasetNode,
     ExaminationNode,
     ProcessingNode,
-    SubjectNode,
-    UNLOADED,
+    ClinicalSubjectNode,
+    UNLOADED, SubjectNode, PreclinicalSubjectNode,
 } from '../../tree/tree.model';
 import {Subject} from '../shared/subject.model';
 import {SubjectService} from "../shared/subject.service";
@@ -61,8 +61,16 @@ export class SubjectNodeComponent implements OnChanges {
         if (changes['input']) {
             if (this.input instanceof SubjectNode) {
                 this.node = this.input;
+            } else if (this.input.preclinical){
+                this.node = new PreclinicalSubjectNode(
+                    this.input.id,
+                    this.input.name,
+                    [],
+                    UNLOADED,
+                    null,
+                    false);
             } else {
-                this.node = new SubjectNode(
+                this.node = new ClinicalSubjectNode(
                     this.input.id,
                     this.input.name,
                     [],
@@ -71,7 +79,7 @@ export class SubjectNodeComponent implements OnChanges {
                     false);
             }
             this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != '/subject/details/' + this.node.id;
+            this.showDetails = this.router.url != '/' + this.node.title + '/details/' + this.node.id;
         }
     }
 
@@ -143,7 +151,7 @@ export class SubjectNodeComponent implements OnChanges {
     }
 
     showSubjectDetails() {
-        this.router.navigate(['/subject/details/' + this.node.id]);
+        this.router.navigate(['/' + this.node.title + '/details/' + this.node.id]);
     }
 
     collapseAll() {
