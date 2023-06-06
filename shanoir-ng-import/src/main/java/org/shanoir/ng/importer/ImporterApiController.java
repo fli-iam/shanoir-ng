@@ -866,7 +866,7 @@ public class ImporterApiController implements ImporterApi {
 				if (subject == null) {
 
 					// Create subject
-					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(subject.getId(), subject.getName()), new IdName(studyId, studyName))));
+					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
 
 					LOG.debug("We found a subject " + subjectName);
 
