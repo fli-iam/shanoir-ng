@@ -207,6 +207,7 @@ export class StudyDTOService {
             studyCenter.center = new Center();
             studyCenter.center.id = dtoStudyCenter.center.id;
             studyCenter.center.name = dtoStudyCenter.center.name;
+            studyCenter.subjectNamePrefix = dtoStudyCenter.subjectNamePrefix;
         }
         return studyCenter;
     }
