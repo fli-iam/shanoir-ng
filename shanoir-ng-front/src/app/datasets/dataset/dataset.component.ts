@@ -19,7 +19,7 @@ import { ActivatedRoute } from '@angular/router';
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
-import { DatasetService } from '../shared/dataset.service';
+import { DatasetService, Format } from '../shared/dataset.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -130,7 +130,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         this.datasetService.download(this.dataset, 'nii', id).then(() => this.downloading = false);
     }
 
-    download(format: string) {
+    download(format: Format) {
         this.downloading = true;
         this.datasetService.download(this.dataset, format).then(() => this.downloading = false);
     }

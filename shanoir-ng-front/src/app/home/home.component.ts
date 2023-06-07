@@ -26,6 +26,7 @@ import { User } from '../users/shared/user.model';
 import { UserService } from '../users/shared/user.service';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { AccessRequest } from '../users/access-request/access-request.model';
+import { MassDownloadService } from '../shared/mass-download/mass-download.service';
 
 @Component({
     selector: 'home',
@@ -57,7 +58,8 @@ export class HomeComponent {
             private studyService: StudyService,
             private keycloakService: KeycloakService,
             private userService: UserService,
-            private taskService: TaskService) {
+            private taskService: TaskService,
+            public test: MassDownloadService) {
         //this.breadcrumbsService.nameStep('Home');
         this.breadcrumbsService.markMilestone();
         this.load();

@@ -102,10 +102,10 @@ export abstract class EntityService<T extends Entity> {
             })
     }
 
-    get(id: number): Promise<T> {
+    get(id: number, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
         return this.http.get<any>(this.API_URL + '/' + id)
             .toPromise()
-            .then(this.mapEntity);
+            .then(entity => this.mapEntity(entity, null, mode));
     }
 
     create(entity: T): Promise<T> {
@@ -119,7 +119,7 @@ export abstract class EntityService<T extends Entity> {
             .toPromise();
     }
 
-    protected mapEntity = (entity: any, quickResult?: T): Promise<T> => {
+    protected mapEntity = (entity: any, quickResult?: T, mode: 'eager' | 'lazy' = 'eager'): Promise<T> => {
         return Promise.resolve(this.toRealObject(entity));
     }
 

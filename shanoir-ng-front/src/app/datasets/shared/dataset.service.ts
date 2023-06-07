@@ -26,6 +26,8 @@ import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
 
+export type Format = 'eeg' | 'nii' | 'BIDS' | 'dcm';
+
 @Injectable()
 export class DatasetService extends EntityService<Dataset> implements OnDestroy {
 
@@ -98,7 +100,6 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
     getByIds(ids: Set<number>): Promise<Dataset[]> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', Array.from(ids).join(","));
-
         return this.http.post<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/allById', formData)
             .toPromise()
             .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
@@ -160,17 +161,17 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
   public downloadDatasetsByExamination(examinationId: number, format: string, progressBar: LoadingBarComponent) {
     let params = new HttpParams().set("examinationId", '' + examinationId).set("format", format);
     this.subscribtions.push(
-      this.http.get(
-        AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination',{
-          reportProgress: true,
-          observe: 'events',
-          responseType: 'blob',
-          params: params
-        }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
-        error =>  {
-          this.errorService. handleError(error);
-          progressBar.progress = 0;
-        })
+        this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination',{
+                reportProgress: true,
+                observe: 'events',
+                responseType: 'blob',
+                params: params
+            }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
+            error =>  {
+                this.errorService. handleError(error);
+                progressBar.progress = 0;
+            })
     );
   }
 
@@ -188,7 +189,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         )
     }
 
-    download(dataset: Dataset, format: string, converterId: number = null): Promise<void> {
+    download(dataset: Dataset, format: Format, converterId: number = null): Promise<void> {
         if (!dataset.id) throw Error('Cannot download a dataset without an id');
         return this.downloadFromId(dataset.id, format, converterId);
     }
@@ -251,9 +252,9 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         AppUtils.browserDownloadFile(response.body, this.getFilename(response));
     }
 
-    protected mapEntity = (dto: DatasetDTO): Promise<Dataset> => {
+    protected mapEntity = (dto: DatasetDTO, quickResult?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> => {
         let result: Dataset = DatasetUtils.getDatasetInstance(dto.type);
-        this.datasetDTOService.toEntity(dto, result);
+        this.datasetDTOService.toEntity(dto, result, mode);
         return Promise.resolve(result);
     }
 
