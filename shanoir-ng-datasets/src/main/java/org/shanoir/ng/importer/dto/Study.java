@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.dto;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
@@ -62,6 +63,10 @@ public class Study {
 
 	public List<Serie> getSeries() {
 		return series;
+	}
+
+	public List<Serie> getSelectedSeries() {
+		return series.stream().filter(s -> s.getSelected() != null && s.getSelected()).collect(Collectors.toList());
 	}
 
 	public void setSeries(List<Serie> series) {

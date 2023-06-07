@@ -166,7 +166,7 @@ public class ImporterServiceTest {
 		assertTrue(task.getStatus() == 1);
 		// NOTE: This test is important as we use the message to send an mail to study admin further.
 		// PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
-		assertEquals("studyName(1): Successfully created datasets for subject subjectName in examination 2", task.getMessage());
+		assertEquals("studyName (n°1) : Successfully created datasets for subject subjectName in examination 2", task.getMessage());
 		
 		// THEN datasets are created
 		// Check what we save at the end
