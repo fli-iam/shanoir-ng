@@ -17,7 +17,7 @@ import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { DatasetService } from '../datasets/shared/dataset.service';
+import { DatasetService, Format } from '../datasets/shared/dataset.service';
 import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 
@@ -41,6 +41,7 @@ import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/datase
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import {environment} from "../../environments/environment";
 import {DatasetType} from "../datasets/shared/dataset-type.model";
+import { MassDownloadService } from '../shared/mass-download/mass-download.service';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -80,7 +81,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
-            private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
+            private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private downloadService: MassDownloadService,
             private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
 
         this.getRole();
@@ -459,7 +460,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
-            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true }
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true },
+            {title: "Download (experimental)", awesome: "fa-solid fa-download", action: () => this.downloadSelected('dcm'), disabledIfNoSelected: true}
         );
         return customActionDefs;
     }
@@ -478,14 +480,21 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
-            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true }
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true },
+            {title: "Download (experimental)", awesome: "fa-solid fa-download", action: () => this.downloadSelected('dcm'), disabledIfNoSelected: true}
         );
         return customActionDefs;
     }
 
-    massiveDownload(type: string) {
+    massiveDownload(type: Format) {
         if (this.selectedDatasetIds) {
             this.datasetService.downloadDatasets([...this.selectedDatasetIds], type, this.progressBar);
+        }
+    }
+
+    downloadSelected(type: Format) {
+        if (this.selectedDatasetIds) {
+            this.downloadService.download([...this.selectedDatasetIds], type);
         }
     }
 

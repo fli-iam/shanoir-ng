@@ -14,42 +14,65 @@
 
 import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Task } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
+import { NotificationsService } from '../notifications/notifications.service';
+
+export type Report = {
+    requestedDatasetIds: number[],
+    startTime: number,
+    list?: {
+        [key: number]: {
+            status: 'QUEUED' | 'ERROR' | 'SUCCESS',
+            error?: any,
+            errorTime?: number
+        }
+    }
+    nbSuccess?: number;
+    nbError?: number;
+};
 
 @Injectable()
 export class MassDownloadService {
 
-    constructor(private datasetService: DatasetService) {}
-
-    test() { // TODO : DELETE
-        this.download([232, 231, 224, 222, 221, 216, 213], 'dcm');
-    }
+    constructor(
+            private datasetService: DatasetService,
+            private notificationService: NotificationsService) {}
 
     download(datasetIds: number[], format: Format, nbQueues: number = 4) {
+        if (datasetIds.length == 0) return;
         this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
+            let task: Task = this.createTask(datasetIds);
             let ids = [...datasetIds]; // copy array
-            let report = {requestedDatasetIds: datasetIds};
+            let report: Report = this.initReport(datasetIds);
+            datasetIds.forEach(id => report.list[id] = { status: 'QUEUED' });
+            let promises: Promise<void>[] = []; 
             for (let queueIndex = 0; queueIndex < nbQueues; queueIndex ++) { // build the dl queues
-                this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report);
+                promises.push(
+                    this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task)
+                );
             }
+            Promise.all(promises).then(() => {
+                task.lastUpdate = new Date();
+                task.status = 1;
+            });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
 
-    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number [], report: any): Promise<void> {
-        return this.saveDataset(id, format, userFolderHandle, report).then(() => {
+    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number [], report: Report, task: Task): Promise<void> {
+        return this.saveDataset(id, format, userFolderHandle, report, task).then(() => {
             if (remainingIds.length > 0) {
-                return this.recursiveSave(remainingIds.shift(), format, userFolderHandle, remainingIds, report);
+                return this.recursiveSave(remainingIds.shift(), format, userFolderHandle, remainingIds, report, task);
             } else {
                 return Promise.resolve();
             }
         });
     } 
 
-    private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: any): Promise<void> {
+    private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task): Promise<void> {
         const metadataPromise: Promise<Dataset> = this.datasetService.get(id, 'lazy');
         const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format);
-
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
             const filename: string = this.getFilename(httpResponse);
@@ -59,8 +82,20 @@ export class MassDownloadService {
                     + '/'
                     + filename
             return this.writeMyFile(path, blob, userFolderHandle);
+        }).then(() => {
+            report.list[id].status = 'SUCCESS';
+            report.nbSuccess++;
+            task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved' ;
         }).catch(reason => {
-
+            report.list[id].status = 'ERROR';
+            report.list[id].error = reason;
+            report.list[id].errorTime = Date.now();
+            report.nbError++;
+            task.message = 'saving dataset n°' + id + ' failed' ;
+            task.status = -1;
+        }).finally(() => {
+            task.lastUpdate = task.creationDate;
+            task.progress = (report.nbSuccess + report.nbError) / report.requestedDatasetIds.length;
         });
     }
 
@@ -109,6 +144,28 @@ export class MassDownloadService {
         const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');
         return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace('/', '_');
+    }
+
+    private initReport(datasetIds: number[]): Report {
+        return{
+            requestedDatasetIds: datasetIds,
+            startTime: Date.now(),
+            list: {},
+            nbError: 0,
+            nbSuccess: 0
+        };
+    }
+
+    private createTask(datasetIds: number[]): Task {
+        let task: Task = new Task();
+        task.id = Date.now();
+        task.creationDate = new Date();
+        task.lastUpdate = task.creationDate;
+        task.message = 'Download launched for ' + datasetIds.length + ' datasets';
+        task.progress = 0;
+        task.status = 2;
+        this.notificationService.pushLocalTask(task);
+        return task;
     }
 }
 

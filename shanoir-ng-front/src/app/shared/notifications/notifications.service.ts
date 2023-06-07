@@ -14,55 +14,38 @@
 import { Injectable } from '@angular/core';
 import { EventSourcePolyfill } from 'ng-event-source';
 
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Task } from '../../async-tasks/task.model';
 import { TaskService } from '../../async-tasks/task.service';
-import { KeycloakService } from '../keycloak/keycloak.service';
 import * as AppUtils from '../../utils/app.utils';
-import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
+import { KeycloakService } from '../keycloak/keycloak.service';
 
 @Injectable()
 export class NotificationsService {
   
-    public nbProcess: number = 0;
-    public nbDone: number = 0;
     protected tasks: Task[] = [];
-    public tasksDone: Task[] = [];
-    public tasksInProgress: Task[] = [];
     protected isLoading = false;
     protected source;
     private tasksSubject: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]);
+    private clientSideTasks: Task[] = [];
+
 
     constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
         this.connect();
     }
 
-    private refresh(items = []) {
+    private refresh() {
         this.isLoading = true;
-        if (items.length == 0) {
-            this.taskService.getTasks().then(itemsGot => {
-                this.tasksSubject.next(itemsGot);
-                if (itemsGot && itemsGot.length > 0) {
-                    this.refresh(itemsGot);
-                }
-            });
-            return;
-        }
-
-        this.tasks = items;
-        this.nbProcess = 0;
-        this.nbDone = 0;
-        this.tasksDone = [];
-        this.tasksInProgress = []
-        for (let task of this.tasks) {
-            if (task.status == 1) {
-                this.tasksDone.push(task);
-                this.nbDone +=1;
-            } else {
-                this.tasksInProgress.push(task);
-                 this.nbProcess +=1;
+        this.taskService.getTasks().then(items => {
+            if (items && items.length > 0) {
+                this.tasks = items;
+                this.emitTasks();
             }
-        }
-        this.isLoading = false;
+        }).finally(() => {
+            this.isLoading = false;
+        });
+        return;
+        
     }
 
     private connect() {
@@ -88,10 +71,14 @@ export class NotificationsService {
         return this.tasksSubject;
     }
 
-    totalProgress(): number {
-        let total: number = 0;
-        this.tasksInProgress.forEach(task => total += task.progress);
-        return total/this.tasksInProgress.length;
+    pushLocalTask(task: Task) {
+        this.clientSideTasks.push(task);
+        this.emitTasks();
     }
 
+    private emitTasks() {
+        let all = this.clientSideTasks.concat(this.tasks)
+                .sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
+        this.tasksSubject.next(all);
+    }
 }

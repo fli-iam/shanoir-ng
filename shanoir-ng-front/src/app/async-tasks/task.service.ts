@@ -24,14 +24,16 @@ import { HttpClient } from '@angular/common/http';
 export class TaskService extends EntityService<Task> {
 
     API_URL = AppUtils.BACKEND_API_TASKS_URL;
+    
 
     constructor(protected http: HttpClient) {
-        super(http)
+        super(http);
     }
 
     getEntityInstance() { return new Task(); }
 
     getTasks(): Promise<Task[]> {
-       return this.http.get<Task[]>(this.API_URL).toPromise();
+        return this.http.get<Task[]>(this.API_URL)
+            .toPromise();
     }
 }

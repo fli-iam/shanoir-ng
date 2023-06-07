@@ -50,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </div>
     <li routerLink="/task" routerLinkActive="active">
         <i class="fas fa-tasks"></i>Jobs
-        <span *ngIf="notificationsService.nbProcess > 0" class="notif">( {{notificationsService.nbProcess}} pending - {{notificationsService.totalProgress() * 100 | number:'0.0-0'}}%)</span>
+        
     </li>
     <!-- <li routerLink="/carmin-dataset-processings" routerLinkActive="active">
         <i class="fas fa-solid fa-microchip"></i>VIP dataset processings
