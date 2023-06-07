@@ -55,7 +55,7 @@ export class NotificationsService {
 
     updateStatusVars() {
         let tmpTasksInProgress = [];
-        for (let task of this.tasks) {
+        for (let task of this.allTasks) {
             if (task.status == -1) {
                 let freshError: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
                 if (freshError) {
@@ -108,13 +108,17 @@ export class NotificationsService {
 
     pushLocalTask(task: Task) {
         this.clientSideTasks.push(task);
+        this.updateStatusVars();
         this.emitTasks();
     }
 
     private emitTasks() {
-        let all = this.clientSideTasks.concat(this.tasks)
-                .sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
-        this.tasksSubject.next(all);
+        this.tasksSubject.next(this.allTasks);
+    }
+
+    private get allTasks(): Task[] {
+        return this.clientSideTasks.concat(this.tasks)
+            .sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
     }
 
     totalProgress(): number {

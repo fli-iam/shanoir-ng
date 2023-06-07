@@ -56,6 +56,7 @@ export class MassDownloadService {
             Promise.all(promises).then(() => {
                 task.lastUpdate = new Date();
                 task.status = 1;
+                task.message = 'download completed, files saved in the selected directory';
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
@@ -164,6 +165,7 @@ export class MassDownloadService {
         task.message = 'Download launched for ' + datasetIds.length + ' datasets';
         task.progress = 0;
         task.status = 2;
+        task.eventType = 'downloadDataset.event';
         this.notificationService.pushLocalTask(task);
         return task;
     }
