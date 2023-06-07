@@ -45,35 +45,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label>Study</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
-							    <a [routerLink]="['/study/details/', qualityCard.study?.id]">
+							    <a [routerLink]="['/study/details/', qualityCard.study?.id]" (click)="breadcrumbsService.markMilestone()">
 								    {{qualityCard.study.name}}
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault>
-								<select-box formControlName="study" [(ngModel)]="qualityCard.study" [optionArr]="studies" [disabled]="lockStudy">
+								<select-box [readOnly]="forceStudyId" formControlName="study" [(ngModel)]="qualityCard.study" (userChange)="onStudyChange()" [optionArr]="studies" [disabled]="lockStudy">
 								</select-box>
 							</ng-template>
 						</span>
 					</li>
+					<!-- <li>
+						<label>Auto check at import</label>
+						<span class="right-col" [ngSwitch]="mode">
+							<ng-container *ngIf="mode == 'view'">
+								<span *ngIf="qualityCard.toCheckAtImport" class="bool-true"><i class="fas fa-check"></i></span>
+								<span *ngIf="!qualityCard.toCheckAtImport" class="bool-false"><i class="fas fa-times"></i></span>
+							</ng-container>
+							<ng-container *ngIf="mode != 'view'">
+								<checkbox [(ngModel)]="qualityCard.toCheckAtImport" formControlName="toCheckAtImport"></checkbox>
+							</ng-container>
+						</span>
+					</li> -->
 				</ol>
 			</fieldset>
 			<fieldset class="rules">
 				<legend>
 					Rules
-					<tool-tip [large]="true">
-						There are tree differents types of rules for a qualitycard :
-						<ul>
-							<li>
-								<span class="bold">Rules that apply to every dataset of every acquisition of the examination :</span>
-								each dataset is checked regarding the conditions of that one rule and updated regarding the assignments of that one rule.
-							</li>
-							<li>
-								<span class="bold">Rules that apply to the acquisition :</span>
-								conditions on the acquisition's metadata can be set as well as the minimal number of datasets that fullfil one given condition,
-								then an assignment is applied to that acquisition.
-							</li>
-						</ul>
-					</tool-tip>
 				</legend>
 				<study-card-rules class="rules" [formGroup]="form"
 					cardType="qualitycard"
@@ -84,6 +82,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					[showErrors]="showRulesErrors"
 					(selectedRulesChange)="selectedRules = $event"> <!-- (importRules)="importRules()" -->
 				</study-card-rules>
+			</fieldset>
+			<fieldset class="report" *ngIf="report">
+				<legend>
+					Application Report 
+					<span *ngIf="reportIsTest">(test)</span>
+				</legend>
+				<shanoir-table class="report"
+                    [getPage]="getPage.bind(this)"
+                    [columnDefs]="reportColumns"
+                    [browserSearch]="false"
+                    [collapseControls]="true"
+                ></shanoir-table>
 			</fieldset>
 			<form-footer
 				[state]="footerState"
@@ -99,17 +109,29 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[disabled]="footerState.valid || showRulesErrors || qualityCard.rules?.length == 0">
 					Show all errors<i class="fas fa-bug"></i>
 				</button>
-				<!-- <button *ngIf="selectMode" 
-						class="Button right-icon" 
-						(click)="clickImportRules()" 
-						[disabled]="selectedRules.length <= 0">
-					Import selected rules<i class="fas fa-file-import"></i>
-				</button> -->
-				<button *ngIf="mode == 'view' && isAdminOrExpert"
-						type="button" 
-						class="Button right-icon" 
-						(click)="goToApply()">
-					Reapply study card<i class="fas fa-cogs"></i>
+				<button 
+						*ngIf="mode == 'view' && isStudyAdmin"
+						type="button"
+						class="right-icon apply test" 
+						(click)="test()" 
+						[disabled]="applying || testing">
+					Test
+                    <i *ngIf="!testing" class="fa-solid fa-play"></i>
+                    <i *ngIf="testing" class="fa fa-cog fa-spin"></i> 
+                </button>
+				<button 
+						*ngIf="mode == 'view' && isStudyAdmin"
+						type="button"
+						class="alt right-icon apply" 
+						(click)="apply()" 
+						[disabled]="applying || testing">
+					Apply now
+					<i *ngIf="!applying" class="fa-solid fa-play"></i>
+                    <i *ngIf="applying" class="fa fa-cog fa-spin"></i> 
+                </button>
+				<button *ngIf="report" type="button" class="apply right-icon" (click)="downloadReport()">
+					Download error report
+					<i class="fas fa-floppy-disk"></i>
 				</button>
 			</form-footer>
 		</div>

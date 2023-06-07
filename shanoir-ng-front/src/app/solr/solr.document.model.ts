@@ -24,9 +24,13 @@ export class SolrDocument {
     examinationId: string;
     examinationComment: string;
     centerName: string;
+
+    centerId: string;
     tags: string;
     examinationDate: Date;
     subjectName: string;
+
+    subjectId: string;
     studyName: string;
     studyId: string;
     id: number; // only for the table component..
@@ -34,10 +38,13 @@ export class SolrDocument {
 
 export class SolrRequest {
     studyName: string[];
+    studyId: string[];
     subjectName: string[];
+    subjectId: string[];
     examinationId: string[];
     examinationComment: string[];
     centerName: string[];
+    centerId: string[];
     datasetName: string[];
     datasetStartDate: Date | 'invalid';
     datasetEndDate: Date | 'invalid';

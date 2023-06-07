@@ -10,7 +10,7 @@
     --dark-grey: #333;
     --very-dark-grey: #222;
 
-    --color-overlay: rgba(70, 70, 70, 0.8); 
+    --color-overlay: rgba(70, 70, 70, 0.8);
 
     --color-a: #5f0f4e;
     --color-a-light: #6C1C5B;
@@ -25,7 +25,7 @@
 
     --shadow-height: 15px;
     --shadow-color: rgba(0,0,0,0.3);
-    
+
     --instance-name: "SHANOIR_INSTANCE_NAME";
     --instance-color: SHANOIR_INSTANCE_COLOR;
     --user-color:     SHANOIR_USER_COLOR;
@@ -41,7 +41,7 @@ h2 { margin: 0; font-size: 25px; }
 hr { margin: 7px 0 !important; border-bottom: 1px solid var(--color-b-light) !important; border: 0; }
 option:disabled { color: var(--greyer); }
 ul { padding: 0; }
-li { list-style: none; } 
+li { list-style: none; }
 form { margin: 0; }
 select:disabled { opacity: 0.5; }
 a:hover { cursor: pointer; }
@@ -65,13 +65,13 @@ table.layout { border: none; border-collapse: collapse; }
   table.layout td + td { border-left: 3px dashed var(--light-grey); }
 
 button { background-color: var(--color-b); border: 0px; border-radius: 2px; color: var(--very-light-grey); padding: 5px 10px; transition-property: transform, box-shadow; transition-duration: 0.3s; transition-timing-function: ease-in-out; }
-  button:disabled { background-color: var(--grey); border-color: var(--grey); cursor: auto; } 
-  button:active, 
+  button:disabled { background-color: var(--grey); border-color: var(--grey); cursor: auto; }
+  button:active,
   button:enabled:hover { cursor: pointer; color: var(--very-light-grey); background-color: var(--color-b-light2); box-shadow: none !important; transform: none !important; transition: none !important; }
 button + button { margin-left: 5px; }
 button.alt { background-color: var(--color-c); }
-  button.alt:disabled { background-color: var(--grey); } 
-  button.alt:active, 
+  button.alt:disabled { background-color: var(--grey); }
+  button.alt:active,
   button.alt:enabled:hover { background-color: var(--color-c-light); }
 
 
@@ -79,7 +79,7 @@ input[type='date'] { width: 140px; }
 .hidden { display: none !important; }
 h2 + shanoir-table { margin-top: 20px; }
 
-input, select, select-box, datepicker { 
+input, select, select-box, datepicker {
   border: none; border-bottom: 1px solid var(--grey); background-color: transparent; height: 19px; padding: 1px 0;
 }
 input:focus, select:focus, select-box:focus, select-box:focus-within, datepicker:focus {
@@ -107,13 +107,13 @@ form { color: var(--dark-grey); position: relative; }
   form input:not([type]), form input[type='text'], form input[type='password'], form input[type='email'], form textarea, form select, form select-box { width: 220px; }
   form fieldset { border: 0; padding: 0; margin: 30px 0; display: block; min-width: 504px; }
   form fieldset.disabled { color: var(--grey); }
-  form fieldset ~ fieldset { margin-right: 20px; } 
+  form fieldset ~ fieldset { margin-right: 20px; }
   form fieldset.line { border-top: 1px solid var(--grey); padding-top: 11px; }
     form fieldset fieldset legend { padding: 0 0 5px; font-weight: normal; }
     form fieldset fieldset label { display: block; width: auto; }
     form fieldset fieldset label { margin-left: 183px; }
   form legend { padding: 0 10px 0 0; color: var(--color-a); font-size: 14px; margin: 10px 0; color: var(--color-c); width: 100%; }
-  form li > label { display: inline-block; width: 250px; vertical-align: top; }
+  form li > label { display: inline-block; width: 250px; vertical-align: top; height: 20px; line-height: 20px; }
   form fieldset ol { margin: 0; padding: 0; }
   form fieldset li { list-style: none; padding: 3px 0; margin: 0; min-height: 22px; }
     form fieldset li input,
@@ -165,8 +165,8 @@ form { color: var(--dark-grey); position: relative; }
   my-date-picker .mydp .headertodaybtn { font-size: 12px !important; min-width: 0 !important; }
   my-date-picker .mydp .selbtngroup { top: 3px !important; right: 2px !important; height: 15px !important; }
   my-date-picker .mydp .selectorarrow::before { border-color: rgba(204, 204, 204, 0) rgba(204, 204, 204, 0) #f1f1f1 !important; border-width: 12px !important; margin-left: -12px !important; }
-  my-date-picker .mydp .caltable, 
-  my-date-picker .mydp .daycell, 
+  my-date-picker .mydp .caltable,
+  my-date-picker .mydp .daycell,
   my-date-picker .mydp .weekdaytitle { color: var(--color-a) !important; }
   my-date-picker .mydp .sunday { color: var(--color-b) !important; }
 
@@ -201,3 +201,5 @@ form { color: var(--dark-grey); position: relative; }
 node node { margin-left: 18px; }
 
 .link { cursor: pointer; }
+
+.open-new-tab { text-decoration: none; }

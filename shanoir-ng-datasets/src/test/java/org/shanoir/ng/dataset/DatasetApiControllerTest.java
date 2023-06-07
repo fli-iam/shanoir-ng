@@ -230,7 +230,7 @@ public class DatasetApiControllerTest {
 	public void testMassiveDownloadByDatasetsIdToMuchIds() {
 		// GIVEN a list of datasets to export
 		StringBuilder strb = new StringBuilder();
-		for (int i = 0; i < 55 ; i++) {
+		for (int i = 0; i < 505 ; i++) {
 			strb.append(i).append(",");
 		}
 		String ids = strb.substring(0, strb.length() -1);
@@ -253,7 +253,7 @@ public class DatasetApiControllerTest {
 		// GIVEN a study with more then 50 datasets to export
 
 		List<Dataset> hugeList = new ArrayList<Dataset>();
-		for (int i = 0; i < 51 ; i++) {
+		for (int i = 0; i < 501 ; i++) {
 			hugeList.add(new MrDataset());
 		}
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(hugeList);

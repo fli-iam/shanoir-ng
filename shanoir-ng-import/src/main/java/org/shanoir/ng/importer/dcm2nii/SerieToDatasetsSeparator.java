@@ -120,8 +120,8 @@ public class SerieToDatasetsSeparator {
 			double diff = imageOrientationPatient[i] - otherImageOrientationPatient[i];
 			if (diff != 0) {
 				if (Math.abs(diff) < 0.0001) {
-					LOG.info(
-							"imageOrientationEquals : Attention! The image orientation is not strictly parallel. Found {} != {}. However, we tolerate this difference.", otherImageOrientationPatient[i], imageOrientationPatient[i]);
+					LOG.debug(
+							"Attention! The image orientation is not strictly parallel. Found {} != {}. However, we tolerate this difference.", otherImageOrientationPatient[i], imageOrientationPatient[i]);
 				} else {
 					return false;
 				}

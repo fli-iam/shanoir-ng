@@ -51,6 +51,7 @@ import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.model.Study;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -326,7 +327,7 @@ public class WADODownloaderService {
 		}
 	}
 
-	public Attributes getDicomAttributesForDataset(Dataset dataset) {
+	public Attributes getDicomAttributesForDataset(Dataset dataset) throws PacsException {
 		List<URL> urls = new ArrayList<>();
 		try {
 			DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
@@ -344,7 +345,7 @@ public class WADODownloaderService {
 				+ " : no pacs url for this dataset");
 			}
 		} catch (IOException | MessagingException | RestClientException e) {
-			throw new RestClientException("Can not get dicom attributes for dataset " + dataset.getId(), e);
+			throw new PacsException("Can not get dicom attributes for dataset " + dataset.getId(), e);
 		}
 		return null;
 	}	
@@ -367,31 +368,31 @@ public class WADODownloaderService {
 		return null;
 	}
 
-	public Attributes getDicomAttributesForStudy(Study study) {
+	public Attributes getDicomAttributesForStudy(Study study) throws PacsException {
 		long ts = new Date().getTime();
 		Examination exam = getFirstIfExist(study.getExaminations());
 		if (exam == null) return null;
 		Attributes result = getDicomAttributesForExamination(exam);
-		LOG.error("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return result;
 	}
 
 
-	public Attributes getDicomAttributesForExamination(Examination examination) {
+	public Attributes getDicomAttributesForExamination(Examination examination) throws PacsException {
 		long ts = new Date().getTime();
 		DatasetAcquisition acquisition = getFirstIfExist(examination.getDatasetAcquisitions());
 		if (acquisition == null) return null;
 		Attributes result = getDicomAttributesForAcquisition(acquisition);
-		LOG.error("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return result;
 	}
 
-	public Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) {
+	public Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
 		long ts = new Date().getTime();
 		Dataset ds = getFirstIfExist(acquisition.getDatasets());
 		if (ds == null) return null;
 		Attributes result = getDicomAttributesForDataset(ds);
-		LOG.error("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return result;
 	}
 

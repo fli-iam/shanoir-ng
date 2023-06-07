@@ -39,15 +39,17 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 @SqlResultSetMapping(name = "SolrResult", classes = {@ConstructorResult(targetClass = ShanoirMetadata.class,
 	columns = {@ColumnResult(name="datasetId", type = Long.class), @ColumnResult(name="datasetName", type = String.class),
 			@ColumnResult(name="datasetType", type = Integer.class), @ColumnResult(name="datasetNature", type = Integer.class),
-			@ColumnResult(name="datasetCreationDate", type = LocalDate.class), @ColumnResult(name="examinationId", type = Long.class),
-			@ColumnResult(name="examinationComment", type = String.class),
-			@ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="subjectName", type = String.class),
-			@ColumnResult(name="subjectId", type = Long.class),
+			@ColumnResult(name="datasetCreationDate", type = LocalDate.class),
+			@ColumnResult(name="examinationId", type = Long.class), @ColumnResult(name="examinationComment", type = String.class),
+			@ColumnResult(name="examinationDate", type = LocalDate.class),
+			@ColumnResult(name="subjectName", type = String.class), @ColumnResult(name="subjectId", type = Long.class),
 			@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
-			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="sliceThickness", type = Double.class),
-			@ColumnResult(name="pixelBandwidth", type = Double.class), @ColumnResult(name="magneticFieldStrength", type = Double.class)
+			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="centerId", type = Long.class),
+			@ColumnResult(name="sliceThickness", type = Double.class), @ColumnResult(name="pixelBandwidth", type = Double.class),
+			@ColumnResult(name="magneticFieldStrength", type = Double.class)
 	})
 })
+
 public class ShanoirMetadata {
 	
 	@Id
@@ -78,6 +80,8 @@ public class ShanoirMetadata {
 	private Long studyId;
 	
 	private String centerName;
+
+	private Long centerId;
 	
 	private Double sliceThickness;
 	
@@ -93,7 +97,7 @@ public class ShanoirMetadata {
 	
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
 			LocalDate datasetCreationDate, Long examinationId, String examinationComment, LocalDate examinationDate,
-			String subjectName, Long subjectId, String studyName, Long studyId, String centerName, Double sliceThickness,
+			String subjectName, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
 			Double pixelBandwidth, Double magneticFieldStrength) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
@@ -108,6 +112,7 @@ public class ShanoirMetadata {
 		this.studyName = studyName;
 		this.studyId = studyId;
 		this.centerName = centerName;
+		this.centerId = centerId;
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
@@ -322,5 +327,12 @@ public class ShanoirMetadata {
 	public void setSubjectId(Long subjectId) {
 		this.subjectId = subjectId;
 	}
-	
+
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
 }
