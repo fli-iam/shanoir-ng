@@ -71,6 +71,7 @@ export class CenterDTOService {
             //studyCenter.center.id = dto.id;
             studyCenter.study = new Study();
             studyCenter.study.id = scDto.study.id;
+            studyCenter.subjectNamePrefix = scDto.subjectNamePrefix;
             entity.studyCenterList.push(studyCenter);
         }
         return entity;
