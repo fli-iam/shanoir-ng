@@ -23,5 +23,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <shanoir-table  #subjectEntityTable
     [getPage]="getPage.bind(this)" 
     [columnDefs]="columnDefs" 
-    [customActionDefs]="customActionDefs" >
-</shanoir-table> 
+    [customActionDefs]="customActionDefs"
+    [rowRoute]="rowClick.bind(this)">
+</shanoir-table>

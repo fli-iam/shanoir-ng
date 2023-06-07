@@ -169,7 +169,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<i class="fa fa-cog fa-spin"></i>
 				</span>
       </button>
-      <button *ngIf="mode == 'view'" type="submit" (click)="changePassword()" i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton">
+      <button *ngIf="mode == 'view' && (user.id == keycloakService.getUserId())" type="submit" (click)="changePassword()" i18n="Edit user|Accept account request button label@@editUserAcceptAccountRequestButton">
         Change password
       </button>
     </form-footer>

@@ -18,5 +18,5 @@ div.warning { color: orangered; }
 .button-div { margin: 20px 0 40px; }
 .done, .error { font-size: 35px; font-weight: bold; }
 .done { color: darkgreen; }
-.done { color: var(--color-error); }
+.error { color: var(--color-error); }
 checkbox { vertical-align: bottom; }

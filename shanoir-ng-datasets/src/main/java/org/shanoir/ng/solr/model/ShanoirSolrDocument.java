@@ -77,7 +77,11 @@ public class ShanoirSolrDocument {
 	@Field
 	@Indexed
 	private String subjectName;
-	
+
+	@Field
+	@Indexed
+	private Long subjectId;
+
 	@Field
 	@Indexed
 	private String studyName;
@@ -89,7 +93,11 @@ public class ShanoirSolrDocument {
 	@Field
 	@Indexed
 	private String centerName;
-	
+
+	@Field
+	@Indexed
+	private Long centerId;
+
 	@Field
 	@Indexed
 	private Double sliceThickness;
@@ -112,7 +120,7 @@ public class ShanoirSolrDocument {
 	
 	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate,
-			String subjectName, String studyName, Long studyId, String centerName, Double sliceThickness,
+			String subjectName, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
 			Double pixelBandwidth, Double magneticFieldStrength) {
 		this.id = id;
 		this.datasetId = datasetId;
@@ -124,9 +132,11 @@ public class ShanoirSolrDocument {
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
 		this.subjectName = subjectName;
+		this.subjectId = subjectId;
 		this.studyName = studyName;
 		this.studyId = studyId;
 		this.centerName = centerName;
+		this.centerId = centerId;
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
@@ -327,5 +337,20 @@ public class ShanoirSolrDocument {
 	public void setTags(List<String> tags) {
 		this.tags = tags;
 	}
-	
+
+	public Long getSubjectId() {
+		return subjectId;
+	}
+
+	public void setSubjectId(Long subjectId) {
+		this.subjectId = subjectId;
+	}
+
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
 }
