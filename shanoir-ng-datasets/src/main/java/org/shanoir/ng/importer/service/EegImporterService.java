@@ -73,7 +73,7 @@ public class EegImporterService {
         if (importJob == null || importJob.getDatasets() == null || importJob.getDatasets().isEmpty()) {
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("No datasets to create. Please check your EEG files");
-            event.setProgress(1f);
+            event.setProgress(-1f);
             eventService.publishEvent(event);
             return;
         }
@@ -192,8 +192,8 @@ public class EegImporterService {
             event.setProgress(1f);
             event.setStatus(ShanoirEvent.SUCCESS);
             // This message is important for email service
-            event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
-                    +": Successfully created datasets for subject " + importJob.getSubjectName()
+            event.setMessage(importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")"
+                    +" : Successfully created datasets for subject " + importJob.getSubjectName()
                     + " in examination " + examination.getId());
             eventService.publishEvent(event);
 
@@ -203,7 +203,7 @@ public class EegImporterService {
             LOG.error("Error while importing EEG: ", e);
             event.setStatus(ShanoirEvent.ERROR);
             event.setMessage("An unexpected error occured, please contact an administrator.");
-            event.setProgress(1f);
+            event.setProgress(-1f);
             eventService.publishEvent(event);
 
             // Send failure mail

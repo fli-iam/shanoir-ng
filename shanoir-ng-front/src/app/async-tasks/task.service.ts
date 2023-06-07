@@ -34,6 +34,7 @@ export class TaskService extends EntityService<Task> {
 
     getTasks(): Promise<Task[]> {
         return this.http.get<Task[]>(this.API_URL)
-            .toPromise();
+            .toPromise()
+            .then(this.mapEntityList);
     }
 }

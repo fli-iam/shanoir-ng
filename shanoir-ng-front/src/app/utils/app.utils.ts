@@ -258,6 +258,14 @@ export function capitalsAndUnderscoresToDisplayable(str: string) {
     return capitalizeFirstLetter(str.replace(new RegExp('_', 'g'), ' ').toLowerCase());
 }
 
+export function camelToSpaces(str: string): string {
+    return str
+        // insert a space before all caps
+        .replace(/([A-Z])/g, ' $1')
+        // uppercase the first character
+        .replace(/^./, function(str){ return str.toUpperCase(); });
+}
+
 export function isFunction(obj) {
     return !!(obj && obj.constructor && obj.call && obj.apply);
 }

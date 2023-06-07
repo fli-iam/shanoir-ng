@@ -13,15 +13,68 @@
  */
 
 import { Entity } from '../shared/components/entity/entity.abstract';
+import { camelToSpaces } from '../utils/app.utils';
 
 export class Task extends Entity {
 
     id: number;
     creationDate: Date;
     lastUpdate: Date;
-    status: number;
-    message: string;
-    progress: number;
-    eventType: string;
+    _status: -1 | 1 | 2;
+    _message: string;
+    _progress: number;
+    _eventType: string;
+    eventLabel: string;
     objectId: number;
+    timestamp: number;
+    route: string;
+
+    set eventType(eventType: string) {
+        this._eventType = eventType;
+        this.eventLabel = camelToSpaces(this.eventType.replace('.event', ''));
+    }
+
+    get eventType(): string {
+        return this._eventType;
+    }
+
+    set status(status: -1 | 1 | 2) {
+        this._status = status;
+        if (status == -1) this._progress = -1;
+    }
+
+    get status(): -1 | 1 | 2 {
+        return this._status;
+    }
+
+    set progress(progress: number) {
+        if (this.status == -1) this._progress = -1;
+        else this._progress = progress;
+    }
+
+    get progress(): number {
+        return this._progress;
+    }
+
+    set message(message: string) {
+        this._message = message;
+        this.route = this.buildRoute();
+    }
+
+    get message(): string {
+        return this._message;
+    }
+
+    private buildRoute(): string {
+        if (this.eventType === 'importDataset.event' && this.status != -1) {
+            if (this.message.lastIndexOf('in examination ') != -1) {
+                return '/examination/details/' + this.message.slice(this.message.lastIndexOf('in examination ') + ('in examination '.length));
+            } else if (this.message.lastIndexOf('for examination ') != -1) {
+                return '/examination/details/' + this.message.slice(this.message.lastIndexOf('for examination ') + ('for examination '.length));
+            } else if (this.message.indexOf('in dataset') != -1) {
+                return '/dataset/details/' + this.message.slice(this.message.lastIndexOf('in dataset ') + ('in dataset '.length));
+            }
+        }
+        return null;
+    }
 }

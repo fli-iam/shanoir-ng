@@ -34,6 +34,8 @@ public class ImportJob implements Serializable {
 	public static final String INDEX_PROPERTY = "index";
 	
 	private static final long serialVersionUID = 8804929608059674037L;
+	
+	private long timestamp;
 
 	private boolean fromDicomZip;
 
@@ -68,6 +70,14 @@ public class ImportJob implements Serializable {
 	private ShanoirEvent shanoirEvent;
 	
 	private Long userId;
+	
+	public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 	
 	public Long getUserId() {
 		return userId;

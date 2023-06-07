@@ -24,7 +24,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-        <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showDetails()"></menu-item>
+        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+            <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+        </a>
     </dropdown-menu>
 
     <ng-container *ngIf="node.open && node.acquisitionEquipments && node.acquisitionEquipments != $any('UNLOADED')">

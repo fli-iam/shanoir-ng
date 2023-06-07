@@ -26,11 +26,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </li>
     <li *ngIf="model && model.length > 0 && columnDefs">
         <shanoir-table #table
-                [getPage]="getPage.bind(this)" 
+                [getPage]="getPage.bind(this)"
                 [editMode]="mode != 'view'"
                 [columnDefs]="columnDefs"
                 [browserSearch]="false"
-                (rowEdit)="onChange()">
+                [rowRoute]="rowClick.bind(this)">
         </shanoir-table>
     </li>
 </ol>

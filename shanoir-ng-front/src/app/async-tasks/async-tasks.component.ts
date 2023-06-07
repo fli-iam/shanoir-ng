@@ -34,11 +34,14 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     
     @ViewChild('table', { static: false }) table: TableComponent;
     private tasks: Task[] = [];
+    protected selected: Task;
 
     constructor(
             private taskService: TaskService,
             private notificationsService: NotificationsService) {
         super('task');
+        notificationsService.nbNew = 0;
+        notificationsService.nbNewError = 0;
     }
 
     ngAfterViewInit(): void {
@@ -74,49 +77,16 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     // }
 
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleString();
-            }
-            return null;
-        };
         return [
             { headerName: 'Message', field: 'message', width: '100%', type:'link',
-				route: (task: Task) => {
-                    if (task.eventType === 'importDataset.event') {
-                        if (task.message.lastIndexOf('in examination ') != -1) {
-                            return '/examination/details/' + task.message.slice(task.message.lastIndexOf('in examination ') + ('in examination '.length));
-                        } else if (task.message.lastIndexOf('for examination ') != -1) {
-                            return '/examination/details/' + task.message.slice(task.message.lastIndexOf('for examination ') + ('for examination '.length));
-                        } else if (task.message.indexOf('in dataset') != -1) {
-                            return '/dataset/details/' + task.message.slice(task.message.lastIndexOf('in dataset ') + ('in dataset '.length))
-                        }
-                    }
-                    return;
-                }
+				route: (task: Task) => task.route
             },
             { headerName: 'Progress', field: 'progress', width: '110px', type: 'progress' },
-            { headerName: 'Status', field: 'status', width: '70px', cellRenderer: function (params: any) {
-                    if (params.data.status == 2) {
-                        return "In progress"
-                    }
-                    if (params.data.status == 1) {
-                        return {text: 'Success', color: 'darkgreen'}
-                    }
-                    if (params.data.status == -1) {
-                        return {text: 'Error', color: 'red'}
-                    }
-                } 
+            {
+                headerName: "Creation", field: "creationDate", width: '130px', type: 'date'
             },
             {
-                headerName: "Creation", field: "creationDate", width: '130px', cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.creationDate);
-                }
-            },
-            {
-                headerName: "Last update", field: "lastUpdate", width: '130px', defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
-                    return dateRenderer(params.data.lastUpdate);
-                }
+                headerName: "Last update", field: "lastUpdate", width: '130px', defaultSortCol: true, defaultAsc: false, type: 'date'
             },
         ];
     }

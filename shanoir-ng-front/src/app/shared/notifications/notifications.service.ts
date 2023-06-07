@@ -23,7 +23,11 @@ import { KeycloakService } from '../keycloak/keycloak.service';
 @Injectable()
 export class NotificationsService {
   
+    public nbNew: number = 0;
+    public nbNewError: number = 0;
     protected tasks: Task[] = [];
+    public tasksInProgress: Task[] = [];
+    public freshCompletedTasks: Task[] = [];
     protected isLoading = false;
     protected source;
     private tasksSubject: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]);
@@ -34,26 +38,57 @@ export class NotificationsService {
         this.connect();
     }
 
+
     private refresh() {
         this.isLoading = true;
         this.taskService.getTasks().then(items => {
             if (items && items.length > 0) {
                 this.tasks = items;
+                this.updateStatusVars();
                 this.emitTasks();
             }
         }).finally(() => {
             this.isLoading = false;
         });
         return;
-        
+    }   
+
+    updateStatusVars() {
+        let tmpTasksInProgress = [];
+        for (let task of this.tasks) {
+            if (task.status == -1) {
+                let freshError: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
+                if (freshError) {
+                    this.nbNewError++;
+                    this.freshCompletedTasks.push(task);
+                    // remove after 30s
+                    setTimeout(() => {
+                        this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
+                    }, 30000);
+                }
+            } else if (task.status == 1) {
+                let freshDone: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
+                if (freshDone) {
+                    this.nbNew++;
+                    this.freshCompletedTasks.push(task);
+                    // remove after 30s
+                    setTimeout(() => {
+                        this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
+                    }, 30000);
+                }
+            } else if (task.status == 2) {
+                tmpTasksInProgress.push(task);
+            }
+        }
+        this.tasksInProgress = tmpTasksInProgress;
     }
 
     private connect() {
         this.keycloakService.getToken().then(token => {
             this.source = new EventSourcePolyfill(AppUtils.BACKEND_API_UPDATE_TASKS_URL, {
-                  headers: {
-                    'Authorization': "Bearer " + token
-                  }
+                    headers: {
+                        'Authorization': "Bearer " + token
+                    }
                 });
             this.source.addEventListener('message', message => {
                 if (message.data !== "{}") {
@@ -80,5 +115,11 @@ export class NotificationsService {
         let all = this.clientSideTasks.concat(this.tasks)
                 .sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
         this.tasksSubject.next(all);
+    }
+
+    totalProgress(): number {
+        let total: number = 0;
+        this.tasksInProgress.forEach(task => total += task.progress);
+        return total/this.tasksInProgress.length;
     }
 }

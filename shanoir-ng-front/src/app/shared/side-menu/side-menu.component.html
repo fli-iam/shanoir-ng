@@ -48,10 +48,41 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <div *ngIf="state.notifOpened && accessRequestsToValidate > 0" class="sub-menu" [@slideDown]="state.notifOpened">
         <li routerLink="/access-request/list" routerLinkActive="active"><i class="fa-solid fa-user-lock"></i>Access Requests<span class="counter">{{accessRequestsToValidate}}</span></li>
     </div>
-    <li routerLink="/task" routerLinkActive="active">
-        <i class="fas fa-tasks"></i>Jobs
-        
+    <li>
+        <a routerLink="/task" routerLinkActive="active" class="menu-link">
+            <i class="fas fa-tasks"></i>Jobs
+            <span *ngIf="!state.jobsOpened && notificationsService.tasksInProgress.length > 0 && notificationsService.totalProgress() < 1">
+                <progress-bar [progress]="notificationsService.totalProgress()" [width]="70"></progress-bar>
+            </span>
+            <span *ngIf="notificationsService.nbNew" class="notif">
+                <i class="fa-regular fa-bell"></i>
+                {{notificationsService.nbNew}}
+            </span>
+            <span *ngIf="notificationsService.nbNewError" class="notif error">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                {{notificationsService.nbNewError}}
+            </span>
+        </a>
+        <!-- <span *ngIf="notificationsService.tasksInProgress.length > 0" (click)="state.jobsOpened = !state.jobsOpened; saveState();" class="chevron"><i class="fas fa-chevron-down"></i></span> -->
     </li>
+    <!-- *ngIf="state.jobsOpened" -->
+    <div class="sub-menu jobs" [@slideDown]="state.jobsOpened">
+        <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress)" [ngSwitch]="task.eventType" [@disapearUp] [@.disabled]="task.status == 2">
+            <a routerLink="/task"  routerLinkActive="active">
+                <progress-bar [progress]="task.progress" [width]="50"></progress-bar>
+                <ng-template [ngSwitchCase]="'downloadDataset.event'">
+                    <i class="fa-solid fa-download"></i>
+                </ng-template>
+                <ng-template [ngSwitchCase]="'importDataset.event'">
+                    <i class="fa-solid fa-upload"></i>
+                </ng-template>
+                <ng-template ngSwitchDefault>
+                    <i class="fa-regular fa-clock"></i>
+                </ng-template>
+                {{task.creationDate | date: 'HH:mm:ss'}} - {{task.eventLabel}}
+            </a>
+        </li>
+    </div>
     <!-- <li routerLink="/carmin-dataset-processings" routerLinkActive="active">
         <i class="fas fa-solid fa-microchip"></i>VIP dataset processings
     </li> -->

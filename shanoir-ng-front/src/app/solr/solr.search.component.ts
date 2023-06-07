@@ -22,26 +22,24 @@ import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 
 import { AfterViewChecked } from "@angular/core";
-import { Pageable } from "../shared/components/table/pageable.model";
-import { TableComponent } from "../shared/components/table/table.component";
-import { ColumnDefinition } from '../shared/components/table/column.definition.type';
-import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
-import { SolrService } from "./solr.service";
+import { environment } from "../../environments/environment";
+import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
+import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
+import { ProcessingService } from '../processing/processing.service';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
-import { Page } from '../shared/components/table/pageable.model';
-import { KeycloakService } from '../shared/keycloak/keycloak.service';
+import { ColumnDefinition } from '../shared/components/table/column.definition.type';
+import { Page, Pageable } from "../shared/components/table/pageable.model";
+import { TableComponent } from "../shared/components/table/table.component";
 import { ConsoleService } from '../shared/console/console.service';
+import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
+import { KeycloakService } from '../shared/keycloak/keycloak.service';
+import { MassDownloadService } from '../shared/mass-download/mass-download.service';
+import { Range } from '../shared/models/range.model';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
-import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
-import { Range } from '../shared/models/range.model';
-import { ProcessingService } from '../processing/processing.service';
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
-import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
-import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
-import {environment} from "../../environments/environment";
-import {DatasetType} from "../datasets/shared/dataset-type.model";
-import { MassDownloadService } from '../shared/mass-download/mass-download.service';
+import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
+import { SolrService } from "./solr.service";
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -407,10 +405,18 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Creation", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
-            {headerName: "Study", field: "studyName"},
-            {headerName: "Subject", field: "subjectName"},
-            {headerName: "Center", field: "centerName"},
-            {headerName: "Exam", field: "examinationComment"},
+            {headerName: "Study", field: "studyName",
+                route: item => '/study/details/' + item.studyId
+            },
+            {headerName: "Subject", field: "subjectName",
+                route: item => '/subject/details/' + item.subjectId
+            },
+            {headerName: "Center", field: "centerName",
+                route: item => '/center/details/' + item.centerId
+            },
+            {headerName: "Exam", field: "examinationComment",
+                route: item => '/examination/details/' + item.examinationId
+            },
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
                 return dateRenderer(params.data.examinationDate);
               }},
@@ -422,10 +428,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
               action: item => {
                 window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + item.examinationId, '_blank');
               }
-            },
-            {headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => {
-                this.router.navigate(['/dataset/details/' + item.id]);
-            }}
+            }
         ];
         return columnDefs;
     }
@@ -502,8 +505,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selectedDatasetIds = selection;
     }
 
-    onRowClick(solrRequest: any) {
-        this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
+    rowClick(item): string {
+        return '/dataset/details/' + item.datasetId;
     }
 
     getSelectedPage(pageable: Pageable): Promise<Page<any>> {

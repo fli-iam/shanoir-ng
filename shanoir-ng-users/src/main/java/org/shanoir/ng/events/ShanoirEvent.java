@@ -9,6 +9,7 @@ import javax.persistence.Index;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 
 /**
@@ -38,6 +39,7 @@ public class ShanoirEvent {
 	protected Long userId;
 
 	/** Message of the event, can be informative, or display an error **/
+	@Type(type="text")
 	protected String message;
 
 	/** Creation date, automatically generated **/
@@ -57,6 +59,8 @@ public class ShanoirEvent {
 
 	/** The study ID of the event */
 	protected Long studyId;
+	
+	protected Long timestamp;
 
 	public ShanoirEvent() {
 		// Default empty constructor for json deserializer.
@@ -202,4 +206,11 @@ public class ShanoirEvent {
 		this.studyId = studyId;
 	}
 
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
 }
