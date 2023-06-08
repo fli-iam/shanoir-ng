@@ -66,7 +66,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
             return this.animalSubjectService.getAnimalSubjectsBySubjectIds(Array.from(subMap.keys())).then(animalSubjects => {
 
                 if (!animalSubjects) {
-                    return;
+                    return [];
                 }
 
                 for (let aSub of animalSubjects){
