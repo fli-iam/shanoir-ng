@@ -47,6 +47,7 @@ import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.studycard.model.rule.StudyCardRule;
+import org.shanoir.ng.studycard.repository.QualityCardRepository;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.slf4j.Logger;
@@ -92,7 +93,7 @@ public class DatasetMigrationService {
 	private StudyCardRepository studyCardService;
 	
 	@Autowired
-	private QualityCardService qualityCardService;
+	private QualityCardRepository qualityCardRepository;
 	
 	@Autowired
 	private DistantKeycloakConfigurationService distantKeycloakConfigurationService;
@@ -185,7 +186,7 @@ public class DatasetMigrationService {
 
 		// Migrate all quality cards
 		job.getLogging().add("Quality card migration");
-		List<QualityCard> qualityCards = qualityCardService.findByStudy(job.getOldStudyId());
+		List<QualityCard> qualityCards = qualityCardRepository.findByStudyId(job.getOldStudyId());
 		Map<Long, Long> qualityCardmap = new HashMap<>();
 		for (QualityCard qc : qualityCards) {
 			long oldId = qc.getId();
