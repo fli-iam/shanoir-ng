@@ -125,10 +125,10 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         if (!this.keycloakService.isUserAdminOrExpert()) return;
         this.confirmDialogService
             .confirm(
-                'Delete', 'Are you sure you want to delete preclinical-subject n° ' + entity.animalSubject.id+ ' ?'
+                'Delete', 'Are you sure you want to delete preclinical-subject n° ' + entity.id + ' ?'
             ).then(res => {
                 if (res) {
-                    this.animalSubjectService.delete(entity.animalSubject.id).then((res) => {
+                    this.animalSubjectService.delete(entity.id).then((res) => {
                         this.subjectService.delete(entity.subject.id).then((res2) => {
                             this.onDelete.next({entity: entity});
                             const index: number = this.preclinicalSubjects.indexOf(entity);
