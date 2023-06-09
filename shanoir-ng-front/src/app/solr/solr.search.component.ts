@@ -464,7 +464,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true },
-            {title: "Download (experimental)", awesome: "fa-solid fa-download", action: () => this.downloadSelected('dcm'), disabledIfNoSelected: true}
+            {title: "Download (experimental)", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true}
         );
         return customActionDefs;
     }
@@ -484,7 +484,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true },
-            {title: "Download (experimental)", awesome: "fa-solid fa-download", action: () => this.downloadSelected('dcm'), disabledIfNoSelected: true}
+            {title: "Download (experimental)", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true}
         );
         return customActionDefs;
     }
@@ -495,9 +495,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         }
     }
 
-    downloadSelected(type: Format) {
+    downloadSelected() {
         if (this.selectedDatasetIds) {
-            this.downloadService.download([...this.selectedDatasetIds], type);
+            this.downloadService.downloadByIds([...this.selectedDatasetIds]);
         }
     }
 

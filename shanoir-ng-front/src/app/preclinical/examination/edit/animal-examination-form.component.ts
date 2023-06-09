@@ -30,8 +30,6 @@ import { ExtraDataService } from '../../extraData/extraData/shared/extradata.ser
 import { CenterService } from '../../../centers/shared/center.service';
 import { StudyService } from '../../../studies/shared/study.service';
 import { IdName } from '../../../shared/models/id-name.model';
-import { ModalComponent } from '../../../shared/components/modal/modal.component';
-import { Subject } from '../../../subjects/shared/subject.model';
 import { AnimalSubjectService } from '../../animalSubject/shared/animalSubject.service';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import * as AppUtils from '../../../utils/app.utils';
@@ -55,7 +53,6 @@ import { ExaminationNode } from '../../../tree/tree.model';
 @ModesAware
 export class AnimalExaminationFormComponent extends EntityComponent<Examination>{
 
-	@ViewChild('instAssessmentModal', { static: false }) instAssessmentModal: ModalComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
 
     urlupload: string;
@@ -359,11 +356,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     
     onAgentChange(event) {
         this.contrastAgent = event;
-    }
-    
-    
-    closePopin(instAssessmentId?: number) {
-        this.instAssessmentModal.hide();
     }
     
     public async hasEditRight(): Promise<boolean> {

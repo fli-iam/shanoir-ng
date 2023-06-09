@@ -3,7 +3,7 @@
 <div [hidden]="progressBar.progress == 0">
     <progress-bar #progressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
 </div>
-<app-modal #downloadDialog >
+<div>
     <div class="main">
     <div class="header">Massive download</div>
     <div *ngIf="inError" class="body">{{errorMessage}}</div>
@@ -17,4 +17,4 @@
         <button type="button" (click)="cancel()">Cancel</button>
     </div>
 </div>
-</app-modal>
+</div>

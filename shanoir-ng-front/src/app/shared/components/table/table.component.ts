@@ -15,7 +15,6 @@ import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListe
 import { fromEvent, Subscription } from 'rxjs';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { GlobalService } from '../../services/global.service';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
 import * as shajs from 'sha.js';
@@ -61,7 +60,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     isError: boolean = false;
     filter: Filter = new Filter(null, null);
     firstLoading: boolean = true;
-    @ViewChild('settingsDialog') settingsDialog: ModalComponent;
     currentDrag: {columns: any; leftOrigin: number, totalWidth: number, leftColIndex: number};
     private subscriptions: Subscription[] = [];
     private hash: string;
@@ -71,6 +69,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     expended: boolean[] = [];
     subRowOpen: any = {};
     path: string;
+    settingsOpened: boolean = false;
 
     constructor(
             private elementRef: ElementRef,
@@ -175,6 +174,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
 
     onRowClick(item: Object) {
+        console.log('click')
         if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }

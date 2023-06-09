@@ -15,9 +15,9 @@
 import { Component, ViewChild, Input} from '@angular/core';
 import { DatasetService } from '../shared/dataset.service';
 import { StudyService } from '../../studies/shared/study.service';
-import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 @Component({
     selector: 'dataset-download',
@@ -34,7 +34,8 @@ export class DatasetDownloadComponent {
     
     constructor(
         private datasetService: DatasetService,
-        private studyService: StudyService) {
+        private studyService: StudyService,
+        private downloadService: MassDownloadService) {
     }
 
     @Input() datasetIds: number[] = [];
@@ -46,8 +47,6 @@ export class DatasetDownloadComponent {
     public errorMessage: string;
     public readonly ImagesUrlUtil = ImagesUrlUtil;
     public mode: 'all' | 'selected';
-
-    @ViewChild('downloadDialog') downloadDialog: ModalComponent;
 
     modalitySelected(value) {
         if (value === 'nii') {
@@ -65,7 +64,7 @@ export class DatasetDownloadComponent {
         }
         // Display the messageBox with options
         this.mode = 'all';
-        this.downloadDialog.show();
+        //this.downloadDialog.show();
     }
 
     prepareDownloadSelected() {
@@ -76,7 +75,7 @@ export class DatasetDownloadComponent {
         // Display the messageBox with options
         this.mode = 'selected';
         this.type = 'nii';
-        this.downloadDialog.show();
+        //this.downloadDialog.show();
     }
 
     /** Download the data */
@@ -91,11 +90,11 @@ export class DatasetDownloadComponent {
                 this.datasetService.downloadDatasetsByStudy(this.studyId, this.type, this.progressBar);
             }
         }
-        this.downloadDialog.hide();
+        //this.downloadDialog.hide();
     }
 
     public cancel() {
-        this.downloadDialog.hide();
+        //this.downloadDialog.hide();
     }
 
 }

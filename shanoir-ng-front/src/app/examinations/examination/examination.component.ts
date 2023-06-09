@@ -21,7 +21,6 @@ import { CenterService } from '../../centers/shared/center.service';
 import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
@@ -43,7 +42,6 @@ import { environment } from '../../../environments/environment';
 
 export class ExaminationComponent extends EntityComponent<Examination> {
 
-    @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('input') private fileInput: ElementRef;
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
 

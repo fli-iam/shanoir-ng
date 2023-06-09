@@ -103,9 +103,6 @@ import { DropdownMenuComponent } from './shared/components/dropdown-menu/dropdow
 import { MenuItemComponent } from './shared/components/dropdown-menu/menu-item/menu-item.component';
 import { FormFooterComponent } from './shared/components/form-footer/form-footer.component';
 import { LoadingBarComponent } from './shared/components/loading-bar/loading-bar.component';
-import { ModalComponent } from './shared/components/modal/modal.component';
-import { ModalService } from './shared/components/modals/modal.service';
-import { ModalsComponent } from './shared/components/modals/modals.component';
 import { PapayaComponent } from './shared/components/papaya/papaya.component';
 import { SubjectStudyListComponent } from './shared/components/subject-study-list/subject-study-list.component';
 import { PagerComponent } from './shared/components/table/pager/pager.component';
@@ -180,10 +177,7 @@ import { CenterNodeComponent } from './centers/tree/center-node.component';
 import { EquipmentNodeComponent } from './acquisition-equipments/tree/equipment-node.component';
 import { MemberNodeComponent } from './users/tree/member-node.component';
 import { StudyCardNodeComponent } from './study-cards/tree/study-card-node.component';
-
 import { ReplaceSpacePipe } from './utils/pipes';
-
-//import { ModalService} from './shared/components/modal/modal.service';
 import { AnimalSubjectsListComponent }   from './preclinical/animalSubject/list/animalSubject-list.component';
 import { AnimalSubjectService }   from './preclinical/animalSubject/shared/animalSubject.service';
 import { AnimalSubjectFormComponent }   from './preclinical/animalSubject/edit/animalSubject-form.component';
@@ -271,6 +265,7 @@ import { AccessRequestService } from './users/access-request/access-request.serv
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 import { MassDownloadService } from './shared/mass-download/mass-download.service';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
+import { DownloadSetupComponent } from './shared/mass-download/download-setup/download-setup.component';
 
 
 @NgModule({
@@ -311,7 +306,6 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         ManufacturerComponent,
         ManufacturerModelComponent,
         ManufacturerModelPipe,
-        ModalComponent,
         MenuItemComponent,
         StudyComponent,
         StudyListComponent,
@@ -358,7 +352,6 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         TableSearchComponent,
         TimesPipe,
         FormFooterComponent,
-        ModalsComponent,
         BreadcrumbsComponent,
         SelectBoxComponent,
         UploaderComponent,
@@ -459,19 +452,10 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         QualityCardListComponent,
         QualityCardComponent,
         QualityCardRuleComponent,
-        TaskStatusComponent
+        TaskStatusComponent,
+        DownloadSetupComponent
     ],
-    // Not required anymore with Angular > 9.0
-    // entryComponents: [
-    //     ConfirmDialogComponent,
-    //     ModalsComponent
-    // ],
     providers: [
-        // {
-        //     provide: APP_BASE_HREF,
-        //     useValue: environment.production  ? '/shanoir-ng/' : '/dev/'
-        // },
-        // AccountEventsService,
         AcquisitionEquipmentService,
         AuthAdminGuard,
         AuthAdminOrExpertGuard,
@@ -490,7 +474,6 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         KeycloakService,
         ManufacturerModelService,
         ManufacturerService,
-        ModalService,
         RoleService,
         StudyService,
         CoilService,

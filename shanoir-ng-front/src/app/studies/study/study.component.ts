@@ -46,6 +46,7 @@ import { AccessRequest } from 'src/app/users/access-request/access-request.model
 import { ProcessingService } from 'src/app/processing/processing.service';
 import {Dataset} from "../../datasets/shared/dataset.model";
 import {DatasetService} from "../../datasets/shared/dataset.service";
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 @Component({
     selector: 'study-detail',
@@ -95,7 +96,8 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
-            private processingService: ProcessingService) {
+            private processingService: ProcessingService,
+            private downloadService: MassDownloadService) {
 
         super(route, 'study');
         this.activeTab = 'general';
@@ -653,5 +655,9 @@ export class StudyComponent extends EntityComponent<Study> {
                 this.study.subjectStudyList = study.subjectStudyList;
             });
         }, 1000);
+    }
+
+    downloadAll() {
+        this.downloadService.downloadAllByStudyId(this.study.id);
     }
 }

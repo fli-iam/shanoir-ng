@@ -59,28 +59,36 @@ export class NotificationsService {
             if (task.status == -1) {
                 let freshError: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
                 if (freshError) {
-                    this.nbNewError++;
-                    this.freshCompletedTasks.push(task);
-                    // remove after 30s
-                    setTimeout(() => {
-                        this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
-                    }, 30000);
+                    this.pushToFreshError(task);
                 }
             } else if (task.status == 1) {
                 let freshDone: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
                 if (freshDone) {
-                    this.nbNew++;
-                    this.freshCompletedTasks.push(task);
-                    // remove after 30s
-                    setTimeout(() => {
-                        this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
-                    }, 30000);
+                    this.pushToFreshCompleted(task);
                 }
             } else if (task.status == 2) {
                 tmpTasksInProgress.push(task);
             }
         }
         this.tasksInProgress = tmpTasksInProgress;
+    }
+
+    pushToFreshCompleted(task: Task) {
+        this.freshCompletedTasks.push(task);
+        this.nbNew++;
+        // remove after 30s
+        setTimeout(() => {
+            this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
+        }, 30000);
+    }
+
+    pushToFreshError(task: Task) {
+        this.nbNewError++;
+        this.freshCompletedTasks.push(task);
+        // remove after 30s
+        setTimeout(() => {
+            this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
+        }, 30000);
     }
 
     private connect() {
