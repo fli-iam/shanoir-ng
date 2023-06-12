@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.jboss.seam.annotations.Logger;
-import org.jboss.seam.log.Log;
-import org.jboss.seam.log.Logging;
+import org.apache.log4j.Logger;
 
 /**
  * The Class StreamGobbler.
@@ -18,8 +16,7 @@ import org.jboss.seam.log.Logging;
 public class StreamGobbler extends Thread {
 
 	/** The log. */
-	@Logger
-	private final Log log = Logging.getLog(StreamGobbler.class);
+	private final Logger logger = Logger.getLogger(StreamGobbler.class);
 
 	/** The is. */
 	private InputStream is;
@@ -56,19 +53,19 @@ public class StreamGobbler extends Thread {
 
 			while ((line = br.readLine()) != null) {
 				if (type.equals("ERROR")) {
-					log.error(line);
+					logger.error(line);
 					stringDisplay += "ERROR : " + line + "\n";
 				} else if (type.equals("DEBUG")) {
-					log.debug(line);
+					logger.debug(line);
 					stringDisplay += "DEBUG : " + line + "\n";
 				} else if (type.equals("INFO")) {
-					log.info(line);
+					logger.info(line);
 					stringDisplay += "INFO : " + line + "\n";
 				}
 			}
 			isr.close();
 		} catch (final IOException ioe) {
-			log.error("IOE", ioe);
+			logger.error("IOE", ioe);
 		}
 	}
 

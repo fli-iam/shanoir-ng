@@ -9,16 +9,12 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.dcm4che2.data.DicomObject;
+import org.dcm4che3.data.Attributes;
 import org.shanoir.uploader.dicom.query.ConfigBean;
-//import org.shanoir.dicom.query.DicomQueryHelper;
-//import org.shanoir.services.dicom.server.ConfigBean;
-//import org.shanoir.services.dicom.server.Echo;
 import org.shanoir.uploader.dicom.query.DcmQR;
 import org.shanoir.uploader.dicom.query.DicomQueryHelper;
 import org.shanoir.uploader.dicom.query.Echo;
 import org.shanoir.uploader.dicom.query.Media;
-import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.utils.Util;
 
 /**
@@ -37,14 +33,14 @@ public class DicomServerClient implements IDicomServerClient {
 	
 	private ConfigBean config = new ConfigBean();
 		
-	private DcmRcvManager dcmRcvManager = new DcmRcvManager();
+//	private DcmRcvManager dcmRcvManager = new DcmRcvManager();
 	
 	private File workFolder;
 	
 	public DicomServerClient(final Properties dicomServerProperties, final File workFolder) {
 		config.initWithPropertiesFile(dicomServerProperties);
 		this.workFolder = workFolder;
-		dcmRcvManager.start(config, workFolder.getAbsolutePath());
+//		dcmRcvManager.start(config, workFolder.getAbsolutePath()); @todoMK
 	}
 	
 	/* (non-Javadoc)
@@ -91,7 +87,7 @@ public class DicomServerClient implements IDicomServerClient {
 	public synchronized List<String> retrieveDicomFiles(final Collection<Serie> selectedSeries, final File uploadFolder) {
 		final DcmQR dcmqr = new DcmQR();
 		final DicomQueryHelper dQH = new DicomQueryHelper(dcmqr, config, "MR");
-		dcmRcvManager.setDestination(uploadFolder.getAbsolutePath());
+//		dcmRcvManager.setDestination(uploadFolder.getAbsolutePath());
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		final List<String> oldFileNames = new ArrayList<String>();
 		// Iterate over all series and send command for sending DICOM files.
@@ -149,11 +145,11 @@ public class DicomServerClient implements IDicomServerClient {
 	 * @return
 	 */
 	private boolean getFilesFromServer(DcmQR dcmqr, DicomQueryHelper dQH, final String studyInstanceUID, final String seriesInstanceUID) throws Exception {
-		final List<DicomObject> list;
+		final List<Attributes> list = null;
 		try{
 			String[] argsArray = dQH.buildCommand("-S", true, null, studyInstanceUID, seriesInstanceUID);
 			logger.info("\n\n C_MOVE, serie command: launching dcmqr with args: " + Util.arrayToString(argsArray)+"\n\n");
-			list = dcmqr.query(argsArray);
+//			list = dcmqr.query(argsArray); @todoMK
 			logger.debug("\n\n Dicom Query list:\n "+list.toString()+"\n");
 		} catch (final Exception e) {
 			logger.error(e.getMessage(), e);

@@ -15,9 +15,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.dcm4che2.tool.dcmecho.DcmEcho;
+
 import org.shanoir.uploader.ShUpConfig;
-//import org.shanoir.uploader.crypto.BlowfishAlgorithm;
 import org.shanoir.uploader.gui.DicomServerConfigurationWindow;
 
 /**
@@ -138,52 +137,53 @@ public class DicomServerConfigurationListener implements ActionListener {
 	// this method verifies the connexion to the PACS
 	public boolean echo(String remoteHost, String remotePortString, String calledAET) {
 		logger.info("echo: Starting...");
-		final DcmEcho dcmecho = new DcmEcho(DCMECHO);
-
-		dcmecho.setRemoteHost(remoteHost);
-		dcmecho.setRemotePort((int) (Integer.parseInt(remotePortString)));
-		dcmecho.setCalledAET(calledAET, false);
-		if (dicomWindow.isDicomServerEnableTLS3DES) {
-			dcmecho.setTlsNeedClientAuth(false);
-			dcmecho.setTls3DES_EDE_CBC();
-			dcmecho.setKeyStoreURL(dicomWindow.keyStoreURLTF.getText());
-			// get keystore password
-			char[] input1 = dicomWindow.keyStorePasswordTF.getPassword();
-			String keyStorePassword = "";
-			for (int i = 0; i < input1.length; i++)
-				keyStorePassword += input1[i];
-
-			dcmecho.setKeyStorePassword(keyStorePassword);
-			dcmecho.setTrustStoreURL(dicomWindow.trustStoreURLTF.getText());
-			// get truststore password
-			char[] input2 = dicomWindow.keyStorePasswordTF.getPassword();
-			String trustStorePassword = "";
-			for (int i = 0; i < input2.length; i++)
-				trustStorePassword += input2[i];
-			dcmecho.setTrustStorePassword(trustStorePassword);
-
-		}
-		try {
-			dcmecho.open();
-		} catch (Exception e) {
-			logger.error("echo: Failed to open connection:" + e.getMessage());
-			return false;
-		}
-		try {
-			dcmecho.echo();
-			logger.info("echo: Success.");
-			return true;
-		} catch (Exception e) {
-			logger.error("echo: Failed to echo:" + e.getMessage());
-			return false;
-		} finally {
-			try {
-				dcmecho.close();
-			} catch (Exception e) {
-				logger.error("echo: Failed to close connection:" + e.getMessage());
-				return false;
-			}
-		}
+//		final DcmEcho dcmecho = new DcmEcho(DCMECHO);
+//
+//		dcmecho.setRemoteHost(remoteHost);
+//		dcmecho.setRemotePort((int) (Integer.parseInt(remotePortString)));
+//		dcmecho.setCalledAET(calledAET, false);
+//		if (dicomWindow.isDicomServerEnableTLS3DES) {
+//			dcmecho.setTlsNeedClientAuth(false);
+//			dcmecho.setTls3DES_EDE_CBC();
+//			dcmecho.setKeyStoreURL(dicomWindow.keyStoreURLTF.getText());
+//			// get keystore password
+//			char[] input1 = dicomWindow.keyStorePasswordTF.getPassword();
+//			String keyStorePassword = "";
+//			for (int i = 0; i < input1.length; i++)
+//				keyStorePassword += input1[i];
+//
+//			dcmecho.setKeyStorePassword(keyStorePassword);
+//			dcmecho.setTrustStoreURL(dicomWindow.trustStoreURLTF.getText());
+//			// get truststore password
+//			char[] input2 = dicomWindow.keyStorePasswordTF.getPassword();
+//			String trustStorePassword = "";
+//			for (int i = 0; i < input2.length; i++)
+//				trustStorePassword += input2[i];
+//			dcmecho.setTrustStorePassword(trustStorePassword);
+//
+//		}
+//		try {
+//			dcmecho.open();
+//		} catch (Exception e) {
+//			logger.error("echo: Failed to open connection:" + e.getMessage());
+//			return false;
+//		}
+//		try {
+//			dcmecho.echo();
+//			logger.info("echo: Success.");
+//			return true;
+//		} catch (Exception e) {
+//			logger.error("echo: Failed to echo:" + e.getMessage());
+//			return false;
+//		} finally {
+//			try {
+//				dcmecho.close();
+//			} catch (Exception e) {
+//				logger.error("echo: Failed to close connection:" + e.getMessage());
+//				return false;
+//			}
+//		}
+		return true;
 	}
 
 	// check only remoteHost, remotePortString and calledAET parameters (remote PACS

@@ -3,7 +3,7 @@ package org.shanoir.uploader.dicom;
 import java.util.HashMap;
 import java.util.List;
 
-import org.dcm4che2.data.DicomObject;
+import org.dcm4che3.data.Attributes;
 
 /**
  * 
@@ -20,7 +20,7 @@ public interface DicomTreeNode {
 	
 	public void addTreeNodes(final DicomTreeNode firstLevelChild, final DicomTreeNode secondLevelChild, final DicomTreeNode thirdLevelChild);
 
-	public DicomTreeNode initChildTreeNode(final DicomObject dicomObject);
+	public DicomTreeNode initChildTreeNode(final Attributes attributes);
 	
 	/**
 	 * Gets the description map.

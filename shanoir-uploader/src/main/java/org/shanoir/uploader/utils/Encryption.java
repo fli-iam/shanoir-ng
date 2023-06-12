@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.log4j.Logger;
-import org.jboss.seam.util.Hex;
 import org.shanoir.uploader.cryptography.BlowfishAlgorithm;
 
 /**
