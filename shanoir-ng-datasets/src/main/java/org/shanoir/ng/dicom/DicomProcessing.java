@@ -37,7 +37,6 @@ public class DicomProcessing {
 				// Else we do not load the picture in Ram for faster performance.
 				datasetAttributes = dIS.readDataset(Tag.PixelData);
 			}
-			dIS.close();
 			return datasetAttributes;
 		}
 	}
