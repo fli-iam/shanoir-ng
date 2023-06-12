@@ -249,11 +249,12 @@ public class DatasetMigrationService {
 	private QualityCard moveQualityCard(QualityCard qc, MigrationJob job) throws ShanoirException {
 		qc.setId(null);
 		qc.setStudyId(job.getStudy().getId());
-
+		
 		for (QualityExaminationRule oldRule : qc.getRules()) {
 			oldRule.setId(null);
 			for (StudyCardCondition condition : oldRule.getConditions()) {
 				condition.setId(null);
+				condition.setValues(condition.getValues());
 			}
 		}
 		entityManager.detach(qc);

@@ -21,6 +21,7 @@ import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.validation.constraints.NotNull;
@@ -54,7 +55,7 @@ public abstract class StudyCardCondition extends AbstractEntity {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(StudyCardCondition.class);
 	
-	@ElementCollection 
+	@ElementCollection (fetch = FetchType.EAGER) 
 	@Column(name = "value")
 	private List<String> values;
 	
