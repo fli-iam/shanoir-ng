@@ -59,8 +59,6 @@ public class ShanoirEvent {
 
 	/** The study ID of the event */
 	protected Long studyId;
-	
-	protected Long timestamp;
 
 	public ShanoirEvent() {
 		// Default empty constructor for json deserializer.
@@ -205,12 +203,4 @@ public class ShanoirEvent {
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
 	}
-
-    public Long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Long timestamp) {
-        this.timestamp = timestamp;
-    }
 }

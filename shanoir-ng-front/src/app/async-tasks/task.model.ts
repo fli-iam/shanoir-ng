@@ -26,7 +26,6 @@ export class Task extends Entity {
     _eventType: string;
     eventLabel: string;
     objectId: number;
-    timestamp: number;
     route: string;
 
     set eventType(eventType: string) {

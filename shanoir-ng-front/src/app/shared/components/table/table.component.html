@@ -34,7 +34,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
                     #refTd
                     >
-                <div class="cell-container" [class.table-edit]="editMode" *ngIf="col.type != 'button'" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi" [class.wrap]="col.wrap">
+                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.table-edit]="editMode" *ngIf="col.type != 'button'" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi" [class.wrap]="col.wrap">
+
                     <!-- default display -->
                     <a class="cell-new-tab" [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi && col.type != 'button'">
                         <span
