@@ -77,4 +77,5 @@ public class BrainVisionReaderTest {
 		assertNull(event2.getDate());
 
 	}
+
 }

@@ -242,6 +242,3 @@ spring:
     init:
       data-locations: classpath:/scripts/test-data-h2.sql
       mode: always
-logging:
-  file:
-    name: /tmp/shanoir-ng-import.log
