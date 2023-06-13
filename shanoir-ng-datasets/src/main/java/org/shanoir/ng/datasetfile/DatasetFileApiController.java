@@ -89,6 +89,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 						path = path.replace(MigrationConstants.DCM4CHEE_WEB_RS_CONSTANT, dicomWADOURI);
 					}
 				}
+				LOG.error("Moving PACS dataset file, origin:" +datasetFile.getPath() + ", destination: " + path);
 				datasetFile.setPath(path);
 			}
 
@@ -106,7 +107,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 		// Transfer to pacs
 		DatasetFile datasetFile = datasetFileService.findById(datasetFileId).orElse(null);
 		File expressionFolder = new File(migrationFolder + "/migration-" + datasetFile.getDatasetExpression().getId());
-		LOG.error("Adding files to pacs" + expressionFolder.getAbsolutePath());
+		LOG.error("Adding files to pacs: " + expressionFolder.getAbsolutePath());
 		try {
 			if (dicomWeb) {
 				dicomWebService.sendDicomFilesToPacs(expressionFolder);
@@ -131,6 +132,9 @@ public class DatasetFileApiController implements DatasetFileApi {
 		File destination = null;
 		try {
 			destination = new File(migrationFolder + "/migration-" + datasetFile.getDatasetExpression().getId() + File.separator +  LocalDateTime.now() + file.getName());
+			
+			LOG.error("Migrating file to: " + destination.getAbsolutePath());
+			
 			if (datasetFile.isPacs()) {
 				// Copy file to load it in the PACS
 				destination.getParentFile().mkdirs();

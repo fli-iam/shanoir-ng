@@ -273,6 +273,8 @@ public class StudyMigrationService {
 				entityManager.clear();
 				this.studyRepository.addProtocolFile(studyId, fileName);
 			}
+			// TODO: temporary
+			job.getLogging().forEach(LOG::error);
 		} catch (IOException e) {
 			LOG.error("ERROR: Could not publish migration logs.", e);
 		} finally {
