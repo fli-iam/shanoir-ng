@@ -71,9 +71,9 @@ public class DatasetFileApiController implements DatasetFileApi {
 			if (datasetFile.isPacs()) {
 
 				String path = datasetFile.getPath();
-				path = path.replaceFirst(MigrationConstants.DCM4CHEE_PROTOCOL_CONSTANT, dcm4cheeProtocol);
-				path = path.replaceFirst(MigrationConstants.DCM4CHEE_HOST_CONSTANT, dcm4cheeHost);
-				path = path.replaceFirst(MigrationConstants.DCM4CHEE_PORT_CONSTANT, dcm4cheePortWeb);
+				path = path.replace(MigrationConstants.DCM4CHEE_PROTOCOL_CONSTANT, dcm4cheeProtocol);
+				path = path.replace(MigrationConstants.DCM4CHEE_HOST_CONSTANT, dcm4cheeHost);
+				path = path.replace(MigrationConstants.DCM4CHEE_PORT_CONSTANT, dcm4cheePortWeb);
 
 				// This may have to be changes in case old is dicom and new is not
 				if (path.contains(MigrationConstants.DCM4CHEE_WADO_URI_CONSTANT)) {

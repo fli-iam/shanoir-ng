@@ -526,9 +526,9 @@ public class DatasetMigrationService {
 			} else {
 				// Change PACS url with constants
 				String path = file.getPath();
-				path = path.replace(dcm4cheeProtocol, MigrationConstants.DCM4CHEE_PROTOCOL_CONSTANT);
-				path = path.replace(dcm4cheeHost, MigrationConstants.DCM4CHEE_HOST_CONSTANT);
-				path = path.replace(dcm4cheePortWeb, MigrationConstants.DCM4CHEE_PORT_CONSTANT);
+				path = path.replaceFirst(dcm4cheeProtocol, MigrationConstants.DCM4CHEE_PROTOCOL_CONSTANT);
+				path = path.replaceFirst(dcm4cheeHost, MigrationConstants.DCM4CHEE_HOST_CONSTANT);
+				path = path.replaceFirst(dcm4cheePortWeb, MigrationConstants.DCM4CHEE_PORT_CONSTANT);
 				if (dicomWeb) {
 					path = path.replace(dicomWebRS, MigrationConstants.DCM4CHEE_WEB_RS_CONSTANT);
 				} else {
