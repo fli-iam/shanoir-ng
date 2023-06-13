@@ -97,7 +97,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 /**
  * This is the main component of the import of Shanoir-NG. The front-end in
@@ -178,7 +178,7 @@ public class ImporterApiController implements ImporterApi {
 
 	@Override
 	public ResponseEntity<ImportJob> uploadDicomZipFile(
-			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile dicomZipFile)
+			@Parameter(name = "file detail") @RequestPart("file") final MultipartFile dicomZipFile)
 					throws RestServiceException {
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
@@ -263,7 +263,7 @@ public class ImporterApiController implements ImporterApi {
 
 	@Override
 	public ResponseEntity<Void> startImportJob(
-			@ApiParam(value = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
+			@Parameter(name = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
 					throws RestServiceException {
 		File userImportDir = ImportUtils.getUserImportDir(importDir);
 		final Long userId = KeycloakUtil.getTokenUserId();
@@ -303,7 +303,7 @@ public class ImporterApiController implements ImporterApi {
 
 	@Override
 	public ResponseEntity<ImportJob> queryPACS(
-			@ApiParam(value = "DicomQuery", required = true) @Valid @RequestBody final DicomQuery dicomQuery)
+			@Parameter(name = "DicomQuery", required = true) @Valid @RequestBody final DicomQuery dicomQuery)
 					throws RestServiceException {
 		ImportJob importJob;
 		try {
@@ -324,7 +324,7 @@ public class ImporterApiController implements ImporterApi {
 
 	@Override
 	public ResponseEntity<ImportJob> importDicomZipFile(
-			@ApiParam(value = "file detail") @RequestBody final String dicomZipFilename) throws RestServiceException {
+			@Parameter(name = "file detail") @RequestBody final String dicomZipFilename) throws RestServiceException {
 		// We use this when coming from BRUKER upload
 		if (dicomZipFilename == null) {
 			throw new RestServiceException(
@@ -353,7 +353,7 @@ public class ImporterApiController implements ImporterApi {
 	 * informations collected
 	 */
 	public ResponseEntity<EegImportJob> uploadEEGZipFile(
-			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile eegFile)
+			@Parameter(name = "file detail") @RequestPart("file") final MultipartFile eegFile)
 					throws RestServiceException {
 		try {
 			// Do some checks about the file, must be != null and must be a .zip file
@@ -393,7 +393,7 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	@Override
-	public ResponseEntity<EegImportJob> analyzeEegZipFile(@ApiParam(value = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException {
+	public ResponseEntity<EegImportJob> analyzeEegZipFile(@Parameter(name = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException {
 		try {
 			List<EegDataset> datasets = new ArrayList<>();
 
@@ -460,8 +460,8 @@ public class ImporterApiController implements ImporterApi {
 	 * This method imports dataset file, and converts them to nifti if necessary (in case of a Analyze file format from .hdr/.img files)
 	 */
 	public ResponseEntity<String> uploadProcessedDataset(
-			@ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, 
-			@ApiParam(value = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
+			@Parameter(name = "image detail") @RequestPart("image") MultipartFile imageFile, 
+			@Parameter(name = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
 					throws RestServiceException {
 
 		String imageFileName = imageFile == null ? "" : imageFile.getOriginalFilename();
@@ -655,7 +655,7 @@ public class ImporterApiController implements ImporterApi {
 	 */
 	@Override
 	public ResponseEntity<Void> startImportEEGJob(
-			@ApiParam(value = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
+			@Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
 		// Comment: Anonymisation is not necessary for pure brainvision EEGs data
 		// For .EDF, anonymisation could be done here.
 		// Comment: BIDS translation will be done during export and not during import.
@@ -778,7 +778,7 @@ public class ImporterApiController implements ImporterApi {
 	 * @throws RestServiceException
 	 */
 	@Override
-	public ResponseEntity<ByteArrayResource> getDicomImage(@ApiParam(value = "path", required=true)  @RequestParam(value = "path", required = true) String path)
+	public ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required=true)  @RequestParam(value = "path", required = true) String path)
 			throws RestServiceException, IOException {
 
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);
@@ -805,12 +805,12 @@ public class ImporterApiController implements ImporterApi {
 				.body(resource);
 	}
 
-	public ResponseEntity<ImportJob> uploadMultipleDicom(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
-			@ApiParam(value = "studyId", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "studyName", required = true) @PathVariable("studyName") String studyName,
-			@ApiParam(value = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
-			@ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId,
-			@ApiParam(value = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException {
+	public ResponseEntity<ImportJob> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
+			@Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
+			@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
+			@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
+			@Parameter(name = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException {
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(

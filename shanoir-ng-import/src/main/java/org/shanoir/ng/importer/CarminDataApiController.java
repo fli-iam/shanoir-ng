@@ -39,7 +39,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.util.UriUtils;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 /**
  * Carmin data upload results from VIP to tmp folder endpoint
@@ -68,7 +68,7 @@ public class CarminDataApiController implements CarminDataApi {
 
     @Override
     public ResponseEntity<Path> uploadPath(
-            @ApiParam(value = "") @Valid @RequestBody UploadData body)
+            @Parameter(name = "") @Valid @RequestBody UploadData body)
             throws RestServiceException {
 
         String completePath = extractPathFromRequest(httpServletRequest);

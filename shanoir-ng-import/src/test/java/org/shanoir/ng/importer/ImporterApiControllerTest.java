@@ -14,11 +14,8 @@
 
 package org.shanoir.ng.importer;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -30,9 +27,8 @@ import java.util.Collections;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
@@ -56,7 +52,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
@@ -70,13 +65,11 @@ import com.google.gson.GsonBuilder;
  * @author atouboul
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = ImporterApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class ImporterApiControllerTest {
-
-	private static final String UPLOAD_EEG_PATH = "/importer/upload_eeg/";
 
 	private static final String START_EEG_JOB_PATH = "/importer/start_import_eeg_job/";
 
@@ -114,7 +107,7 @@ public class ImporterApiControllerTest {
 	@MockBean
 	private ShanoirEventService shanoirEventService;
 
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException, IOException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 	}

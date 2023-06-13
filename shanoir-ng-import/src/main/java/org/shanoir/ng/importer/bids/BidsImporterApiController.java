@@ -64,7 +64,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class BidsImporterApiController implements BidsImporterApi {
@@ -104,10 +104,10 @@ public class BidsImporterApiController implements BidsImporterApi {
 	 */
 	@Override
 	public ResponseEntity<ImportJob> importAsBids(
-			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile bidsFile,
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") String studyName,
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId)
+			@Parameter(name = "file detail") @RequestPart("file") final MultipartFile bidsFile,
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId)
 					throws RestServiceException, ShanoirException, IOException {
 
 		// STEP 1: Analyze folder and unzip it.
