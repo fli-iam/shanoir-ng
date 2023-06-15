@@ -1,7 +1,7 @@
 package org.shanoir.uploader.dicom.query;
 
 import org.apache.log4j.Logger;
-import org.dcm4che2.tool.dcmecho.DcmEcho;
+import org.dcm4che3.tool.dcmecho.DcmEcho;
 
 /**
  * 
