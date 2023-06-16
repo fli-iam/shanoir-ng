@@ -247,13 +247,13 @@ public class WADODownloaderService {
 		List<File> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
 			String url = iterator.next().toString();
-			files.add(new File(downloadDicomFilesForURL(url, workFolder, subjectName, dataset, index)));
+			files.add(new File(downloadDicomFileForURL(url, workFolder, subjectName, dataset, index)));
 			index++;
 		}
 		return files;
 	}
 
-	public String downloadDicomFilesForURL(String url, final File workFolder, String subjectName, Dataset dataset, int index) throws IOException, MessagingException {
+	public String downloadDicomFileForURL(String url, final File workFolder, String subjectName, Dataset dataset, int index) throws IOException, MessagingException {
 		String instanceUID = null;
 
 		// Handle and check at first for WADO-RS URLs by "/instances/"
@@ -262,7 +262,7 @@ public class WADODownloaderService {
 		if (indexInstanceUID > 0) {
 			instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
 			byte[] responseBody = downloadFileFromPACS(url);
-			extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
+			return extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
 		} else {
 			// handle and check secondly for WADO-URI URLs by "objectUID="
 			// instanceUID == objectUID
@@ -308,12 +308,12 @@ public class WADODownloaderService {
 				try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 					Files.copy(bIS, extractedDicomFile.toPath());
 					extractedDicomFile.getAbsolutePath();
+					return extractedDicomFile.getAbsolutePath();
 				}
 			} else {
 				throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
 			}
 		}
-		return null;
 	}
 
 	public String downloadDicomMetadataForURL(final URL url) throws IOException, MessagingException, RestClientException {
@@ -494,7 +494,7 @@ public class WADODownloaderService {
 	 * @throws IOException
 	 * @throws MessagingException
 	 */
-	private void extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder)
+	private String extractDICOMFilesFromMHTMLFile(final byte[] responseBody, final String instanceUID, final File workFolder)
 			throws IOException, MessagingException {
 		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
 			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
@@ -510,11 +510,13 @@ public class WADODownloaderService {
 						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + count + DCM);
 					}
 					Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
+					return extractedDicomFile.getAbsolutePath();
 				} else {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
 				}
 			}
 		}
+		return null;
 	}
 
 

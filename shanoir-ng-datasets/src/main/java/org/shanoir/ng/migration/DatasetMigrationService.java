@@ -2,6 +2,7 @@ package org.shanoir.ng.migration;
 
 import java.io.File;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -500,11 +501,11 @@ public class DatasetMigrationService {
 			String result = null;
 			if (DatasetExpressionFormat.DICOM.equals(file.getDatasetExpression().getDatasetExpressionFormat())) {
 				// Dicom
-				result = downloader.downloadDicomFilesForURL(file.getPath(), workFolder, "", createdDataset, 0);
+				result = downloader.downloadDicomFileForURL(file.getPath(), workFolder, "", createdDataset, 0);
 			} else {
 				// Nifti
 				URL url = new URL(file.getPath().replaceAll("%20", " "));
-				File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
+				File srcFile = new File(UriUtils.decode(url.getPath(), StandardCharsets.UTF_8.name()));
 				result = srcFile.getAbsolutePath();
 			}
 
@@ -518,10 +519,7 @@ public class DatasetMigrationService {
 				file.setPath(file.getPath().replace("study-" + job.getOldStudyId() , "study-" + job.getStudy().getId()));
 				file.setPath(file.getPath().replace("examination" + oldExamId , "examination" + job.getExaminationMap().get(oldExamId)));
 				file.setPath(file.getPath().replace(
-						"-" + createdDataset.getSubjectId()							  + "/ses-" + oldExamId ,
-						"-" + job.getSubjectsMap().get(createdDataset.getSubjectId()) + "/ses-" + job.getExaminationMap().get(oldExamId)));
-				file.setPath(file.getPath().replace(
-						"/ses-" + oldExamId ,
+						"/ses-" + oldExamId,
 						"/ses-" + job.getExaminationMap().get(oldExamId)));
 			} else {
 				// Change PACS url with constants
@@ -543,8 +541,9 @@ public class DatasetMigrationService {
 			distantShanoir.moveDatasetFile(createdFile, new File(result));
 
 		} catch (Exception e) {
+			LOG.error("Erreur: ", e);
 			// Add error to list of errors and continue
-			job.getLogging().add("ERROR : Dataset File could not be migrated: " + file.getPath() + " : " + e.getMessage());
+			job.getLogging().add("ERROR : Dataset File could not be migrated: " + file.getPath());
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDY_MIGRATION_LOGGING_QUEUE, getJobAsString(job));
 		} finally {
 			FileUtils.deleteQuietly(workFolder);
