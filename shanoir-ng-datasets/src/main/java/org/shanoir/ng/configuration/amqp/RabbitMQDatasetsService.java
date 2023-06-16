@@ -355,7 +355,7 @@ public class RabbitMQDatasetsService {
 			ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
 
 			// Delete associated examinations and datasets from solr repository then from database
-			for (Examination exam : examinationRepository.findByStudyId(Long.valueOf(event.getObjectId()))) {
+			for (Examination exam : examinationRepository.findByStudy_Id(Long.valueOf(event.getObjectId()))) {
 				examinationService.deleteFromRabbit(exam);
 			}
 			// also delete associated study cards

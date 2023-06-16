@@ -30,19 +30,25 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class ShanoirSolrQuery {
 	
 	private Collection<String> studyName;
+
+	private Collection<Long> studyId;
 	
 	private Collection<String> subjectName;
-	
+
+	private Collection<Long> subjectId;
+
+	private Collection<Long> examinationId;
+
 	private Collection<String> examinationComment;
 	
 	private	Collection<String> datasetName;
 	
 	private	Collection<String> centerName;
+
+	private Collection<Long> centerId;
 	
 	private	Collection<String> tags;
-	
-	private Collection<Long> studyId;
-	
+
 	private LocalDate datasetStartDate;
 	
 	private LocalDate datasetEndDate;
@@ -89,6 +95,14 @@ public class ShanoirSolrQuery {
 	 */
 	public void setSubjectName(Collection<String> subjectName) {
 		this.subjectName = subjectName;
+	}
+
+	public Collection<Long> getExaminationId() {
+		return examinationId;
+	}
+
+	public void setExaminationId(Collection<Long> examinationId) {
+		this.examinationId = examinationId;
 	}
 
 	/**
@@ -265,5 +279,21 @@ public class ShanoirSolrQuery {
 	
 	public Range<LocalDate> getDatasetDateRange() {
 		return new Range<LocalDate>(getDatasetStartDate(), getDatasetEndDate());
+	}
+
+	public Collection<Long> getSubjectId() {
+		return subjectId;
+	}
+
+	public void setSubjectId(Collection<Long> subjectId) {
+		this.subjectId = subjectId;
+	}
+
+	public Collection<Long> getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Collection<Long> centerId) {
+		this.centerId = centerId;
 	}
 }

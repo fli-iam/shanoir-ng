@@ -33,6 +33,7 @@ export class Study extends Entity {
     monoCenter: boolean;
     name: string;
     nbExaminations: number;
+    nbSubjects: number;
     nbSujects: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
@@ -40,14 +41,19 @@ export class Study extends Entity {
     studyCenterList: StudyCenter[] = [];
     studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
     profile: Profile;
+    size: number = null;
     studyType: StudyType;
     subjectStudyList: SubjectStudy[] = [];
     studyUserList: StudyUser[] = [];
     timepoints: Timepoint[];
-    visibleByDefault: boolean;
+    visibleByDefault: boolean = false;
     withExamination: boolean;
     studyCardList: StudyCard[];
     tags: Tag[];
+    studyTags: Tag[];
+    description: string;
+    accessRequestedByCurrentUser: boolean = false;
+    locked: boolean = false; // current user has no access
 
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);
@@ -64,12 +70,14 @@ export class SimpleStudy {
     id: number;
     name: string;
     tags: Tag[];
+    studyTags: Tag[];
     studyUserList: StudyUser[];
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
         this.name = study.name;
         this.tags = study.tags;
+        this.studyTags = study.studyTags;
         this.studyUserList = study.studyUserList;
     }
 }

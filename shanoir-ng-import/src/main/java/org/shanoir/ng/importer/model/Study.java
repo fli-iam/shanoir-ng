@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.model;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -80,6 +81,10 @@ public class Study {
 
 	public List<Serie> getSeries() {
 		return series;
+	}
+
+	public List<Serie> getSelectedSeries() {
+		return series.stream().filter(Serie::getSelected).collect(Collectors.toList());
 	}
 
 	public void setSeries(List<Serie> series) {

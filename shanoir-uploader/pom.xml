@@ -13,13 +13,13 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>11</java.version>
-		<keycloak.version>13.0.1</keycloak.version>
+		<keycloak.version>20.0.0</keycloak.version>
 		<jackson.version>2.13.4</jackson.version>
 		<javax.activation.version>1.2.0</javax.activation.version>
 		<jaxb.api.version>2.3.0</jaxb.api.version>
 		<lombok.version>1.18.6</lombok.version>
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
-        <junit.platform.version>1.8.2</junit.platform.version>
+		<junit.platform.version>1.8.2</junit.platform.version>
 	</properties>
 
 	<dependencies>
@@ -46,6 +46,16 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.datatype</groupId>
+    		<artifactId>jackson-datatype-jsr310</artifactId>
+    		<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.datatype</groupId>
+		    <artifactId>jackson-datatype-jdk8</artifactId>
+		    <version>${jackson.version}</version>
 		</dependency>
 		<!-- dependency log4j -->
 		<dependency>
@@ -137,7 +147,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20190722</version>
+			<version>20230227</version>
 		</dependency>
 		<!-- dependency for Apache commons-lang library -->
 		<dependency>

@@ -10,19 +10,41 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM jboss/keycloak:16.1.1
+FROM quay.io/keycloak/keycloak:20.0.0 as base_image
 
-COPY --chown=jboss themes/. /opt/jboss/keycloak/themes
+# keycloak options (https://www.keycloak.org/server/all-config)
+#
+# Here we list only the variables that need to be set at both runtime *and* at
+# buildtime ("kc.sh build"). If they do not have the same values then the
+# quarkus image has to be rebuilt at runtime, which delays container startup
+# with a message like: "(Quarkus augmentation completed in 180315ms)"
+#
+# The relevant variables can be listed with: /opt/keycloak/bin/kc.sh show-config
+#
+# All other variables are set in the entrypoint.
+ENV KC_DB="mysql" \
+    KC_HTTP_RELATIVE_PATH="/auth"
 
-COPY shanoir-ng-keycloak-auth.jar /opt/jboss/keycloak/standalone/deployments/
+#
+# Use builder to integrate custom provider
+#
+FROM base_image as builder
 
-COPY cfg/. /opt/jboss/keycloak/
+COPY shanoir-ng-keycloak-auth.jar /opt/keycloak/providers
+
+WORKDIR /opt/keycloak
+RUN /opt/keycloak/bin/kc.sh build
+
+#
+# Create actual image, based on builder before
+#
+FROM base_image
+
+COPY --from=builder /opt/keycloak/ /opt/keycloak/
+COPY --chown=keycloak themes/. /opt/keycloak/themes
+COPY cfg/. /opt/keycloak/
 
 COPY entrypoint entrypoint_common oneshot /bin/
 
-# unset the env var, so that the default value is set by the entrypoint script
-# (like all other env vars)
-ENV PROXY_ADDRESS_FORWARDING ""
-
-ENTRYPOINT ["/bin/entrypoint", "/opt/jboss/tools/docker-entrypoint.sh", "-b", "0.0.0.0", \
-	"-bmanagement", "0.0.0.0", "-Dkeycloak.profile.feature.scripts=enabled"]
+ENTRYPOINT ["/bin/entrypoint", "/opt/keycloak/bin/kc.sh"]
+CMD ["start"]

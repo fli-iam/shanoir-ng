@@ -1,44 +1,6 @@
 <#macro registrationLayout bodyClass="" displayInfo=false displayMessage=true displayRequiredFields=false showAnotherWayIfPresent=true>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" class="${properties.kcHtmlClass!}">
-<script type="application/ld+json">
-{
- "@context": "http://schema.org",
- "@id": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST",
- "@type": "DataCatalog",
- "dct:conformsTo": "https://bioschemas.org/profiles/DataCatalog/0.3-RELEASE-2019_07_01",
- "description": "Shanoir-NG (SHAring NeurOImaging Resources, Next Generation) is a web platform (open-source) for clinical and preclinical research, designed to import, share, archive, search and visualize all kind of medical imaging data (BIDS, MR, CT, PT, EEG, Bruker). Its origin goes back to neuroimaging, but its usage is now open for all kind of organs. It provides a user-friendly, secure web access and offers an intuitive workflow to facilitate the collecting and retrieving of imaging data from multiple sources and a wizzard to make the completion of metadata easy. Shanoir-NG comes along with many features such as pseudonymization of data for all imports, automatic NIfTI conversion and support for multi-centres clinical studies.",
- "keywords": [
- "Medical Imaging",
- "Neuroimaging",
- "Neuroinformatics",
- "MRI",
- "Research"
- ],
- "license": "https://www.gnu.org/licenses/gpl-3.0.en.html",
- "name": "Shanoir",
- "provider": [
- {
- "@context": "http://schema.org",
- "@type": "Organization",
- "dct:conformsTo": "https://bioschemas.org/profiles/Organization/0.2-DRAFT-2019_07_19",
- "description": "France Life Imaging (FLI) is a harmonized imaging network for biomedical research giving access to innovative or even unique imaging equipment systems and to a methodological expertise in all imaging fields to researchers, from public research organisations and industries.",
- "name": "France Life Imaging",
- "url": "https://www.francelifeimaging.fr"
- },
- {
- "@context": "http://schema.org",
- "@type": "Organization",
- "dct:conformsTo": "https://bioschemas.org/profiles/Organization/0.2-DRAFT-2019_07_19",
- "description": "Inria - National Institute for Research in Digital Science and Technology",
- "name": "Inria",
- "url": "https://inria.fr"
- }
- ],
-  "url": "SHANOIR_URL_SCHEME://SHANOIR_URL_HOST"
-}
-
-</script>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />

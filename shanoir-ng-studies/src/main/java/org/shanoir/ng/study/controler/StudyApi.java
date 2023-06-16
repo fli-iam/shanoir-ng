@@ -27,6 +27,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
+import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
@@ -84,8 +85,8 @@ public interface StudyApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Study.class),
 			@ApiResponse(code = 404, message = "no study found", response = Study.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = Study.class) })
-	@RequestMapping(value = "/public", produces = { "application/json" }, method = RequestMethod.GET)
-	ResponseEntity<List<IdName>> findPublicStudies();
+	@RequestMapping(value = "/public/data", produces = { "application/json" }, method = RequestMethod.GET)
+	ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData();
 
 	@ApiOperation(value = "", notes = "Returns id and name for all the studies", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {
@@ -135,6 +136,16 @@ public interface StudyApi {
 	ResponseEntity<StudyDTO> saveNewStudy(
 			@ApiParam(value = "study to create", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "If exists, returns the size of the study files corresponding to the given id", response = Long.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "Size of the study files in bytes", response = Long.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/sizeByStudyId/{studyId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	ResponseEntity<Long> getStudyFilesSize(@PathVariable("studyId") Long studyId);
 
 	@ApiOperation(value = "", notes = "Updates a study", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "study updated", response = Void.class),
@@ -274,6 +285,21 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> deleteDataUserAgreement(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws IOException;
+
+
+	@ApiOperation(value = "", notes = "Deletes the user of a study", response = Void.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 204, message = "user removed from study", response = Void.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study or user found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@RequestMapping(value = "studyUser/{studyId}/{userId}", produces = {
+			"application/json" }, method = RequestMethod.DELETE)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> deleteStudyUser(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "id of the user", required = true) @PathVariable("userId") Long userId)
 			throws IOException;
 
 	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available for a given user", response = Study.class, tags = {})

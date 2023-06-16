@@ -24,16 +24,17 @@ import org.shanoir.ng.accessrequest.model.AccessRequest;
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.exception.AccountNotOnDemandException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.ForbiddenException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PasswordPolicyException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.user.model.User;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -44,14 +45,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class UserApiController extends AbstractUserRequestApiController implements UserApi {
 	
-	@Autowired
-	ShanoirEventService eventService;
+	@Value("${vip.enabled}")
+	private boolean vipEnabled;
 
 	@Autowired
-	AccessRequestService accessRequestService;
-
-	@Autowired
-	RabbitTemplate rabbitTemplate;
+	private AccessRequestService accessRequestService;
 
 	@Override
 	public ResponseEntity<Void> deleteUser(@PathVariable("userId") final Long userId) throws ForbiddenException {
@@ -64,6 +62,37 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		}
 	}
 
+	@Override
+	public ResponseEntity<Void> confirmAccountRequest(@PathVariable("userId") final Long userId,
+			@RequestBody final User user, final BindingResult result) throws RestServiceException {
+		
+		try {
+			validate(user, result);
+			getUserService().confirmAccountRequest(user);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			
+		} catch (EntityNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (AccountNotOnDemandException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
+		}
+	}
+
+	
+	@Override
+	public ResponseEntity<Void> denyAccountRequest(@PathVariable("userId") final Long userId) throws RestServiceException {
+		try {
+			getUserService().denyAccountRequest(userId);
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			
+		} catch (EntityNotFoundException e) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		} catch (AccountNotOnDemandException e) {
+			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage()));
+		}
+	}
+
+	
 	@Override
 	public ResponseEntity<User> findUserById(@PathVariable("userId") final Long userId) {
 		final User user = getUserService().findById(userId);
@@ -122,6 +151,9 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		/* Save user in db. */
 		try {
 			User createdUser = getUserService().create(user);
+			if(vipEnabled){
+				getVipUserService().createVIPAccountRequest(createdUser);
+			}
 			return new ResponseEntity<>(createdUser, HttpStatus.OK);
 		} catch (PasswordPolicyException e) {
 			throw new RestServiceException(
@@ -129,8 +161,10 @@ public class UserApiController extends AbstractUserRequestApiController implemen
 		} catch (SecurityException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while registering the user in Keycloak"));
+		} catch (MicroServiceCommunicationException e) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected error while communicating with VIP"));
 		}
-
 	}
 
 	@Override

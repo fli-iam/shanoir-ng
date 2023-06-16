@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.controler;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -28,6 +29,8 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.dto.mapper.SubjectMapper;
@@ -36,6 +39,8 @@ import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -61,6 +66,9 @@ public class SubjectApiController implements SubjectApi {
 	@Autowired
 	private ShanoirEventService eventService;
 
+	@Autowired
+	private StudyService studyService;
+
 	@Override
 	public ResponseEntity<Void> deleteSubject(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
@@ -85,11 +93,22 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<List<SubjectDTO>> findSubjects() {
-		final List<Subject> subjects = subjectService.findAll();
+	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
+
+		List<Subject> subjects = new ArrayList<>();
+
+		if(preclinical && clinical){
+			subjects = subjectService.findAll();
+		} else if (preclinical) {
+			subjects = subjectService.findByPreclinical(true);
+		} else if (clinical) {
+			subjects = subjectService.findByPreclinical(false);
+		}
+
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
+
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 
@@ -182,5 +201,17 @@ public class SubjectApiController implements SubjectApi {
 					new ErrorDetails(errors));
 			throw new RestServiceException(error);
 		}
+	}
+
+	public ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name) {
+		// Get all allowed studies
+		List<Study> studies = this.studyService.findAll();
+		
+		Page<Subject> subjects = this.subjectService.getFilteredPageByStudies(page, name, studies);
+		
+		if (subjects.getContent().isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 }

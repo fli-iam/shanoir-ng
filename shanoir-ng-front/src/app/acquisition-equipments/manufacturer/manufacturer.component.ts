@@ -13,7 +13,7 @@
  */
 
 import { Component } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -64,7 +64,7 @@ export class ManufacturerComponent extends EntityComponent<Manufacturer> {
             });
     }   
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'name': [this.manuf.name, [Validators.required, Validators.minLength(2), Validators.maxLength(200), this.registerOnSubmitValidator('unique', 'name')]]
         });

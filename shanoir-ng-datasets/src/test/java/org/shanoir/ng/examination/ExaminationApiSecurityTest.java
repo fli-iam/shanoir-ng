@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.math3.util.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,11 +36,9 @@ import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectDTO;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -53,9 +50,7 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockMultipartFile;
@@ -110,7 +105,7 @@ public class ExaminationApiSecurityTest {
 		assertAccessDenied(api::deleteExamination, 1L);
 		assertAccessDenied(api::findExaminationById, 1L);
 		assertAccessDenied(api::findExaminations, PageRequest.of(0, 10));
-		assertAccessDenied(api::findExaminationsBySubjectIdStudyId, 1L, 1L);
+		assertAccessDenied((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);
 		assertAccessDenied(api::findExaminationsBySubjectId, 1L);
 		assertAccessDenied(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
 		assertAccessDenied(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult);
@@ -134,7 +129,7 @@ public class ExaminationApiSecurityTest {
 		assertAccessAuthorized(api::deleteExamination, 1L);
 		assertAccessAuthorized(api::findExaminationById, 1L);
 		assertAccessAuthorized(api::findExaminations, PageRequest.of(0, 10));
-		assertAccessAuthorized(api::findExaminationsBySubjectIdStudyId, 1L, 1L);
+		assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);
 		assertAccessAuthorized(api::findExaminationsBySubjectId, 1L);
 		assertAccessAuthorized(api::saveNewExamination, new ExaminationDTO(), mockBindingResult);
 		assertAccessAuthorized(api::updateExamination, 1L, mockExaminationDTO(1L), mockBindingResult);
@@ -199,13 +194,13 @@ public class ExaminationApiSecurityTest {
 		given(examinationRepository.findById(4L)).willReturn(Optional.of(exam4));
 		ExaminationDTO examDTO4 = mockExaminationDTO(4L, 4L, 4L, 4L);
 		// exam 1 & 3 are in study 1 > subject 1 (but in different centers)
-		given(examinationRepository.findBySubjectIdAndStudyId(1L, 1L)).willReturn(Utils.toList(exam1, exam3));
+		given(examinationRepository.findBySubjectIdAndStudy_Id(1L, 1L)).willReturn(Utils.toList(exam1, exam3));
 		given(examinationRepository.findBySubjectId(1L)).willReturn(Utils.toList(exam1, exam3));
 		// exam 2 is in study 2 > subject 2
-		given(examinationRepository.findBySubjectIdAndStudyId(2L, 2L)).willReturn(Utils.toList(exam2));
+		given(examinationRepository.findBySubjectIdAndStudy_Id(2L, 2L)).willReturn(Utils.toList(exam2));
 		given(examinationRepository.findBySubjectId(2L)).willReturn(Utils.toList(exam2));
 		//exam 4 is in study 4 > subject 4
-		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(Utils.toList(exam4));
+		given(examinationRepository.findBySubjectIdAndStudy_Id(4L, 4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findPageByStudyCenterOrStudyIdIn(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
 		given(examinationRepository.findPageByStudyCenterOrStudyIdIn(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
@@ -250,13 +245,13 @@ public class ExaminationApiSecurityTest {
 		assertAccessAuthorized(api::findPreclinicalExaminations, false, PageRequest.of(0, 10));
 		
 		// findExaminationsBySubjectIdStudyId(Long, Long)
-		assertAccessAuthorized(api::findExaminationsBySubjectIdStudyId, 1L, 1L);
+		assertAccessAuthorized((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 1L, 1L);
 		try {
 			// either the access is denied or the body is empty, both are fine
 			ResponseEntity<List<SubjectExaminationDTO>> examsOfSubject2LStudy2L = api.findExaminationsBySubjectIdStudyId(2L,  2L);
 			assertThat(examsOfSubject2LStudy2L.getBody() == null || examsOfSubject2LStudy2L.getBody().isEmpty());
 		} catch (AccessDeniedException e) { /* good */ }
-		assertAccessDenied(api::findExaminationsBySubjectIdStudyId, 4L, 4L);
+		assertAccessDenied((subjectId, studyId) -> api.findExaminationsBySubjectIdStudyId(subjectId, studyId), 4L, 4L);
 		// check access denied to exam 3
 		List<SubjectExaminationDTO> examList1 = api.findExaminationsBySubjectIdStudyId(1L,  1L).getBody();
 		assertThat(examList1.size()).isEqualTo(1);
@@ -334,7 +329,7 @@ public class ExaminationApiSecurityTest {
 	private Examination mockExam(Long id, Long centerId, Long studyId) {
 		Examination exam = mockExam(id);
 		exam.setCenterId(centerId);
-		exam.setStudyId(studyId);
+		exam.setStudy(mockStudy(studyId));
 		return exam;
 	}
 	

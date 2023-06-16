@@ -19,7 +19,6 @@ import { ColumnDefinition } from '../../shared/components/table/column.definitio
 import { StudyService } from '../../studies/shared/study.service';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
@@ -62,7 +61,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
         let colDef: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {
-                headerName: "Subject", field: "subject.name", orderBy: ['subjectId'], cellRenderer: function (params: any) {
+                headerName: "Subject", field: "subject.name", cellRenderer: function (params: any) {
                     return (params.data.subject) ? params.data.subject.name : '';
                 }
             },{
@@ -70,7 +69,7 @@ export class ExaminationListComponent extends EntityListComponent<Examination>{
                     return dateRenderer(params.data.examinationDate);
                 }, width: "100px"
             },{
-                headerName: "Research study", field: "study.name", orderBy: ['studyId'],
+                headerName: "Research study", field: "study.name", orderBy: ['study.name'],
                 route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null
             },{
                 headerName: "Center", field: "center.name", orderBy: ['centerId'],

@@ -39,11 +39,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <ul class="menu-list">
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
-    <li *ngIf="duasToSign() > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>
-        Notifications<span class="counter">{{duasToSign()}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    <li *ngIf="(duasToSign() + accessRequestsToValidate) > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>
+        Notifications<span class="counter">{{duasToSign() + accessRequestsToValidate}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
     <div *ngIf="state.notifOpened && duasToSign() > 0" class="sub-menu" [@slideDown]="state.notifOpened">
         <li routerLink="/dua" routerLinkActive="active"><i class="fas fa-pen-alt"></i>Data User Agreement<span class="counter">{{duasToSign()}}</span></li>
+    </div>
+    <div *ngIf="state.notifOpened && accessRequestsToValidate > 0" class="sub-menu" [@slideDown]="state.notifOpened">
+        <li routerLink="/access-request/list" routerLinkActive="active"><i class="fa-solid fa-user-lock"></i>Access Requests<span class="counter">{{accessRequestsToValidate}}</span></li>
     </div>
     <li routerLink="/task" routerLinkActive="active">
         <i class="fas fa-tasks"></i>Jobs
@@ -68,6 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Acquisition equipments</li>
         <li routerLink="/coil/list" routerLinkActive="active"><i class="fas fa-magnet"></i>Coils</li>
         <li routerLink="/study-card/list" routerLinkActive="active"><i class="fa-solid fa-shuffle"></i>Study Cards</li>
+        <li routerLink="/quality-card/list" routerLinkActive="active"><i class="fa-solid fa-shuffle"></i>Quality Cards</li>
     </div>
 
     <li (click)="state.precOpened = !state.precOpened; saveState();"><i class="fas fa-cat"></i>Preclinical<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
@@ -100,7 +104,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </ul>
 
 <div class="bottom-info">
-    <div>{{VERSION.raw}}</div>
-    <div>Copyright (C) 2009-2022 Inria</div>
-    <div><a href="https://www.inria.fr/">https://www.inria.fr/</a></div>
+    <div><a href="https://github.com/fli-iam/shanoir-ng/commit/{{VERSION.hash?.substring(1)}}" target="_blank" [style.text-decoration]="'none'">{{VERSION.raw}}</a></div>
+    <div>Copyright (C) 2009-2023 Inria</div>
+    <div><a href="https://www.inria.fr/" target="_blank">https://www.inria.fr/</a></div>
 </div>

@@ -11,23 +11,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {HttpClient, HttpEvent, HttpEventType, HttpResponse} from '@angular/common/http';
-import {Injectable, OnDestroy} from '@angular/core';
-import {Subscription} from 'rxjs';
-import {Observable} from 'rxjs/Observable';
+import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
+import { Injectable, OnDestroy } from '@angular/core';
+import { saveAs } from 'file-saver-es';
+import { Subject, Subscription } from 'rxjs';
+import { Observable } from 'rxjs/Observable';
 
-import {BidsElement} from '../../bids/model/bidsElement.model';
-import {DataUserAgreement} from '../../dua/shared/dua.model';
-import {EntityService} from '../../shared/components/entity/entity.abstract.service';
-import {LoadingBarComponent} from '../../shared/components/loading-bar/loading-bar.component';
-import {KeycloakService} from '../../shared/keycloak/keycloak.service';
-import {IdName} from '../../shared/models/id-name.model';
-import {SubjectWithSubjectStudy} from '../../subjects/shared/subject.with.subject-study.model';
+import { BidsElement } from '../../bids/model/bidsElement.model';
+import { DataUserAgreement } from '../../dua/shared/dua.model';
+import { EntityService } from '../../shared/components/entity/entity.abstract.service';
+import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { IdName } from '../../shared/models/id-name.model';
+import { Profile } from '../../shared/models/profile.model';
+import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
-import {StudyUserRight} from './study-user-right.enum';
-import {CenterStudyDTO, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
-import {Study} from './study.model';
-import {Profile} from "../../shared/models/profile.model";
+import { StudyUserRight } from './study-user-right.enum';
+import { CenterStudyDTO, PublicStudyData, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
+import { Study } from './study.model';
+import { combineAll } from 'rxjs/operators';
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -37,6 +39,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     private _duasToSign: number = 0;
 
     subscribtions: Subscription[] = [];
+
+    // currently uploads, number is the studyId and Subjet is a rxjs Subject
+    fileUploadings: Map<number, Promise<void>> = new Map();
 
     constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService) {
         super(http)
@@ -61,15 +66,15 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .toPromise();
     }
 
-    getChallenges(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_CHALLENGES_URL)
-            .toPromise().then((typeResult: IdName[]) => {
-                return typeResult;
-            });
+    getPublicStudiesData(): Promise<PublicStudyData[]> {
+      return this.http.get<PublicStudyData[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_DATA_URL)
+        .toPromise().then((typeResult: PublicStudyData[]) => {
+          return typeResult;
+        });
     }
 
-    getPublicStudies(): Promise<IdName[]> {
-        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_PUBLIC_STUDIES_URL)
+    getChallenges(): Promise<IdName[]> {
+        return this.http.get<IdName[]>(AppUtils.BACKEND_API_STUDY_CHALLENGES_URL)
             .toPromise().then((typeResult: IdName[]) => {
                 return typeResult;
             });
@@ -118,7 +123,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return this.findStudiesIcanAdmin().then(studies => studies.map(study => new IdName(study.id, study.name)));
     }
 
-    uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
+    uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Promise<any> {
         const endpoint = this.API_URL + '/' + fileType + '-upload/' + studyId;
         const formData: FormData = new FormData();
         if (fileType == 'dua') {
@@ -126,8 +131,16 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         } else if (fileType == 'protocol-file') {
             formData.append('file', fileToUpload, fileToUpload.name);
         }
-        return this.http.post<any>(endpoint, formData);
+        const promise: Promise<void> = this.http.post<any>(endpoint, formData).toPromise();
+        // keep a track on the current uploadings
+        if (this.fileUploadings.has(studyId)) {
+            this.fileUploadings.set(studyId, Promise.all([this.fileUploadings.get(studyId), promise]).then(() => null));
+        } else {
+            this.fileUploadings.set(studyId, promise);
+        }
+        return promise;
     }
+    
 
     deleteFile(studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
         const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId;
@@ -175,6 +188,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
                 });
     }
 
+    deleteUserFromStudy(studyId: number, userId: number): Promise<void> {
+      return this.http.delete<void>(AppUtils.BACKEND_API_STUDY_DELETE_USER + "/" + studyId + "/" + userId)
+        .toPromise();
+    }
+
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');
@@ -187,7 +205,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
               progressBar.progress = -1;
               break;
             case HttpEventType.DownloadProgress:
-              progressBar.progress = (event.loaded / event.total);
+              progressBar.progress = event.loaded;
               break;
             case HttpEventType.Response:
                 saveAs(event.body, this.getFilename(event));
@@ -250,4 +268,9 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             subscribtion.unsubscribe();
         }
     }
+
+  getSizeByStudyId(id: number): Promise<number> {
+    return this.http.get<number>(AppUtils.BACKEND_API_STUDY_URL + '/sizeByStudyId/' + id)
+      .toPromise();
+  }
 }

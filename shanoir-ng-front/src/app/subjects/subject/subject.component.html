@@ -91,13 +91,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                 <label *ngIf="hasError('name', ['required'])" class="form-validation-alert" i18n="Subject detail|Name required error@@subjectDetailNameRequiredError">Common Name is required !</label>
                                 <label *ngIf="hasError('name', ['minlength', 'maxlength'])" class="form-validation-alert" i18n="Subject detail|Name Length error@@subjectDetailNameLengthError">Length must be between 2 and 64 !</label>
                                 <label *ngIf="hasError('name', ['unique'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">This name is already taken !</label>
-                                <label *ngIf="hasError('name', ['subjectNamePrefix'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">The name should not equal to the study prefix.</label>
+                                <label *ngIf="hasError('name', ['subjectNamePrefix'])" class="form-validation-alert" i18n="Subject detail|Name unique error@@subjectDetailNameUniqueError">The name should not be equal to the study prefix.</label>
                                 <label *ngIf="hasError('name', ['pattern'])" class="form-validation-alert" i18n="Subject detail|Name chars error@@subjectDetailNameCharsError">Forbidden characters</label>
                             </ng-template>
                         </span>
 					</li>
 					<li class="info" *ngIf="subjectNamePrefix && !subject.name?.startsWith(subjectNamePrefix) && mode != 'view'" @slideDown>
-						<span class="icon"><i class="fas fa-info-circle"></i></span>This study is configured to use prefixes for subject names, here the prefix is <b>{{subjectNamePrefix}}</b>. 
+						<span class="icon"><i class="fas fa-info-circle"></i></span>This study is configured to use prefixes for subject names, here the prefix is <b>{{subjectNamePrefix}}</b>.
 						However the prefix is optional and if you know what you are doing please just ignore this message.
 					</li>
 					<div *ngIf="humanSelected()" [@slideDown]="humanSelected()">
@@ -178,7 +178,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</fieldset>
 			<fieldset *ngIf="mode=='view'">
 				<legend i18n="Subject data|Title@@subjectDetailDataTitle">Tree</legend>
-				<reverse-subject-node [input]="subjectNode" 
+				<reverse-subject-node [input]="subjectNode"
 						(nodeInit)="onSubjectNodeInit($event)"></reverse-subject-node>
 			</fieldset>
 			<form-footer

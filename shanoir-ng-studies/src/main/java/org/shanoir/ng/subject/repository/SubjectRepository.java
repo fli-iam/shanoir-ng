@@ -15,9 +15,13 @@
 package org.shanoir.ng.subject.repository;
 
 import org.shanoir.ng.subject.model.Subject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+
+import java.util.List;
 
 /**
  * Repository for Subject.
@@ -56,6 +60,10 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	@Query(value = "SELECT * FROM subject WHERE name LIKE :centerCode AND name REGEXP '^[0-9]+$' ORDER BY name DESC LIMIT 1", nativeQuery = true)
 	Subject findSubjectFromCenterCode(@Param("centerCode") String centerCode);
 	
+	Page<Subject> findByNameContaining(String name, Pageable pageable);
+	
+	Page<Subject> findDistinctByNameContainingAndSubjectStudyListStudyIdIn(String name, Pageable pageable, Iterable<Long> studyIds);
+	
 	/**
 	 * Returns all instances of the type.
 	 * 
@@ -63,4 +71,5 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	 */
 	Iterable<Subject> findBySubjectStudyListStudyIdIn(Iterable<Long> studyIds);
 
+	List<Subject> findByPreclinical(boolean preclinical);
 }

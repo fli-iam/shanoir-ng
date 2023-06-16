@@ -49,7 +49,7 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
         StudyCardDTOService.mapSyncFields(dto, result);
         return Promise.all([
             this.studyService.get(dto.studyId).then(study => result.study = study),
-            this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq),
+            dto.acquisitionEquipmentId ? this.acqEqService.get(dto.acquisitionEquipmentId).then(acqEq => result.acquisitionEquipment = acqEq) : null,
             this.niftiService.get(dto.niftiConverterId).then(nifti => result.niftiConverter = nifti),
             this.dicomService.getDicomTags().then(tags => this.completeDicomTagNames(result, tags)),
             this.coilService.getAll().then(coils => this.completeCoils(result, coils))
@@ -107,7 +107,7 @@ export class StudyCardDTOService extends StudyCardDTOServiceAbstract {
             this.acqEqService.getAll().then(acqs => {
                 for (let entity of result) {
                     if (entity.acquisitionEquipment) 
-                        entity.acquisitionEquipment = acqs.find(acq => acq.id == entity.acquisitionEquipment.id);
+                        entity.acquisitionEquipment = acqs.find(acq => acq.id == entity.acquisitionEquipment?.id);
                 }
             }),
             this.niftiService.getAll().then(niftis => {

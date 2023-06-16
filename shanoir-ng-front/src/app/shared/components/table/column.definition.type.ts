@@ -36,6 +36,9 @@ export type ColumnDefinition = {
     /** disable the possibility of sorting the table based on that column */
     disableSorting?: boolean,
 
+    /** disable the possibility of sorting the table based on that column */
+    disableSearch?: boolean,
+
     /** default width of the column as a css representation (20px, 15%, ...) */
     width?: string,
 
@@ -72,6 +75,8 @@ export type ColumnDefinition = {
     /** css color the the awesome icon */ 
     colorFalse?: string,
 
+    awesomeFunction?: (item: any) => { awesome: `fa${string} fa${string}`, color: string }
+
     /** add a descrption when cursor stands still a few second over the column */
     tip?: string,
 
@@ -80,4 +85,10 @@ export type ColumnDefinition = {
 
     /** field edition callback */
     onEdit?: (item: any, fieldValue: any) => void,
+
+    /** custom graphics of the cell */
+    cellGraphics?: (item) => {color?: string, backgroundColor?: string, tag?: boolean, awesome?: string}
+
+    /** enable text wrapping for this column */
+    wrap?: boolean;
 }

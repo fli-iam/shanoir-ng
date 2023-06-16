@@ -126,7 +126,7 @@ public class BidsServiceTest {
 		SubjectStudy susu = new SubjectStudy();
 		susu.setSubject(this.subject);
 		subjectStudies.add(	susu);
-		given(subjectStudyRepository.findByStudyId(exam.getStudyId())).willReturn(subjectStudies);
+		given(subjectStudyRepository.findByStudy_Id(exam.getStudyId())).willReturn(subjectStudies);
 		
 		// Mock on examination service to get the list of subject
 		given(examService.findBySubjectId(subject.getId())).willReturn(Collections.singletonList(exam));

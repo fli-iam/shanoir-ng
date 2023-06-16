@@ -1,0 +1,130 @@
+body {
+	background-color: #5f0f4e;
+	color: var(--very-dark-grey);
+	min-height: auto;
+}
+
+.header {
+	position: relative;
+	margin-top: 20px;
+	margin-left: 20px;
+	margin-right: 20px;
+}
+
+.github-logo {
+	max-height: 50px;
+	cursor: pointer;
+}
+
+.shanoir {
+	text-align:center;
+	margin-bottom: 65px;
+}
+
+.shanoir-logo {
+	margin-top: 25px;
+}
+
+.shanoir-text {
+	display: block;
+	color: white;
+}
+
+.stats {
+	margin-top: 40px;
+	margin-left: 20px;
+	font-size: 15px;
+	color: white;
+	text-align: center;
+}
+
+hr {
+	border-bottom: 1px solid var(--grey) !important;
+	width: 100%;
+}
+
+.buttons {
+	float: right;
+}
+
+.buttons button { padding-left: 20px; padding-right: 20px; margin-left: 20px; }
+
+.buttonItem { text-decoration: underline; color: var(--greyer); }
+
+.study-tab {
+	margin-top: 20px;
+	display: inline-block;
+	background: var(--very-light-grey);
+	margin-right: 20px;
+	margin-left: 20px;
+	border-radius: 2px;
+	width: 1200px;
+	text-align: left;
+	margin-bottom: 40px;
+}
+
+.study-tab-parent { text-align: center; }
+
+.title { font-size: 25px; }
+
+.studyTitle {
+	color: #4e003d;
+}
+
+.studyDescription {
+	padding-right: 20px;
+	color: var(--color-a);
+	font-size: 22px;
+}
+
+.studyValues, .status, .dates {
+	font-size: 13px;
+}
+
+.accessRequest {
+	position: absolute;
+	bottom: 23px;
+    right: 21px;
+}
+
+.studyTagContainer {
+	text-align: right;
+}
+
+.tags {
+	text-align: right;
+	display: inline-block;
+	float: right;
+}
+
+.tag {
+	border-radius: 2px;
+	padding: 2px 8px;
+	display: inline-block;
+	margin: 2px 4px 2px 0;
+	border: 1px solid var(--grey);
+	color: var(--dark-grey);
+}
+
+.studyItem {
+	position: relative;
+	color: black;
+	padding-left: 20px;
+	padding-top: 10px;
+	padding-right: 20px;
+	font-size: 13px;
+}
+
+.showMoreButton {
+	text-align:center;
+	opacity: 0;
+}
+
+.dark { color:white; }
+.details, .tags { margin-top: 20px; }
+.studyValues, .status, .dates { margin-top: 7px; }
+.label { color: var(--color-b); text-transform: uppercase; }
+.spacer::after { content: ""; border-left: 1px solid #aaa; margin: 0px 15px 0px 14px; font-size: 11px; }
+.title .spacer::after { margin: 0px 17px 0px 17px; font-size: 18px; }
+.details { display: inline-block; margin-bottom: 15px; }
+

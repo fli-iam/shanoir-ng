@@ -128,19 +128,27 @@ dcm4chee-arc:
   # default is true as we want to use new protocols in sh-ng
   dicom.web: false
   dicom.c-store.aet.called: DCM4CHEE
-  # use "/wado" for dcm4chee2 and "/dcm4chee-arc/aets/DCM4CHEE/wado" for dcm4chee3
-  dicom.wado.uri: /dcm4chee-arc/aets/DCM4CHEE/wado
-  dicom.web.rs: /dcm4chee-arc/aets/DCM4CHEE/rs/studies
+  # use "/wado" for dcm4chee2 and "/dcm4chee-arc/aets/AS_RECEIVED/wado" for dcm4chee3
+  dicom.wado.uri: /dcm4chee-arc/aets/AS_RECEIVED/wado
+  dicom.web.rs: /dcm4chee-arc/aets/AS_RECEIVED/rs/studies
   dicom.web.http.client.max.total: 500
   dicom.web.http.client.max.per.route: 500
 
 # VIP
 vip:
-  uri: http://192.168.255.18:9090/rest/executions/
+  uri: ${VIP_URL_SCHEME}://${VIP_URL_HOST}/rest/executions/
   upload-folder: /tmp/vip_uploads
   sleep-time: 20000
   file-formats: .nii.gz, .nii
+  result-file-name: input_params.json
 
+# Service account
+service-account:
+  token:
+    uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng/protocol/openid-connect/token
+  client:
+    id: service-account
+    credential-secret: <credential-secret>
 ---
 
 ######################################

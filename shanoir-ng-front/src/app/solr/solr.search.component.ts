@@ -2,18 +2,18 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { DatePipe } from '@angular/common';
+import { formatDate } from '@angular/common';
 import { AfterContentInit, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
+import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
@@ -39,6 +39,10 @@ import { ProcessingService } from '../processing/processing.service';
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
+import {environment} from "../../environments/environment";
+import {DatasetType} from "../datasets/shared/dataset-type.model";
+import {Dataset} from "../datasets/shared/dataset.model";
+import {Study} from "../studies/shared/study.model";
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -48,7 +52,6 @@ export type TextualFacet = typeof TextualFacetNames[number];
     templateUrl: 'solr.search.component.html',
     styleUrls: ['solr.search.component.css'],
     animations: [slideDown],
-    providers: [DatePipe]
 })
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
@@ -60,7 +63,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectionColumnDefs: ColumnDefinition[];
     customActionDefs: any[];
     selectionCustomActionDefs: any[];
-    form: FormGroup;
+    form: UntypedFormGroup;
     @ViewChild('table', { static: false }) table: TableComponent;
     @ViewChild('selectionTable', { static: false }) selectionTable: TableComponent;
     selectedDatasetIds: Set<number> = new Set();
@@ -77,16 +80,16 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     private facetPageable: Map<string, FacetPageable>;
 
     constructor(
-            private breadcrumbsService: BreadcrumbsService, private formBuilder: FormBuilder, private datePipe: DatePipe,
+            private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
             private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
-                
+
         this.breadcrumbsService.markMilestone();
-        this.breadcrumbsService.nameStep('Solr Search'); 
+        this.breadcrumbsService.nameStep('Solr Search');
 
         this.form = this.buildForm();
         this.columnDefs = this.getColumnDefs();
@@ -141,7 +144,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.loaded = true;
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
@@ -169,7 +172,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     dateOrderValidator = (control: AbstractControl): ValidationErrors | null => {
-        if (this.solrRequest.datasetStartDate && this.solrRequest.datasetEndDate 
+        if (this.solrRequest.datasetStartDate && this.solrRequest.datasetEndDate
             && this.solrRequest.datasetStartDate > this.solrRequest.datasetEndDate) {
                 return { order: true }
         }
@@ -184,26 +187,26 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         let savedRequest: SolrRequest = this.breadcrumbsService.currentStep.data.solrRequest;
         this.solrRequest = savedRequest;
     }
-    
+
     updateSelections() {
         this.selections = [];
         if (this.solrRequest.datasetStartDate && this.solrRequest.datasetStartDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'from: ' + this.datePipe.transform(this.solrRequest.datasetStartDate, 'dd/MM/yyy'),
+                    'from: ' + formatDate(this.solrRequest.datasetStartDate, 'dd/MM/yyy', 'en-US', 'UTC'),
                     () => this.solrRequest.datasetStartDate = null
             ));
         }
         if (this.solrRequest.datasetEndDate && this.solrRequest.datasetEndDate != 'invalid') {
             this.selections.push(new DateSelectionBlock(
-                    'to: ' + this.datePipe.transform(this.solrRequest.datasetEndDate, 'dd/MM/yyy'),
-                    () => this.solrRequest.datasetEndDate = null 
+                    'to: ' + formatDate(this.solrRequest.datasetEndDate, 'dd/MM/yyy', 'en-US', 'UTC'),
+                    () => this.solrRequest.datasetEndDate = null
             ));
         }
         TextualFacetNames.forEach(facetName => {
             if (this.solrRequest[facetName] && Array.isArray(this.solrRequest[facetName])) {
                 (this.solrRequest[facetName] as []).forEach((facetVal, index) => {
                     this.selections = this.selections.concat(
-                        new SimpleValueSelectionBlock(facetVal, () => { 
+                        new SimpleValueSelectionBlock(facetVal, () => {
                             this.solrRequest[facetName].splice(index, 1);
                         })
                     );
@@ -211,7 +214,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 })
             }
         })
-        
+
         if (this.solrRequest.sliceThickness?.hasBound()) {
             this.selections.push(new RangeSelectionBlock('S. Thickness', this.solrRequest.sliceThickness));
         }
@@ -321,9 +324,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     protected openDeleteConfirmDialog = (solrDocument: SolrDocument) => {
         this.confirmDialogService
             .confirm(
-                'Delete dataset', 
+                'Delete dataset',
                 'Are you sure you want to delete the dataset "'
-                    + solrDocument.datasetName 
+                    + solrDocument.datasetName
                     + '" with id n° ' + solrDocument.datasetId + ' ?'
             ).then(res => {
                 if (res) {
@@ -332,7 +335,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                         this.table.refresh().then(() => {
                             this.consoleService.log('info', 'Dataset n°' + solrDocument.datasetId + 'was sucessfully deleted');
                         });
-                    });                    
+                    });
                 }
             })
     }
@@ -340,7 +343,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     protected openDeleteSelectedConfirmDialog = () => {
         this.confirmDialogService
             .confirm(
-                'Delete dataset', 
+                'Delete dataset',
                 'Are you sure you want to delete ' + this.selectedDatasetIds.size + ' dataset(s) ?'
             ).then(res => {
                 if (res) {
@@ -352,21 +355,21 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                         });
                     }).catch(reason => {
                         if(reason?.error?.code == 403) {
-                            this.confirmDialogService.error('Impossible', 
+                            this.confirmDialogService.error('Impossible',
                                 'Some of the selected datasets belong to studies that you don\'t administrate. '
-                                + 'You cannot delete those datasets. Please select only datasets that you can administrate (see the yellow shield icon) and try again. ' 
+                                + 'You cannot delete those datasets. Please select only datasets that you can administrate (see the yellow shield icon) and try again. '
                                 +' If you really need to delete those datasets, contact an administrator for the corresponding study '
                                 + ' and ask him to grant you the administrator role in the study.');
                         } else throw Error(reason);
-                    });                    
+                    });
                 }
             });
     }
 
-    protected openApplyStudyCard = () => { 
+    protected openApplyStudyCard = () => {
         this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
             if (this.role != 'admin') {
-                let nonAdminAcqs: DatasetAcquisition[] = acquisitions?.filter(acq => 
+                let nonAdminAcqs: DatasetAcquisition[] = acquisitions?.filter(acq =>
                     !this.rights?.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
                 );
                 let studies: Set<string> = new Set();
@@ -390,13 +393,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     private getCommonColumnDefs() {
+
         function dateRenderer(date: number) {
             if (date) {
-                return new Date(date).toLocaleDateString();
+                return formatDate(new Date(date),'dd/MM/yyyy', 'en-US', 'UTC');
             }
             return null;
         };
-
         let columnDefs: ColumnDefinition[] = [
             {headerName: "Id", field: "id", type: "number", width: "60px", defaultSortCol: true, defaultAsc: false},
             {headerName: "Admin", type: "boolean", cellRenderer: row => this.hasAdminRight(row.data.studyId), awesome: "fa-solid fa-shield", color: "goldenrod", disableSorting: true},
@@ -405,15 +408,30 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Creation", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
-            {headerName: "Study", field: "studyName"},
-            {headerName: "Subject", field: "subjectName"},
-            {headerName: "Center", field: "centerName"},
-            {headerName: "Exam", field: "examinationComment"},
-            {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => dateRenderer(params.data.examinationDate)},
+            {headerName: "Study", field: "studyName",
+                route: item => '/study/details/' + item.studyId
+            },
+            {headerName: "Subject", field: "subjectName",
+                route: item => '/subject/details/' + item.subjectId
+            },
+            {headerName: "Center", field: "centerName",
+                route: item => '/center/details/' + item.centerId
+            },
+            {headerName: "Exam", field: "examinationComment",
+                route: item => '/examination/details/' + item.examinationId
+            },
+            {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
+                return dateRenderer(params.data.examinationDate);
+              }},
             {headerName: "Slice", field: "sliceThickness"},
             {headerName: "Pixel", field: "pixelBandwidth"},
             {headerName: "Mag. strength", field: "magneticFieldStrength"},
-            {headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.router.navigate(['/dataset/details/' + item.id])}
+            {headerName: "OHIF Viewer", type: "button", awesome: "fa-solid fa-up-right-from-square",
+              condition: item => (item.datasetType.includes("MR") || item.datasetType.includes("Pet") || item.datasetType.includes("Ct")),
+              action: item => {
+                window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + item.examinationId, '_blank');
+              }
+            }
         ];
         return columnDefs;
     }
@@ -434,7 +452,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-solid fa-ban", action: item => {
             this.selectedDatasetIds.delete(item.id);
             this.selectionTable.refresh();
-        }}) 
+        }})
         return columnDefs;
     }
 
@@ -450,7 +468,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true }
         );
-        return customActionDefs; 
+        return customActionDefs;
     }
 
     getSelectionCustomActionsDefs(): any[] {
@@ -482,8 +500,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selectedDatasetIds = selection;
     }
 
-    onRowClick(solrRequest: any) {
-        this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
+    rowClick(item): string {
+        return '/dataset/details/' + item.datasetId;
     }
 
     getSelectedPage(pageable: Pageable): Promise<Page<any>> {

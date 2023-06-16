@@ -1,13 +1,13 @@
 /**
-< * Shanoir NG - Import, manage and share neuroimaging data
+ < * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -103,13 +103,13 @@ import io.swagger.annotations.ApiParam;
  * This is the main component of the import of Shanoir-NG. The front-end in
  * Angular only communicates with this service. The import ms itself is calling
  * the ms datasets service.
- * 
+ *
  * The Import MS returns only a random ID to the outside world for one import.
  * Internally each user has its own folder in the importDirectory. So, when the
  * workFolder in the ImportJob is set to be returned, there is only the random
  * ID. When the requests arrive MS Import is adding the userId and the real path
  * value.
- * 
+ *
  * @author mkain
  *
  */
@@ -179,7 +179,7 @@ public class ImporterApiController implements ImporterApi {
 	@Override
 	public ResponseEntity<ImportJob> uploadDicomZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile dicomZipFile)
-					throws RestServiceException {
+			throws RestServiceException {
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), WRONG_CONTENT_FILE_UPLOAD, null));
@@ -194,7 +194,7 @@ public class ImporterApiController implements ImporterApi {
 			 * the import work folder (the root of everything): split imports to clearly
 			 * separate them into separate folders for each user
 			 */
-			File userImportDir = ImportUtils.getUserImportDir(importDir);			
+			File userImportDir = ImportUtils.getUserImportDir(importDir);
 			boolean createDicomDir = false;
 			File tempFile = ImportUtils.saveTempFile(userImportDir, dicomZipFile);
 			if (!ImportUtils.checkZipContainsFile(DICOMDIR, tempFile)) {
@@ -222,7 +222,7 @@ public class ImporterApiController implements ImporterApi {
 			 * 3. STEP: split instances into non-images and images and get additional meta-data
 			 * from first dicom file of each serie, meta-data missing in dicomdir.
 			 */
-			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
+			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, null);
 
 			/**
 			 * . STEP: create ImportJob
@@ -246,7 +246,7 @@ public class ImporterApiController implements ImporterApi {
 	 * Patient - Study - Serie - Instance 2. STEP: split instances into non-images
 	 * and images and get additional meta-data from first dicom file of each serie,
 	 * meta-data missing in dicomdir.
-	 * 
+	 *
 	 * @param dirWithDicomDir
 	 * @return
 	 * @throws IOException
@@ -264,7 +264,7 @@ public class ImporterApiController implements ImporterApi {
 	@Override
 	public ResponseEntity<Void> startImportJob(
 			@ApiParam(value = "ImportJob", required = true) @Valid @RequestBody final ImportJob importJob)
-					throws RestServiceException {
+			throws RestServiceException {
 		File userImportDir = ImportUtils.getUserImportDir(importDir);
 		final Long userId = KeycloakUtil.getTokenUserId();
 		importJob.setUserId(userId);
@@ -304,7 +304,7 @@ public class ImporterApiController implements ImporterApi {
 	@Override
 	public ResponseEntity<ImportJob> queryPACS(
 			@ApiParam(value = "DicomQuery", required = true) @Valid @RequestBody final DicomQuery dicomQuery)
-					throws RestServiceException {
+			throws RestServiceException {
 		ImportJob importJob;
 		try {
 			importJob = queryPACSService.queryCFIND(dicomQuery);
@@ -354,7 +354,7 @@ public class ImporterApiController implements ImporterApi {
 	 */
 	public ResponseEntity<EegImportJob> uploadEEGZipFile(
 			@ApiParam(value = "file detail") @RequestPart("file") final MultipartFile eegFile)
-					throws RestServiceException {
+			throws RestServiceException {
 		try {
 			// Do some checks about the file, must be != null and must be a .zip file
 			if (eegFile == null) {
@@ -460,9 +460,9 @@ public class ImporterApiController implements ImporterApi {
 	 * This method imports dataset file, and converts them to nifti if necessary (in case of a Analyze file format from .hdr/.img files)
 	 */
 	public ResponseEntity<String> uploadProcessedDataset(
-			@ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, 
-			@ApiParam(value = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
-					throws RestServiceException {
+			@ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile,
+			@ApiParam(value = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile)
+			throws RestServiceException {
 
 		String imageFileName = imageFile == null ? "" : imageFile.getOriginalFilename();
 		String headerFileName = headerFile == null ? "" : headerFile.getOriginalFilename();
@@ -509,7 +509,7 @@ public class ImporterApiController implements ImporterApi {
 
 	/**
 	 * Reads a list of .edf files to generate a bunch of datasets.
-	 * 
+	 *
 	 * @param datasets         the list of datasets to import
 	 * @param dataFileDir      the file directory where we are working
 	 * @param edfMatchingFiles the list of .edf files
@@ -590,7 +590,7 @@ public class ImporterApiController implements ImporterApi {
 
 	/**
 	 * Reads a list of .vhdr files to generate a bunch of datasets.
-	 * 
+	 *
 	 * @param dataFileDir     the file directory where we are working
 	 * @param bvMatchingFiles the list of vhdr files
 	 * @param datasets        the list of datasets to import
@@ -598,7 +598,7 @@ public class ImporterApiController implements ImporterApi {
 	 * @throws ShanoirImportException when parsing fails
 	 */
 	private void readBrainvisionFiles(final File[] bvMatchingFiles, final File dataFileDir,
-			final List<EegDataset> datasets) throws ShanoirImportException {
+									  final List<EegDataset> datasets) throws ShanoirImportException {
 		for (File vhdrFile : bvMatchingFiles) {
 
 			// Parse the file
@@ -684,7 +684,7 @@ public class ImporterApiController implements ImporterApi {
 
 	@Override
 	public ResponseEntity<Void> uploadFile(@PathVariable("tempDirId") String tempDirId,
-			@RequestParam("file") MultipartFile file) throws RestServiceException, IOException {
+										   @RequestParam("file") MultipartFile file) throws RestServiceException, IOException {
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);
 		final File importJobDir = new File(userImportDir, tempDirId);
 		// only continue in case of existing temp dir id
@@ -768,7 +768,7 @@ public class ImporterApiController implements ImporterApi {
 
 	/**
 	 * This methods returns a dicom file
-	 * 
+	 *
 	 * @param path
 	 *            the dicom file path
 	 * @throws ShanoirException
@@ -806,11 +806,11 @@ public class ImporterApiController implements ImporterApi {
 	}
 
 	public ResponseEntity<ImportJob> uploadMultipleDicom(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
-			@ApiParam(value = "studyId", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "studyName", required = true) @PathVariable("studyName") String studyName,
-			@ApiParam(value = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
-			@ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId,
-			@ApiParam(value = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException {
+														 @ApiParam(value = "studyId", required = true) @PathVariable("studyId") Long studyId,
+														 @ApiParam(value = "studyName", required = true) @PathVariable("studyName") String studyName,
+														 @ApiParam(value = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
+														 @ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId,
+														 @ApiParam(value = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException {
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
@@ -820,7 +820,7 @@ public class ImporterApiController implements ImporterApi {
 		ImportJob job = null;
 
 		try {
-			File userImportDir = ImportUtils.getUserImportDir(importDir);			
+			File userImportDir = ImportUtils.getUserImportDir(importDir);
 			File tempFile = ImportUtils.saveTempFile(userImportDir, dicomZipFile);
 			File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, dicomZipFile, true);
 
@@ -835,7 +835,7 @@ public class ImporterApiController implements ImporterApi {
 
 			String subjectName = studyName + "_" + subjectFolder.getName();
 			Subject subject = null;
-			
+
 			// Sort examination folders by alphabetical order
 			List<File> sortedExamFolders = Arrays.asList(examinationsFolders);
 			sortedExamFolders.sort(new Comparator<File>() {
@@ -844,7 +844,7 @@ public class ImporterApiController implements ImporterApi {
 					return f1.getName().compareTo(f2.getName());
 				}
 			});
-			
+
 			// STEP 4: Iterate over examination folders
 			for (File examFolder : sortedExamFolders) {
 				job = null;
@@ -864,10 +864,10 @@ public class ImporterApiController implements ImporterApi {
 
 				// Create subject only once.
 				if (subject == null) {
-					
+
 					// Create subject
-					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(subject, new IdName(studyId, studyName))));
-					
+					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
+
 					LOG.debug("We found a subject " + subjectName);
 
 					// Create subject
@@ -901,7 +901,7 @@ public class ImporterApiController implements ImporterApi {
 
 				// STEP 4.2 Create examination
 				ExaminationDTO examination = ImportUtils.createExam(studyId, centerId, subject.getId(), examFolder.getName(), job.getPatients().get(0).getStudies().get(0).getStudyDate(), subject.getName());
-				
+
 				// Create multiple examinations for every session folder
 				Long examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 

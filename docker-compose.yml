@@ -20,12 +20,17 @@ services:
     build: ./docker-compose/keycloak-database
     environment:
       - MYSQL_DATABASE=keycloak
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
     volumes:
       - "keycloak-database-data:/var/lib/mysql"
     networks:
       - shanoir_ng_network
   keycloak:
     container_name: "${SHANOIR_PREFIX}keycloak"
+    #command: ["start-dev"]   # default is "start" to run in production mode
     environment:
       - SHANOIR_ADMIN_EMAIL
       - SHANOIR_ADMIN_NAME
@@ -50,7 +55,7 @@ services:
   #  
   rabbitmq:
     container_name: "${SHANOIR_PREFIX}rabbitmq"
-    image: rabbitmq:3.7.7-management-alpine
+    image: rabbitmq:3.10.7
     volumes:
       - "rabbitmq-data:/var/lib/rabbitmq/mnesia/rabbitmq"
     ports:
@@ -69,6 +74,10 @@ services:
       - ./docker-compose/database/variables.env
     environment:
       - SHANOIR_MIGRATION
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
     volumes:
       - "database-data:/var/lib/mysql"
     ports:
@@ -166,6 +175,8 @@ services:
       - SHANOIR_VIEWER_OHIF_URL_SCHEME
       - SHANOIR_VIEWER_OHIF_URL_HOST
       - SHANOIR_MIGRATION
+      - VIP_URL_SCHEME
+      - VIP_URL_HOST
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro
@@ -308,6 +319,8 @@ services:
       - SHANOIR_CERTIFICATE_PEM_CRT
       - SHANOIR_CERTIFICATE_PEM_KEY
       - SHANOIR_KEYCLOAK_ADAPTER_MODE
+      - VIP_URL_SCHEME
+      - VIP_URL_HOST
     volumes:
       - "logs:/var/log/nginx"
       - certificate-share-data:/opt/ssl:ro

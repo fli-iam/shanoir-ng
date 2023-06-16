@@ -14,9 +14,6 @@
 
 package org.shanoir.ng.importer.service;
 
-import java.io.File;
-import java.util.List;
-
 import org.shanoir.ng.dicom.DIMSEService;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.importer.dto.Dataset;
@@ -28,6 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.util.List;
 
 /**
  * The DicomPersisterService sends DICOM images to the PACS for their permanent

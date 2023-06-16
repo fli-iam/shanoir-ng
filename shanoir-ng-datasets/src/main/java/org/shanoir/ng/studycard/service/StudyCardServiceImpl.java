@@ -20,7 +20,7 @@ import java.util.List;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.model.StudyCardRule;
+import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,9 +58,9 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
-	public StudyCard save(final StudyCard studyCard) throws MicroServiceCommunicationException {
-		studyCard.setLastEditTimestamp(System.currentTimeMillis());
-		StudyCard savedStudyCard = studyCardRepository.save(studyCard);
+	public StudyCard save(final StudyCard card) throws MicroServiceCommunicationException {
+	    card.setLastEditTimestamp(System.currentTimeMillis());
+		StudyCard savedStudyCard = studyCardRepository.save(card);
 		return savedStudyCard;
 	}
 
@@ -70,10 +70,10 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
-	public StudyCard update(final StudyCard studyCard) throws EntityNotFoundException, MicroServiceCommunicationException {
-		final StudyCard studyCardDb = studyCardRepository.findById(studyCard.getId()).orElse(null);
-		if (studyCardDb == null) throw new EntityNotFoundException(StudyCard.class, studyCard.getId());
-		updateStudyCardValues(studyCardDb, studyCard);
+	public StudyCard update(final StudyCard card) throws EntityNotFoundException, MicroServiceCommunicationException {
+		final StudyCard studyCardDb = studyCardRepository.findById(card.getId()).orElse(null);
+		if (studyCardDb == null) throw new EntityNotFoundException(StudyCard.class, card.getId());
+		updateStudyCardValues(studyCardDb, card);
 		studyCardDb.setLastEditTimestamp(System.currentTimeMillis());
 		studyCardRepository.save(studyCardDb);
 		return studyCardDb;
@@ -94,14 +94,14 @@ public class StudyCardServiceImpl implements StudyCardService {
 		studyCardDb.setId(studyCard.getId());
 		studyCardDb.setNiftiConverterId(studyCard.getNiftiConverterId());
 		studyCardDb.setStudyId(studyCard.getStudyId());
-		if (studyCardDb.getRules() == null) studyCardDb.setRules(new ArrayList<StudyCardRule>());
+		if (studyCardDb.getRules() == null) studyCardDb.setRules(new ArrayList<StudyCardRule<?>>());
 		else studyCardDb.getRules().clear();
 		if (studyCard.getRules() != null) studyCardDb.getRules().addAll(studyCard.getRules());
 		return studyCardDb;
 	}
 
 	@Override
-	public List<StudyCard> findStudyCardsOfStudy(Long studyId) {
+	public List<StudyCard> findByStudy(Long studyId) {
 		return this.studyCardRepository.findByStudyId(studyId);
 	}
 

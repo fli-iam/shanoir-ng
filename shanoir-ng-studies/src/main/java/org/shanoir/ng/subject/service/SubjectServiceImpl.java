@@ -18,13 +18,18 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.shanoir.ng.studyexamination.StudyExaminationRepository;
@@ -44,6 +49,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -82,13 +89,17 @@ public class SubjectServiceImpl implements SubjectService {
 	@Autowired
 	private StudyUserRepository studyUserRepository;
 
-	@Autowired SubjectMapper subjectMapper;
+	@Autowired
+	private SubjectMapper subjectMapper;
 	
 	@Autowired
 	private ObjectMapper objectMapper;
 
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
+	
+	@Autowired
+	private ShanoirEventService eventService;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
@@ -104,6 +115,9 @@ public class SubjectServiceImpl implements SubjectService {
 		studyExaminationRepository.deleteBySubject(subject.get());
 		
 		subjectRepository.deleteById(id);
+
+		// Propagate deletion
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 	}
 
 	@Override
@@ -304,5 +318,16 @@ public class SubjectServiceImpl implements SubjectService {
 			return null;
 		}
 		return subjectRepository.findSubjectFromCenterCode(centerCode + "%");
+	}
+
+	@Override
+	public Page<Subject> getFilteredPageByStudies(Pageable page, String name, List<Study> studies) {
+		Iterable<Long> studyIds = studies.stream().map(study -> study.getId()).collect(Collectors.toList());
+		return subjectRepository.findDistinctByNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
+	}
+
+	@Override
+	public List<Subject> findByPreclinical(boolean preclinical) {
+		return subjectRepository.findByPreclinical(preclinical);
 	}
 }

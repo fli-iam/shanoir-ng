@@ -15,19 +15,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <node
         *ngIf="node"
         [class.selected]="this.menuOpened"
-        [label]="node.label" 
+        [label]="node.label"
         awesome="fas fa-user-injured"
         [(opened)]="node.open"
         [hasChildren]="hasChildren()"
         (labelClick)="menuOpened = !menuOpened"
         [dataLoading]="loading"
-        title="subject">
+        [title]="node.title + ' n°' + node.id">
 
     <dropdown-menu [(openInput)]="menuOpened" *ngIf="menuOpened">
-        <menu-item label="Details..." awesome="fa-regular fa-eye" (click)="showSubjectDetails()"></menu-item>
+        <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
+            <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
+        </a>
     </dropdown-menu>
 
-    <ng-container *ngIf="node.open && node.studies && node.studies != $any('UNLOADED')">        
+    <ng-container *ngIf="node.open && node.studies && node.studies != $any('UNLOADED')">
         <reverse-study-node
                 *ngFor="let studyNode of node.studies"
                 [input]="studyNode"

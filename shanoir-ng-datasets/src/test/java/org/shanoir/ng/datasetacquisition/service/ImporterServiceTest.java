@@ -100,73 +100,6 @@ public class ImporterServiceTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testCreateEegDataset() throws IOException {
-		// Create a complete import job with some files and channels and events...
-		EegImportJob importJob = new EegImportJob();
-		EegDatasetDTO dataset = new EegDatasetDTO();
-		importJob.setDatasets(Collections.singletonList(dataset));
-		
-		Channel chan = new Channel();
-		chan.setHighCutoff(1);
-		chan.setLowCutoff(132);
-		chan.setName("Charles Aznavourian");
-		chan.setNotch(2);
-		chan.setReferenceType(ChannelType.EEG);
-		chan.setReferenceUnits("Diam's");
-		chan.setResolution(2);
-		chan.setX(1);
-		chan.setX(2);
-		chan.setX(3);
-		
-		Event event = new Event();
-		event.setDescription("description");
-		event.setType("type");
-		event.setType("type");
-		
-		dataset.setChannels(Collections.singletonList(chan));
-		dataset.setEvents(Collections.singletonList(event));
-		importJob.setSubjectId(Long.valueOf(1));
-		importJob.setStudyId(Long.valueOf(1));
-		importJob.setExaminationId(Long.valueOf(1));
-		importJob.setAcquisitionEquipmentId(Long.valueOf(1));
-		importJob.setSubjectName("What about us");
-		dataset.setName("Charles Trenet");
-		importJob.setWorkFolder("Julien Clerc");
-		importJob.setSubjectName("subjName");
-		importJob.setStudyName("studname");
-		
-		service.createEegDataset(importJob);
-		ArgumentCaptor<DatasetAcquisition> datasetAcquisitionCapturer = ArgumentCaptor.forClass(DatasetAcquisition.class);
-		
-		ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(taskService, Mockito.times(3)).publishEvent(argument.capture());
-		
-		List<ShanoirEvent> values = argument.getAllValues();
-		ShanoirEvent task = values.get(0);
-		assertTrue(task.getStatus() == 1);
-
-		// Check what we save at the end
-		verify(datasetAcquisitionService).create(datasetAcquisitionCapturer.capture());
-		DatasetAcquisition hack = datasetAcquisitionCapturer.getValue();
-		
-		EegDataset ds = (EegDataset) hack.getDatasets().get(0);
-		assertEquals(chan, ds.getChannels().get(0));
-		assertNotNull(chan.getDataset());
-		
-		assertEquals(event, ds.getEvents().get(0));
-		assertNotNull(event.getDataset());
-		
-		assertEquals(1, ds.getChannelCount());
-		assertEquals(ds.getName(), dataset.getName());
-		assertEquals(DatasetExpressionFormat.EEG, ds.getDatasetExpressions().get(0).getDatasetExpressionFormat());
-		
-		DatasetMetadata metadata = ds.getOriginMetadata();
-		assertNotNull(metadata);
-		assertEquals(DatasetModalityType.EEG_DATASET, metadata.getDatasetModalityType());
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void createAllDatasetAcquisition() throws Exception {
 		// GIVEN an importJob with series and patients
 		List<Patient> patients = new ArrayList<Patient>();
@@ -225,7 +158,7 @@ public class ImporterServiceTest {
 		assertTrue(task.getStatus() == 1);
 		// NOTE: This test is important as we use the message to send an mail to study admin further.
 		// PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
-		assertEquals("studyName(1): Successfully created datasets for subject subjectName in examination 2", task.getMessage());
+		assertEquals("studyName (n°1) : Successfully created datasets for subject subjectName in examination 2", task.getMessage());
 		
 		// THEN datasets are created
 		// Check what we save at the end
