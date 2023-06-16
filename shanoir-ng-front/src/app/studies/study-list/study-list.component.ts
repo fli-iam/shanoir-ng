@@ -116,6 +116,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             },
             {
                 headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'
+            },
+            {
+                headerName: "Members", field: "nbMembers", type: "number", width: '30px'
             }
         ];
         return colDef;

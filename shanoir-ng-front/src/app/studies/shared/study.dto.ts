@@ -136,6 +136,9 @@ export class StudyDTOService {
         //entity.timepoints = dto.timepoints;
         entity.visibleByDefault = dto.visibleByDefault;
         entity.withExamination = dto.withExamination;
+        if (dto.studyUserList) {
+            entity.nbMembers = dto.studyUserList.length;
+        }
         if (dto.studyCards) {
             entity.studyCardList = dto.studyCards.map(studyCardDTO => StudyCardDTOServiceAbstract.mapSyncFields(studyCardDTO, new StudyCard()));
         } else {
@@ -245,6 +248,7 @@ export class StudyDTO {
     name: string;
     nbExaminations: number;
     nbSujects: number;
+    nbMembers: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
     profile: Profile;
