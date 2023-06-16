@@ -85,7 +85,7 @@ public class ImporterService {
 	private ShanoirEventService eventService;
 
 	@Autowired
-  private SolrService solrService;
+    private SolrService solrService;
 
 	@Autowired
 	private ImporterMailService mailService;
@@ -120,18 +120,22 @@ public class ImporterService {
 				for (Patient patient : importJob.getPatients()) {
 					for (Study study : patient.getStudies()) {
 						float progress = 0.5f;
-						for (Serie serie : study.getSeries() ) {
-							if (serie.getSelected() != null && serie.getSelected()) {
-								DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
-								if (acquisition != null) {
-									generatedAcquisitions.add(acquisition);
-								}
-								rank++;
+
+						List<Serie> series = study.getSelectedSeries();
+						int nbSeries = series.size();
+						int cpt = 1;
+
+						for (Serie serie : series) {
+							event.setMessage("Creating datasets for serie [" + serie.getProtocolName() + "] (" + cpt + "/" + nbSeries + ") of examination [" + importJob.getExaminationId() + "]...");
+							eventService.publishEvent(event);
+							DatasetAcquisition acquisition = createDatasetAcquisitionForSerie(serie, rank, examination, importJob);
+							if (acquisition != null) {
+								generatedAcquisitions.add(acquisition);
 							}
 							progress += 0.5f / study.getSeries().size();
-							event.setMessage("Treating serie " + serie.getSeriesDescription()+ " for examination " + importJob.getExaminationId());
 							event.setProgress(progress);
-							eventService.publishEvent(event);
+							rank++;
+							cpt++;
 						}
 					}
 				}
@@ -142,8 +146,8 @@ public class ImporterService {
 			event.setProgress(1f);
 			event.setStatus(ShanoirEvent.SUCCESS);
 
-			event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
-					+": Successfully created datasets for subject " + importJob.getSubjectName()
+			event.setMessage(importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")"
+					+" : Successfully created datasets for subject " + importJob.getSubjectName()
 					+ " in examination " + examination.getId());
 			eventService.publishEvent(event);
 

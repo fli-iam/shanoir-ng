@@ -14,23 +14,8 @@
 
 package org.shanoir.ng.examination.controler;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.io.FileUtils;
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
@@ -41,16 +26,12 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
+import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +46,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.ApiParam;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Controller
 public class ExaminationApiController implements ExaminationApi {
@@ -85,10 +76,7 @@ public class ExaminationApiController implements ExaminationApi {
 	private CenterRepository centerRepository;
 
 	@Autowired
-	ShanoirEventService eventService;
-
-	@Autowired
-	StudyRepository studyRepository;
+	private ShanoirEventService eventService;
 
 	private final HttpServletRequest request;
 
@@ -162,59 +150,7 @@ public class ExaminationApiController implements ExaminationApi {
 	public ResponseEntity<List<SubjectExaminationDTO>> findExaminationsBySubjectIdStudyId(
 			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
-
 		final List<Examination> examinations = examinationService.findBySubjectIdStudyId(subjectId, studyId);
-		
-		// Load study-dataset association (dataset database)
-		Study study = studyRepository.findById(studyId).orElse(null);
-		
-		List<Dataset> relatedDatasets = study.getRelatedDatasets();
-		if (relatedDatasets != null && !relatedDatasets.isEmpty()) {
-			List<Examination> relatedExams = new ArrayList<>();
-			Set<Long> studyIds = new HashSet<>();
-
-			// Get every other study linked using the datasets
-			for (Dataset dataset : relatedDatasets) {
-				studyIds.add(dataset.getStudyId());
-			}
-
-			// Load examinations linked to the study of the datasets
-			for (Long relatedStudyId : studyIds) {
-				relatedExams.addAll(examinationService.findBySubjectIdStudyId(subjectId, relatedStudyId));
-			}
-			
-			Set<Examination> examsToKeep = new HashSet<>();
-			Set<DatasetAcquisition> acqToKeep = new HashSet<>();
-			
-			// Clean these examinations / dataset Acquisition from unnecessary datasets
-			for (Examination exam :relatedExams) {
-				for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
-					List<Dataset> current = new ArrayList<>();
-					for (Dataset ds : relatedDatasets) {
-						if (acq.getDatasets().contains(ds)) {
-							examsToKeep.add(exam);
-							exam.setId(null);
-							acqToKeep.add(acq);
-							acq.setId(null);
-							current.add(ds);
-						}
-					}
-					// update datasets
-					acq.setDatasets(current);
-				}
-			}
-			// Clean examinations from useless acquisitions
-			for (Examination exam : examsToKeep) {
-				List<DatasetAcquisition> current = new ArrayList<>();
-				for (DatasetAcquisition acq : acqToKeep) {
-					if (acq.getExamination().equals(exam)) {
-						current.add(acq);
-					}
-				}
-				exam.setDatasetAcquisitions(current);
-			}
-			examinations.addAll(examsToKeep);
-		}
 		for (Examination exam : examinations) {
 			orderDatasetAcquisitions(exam);
 		}

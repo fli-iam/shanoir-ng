@@ -3,12 +3,12 @@
 
     <div>
         <label for="execution_name">Execution Name *</label>
-        <input type="text" id="execution_name" formControlName="execution_name" required>
+        <input type="text" id="execution_name" formControlName="execution_name" required [(ngModel)]="execDefaultName">
     </div>
-    
-    <div> 
+
+    <div>
     Default execution parameters: please choose default parameters value for every parameter.<br/>
-    Please note that for file parameters, the text box is used for regular expression if you want to organize dataset in different arguments 
+    Please note that for file parameters, the text box is used for regular expression if you want to organize dataset in different arguments
     </div>
 
     <div *ngFor="let parameter of pipeline.parameters">

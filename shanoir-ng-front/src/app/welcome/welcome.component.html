@@ -12,7 +12,7 @@
 	<div class="shanoir">
 		<img class="shanoir-logo" [src]="shanoirLogoUrl"/>
 		<div class="shanoir-text">
-			Sharing NeurOImaging Resources
+			SHAring iN vivO Imaging Resources
 		</div>
 	</div>
     <div class="stats">
@@ -40,12 +40,12 @@
                         </span>
                     </div>
                     <div class="status">
-                        <span class="label">id : </span>{{ study.id }} 
+                        <span class="label">id : </span>{{ study.id }}
                         <span class="spacer"></span>
                         <span class="label">Status : </span>{{study.studyStatus.replace('_', ' ') | titlecase }}
                     </div>
                     <div class="studyValues">
-                        <span class="label">Examinations : </span>{{ study.nbExaminations }} 
+                        <span class="label">Examinations : </span>{{ study.nbExaminations }}
                         <span class="spacer"></span>
                         <span class="label">Subjects : </span>{{ study.nbSubjects }}
                         <span *ngIf="study.studyType">

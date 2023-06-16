@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -15,9 +15,10 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { Router } from '@angular/router';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 
-import { AcquisitionEquipmentNode, CenterNode, UNLOADED } from '../../tree/tree.model';
+import {AcquisitionEquipmentNode, CenterNode, DatasetNode, UNLOADED} from '../../tree/tree.model';
 import { Center } from '../shared/center.model';
 import { CenterService } from '../shared/center.service';
+import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 
 
 @Component({
@@ -32,13 +33,15 @@ export class CenterNodeComponent implements OnChanges {
     node: CenterNode;
     loading: boolean = false;
     menuOpened: boolean = false;
+    detailsPath: string = '/center/details/';
 
     constructor(
         private router: Router,
         private centerService: CenterService,
-        private acquisitionEquipmentPipe: AcquisitionEquipmentPipe) {
+        private acquisitionEquipmentPipe: AcquisitionEquipmentPipe,
+        private keycloakService: KeycloakService) {
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['input']) {
             if (this.input instanceof CenterNode) {
@@ -55,22 +58,22 @@ export class CenterNodeComponent implements OnChanges {
         else return this.node.acquisitionEquipments.length > 0;
     }
 
-    showDetails() {
-        this.router.navigate(['/center/details/' + this.node.id]);
-    }
-
     loadEquipments() {
         this.loading = true;
         this.centerService.get(this.node.id).then(
             center =>  {
                 if (center) {
                     this.node.acquisitionEquipments = center.acquisitionEquipments.map(
-                            acqEq => new AcquisitionEquipmentNode(acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED'));
+                            acqEq => new AcquisitionEquipmentNode(acqEq.id, this.acquisitionEquipmentPipe.transform(acqEq), 'UNLOADED', this.keycloakService.isUserAdminOrExpert()));
                 }
                 this.loading = false;
                 this.node.open = true;
             }).catch(() => {
                 this.loading = false;
             });
+    }
+
+    onEquipmentDelete(index: number) {
+        (this.node.acquisitionEquipments as AcquisitionEquipmentNode[]).splice(index, 1) ;
     }
 }

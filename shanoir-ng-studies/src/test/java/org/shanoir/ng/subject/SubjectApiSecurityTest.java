@@ -94,7 +94,7 @@ public class SubjectApiSecurityTest {
 	@WithAnonymousUser
 	public void testAsAnonymous() throws ShanoirException, RestServiceException {
 		assertAccessDenied(api::deleteSubject, ENTITY_ID);
-		assertAccessDenied(api::findSubjects);
+		assertAccessDenied(api::findSubjects, true, true);
 		assertAccessDenied(api::findSubjectsNames);
 		assertAccessDenied(api::findSubjectById, ENTITY_ID);
 		assertAccessDenied(api::saveNewSubject, mockNew, null, mockBindingResult);
@@ -156,7 +156,7 @@ public class SubjectApiSecurityTest {
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
 		assertAccessAuthorized(api::deleteSubject, ENTITY_ID);
-		assertAccessAuthorized(api::findSubjects);
+		assertAccessAuthorized(api::findSubjects, true, true);
 		assertAccessAuthorized(api::findSubjectsNames);
 		assertAccessAuthorized(api::findSubjectById, ENTITY_ID);
 		assertAccessAuthorized(api::saveNewSubject, mockNew, null, mockBindingResult);
@@ -179,8 +179,8 @@ public class SubjectApiSecurityTest {
 		assertAccessDenied(api::findSubjectByIdentifier, "identifier");
 		
 		given(repository.findAll()).willReturn(Arrays.asList(subjectMockNoRights));
-		assertAccessAuthorized(api::findSubjects);
-		assertEquals(null, api.findSubjects().getBody());
+		assertAccessAuthorized(api::findSubjects,true, true);
+		assertEquals(null, api.findSubjects(true, true).getBody());
 		assertAccessAuthorized(api::findSubjectsNames);
 		//assertNotNull(api.findSubjectsNames().getBody());
 		SubjectStudy subjectStudyMock = new SubjectStudy();
@@ -204,8 +204,8 @@ public class SubjectApiSecurityTest {
 		assertAccessDenied(api::findSubjectByIdentifier, "identifier");
 		
 		given(repository.findAll()).willReturn(Arrays.asList(subjectMockWrongRights));
-		assertAccessAuthorized(api::findSubjects);
-		assertEquals(null, api.findSubjects().getBody());
+		assertAccessAuthorized(api::findSubjects, true, true);
+		assertEquals(null, api.findSubjects(true, true).getBody());
 		assertAccessAuthorized(api::findSubjectsNames);
 		//assertEquals(null, api.findSubjectsNames().getBody());
 		subjectStudyMock = new SubjectStudy();
@@ -229,8 +229,8 @@ public class SubjectApiSecurityTest {
 		
 		given(repository.findAll()).willReturn(Arrays.asList(subjectMockRightRights));
 		given(repository.findAllById(Arrays.asList(1L))).willReturn(Arrays.asList(subjectMockRightRights));
-		assertAccessAuthorized(api::findSubjects);
-		assertEquals(1, api.findSubjects().getBody().size());
+		assertAccessAuthorized(api::findSubjects, true, true);
+		assertEquals(1, api.findSubjects(true, true).getBody().size());
 		assertAccessAuthorized(api::findSubjectsNames);
 		//assertEquals(1, api.findSubjectsNames().getBody().size());
 		subjectStudyMock = new SubjectStudy();

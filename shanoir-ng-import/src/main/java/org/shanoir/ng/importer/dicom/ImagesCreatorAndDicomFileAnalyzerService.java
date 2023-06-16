@@ -38,6 +38,8 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,10 +77,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	@Autowired
 	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
 
+	@Autowired
+	private ShanoirEventService eventService;
+
 	@Value("${shanoir.import.upload.folder}")
 	private String uploadFolder;
 
-	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS)
+	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event)
 			throws FileNotFoundException {
 		// patient level
 		for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
@@ -89,10 +94,17 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				Study study = studiesIt.next();
 				// serie level
 				List<Serie> series = study.getSeries();
+				int nbSeries = series.size();
+				int cpt = 1;
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
+					if(event != null){
+						event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] " + cpt + "/" + nbSeries + ")");
+						eventService.publishEvent(event);
+					}
 					filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
 					getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
+					cpt++;
 				}
 			}
 		}

@@ -222,7 +222,7 @@ public class ImporterApiController implements ImporterApi {
 			 * 3. STEP: split instances into non-images and images and get additional meta-data
 			 * from first dicom file of each serie, meta-data missing in dicomdir.
 			 */
-			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
+			imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, null);
 
 			/**
 			 * . STEP: create ImportJob
@@ -866,7 +866,7 @@ public class ImporterApiController implements ImporterApi {
 				if (subject == null) {
 
 					// Create subject
-					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(subject.getId(), subject.getName()), new IdName(studyId, studyName))));
+					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
 
 					LOG.debug("We found a subject " + subjectName);
 

@@ -21,7 +21,8 @@ public enum Operation {
 	ENDS_WITH(3),
 	CONTAINS(4),
 	SMALLER_THAN(5),
-	BIGGER_THAN(6);
+	BIGGER_THAN(6),
+	DOES_NOT_CONTAIN(7);
 	
 	private int id;
 	
@@ -56,7 +57,7 @@ public enum Operation {
 	}
 	
 	public boolean isTextual() {
-		return this.equals(CONTAINS) || this.equals(ENDS_WITH) || this.equals(EQUALS) || this.equals(STARTS_WITH);
+		return this.equals(CONTAINS) || this.equals(DOES_NOT_CONTAIN) || this.equals(ENDS_WITH) || this.equals(EQUALS) || this.equals(STARTS_WITH);
 	}
 
 }

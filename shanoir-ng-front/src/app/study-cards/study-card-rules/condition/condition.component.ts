@@ -37,7 +37,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     @Input() fields: ShanoirMetadataField[];
     tagOptions: Option<DicomTag>[];
     shanoirFieldOptions: Option<any>[];
-    operations: Operation[] = ['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', 'SMALLER_THAN', 'BIGGER_THAN'];
+    operations: Operation[] = ['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', "DOES_NOT_CONTAIN", 'SMALLER_THAN', 'BIGGER_THAN'];
     @Output() delete: EventEmitter<void> = new EventEmitter();
     init: boolean = false;
     conditionTypeOptions: Option<ConditionScope>[];
@@ -198,7 +198,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.condition.values = [null];
             if (value.endsWith('OnDataset') || value.endsWith('OnDatasets')) {
                 this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'Dataset');
-            } else if (value.endsWith('OnAcquisition') || value.endsWith('OnAcquisitions')) {
+            } else if (value.endsWith('OnAcq') || value.endsWith('OnAcq')) {
                 this.fieldOptions.forEach(opt => opt.disabled = opt.section != 'DatasetAcquisition');
             } else {
                 this.fieldOptions.forEach(opt => opt.disabled = false);
