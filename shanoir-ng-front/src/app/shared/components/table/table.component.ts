@@ -174,7 +174,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
 
 
     onRowClick(item: Object) {
-        console.log('click')
         if (this.rowClick.observers.length > 0 && !this.rowDisabled(item)) this.rowClick.emit(item);
         else if (this.selectionAllowed) this.onSelectChange(item, !this.isSelected(item));
     }

@@ -69,8 +69,7 @@ export class MassDownloadService {
                 task.lastUpdate = new Date();
                 task.status = task.status == -1 ? -1 : 1;
                 task.message = 'download completed in ' + (Date.now() - start) + 'ms, files saved in the selected directory';
-                this.notificationService.pushToFreshCompleted(task);
-                this.notificationService.updateStatusVars();
+                this.notificationService.pushLocalTask(task);
                 report.duration = Date.now() - start;
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
@@ -101,12 +100,11 @@ export class MassDownloadService {
                 task.lastUpdate = new Date();
                 task.status = task.status == -1 ? -1 : 1;
                 task.message = 'download completed in ' + (Date.now() - start) + 'ms, files saved in the selected directory';
-                this.notificationService.pushToFreshCompleted(task);
-                this.notificationService.updateStatusVars();
+                this.notificationService.pushLocalTask(task);
                 report.duration = Date.now() - start;
             }).catch(reason => {
                 task.message = 'download error : ' + reason;
-                this.notificationService.pushToFreshError(task);
+                this.notificationService.pushLocalTask(task);
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
@@ -154,6 +152,7 @@ export class MassDownloadService {
         }).finally(() => {
             task.lastUpdate = task.creationDate;
             task.progress = (report.nbSuccess + report.nbError) / report.requestedDatasetIds.length;
+            this.notificationService.pushLocalTask(task);
         });
     }
 

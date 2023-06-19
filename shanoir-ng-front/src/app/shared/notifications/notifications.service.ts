@@ -25,32 +25,68 @@ export class NotificationsService {
   
     public nbNew: number = 0;
     public nbNewError: number = 0;
-    protected tasks: Task[] = [];
+    private tasks: Task[] = [];
     public tasksInProgress: Task[] = [];
     public freshCompletedTasks: Task[] = [];
-    protected isLoading = false;
-    protected source;
-    private tasksSubject: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]);
-    private clientSideTasks: Task[] = [];
+    private source;
+    private tasksSubject: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]) ;
+    private storageKey: string = KeycloakService.auth.userId + 'downloadTasks';
+    private newLocalTasksQueue: Task[] = [];
+    private localTasks: Task[] = [];
+    private writeLocalStorageConnection;
+    private readLocalStorageConnection;
+    private lastLocalStorageRead: number = 0;
+    readonly writeInterval: number = 500;
 
 
     constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
-        this.connect();
+        this.connectToServer();
+        this.connectReadSessionToLocalStorage();
     }
 
+    private connectWriteSessionToLocalStorage() {
+        if (this.writeLocalStorageConnection) clearInterval(this.writeLocalStorageConnection);
+        this.writeLocalStorageConnection = setInterval(() => {
+            try {
+                if (this.newLocalTasksQueue?.length > 0) {
+                    this.updateLocalStorage();
+                } else {
+                    clearInterval(this.writeLocalStorageConnection);
+                    this.writeLocalStorageConnection = null;
+                }
+            } catch (e) {
+                clearInterval(this.writeLocalStorageConnection);
+                this.writeLocalStorageConnection = null;
+                throw e;
+            }
+        }, this.writeInterval);
+    }
+
+    private connectReadSessionToLocalStorage() {
+        if (this.readLocalStorageConnection) clearInterval(this.readLocalStorageConnection);
+        this.readLocalStorageConnection = setInterval(() => {
+            try {
+                if ((Date.now() - this.lastLocalStorageRead) >= 900) {
+                    this.readLocalTasks();
+                    this.updateStatusVars();
+                    this.emitTasks();
+                }
+            } catch (e) {
+                clearInterval(this.lastLocalStorageRead);
+                this.lastLocalStorageRead = null;
+                throw e;
+            }
+        }, 1000);
+    }
 
     private refresh() {
-        this.isLoading = true;
         this.taskService.getTasks().then(items => {
-            if (items && items.length > 0) {
+            if (items) {
                 this.tasks = items;
                 this.updateStatusVars();
                 this.emitTasks();
             }
-        }).finally(() => {
-            this.isLoading = false;
         });
-        return;
     }   
 
     updateStatusVars() {
@@ -91,7 +127,7 @@ export class NotificationsService {
         }, 30000);
     }
 
-    private connect() {
+    private connectToServer() {
         this.keycloakService.getToken().then(token => {
             this.source = new EventSourcePolyfill(AppUtils.BACKEND_API_UPDATE_TASKS_URL, {
                     headers: {
@@ -103,10 +139,7 @@ export class NotificationsService {
                     this.refresh();
                 }
             });
-            this.refresh();
-            this.source.onmessage = (message)=>{
-                let n:Notification = JSON.parse(message.data);
-            }     
+            this.refresh(); 
         });
     }
 
@@ -115,9 +148,18 @@ export class NotificationsService {
     }
 
     pushLocalTask(task: Task) {
-        this.clientSideTasks.push(task);
-        this.updateStatusVars();
-        this.emitTasks();
+        this.createOrUpdateTask(task);
+        // task.onChange.subscribe(t => {
+        //     this.createOrUpdateTask(t);
+        // })       
+    }
+    
+    private createOrUpdateTask(task: Task) {
+        this.newLocalTasksQueue = this.newLocalTasksQueue.filter(t => t.id != task.id);
+        this.newLocalTasksQueue.push(task);
+        if (!this.writeLocalStorageConnection) {
+            this.connectWriteSessionToLocalStorage();
+        }
     }
 
     private emitTasks() {
@@ -125,8 +167,30 @@ export class NotificationsService {
     }
 
     private get allTasks(): Task[] {
-        return this.clientSideTasks.concat(this.tasks)
+        return this.localTasks.concat(this.tasks)
             .sort((a, b) => new Date(b.creationDate).getTime() - new Date(a.creationDate).getTime());
+    }
+
+    private readLocalTasks() {
+        let storageTasksStr: string = localStorage.getItem(this.storageKey);
+        this.lastLocalStorageRead = Date.now();
+        if (!storageTasksStr) {
+            this.localTasks = [];
+        } else {
+            this.localTasks = JSON.parse(storageTasksStr).map(task => Object.assign(new Task(), task));
+        }
+    }
+
+    private updateLocalStorage() {
+        this.readLocalTasks();
+        let tmpTasks: Task[] = this.localTasks.filter(lt => !this.newLocalTasksQueue.find(nlt => lt.id == nlt.id));
+        tmpTasks = tmpTasks.concat(this.newLocalTasksQueue);
+        let tmpTasksStr: string = '[' + tmpTasks.map(t => t.stringify()).join(',') + ']';
+        localStorage.setItem(this.storageKey, tmpTasksStr);
+        this.newLocalTasksQueue = [];
+        this.localTasks = tmpTasks;
+        this.updateStatusVars();
+        this.emitTasks();
     }
 
     totalProgress(): number {
