@@ -194,7 +194,14 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
         this.router.navigate([this.entityRoutes.getRouteToList()]);
     }
 
-    rowClick(item): string {
+    getRowRoute(item): string {
+        if (item.visibleByDefault && item.locked && !this.keycloakService.isUserAdmin()) {
+            if (item.accessRequestedByCurrentUser) {
+                return null;
+            } else {
+                return null;
+            }
+        }
         return this.entityRoutes.getRouteToView(item.id);
     }
 
