@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author mkain
  *
  */
-@RunWith(MockitoJUnitRunner.class)
+
 public class MrProtocolStrategyTest {
 
 	/** Logger. */

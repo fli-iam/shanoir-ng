@@ -250,14 +250,14 @@ public class ExaminationApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void testAddExtraData() throws IOException {
 		// GIVEN a file to add to an examination
-		File importZip = tempFolder.newFile("test-import-extra-data.zip");
+		File importZip = tempFolder.createTempFile("test-import-extra-data", ".zip");
 
 		try {
 			importZip.createNewFile();
 			MockMultipartFile file = new MockMultipartFile("file", "test-import-extra-data.txt", MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream(importZip.getAbsolutePath()));
 
 			// WHEN The file is added to the examination
-			mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH + "/extra-data-upload/1").file(file))
+			mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/extra-data-upload/1").file(file))
 			.andExpect(status().isUnprocessableEntity());
 
 			Mockito.verify(examinationServiceMock).addExtraData(Mockito.any(Long.class), Mockito.any(MultipartFile.class));
