@@ -1,6 +1,8 @@
 package org.shanoir.ng.datasetfile;
 
 import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 
 import javax.validation.Valid;
@@ -144,9 +146,11 @@ public class DatasetFileApiController implements DatasetFileApi {
 				// MOVE nifti (and others) on disc
 				destination = new File(datasetFile.getPath().replace("file://", ""));
 				destination.getParentFile().mkdirs();
-				file.transferTo(destination);
+				
+				try (InputStream is = file.getInputStream()) {
+				    Files.copy(is, destination.toPath());
+				}
 			}
-
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while adding dataset file."));
