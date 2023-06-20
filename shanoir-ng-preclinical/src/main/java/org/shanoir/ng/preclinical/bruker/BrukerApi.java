@@ -21,20 +21,20 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-@Api(value = "bruker")
+@Tag(name = "bruker")
 public interface BrukerApi {
 
 	@ApiOperation(value = "Upload bruker zip archive file", notes = "", response = String.class, tags = {
 			"BrukerModel", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "success returns ", response = String.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-			@ApiResponse(code = 406, message = "Not valid bruker file", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "success returns "),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "406", description = "Not valid bruker file"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PostMapping(value = "/bruker/upload", produces = { "application/json" }, consumes = {
 			MediaType.MULTIPART_FORM_DATA_VALUE, "application/json" })
 	ResponseEntity<String> uploadBrukerFile(@RequestParam("files") MultipartFile[] uploadfiles)

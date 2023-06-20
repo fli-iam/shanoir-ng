@@ -30,97 +30,97 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-@Api(value = "pathology_model")
+@Tag(name = "pathology_model")
 public interface PathologyModelApi {
 
-    @ApiOperation(value = "Add a new pathology model", notes = "", response = Void.class, tags={ "PathologyModel", })
+    @Operation(summary = "Add a new pathology model", description = "")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "success returns Pathology model", response = PathologyModel.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = PathologyModel.class),
-        @ApiResponse(code = 409, message = "Already exists - conflict", response = PathologyModel.class),
-        @ApiResponse(code = 500, message = "Unexpected Error", response = PathologyModel.class) })
+        @ApiResponse(responseCode = "200", description = "success returns Pathology model"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+        @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @PostMapping(value = "/pathology/model",
         produces = { "application/json" },
         consumes = { "application/json" })
-    ResponseEntity<PathologyModel> createPathologyModel(@ApiParam(value = "pathology model to create", required = true) @RequestBody PathologyModel model,
+    ResponseEntity<PathologyModel> createPathologyModel(@Parameter(name = "pathology model to create", required = true) @RequestBody PathologyModel model,
 	BindingResult result) throws RestServiceException;
 
 
-    @ApiOperation(value = "Deletes a pathology model", notes = "", response = Void.class, tags={ "PathologyModel", })
+    @Operation(summary = "Deletes a pathology model", description = "")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid pathology model id", response = Void.class),
-        @ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+        @ApiResponse(responseCode = "200", description = "Successful operation"),
+        @ApiResponse(responseCode = "400", description = "Invalid pathology model id"),
+        @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @DeleteMapping(value = "/pathology/model/{id}",
         produces = { "application/json" })
-    ResponseEntity<Void> deletePathologyModel(@ApiParam(value = "pathology model id",required=true ) @PathVariable("id") Long id);
+    ResponseEntity<Void> deletePathologyModel(@Parameter(name = "pathology model id",required=true ) @PathVariable("id") Long id);
 
 
-    @ApiOperation(value = "Get Pathology model", notes = "", response = PathologyModel.class, responseContainer = "List", tags={ "PathologyModel", })
+    @Operation(summary = "Get Pathology model", description = "")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "A pathology model", response = PathologyModel.class),
-        @ApiResponse(code = 404, message = "Pathology model not found", response = Void.class),
-        @ApiResponse(code = 500, message = "Unexpected error", response = PathologyModel.class) })
+        @ApiResponse(responseCode = "200", description = "A pathology model"),
+        @ApiResponse(responseCode = "404", description = "Pathology model not found"),
+        @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/pathology/model/{id}",
         produces = { "application/json" })
-    ResponseEntity<PathologyModel> getPathologyModelById(@ApiParam(value = "Pathology model id",required=true ) @PathVariable("id") Long id);
+    ResponseEntity<PathologyModel> getPathologyModelById(@Parameter(name = "Pathology model id",required=true ) @PathVariable("id") Long id);
 
 
-    @ApiOperation(value = "List all pathologies models", notes = "", response = PathologyModel.class, responseContainer = "List", tags={ "PathologyModel", })
+    @Operation(summary = "List all pathologies models", description = "")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "An array of pathology models", response = PathologyModel.class),
-        @ApiResponse(code = 500, message = "Unexpected error", response = PathologyModel.class) })
+        @ApiResponse(responseCode = "200", description = "An array of pathology models"),
+        @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/pathology/model",
         produces = { "application/json" })
     ResponseEntity<List<PathologyModel>> getPathologyModels();
     
-    @ApiOperation(value = "List all pathologies models for given pathology", notes = "", response = PathologyModel.class, responseContainer = "List", tags={ "PathologyModel", })
+    @Operation(summary = "List all pathologies models for given pathology", description = "")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "An array of pathology models", response = PathologyModel.class),
-        @ApiResponse(code = 500, message = "Unexpected error", response = PathologyModel.class) })
+        @ApiResponse(responseCode = "200", description = "An array of pathology models"),
+        @ApiResponse(responseCode = "500", description = "Unexpected error") })
     @GetMapping(value = "/pathology/{id}/model/all",
         produces = { "application/json" })
-    ResponseEntity<List<PathologyModel>> getPathologyModelsByPathology(@ApiParam(value = "ID of pathology",required=true ) @PathVariable("id") Long id);
+    ResponseEntity<List<PathologyModel>> getPathologyModelsByPathology(@Parameter(name = "ID of pathology",required=true ) @PathVariable("id") Long id);
 
 
-    @ApiOperation(value = "Update an existing pathology model", notes = "", response = Void.class, tags={ "PathologyModel", })
+    @Operation(summary = "Update an existing pathology model", description = "")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 404, message = "Pathology not found", response = Void.class),
-        @ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+        @ApiResponse(responseCode = "200", description = "Successful operation"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "404", description = "Pathology not found"),
+        @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @PutMapping(value = "/pathology/model/{id}",
         produces = { "application/json" },
         consumes = { "application/json" })
-    ResponseEntity<Void> updatePathologyModel(@ApiParam(value = "ID of pathology model that needs to be updated",required=true ) @PathVariable("id") Long id,
-        @ApiParam(value = "Pathology model object that needs to be updated" ,required=true ) @RequestBody PathologyModel model,
+    ResponseEntity<Void> updatePathologyModel(@Parameter(name = "ID of pathology model that needs to be updated",required=true ) @PathVariable("id") Long id,
+        @Parameter(name = "Pathology model object that needs to be updated" ,required=true ) @RequestBody PathologyModel model,
         final BindingResult result) throws RestServiceException;
 
-    @ApiOperation(value = "Upload model specifications", notes = "", response = PathologyModel.class, tags={ "PathologyModel", })
+    @Operation(summary = "Upload model specifications", description = "")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "success returns model", response = PathologyModel.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = PathologyModel.class),
-        @ApiResponse(code = 500, message = "Unexpected Error", response = PathologyModel.class) })
+        @ApiResponse(responseCode = "200", description = "success returns model"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @PostMapping(value = "/pathology/model/upload/specs/{id}",
         produces = { "application/json" },
         consumes = { MediaType.MULTIPART_FORM_DATA_VALUE, "application/json" })
-    ResponseEntity<PathologyModel> uploadModelSpecifications(@ApiParam(value = "Pathology model id",required=true ) @PathVariable("id") Long id,
+    ResponseEntity<PathologyModel> uploadModelSpecifications(@Parameter(name = "Pathology model id",required=true ) @PathVariable("id") Long id,
     		@RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException;
 	
-    @ApiOperation(value = "Download model specifications file file", notes = "", response = Void.class, tags={ "PathologyModel", })
+    @Operation(summary = "Download model specifications file file", description = "")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid PathologyModel  id", response = Void.class),
-        @ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+        @ApiResponse(responseCode = "200", description = "Successful operation"),
+        @ApiResponse(responseCode = "400", description = "Invalid PathologyModel  id"),
+        @ApiResponse(responseCode = "500", description = "Unexpected Error") })
     @GetMapping(value = "/pathology/model/download/specs/{id}",
         produces = { MediaType.APPLICATION_OCTET_STREAM_VALUE,"application/json" })
-    ResponseEntity<Resource> downloadModelSpecifications(@ApiParam(value = "pathology model id",required=true ) @PathVariable("id") Long id) throws RestServiceException;
+    ResponseEntity<Resource> downloadModelSpecifications(@Parameter(name = "pathology model id",required=true ) @PathVariable("id") Long id) throws RestServiceException;
 
     
 }

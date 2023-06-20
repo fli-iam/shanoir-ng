@@ -35,139 +35,139 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-@Api(value = "extra_data")
+@Tag(name = "extra_data")
 @RequestMapping("")
 public interface ExtraDataApi {
 
 	@ApiOperation(value = "Upload extra data", notes = "", response = ExaminationExtraData.class, tags = {
 			"ExaminationExtraData", })
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "success returns Extra data", response = ExaminationExtraData.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = ExaminationExtraData.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = ExaminationExtraData.class) })
+			@ApiResponse(responseCode = "200", description = "success returns Extra data"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PostMapping(value = "/examination/extradata/upload/{id}", produces = { "application/json" }, consumes = {
 			MediaType.MULTIPART_FORM_DATA_VALUE, "application/json" })
 	ResponseEntity<ExaminationExtraData> uploadExtraData(
-			@ApiParam(value = "extradata id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "extradata id", required = true) @PathVariable("id") Long id,
 			@RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException;
 
-	@ApiOperation(value = "Create extra data", notes = "", response = Void.class, tags = { "ExaminationExtraData", })
+	@Operation(summary = "Create extra data", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "success returns Extra data", response = ExaminationExtraData.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = ExaminationExtraData.class),
-			@ApiResponse(code = 409, message = "Already exists - conflict", response = ExaminationExtraData.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = ExaminationExtraData.class) })
+			@ApiResponse(responseCode = "200", description = "success returns Extra data"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PostMapping(value = "/examination/{id}/extradata", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<ExaminationExtraData> createExtraData(
-			@ApiParam(value = "Examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Extra data to create", required = true) @RequestBody ExaminationExtraData extradata,
+			@Parameter(name = "Examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Extra data to create", required = true) @RequestBody ExaminationExtraData extradata,
 			BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "Create physiological extra data", notes = "", response = Void.class, tags = {
 			"PhysiologicalData", })
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "success returns Extra data", response = PhysiologicalData.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = PhysiologicalData.class),
-			@ApiResponse(code = 409, message = "Already exists - conflict", response = PhysiologicalData.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = PhysiologicalData.class) })
+			@ApiResponse(responseCode = "200", description = "success returns Extra data"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PostMapping(value = "/examination/{id}/physiologicaldata", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<PhysiologicalData> createPhysiologicalExtraData(
-			@ApiParam(value = "Examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Physiological Extra data to create", required = true) @RequestBody PhysiologicalData extradata,
+			@Parameter(name = "Examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Physiological Extra data to create", required = true) @RequestBody PhysiologicalData extradata,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "Create blood gas extra data", notes = "", response = Void.class, tags = { "BloodGasData", })
+	@Operation(summary = "Create blood gas extra data", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "success returns Extra data", response = BloodGasData.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = BloodGasData.class),
-			@ApiResponse(code = 409, message = "Already exists - conflict", response = BloodGasData.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = BloodGasData.class) })
+			@ApiResponse(responseCode = "200", description = "success returns Extra data"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PostMapping(value = "/examination/{id}/bloodgasdata", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<BloodGasData> createBloodGasExtraData(
-			@ApiParam(value = "Examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "BloodGas Extra data to create", required = true) @RequestBody BloodGasData extradata,
+			@Parameter(name = "Examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "BloodGas Extra data to create", required = true) @RequestBody BloodGasData extradata,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "Deletes a extradata", notes = "", response = Void.class, tags = { "ExaminationExtraData", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid Examination Extra Data  id", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Deletes a extradata", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid Examination Extra Data  id"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@DeleteMapping(value = "/examination/{id}/extradata/{eid}", produces = {
 			"application/json" })
 	ResponseEntity<Void> deleteExtraData(
-			@ApiParam(value = "Examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Examination extra data id", required = true) @PathVariable("eid") Long eid)
+			@Parameter(name = "Examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Examination extra data id", required = true) @PathVariable("eid") Long eid)
 			throws RestServiceException;
 
 	@ApiOperation(value = "Get extra data by id", notes = "", response = ExaminationExtraData.class, responseContainer = "List", tags = {
 			"ExaminationExtraData", })
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An examination extra data", response = ExaminationExtraData.class),
-			@ApiResponse(code = 404, message = "Examination extra data not found", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = ExaminationExtraData.class) })
+			@ApiResponse(responseCode = "200", description = "An examination extra data"),
+			@ApiResponse(responseCode = "404", description = "Examination extra data not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/examination/{id}/extradata/{eid}", produces = {
 			"application/json" })
 	ResponseEntity<ExaminationExtraData> getExtraDataById(
-			@ApiParam(value = "Examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ExaminationExtraData id", required = true) @PathVariable("eid") Long eid);
+			@Parameter(name = "Examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ExaminationExtraData id", required = true) @PathVariable("eid") Long eid);
 
 	@ApiOperation(value = "List all extra data for given examination id", notes = "", response = ExaminationExtraData.class, responseContainer = "List", tags = {
 			"ExaminationExtraData", })
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of extra data elements", response = ExaminationExtraData.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = ExaminationExtraData.class) })
+			@ApiResponse(responseCode = "200", description = "An array of extra data elements"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/examination/{id}/extradata/all", produces = {
 			"application/json" })
 	ResponseEntity<List<ExaminationExtraData>> getExaminationExtraData(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException;
 
 	@ApiOperation(value = "Download an extradata file", notes = "", response = Void.class, tags = {
 			"ExaminationExtraData", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid Examination Extra Data  id", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid Examination Extra Data  id"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@GetMapping(value = "/examination/extradata/download/{id}")
 	void downloadExtraData(
-			@ApiParam(value = "Examination extra data id to download", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Examination extra data id to download", required = true) @PathVariable("id") Long id,
 			HttpServletResponse response)
 			throws RestServiceException;
 
 	@ApiOperation(value = "Update an existing physiologicalData", notes = "", response = Void.class, tags = {
 			"ExaminationExtraData", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-			@ApiResponse(code = 404, message = "ExaminationExtraData not found", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "404", description = "ExaminationExtraData not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PutMapping(value = "/examination/{id}/physiologicaldata/{eid}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<Void> updatePhysiologicalData(
-			@ApiParam(value = "ID of examination that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of physiologicaldata that needs to be updated", required = true) @PathVariable("eid") Long eid,
-			@ApiParam(value = "Physiological object that needs to be updated", required = true) @RequestBody PhysiologicalData physiologicalData,
+			@Parameter(name = "ID of examination that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of physiologicaldata that needs to be updated", required = true) @PathVariable("eid") Long eid,
+			@Parameter(name = "Physiological object that needs to be updated", required = true) @RequestBody PhysiologicalData physiologicalData,
 			final BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "Update an existing bloodGasData", notes = "", response = Void.class, tags = {
 			"ExaminationExtraData", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-			@ApiResponse(code = 404, message = "BloodGasData not found", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "404", description = "BloodGasData not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PutMapping(value = "/examination/{id}/bloodgasdata/{eid}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<Void> updateBloodGasData(
-			@ApiParam(value = "ID of examination that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of bloodgasdata that needs to be updated", required = true) @PathVariable("eid") Long eid,
-			@ApiParam(value = "BloodGasData object that needs to be updated", required = true) @RequestBody BloodGasData bloodGasData,
+			@Parameter(name = "ID of examination that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of bloodgasdata that needs to be updated", required = true) @PathVariable("eid") Long eid,
+			@Parameter(name = "BloodGasData object that needs to be updated", required = true) @RequestBody BloodGasData bloodGasData,
 			final BindingResult result) throws RestServiceException;
 
 }

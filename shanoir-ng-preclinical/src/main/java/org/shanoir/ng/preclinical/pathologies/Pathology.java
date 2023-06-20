@@ -30,7 +30,7 @@ import org.shanoir.ng.shared.validation.Unique;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Reference
  */
@@ -65,7 +65,7 @@ public class Pathology extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getName() {
     return name;
   }

@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Subject Therapies
@@ -99,7 +99,7 @@ public class SubjectTherapy extends HalEntity {
 		return this;
 	}
 
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public AnimalSubject getAnimalSubject() {
 		return animalSubject;
 	}
@@ -113,7 +113,7 @@ public class SubjectTherapy extends HalEntity {
 		return this;
 	}
 
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Therapy getTherapy() {
 		return therapy;
 	}
@@ -127,7 +127,7 @@ public class SubjectTherapy extends HalEntity {
 		return this;
 	}
 
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -141,7 +141,7 @@ public class SubjectTherapy extends HalEntity {
 		return this;
 	}
 
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Date getEndDate() {
 		return endDate;
 	}
@@ -155,7 +155,7 @@ public class SubjectTherapy extends HalEntity {
 		return this;
 	}
 
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Double getDose() {
 		return dose;
 	}
@@ -169,7 +169,7 @@ public class SubjectTherapy extends HalEntity {
 		return this;
 	}
 
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getDoseUnit() {
 		return doseUnit;
 	}
@@ -183,7 +183,7 @@ public class SubjectTherapy extends HalEntity {
 		return this;
 	}
 
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public String getFrequency() {
 		return frequency;
 	}
@@ -195,7 +195,7 @@ public class SubjectTherapy extends HalEntity {
 	/**
 	 * @return the molecule
 	 */
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public String getMolecule() {
 		return molecule;
 	}

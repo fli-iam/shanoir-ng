@@ -27,7 +27,7 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Animal Subject
@@ -84,7 +84,7 @@ public class AnimalSubject extends HalEntity {
 	 * 
 	 * @return specie
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getSpecie() {
 		return specie;
 	}
@@ -103,7 +103,7 @@ public class AnimalSubject extends HalEntity {
 	 * 
 	 * @return strain
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getStrain() {
 		return strain;
 	}
@@ -122,7 +122,7 @@ public class AnimalSubject extends HalEntity {
 	 * 
 	 * @return biotype
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getBiotype() {
 		return biotype;
 	}
@@ -141,7 +141,7 @@ public class AnimalSubject extends HalEntity {
 	 * 
 	 * @return provider
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getProvider() {
 		return provider;
 	}
@@ -160,7 +160,7 @@ public class AnimalSubject extends HalEntity {
 	 * 
 	 * @return stabulation
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getStabulation() {
 		return stabulation;
 	}

@@ -37,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Anesthetic
  */
@@ -84,7 +84,7 @@ public class Anesthetic extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getName() {
     return name;
   }
@@ -99,7 +99,7 @@ public class Anesthetic extends HalEntity   {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getComment() {
     return comment;
   }
@@ -113,7 +113,7 @@ public class Anesthetic extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public AnestheticType getAnestheticType() {
     return anestheticType;
   }

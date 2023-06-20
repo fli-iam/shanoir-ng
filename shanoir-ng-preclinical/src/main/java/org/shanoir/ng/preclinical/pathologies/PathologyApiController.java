@@ -31,7 +31,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class PathologyApiController implements PathologyApi {
@@ -51,7 +51,7 @@ public class PathologyApiController implements PathologyApi {
 
 	@Override
 	public ResponseEntity<Pathology> createPathology(
-			@ApiParam(value = "pathology to create", required = true) @RequestBody Pathology pathology,
+			@Parameter(name = "pathology to create", required = true) @RequestBody Pathology pathology,
 			BindingResult result) throws RestServiceException {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(pathology);
@@ -80,7 +80,7 @@ public class PathologyApiController implements PathologyApi {
 
 	@Override
 	public ResponseEntity<Void> deletePathology(
-			@ApiParam(value = "Pathology id to delete", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "Pathology id to delete", required = true) @PathVariable("id") Long id) {
 		if (pathologiesService.findById(id) == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -94,7 +94,7 @@ public class PathologyApiController implements PathologyApi {
 
 	@Override
 	public ResponseEntity<Pathology> getPathologyById(
-			@ApiParam(value = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final Pathology pathology = pathologiesService.findById(id);
 		if (pathology == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -113,8 +113,8 @@ public class PathologyApiController implements PathologyApi {
 
 	@Override
 	public ResponseEntity<Void> updatePathology(
-			@ApiParam(value = "ID of subject that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Pathology object that needs to be updated", required = true) @RequestBody Pathology pathology,
+			@Parameter(name = "ID of subject that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Pathology object that needs to be updated", required = true) @RequestBody Pathology pathology,
 			final BindingResult result) throws RestServiceException {
 
 		pathology.setId(id);

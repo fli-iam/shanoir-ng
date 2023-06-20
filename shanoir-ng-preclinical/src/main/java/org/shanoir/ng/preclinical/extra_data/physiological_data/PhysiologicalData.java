@@ -24,7 +24,7 @@ import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationE
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Examination Extra Data
  */
@@ -55,7 +55,7 @@ public class PhysiologicalData extends ExaminationExtraData   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public boolean getHasHeartRate() {
     return hasHeartRate;
   }
@@ -69,7 +69,7 @@ public class PhysiologicalData extends ExaminationExtraData   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public boolean getHasRespiratoryRate() {
     return hasRespiratoryRate;
   }
@@ -83,7 +83,7 @@ public class PhysiologicalData extends ExaminationExtraData   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public boolean getHasSao2() {
     return hasSao2;
   }
@@ -97,7 +97,7 @@ public class PhysiologicalData extends ExaminationExtraData   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public boolean getHasTemperature() {
     return hasTemperature;
   }

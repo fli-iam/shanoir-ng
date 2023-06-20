@@ -33,7 +33,7 @@ import org.shanoir.ng.shared.validation.Unique;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Therapy
  */
@@ -75,7 +75,7 @@ public class Therapy extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getName() {
     return name;
   }
@@ -89,7 +89,7 @@ public class Therapy extends HalEntity   {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getComment() {
     return comment;
   }
@@ -103,7 +103,7 @@ public class Therapy extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public TherapyType getTherapyType() {
     return therapyType;
   }

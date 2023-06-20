@@ -35,7 +35,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-23T14:51:04.625Z")
 
@@ -58,7 +58,7 @@ public class RefsApiController implements RefsApi {
 
 	@Override
 	public ResponseEntity<Reference> createReferenceValue(
-			@ApiParam(value = "Ref value to add", required = true) @RequestBody Reference reference)
+			@Parameter(name = "Ref value to add", required = true) @RequestBody Reference reference)
 			throws RestServiceException {
 		try {
 			Reference checkRef = referenceService.findByCategoryTypeAndValue(reference.getCategory(),
@@ -84,7 +84,7 @@ public class RefsApiController implements RefsApi {
 
 	@Override
 	public ResponseEntity<Void> deleteReferenceValue(
-			@ApiParam(value = "id of reference", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "id of reference", required = true) @PathVariable("id") Long id) {
 
 		Reference toDelete = referenceService.findById(id);
 		if (toDelete == null) {
@@ -101,7 +101,7 @@ public class RefsApiController implements RefsApi {
 
 	@Override
 	public ResponseEntity<List<Reference>> getReferencesByCategory(
-			@ApiParam(value = "type of reference", required = true) @PathVariable("category") String category) {
+			@Parameter(name = "type of reference", required = true) @PathVariable("category") String category) {
 		final List<Reference> refs = referenceService.findByCategory(category);
 		if (refs.isEmpty()) {
 			return new ResponseEntity<List<Reference>>(HttpStatus.NO_CONTENT);
@@ -111,8 +111,8 @@ public class RefsApiController implements RefsApi {
 
 	@Override
 	public ResponseEntity<List<Reference>> getReferencesByCategoryAndType(
-			@ApiParam(value = "Category of the reference", required = true) @PathVariable("category") String category,
-			@ApiParam(value = "Type of the reference", required = true) @PathVariable("type") String type) {
+			@Parameter(name = "Category of the reference", required = true) @PathVariable("category") String category,
+			@Parameter(name = "Type of the reference", required = true) @PathVariable("type") String type) {
 		final List<Reference> refs = referenceService.findByCategoryAndType(category, type);
 		if (refs.isEmpty()) {
 			return new ResponseEntity<List<Reference>>(HttpStatus.NO_CONTENT);
@@ -131,7 +131,7 @@ public class RefsApiController implements RefsApi {
 
 	@Override
 	public ResponseEntity<List<String>> getReferenceTypesByCategory(
-			@ApiParam(value = "category of reference", required = true) @PathVariable("category") String category) {
+			@Parameter(name = "category of reference", required = true) @PathVariable("category") String category) {
 		final List<String> types = referenceService.findTypesByCategory(category);
 		if (types.isEmpty()) {
 			return new ResponseEntity<List<String>>(HttpStatus.NO_CONTENT);
@@ -150,7 +150,7 @@ public class RefsApiController implements RefsApi {
 
 	@Override
 	public ResponseEntity<Reference> getReferenceById(
-			@ApiParam(value = "id of reference", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "id of reference", required = true) @PathVariable("id") Long id) {
 		final Reference ref = referenceService.findById(id);
 		if (ref == null) {
 			return new ResponseEntity<Reference>(HttpStatus.NO_CONTENT);
@@ -160,9 +160,9 @@ public class RefsApiController implements RefsApi {
 
 	@Override
 	public ResponseEntity<Reference> getReferenceByCategoryTypeAndValue(
-			@ApiParam(value = "category of reference", required = true) @PathVariable("category") String category,
-			@ApiParam(value = "type of reference", required = true) @PathVariable("type") String type,
-			@ApiParam(value = "value of reference type to be deleted", required = true) @PathVariable("value") String value) {
+			@Parameter(name = "category of reference", required = true) @PathVariable("category") String category,
+			@Parameter(name = "type of reference", required = true) @PathVariable("type") String type,
+			@Parameter(name = "value of reference type to be deleted", required = true) @PathVariable("value") String value) {
 		final Reference ref = referenceService.findByCategoryTypeAndValue(category, type, value);
 		if (ref == null) {
 			return new ResponseEntity<Reference>(HttpStatus.NO_CONTENT);
@@ -172,8 +172,8 @@ public class RefsApiController implements RefsApi {
 
 	@Override
 	public ResponseEntity<Void> updateReferenceValue(
-			@ApiParam(value = "id of ref to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "New value for the ref given as name", required = true) @RequestBody Reference reference,
+			@Parameter(name = "id of ref to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "New value for the ref given as name", required = true) @RequestBody Reference reference,
 			final BindingResult result) throws RestServiceException {
 		Reference toUpdate = referenceService.findById(id);
 		if (toUpdate == null) {

@@ -39,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Subject Pathology
@@ -100,7 +100,7 @@ public class SubjectPathology extends HalEntity {
 	}
 
 	@JsonIgnore
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public AnimalSubject getAnimalSubject() {
 		return animalSubject;
 	}
@@ -119,7 +119,7 @@ public class SubjectPathology extends HalEntity {
 	 * 
 	 * @return subjectId
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Pathology getPathology() {
 		return pathology;
 	}
@@ -138,7 +138,7 @@ public class SubjectPathology extends HalEntity {
 	 * 
 	 * @return subjectId
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public PathologyModel getPathologyModel() {
 		return pathologyModel;
 	}
@@ -157,7 +157,7 @@ public class SubjectPathology extends HalEntity {
 	 * 
 	 * @return location
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getLocation() {
 		return location;
 	}
@@ -176,7 +176,7 @@ public class SubjectPathology extends HalEntity {
 	 * 
 	 * @return startDate
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -190,7 +190,7 @@ public class SubjectPathology extends HalEntity {
 		return this;
 	}
 
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Date getEndDate() {
 		return endDate;
 	}

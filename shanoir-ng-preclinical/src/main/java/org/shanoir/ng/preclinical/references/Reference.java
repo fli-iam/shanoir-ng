@@ -29,7 +29,7 @@ import org.shanoir.ng.shared.hateoas.Links;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Reference
  */
@@ -69,7 +69,7 @@ public class Reference extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getCategory() {
     return category;
   }
@@ -87,7 +87,7 @@ public class Reference extends HalEntity   {
    * none
    * @return type
   **/
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getReftype() {
     return reftype;
   }
@@ -105,7 +105,7 @@ public class Reference extends HalEntity   {
    * none
    * @return value
   **/
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getValue() {
     return value;
   }

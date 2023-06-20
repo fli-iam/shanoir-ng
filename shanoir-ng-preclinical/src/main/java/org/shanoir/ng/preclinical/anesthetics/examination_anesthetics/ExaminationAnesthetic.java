@@ -34,7 +34,7 @@ import org.shanoir.ng.shared.hateoas.Links;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Examination Anesthetic
  */
@@ -95,7 +95,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Long getExaminationId() {
     return examinationId;
   }
@@ -109,7 +109,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Anesthetic getAnesthetic() {
     return anesthetic;
   }
@@ -123,7 +123,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Double getDose() {
     return dose;
   }
@@ -137,7 +137,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Reference getDoseUnit() {
     return doseUnit;
   }
@@ -151,7 +151,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getInjectionInterval() {
     return injectionInterval;
   }
@@ -165,7 +165,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getInjectionSite() {
     return injectionSite;
   }
@@ -179,7 +179,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getInjectionType() {
     return injectionType;
   }
@@ -193,7 +193,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Date getStartDate() {
     return startDate;
   }
@@ -207,7 +207,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Date getEndDate() {
     return endDate;
   }

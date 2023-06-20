@@ -36,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Anesthetic Ingredient
  */
@@ -84,7 +84,7 @@ public class AnestheticIngredient extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Anesthetic getAnesthetic() {
     return anesthetic;
   }
@@ -98,7 +98,7 @@ public class AnestheticIngredient extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Reference getName() {
     return name;
   }
@@ -113,7 +113,7 @@ public class AnestheticIngredient extends HalEntity   {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Double getConcentration() {
     return concentration;
   }
@@ -127,7 +127,7 @@ public class AnestheticIngredient extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Reference getConcentrationUnit() {
     return concentrationUnit;
   }

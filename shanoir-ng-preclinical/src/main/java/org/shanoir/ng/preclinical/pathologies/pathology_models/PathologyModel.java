@@ -34,7 +34,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * PathologyModel
  */
@@ -91,7 +91,7 @@ public class PathologyModel extends HalEntity   {
    * none
    * @return type
   **/
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getName() {
     return name;
   }
@@ -109,7 +109,7 @@ public class PathologyModel extends HalEntity   {
    * none
    * @return type
   **/
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getComment() {
     return comment;
   }
@@ -123,7 +123,7 @@ public class PathologyModel extends HalEntity   {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getFilename() {
     return filename;
   }
@@ -133,7 +133,7 @@ public class PathologyModel extends HalEntity   {
   }
 	   
   @JsonIgnore
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getFilepath() {
     return filepath;
   }
@@ -151,7 +151,7 @@ public class PathologyModel extends HalEntity   {
    * none
    * @return type
   **/
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Pathology getPathology() {
     return pathology;
   }

@@ -26,111 +26,111 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-@Api(value = "refs")
+@Tag(name = "refs")
 @RequestMapping("/refs")
 public interface RefsApi {
 
-	@ApiOperation(value = "Add a new Reference", notes = "", response = Void.class, tags = { "Reference", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "success returns Reference", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Add a new Reference", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "success returns Reference"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<Reference> createReferenceValue(
-			@ApiParam(value = "Ref to add", required = true) @RequestBody Reference body) throws RestServiceException;
+			@Parameter(name = "Ref to add", required = true) @RequestBody Reference body) throws RestServiceException;
 
-	@ApiOperation(value = "Deletes a reference", notes = "", response = Void.class, tags = { "Reference", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Not found", response = Void.class),
-			@ApiResponse(code = 406, message = "Not acceptable", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Deletes a reference", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Not found"),
+			@ApiResponse(responseCode = "406", description = "Not acceptable"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@DeleteMapping(value = "/{id}", produces = { "application/json" })
 	ResponseEntity<Void> deleteReferenceValue(
-			@ApiParam(value = "id of reference to be deleted", required = true) @PathVariable("id") Long id);
+			@Parameter(name = "id of reference to be deleted", required = true) @PathVariable("id") Long id);
 
 	@ApiOperation(value = "Get existing references by category", notes = "", response = Reference.class, responseContainer = "List", tags = {
 			"Reference", })
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of references values according to category parameter", response = Reference.class),
-			@ApiResponse(code = 204, message = "No content", response = Reference.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = Reference.class) })
+			@ApiResponse(responseCode = "200", description = "An array of references values according to category parameter"),
+			@ApiResponse(responseCode = "204", description = "No content"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/category/{category}", produces = { "application/json" })
 	ResponseEntity<List<Reference>> getReferencesByCategory(
-			@ApiParam(value = "Category of the references", required = true) @PathVariable("category") String category);
+			@Parameter(name = "Category of the references", required = true) @PathVariable("category") String category);
 
 	@ApiOperation(value = "Get all references for given category and type", notes = "", response = Reference.class, responseContainer = "List", tags = {
 			"Reference", })
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of references values according to category and type parameter", response = Reference.class),
-			@ApiResponse(code = 204, message = "No content", response = Reference.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = Reference.class) })
+			@ApiResponse(responseCode = "200", description = "An array of references values according to category and type parameter"),
+			@ApiResponse(responseCode = "204", description = "No content"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/category/{category}/{type}", produces = {
 			"application/json" })
 	ResponseEntity<List<Reference>> getReferencesByCategoryAndType(
-			@ApiParam(value = "Category of the reference", required = true) @PathVariable("category") String category,
-			@ApiParam(value = "Type of the reference", required = true) @PathVariable("type") String type);
+			@Parameter(name = "Category of the reference", required = true) @PathVariable("category") String category,
+			@Parameter(name = "Type of the reference", required = true) @PathVariable("type") String type);
 
 	@ApiOperation(value = "References categories", notes = "", response = String.class, responseContainer = "List", tags = {
 			"Reference", })
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of ref elements names", response = String.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = String.class) })
+			@ApiResponse(responseCode = "200", description = "An array of ref elements names"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/categories", produces = { "application/json" })
 	ResponseEntity<List<String>> getReferenceCategories();
 
 	@ApiOperation(value = "References types for given category", notes = "", response = String.class, responseContainer = "List", tags = {
 			"Reference", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "An array of ref types names", response = String.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = String.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "An array of ref types names"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/category/{category}/types", produces = { "application/json" })
 	ResponseEntity<List<String>> getReferenceTypesByCategory(
-			@ApiParam(value = "Category of the reference", required = true) @PathVariable("category") String category);
+			@Parameter(name = "Category of the reference", required = true) @PathVariable("category") String category);
 
 	@ApiOperation(value = "Get all references", notes = "", response = Reference.class, responseContainer = "List", tags = {
 			"Reference", })
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of all references", response = Reference.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = Reference.class) })
+			@ApiResponse(responseCode = "200", description = "An array of all references"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "", produces = { "application/json" })
 	ResponseEntity<List<Reference>> getReferences();
 
 	@ApiOperation(value = "Find reference by its id", notes = "Returns a reference", response = Reference.class, tags = {
 			"Reference", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Reference.class),
-			@ApiResponse(code = 404, message = "Reference not found", response = Reference.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Reference.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "404", description = "Reference not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@GetMapping(value = "/{id}", produces = { "application/json" })
 	ResponseEntity<Reference> getReferenceById(
-			@ApiParam(value = "Id of the reference", required = true) @PathVariable("id") Long id);
+			@Parameter(name = "Id of the reference", required = true) @PathVariable("id") Long id);
 
 	@ApiOperation(value = "Find reference by category, type and value", notes = "Returns a reference", response = Reference.class, tags = {
 			"Reference", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Reference.class),
-			@ApiResponse(code = 404, message = "Reference not found", response = Reference.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Reference.class) })
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "404", description = "Reference not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@GetMapping(value = "/category/{category}/{type}/{value}", produces = {
 			"application/json" })
 	ResponseEntity<Reference> getReferenceByCategoryTypeAndValue(
-			@ApiParam(value = "Category of the reference", required = true) @PathVariable("category") String category,
-			@ApiParam(value = "type of reference", required = true) @PathVariable("type") String type,
-			@ApiParam(value = "value of reference", required = true) @PathVariable("value") String value);
+			@Parameter(name = "Category of the reference", required = true) @PathVariable("category") String category,
+			@Parameter(name = "type of reference", required = true) @PathVariable("type") String type,
+			@Parameter(name = "value of reference", required = true) @PathVariable("value") String value);
 
-	@ApiOperation(value = "Update an existing Ref ", notes = "", response = Void.class, tags = { "Reference", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-			@ApiResponse(code = 404, message = "Reference value not found", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Update an existing Ref ", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "404", description = "Reference value not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PutMapping(value = "/{id}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<Void> updateReferenceValue(
-			@ApiParam(value = "value of ref name to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "New value for the ref given as name", required = true) @RequestBody Reference body,
+			@Parameter(name = "value of ref name to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "New value for the ref given as name", required = true) @RequestBody Reference body,
 			BindingResult result) throws RestServiceException;
 
 }

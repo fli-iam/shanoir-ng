@@ -41,7 +41,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class AnimalSubjectApiController implements AnimalSubjectApi {
@@ -72,7 +72,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<AnimalSubject> createAnimalSubject(
-			@ApiParam(value = "AnimalSubject object to add", required = true) @RequestBody @Valid final AnimalSubject animalSubject,
+			@Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final AnimalSubject animalSubject,
 			final BindingResult result) throws RestServiceException {
 
 		/* Validation */
@@ -108,7 +108,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<Void> deleteAnimalSubject(
-			@ApiParam(value = "AnimalSubject id to delete", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "AnimalSubject id to delete", required = true) @PathVariable("id") Long id) {
 		if (subjectService.findById(id) == null) {
 			LOG.error("ERROR animalSubject not found while deleting {}", id);
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -133,7 +133,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<AnimalSubject> getAnimalSubjectById(
-			@ApiParam(value = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final AnimalSubject subject = subjectService.findById(id);
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -153,8 +153,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<Void> updateAnimalSubject(
-			@ApiParam(value = "ID of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubject animalSubject,
+			@Parameter(name = "ID of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubject animalSubject,
 			final BindingResult result) throws RestServiceException {
 
 		// IMPORTANT : avoid any confusion that could lead to security breach
@@ -188,7 +188,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<AnimalSubject> getAnimalSubjectBySubjectId(
-			@ApiParam(value = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final List<AnimalSubject> subjects = subjectService.findBySubjectId(id);
 		if (subjects == null || subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -37,7 +37,7 @@ import org.shanoir.ng.shared.hateoas.Links;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Contrast Agent
  */
@@ -117,7 +117,7 @@ public class ContrastAgent extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Reference getName() {
     return name;
   }
@@ -131,7 +131,7 @@ public class ContrastAgent extends HalEntity   {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getManufacturedName() {
     return manufacturedName;
   }
@@ -146,7 +146,7 @@ public class ContrastAgent extends HalEntity   {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Double getConcentration() {
     return concentration;
   }
@@ -160,7 +160,7 @@ public class ContrastAgent extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Reference getConcentrationUnit() {
     return concentrationUnit;
   }
@@ -174,7 +174,7 @@ public class ContrastAgent extends HalEntity   {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Double getDose() {
     return dose;
   }
@@ -188,7 +188,7 @@ public class ContrastAgent extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Reference getDoseUnit() {
     return doseUnit;
   }
@@ -202,7 +202,7 @@ public class ContrastAgent extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public InjectionInterval getInjectionInterval() {
     return injectionInterval;
   }
@@ -216,7 +216,7 @@ public class ContrastAgent extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public InjectionSite getInjectionSite() {
     return injectionSite;
   }
@@ -230,7 +230,7 @@ public class ContrastAgent extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public InjectionType getInjectionType() {
     return injectionType;
   }

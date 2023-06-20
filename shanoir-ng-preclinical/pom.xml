@@ -63,7 +63,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</dependency>
 	</dependencies>
 
-
 	<build>
 		<plugins>
 			<!-- Package shanoir-ng-preclinical.jar as Spring Boot executable: Avoid 
