@@ -145,10 +145,15 @@ public class DatasetFileApiController implements DatasetFileApi {
 				// Get the dataset file then copy the file to path
 				// MOVE nifti (and others) on disc
 				destination = new File(datasetFile.getPath().replace("file://", ""));
-				destination.getParentFile().mkdirs();
+				boolean result = destination.getParentFile().mkdirs();
+				if (result) {
+					LOG.error("We created" + destination.getAbsolutePath());
+				} else {
+					LOG.error("We did not created" + destination.getAbsolutePath());
+				}
 				
 				try (InputStream is = file.getInputStream()) {
-				    Files.copy(is, destination.toPath());
+				    Files.copy(is, destination.getAbsolutePath());
 				}
 			}
 			return new ResponseEntity<>(HttpStatus.OK);

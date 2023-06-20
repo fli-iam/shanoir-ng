@@ -516,8 +516,6 @@ public class DatasetMigrationService {
 
 			// Update path for the new  server (replace usual paths)
 			if (!file.isPacs()) {
-				file.setPath(file.getPath().replace("study-" + job.getOldStudyId() , "study-" + job.getStudy().getId()));
-				file.setPath(file.getPath().replace("examination" + oldExamId , "examination" + job.getExaminationMap().get(oldExamId)));
 				file.setPath(file.getPath().replace(
 						"/ses-" + oldExamId,
 						"/ses-" + job.getExaminationMap().get(oldExamId)));
