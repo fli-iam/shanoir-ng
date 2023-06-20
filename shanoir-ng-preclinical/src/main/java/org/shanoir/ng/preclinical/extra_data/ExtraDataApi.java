@@ -45,8 +45,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("")
 public interface ExtraDataApi {
 
-	@ApiOperation(value = "Upload extra data", notes = "", response = ExaminationExtraData.class, tags = {
-			"ExaminationExtraData", })
+	@Operation(summary = "Upload extra data", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "success returns Extra data"),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
@@ -70,8 +69,7 @@ public interface ExtraDataApi {
 			@Parameter(name = "Extra data to create", required = true) @RequestBody ExaminationExtraData extradata,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "Create physiological extra data", notes = "", response = Void.class, tags = {
-			"PhysiologicalData", })
+	@Operation(summary = "Create physiological extra data", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "success returns Extra data"),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
@@ -108,8 +106,7 @@ public interface ExtraDataApi {
 			@Parameter(name = "Examination extra data id", required = true) @PathVariable("eid") Long eid)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Get extra data by id", notes = "", response = ExaminationExtraData.class, responseContainer = "List", tags = {
-			"ExaminationExtraData", })
+	@Operation(summary = "Get extra data by id", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "An examination extra data"),
 			@ApiResponse(responseCode = "404", description = "Examination extra data not found"),
@@ -120,8 +117,7 @@ public interface ExtraDataApi {
 			@Parameter(name = "Examination id", required = true) @PathVariable("id") Long id,
 			@Parameter(name = "ExaminationExtraData id", required = true) @PathVariable("eid") Long eid);
 
-	@ApiOperation(value = "List all extra data for given examination id", notes = "", response = ExaminationExtraData.class, responseContainer = "List", tags = {
-			"ExaminationExtraData", })
+	@Operation(summary = "List all extra data for given examination id", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "An array of extra data elements"),
 			@ApiResponse(responseCode = "500", description = "Unexpected error") })
@@ -131,8 +127,7 @@ public interface ExtraDataApi {
 			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Download an extradata file", notes = "", response = Void.class, tags = {
-			"ExaminationExtraData", })
+	@Operation(summary = "Download an extradata file", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid Examination Extra Data  id"),
 			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
@@ -142,8 +137,7 @@ public interface ExtraDataApi {
 			HttpServletResponse response)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Update an existing physiologicalData", notes = "", response = Void.class, tags = {
-			"ExaminationExtraData", })
+	@Operation(summary = "Update an existing physiologicalData", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
 			@ApiResponse(responseCode = "404", description = "ExaminationExtraData not found"),
@@ -156,8 +150,7 @@ public interface ExtraDataApi {
 			@Parameter(name = "Physiological object that needs to be updated", required = true) @RequestBody PhysiologicalData physiologicalData,
 			final BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "Update an existing bloodGasData", notes = "", response = Void.class, tags = {
-			"ExaminationExtraData", })
+	@Operation(summary = "Update an existing bloodGasData", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
 			@ApiResponse(responseCode = "404", description = "BloodGasData not found"),

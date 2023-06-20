@@ -29,8 +29,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Tag(name = "bruker")
 public interface BrukerApi {
 
-	@ApiOperation(value = "Upload bruker zip archive file", notes = "", response = String.class, tags = {
-			"BrukerModel", })
+	@Operation(summary = "Upload bruker zip archive file", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "success returns "),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
 			@ApiResponse(responseCode = "406", description = "Not valid bruker file"),

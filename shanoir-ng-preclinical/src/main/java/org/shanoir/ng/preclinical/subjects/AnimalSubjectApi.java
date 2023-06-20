@@ -38,8 +38,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @RequestMapping("/subject")
 public interface AnimalSubjectApi {
 
-	@ApiOperation(value = "Add a new animalsubject", notes = "", response = AnimalSubject.class, tags = {
-			"AnimalSubject", })
+	@Operation(summary = "Add a new animalsubject", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "success returns AnimalSubject"),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
@@ -59,8 +58,7 @@ public interface AnimalSubjectApi {
 	ResponseEntity<Void> deleteAnimalSubject(
 			@Parameter(name = "AnimalSubject id to delete", required = true) @PathVariable("id") Long id);
 
-	@ApiOperation(value = "Find animalSubject by ID", notes = "Returns a subject", response = AnimalSubject.class, tags = {
-			"AnimalSubject", })
+	@Operation(summary = "Find animalSubject by ID", description = "Returns a subject")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid ID supplied"),
 			@ApiResponse(responseCode = "404", description = "Subject not found"),
@@ -69,8 +67,7 @@ public interface AnimalSubjectApi {
 	ResponseEntity<AnimalSubject> getAnimalSubjectById(
 			@Parameter(name = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
-	@ApiOperation(value = "Find animalSubject by SubjectID", notes = "Returns a subject", response = AnimalSubject.class, tags = {
-			"AnimalSubject", })
+	@Operation(summary = "Find animalSubject by SubjectID", description = "Returns a subject")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid ID supplied"),
 			@ApiResponse(responseCode = "404", description = "Subject not found"),
@@ -79,8 +76,7 @@ public interface AnimalSubjectApi {
 	ResponseEntity<AnimalSubject> getAnimalSubjectBySubjectId(
 			@Parameter(name = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
-	@ApiOperation(value = "List all animalSubjects", notes = "", response = AnimalSubject.class, responseContainer = "List", tags = {
-			"AnimalSubject", })
+	@Operation(summary = "List all animalSubjects", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "An array of Preclinical AnimalSubject"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -89,8 +85,7 @@ public interface AnimalSubjectApi {
 	@GetMapping(value = "/all", produces = { "application/json" })
 	ResponseEntity<List<AnimalSubject>> getAnimalSubjects();
 
-	@ApiOperation(value = "Update an existing animalSubject", notes = "", response = Void.class, tags = {
-			"AnimalSubject", })
+	@Operation(summary = "Update an existing animalSubject", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
 			@ApiResponse(responseCode = "404", description = "Subject not found"),

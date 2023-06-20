@@ -34,8 +34,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Tag(name = "examination_anesthetic")
 public interface ExaminationAnestheticApi {
 
-	@ApiOperation(value = "Add a new anesthetic to examination", notes = "", response = Void.class, tags = {
-			"ExaminationAnesthetic", })
+	@Operation(summary = "Add a new anesthetic to examination", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "success returns anesthetic examination"),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
@@ -48,8 +47,7 @@ public interface ExaminationAnestheticApi {
 			@Parameter(name = "anesthetic to add to examination", required = true) @RequestBody ExaminationAnesthetic anesthetic,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "Deletes an anesthetic from examination", notes = "", response = Void.class, tags = {
-			"ExaminationAnesthetic", })
+	@Operation(summary = "Deletes an anesthetic from examination", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid examination anesthetic id"),
 			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
@@ -60,8 +58,7 @@ public interface ExaminationAnestheticApi {
 			@Parameter(name = "examination anesthetic id", required = true) @PathVariable("eaid") Long eaid)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Get examination anesthetic by id", notes = "", response = ExaminationAnesthetic.class, responseContainer = "List", tags = {
-			"ExaminationAnesthetic", })
+	@Operation(summary = "Get examination anesthetic by id", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "An examination anesthetic"),
 			@ApiResponse(responseCode = "404", description = "Examination anesthetic not found"),
@@ -73,8 +70,7 @@ public interface ExaminationAnestheticApi {
 			@Parameter(name = "Examination anesthetic id", required = true) @PathVariable("eaid") Long eaid)
 			throws RestServiceException;
 
-	@ApiOperation(value = "List all anesthetics for examination", notes = "", response = ExaminationAnesthetic.class, responseContainer = "List", tags = {
-			"ExaminationAnesthetic", })
+	@Operation(summary = "List all anesthetics for examination", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "An array of examination anesthetics"),
 			@ApiResponse(responseCode = "500", description = "Unexpected error") })
@@ -84,8 +80,7 @@ public interface ExaminationAnestheticApi {
 			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Update an existing examination anesthetic", notes = "", response = Void.class, tags = {
-			"ExaminationAnesthetic", })
+	@Operation(summary = "Update an existing examination anesthetic", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
 			@ApiResponse(responseCode = "404", description = "Examination anesthetic not found"),
@@ -98,8 +93,7 @@ public interface ExaminationAnestheticApi {
 			@Parameter(name = "Examination Anesthetic that will be be updated", required = true) @RequestBody ExaminationAnesthetic anesthetic,
 			final BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "List all examinationsAnesthetics for a given anesthetic", notes = "", response = ExaminationAnesthetic.class, responseContainer = "List", tags = {
-			"ExaminationAnesthetic", })
+	@Operation(summary = "List all examinationsAnesthetics for a given anesthetic", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "An array of examination anesthetics"),
 			@ApiResponse(responseCode = "500", description = "Unexpected error") })

@@ -35,8 +35,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Tag(name = "subject_pathology", description = "the subject pathologies API")
 public interface SubjectPathologyApi {
 
-	@ApiOperation(value = "Add a new subject pathology", notes = "", response = Void.class, tags = {
-			"SubjectPathology", })
+	@Operation(summary = "Add a new subject pathology", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "success returns subject pathology"),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
@@ -49,8 +48,7 @@ public interface SubjectPathologyApi {
 			@Parameter(name = "pathology to add to subject", required = true) @RequestBody SubjectPathology pathos,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "Deletes a pathology from subject", notes = "", response = Void.class, tags = {
-			"SubjectPathology", })
+	@Operation(summary = "Deletes a pathology from subject", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid subject pathology id"),
 			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
@@ -61,8 +59,7 @@ public interface SubjectPathologyApi {
 			@Parameter(name = "pathology id", required = true) @PathVariable("pid") Long pid)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Deletes all pathology linked to a given subject", notes = "", response = Void.class, tags = {
-			"SubjectPathology", })
+	@Operation(summary = "Deletes all pathology linked to a given subject", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid subject id"),
 			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
@@ -72,8 +69,7 @@ public interface SubjectPathologyApi {
 			@Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Get subject pathology by id", notes = "", response = SubjectPathology.class, responseContainer = "List", tags = {
-			"SubjectPathology", })
+	@Operation(summary = "Get subject pathology by id", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "A subject pathology"),
 			@ApiResponse(responseCode = "404", description = "Subjet pathology not found"),
@@ -85,8 +81,7 @@ public interface SubjectPathologyApi {
 			@Parameter(name = "Subject pathology id", required = true) @PathVariable("pid") Long pid)
 			throws RestServiceException;
 
-	@ApiOperation(value = "List all pathologies for subject", notes = "", response = SubjectPathology.class, responseContainer = "List", tags = {
-			"SubjectPathology", })
+	@Operation(summary = "List all pathologies for subject", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "An array of subject pathologies"),
 			@ApiResponse(responseCode = "500", description = "Unexpected error") })
@@ -95,8 +90,7 @@ public interface SubjectPathologyApi {
 	ResponseEntity<List<SubjectPathology>> getSubjectPathologies(
 			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException;
 
-	@ApiOperation(value = "List all subjects for pathology", notes = "", response = SubjectPathology.class, responseContainer = "List", tags = {
-			"SubjectPathology", })
+	@Operation(summary = "List all subjects for pathology", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "An array of subject pathologies"),
 			@ApiResponse(responseCode = "500", description = "Unexpected error") })
@@ -106,8 +100,7 @@ public interface SubjectPathologyApi {
 			@Parameter(name = "pathology id", required = true) @PathVariable("pid") Long pid)
 			throws RestServiceException;
 
-	@ApiOperation(value = "List all subjects for pathology model", notes = "", response = SubjectPathology.class, responseContainer = "List", tags = {
-			"SubjectPathology", })
+	@Operation(summary = "List all subjects for pathology model", description = "")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "An array of subject pathologies"),
 			@ApiResponse(responseCode = "500", description = "Unexpected error") })
@@ -116,8 +109,7 @@ public interface SubjectPathologyApi {
 	public ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathologyModel(
 			@Parameter(name = "pathology model id", required = true) @PathVariable("pathoModelId") Long pathoModelId);
 
-	@ApiOperation(value = "Update an existing subject pathology", notes = "", response = Void.class, tags = {
-			"SubjectPathology", })
+	@Operation(summary = "Update an existing subject pathology", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
 			@ApiResponse(responseCode = "404", description = "Subject Pathology not found"),
