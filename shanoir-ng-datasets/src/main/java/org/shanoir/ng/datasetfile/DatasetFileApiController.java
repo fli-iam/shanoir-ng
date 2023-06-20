@@ -2,7 +2,10 @@ package org.shanoir.ng.datasetfile;
 
 import java.io.File;
 import java.io.InputStream;
+import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 
 import javax.validation.Valid;
@@ -153,7 +156,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 				}
 				
 				try (InputStream is = file.getInputStream()) {
-				    Files.copy(is, destination.getAbsolutePath());
+				    Files.copy(is, Paths.get(destination.getAbsolutePath()));
 				}
 			}
 			return new ResponseEntity<>(HttpStatus.OK);
