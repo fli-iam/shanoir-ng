@@ -50,7 +50,6 @@ public class SolrApiController implements SolrApi {
 	
 	@Override
 	public ResponseEntity<Void> indexAll() throws RestServiceException {
-		
 		solrService.indexAll();		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
