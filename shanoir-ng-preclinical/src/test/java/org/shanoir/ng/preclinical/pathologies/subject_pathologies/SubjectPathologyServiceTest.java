@@ -20,14 +20,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.preclinical.references.RefsRepository;
 import org.shanoir.ng.preclinical.subjects.AnimalSubject;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -42,7 +40,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+
 public class SubjectPathologyServiceTest {
 
 	private static final Long SPATHO_ID = 1L;
@@ -61,7 +59,7 @@ public class SubjectPathologyServiceTest {
 	@InjectMocks
 	private SubjectPathologyServiceImpl spathosService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(spathosRepository.findAll()).willReturn(Arrays.asList(PathologyModelUtil.createSubjectPathology()));
 		given(spathosRepository.findAllByLocation(ReferenceModelUtil.createReferenceLocation()))
@@ -95,8 +93,8 @@ public class SubjectPathologyServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<SubjectPathology> spathos = spathosService.findAll();
-		Assert.assertNotNull(spathos);
-		Assert.assertTrue(spathos.size() == 1);
+		Assertions.assertNotNull(spathos);
+		Assertions.assertTrue(spathos.size() == 1);
 
 		Mockito.verify(spathosRepository, Mockito.times(1)).findAll();
 	}
@@ -105,7 +103,7 @@ public class SubjectPathologyServiceTest {
 	/*
 	 * @Test public void findAllBySubjectTest() { final List<SubjectPathology>
 	 * spathos = spathosService.findBySubject(SubjectModelUtil.createSubject());
-	 * Assert.assertNotNull(spathos); Assert.assertTrue(spathos.size() == 1);
+	 * Assertions.assertNotNull(spathos); Assertions.assertTrue(spathos.size() == 1);
 	 * 
 	 * Mockito.verify(spathosRepository,
 	 * Mockito.times(1)).findBySubject(SubjectModelUtil.createSubject()); }
@@ -113,8 +111,8 @@ public class SubjectPathologyServiceTest {
 	@Test
 	public void findAllByPathologyTest() {
 		final List<SubjectPathology> spathos = spathosService.findAllByPathology(PathologyModelUtil.createPathology());
-		Assert.assertNotNull(spathos);
-		Assert.assertTrue(spathos.size() == 1);
+		Assertions.assertNotNull(spathos);
+		Assertions.assertTrue(spathos.size() == 1);
 
 		Mockito.verify(spathosRepository, Mockito.times(1)).findAllByPathology(PathologyModelUtil.createPathology());
 	}
@@ -123,8 +121,8 @@ public class SubjectPathologyServiceTest {
 	public void findAllByPathologyModelTest() {
 		final List<SubjectPathology> spathos = spathosService
 				.findAllByPathologyModel(PathologyModelUtil.createPathologyModel());
-		Assert.assertNotNull(spathos);
-		Assert.assertTrue(spathos.size() == 1);
+		Assertions.assertNotNull(spathos);
+		Assertions.assertTrue(spathos.size() == 1);
 
 		Mockito.verify(spathosRepository, Mockito.times(1))
 				.findAllByPathologyModel(PathologyModelUtil.createPathologyModel());
@@ -134,8 +132,8 @@ public class SubjectPathologyServiceTest {
 	public void findAllByLocationTest() {
 		final List<SubjectPathology> spathos = spathosService
 				.findAllByLocation(ReferenceModelUtil.createReferenceLocation());
-		Assert.assertNotNull(spathos);
-		Assert.assertTrue(spathos.size() == 1);
+		Assertions.assertNotNull(spathos);
+		Assertions.assertTrue(spathos.size() == 1);
 
 		Mockito.verify(spathosRepository, Mockito.times(1))
 				.findAllByLocation(ReferenceModelUtil.createReferenceLocation());
@@ -144,11 +142,11 @@ public class SubjectPathologyServiceTest {
 	@Test
 	public void findByIdTest() {
 		final SubjectPathology spatho = spathosService.findById(SPATHO_ID);
-		Assert.assertNotNull(spatho);
-		Assert.assertTrue(PathologyModelUtil.MODEL_NAME.equals(spatho.getPathologyModel().getName()));
-		Assert.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(spatho.getPathology().getName()));
-		Assert.assertTrue(ReferenceModelUtil.REFERENCE_LOCATION_VALUE.equals(spatho.getLocation().getValue()));
-		Assert.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(spatho.getAnimalSubject().getId()));
+		Assertions.assertNotNull(spatho);
+		Assertions.assertTrue(PathologyModelUtil.MODEL_NAME.equals(spatho.getPathologyModel().getName()));
+		Assertions.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(spatho.getPathology().getName()));
+		Assertions.assertTrue(ReferenceModelUtil.REFERENCE_LOCATION_VALUE.equals(spatho.getLocation().getValue()));
+		Assertions.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(spatho.getAnimalSubject().getId()));
 
 		Mockito.verify(spathosRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -163,8 +161,8 @@ public class SubjectPathologyServiceTest {
 	@Test
 	public void updateTest() throws ShanoirException {
 		final SubjectPathology updatedSpatho = spathosService.update(createSubjectPathology());
-		Assert.assertNotNull(updatedSpatho);
-		Assert.assertTrue(UPDATED_PATHO_NAME.equals(updatedSpatho.getPathology().getName()));
+		Assertions.assertNotNull(updatedSpatho);
+		Assertions.assertTrue(UPDATED_PATHO_NAME.equals(updatedSpatho.getPathology().getName()));
 
 		Mockito.verify(spathosRepository, Mockito.times(1)).save(Mockito.any(SubjectPathology.class));
 	}

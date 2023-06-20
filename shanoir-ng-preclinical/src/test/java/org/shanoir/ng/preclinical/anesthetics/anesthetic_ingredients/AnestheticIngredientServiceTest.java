@@ -20,10 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -34,7 +33,6 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Anesthetic ingredients service test.
@@ -42,7 +40,7 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author sloury
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+
 public class AnestheticIngredientServiceTest {
 
 	private static final Long INGREDIENT_ID = 1L;
@@ -60,7 +58,7 @@ public class AnestheticIngredientServiceTest {
 	
 			
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(ingredientsRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticIngredient()));
 		given(ingredientsRepository.findByAnesthetic(AnestheticModelUtil.createAnestheticGas())).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticIngredient()));
@@ -78,8 +76,8 @@ public class AnestheticIngredientServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<AnestheticIngredient> ingredients = ingredientsService.findAll();
-		Assert.assertNotNull(ingredients);
-		Assert.assertTrue(ingredients.size() == 1);
+		Assertions.assertNotNull(ingredients);
+		Assertions.assertTrue(ingredients.size() == 1);
 
 		Mockito.verify(ingredientsRepository, Mockito.times(1)).findAll();
 	}
@@ -87,8 +85,8 @@ public class AnestheticIngredientServiceTest {
 	@Test
 	public void findByIdTest() {
 		final AnestheticIngredient ingredient = ingredientsService.findById(INGREDIENT_ID);
-		Assert.assertNotNull(ingredient);
-		Assert.assertTrue(ReferenceModelUtil.REFERENCE_INGREDIENT_ISOFLURANE_VALUE.equals(ingredient.getName().getValue()));
+		Assertions.assertNotNull(ingredient);
+		Assertions.assertTrue(ReferenceModelUtil.REFERENCE_INGREDIENT_ISOFLURANE_VALUE.equals(ingredient.getName().getValue()));
 
 		Mockito.verify(ingredientsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -96,8 +94,8 @@ public class AnestheticIngredientServiceTest {
 	@Test
 	public void findByAnestheticTest() {
 		final List<AnestheticIngredient> ingredients = ingredientsService.findByAnesthetic(AnestheticModelUtil.createAnestheticGas());
-		Assert.assertNotNull(ingredients);
-		Assert.assertTrue(ingredients.size() == 1);
+		Assertions.assertNotNull(ingredients);
+		Assertions.assertTrue(ingredients.size() == 1);
 
 		Mockito.verify(ingredientsRepository, Mockito.times(1)).findByAnesthetic(AnestheticModelUtil.createAnestheticGas());
 	}
@@ -114,8 +112,8 @@ public class AnestheticIngredientServiceTest {
 	@Test
 	public void updateTest() throws ShanoirException {
 		final AnestheticIngredient updatedIngredient = ingredientsService.update(createAnestheticIngredient());
-		Assert.assertNotNull(updatedIngredient);
-		Assert.assertTrue(UPDATED_INGREDIENT_CONCENTRATION.equals(updatedIngredient.getConcentration()));
+		Assertions.assertNotNull(updatedIngredient);
+		Assertions.assertTrue(UPDATED_INGREDIENT_CONCENTRATION.equals(updatedIngredient.getConcentration()));
 
 		Mockito.verify(ingredientsRepository, Mockito.times(1)).save(Mockito.any(AnestheticIngredient.class));
 	}

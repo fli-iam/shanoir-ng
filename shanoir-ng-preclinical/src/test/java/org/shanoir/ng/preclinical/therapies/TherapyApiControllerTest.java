@@ -20,9 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.references.RefsService;
@@ -38,7 +37,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -51,7 +49,7 @@ import com.google.gson.GsonBuilder;
  * @author sloury
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = TherapyApiController.class)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
 @ActiveProfiles("test")
@@ -85,7 +83,7 @@ public class TherapyApiControllerTest {
 
 	
 
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 

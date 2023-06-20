@@ -15,13 +15,12 @@
 package org.shanoir.ng.preclinical.pathologies.subject_pathologies;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.subjects.AnimalSubjectRepository;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
@@ -29,14 +28,8 @@ import org.shanoir.ng.utils.PathologyModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper;
-import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
 
 /**
  * Tests for repository 'subject pathology'.
@@ -44,7 +37,7 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
  * @author sloury
  *
  */
-@RunWith(SpringRunner.class)
+
 @DataJpaTest
 @ActiveProfiles("test")
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
@@ -61,16 +54,6 @@ public class SubjectPathologyRepositoryTest {
 
 	@Autowired
 	private AnimalSubjectRepository subjectRepository;
-
-	/*
-	 * Mocks used to avoid unsatisfied dependency exceptions.
-	 */
-	@MockBean
-	private AuthenticationManager authenticationManager;
-	@MockBean
-	private DocumentationPluginsBootstrapper documentationPluginsBootstrapper;
-	@MockBean
-	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
 
 	@Test
 	public void findAllTest() throws Exception {

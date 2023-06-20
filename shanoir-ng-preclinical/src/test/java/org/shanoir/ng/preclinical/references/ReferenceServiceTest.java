@@ -20,14 +20,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -38,7 +36,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  */
  
-@RunWith(MockitoJUnitRunner.class)
+
 public class ReferenceServiceTest {
 
 	private static final Long REFERENCE_ID = 1L;
@@ -53,7 +51,7 @@ public class ReferenceServiceTest {
 	@InjectMocks
 	private RefsServiceImpl referenceService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(refsRepository.findAll()).willReturn(Arrays.asList(ReferenceModelUtil.createReferenceSpecie()));
 		given(refsRepository.findById(REFERENCE_ID)).willReturn(Optional.of(ReferenceModelUtil.createReferenceSpecie()));
@@ -70,8 +68,8 @@ public class ReferenceServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<Reference> references = referenceService.findAll();
-		Assert.assertNotNull(references);
-		Assert.assertTrue(references.size() == 1);
+		Assertions.assertNotNull(references);
+		Assertions.assertTrue(references.size() == 1);
 
 		Mockito.verify(refsRepository, Mockito.times(1)).findAll();
 	}
@@ -79,10 +77,10 @@ public class ReferenceServiceTest {
 	@Test
 	public void findByIdTest() {
 		final Reference reference = referenceService.findById(REFERENCE_ID);
-		Assert.assertNotNull(reference);
-		Assert.assertTrue(ReferenceModelUtil.REFERENCE_CATEGORY.equals(reference.getCategory()));
-		Assert.assertTrue(ReferenceModelUtil.REFERENCE_TYPE.equals(reference.getReftype()));
-		Assert.assertTrue(ReferenceModelUtil.REFERENCE_VALUE.equals(reference.getValue()));
+		Assertions.assertNotNull(reference);
+		Assertions.assertTrue(ReferenceModelUtil.REFERENCE_CATEGORY.equals(reference.getCategory()));
+		Assertions.assertTrue(ReferenceModelUtil.REFERENCE_TYPE.equals(reference.getReftype()));
+		Assertions.assertTrue(ReferenceModelUtil.REFERENCE_VALUE.equals(reference.getValue()));
 
 		Mockito.verify(refsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -97,8 +95,8 @@ public class ReferenceServiceTest {
 	@Test
 	public void updateTest() throws ShanoirException {
 		final Reference updatedRef = referenceService.update(createReference());
-		Assert.assertNotNull(updatedRef);
-		Assert.assertTrue(UPDATED_REFERENCE_VALUE.equals(updatedRef.getValue()));
+		Assertions.assertNotNull(updatedRef);
+		Assertions.assertTrue(UPDATED_REFERENCE_VALUE.equals(updatedRef.getValue()));
 
 		Mockito.verify(refsRepository, Mockito.times(1)).save(Mockito.any(Reference.class));
 	}

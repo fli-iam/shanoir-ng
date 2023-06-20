@@ -20,14 +20,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -38,7 +36,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+
 public class PathologyServiceTest {
 
 	private static final Long PATHOLOGY_ID = 1L;
@@ -53,7 +51,7 @@ public class PathologyServiceTest {
 	@InjectMocks
 	private PathologyServiceImpl pathologiesService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(pathologiesRepository.findAll()).willReturn(Arrays.asList(PathologyModelUtil.createPathology()));
 		given(pathologiesRepository.findById(PATHOLOGY_ID)).willReturn(Optional.of(PathologyModelUtil.createPathology()));
@@ -70,8 +68,8 @@ public class PathologyServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<Pathology> pathologies = pathologiesService.findAll();
-		Assert.assertNotNull(pathologies);
-		Assert.assertTrue(pathologies.size() == 1);
+		Assertions.assertNotNull(pathologies);
+		Assertions.assertTrue(pathologies.size() == 1);
 
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).findAll();
 	}
@@ -79,8 +77,8 @@ public class PathologyServiceTest {
 	@Test
 	public void findByIdTest() {
 		final Pathology pathology = pathologiesService.findById(PATHOLOGY_ID);
-		Assert.assertNotNull(pathology);
-		Assert.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(pathology.getName()));
+		Assertions.assertNotNull(pathology);
+		Assertions.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(pathology.getName()));
 
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -97,8 +95,8 @@ public class PathologyServiceTest {
 	@Test
 	public void updateTest() throws ShanoirException {
 		final Pathology updatedPathology = pathologiesService.update(createPathology());
-		Assert.assertNotNull(updatedPathology);
-		Assert.assertTrue(UPDATED_PATHOLOGY_DATA.equals(updatedPathology.getName()));
+		Assertions.assertNotNull(updatedPathology);
+		Assertions.assertTrue(UPDATED_PATHOLOGY_DATA.equals(updatedPathology.getName()));
 
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).save(Mockito.any(Pathology.class));
 	}
@@ -107,8 +105,8 @@ public class PathologyServiceTest {
 	@Test
 	public void findByNameTest() {
 		final Pathology pathology = pathologiesService.findByName(UPDATED_PATHOLOGY_DATA);
-		Assert.assertNotNull(pathology);
-		Assert.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(pathology.getName()));
+		Assertions.assertNotNull(pathology);
+		Assertions.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(pathology.getName()));
 
 		Mockito.verify(pathologiesRepository, Mockito.times(1)).findById(Mockito.anyLong()).orElse(null);
 	}

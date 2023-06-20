@@ -20,12 +20,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeEachClass;
 import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
@@ -44,7 +43,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -57,7 +55,7 @@ import com.google.gson.GsonBuilder;
  * @author sloury
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = PathologyModelApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
@@ -88,16 +86,16 @@ public class PathologyModelApiControllerTest {
 
 
 	@ClassRule
-	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	public static File tempFolder = new File();
 	
 	public static String tempFolderPath;
-	@BeforeClass
+	@BeforeEachClass
 	public static void beforeClass() {
 		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
 	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
@@ -159,7 +157,7 @@ public class PathologyModelApiControllerTest {
 	@WithMockUser
 	public void uploadSpecificationsTest() throws Exception {
 		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain", "some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH_UPLOAD_SPECS).file(firstFile))
+		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_SPECS).file(firstFile))
 				.andExpect(status().isOk());
 	}
 
