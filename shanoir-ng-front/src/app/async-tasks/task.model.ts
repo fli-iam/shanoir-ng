@@ -12,7 +12,6 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Subject } from 'rxjs';
 import { Entity } from '../shared/components/entity/entity.abstract';
 import { Report } from '../shared/mass-download/mass-download.service';
 import { camelToSpaces } from '../utils/app.utils';
@@ -29,7 +28,7 @@ export class Task extends Entity {
     eventLabel: string;
     objectId: number;
     route: string;
-    onChange: Subject<Task> = new Subject();
+    private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route'];
 
     set eventType(eventType: string) {
         this._eventType = eventType;
@@ -43,7 +42,6 @@ export class Task extends Entity {
     set status(status: -1 | 1 | 2) {
         this._status = status;
         if (status == -1) this._progress = -1;
-        this.onChange.next(this);
     }
 
     get status(): -1 | 1 | 2 {
@@ -51,9 +49,6 @@ export class Task extends Entity {
     }
 
     set progress(progress: number) {
-        if (progress > this.progress && progress % 10 == 0) {
-            this.onChange.next(this);
-        }
         if (this.status == -1) this._progress = -1;
         else this._progress = progress;
     }
@@ -65,7 +60,6 @@ export class Task extends Entity {
     set message(message: string) {
         this._message = message;
         this.route = this.buildRoute();
-        this.onChange.next(this);
     }
 
     get message(): string {
@@ -86,7 +80,20 @@ export class Task extends Entity {
     }
 
     stringify(): string {
-        return JSON.stringify(this, ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route']); 
+        return JSON.stringify(this, this.FIELDS); 
+    }
+
+    clone(): Task {
+        let clone: Task = new Task();
+        this.FIELDS.forEach(fieldName => clone[fieldName] = this[fieldName]);
+        return clone;
+    }
+
+    equals(task: Task) {
+        for (let fieldName of this.FIELDS) {
+            if (task[fieldName] != this[fieldName]) return false;
+        }
+        return true;
     }
 }
 

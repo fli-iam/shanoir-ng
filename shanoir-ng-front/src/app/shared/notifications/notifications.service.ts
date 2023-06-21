@@ -67,7 +67,7 @@ export class NotificationsService {
         this.readLocalStorageConnection = setInterval(() => {
             try {
                 if ((Date.now() - this.lastLocalStorageRead) >= 900) {
-                    this.readLocalTasks();
+                    this.readLocalTasks()
                     this.updateStatusVars();
                     this.emitTasks();
                 }
@@ -148,10 +148,7 @@ export class NotificationsService {
     }
 
     pushLocalTask(task: Task) {
-        this.createOrUpdateTask(task);
-        // task.onChange.subscribe(t => {
-        //     this.createOrUpdateTask(t);
-        // })       
+        this.createOrUpdateTask(task.clone());
     }
     
     private createOrUpdateTask(task: Task) {
@@ -174,11 +171,11 @@ export class NotificationsService {
     private readLocalTasks() {
         let storageTasksStr: string = localStorage.getItem(this.storageKey);
         this.lastLocalStorageRead = Date.now();
-        if (!storageTasksStr) {
-            this.localTasks = [];
-        } else {
-            this.localTasks = JSON.parse(storageTasksStr).map(task => Object.assign(new Task(), task));
+        let storageTasks: Task[] = [];
+        if (storageTasksStr) {
+            storageTasks = JSON.parse(storageTasksStr).map(task => Object.assign(new Task(), task));
         }
+        this.localTasks = storageTasks;
     }
 
     private updateLocalStorage() {
