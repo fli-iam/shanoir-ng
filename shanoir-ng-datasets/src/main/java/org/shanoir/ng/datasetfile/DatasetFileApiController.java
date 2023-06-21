@@ -148,12 +148,17 @@ public class DatasetFileApiController implements DatasetFileApi {
 				// Get the dataset file then copy the file to path
 				// MOVE nifti (and others) on disc
 				destination = new File(datasetFile.getPath().replace("file://", ""));
+				
+				Files.createDirectories(destination.getParentFile().toPath());
+
+				/*
 				boolean result = destination.getParentFile().mkdirs();
 				if (result) {
 					LOG.error("We created" + destination.getAbsolutePath());
 				} else {
 					LOG.error("We did not created" + destination.getAbsolutePath());
 				}
+				*/
 				
 				try (InputStream is = file.getInputStream()) {
 				    Files.copy(is, Paths.get(destination.getAbsolutePath()));
@@ -161,6 +166,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 			}
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
+			LOG.error("erreur de creation de dossier", e);
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error while adding dataset file."));
 		}
 	}
