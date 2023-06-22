@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
@@ -150,7 +151,6 @@ public class DatasetFileApiController implements DatasetFileApi {
 			} else {
 				// Get the dataset file then copy the file to path
 				// MOVE nifti (and others) on disc
-				
 
 				String path = datasetFile.getPath().substring(datasetFile.getPath().indexOf("/sub-"));
 				
@@ -158,8 +158,14 @@ public class DatasetFileApiController implements DatasetFileApi {
 				
 				destination = new File(niftiStorageDir + path);
 				
+				LOG.error(path);
+				
 				destination.getParentFile().mkdirs();
+				
+				LOG.error(destination.getParentFile().getAbsolutePath());
 
+				Files.createDirectories(Path.of(destination.getParentFile().getAbsolutePath()));
+				
 				file.transferTo(destination);
 			}
 			return new ResponseEntity<>(HttpStatus.OK);
