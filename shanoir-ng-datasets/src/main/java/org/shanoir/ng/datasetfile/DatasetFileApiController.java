@@ -141,7 +141,6 @@ public class DatasetFileApiController implements DatasetFileApi {
 		File destination = null;
 		try {
 			destination = new File(migrationFolder + "/migration-" + datasetFile.getDatasetExpression().getId() + File.separator +  LocalDateTime.now() + file.getName());
-			file.transferTo(destination);
 			
 			LOG.error("Migrating file to: " + destination.getAbsolutePath());
 			
