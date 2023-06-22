@@ -64,6 +64,9 @@ public class DatasetFileApiController implements DatasetFileApi {
 
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
+	
+	@Value("${datasets-data}")
+	private String niftiStorageDir;
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetFileApiController.class);
 
@@ -127,7 +130,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 		}
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
-
+                                                                                                                                                                              
 	@Override
 	public ResponseEntity<Void> addFile(
 			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId,
@@ -147,22 +150,17 @@ public class DatasetFileApiController implements DatasetFileApi {
 			} else {
 				// Get the dataset file then copy the file to path
 				// MOVE nifti (and others) on disc
-				destination = new File(datasetFile.getPath().replace("file://", ""));
 				
-				Files.createDirectories(destination.getParentFile().toPath());
 
-				/*
-				boolean result = destination.getParentFile().mkdirs();
-				if (result) {
-					LOG.error("We created" + destination.getAbsolutePath());
-				} else {
-					LOG.error("We did not created" + destination.getAbsolutePath());
-				}
-				*/
+				String path = datasetFile.getPath().substring(datasetFile.getPath().indexOf("/sub-"));
 				
-				try (InputStream is = file.getInputStream()) {
-				    Files.copy(is, Paths.get(destination.getAbsolutePath()));
-				}
+				LOG.error(path);
+				
+				destination = new File(niftiStorageDir + path);
+				
+				destination.getParentFile().mkdirs();
+
+				file.transferTo(destination);
 			}
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
