@@ -17,9 +17,10 @@ package org.shanoir.ng.preclinical.bruker;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
+
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeEachClass;
-import org.junit.ClassRule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentMatchers;
@@ -63,13 +64,14 @@ public class BrukerApiControllerTest {
 	@MockBean
 	private RestTemplate restTemplate;
 
-	@ClassRule
-	public static File tempFolder = new File();
+	@TempDir
+	public File tempFolder;
 	
 	public static String tempFolderPath;
-	@BeforeEachClass
-	public static void beforeClass() {
-		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+	
+	@BeforeAll
+	public void beforeClass() {
+		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
 	    System.setProperty("preclinical.uploadBrukerFolder", tempFolderPath);
 	}
 
@@ -95,4 +97,5 @@ public class BrukerApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
 				.andExpect(status().isNotAcceptable());
 	}
+
 }

@@ -18,11 +18,11 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
 import java.util.Arrays;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.BeforeEachClass;
-import org.junit.ClassRule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
@@ -111,13 +111,14 @@ public class ExtraDataApiControllerTest {
 	@MockBean
 	private ExtraDataEditableByManager editableOnlyValidator;
 
-	@ClassRule
-	public static File tempFolder = new File();
+	@TempDir
+	public File tempFolder;
 	
-	public static String tempFolderPath;
-	@BeforeEachClass
-	public static void beforeClass() {
-		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+	public String tempFolderPath;
+	
+	@BeforeAll
+	public void beforeClass() {
+		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
 	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
 	}
 
