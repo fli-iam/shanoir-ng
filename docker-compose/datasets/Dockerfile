@@ -46,8 +46,6 @@ RUN mkdir -pv /var/log/shanoir-ng-logs
 ADD shanoir-ng-datasets.jar shanoir-ng-datasets.jar
 COPY entrypoint entrypoint_common oneshot /bin/
 
-RUN chmod +w /var/datasets-data
-
 # Use the below line for remote debugging and to active dev profile
 # ENTRYPOINT ["/bin/entrypoint", "java", "-Xdebug", "-Xrunjdwp:transport=dt_socket,server=y,address=0.0.0.0:9914,suspend=y", "-Djava.security.egd=file:/dev/./urandom", "-Djavax.net.ssl.trustStorePassword=changeit", "-Dspring.profiles.active=dev", "-jar", "/shanoir-ng-datasets.jar"]
 

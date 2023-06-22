@@ -141,6 +141,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 		File destination = null;
 		try {
 			destination = new File(migrationFolder + "/migration-" + datasetFile.getDatasetExpression().getId() + File.separator +  LocalDateTime.now() + file.getName());
+			file.transferTo(destination);
 			
 			LOG.error("Migrating file to: " + destination.getAbsolutePath());
 			
@@ -152,21 +153,13 @@ public class DatasetFileApiController implements DatasetFileApi {
 				// Get the dataset file then copy the file to path
 				// MOVE nifti (and others) on disc
 
-				String path = datasetFile.getPath().substring(datasetFile.getPath().indexOf("/sub-"));
+				File newDestination = new File(niftiStorageDir + File.separator +  LocalDateTime.now() + file.getName());
 				
-				LOG.error(path);
+				newDestination.getParentFile().mkdirs();
 				
-				destination = new File(niftiStorageDir + path);
+				Files.createDirectories(Path.of(newDestination.getParentFile().getAbsolutePath()));
 				
-				LOG.error(path);
-				
-				destination.getParentFile().mkdirs();
-				
-				LOG.error(destination.getParentFile().getAbsolutePath());
-
-				Files.createDirectories(Path.of(destination.getParentFile().getAbsolutePath()));
-				
-				file.transferTo(destination);
+				file.transferTo(newDestination);
 			}
 			return new ResponseEntity<>(HttpStatus.OK);
 		} catch (Exception e) {
