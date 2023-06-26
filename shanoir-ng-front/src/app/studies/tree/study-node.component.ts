@@ -49,6 +49,7 @@ export class StudyNodeComponent implements OnChanges {
     showDetails: boolean;
     canAdmin: boolean = false;
     @Input() hasBox: boolean = false;
+    detailsPath: string = '/study/details/';
 
     constructor(
             private router: Router,
@@ -87,22 +88,17 @@ export class StudyNodeComponent implements OnChanges {
                 })
 
                 this.node = new StudyNode(
-                    this.input.id,
-                    this.input.name,
-                    subjects,
-                    centers,
-                    UNLOADED,
-                    members);  // members
+                        this.input.id,
+                        this.input.name,
+                        subjects,
+                        centers,
+                        UNLOADED,
+                        members);  // members
             }
             this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != '/study/details/' + this.node.id;
+            this.showDetails = this.router.url != this.detailsPath  + this.node.id;
         })
     }
-
-    showStudyDetails() {
-        this.router.navigate(['/study/details/' + this.node.id]);
-    }
-
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
         if (!dependencyArr) return false;
         else if (dependencyArr == UNLOADED) return 'unknown';

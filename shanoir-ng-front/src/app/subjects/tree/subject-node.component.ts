@@ -49,6 +49,7 @@ export class SubjectNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
+    detailsPath: string = "/subject/details/";
 
     constructor(
         private examinationService: ExaminationService,

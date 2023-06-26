@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,14 +33,14 @@ import { UserService } from '../../users/shared/user.service';
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
     @ViewChild('table', { static: false }) table: TableComponent;
-    
+
     constructor(
         private studyService: StudyService,
         private userService: UserService) {
-            
+
         super('study');
     }
-    
+
     getService(): EntityService<Study> {
         return this.studyService;
     }
@@ -116,6 +116,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             },
             {
                 headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'
+            },
+            {
+                headerName: "Members", field: "nbMembers", type: "number", width: '30px'
             }
         ];
         return colDef;
@@ -128,15 +131,15 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     getOptions() {
         return {
             new: this.keycloakService.isUserAdminOrExpert(),
-            view: true, 
-            edit: this.keycloakService.isUserAdminOrExpert(), 
+            view: true,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: false
         };
     }
 
     canEdit(study: Study): boolean {
         return this.keycloakService.isUserAdmin() || (
-            study.studyUserList && 
+            study.studyUserList &&
             study.studyUserList.filter(su => su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0
         );
     }
@@ -146,7 +149,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             if (study.accessRequestedByCurrentUser) {
                 this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.');
             } else {
-                this.confirmDialogService.confirm('Authorization needed', 
+                this.confirmDialogService.confirm('Authorization needed',
                     'Before accessing this study you have to request an access to its administrator, do you want to proceed ?'
                 ).then(result => {
                     if (result) this.router.navigate(['/access-request/study/' + study.id]);

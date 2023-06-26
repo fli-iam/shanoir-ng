@@ -88,4 +88,5 @@ export class ReverseSubjectNodeComponent implements OnChanges {
         else if (this.node.studies == 'UNLOADED') return 'unknown';
         else return this.node.studies.length > 0;
     }
+
 }

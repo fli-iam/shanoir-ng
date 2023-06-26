@@ -22,7 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         (labelClick)="menuOpened = !menuOpened"
         [dataLoading]="loading"
         [title]="node.title + ' n°' + node.id">
-
+  
     <ng-container *ngIf="node.open && node.studies && node.studies != $any('UNLOADED')">
         <reverse-study-node
                 *ngFor="let studyNode of node.studies"

@@ -73,8 +73,7 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
             },
             { headerName: "Manual HD", field: "manualHemisphericDominance", disableSearch: true},
             { headerName: "Language HD", field: "languageHemisphericDominance", disableSearch: true},
-            { headerName: "Imaged object category", field: "imagedObjectCategory", disableSearch: true},
-            { headerName: "Personal Comments", field: "", disableSearch: true}
+            { headerName: "Imaged object category", field: "imagedObjectCategory", disableSearch: true}
         ];
     }
 

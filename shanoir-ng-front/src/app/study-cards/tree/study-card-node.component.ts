@@ -32,6 +32,7 @@ export class StudyCardNodeComponent implements OnChanges {
     node: StudyCardNode;
     loading: boolean = false;
     menuOpened: boolean = false;
+    detailsPath: string = '/study-card/details/';
 
     constructor(
         private router: Router,
@@ -46,10 +47,6 @@ export class StudyCardNodeComponent implements OnChanges {
                 throw new Error('not implemented yet');
             }
         }
-    }
-
-    showDetails() {
-        this.router.navigate(['/study-card/details/' + this.node.id]);
     }
 
     deleteStudyCard() {
