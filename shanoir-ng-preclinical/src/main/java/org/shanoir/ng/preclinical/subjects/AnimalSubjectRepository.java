@@ -20,7 +20,4 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface AnimalSubjectRepository extends CrudRepository<AnimalSubject, Long>, AnimalSubjectRepositoryCustom {
 
-	List<AnimalSubject> findBySubjectId(Long id);
-
-    List<AnimalSubject> findBySubjectIdIn(List<Long> subjectIds);
 }

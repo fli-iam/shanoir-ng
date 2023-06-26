@@ -55,7 +55,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         return this.subjectService.getPreclinicalSubjects().then(subjects => {
 
             if (!subjects) {
-                return;
+                return [];
             }
 
             const subMap = new Map();
@@ -63,17 +63,17 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                 subMap.set(sub.id, sub);
             }
 
-            return this.animalSubjectService.getAnimalSubjectsBySubjectIds(Array.from(subMap.keys())).then(animalSubjects => {
+            return this.animalSubjectService.getAnimalSubjects().then(animalSubject => {
 
-                if (!animalSubjects) {
+                if (!animalSubject) {
                     return [];
                 }
 
-                for (let aSub of animalSubjects){
+                for (let aSub of animalSubject){
                     let preSubject: PreclinicalSubject = new PreclinicalSubject();
                     preSubject.animalSubject = aSub;
                     preSubject.id = aSub.id;
-                    preSubject.subject = subMap.get(preSubject.animalSubject.subjectId);
+                    preSubject.subject = subMap.get(preSubject.id);
                     this.preclinicalSubjects.push(preSubject);
                 }
                 return this.preclinicalSubjects;
@@ -86,7 +86,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         let colDef: ColumnDefinition[] = [
             {headerName: "Common name", field: "subject.name"},
             {headerName: "Imaged object category", field: "subject.imagedObjectCategory", cellRenderer: function (params: any) {
-                    let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory>params.data.subject.imagedObjectCategory;
+                    let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory> params.data.subject.imagedObjectCategory;
                     if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.PHANTOM) {
                     	return 'Phantom';
                     }else if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.LIVING_ANIMAL) {
@@ -129,7 +129,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
             ).then(res => {
                 if (res) {
                     this.animalSubjectService.delete(entity.id).then((res) => {
-                        this.subjectService.delete(entity.subject.id).then((res2) => {
+                        this.subjectService.delete(entity.id).then((res2) => {
                             this.onDelete.next({entity: entity});
                             const index: number = this.preclinicalSubjects.indexOf(entity);
                             if (index !== -1) {

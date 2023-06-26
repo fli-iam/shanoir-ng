@@ -17,6 +17,7 @@ package org.shanoir.ng.preclinical.subjects;
 import java.util.Objects;
 
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -37,9 +38,6 @@ import io.swagger.annotations.ApiModelProperty;
 @Table(name = "animal_subject")
 @JsonPropertyOrder({ "_links", "subjectId", "specie", "strain", "biotype", "provider", "stabulation" })
 public class AnimalSubject extends HalEntity {
-
-	@NotNull
-	private Long subjectId;
 
 	@ManyToOne
 	@JsonProperty("specie")
@@ -69,14 +67,6 @@ public class AnimalSubject extends HalEntity {
 	public AnimalSubject specie(Reference specie) {
 		this.specie = specie;
 		return this;
-	}
-
-	public Long getSubjectId() {
-		return subjectId;
-	}
-
-	public void setSubjectId(Long subjectId) {
-		this.subjectId = subjectId;
 	}
 
 	/**
@@ -178,7 +168,7 @@ public class AnimalSubject extends HalEntity {
 			return false;
 		}
 		AnimalSubject subject = (AnimalSubject) o;
-		return Objects.equals(this.subjectId, subject.subjectId) && Objects.equals(this.specie, subject.specie)
+		return Objects.equals(this.getId(), subject.getId()) && Objects.equals(this.specie, subject.specie)
 				&& Objects.equals(this.strain, subject.strain) && Objects.equals(this.biotype, subject.biotype)
 				&& Objects.equals(this.provider, subject.provider)
 				&& Objects.equals(this.stabulation, subject.stabulation);
@@ -186,15 +176,14 @@ public class AnimalSubject extends HalEntity {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(subjectId, specie, strain, biotype, provider, stabulation);
+		return Objects.hash(this.getId(), specie, strain, biotype, provider, stabulation);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class AnimalSubject {\n");
-
-		sb.append("    subjectId: ").append(toIndentedString(subjectId)).append("\n");
+		sb.append("    subjectId: ").append(toIndentedString(this.getId())).append("\n");
 		sb.append("    specie: ").append(toIndentedString(specie)).append("\n");
 		sb.append("    strain: ").append(toIndentedString(strain)).append("\n");
 		sb.append("    biotype: ").append(toIndentedString(biotype)).append("\n");

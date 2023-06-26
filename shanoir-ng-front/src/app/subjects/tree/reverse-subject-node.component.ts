@@ -38,6 +38,7 @@ export class ReverseSubjectNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
+    awesome = "fas fa-user-injured";
 
     constructor(
             private examinationService: ExaminationService,
@@ -54,6 +55,9 @@ export class ReverseSubjectNodeComponent implements OnChanges {
                     this.input.id,
                     this.input.name,
                     this.input.subjectStudyList.map(subjectStudy => this.mapStudy(subjectStudy.study)));
+                    if(this.input.preclinical){
+                        this.awesome = "fas fa-hippo"
+                    }
             }
             this.nodeInit.emit(this.node);
             this.showDetails = this.router.url != '/subject/details/' + this.node.id;

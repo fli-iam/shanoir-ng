@@ -18,10 +18,10 @@ import java.util.List;
 
 import javax.validation.Valid;
 
-import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.model.AnimalSubjectDto;
+import org.shanoir.ng.model.PreclinicalSubjectDto;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.annotations.Api;
@@ -34,7 +34,7 @@ import io.swagger.annotations.ApiResponses;
 @RequestMapping("/subject")
 public interface AnimalSubjectApi {
 
-	@ApiOperation(value = "Add a new animalsubject", notes = "", response = AnimalSubject.class, tags = {
+	@ApiOperation(value = "Add a new animalsubject", notes = "", response = PreclinicalSubjectDto.class, tags = {
 			"AnimalSubject", })
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "success returns AnimalSubject", response = AnimalSubject.class),
@@ -43,8 +43,8 @@ public interface AnimalSubjectApi {
 			@ApiResponse(code = 500, message = "Unexpected Error", response = AnimalSubject.class) })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
-	ResponseEntity<AnimalSubject> createAnimalSubject(
-			@ApiParam(value = "AnimalSubject object to add", required = true) @RequestBody @Valid final AnimalSubject animalSubject,
+	ResponseEntity<PreclinicalSubjectDto> createAnimalSubject(
+			@ApiParam(value = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto animalSubject,
 			final BindingResult result) throws RestServiceException;
 
 	@ApiOperation(value = "Deletes an animalSubject", notes = "", response = Void.class, tags = { "AnimalSubject", })
@@ -62,18 +62,8 @@ public interface AnimalSubjectApi {
 			@ApiResponse(code = 404, message = "Subject not found", response = AnimalSubject.class),
 			@ApiResponse(code = 500, message = "Unexpected Error", response = AnimalSubject.class) })
 	@GetMapping(value = "/{id}", produces = { "application/json" })
-	ResponseEntity<AnimalSubject> getAnimalSubjectById(
+	ResponseEntity<AnimalSubjectDto> getAnimalSubjectById(
 			@ApiParam(value = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
-
-	@ApiOperation(value = "Find animalSubject by SubjectID", notes = "Returns a subject", response = AnimalSubject.class, tags = {
-			"AnimalSubject", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = AnimalSubject.class),
-			@ApiResponse(code = 400, message = "Invalid ID supplied", response = AnimalSubject.class),
-			@ApiResponse(code = 404, message = "Subject not found", response = AnimalSubject.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = AnimalSubject.class) })
-	@GetMapping(value = "/find/{id}", produces = { "application/json" })
-	ResponseEntity<AnimalSubject> getAnimalSubjectBySubjectId(
-			@ApiParam(value = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
 	@ApiOperation(value = "List all animalSubjects", notes = "", response = AnimalSubject.class, responseContainer = "List", tags = {
 			"AnimalSubject", })
@@ -83,16 +73,7 @@ public interface AnimalSubjectApi {
 			@ApiResponse(code = 403, message = "forbidden", response = AnimalSubject.class),
 			@ApiResponse(code = 500, message = "Unexpected error", response = AnimalSubject.class) })
 	@GetMapping(value = "/all", produces = { "application/json" })
-	ResponseEntity<List<AnimalSubject>> getAnimalSubjects();
-
-	@ApiOperation(value = "", notes = "If exists, returns the animal subjects corresponding to the given subjects ids", response = List.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "An array of Preclinical AnimalSubject", response = AnimalSubject.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@PostMapping(value = "/allBySubjectId", produces = { "application/json" })
-	ResponseEntity<List<AnimalSubject>> findAnimalSubjectsBySubjectIds(
-			@RequestParam(value = "subjectIds", required = true) List<Long> subjectIds);
+	ResponseEntity<List<AnimalSubjectDto>> getPreclinicalSubjects();
 
 	@ApiOperation(value = "Update an existing animalSubject", notes = "", response = Void.class, tags = {
 			"AnimalSubject", })

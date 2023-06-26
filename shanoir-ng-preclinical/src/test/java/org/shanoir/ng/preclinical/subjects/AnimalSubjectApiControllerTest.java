@@ -101,9 +101,8 @@ public class AnimalSubjectApiControllerTest {
 		doNothing().when(subjectsServiceMock).deleteById(1L);
 		given(subjectsServiceMock.findAll()).willReturn(Arrays.asList(new AnimalSubject()));
 		given(subjectsServiceMock.findById(1L)).willReturn(new AnimalSubject());
-		List<AnimalSubject> subjects = new ArrayList<AnimalSubject>();
-		subjects.add(new AnimalSubject());
-		given(subjectsServiceMock.findBySubjectId(1L)).willReturn(subjects);
+		AnimalSubject subject = new AnimalSubject();
+		given(subjectsServiceMock.findById(1L)).willReturn(subject);
 		AnimalSubject anSubj = new AnimalSubject();
 		anSubj.setId(Long.valueOf(123));
 		given(subjectsServiceMock.save(Mockito.any(AnimalSubject.class))).willReturn(anSubj );

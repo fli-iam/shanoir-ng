@@ -54,7 +54,6 @@ public final class AnimalSubjectModelUtil {
 	public static AnimalSubject createAnimalSubject() {
 		final AnimalSubject subject = new AnimalSubject();
 		subject.setId(SUBJECT_ID);
-		subject.setSubjectId(SUBJECT_ID);
 		subject.setSpecie(createSpecie());
 		subject.setStrain(createStrain());
 		subject.setStabulation(createStabulation());

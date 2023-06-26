@@ -74,7 +74,4 @@ public interface AnimalSubjectService {
 
 	List<AnimalSubject> findByReference(Reference reference);
 
-	List<AnimalSubject> findBySubjectId(Long id);
-
-	List<AnimalSubject> findBySubjectIdIn(List<Long> subjectIds);
 }

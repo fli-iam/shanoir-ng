@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.ColumnResult;
 import javax.persistence.ConstructorResult;
 import javax.persistence.Entity;
@@ -31,7 +30,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PostLoad;
 import javax.persistence.SqlResultSetMapping;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
@@ -84,9 +82,9 @@ public class Subject extends HalEntity {
 	/** Manual Hemispheric dominance. */
 	private Integer manualHemisphericDominance;
 
+
 	/** Flag to set the subject as pre-clinical subject */
-	@Column(nullable=false)
-	@ColumnDefault("false")
+
 	private boolean preclinical;
 	
 	/**
@@ -216,5 +214,4 @@ public class Subject extends HalEntity {
 	public void setPreclinical(boolean preclinical) {
 		this.preclinical = preclinical;
 	}
-
 }

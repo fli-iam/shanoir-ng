@@ -122,7 +122,7 @@ public class SubjectTherapyServiceTest {
 		final SubjectTherapy stherapy = stherapiesService.findById(STHERAPY_ID);
 		Assert.assertNotNull(stherapy);
 		Assert.assertTrue(TherapyModelUtil.THERAPY_NAME_BRAIN.equals(stherapy.getTherapy().getName()));
-		Assert.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(stherapy.getAnimalSubject().getSubjectId()));
+		Assert.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(stherapy.getAnimalSubject().getId()));
 
 		Mockito.verify(stherapiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}

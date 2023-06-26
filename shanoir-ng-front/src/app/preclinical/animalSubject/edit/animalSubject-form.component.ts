@@ -132,12 +132,12 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     initView(): Promise<void> {
         return new  Promise<void>(resolve => {
             this.preclinicalSubject = new PreclinicalSubject();
-            this.preclinicalSubject.subject = new Subject();
             this.preclinicalSubject.animalSubject = new AnimalSubject();
+            this.preclinicalSubject.subject = new Subject();
             this.preclinicalSubject.animalSubject.id = this.id;
             this.preclinicalSubject.id = this.id;
-            this.animalSubjectService.getAnimalSubject(this.id).then(animalSubject => {
-                this.subjectService.get(animalSubject.subjectId).then((subject) => {
+            this.animalSubjectService.getAnimalSubject(this.preclinicalSubject.id).then(animalSubject => {
+                this.subjectService.get(this.preclinicalSubject.id).then(subject => {
                     this.preclinicalSubject.animalSubject = animalSubject;
                     this.preclinicalSubject.subject = subject;
                     // subjectStudy
@@ -166,17 +166,18 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         this.loadData();
         return new  Promise<void>(resolve => {
             this.preclinicalSubject = new PreclinicalSubject();
-            this.preclinicalSubject.subject = new Subject();
+            this.preclinicalSubject.id = this.id;
             this.preclinicalSubject.animalSubject = new AnimalSubject();
             this.preclinicalSubject.animalSubject.id = this.id;
-            this.preclinicalSubject.id = this.id;
+            this.preclinicalSubject.subject = new Subject();
+            this.preclinicalSubject.subject.id = this.id;
             this.animalSubjectService.getAnimalSubject(this.id).then(animalSubject => {
                 animalSubject.specie = this.getReferenceById(animalSubject.specie);
                 animalSubject.strain = this.getReferenceById(animalSubject.strain);
                 animalSubject.biotype = this.getReferenceById(animalSubject.biotype);
                 animalSubject.provider = this.getReferenceById(animalSubject.provider);
                 animalSubject.stabulation = this.getReferenceById(animalSubject.stabulation);
-                this.subjectService.get(animalSubject.subjectId).then((subject) => {
+                this.subjectService.get(this.preclinicalSubject.id).then((subject) => {
                     this.preclinicalSubject.animalSubject = animalSubject;
                     this.preclinicalSubject.subject = subject;
                     // subjectStudy
@@ -198,9 +199,8 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         return new  Promise<void>(resolve => {
             this.loadData();
             this.preclinicalSubject = new PreclinicalSubject();
-            this.preclinicalSubject.subject = new Subject();
             this.preclinicalSubject.animalSubject = new AnimalSubject();
-            this.preclinicalSubject.subject.preclinical = true;
+            this.preclinicalSubject.subject = new Subject();
             this.preclinicalSubject.subject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
             resolve();
         });
@@ -234,7 +234,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     	fixedSubjectStudy.physicallyInvolved = subjectStudy.physicallyInvolved;
     	fixedSubjectStudy.subject = this.getSubject();
     	fixedSubjectStudy.study = subjectStudy.study;
-    	fixedSubjectStudy.subjectId = this.preclinicalSubject.subject.id;
+    	fixedSubjectStudy.subjectId = this.preclinicalSubject.id;
     	fixedSubjectStudy.studyId = subjectStudy.study.id;
         fixedSubjectStudy.tags = subjectStudy.tags;
     	return fixedSubjectStudy;
@@ -328,7 +328,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     goToEdit(id?: number): void {
-        super.goToEdit(this.preclinicalSubject.animalSubject.id);
+        super.goToEdit(this.preclinicalSubject.id);
     }
 
     public save(): Promise<PreclinicalSubject> {
@@ -370,82 +370,81 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         }
 
         this.preclinicalSubject.subject.identifier = this.generateSubjectIdentifier();
-        this.preclinicalSubject.subject.preclinical = true;
-        return this.subjectService.create(this.preclinicalSubject.subject).then((subject) => {
-            this.preclinicalSubject.subject = subject;
-            this.preclinicalSubject.animalSubject.subjectId = subject.id;
-            return this.animalSubjectService.createAnimalSubject(this.preclinicalSubject.animalSubject).then((animalSubject) => {
-                this.preclinicalSubject.id = animalSubject.id;
-                this.preclinicalSubject.animalSubject = animalSubject;
-                //Then add pathologies
-                // Create therapies and pathologies from breadcrumb cache
+
+        return this.animalSubjectService.createPreclinicalSubject(this.preclinicalSubject).then((preclinicalSubject) => {
+            this.preclinicalSubject.id = preclinicalSubject.id;
+            this.preclinicalSubject.animalSubject = preclinicalSubject.animalSubject;
+            this.preclinicalSubject.subject = preclinicalSubject.subject;
+            //Then add pathologies
+            // Create therapies and pathologies from breadcrumb cache
+            if (this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
+                for (let therapy of this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
+                    this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
+                }
+            } else if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
+                for (let therapy of this.preclinicalSubject.therapies) {
+                    this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
+                }
+            }
+            if (this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
+                for (let pathology of this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
+                    this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
+                }
+            } else if (this.preclinicalSubject && this.preclinicalSubject.pathologies) {
+                for (let pathology of this.preclinicalSubject.pathologies) {
+                    this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
+                }
+            }
+            return this.preclinicalSubject;
+        }, this.catchSavingErrors);
+    }
+
+    updateSubject(): Promise<AnimalSubject> {
+
+        if (!(this.preclinicalSubject && this.preclinicalSubject.subject)) {
+            return;
+        }
+
+        this.generateSubjectIdentifier();
+        this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
+        return this.subjectService.update(this.preclinicalSubject.id, this.preclinicalSubject.subject)
+            .then(subject => {
+                if (this.preclinicalSubject.animalSubject) {
+                    this.animalSubjectService.updateAnimalSubject(this.preclinicalSubject.animalSubject).catch(this.catchSavingErrors);
+                }
+                // Create, Update, Delete therapies and pathologies from breadcrumb cache
                 if (this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
                     for (let therapy of this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
                         this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
                     }
-                } else if (this.preclinicalSubject && this.preclinicalSubject.therapies) {
-                    for (let therapy of this.preclinicalSubject.therapies) {
-                        this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
+                }
+                if (this.getCache(this.therapiesComponent.getEntityName() + "ToUpdate")) {
+                    for (let therapy of this.getCache(this.therapiesComponent.getEntityName() + "ToUpdate")) {
+                        this.subjectTherapyService.updateSubjectTherapy(this.preclinicalSubject, therapy);
+                    }
+                }
+                if (this.getCache(this.therapiesComponent.getEntityName() + "ToDelete")) {
+                    for (let therapy of this.getCache(this.therapiesComponent.getEntityName() + "ToDelete")) {
+                        this.subjectTherapyService.deleteSubjectTherapy(this.preclinicalSubject, therapy);
                     }
                 }
                 if (this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
                     for (let pathology of this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
                         this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
                     }
-                } else if (this.preclinicalSubject && this.preclinicalSubject.pathologies) {
-                    for (let pathology of this.preclinicalSubject.pathologies) {
-                        this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
+                }
+                if (this.getCache(this.pathologiesComponent.getEntityName() + "ToUpdate")) {
+                    for (let pathology of this.getCache(this.pathologiesComponent.getEntityName() + "ToUpdate")) {
+                        this.subjectPathologyService.updateSubjectPathology(this.preclinicalSubject, pathology);
                     }
                 }
-                return animalSubject;
-            }, this.catchSavingErrors);
-            return subject;
-        }, this.catchSavingErrors);
-    }
-
-    updateSubject(): Promise<AnimalSubject> {
-            if (this.preclinicalSubject && this.preclinicalSubject.subject){
-                this.generateSubjectIdentifier();
-                this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
-                return this.subjectService.update(this.preclinicalSubject.subject.id, this.preclinicalSubject.subject)
-                    .then(subject => {
-                        if (this.preclinicalSubject.animalSubject){
-                             this.animalSubjectService.updateAnimalSubject(this.preclinicalSubject.animalSubject).catch(this.catchSavingErrors);
-                        }
-                        // Create, Update, Delete therapies and pathologies from breadcrumb cache
-                        if (this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
-                            for (let therapy of this.getCache(this.therapiesComponent.getEntityName() + "ToCreate")) {
-                                this.subjectTherapyService.createSubjectTherapy(this.preclinicalSubject, therapy);
-                            }
-                        }
-                        if (this.getCache(this.therapiesComponent.getEntityName() + "ToUpdate")) {
-                            for (let therapy of this.getCache(this.therapiesComponent.getEntityName() + "ToUpdate")) {
-                                this.subjectTherapyService.updateSubjectTherapy(this.preclinicalSubject, therapy);
-                            }
-                        }
-                        if (this.getCache(this.therapiesComponent.getEntityName() + "ToDelete")) {
-                            for (let therapy of this.getCache(this.therapiesComponent.getEntityName() + "ToDelete")) {
-                                this.subjectTherapyService.deleteSubjectTherapy(this.preclinicalSubject, therapy);
-                            }
-                        }
-                        if (this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
-                            for (let pathology of this.getCache(this.pathologiesComponent.getEntityName() + "ToCreate")) {
-                                this.subjectPathologyService.createSubjectPathology(this.preclinicalSubject, pathology);
-                            }
-                        }
-                        if (this.getCache(this.pathologiesComponent.getEntityName() + "ToUpdate")) {
-                            for (let pathology of this.getCache(this.pathologiesComponent.getEntityName() + "ToUpdate")) {
-                                this.subjectPathologyService.updateSubjectPathology(this.preclinicalSubject, pathology);
-                            }
-                        }
-                        if (this.getCache(this.pathologiesComponent.getEntityName() + "ToDelete")) {
-                            for (let pathology of this.getCache(this.pathologiesComponent.getEntityName() + "ToDelete")) {
-                                this.subjectPathologyService.deleteSubjectPathology(this.preclinicalSubject, pathology);
-                            }
-                        }
-                        return this.preclinicalSubject.animalSubject;
-                    }).catch(this.catchSavingErrors);
-            }
+                if (this.getCache(this.pathologiesComponent.getEntityName() + "ToDelete")) {
+                    for (let pathology of this.getCache(this.pathologiesComponent.getEntityName() + "ToDelete")) {
+                        this.subjectPathologyService.deleteSubjectPathology(this.preclinicalSubject, pathology);
+                    }
+                }
+                return this.preclinicalSubject.animalSubject;
+            }).catch(this.catchSavingErrors);
     }
 
     sortReferences() {

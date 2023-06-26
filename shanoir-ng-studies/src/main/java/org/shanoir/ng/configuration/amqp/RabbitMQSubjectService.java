@@ -12,26 +12,32 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.subject.service;
+package org.shanoir.ng.configuration.amqp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.SubjectType;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,19 +51,22 @@ public class RabbitMQSubjectService {
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQSubjectService.class);
 
 	@Autowired
-	SubjectRepository subjectRepository;
+	private SubjectRepository subjectRepository;
 
 	@Autowired
-	SubjectService subjectService;
+	private SubjectService subjectService;
 
 	@Autowired
-	StudyRepository studyRepository;
+	private StudyRepository studyRepository;
 
 	@Autowired
-	SubjectStudyRepository subjectStudyRepository;
+	private SubjectStudyRepository subjectStudyRepository;
+
+	@Autowired
+	private ShanoirEventService eventService;
 	
 	@Autowired
-	ObjectMapper mapper;
+	private ObjectMapper mapper;
 	
 	/**
 	 * This methods returns a list of subjects for a given study ID
@@ -165,6 +174,44 @@ public class RabbitMQSubjectService {
 		}
 	}
 
+	/**
+	 * Receives a shanoirEvent as a json object, concerning a preclinical subject deletion
+	 * @param eventAsString the task as a json string.
+	 */
+	@RabbitListener(bindings = @QueueBinding(
+			key = ShanoirEventType.DELETE_PRECLINICAL_SUBJECT_EVENT,
+			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
+			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
+					autoDelete = "false", durable = "true", type= ExchangeTypes.TOPIC))
+	)
+
+	@Transactional
+	public void deletePreclinicalSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		try {
+
+			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
+
+			Optional<Subject> subject = subjectRepository.findById(Long.valueOf(event.getObjectId()));
+
+			if(subject.isEmpty()){
+				return;
+			}
+
+			String id = subject.get().getId().toString();
+			subjectRepository.delete(subject.get());
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, id, KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			LOG.info("Subject [{}] has been deleted following deletion of preclinical subject [{}]", id, id);
+
+
+		} catch (Exception e) {
+			LOG.error("Something went wrong deserializing the event", e);
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
+
+
+
 	private boolean studyListContains(List<SubjectStudy> subjectStudyList, Long studyId) {
 		for (SubjectStudy sustu : subjectStudyList) {
 			if (sustu.getStudy().getId().equals(studyId)) {
@@ -173,4 +220,5 @@ public class RabbitMQSubjectService {
 		}
 		return false;
 	}
+
 }

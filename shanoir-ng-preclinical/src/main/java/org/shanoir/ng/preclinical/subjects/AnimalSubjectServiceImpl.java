@@ -17,7 +17,11 @@ package org.shanoir.ng.preclinical.subjects;
 import java.util.List;
 
 import org.shanoir.ng.preclinical.references.Reference;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,7 +88,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	}
 
 	private AnimalSubject updateSubjectValues(final AnimalSubject subjectDb, final AnimalSubject subject) {
-		subjectDb.setSubjectId(subject.getSubjectId());
+		subjectDb.setId(subject.getId());
 		subjectDb.setBiotype(subject.getBiotype());
 		subjectDb.setProvider(subject.getProvider());
 		subjectDb.setSpecie(subject.getSpecie());
@@ -97,15 +101,5 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	public List<AnimalSubject> findByReference(Reference reference) {
 		return Utils.toList(subjectsRepository.findByReference(reference));
 	}
-
-	@Override
-	public List<AnimalSubject> findBySubjectId(Long id) {
-		return this.subjectsRepository.findBySubjectId(id);
-	}
-
-    @Override
-    public List<AnimalSubject> findBySubjectIdIn(List<Long> subjectIds) {
-		return this.subjectsRepository.findBySubjectIdIn(subjectIds);
-    }
 
 }
