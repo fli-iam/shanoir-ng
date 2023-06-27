@@ -13,11 +13,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2>Manage dataset acquisitions</h2>
-  
+
 <shanoir-table #table
-    [getPage]="getPage.bind(this)" 
-    [columnDefs]="columnDefs" 
-    [customActionDefs]="customActionDefs" 
-    [rowRoute]="rowClick.bind(this)"
+    [getPage]="getPage.bind(this)"
+    [columnDefs]="columnDefs"
+    [customActionDefs]="customActionDefs"
+    [rowRoute]="getRowRoute.bind(this)"
     [browserSearch]="false">
 </shanoir-table>
