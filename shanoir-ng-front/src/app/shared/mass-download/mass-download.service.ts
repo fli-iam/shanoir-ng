@@ -128,10 +128,10 @@ export class MassDownloadService {
 
     private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, dataset?: Dataset): Promise<void> {
         const metadataPromise: Promise<Dataset> = (dataset?.id == id) ? Promise.resolve(dataset) : this.datasetService.get(id, 'lazy');
-        const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format);
+        const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format).catch(e => {console.log(e); throw e});
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
-            const filename: string = this.getFilename(httpResponse);
+            const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
             const path: string = 
                     dataset.datasetAcquisition?.examination?.comment 
                     + '_' + dataset.datasetAcquisition?.examination?.id
@@ -143,6 +143,7 @@ export class MassDownloadService {
             report.nbSuccess++;
             task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
         }).catch(reason => {
+            console.log(reason);
             report.list[id].status = 'ERROR';
             report.list[id].error = reason;
             report.list[id].errorTime = Date.now();
@@ -200,7 +201,7 @@ export class MassDownloadService {
     private getFilename(response: HttpResponse<any>): string {
         const prefix = 'attachment;filename=';
         let contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace('/', '_');
+        return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace('/', '_');
     }
 
     private initReport(datasetIds: number[]): Report {

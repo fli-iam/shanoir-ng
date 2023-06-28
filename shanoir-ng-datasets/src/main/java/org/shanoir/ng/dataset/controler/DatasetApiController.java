@@ -37,6 +37,7 @@ import java.util.zip.ZipOutputStream;
 
 import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -70,6 +71,8 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -81,6 +84,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import io.swagger.annotations.ApiParam;
 
@@ -314,9 +318,14 @@ public class DatasetApiController implements DatasetApi {
 			@ApiParam(value = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
 			@ApiParam(value = "Dowloading nifti, decide the nifti converter id") final Long converterId,
 			@ApiParam(value = "Decide if you want to download dicom (dcm) or nifti (nii) files.", allowableValues = "dcm, nii, eeg", defaultValue = DCM)
-			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response)
-					throws RestServiceException, IOException {
-		this.datasetDownloaderService.downloadDatasetById(datasetId, converterId, format, response);
+			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, 
+			HttpServletResponse response) throws RestServiceException, IOException {
+
+		try {
+			this.datasetDownloaderService.downloadDatasetById(datasetId, converterId, format, response);
+		} catch (RestServiceException e) {
+			response.sendError(e.getErrorModel().getCode(), e.getErrorModel().getMessage());
+		}
 	}
 
 	@Override

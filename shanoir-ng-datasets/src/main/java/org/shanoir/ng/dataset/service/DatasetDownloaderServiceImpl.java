@@ -1,3 +1,17 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.dataset.service;
 
 import java.io.File;
@@ -9,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -16,6 +31,7 @@ import java.util.zip.ZipOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.solr.common.util.Hash;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -80,7 +96,7 @@ public class DatasetDownloaderServiceImpl {
 	@Autowired
 	ShanoirEventService eventService;
 
-	public void downloadDatasetById(Long datasetId, Long converterId, String format,HttpServletResponse response) throws RestServiceException {
+	public void downloadDatasetById(Long datasetId, Long converterId, String format, HttpServletResponse response) throws RestServiceException, IOException {
 
 		final Dataset dataset = datasetService.findById(datasetId);
 		if (dataset == null) {
@@ -115,73 +131,68 @@ public class DatasetDownloaderServiceImpl {
 		response.setHeader("Content-Disposition", "attachment;filename=" + zipFileName);
 
 		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
-			List<URL> pathURLs = new ArrayList<>();
-			
+			List<URL> pathURLs = new ArrayList<>();				
 			switch (format) {
-			case DCM:
-				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-				downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, null);
-				break;
-			case NII:
-				// Check if we want a specific converter -> nifti reconversion
-				if (converterId != null) {
+				case DCM:
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-					// Create temporary workfolder with dicom files, to be able to convert them
-					workFolder.mkdirs();
-
-					downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
-
-					// Convert them, sending to import microservice
-					boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
-					if (!result) {
-						throw new RestServiceException(
-								new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-					} 
-					workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
-
-					for (File res : workFolder.listFiles()) {
-						if (!res.isDirectory()) {
-							// Then send workFolder to zipOutputFile
-							FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
-							ZipEntry zipEntry = new ZipEntry(res.getName());
-							zipEntry.setSize(fileSystemResource.contentLength());
-							zipEntry.setTime(System.currentTimeMillis());
-							zipOutputStream.putNextEntry(zipEntry);
-							StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
-							zipOutputStream.closeEntry();
-						}
+					List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, null);
+					if (files.size() != pathURLs.size()) {
+						MapSupplier errors = new MapSupplier();
+						errors.put("caca", "pipiprout");
+						response.setTrailerFields(errors);
 					}
-				} else  {
-					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+					break;
+				case NII:
+					// Check if we want a specific converter -> nifti reconversion
+					if (converterId != null) {
+						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+						// Create temporary workfolder with dicom files, to be able to convert them
+						workFolder.mkdirs();
+
+						downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
+
+						// Convert them, sending to import microservice
+						boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
+						if (!result) {
+							throw new RestServiceException(
+									new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+						} 
+						workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
+
+						for (File res : workFolder.listFiles()) {
+							if (!res.isDirectory()) {
+								// Then send workFolder to zipOutputFile
+								FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
+								ZipEntry zipEntry = new ZipEntry(res.getName());
+								zipEntry.setSize(fileSystemResource.contentLength());
+								zipEntry.setTime(System.currentTimeMillis());
+								zipOutputStream.putNextEntry(zipEntry);
+								StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
+								zipOutputStream.closeEntry();
+							}
+						}
+					} else  {
+						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+						DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, null);
+					}
+					break;
+				case EEG:
+					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
 					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, null);
-				}
-				break;
-			case EEG:
-				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-				DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, null);
-				break;
-			case BIDS:
-				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
-				DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, null);
-				break;
-			default:
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+					break;
+				case BIDS:
+					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
+					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, null);
+					break;
+				default:
+					throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 			}
-
-			// Check folder emptiness
-			if (pathURLs.isEmpty()) {
-				// Folder is empty => return an error
-				LOG.error("No files could be found for the dataset(s).");
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for this dataset(s)."));
-			}
-
 			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.SUCCESS);
 			eventService.publishEvent(event);
 		} catch (Exception e) {
 			LOG.error("Error while retrieveing dataset data.", e);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieveing dataset data.", e));
+			throw new RestServiceException(e,
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for this dataset(s)."));
 		} finally {
 			FileUtils.deleteQuietly(workFolder);
 		}
