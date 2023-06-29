@@ -60,9 +60,6 @@ public class CardsProcessingService {
     private DatasetAcquisitionService datasetAcquisitionService;
 	
 	@Autowired
-    private RabbitMQSendService rabbitSender;
-	
-	@Autowired
     private WADODownloaderService downloader;
 	
 	@Autowired
@@ -102,7 +99,10 @@ public class CardsProcessingService {
 		if (qualityCard.getStudyId() != study.getId()) throw new IllegalStateException("study and studycard ids don't match");
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
 		    QualityCardResult result = new QualityCardResult();
-		    resetSubjectStudies(result, study);
+		    resetSubjectStudies(study);
+            try {
+                subjectStudyService.update(study.getSubjectStudyList());
+            } catch (EntityNotFoundException e) {} // too bad
 			for (Examination examination : study.getExaminations()) {
 			    // For now, just take the first DICOM instance
 			    // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
@@ -133,9 +133,7 @@ public class CardsProcessingService {
 			        subjectStudyService.update(result.getUpdatedSubjectStudies());
 			    } catch (EntityNotFoundException e) {
 			        throw new IllegalStateException("Could not update subject-studies", e);
-			    }
-			    List<SubjectStudyQualityTagDTO> subjectStudyTagDTOs = getSubjectStudyTagDTOs(result.getUpdatedSubjectStudies());
-			    rabbitSender.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);			    
+			    }	    
 			}
 			return result;
 		} else {
@@ -143,7 +141,7 @@ public class CardsProcessingService {
 		}
 	}
 	
-	private void resetSubjectStudies(QualityCardResult result, Study study) {
+	private void resetSubjectStudies(Study study) {
         if (study != null && study.getSubjectStudyList() != null) {
             for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
                 subjectStudy.setQualityTag(null);
@@ -157,19 +155,6 @@ public class CardsProcessingService {
         result.setExaminationDate(examination.getExaminationDate());
         result.setExaminationComment(examination.getComment());
         return result;
-    }
-
-    private List<SubjectStudyQualityTagDTO> getSubjectStudyTagDTOs(List<SubjectStudy> updatedSubjectStudies) {
-        List<SubjectStudyQualityTagDTO> dtos = new ArrayList<>();
-        if (updatedSubjectStudies != null) {
-            for (SubjectStudy subjectStudy : updatedSubjectStudies) {
-                SubjectStudyQualityTagDTO dto = new SubjectStudyQualityTagDTO();
-                dto.setSubjectStudyId(subjectStudy.getId());
-                dto.setTag(subjectStudy.getQualityTag());
-                dtos.add(dto);
-            }            
-        }
-        return dtos;
     }
 	
 }
