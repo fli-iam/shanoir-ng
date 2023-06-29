@@ -310,7 +310,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.close();
         this.onChangeCallback(this.selectedOption ? this.selectedOption.value : null);
         this.userChange.emit(this.selectedOption ? this.selectedOption.value : null);
-        this.selectOption.emit(this.selectedOption);
     }
 
     public isOptionSelected(option: Option<any>) {
