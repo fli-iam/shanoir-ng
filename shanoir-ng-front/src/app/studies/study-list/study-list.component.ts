@@ -22,6 +22,7 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { UserService } from '../../users/shared/user.service';
+import {StudyCardComponent} from "../../study-cards/study-card/study-card.component";
 
 
 @Component({
@@ -116,6 +117,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             },
             {
                 headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'
+            },
+            {
+                headerName: "Members", field: "nbMembers", type: "number", width: '30px'
             }
         ];
         return colDef;
@@ -141,19 +145,21 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         );
     }
 
-    goToViewFromEntity(study: Study): void {
-        if (study.visibleByDefault && study.locked && !this.keycloakService.isUserAdmin()) {
-            if (study.accessRequestedByCurrentUser) {
-                this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.');
+    goToViewFromEntity(study: any): void {
+        if (study instanceof Study) {
+            if (study.visibleByDefault && study.locked && !this.keycloakService.isUserAdmin()) {
+                if (study.accessRequestedByCurrentUser) {
+                    this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.');
+                } else {
+                    this.confirmDialogService.confirm('Authorization needed',
+                        'Before accessing this study you have to request an access to its administrator, do you want to proceed ?'
+                    ).then(result => {
+                        if (result) this.router.navigate(['/access-request/study/' + study.id]);
+                    });
+                }
             } else {
-                this.confirmDialogService.confirm('Authorization needed',
-                    'Before accessing this study you have to request an access to its administrator, do you want to proceed ?'
-                ).then(result => {
-                    if (result) this.router.navigate(['/access-request/study/' + study.id]);
-                });
+                super.goToViewFromEntity(study);
             }
-        } else {
-            super.goToViewFromEntity(study);
         }
     }
 }

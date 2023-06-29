@@ -35,6 +35,7 @@ export class Study extends Entity {
     nbExaminations: number;
     nbSubjects: number;
     nbSujects: number;
+    nbMembers: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
     startDate: Date;
