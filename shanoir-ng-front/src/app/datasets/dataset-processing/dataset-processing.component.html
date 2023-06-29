@@ -37,7 +37,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<label>Research study</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
-							{{study?.name}}
+                            <a [routerLink]="['/study/details/', study?.id]">
+                                {{study?.name}}
+                            </a>
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<select-box formControlName="study" [(ngModel)]="study" [options]="studyOptions" (userChange)="onStudyChange()"></select-box>
@@ -51,12 +53,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 				<li>
-					<label i18n="Processing detail|Processing type label@@processingDetailProcessingType">Processing type</label> 
+					<label i18n="Processing detail|Processing type label@@processingDetailProcessingType">Processing type</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							{{datasetProcessing.datasetProcessingType}}
 						</ng-template>
-						<ng-template ngSwitchDefault> 
+						<ng-template ngSwitchDefault>
 							<select-box formControlName="processingType" [(ngModel)]="datasetProcessing.datasetProcessingType" [options]="datasetProcessingTypes">
 							</select-box>
 						</ng-template>
@@ -92,15 +94,21 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</ol>
 			<ol *ngIf="isCarminDatasetProcessingEntity">
 				<legend>
-					VIP Execution details 
+					VIP Execution details
 					<tool-tip>Initializing an execution in a VM needs to be done using CARMIN-VIP</tool-tip>
 				</legend>
 				<li>
-					<label class="right-col">pipelineIdentifier</label>
+					<label class="right-col">Pipeline Identifier</label>
 					<span class="right-col">
 						{{carminDatasetProcessing.pipelineIdentifier}}
 					</span>
 				</li>
+                <li>
+                    <label class="right-col">Execution name</label>
+                    <span class="right-col">
+						{{carminDatasetProcessing.name}}
+					</span>
+                </li>
 				<li>
 					<label class="right-col">Workflow identifier</label>
 					<span class="right-col">
@@ -113,9 +121,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						{{carminDatasetProcessing.status}}
 					</span>
 				</li>
-				
+
 			</ol>
-			
+
 			<ol>
 				<legend>
 					Input datasets
@@ -144,7 +152,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</ol>
 
 		</fieldset>
-		
+
 		<form-footer
 			[state]="footerState"
 			(save)="save()"
