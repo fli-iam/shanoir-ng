@@ -3,6 +3,9 @@
 .block i { vertical-align: -1px; }
 .block i, .label { white-space: nowrap; }
 .label { vertical-align: -1px; }
-select-box { width: auto; vertical-align: middle; }
+select { width: 16px; border: none; opacity: 0; }
+.select-wrapper { position: relative; display: inline-block;  }
+.open-icon { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: -1; display: inline-block; }
+.open-icon i { vertical-align: middle; }
 .remove { cursor: pointer; }
 .dark { color:white }

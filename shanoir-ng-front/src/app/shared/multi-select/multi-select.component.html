@@ -20,11 +20,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <span class="label">{{option.label}}</span>
 </span>
 
-<select-box
-    *ngIf="!readOnly"
-    [options]="options"
-    [pipe]="pipe"
-    [disabled]="disabled"
-    [placeholder]="placeholder"
-    (selectOption)="onSelectOption($event)">
-</select-box>
+<span class="select-wrapper">
+    <span class="open-icon"><i class="fa-solid fa-plus"></i></span>
+    <select 
+            *ngIf="!readOnly"
+            [disabled]="disabled"
+            [ngModel]="null"
+            (ngModelChange)="onSelectOption($event)">
+        <option *ngFor="let option of options"
+                [style.color]="option.color"
+                [style.background-color]="option.backgroundColor"
+                [ngValue]="option.value">
+            {{pipe ? pipe.transform(option.value) : option.label}}
+        </option>
+    </select>
+</span>

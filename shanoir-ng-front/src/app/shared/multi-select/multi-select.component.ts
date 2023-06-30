@@ -39,6 +39,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     @Input() disabled: boolean = false;
     @Input() readOnly: boolean = false;
     @Input() placeholder: string;
+    @Input() compactMode: boolean = false;
     @Output() onTouch = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};
@@ -116,7 +117,7 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     }
 
     onSelectOption(e: any) {
-        let option: Option<{id: number}> = this.options?.find(opt => objectsEqual(opt?.value, e?.value));
+        let option: Option<{id: number}> = this.options?.find(opt => objectsEqual(opt?.value, e));
         this.modelArray.push(option.value);
         this.selectedOptions.push(option);
         option.disabled = true;
