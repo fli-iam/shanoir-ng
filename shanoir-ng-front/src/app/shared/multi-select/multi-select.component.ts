@@ -39,7 +39,6 @@ export class MultiSelectComponent implements ControlValueAccessor, OnChanges {
     @Input() disabled: boolean = false;
     @Input() readOnly: boolean = false;
     @Input() placeholder: string;
-    @Input() compactMode: boolean = false;
     @Output() onTouch = new EventEmitter();
     private onTouchedCallback = () => {};
     private onChangeCallback = (_: any) => {};

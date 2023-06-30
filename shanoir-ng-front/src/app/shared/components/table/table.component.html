@@ -39,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                     <!-- default display -->
                     <a class="cell-new-tab" [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi && col.type != 'button'">
-                        <span
+                        <span class="default-data-parent"
                             [style.color]="vars.cellGraphics?.color"
                             [style.border-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.color : null"
                             [style.background-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.backgroundColor : null"
@@ -94,7 +94,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </select>
                     <!-- multi -->
                     <ng-container *ngIf="col.multi">
-                        <multi-select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" [options]="vars.possibleValues" [compactMode]="true"></multi-select>
+                        <multi-select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" [options]="vars.possibleValues"></multi-select>
                     </ng-container>
                 </ng-container>
 

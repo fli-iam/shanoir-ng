@@ -60,10 +60,12 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 		td span.button i { color: var(--color-b); }
 	td.loading,
 	td.empty { padding: 20px 20px; text-align: center; }
-	.cell-container:not(.select) { overflow: hidden; text-overflow: ellipsis; }
-	.cell-container.multiselect, .cell-container.wrap { white-space: initial; width: auto; height: 100%; }
+	.cell-container:not(.select) { overflow: hidden; text-overflow: ellipsis; position: absolute; top: 0; right: 0; bottom: 0; left: 0; padding: 1px 5px; }
+	.cell-container a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.cell-container.multiselect a, .cell-container.wrap a { white-space: initial; width: auto; height: 100%; }
 	/*.cell-container:empty:after { content: '.'; visibility: hidden; }*/
   .cell-new-tab { line-height:21px; height: inherit; display: block; text-decoration: none; color: black; width: auto; }
+  .default-data-parent { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .loader { float: right; border-left: none !important; }
 	.loader img { margin-left: 5px; vertical-align: -1; height: 10px; }
@@ -120,9 +122,7 @@ tr.opened { border-left: 1px solid var(--grey); border-top: 1px solid var(--grey
 .sub-container-table th:not(:first-child) { border-left: 1px solid var(--very-light-grey); }
 .deploy-cell i { color: var(--color-b); padding: 0 5px; }
 
-.block { padding: 1px 5px; border-radius: 10px; border: 1px solid var(--grey); white-space: nowrap; margin-right: 5px; vertical-align: middle; display: inline-block;}
-.block i { vertical-align: -1px; }
-.block i, .label { white-space: nowrap; }
-.label { vertical-align: -1px; }
+.block { padding: 0px 5px; border-radius: 10px; white-space: nowrap; margin-right: 5px; display: inline-block;}
+.block i, .block .label { white-space: nowrap; }
 .dark { color:white; }
 .table-edit { height: auto !important; }
