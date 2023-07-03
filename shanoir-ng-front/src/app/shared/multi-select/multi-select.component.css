@@ -5,7 +5,7 @@
 select { width: 16px; border: none; opacity: 0; cursor: pointer; }
 select:focus { border-bottom: none !important; }
 .select-wrapper { position: relative; display: inline-block;  }
-.open-icon { position: absolute; top: 2.5px; right: 0; bottom: 2.5px; left: 0; z-index: -1; display: inline-block; color: var(--color-a-light); 
+.open-icon { position: absolute; top: 2.5px; right: 0; bottom: 2.5px; left: 0; z-index: -1; display: inline-block; color: var(--color-b); 
     border: 1px solid var(--grey); border-radius: 10px; text-align: center; }
 .open-icon i { vertical-align: -1px; }
 .remove { cursor: pointer; }

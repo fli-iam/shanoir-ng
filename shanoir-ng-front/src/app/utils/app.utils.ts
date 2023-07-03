@@ -310,10 +310,9 @@ export function arraysEqual(array1: any[], array2: any[]) {
 }
 
 export function isDarkColor(colorInp: string): boolean {
-  if (!parseInt(colorInp)) return false;
-  var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
-  var r = parseInt(color.substring(0, 2), 16); // hexToR
-  var g = parseInt(color.substring(2, 4), 16); // hexToG
-  var b = parseInt(color.substring(4, 6), 16); // hexToB
-  return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
+    colorInp = colorInp?.replace('#', '');
+    var r = parseInt(colorInp.substring(0, 2), 16); // hexToR
+    var g = parseInt(colorInp.substring(2, 4), 16); // hexToG
+    var b = parseInt(colorInp.substring(4, 6), 16); // hexToB
+    return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
 }
