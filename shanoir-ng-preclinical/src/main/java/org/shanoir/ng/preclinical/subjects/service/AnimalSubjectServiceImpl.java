@@ -16,13 +16,18 @@ package org.shanoir.ng.preclinical.subjects.service;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.preclinical.references.Reference;
+import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -43,6 +48,12 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 
 	@Autowired
 	private AnimalSubjectRepository subjectsRepository;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private ObjectMapper mapper;
 
 	@Override
 	public void deleteBySubjectId(final Long id) {
@@ -109,6 +120,16 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	@Override
 	public boolean isSubjectIdAlreadyUsed(Long subjectId){
 		return subjectsRepository.existsAnimalSubjectBySubjectId(subjectId);
+	}
+
+    @Override
+	public Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException {
+		Long subjectId;
+		subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, mapper.writeValueAsString(dto));
+		if(subjectId == null){
+			throw new ShanoirException("Created subject id is null.");
+		}
+		return subjectId;
 	}
 
 }

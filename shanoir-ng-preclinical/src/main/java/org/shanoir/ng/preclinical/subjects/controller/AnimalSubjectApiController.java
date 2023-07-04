@@ -19,6 +19,7 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
@@ -84,12 +85,6 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	private AnimalSubjectEditableByManager editableOnlyValidator;
 
 	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
-	@Autowired
-	private ObjectMapper mapper;
-
-	@Autowired
 	private PreclinicalSubjectDtoService dtoService;
 
 	@Override
@@ -124,10 +119,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 		Long subjectId;
 		try {
-			subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, mapper.writeValueAsString(dto));
-			if(subjectId == null){
-				throw new ShanoirException("Created subject id is null.");
-			}
+			subjectId = subjectService.createSubject(dto);
 		} catch (Exception ex){
 			String msg = "Failed to create subject. Animal subject can't be created.";
 			LOG.error(msg, ex);

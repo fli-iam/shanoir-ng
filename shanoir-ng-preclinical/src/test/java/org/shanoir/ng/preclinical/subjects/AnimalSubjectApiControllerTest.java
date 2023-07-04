@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,6 +33,7 @@ import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDtoService;
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.preclinical.references.RefsService;
+import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
@@ -108,11 +110,14 @@ public class AnimalSubjectApiControllerTest {
 
 
 	@Before
-	public void setup() throws ShanoirException {
+	public void setup() throws ShanoirException, JsonProcessingException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(subjectsServiceMock).deleteBySubjectId(1L);
 		given(subjectsServiceMock.findAll()).willReturn(Arrays.asList(new AnimalSubject()));
+		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(new AnimalSubject());
+		given(subjectsServiceMock.createSubject(Mockito.any(SubjectDto.class))).willReturn(1L);
+		given(subjectsServiceMock.isSubjectIdAlreadyUsed(2L)).willReturn(false);
 		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(new AnimalSubject());
 		PreclinicalSubjectDto dto = new PreclinicalSubjectDto();
 		dto.setAnimalSubject(new AnimalSubjectDto());
