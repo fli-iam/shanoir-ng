@@ -243,8 +243,14 @@ public class Serie {
 		this.sequenceName = sequenceName;
 	}
 
-	// TODO ATO : make this nicer as soon as model is fully defined
 	public DatasetFile getFirstDatasetFileForCurrentSerie() {
+		if (getDatasets() == null
+				|| getDatasets().get(0) == null
+				|| getDatasets().get(0).getExpressionFormats() == null
+				|| getDatasets().get(0).getExpressionFormats().get(0) == null
+				|| getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() == null) {
+			return null;
+		}
 		return getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
 	}
 

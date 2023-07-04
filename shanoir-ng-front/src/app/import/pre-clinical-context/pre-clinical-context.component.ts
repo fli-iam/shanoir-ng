@@ -66,7 +66,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         return '/imports/bruker';
     }
     
-    importData(): Promise<any> {
+    importData(timestamp: number): Promise<any> {
         let context = this.importDataService.contextData;
         let contextImportJob = this.importDataService.archiveUploaded;
         let importJob = new ImportJob();
@@ -87,6 +87,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
         importJob.converterId = context.niftiConverter.id;
         importJob.archive = contextImportJob.archive;
+        importJob.timestamp = timestamp;
         return this.importService.startImportJob(importJob);
     }
 

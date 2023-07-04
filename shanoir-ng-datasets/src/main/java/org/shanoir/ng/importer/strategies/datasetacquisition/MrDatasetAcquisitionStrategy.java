@@ -14,7 +14,6 @@
 
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -32,14 +31,11 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
-import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.MrProtocolStrategy;
-import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,18 +56,12 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 	
 	/** Logger. */
 	private static final Logger LOG = LoggerFactory.getLogger(MrDatasetAcquisitionStrategy.class);
-
-	@Autowired
-	private DicomProcessing dicomProcessing;
 	
 	@Autowired
 	private MrProtocolStrategy mrProtocolStrategy;
 	
 	@Autowired
 	private DatasetStrategy<MrDataset> mrDatasetStrategy;
-
-	@Autowired
-	private StudyCardRepository studyCardRepository;
 
     private static final Map<String, BidsDataType> dataTypeMapping;
     static {
@@ -90,28 +80,14 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
     }
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, Attributes dicomAttributes) throws Exception {
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
-		Attributes dicomAttributes = null;
-		try {
-			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced());
-		} catch (IOException e) {
-			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
-		}
 		mrDatasetAcquisition.setCreationDate(LocalDate.now());
 		mrDatasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));
-		StudyCard studyCard = null;
-		if (importJob.getStudyCardId() != null) { // makes sense: imports without studycard exist
-			studyCard = getStudyCard(importJob.getStudyCardId());
-			mrDatasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
-			importJob.setStudyCardName(studyCard.getName());
-		} else {
-			LOG.warn("No studycard given for this import");
-		}
 		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
 	
@@ -144,22 +120,6 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 			}
 			mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata().setBidsDataType(dataTypeMapping.get(imageType));
 		}
-
-		if (studyCard != null) {
-		    studyCard.apply(mrDatasetAcquisition, dicomAttributes);
-		}
-
 		return mrDatasetAcquisition;
-	}
-
-	private StudyCard getStudyCard(Long studyCardId) {
-		StudyCard studyCard = studyCardRepository.findById(studyCardId).orElse(null);
-		if (studyCard == null) {
-			throw new IllegalArgumentException("No study card found with id " + studyCardId);
-		}
-		if (studyCard.getAcquisitionEquipmentId() == null) {
-			throw new IllegalArgumentException("No acq eq id found for the study card " + studyCardId);
-		}
-		return studyCard;
 	}
 }

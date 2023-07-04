@@ -100,6 +100,7 @@ public class QualityExaminationRule extends AbstractEntity {
             if ((conditionResult.isFulfilled() && !getQualityTag().equals(QualityTag.VALID))
                     || (!conditionResult.isFulfilled() && getQualityTag().equals(QualityTag.VALID))) {
                 QualityCardResultEntry resultEntry = initResult(examination);
+                resultEntry.setTagSet(getQualityTag());
                 if (conditionResult.isFulfilled()) {
                     resultEntry.setMessage("Tag " + getQualityTag().name() + " was set because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));                   
                 } else {
