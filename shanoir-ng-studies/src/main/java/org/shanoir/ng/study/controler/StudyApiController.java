@@ -317,7 +317,20 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
-	
+
+	@Override
+	public ResponseEntity<Boolean> hasDUAByStudyId(
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws ShanoirException {
+
+		DataUserAgreement dua = this.dataUserAgreementService.findDUAByUserIdAndStudyId(KeycloakUtil.getTokenUserId(), studyId);
+
+		if (dua != null) {
+			return new ResponseEntity<>(true, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(false, HttpStatus.OK);
+		}
+	}
+
 	@Override
 	public ResponseEntity<Void> acceptDataUserAgreement(
 		@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
@@ -422,7 +435,16 @@ public class StudyApiController implements StudyApi {
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
-	
+
+	@Override
+	public ResponseEntity<List<StudyUser>> getStudyUserByStudyId(Long studyId) {
+		List<StudyUser> studyUserList = this.studyUserService.findStudyUsersByStudyId(studyId);
+		if (!studyUserList.isEmpty()) {
+			return new ResponseEntity<>(studyUserList, HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+	}
 
 	@Override
 	public ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData() {
