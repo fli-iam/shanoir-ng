@@ -77,7 +77,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     private therapies: SubjectTherapy[] = [];
     private pathologies: SubjectPathology[] = [];
     private selectedStudy : IdName;
-    private hasNameUniqueError: boolean = false;
     differ: KeyValueDiffer<string, any>;
 
     catOptions: Option<ImagedObjectCategory>[] = [
@@ -272,7 +271,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.preclinicalSubject.subject.imagedObjectCategory, [Validators.required]],
             'isAlreadyAnonymized': [],
-            'name': [this.preclinicalSubject.subject.name, [Validators.required, this.registerOnSubmitValidator('unique', 'name')]],
+            'name': [this.preclinicalSubject.subject.name, this.nameValidators.concat([this.registerOnSubmitValidator('unique', 'name')])],
             'specie': [this.preclinicalSubject.animalSubject.specie, animal ? [Validators.required] : []],
             'strain': [this.preclinicalSubject.animalSubject.strain, animal ? [Validators.required] : []],
             'biotype': [this.preclinicalSubject.animalSubject.biotype, animal ? [Validators.required] : []],
@@ -495,27 +494,6 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         return null;
     }
 
-    onStudySelect() {
-        this.selectedStudy.selected = true;
-        let newSubjectStudy: SubjectStudy = new SubjectStudy();
-        newSubjectStudy.physicallyInvolved = false;
-        newSubjectStudy.study = new Study();
-        newSubjectStudy.study.id = this.selectedStudy.id;
-        newSubjectStudy.study.name = this.selectedStudy.name;
-        this.subjectStudyList.push(newSubjectStudy);
-        this.preclinicalSubject.subject.subjectStudyList = this.subjectStudyList;
-    }
-
-    removeSubjectStudy(subjectStudy: SubjectStudy):void {
-        for (let study of this.studies) {
-            if (subjectStudy.study.id == study.id) study.selected = false;
-        }
-        const index: number = this.subjectStudyList.indexOf(subjectStudy);
-        if (index !== -1) {
-            this.subjectStudyList.splice(index, 1);
-        }
-    }
-
     generateSubjectIdentifier(): string {
         let hash;
         if (this.preclinicalSubject && this.preclinicalSubject.subject) {
@@ -542,7 +520,9 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
     }
 
     updateStudiesList(){
-        if (this.preclinicalSubject && this.preclinicalSubject.subject && this.preclinicalSubject.subject.subjectStudyList && this.preclinicalSubject.subject.subjectStudyList.length > 0){
+        if (this.preclinicalSubject && this.preclinicalSubject.subject
+            && this.preclinicalSubject.subject.subjectStudyList
+            && this.preclinicalSubject.subject.subjectStudyList.length > 0){
             for(let st of this.preclinicalSubject.subject.subjectStudyList){
                 if (this.studies && this.studies.length > 0){
                     for (let s of this.studies){

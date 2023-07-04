@@ -20,15 +20,20 @@ import java.util.Optional;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.ErrorDetails;
+import org.shanoir.ng.shared.exception.ErrorModel;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.SubjectType;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
+import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -39,6 +44,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,6 +73,9 @@ public class RabbitMQSubjectService {
 	
 	@Autowired
 	private ObjectMapper mapper;
+
+	@Autowired
+	private SubjectUniqueConstraintManager uniqueConstraintManager;
 	
 	/**
 	 * This methods returns a list of subjects for a given study ID
@@ -131,7 +140,7 @@ public class RabbitMQSubjectService {
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE)
 	@RabbitHandler
 	@Transactional
-	public Long createSubject(String subjectAsString) throws JsonProcessingException {
+	public Long createOrUpdateSubject(String subjectAsString) {
 		// create a subject
 		try {
 			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
@@ -180,7 +189,7 @@ public class RabbitMQSubjectService {
 	 */
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.DELETE_PRECLINICAL_SUBJECT_EVENT,
-			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
+			value = @Queue(value = RabbitMQConfiguration.DELETE_ANIMAL_SUBJECT_QUEUE, durable = "true"),
 			exchange = @Exchange(value = RabbitMQConfiguration.EVENTS_EXCHANGE, ignoreDeclarationExceptions = "true",
 					autoDelete = "false", durable = "true", type= ExchangeTypes.TOPIC))
 	)
@@ -209,8 +218,6 @@ public class RabbitMQSubjectService {
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
 	}
-
-
 
 	private boolean studyListContains(List<SubjectStudy> subjectStudyList, Long studyId) {
 		for (SubjectStudy sustu : subjectStudyList) {

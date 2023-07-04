@@ -12,21 +12,27 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.preclinical.subjects;
+package org.shanoir.ng.preclinical.subjects.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.shanoir.ng.model.AnimalSubjectDto;
-import org.shanoir.ng.model.PreclinicalSubjectDto;
-import org.shanoir.ng.model.PreclinicalSubjectDtoService;
-import org.shanoir.ng.model.SubjectDto;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectUniqueValidator;
+import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
+import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
+import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDtoService;
+import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.preclinical.references.RefsService;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -93,12 +99,13 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 		try {
 
-			Long subjectId = createSubject(dto.getSubject());
+			Long subjectId = this.createSubject(dto.getSubject());
 
-			AnimalSubject animalSubject = dtoService.getAnimalSubjectFromDto(dto);
-			animalSubject.setId(subjectId);
+			AnimalSubject animalSubject = dtoService.getAnimalSubjectFromPreclinicalDto(dto);
+			animalSubject.setSubjectId(subjectId);
 
 			this.validateAnimalSubjectCreation(animalSubject, result);
+
 			final AnimalSubject createdSubject = subjectService.save(animalSubject);
 
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_PRECLINICAL_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
@@ -111,7 +118,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 		}
 	}
 
-	private Long createSubject(SubjectDto dto) throws ShanoirException {
+	private Long createSubject(SubjectDto dto) throws ShanoirException, RestServiceException {
 
 		dto.setPreclinical(true);
 
@@ -126,6 +133,16 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 			LOG.error(msg, ex);
 			throw new ShanoirException(msg, ex);
 		}
+
+		if(subjectService.isSubjectIdAlreadyUsed(subjectId)){
+			FieldErrorMap errorMap = new FieldErrorMap();
+			List<FieldError> errors = new ArrayList();
+			errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", dto.getName()));
+			errorMap.put("name", errors);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errorMap)));
+		}
+
 		return subjectId;
 	}
 
@@ -150,9 +167,9 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<AnimalSubjectDto> getAnimalSubjectById(
-			@ApiParam(value = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id) {
-		final AnimalSubjectDto subject = dtoService.getPreclinicalDtoFromAnimalSubject(subjectService.findById(id)).getAnimalSubject();
+	public ResponseEntity<AnimalSubjectDto> getAnimalSubjectBySubjectId(
+			@ApiParam(value = "subject id of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id) {
+		final AnimalSubjectDto subject = dtoService.getPreclinicalDtoFromAnimalSubject(subjectService.getBySubjectId(id)).getAnimalSubject();
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -160,8 +177,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<List<AnimalSubjectDto>> getPreclinicalSubjects() {
-		final List<AnimalSubjectDto> subjects = dtoService.getAnimalDtoListFromAnimalSubjectList(subjectService.findAll());
+	public ResponseEntity<List<AnimalSubjectDto>> getAllAnimalSubjects() {
+		final List<AnimalSubjectDto> subjects = dtoService.getAnimalSubjectDtoListFromAnimalSubjectList(subjectService.findAll());
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -170,18 +187,26 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<Void> updateAnimalSubject(
-			@ApiParam(value = "ID of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubject animalSubject,
+			@ApiParam(value = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long subjectId,
+			@ApiParam(value = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto dto,
 			final BindingResult result) throws RestServiceException {
 
 		// IMPORTANT : avoid any confusion that could lead to security breach
-		animalSubject.setId(id);
 
-		this.validateAnimalSubjectUpdate(animalSubject, result);
+		Long id = subjectService.getIdBySubjectId(subjectId);
+
+		if(id == null){
+			throw new RestServiceException(new ErrorModel(HttpStatus.NOT_FOUND.value(), "No animal subject found for this subject id", null));
+		}
+
+		AnimalSubject subject = dtoService.getAnimalSubjectFromAnimalSubjectDto(dto);
+		subject.setId(id);
+
+		this.validateAnimalSubjectUpdate(subject, result);
 
 		/* Update template in db. */
 		try {
-			subjectService.update(animalSubject);
+			subjectService.update(subject);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_PRECLINICAL_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			LOG.error("Error while trying to update animal subject [{}]", id, e);
@@ -209,15 +234,15 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<Void> deleteAnimalSubject(
-			@ApiParam(value = "AnimalSubject id to delete", required = true) @PathVariable("id") Long id) {
+			@ApiParam(value = "subject id of AnimalSubject to delete", required = true) @PathVariable("id") Long id) {
 		try {
-			AnimalSubject animalSubject = subjectService.findById(id);
+			AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 			if (animalSubject == null) {
 				return new ResponseEntity<>(HttpStatus.OK);
 			}
 			subjectPathologyService.deleteByAnimalSubject(animalSubject);
 			subjectTherapyService.deleteByAnimalSubject(animalSubject);
-			subjectService.deleteById(id);
+			subjectService.deleteBySubjectId(id);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_PRECLINICAL_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 		} catch (ShanoirException e) {
 			LOG.error("ERROR while deleting animal subject " + id, e);

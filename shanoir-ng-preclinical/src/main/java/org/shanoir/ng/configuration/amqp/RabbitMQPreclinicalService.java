@@ -1,9 +1,8 @@
 package org.shanoir.ng.configuration.amqp;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
-import org.shanoir.ng.preclinical.subjects.AnimalSubjectRepository;
-import org.shanoir.ng.preclinical.subjects.AnimalSubjectService;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
@@ -45,7 +44,7 @@ public class RabbitMQPreclinicalService {
                     autoDelete = "false", durable = "true", type= ExchangeTypes.TOPIC))
     )
     @Transactional
-    public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
+    public void deleteAnimalSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
         SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
         try {
 

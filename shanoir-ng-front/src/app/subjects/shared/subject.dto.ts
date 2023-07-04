@@ -21,6 +21,7 @@ import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudyDTO } from './subject-study.dto';
 import { Subject } from './subject.model';
 import { Sex } from './subject.types';
+import {formatDate} from "@angular/common";
 
 
 @Injectable()
@@ -94,7 +95,7 @@ export class SubjectDTO {
     examinations: Id[];
     name: string;
     identifier: string;
-    birthDate: Date;
+    birthDate: string;
     languageHemisphericDominance: "Left" | "Right";
     manualHemisphericDominance: "Left" | "Right";
     imagedObjectCategory: ImagedObjectCategory;
@@ -108,7 +109,7 @@ export class SubjectDTO {
         if (subject.examinations) this.examinations = Id.toIdList(subject.examinations);
         this.name = subject.name;
         this.identifier = subject.identifier;
-        this.birthDate = subject.birthDate;
+        this.birthDate = formatDate(subject.birthDate, 'yyyy-MM-dd', 'en');
         this.languageHemisphericDominance = subject.languageHemisphericDominance;
         this.manualHemisphericDominance = subject.manualHemisphericDominance;
         this.imagedObjectCategory = subject.imagedObjectCategory;

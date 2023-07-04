@@ -1,11 +1,18 @@
-package org.shanoir.ng.model;
+package org.shanoir.ng.preclinical.subjects.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.shanoir.ng.shared.core.model.IdName;
 
+@JsonIgnoreProperties(
+        ignoreUnknown = true
+)
 public class SubjectStudyDto {
 
+    @JsonProperty("subject")
     private IdName subject;
 
+    @JsonProperty("study")
     private IdName study;
 
     public SubjectStudyDto(IdName subject, IdName study) {

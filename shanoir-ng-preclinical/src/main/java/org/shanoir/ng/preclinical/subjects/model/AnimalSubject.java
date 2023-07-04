@@ -12,23 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.preclinical.subjects;
+package org.shanoir.ng.preclinical.subjects.model;
 
-import java.util.Objects;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.annotations.ApiModelProperty;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
-import io.swagger.annotations.ApiModelProperty;
+import javax.persistence.Entity;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import java.util.Objects;
 
 /**
  * Animal Subject
@@ -39,27 +33,24 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonPropertyOrder({ "_links", "subjectId", "specie", "strain", "biotype", "provider", "stabulation" })
 public class AnimalSubject extends HalEntity {
 
+	private Long subjectId;
+
 	@ManyToOne
-	@JsonProperty("specie")
 	// @RefValueExists
 	private Reference specie = null;
 
-	@JsonProperty("strain")
 	@ManyToOne
 	// @RefValueExists
 	private Reference strain = null;
 
-	@JsonProperty("biotype")
 	// @RefValueExists
 	@ManyToOne
 	private Reference biotype = null;
 
-	@JsonProperty("provider")
 	// @RefValueExists
 	@ManyToOne
 	private Reference provider = null;
 
-	@JsonProperty("stabulation")
 	// @RefValueExists
 	@ManyToOne
 	private Reference stabulation = null;
@@ -67,6 +58,14 @@ public class AnimalSubject extends HalEntity {
 	public AnimalSubject specie(Reference specie) {
 		this.specie = specie;
 		return this;
+	}
+
+	public Long getSubjectId() {
+		return subjectId;
+	}
+
+	public void setSubjectId(Long subjectId) {
+		this.subjectId = subjectId;
 	}
 
 	/**
@@ -168,7 +167,9 @@ public class AnimalSubject extends HalEntity {
 			return false;
 		}
 		AnimalSubject subject = (AnimalSubject) o;
-		return Objects.equals(this.getId(), subject.getId()) && Objects.equals(this.specie, subject.specie)
+		return Objects.equals(this.getId(), subject.getId())
+				&& Objects.equals(this.subjectId, subject.getSubjectId())
+				&& Objects.equals(this.specie, subject.specie)
 				&& Objects.equals(this.strain, subject.strain) && Objects.equals(this.biotype, subject.biotype)
 				&& Objects.equals(this.provider, subject.provider)
 				&& Objects.equals(this.stabulation, subject.stabulation);
@@ -183,7 +184,7 @@ public class AnimalSubject extends HalEntity {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("class AnimalSubject {\n");
-		sb.append("    subjectId: ").append(toIndentedString(this.getId())).append("\n");
+		sb.append("    subjectId: ").append(toIndentedString(this.getSubjectId())).append("\n");
 		sb.append("    specie: ").append(toIndentedString(specie)).append("\n");
 		sb.append("    strain: ").append(toIndentedString(strain)).append("\n");
 		sb.append("    biotype: ").append(toIndentedString(biotype)).append("\n");

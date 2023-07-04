@@ -15,7 +15,10 @@
 package org.shanoir.ng.utils;
 
 import org.shanoir.ng.preclinical.references.Reference;
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
+import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
+import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 
 /**
  * Utility class for test. Generates subject.
@@ -44,7 +47,8 @@ public final class AnimalSubjectModelUtil {
 	public static final Long REF_ID_PROVIDER = 5L;
 
 	// Subject data
-	public static final Long SUBJECT_ID = 1L;
+	public static final Long ID = 1L;
+	public static final Long SUBJECT_ID = 2L;
 
 	/**
 	 * Create animal subject.
@@ -53,13 +57,33 @@ public final class AnimalSubjectModelUtil {
 	 */
 	public static AnimalSubject createAnimalSubject() {
 		final AnimalSubject subject = new AnimalSubject();
-		subject.setId(SUBJECT_ID);
+		subject.setId(ID);
+		subject.setSubjectId(SUBJECT_ID);
 		subject.setSpecie(createSpecie());
 		subject.setStrain(createStrain());
 		subject.setStabulation(createStabulation());
 		subject.setBiotype(createBiotype());
 		subject.setProvider(createProvider());
 		return subject;
+	}
+
+	public static AnimalSubjectDto createAnimalSubjectDto() {
+		final AnimalSubjectDto dto = new AnimalSubjectDto();
+		dto.setId(SUBJECT_ID);
+		dto.setSpecie(createSpecie());
+		dto.setStrain(createStrain());
+		dto.setStabulation(createStabulation());
+		dto.setBiotype(createBiotype());
+		dto.setProvider(createProvider());
+		return dto;
+	}
+
+	public static PreclinicalSubjectDto createPreclinicalSubjectDto() {
+		final PreclinicalSubjectDto dto = new PreclinicalSubjectDto();
+		dto.setSubject(new SubjectDto());
+		dto.setAnimalSubject(createAnimalSubjectDto());
+		dto.setId(SUBJECT_ID);
+		return dto;
 	}
 
 	public static Reference createSpecie() {

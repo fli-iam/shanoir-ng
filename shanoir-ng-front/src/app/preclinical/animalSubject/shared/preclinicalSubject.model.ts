@@ -31,14 +31,14 @@ export class PreclinicalSubjectDTO {
 
     id: number;
 	animalSubject: AnimalSubject;
-    subject: Subject;
+    subject: SubjectDTO;
 	pathologies: SubjectPathology[];
 	therapies: SubjectTherapy[];
 
     constructor(entity: PreclinicalSubject) {
         this.id = entity.id;
 		this.animalSubject = entity.animalSubject;
-        this.subject = entity.subject;
+        this.subject = new SubjectDTO(entity.subject);
 		this.pathologies = entity.pathologies;
 		this.therapies = entity.therapies;
     }

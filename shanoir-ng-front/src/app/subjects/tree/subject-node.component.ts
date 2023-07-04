@@ -49,7 +49,7 @@ export class SubjectNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
-    detailsPath: string = "/subject/details/";
+    detailsPath: string = "";
 
     constructor(
         private examinationService: ExaminationService,
@@ -80,7 +80,8 @@ export class SubjectNodeComponent implements OnChanges {
                     false);
             }
             this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != '/' + this.node.title + '/details/' + this.node.id;
+            this.detailsPath = '/' + this.node.title + '/details/' + this.node.id;
+            this.showDetails = this.router.url != this.detailsPath;
         }
     }
 

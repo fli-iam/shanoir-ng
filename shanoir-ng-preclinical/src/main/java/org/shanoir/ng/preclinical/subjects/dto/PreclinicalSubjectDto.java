@@ -1,7 +1,11 @@
-package org.shanoir.ng.model;
+package org.shanoir.ng.preclinical.subjects.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(
+        ignoreUnknown = true
+)
 public class PreclinicalSubjectDto {
 
     @JsonProperty("id")

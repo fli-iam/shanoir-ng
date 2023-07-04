@@ -19,6 +19,7 @@ import {ImagedObjectCategory} from "../../../subjects/shared/imaged-object-categ
 import {Sex} from "../../../subjects/shared/subject.types";
 
 export class AnimalSubject extends Entity {
+
     id: number;
     name: string;
     imagedObjectCategory: ImagedObjectCategory;

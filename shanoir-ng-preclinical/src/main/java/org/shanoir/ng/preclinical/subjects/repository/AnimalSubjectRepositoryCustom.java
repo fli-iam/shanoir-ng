@@ -12,11 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.preclinical.subjects;
+package org.shanoir.ng.preclinical.subjects.repository;
 
 import java.util.List;
 
 import org.shanoir.ng.preclinical.references.Reference;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 
 /**
  * Custom repository for subjects.

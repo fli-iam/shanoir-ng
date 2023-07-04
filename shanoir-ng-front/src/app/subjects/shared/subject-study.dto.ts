@@ -36,8 +36,13 @@ export class SubjectStudyDTO {
     constructor(subjectStudy: SubjectStudy) {
         this.id = subjectStudy.id;
         this.examinations = subjectStudy.examinations ? subjectStudy.examinations.map(exam => exam.id) : null;
-        this.subject = subjectStudy.subject ? new IdName(subjectStudy.subject.id, subjectStudy.subject.name) : null;
-        this.subjectPreclinical = subjectStudy.subject.preclinical;
+        if(subjectStudy.subject != null){
+            this.subject = new IdName(subjectStudy.subject.id, subjectStudy.subject.name);
+            this.subjectPreclinical = subjectStudy.subject.preclinical;
+        }else{
+            this.subject = null;
+            this.subjectPreclinical = false;
+        }
         this.study = subjectStudy.study ? new SimpleStudyDTO(subjectStudy.study) : null;
         this.subjectStudyIdentifier = subjectStudy.subjectStudyIdentifier;
         this.subjectType = subjectStudy.subjectType;

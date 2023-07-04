@@ -12,20 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.preclinical.subjects;
+package org.shanoir.ng.preclinical.subjects.service;
 
 import java.util.List;
 
 import org.shanoir.ng.preclinical.references.Reference;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -48,8 +45,8 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	private AnimalSubjectRepository subjectsRepository;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirException {
-		subjectsRepository.deleteById(id);
+	public void deleteBySubjectId(final Long id) {
+		subjectsRepository.deleteBySubjectId(id);
 	}
 
 	@Override
@@ -58,13 +55,13 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	}
 
 	@Override
-	public AnimalSubject findById(final Long id) {
-		return subjectsRepository.findById(id).orElse(null);
+	public AnimalSubject getBySubjectId(final Long id) {
+		return subjectsRepository.getBySubjectId(id);
 	}
 
 	@Override
 	public AnimalSubject save(final AnimalSubject subject) throws ShanoirException {
-		AnimalSubject savedSubject = null;
+		AnimalSubject savedSubject;
 		try {
 			savedSubject = subjectsRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
@@ -100,6 +97,18 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	@Override
 	public List<AnimalSubject> findByReference(Reference reference) {
 		return Utils.toList(subjectsRepository.findByReference(reference));
+	}
+
+	@Override
+	public Long getIdBySubjectId(long subjectId) {
+		AnimalSubject sub = subjectsRepository.getBySubjectId(subjectId);
+
+		return sub != null ? sub.getId() : null;
+	}
+
+	@Override
+	public boolean isSubjectIdAlreadyUsed(Long subjectId){
+		return subjectsRepository.existsAnimalSubjectBySubjectId(subjectId);
 	}
 
 }
