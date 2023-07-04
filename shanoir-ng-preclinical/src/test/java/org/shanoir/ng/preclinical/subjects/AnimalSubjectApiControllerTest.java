@@ -125,6 +125,7 @@ public class AnimalSubjectApiControllerTest {
 		given(dtoServiceMock.getAnimalSubjectDtoFromAnimalSubject(Mockito.any(AnimalSubject.class))).willReturn(dto.getAnimalSubject());
 		given(dtoServiceMock.getAnimalSubjectDtoListFromAnimalSubjectList(Mockito.anyList())).willReturn(Arrays.asList(dto.getAnimalSubject()));
 		given(dtoServiceMock.getAnimalSubjectFromAnimalSubjectDto(Mockito.any(AnimalSubjectDto.class))).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
+		given(dtoServiceMock.getAnimalSubjectFromPreclinicalDto(Mockito.any(PreclinicalSubjectDto.class))).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
 		AnimalSubject subject = new AnimalSubject();
 		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(subject);
 		AnimalSubject anSubj = new AnimalSubject();
