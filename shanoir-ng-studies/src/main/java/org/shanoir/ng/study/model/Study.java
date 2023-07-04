@@ -156,6 +156,9 @@ public class Study extends HalEntity {
 	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
 
+	@Column(name = "license", columnDefinition = "TEXT")
+	private String license;
+
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyTag> studyTags;
 
@@ -512,6 +515,14 @@ public class Study extends HalEntity {
 
 	public void setDescription(String publicDescription) {
 		this.description = publicDescription;
+	}
+
+	public String getLicense() {
+		return license;
+	}
+
+	public void setLicense(String license) {
+		this.license = license;
 	}
 
 	public List<StudyTag> getStudyTags() {
