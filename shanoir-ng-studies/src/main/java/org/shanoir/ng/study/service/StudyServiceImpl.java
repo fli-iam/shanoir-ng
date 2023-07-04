@@ -250,6 +250,7 @@ public class StudyServiceImpl implements StudyService {
 		studyDb.setName(study.getName());
 		studyDb.setProfile(study.getProfile());
 		studyDb.setDescription(study.getDescription());
+		studyDb.setLicense(study.getLicense());
 		studyDb.setStudyStatus(study.getStudyStatus());
 		studyDb.setVisibleByDefault(study.isVisibleByDefault());
 		studyDb.setWithExamination(study.isWithExamination());

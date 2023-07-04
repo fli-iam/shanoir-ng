@@ -17,6 +17,7 @@ package org.shanoir.ng.shared.service;
 import java.util.List;
 
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -34,6 +35,5 @@ public interface SubjectStudyService {
 	 * @throws EntityNotFoundException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and (@datasetSecurityService.hasRightOnSubjectStudies(#subjectStudies, 'CAN_IMPORT') || @datasetSecurityService.hasRightOnSubjectStudies(#subjectStudies, 'CAN_ADMINISTRATE')))")
-	List<SubjectStudy> update(Iterable<SubjectStudy> subjectStudies) throws EntityNotFoundException;
-
+	List<SubjectStudy> update(Iterable<SubjectStudy> subjectStudies) throws EntityNotFoundException, MicroServiceCommunicationException;
 }
