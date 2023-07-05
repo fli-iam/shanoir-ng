@@ -49,6 +49,7 @@ export class ExecutionComponent implements OnInit {
     fileInputs = [];
     inputDatasets: Dataset[] = [];
     execDefaultName= "";
+    fileFormat="nii";
 
     constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
         this.breadcrumbsService.nameStep('2. Executions');
@@ -184,10 +185,13 @@ export class ExecutionComponent implements OnInit {
     }
 
     getDatasetsValue(datasets) {
-        // TODO the dataset extension format should be selected depending on the pipeline.
         return datasets.forEach(dataset => {
-            let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g, "_")}.nii.gz`
-            return `shanoir:/${dataset_name}?format=nii&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+            let extension = ".nii.gz"
+            if(this.fileFormat == "dcm") {
+                extension = ".zip"
+            }
+            let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g, "_")}${extension}`
+            return `shanoir:/${dataset_name}?format=${this.fileFormat}&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
         })
     }
 

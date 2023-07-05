@@ -25,6 +25,15 @@
              </span>
 	   </div>
     </div>
+
+    <div>
+        <label>Dataset export format</label>
+        <ng-template ngSwitchDefault>
+            <input type="radio" formControlName="format" [(ngModel)]="fileFormat" value="nii" [checked]="true" />NIfTI
+            <input type="radio" formControlName="format" [(ngModel)]="fileFormat" value="dcm" [checked]="false" />DICOM
+        </ng-template>
+    </div>
+
 </form>
 <button type='button' (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
 
