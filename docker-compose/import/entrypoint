@@ -14,4 +14,3 @@ handle_microservice_migration
 abort_if_error
 
 run_microservice "$@"
-
