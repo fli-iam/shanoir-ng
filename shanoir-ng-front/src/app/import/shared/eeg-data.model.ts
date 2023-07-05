@@ -26,6 +26,7 @@ export class EegImportJob {
     coordinatesSystem: String;
     subjectName: String;
     studyName: String;
+    timestamp: number;
 }
 
 export class EquipmentEeg {

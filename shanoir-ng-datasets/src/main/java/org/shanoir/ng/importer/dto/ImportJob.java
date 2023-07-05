@@ -21,199 +21,219 @@ import java.util.Map;
 
 import org.shanoir.ng.shared.event.ShanoirEvent;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * @author atouboul
  *
  */
 public class ImportJob implements Serializable {
 
-	public static final String RANK_PROPERTY = "rank";
-	
-	public static final String INDEX_PROPERTY = "index";
-	
-	private static final long serialVersionUID = 8804929608059674037L;
+    public static final String RANK_PROPERTY = "rank";
+    
+    public static final String INDEX_PROPERTY = "index";
+    
+    private static final long serialVersionUID = 8804929608059674037L;
+    
+    private long timestamp;
 
-	private boolean fromDicomZip;
+    private boolean fromDicomZip;
 
-	private boolean fromShanoirUploader;
+    private boolean fromShanoirUploader;
 
-	private boolean fromPacs;
+    private boolean fromPacs;
 
-	private String workFolder;
+    private String workFolder;
 
-	private List<Patient> patients;
+    private List<Patient> patients;
 
-	private Long examinationId;
+    private Long examinationId;
 
-	private Long studyCardId;
+    private Long studyCardId;
 
-	private Long studyId;
+    private Long studyId;
 
-	private String studyCardName;
+    private String studyCardName;
 
-	private Long acquisitionEquipmentId;
+    private Long acquisitionEquipmentId;
 
-	private String anonymisationProfileToUse;
+    private String anonymisationProfileToUse;
 
-	private Long converterId;
+    private Long converterId;
 
-	private String archive;
+    private String archive;
 
-	private String subjectName;
+    private String subjectName;
 
-	private String studyName;
+    private String studyName;
 
-	private ShanoirEvent shanoirEvent;
-	
-	private Long userId;
-	
-	public Long getUserId() {
-		return userId;
-	}
+    private ShanoirEvent shanoirEvent;
+    
+    private Long userId;
+    
+    public long getTimestamp() {
+        return timestamp;
+    }
 
-	public void setUserId(Long userId) {
-		this.userId = userId;
-	}
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+    
+    public Long getUserId() {
+        return userId;
+    }
 
-	private Map<String, String> properties = new HashMap();
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-	public String getArchive() {
-		return archive;
-	}
+    private Map<String, String> properties = new HashMap();
 
-	public void setArchive(final String archive) {
-		this.archive = archive;
-	}
+    public String getArchive() {
+        return archive;
+    }
 
-	public boolean isFromDicomZip() {
-		return fromDicomZip;
-	}
+    public void setArchive(final String archive) {
+        this.archive = archive;
+    }
 
-	public void setFromDicomZip(final boolean fromDicomZip) {
-		this.fromDicomZip = fromDicomZip;
-	}
+    public boolean isFromDicomZip() {
+        return fromDicomZip;
+    }
 
-	public boolean isFromShanoirUploader() {
-		return fromShanoirUploader;
-	}
+    public void setFromDicomZip(final boolean fromDicomZip) {
+        this.fromDicomZip = fromDicomZip;
+    }
 
-	public void setFromShanoirUploader(final boolean fromShanoirUploader) {
-		this.fromShanoirUploader = fromShanoirUploader;
-	}
+    public boolean isFromShanoirUploader() {
+        return fromShanoirUploader;
+    }
 
-	public boolean isFromPacs() {
-		return fromPacs;
-	}
+    public void setFromShanoirUploader(final boolean fromShanoirUploader) {
+        this.fromShanoirUploader = fromShanoirUploader;
+    }
 
-	public void setFromPacs(final boolean fromPacs) {
-		this.fromPacs = fromPacs;
+    public boolean isFromPacs() {
+        return fromPacs;
+    }
 
-	}
+    public void setFromPacs(final boolean fromPacs) {
+        this.fromPacs = fromPacs;
 
-	public List<Patient> getPatients() {
-		return patients;
-	}
+    }
 
-	public void setPatients(final List<Patient> patients) {
-		this.patients = patients;
-	}
+    public List<Patient> getPatients() {
+        return patients;
+    }
 
-	public Long getExaminationId() {
-		return examinationId;
-	}
+    public void setPatients(final List<Patient> patients) {
+        this.patients = patients;
+    }
 
-	public void setExaminationId(final Long examinationId) {
-		this.examinationId = examinationId;
-	}
+    public Long getExaminationId() {
+        return examinationId;
+    }
 
-	public String getWorkFolder() {
-		return workFolder;
-	}
+    public void setExaminationId(final Long examinationId) {
+        this.examinationId = examinationId;
+    }
 
-	public void setWorkFolder(String workFolder) {
-		this.workFolder = workFolder;
-	}
+    public String getWorkFolder() {
+        return workFolder;
+    }
 
-	public Long getStudyCardId() {
-		return studyCardId;
-	}
+    public void setWorkFolder(String workFolder) {
+        this.workFolder = workFolder;
+    }
 
-	public void setStudyCardId(Long studyCardId) {
-		this.studyCardId = studyCardId;
-	}
+    public Long getStudyCardId() {
+        return studyCardId;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public void setStudyCardId(Long studyCardId) {
+        this.studyCardId = studyCardId;
+    }
 
-	public void setStudyId(final Long StudyId) {
-		this.studyId = StudyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public String getStudyCardName() {
-		return studyCardName;
-	}
+    public void setStudyId(final Long StudyId) {
+        this.studyId = StudyId;
+    }
 
-	public void setStudyCardName(String studyCardName) {
-		this.studyCardName = studyCardName;
-	}
+    public String getStudyCardName() {
+        return studyCardName;
+    }
 
-	public Long getAcquisitionEquipmentId() {
-		return acquisitionEquipmentId;
-	}
+    public void setStudyCardName(String studyCardName) {
+        this.studyCardName = studyCardName;
+    }
 
-	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
-		this.acquisitionEquipmentId = acquisitionEquipmentId;
-	}
+    public Long getAcquisitionEquipmentId() {
+        return acquisitionEquipmentId;
+    }
 
-	public Long getConverterId() {
-		return converterId;
-	}
+    public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+        this.acquisitionEquipmentId = acquisitionEquipmentId;
+    }
 
-	public void setConverterId(Long ConverterId) {
-		this.converterId = ConverterId;
-	}
+    public Long getConverterId() {
+        return converterId;
+    }
 
-	public String getAnonymisationProfileToUse() {
-		return anonymisationProfileToUse;
-	}
+    public void setConverterId(Long ConverterId) {
+        this.converterId = ConverterId;
+    }
 
-	public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
-		this.anonymisationProfileToUse = anonymisationProfileToUse;
-	}
+    public String getAnonymisationProfileToUse() {
+        return anonymisationProfileToUse;
+    }
 
-	public String getSubjectName() {
-		return subjectName;
-	}
+    public void setAnonymisationProfileToUse(String anonymisationProfileToUse) {
+        this.anonymisationProfileToUse = anonymisationProfileToUse;
+    }
 
-	public void setSubjectName(String subjectName) {
-		this.subjectName = subjectName;
-	}
+    public String getSubjectName() {
+        return subjectName;
+    }
 
-	public String getStudyName() {
-		return studyName;
-	}
+    public void setSubjectName(String subjectName) {
+        this.subjectName = subjectName;
+    }
 
-	public void setStudyName(String studyName) {
-		this.studyName = studyName;
-	}
+    public String getStudyName() {
+        return studyName;
+    }
 
-	public ShanoirEvent getShanoirEvent() {
-		return shanoirEvent;
-	}
+    public void setStudyName(String studyName) {
+        this.studyName = studyName;
+    }
 
-	public void setShanoirEvent(ShanoirEvent shanoirEvent) {
-		this.shanoirEvent = shanoirEvent;
-	}
+    public ShanoirEvent getShanoirEvent() {
+        return shanoirEvent;
+    }
 
-	public Map<String, String> getProperties() {
-		return properties;
-	}
+    public void setShanoirEvent(ShanoirEvent shanoirEvent) {
+        this.shanoirEvent = shanoirEvent;
+    }
 
-	public void setProperties(Map<String, String> properties) {
-		this.properties = properties;
-	}
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
+    public Serie getFirstSerie() {
+        if ( getPatients() == null
+                || getPatients().get(0) == null
+                || getPatients().get(0).getStudies() == null
+                || getPatients().get(0).getStudies().get(0) == null
+                || getPatients().get(0).getStudies().get(0).getSeries() == null) {
+            return null;        
+        } else {
+            return getPatients().get(0).getStudies().get(0).getSeries().get(0);
+        }
+    }
 
 }

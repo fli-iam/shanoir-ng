@@ -634,7 +634,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             .updateSubjectStudyValues(context.subject.subjectStudy)
             .then(() => {
                 let that = this;
-                this.importData()
+                this.importData(this.stepTs)
                     .then(() => {
                         this.importDataService.reset();
                         setTimeout(() => {
@@ -649,7 +649,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             });
     }
 
-    abstract importData(): Promise<any>;
+    abstract importData(timestamp: number): Promise<any>;
 
     private hasCoilToUpdate(studycard: StudyCard): boolean {
         if (!studycard) return false;
