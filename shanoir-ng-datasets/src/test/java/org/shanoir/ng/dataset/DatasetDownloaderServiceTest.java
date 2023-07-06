@@ -198,6 +198,7 @@ public class DatasetDownloaderServiceTest {
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
 		dataset.setId(1L);
+		dataset.setDownloadable(true);
 		dataset.setSubjectId(3L);
 		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
 		dataset.setDatasetAcquisition(dsAcq);
@@ -241,6 +242,7 @@ public class DatasetDownloaderServiceTest {
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		dataset.setDownloadable(true);
 		dataset.setId(1L);
 		dataset.setSubjectId(3L);
 		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));

@@ -150,8 +150,8 @@ public abstract class Dataset extends AbstractEntity {
 	/** Subject. */
 	private Long subjectId;
 
-	/** Can we download the subject ? */
-	private boolean downloadable;
+	/** Can we download the dataset */
+	private boolean downloadable = true;
 
 	/** Metadata updated by study card. */
 	@OneToOne(cascade = CascadeType.ALL)
