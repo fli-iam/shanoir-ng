@@ -152,7 +152,7 @@ public class WADODownloaderService {
 	 * @throws RestServiceException
 	 *
 	 */
-	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath) throws IOException, MessagingException, RestServiceException {
+	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, List<SerieError> serieErrors) throws IOException, MessagingException, RestServiceException {
 		int i = 0;
 		List<String> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
@@ -176,8 +176,13 @@ public class WADODownloaderService {
 			// Build name
 			String name = buildFileName(subjectName, dataset, datasetFilePath, instanceUID);
 			// Download and zip
-			String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name, i);
-			if (zipedFile != null) files.add(zipedFile);
+			try {
+				String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
+				if (zipedFile != null) files.add(zipedFile);
+			} catch (ZipPacsFileException e) {
+				writeErrorFileInZip(zipOutputStream, name, i, e.getMessage());
+				if (serieErrors != null) serieErrors.add(new SerieError(i, url, e.getMessage()));
+			}
 		}
 		return files;
 	}
@@ -215,9 +220,10 @@ public class WADODownloaderService {
 	 * @param name the filename without extension
 	 * @param i the position of the file into the dataset
 	 * @return the added file name, null if failed
+	 * @throws ZipPacsFileException
 	 * @throws IOException when couldn't write into the stream
 	 */
-	private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name, int i) throws IOException {
+	private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name) throws ZipPacsFileException {
 		byte[] responseBody = null;
 		try {
 			responseBody = downloadFileFromPACS(url);
@@ -228,15 +234,11 @@ public class WADODownloaderService {
 			zipOutputStream.closeEntry();
 			return name + DCM;
 		} catch (IOException e) {
-			writeErrorFileInZip(zipOutputStream, name, i, null);
-			// LOG the error
-			LOG.error("A dicom file could not be downloaded from the pacs:", e);
-			return null;
+			//LOG.error("A dicom file could not be downloaded from the pacs:", e);
+			throw new ZipPacsFileException(e);
 		} catch (HttpClientErrorException e) {
-			writeErrorFileInZip(zipOutputStream, name, i, "received " + e.getStatusCode() + " from PACS");
-			// LOG the error
-			LOG.error("A dicom file could not be downloaded from the pacs:", e);
-			return null;
+			//LOG.error("A dicom file could not be downloaded from the pacs:", e);
+			throw new ZipPacsFileException("received " + e.getStatusCode() + " from PACS", e);
 		}
 	}
 
@@ -249,12 +251,13 @@ public class WADODownloaderService {
 	 * @param workFolder
 	 * @param subjectName
 	 * @param dataset 
+	 * @param serieErrors
 	 * @throws IOException
 	 * @throws MessagingException
 	 * @return
 	 *
 	 */
-	public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
+	public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset, List<SerieError> serieErrors) throws IOException, MessagingException {
 		int i = 0;
 		List<File> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
@@ -287,6 +290,7 @@ public class WADODownloaderService {
 					try {
 						responseBody = downloadFileFromPACS(url);
 					} catch (Exception e) {
+						
 						// Just insert an error log into the file for missing dicoms.
 						File errorFile = new File(workFolder.getPath() + File.separator + ERROR + i + "_" + name + TXT);
 						i++;
@@ -298,6 +302,8 @@ public class WADODownloaderService {
 
 						// LOG the error
 						LOG.error("A dicom file could not be downloaded from the pacs:", e);
+						
+						if (serieErrors != null) serieErrors.add(new SerieError(i, url, e.getMessage()));
 						continue;
 					}
 					try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
@@ -305,7 +311,7 @@ public class WADODownloaderService {
 						files.add(extractedDicomFile);
 					}
 				} else {
-					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
+					if (serieErrors != null) serieErrors.add(new SerieError(i, url, "URL for download is neither in WADO-RS nor in WADO-URI format"));
 				}
 			}
 		}

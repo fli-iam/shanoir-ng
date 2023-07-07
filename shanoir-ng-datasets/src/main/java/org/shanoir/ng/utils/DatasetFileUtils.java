@@ -21,6 +21,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.download.SerieError;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriUtils;
@@ -51,16 +52,33 @@ public class DatasetFileUtils {
 	 * @param pathURLs
 	 * @throws MalformedURLException
 	 */
-	public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format) throws MalformedURLException {
+	public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format) {
+		getDatasetFilePathURLs(dataset, pathURLs, format, null);
+	}
+
+	/**
+	 * Reads all dataset files depending on the format attached to one dataset.
+	 * @param dataset
+	 * @param pathURLs
+	 * @param serieErrors
+	 * @throws MalformedURLException
+	 */
+	public static void getDatasetFilePathURLs(final Dataset dataset, final List<URL> pathURLs, final DatasetExpressionFormat format, List<SerieError> serieErrors) {
 		List<DatasetExpression> datasetExpressions = dataset.getDatasetExpressions();
 		for (Iterator<DatasetExpression> itExpressions = datasetExpressions.iterator(); itExpressions.hasNext();) {
 			DatasetExpression datasetExpression = itExpressions.next();
 			if (datasetExpression.getDatasetExpressionFormat().equals(format)) {
 				List<DatasetFile> datasetFiles = datasetExpression.getDatasetFiles();
-				for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext();) {
+				int i = 0;
+				for (Iterator<DatasetFile> itFiles = datasetFiles.iterator(); itFiles.hasNext(); i++) {
 					DatasetFile datasetFile = itFiles.next();
-					URL url = new URL(datasetFile.getPath().replaceAll("%20", " "));
-					pathURLs.add(url);
+					URL url;
+					try {
+						url = new URL(datasetFile.getPath().replaceAll("%20", " "));
+						pathURLs.add(url);
+					} catch (MalformedURLException e) {
+						if (serieErrors != null) serieErrors.add(new SerieError(i, datasetFile.getPath().replaceAll("%20", " "), e.getMessage()));
+					}
 				}
 			}
 		}

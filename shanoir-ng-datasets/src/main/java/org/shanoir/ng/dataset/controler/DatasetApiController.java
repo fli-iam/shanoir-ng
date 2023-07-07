@@ -321,11 +321,7 @@ public class DatasetApiController implements DatasetApi {
 			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, 
 			HttpServletResponse response) throws RestServiceException, IOException {
 
-		try {
-			this.datasetDownloaderService.downloadDatasetById(datasetId, converterId, format, response);
-		} catch (RestServiceException e) {
-			response.sendError(e.getErrorModel().getCode(), e.getErrorModel().getMessage());
-		}
+		this.datasetDownloaderService.downloadDatasetById(datasetId, converterId, format, response);
 	}
 
 	@Override

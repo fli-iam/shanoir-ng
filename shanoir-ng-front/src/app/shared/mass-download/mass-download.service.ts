@@ -22,6 +22,8 @@ import { ServiceLocator } from 'src/app/utils/locator.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { DownloadSetupComponent } from './download-setup/download-setup.component';
 
+declare var JSZip: any;
+
 export type Report = {
     requestedDatasetIds: number[],
     startTime: number,
@@ -41,8 +43,8 @@ export type Report = {
 export class MassDownloadService {
 
     constructor(
-            private datasetService: DatasetService,
-            private notificationService: NotificationsService) {
+        private datasetService: DatasetService,
+        private notificationService: NotificationsService) {
     }
 
     downloadByIds(datasetIds: number[]) {
@@ -51,7 +53,7 @@ export class MassDownloadService {
             return this._downloadByIds(datasetIds, options.format, options.nbQueues);
         });
     }
-    
+
     private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4): Promise<void> {
         if (datasetIds.length == 0) return;
         return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
@@ -59,8 +61,8 @@ export class MassDownloadService {
             const start: number = Date.now();
             let ids = [...datasetIds]; // copy array
             let report: Report = this.initReport(datasetIds);
-            let promises: Promise<void>[] = []; 
-            for (let queueIndex = 0; queueIndex < nbQueues; queueIndex ++) { // build the dl queues
+            let promises: Promise<void>[] = [];
+            for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
                 promises.push(
                     this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task)
                 );
@@ -71,6 +73,7 @@ export class MassDownloadService {
                 task.message = 'download completed in ' + (Date.now() - start) + 'ms, files saved in the selected directory';
                 this.notificationService.pushLocalTask(task);
                 report.duration = Date.now() - start;
+                console.log(report);
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
@@ -89,9 +92,9 @@ export class MassDownloadService {
             const start: number = Date.now();
             let ids = [...datasets.map(ds => ds.id)];
             let report: Report = this.initReport(datasets.map(ds => ds.id));
-            let promises: Promise<void>[] = []; 
+            let promises: Promise<void>[] = [];
             let j = 0;
-            for (let queueIndex = 0; queueIndex < nbQueues; queueIndex ++) { // build the dl queues
+            for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
                 promises.push(
                     this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, datasets)
                 );
@@ -115,7 +118,7 @@ export class MassDownloadService {
         })
     }
 
-    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number [], report: Report, task: Task, datasets?: Dataset[]): Promise<void> {
+    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, datasets?: Dataset[]): Promise<void> {
         if (!id) return Promise.resolve();
         return this.saveDataset(id, format, userFolderHandle, report, task, datasets?.find(ds => ds.id == id)).then(() => {
             if (remainingIds.length > 0) {
@@ -124,33 +127,51 @@ export class MassDownloadService {
                 return Promise.resolve();
             }
         });
-    } 
+    }
 
     private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, dataset?: Dataset): Promise<void> {
         const metadataPromise: Promise<Dataset> = (dataset?.id == id) ? Promise.resolve(dataset) : this.datasetService.get(id, 'lazy');
-        const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format).catch(e => {console.log(e); throw e});
+        const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format);
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
-            const path: string = 
-                    dataset.datasetAcquisition?.examination?.comment 
-                    + '_' + dataset.datasetAcquisition?.examination?.id
-                    + '/'
-                    + filename
-            return this.writeMyFile(path, blob, userFolderHandle);
+            const path: string =
+                dataset.datasetAcquisition?.examination?.comment
+                + '_' + dataset.datasetAcquisition?.examination?.id
+                + '/'
+                + filename;
+
+            // Check ERRORS file in zip
+            var zip = new JSZip();
+            let unzipTs: number = Date.now();
+            const errorsCheckPromise: Promise<void> = zip.loadAsync(httpResponse.body).then(dataFiles => {
+                return dataFiles.files['ERRORS.json']?.async('string').then(content => {
+                    const errorsJson: any = JSON.parse(content);
+                    report.list[id].status = 'ERROR';
+                    report.list[id].error = errorsJson;
+                    report.list[id].errorTime = Date.now();
+                    task.message = 'saving dataset n°' + id + ' failed';
+                    task.status = -1;
+                });
+            });
+
+            return Promise.all([errorsCheckPromise, this.writeMyFile(path, blob, userFolderHandle)]);
+
         }).then(() => {
             report.list[id].status = 'SUCCESS';
-            report.nbSuccess++;
             task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
         }).catch(reason => {
-            console.log(reason);
             report.list[id].status = 'ERROR';
             report.list[id].error = reason;
             report.list[id].errorTime = Date.now();
-            report.nbError++;
-            task.message = 'saving dataset n°' + id + ' failed' ;
+            task.message = 'saving dataset n°' + id + ' failed';
             task.status = -1;
         }).finally(() => {
+            if (report.list[id].status == 'SUCCESS') {
+                report.nbSuccess++;
+            } else if (report.list[id].status == 'ERROR') {
+                report.nbError++;
+            }
             task.lastUpdate = task.creationDate;
             task.progress = (report.nbSuccess + report.nbError) / report.requestedDatasetIds.length;
             this.notificationService.pushLocalTask(task);
@@ -165,9 +186,9 @@ export class MassDownloadService {
 
         return this.createDirectoriesIn(splited, userFolderHandle).then(lastFolderHandle => { // create the sub directories
             lastFolderHandle.getFileHandle(filename, { create: true } // create the file handle
-                ).then(fileHandler => {
-                    this.writeFile(fileHandler, content); // write the file
-                });
+            ).then(fileHandler => {
+                this.writeFile(fileHandler, content); // write the file
+            });
         });
     }
 
@@ -186,16 +207,16 @@ export class MassDownloadService {
         await writable.write(contents);
         // Close the file and write the contents to disk.
         await writable.close();
-      }
-      
+    }
+
     private createDirectoriesIn(dirs: string[], parentFolderHandle: FileSystemDirectoryHandle): Promise<FileSystemDirectoryHandle> {
         const dirToCreate: string = dirs.shift(); // separate the first element
-        return parentFolderHandle.getDirectoryHandle(dirToCreate, { create: true})
-                .then(handle => {
-                    if (dirs.length > 0) {
-                        return this.createDirectoriesIn(dirs, handle);
-                    } else return handle;
-                });
+        return parentFolderHandle.getDirectoryHandle(dirToCreate, { create: true })
+            .then(handle => {
+                if (dirs.length > 0) {
+                    return this.createDirectoriesIn(dirs, handle);
+                } else return handle;
+            });
     }
 
     private getFilename(response: HttpResponse<any>): string {
