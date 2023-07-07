@@ -35,7 +35,6 @@ import {Mode} from "../../shared/components/entity/entity.component.abstract";
 })
 export class ExecutionComponent implements OnInit {
 
-    @Input() mode: Mode;
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
     selectedDatasets: Set<Dataset>;
@@ -312,5 +311,9 @@ export class ExecutionComponent implements OnInit {
 
     private cleanExecutionName(name: string): string {
         return name.replace(/[^0-9A-Za-z_-]/g, '_')
+    }
+
+    test() {
+        console.log("test : " + this.fileFormat);
     }
 }

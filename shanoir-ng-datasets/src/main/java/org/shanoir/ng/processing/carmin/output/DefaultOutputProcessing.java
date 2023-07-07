@@ -187,32 +187,23 @@ public class DefaultOutputProcessing extends OutputProcessing {
 	 */
 	private void createProcessedDatasets(List<File> processedFiles, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws EntityNotFoundException, IOException {
 
-		List<Dataset> outputDatasets = new ArrayList<>();
-		
 		// Create dataset processing
-		DatasetProcessing processing = new DatasetProcessing();
-		processing.setComment(carminDatasetProcessing.getPipelineIdentifier());
-		processing.setInputDatasets(inputDatasets);
-		processing.setProcessingDate(carminDatasetProcessing.getProcessingDate());
-		processing.setStudyId(carminDatasetProcessing.getStudyId());
-		processing.setDatasetProcessingType(carminDatasetProcessing.getDatasetProcessingType());
-		processing = datasetProcessingService.create(processing);
+		DatasetProcessing processing = this.createProcessing(carminDatasetProcessing, inputDatasets);
 
 		Study study = studyRepository.findById(carminDatasetProcessing.getStudyId())
 				.orElseThrow(() -> new NotFoundException("Study [" + carminDatasetProcessing.getStudyId() + "] not found."));
 
-		for (File niiftiFile : processedFiles) {
+		for (File file : processedFiles) {
 
-			LOG.info("Processing [{}]...", niiftiFile.getAbsolutePath());
+			LOG.info("Processing [{}]...", file.getAbsolutePath());
 
 			ProcessedDatasetImportJob processedDataset = new ProcessedDatasetImportJob();
-
 			processedDataset.setDatasetProcessing(processing);
-
-			processedDataset.setProcessedDatasetFilePath(niiftiFile.getAbsolutePath());
+			processedDataset.setProcessedDatasetFilePath(file.getAbsolutePath());
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 			processedDataset.setStudyId(carminDatasetProcessing.getStudyId());
 			processedDataset.setStudyName(study.getName());
+			processedDataset.setProcessedDatasetName(getNameWithoutExtension(file.getName()));
 
 			if(inputDatasets.size() != 0) {
 
@@ -235,20 +226,30 @@ public class DefaultOutputProcessing extends OutputProcessing {
 				processedDataset.setDatasetType(MeshDataset.datasetType);
 			}
 
-			processedDataset.setProcessedDatasetName(getNameWithoutExtension(niiftiFile.getName())); 
 			importerService.createProcessedDataset(processedDataset);
 
-			LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), niiftiFile.getAbsolutePath());
+			LOG.info("Processed dataset [{}] has been created from [{}].", processedDataset.getProcessedDatasetName(), file.getAbsolutePath());
 
 		}
 
-		processing.setOutputDatasets(outputDatasets);
 		datasetProcessingService.update(processing);
 
 		// Remove datasets from current Carmin processing
 		carminDatasetProcessing.setInputDatasets(Collections.emptyList());
 		datasetProcessingService.update(carminDatasetProcessing);
 
+	}
+
+	private DatasetProcessing createProcessing(CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) {
+		DatasetProcessing processing = new DatasetProcessing();
+		processing.setComment(carminDatasetProcessing.getPipelineIdentifier());
+		processing.setInputDatasets(inputDatasets);
+		processing.setProcessingDate(carminDatasetProcessing.getProcessingDate());
+		processing.setStudyId(carminDatasetProcessing.getStudyId());
+		processing.setDatasetProcessingType(carminDatasetProcessing.getDatasetProcessingType());
+		processing.setOutputDatasets(new ArrayList<>());
+		processing = datasetProcessingService.create(processing);
+		return processing;
 	}
 
 	private void deleteCacheDir(Path directory) {

@@ -26,12 +26,10 @@
 	   </div>
     </div>
     <div>
-        <label>Dataset export format</label>
-        <span class="right-col" [ngSwitch]="mode">
-    <ng-template ngSwitchDefault>
-        <input type="radio" name="format" id="nii" [(ngModel)]="fileFormat" [value]="'nii'" [checked]="true" />NIfTI
-        <input type="radio" name="format" id="dcm" [(ngModel)]="fileFormat" [value]="'dcm'" [checked]="false" />DICOM
-    </ng-template>
+    <label>Dataset export format</label>
+    <span class="right-col">
+        <input type="radio" name="format" [(ngModel)]="fileFormat" value="nii" (change)="test()" />NIfTI
+        <input type="radio" name="format" [(ngModel)]="fileFormat" value="dcm" (change)="test()" />DICOM
     </span>
     </div>
 </form>
