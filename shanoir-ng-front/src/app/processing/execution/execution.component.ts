@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {
     AbstractControl,
     UntypedFormControl,
@@ -26,6 +26,7 @@ import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
 import {ProcessingService} from '../processing.service';
 import {Option} from '../../shared/select/select.component';
 import { formatDate } from '@angular/common';
+import {Mode} from "../../shared/components/entity/entity.component.abstract";
 
 @Component({
     selector: 'app-execution',
@@ -34,6 +35,7 @@ import { formatDate } from '@angular/common';
 })
 export class ExecutionComponent implements OnInit {
 
+    @Input() mode: Mode;
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
     selectedDatasets: Set<Dataset>;
