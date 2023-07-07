@@ -26,15 +26,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
             <li>
                 <label>Status</label>
-                <span class="right-col"><progress-bar [progress]="task?.progress"></progress-bar></span>
+                <span class="right-col">
+                    <progress-bar [progress]="task?.progress"></progress-bar>
+                    <!-- <button *ngIf="task.eventType == 'downloadDataset.event' && task?.progress == -1" class="alt left-icon normal">
+                        <i class="fas fa-download"></i>
+                        Retry
+                    </button>
+                    <button *ngIf="task.eventType == 'downloadDataset.event' && task?.progress == 2" class="alt left-icon normal">
+                        <i class="fas fa-download"></i>
+                        Retry
+                    </button> -->
+                </span>
             </li>
             <li class="message-li">
                 <label>Last message</label>
                 <span class="right-col">
                     <div class="message">
-                        <code *ngFor="let line of task?.message.split('\n')" [class.tab]="line.startsWith('- ')">
-                            {{line}}
-                        </code>
+                        <pre><code>{{task?.message}}</code></pre>
                     </div>
                 </span>
             </li>

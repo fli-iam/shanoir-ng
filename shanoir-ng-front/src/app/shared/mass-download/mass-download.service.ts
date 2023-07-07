@@ -69,11 +69,22 @@ export class MassDownloadService {
             }
             return Promise.all(promises).then(() => {
                 task.lastUpdate = new Date();
-                task.status = task.status == -1 ? -1 : 1;
-                task.message = 'download completed in ' + (Date.now() - start) + 'ms, files saved in the selected directory';
-                this.notificationService.pushLocalTask(task);
                 report.duration = Date.now() - start;
-                console.log(report);
+                if (report.nbError > 0) {
+                    task.status = -1;
+                    const tab: string = '- ';
+                    task.message = 'download failed in ' + report.duration + 'ms.\n'
+                        + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
+                        + tab + report.nbError + ' datasets were downloaded but are (at least partially) in error and files could be missing.\n'
+                        + 'errors details :\n'
+                        + JSON.stringify(report, null, 4);
+                    JSON.stringify(report);
+                } else {
+                    task.status = task.status == -1 ? -1 : 1;
+                    task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' files saved in the selected directory';
+                }
+
+                this.notificationService.pushLocalTask(task);
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
@@ -145,21 +156,23 @@ export class MassDownloadService {
             var zip = new JSZip();
             let unzipTs: number = Date.now();
             const errorsCheckPromise: Promise<void> = zip.loadAsync(httpResponse.body).then(dataFiles => {
-                return dataFiles.files['ERRORS.json']?.async('string').then(content => {
-                    const errorsJson: any = JSON.parse(content);
-                    report.list[id].status = 'ERROR';
-                    report.list[id].error = errorsJson;
-                    report.list[id].errorTime = Date.now();
-                    task.message = 'saving dataset n°' + id + ' failed';
-                    task.status = -1;
-                });
+                if (dataFiles.files['ERRORS.json']) {
+                    return dataFiles.files['ERRORS.json'].async('string').then(content => {
+                        const errorsJson: any = JSON.parse(content);
+                        report.list[id].status = 'ERROR';
+                        report.list[id].error = errorsJson;
+                        report.list[id].errorTime = Date.now();
+                        task.message = 'saving dataset n°' + id + ' failed';
+                        task.status = -1;
+                    });
+                } else {
+                    report.list[id].status = 'SUCCESS';
+                    task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
+                }
             });
 
-            return Promise.all([errorsCheckPromise, this.writeMyFile(path, blob, userFolderHandle)]);
+            return Promise.all([errorsCheckPromise, this.writeMyFile(path, blob, userFolderHandle)]).then(() => null);
 
-        }).then(() => {
-            report.list[id].status = 'SUCCESS';
-            task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
         }).catch(reason => {
             report.list[id].status = 'ERROR';
             report.list[id].error = reason;
