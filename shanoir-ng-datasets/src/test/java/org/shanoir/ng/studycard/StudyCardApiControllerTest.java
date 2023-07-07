@@ -32,6 +32,7 @@ import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.validation.FindByRepository;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.controler.StudyCardApiController;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
@@ -96,6 +97,9 @@ public class StudyCardApiControllerTest {
 
 	@MockBean
 	private DicomSRImporterService dicomSRImporterService;
+	
+	@MockBean
+	private SolrService solrService;
 
 	@Before
 	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException {
