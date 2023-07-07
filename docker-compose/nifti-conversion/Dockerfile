@@ -110,7 +110,7 @@ RUN install -m 755 external/anima/animaConvertImage /usr/local/bin/
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
 # Also install dicomifier
-# RUN /opt/nifti-converters/dicomifier/dicomifier.ws/run.py
+RUN /opt/nifti-converters/dicomifier/dicomifier.ws/run.py
 
 ADD nifti-conversion.jar nifti-conversion.jar
 COPY entrypoint entrypoint_common oneshot /bin/
