@@ -108,7 +108,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 					} catch (Exception e) { // one serie/file could cause problems, log but continue with next serie
 						LOG.error("Error while processing serie: {} {} {}", serie.toString(), e.getMessage(), e.getStackTrace());
 						serie.setErroneous(true);
-						serie.setErrorMessage(e.getMessage() + ", " + e.getStackTrace());
+						serie.setErrorMessage(e.getMessage() + ", " + e.toString());
 						if(event != null){
 							event.setMessage("Error with serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
 							eventService.publishEvent(event);
