@@ -105,19 +105,28 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 					try {
 						filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
 					} catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
-						LOG.error("Error while processing serie: {} {} {}", serie.toString(), e.getMessage(), e.getStackTrace());
-						serie.setErroneous(true);
-						serie.setErrorMessage(e.getMessage() + ", " + e.toString());
-						serie.setSelected(false);
-						if(event != null){
-							event.setMessage("Error with serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
-							eventService.publishEvent(event);
-						}
+						handleError(event, nbSeries, cpt, serie, e);
 					}
-					getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS); // outside try-catch as less error prone and to show at least series name for error series
+					// use a second try here, in case error is on serie, to get at least the serie name for error tracing
+					try {
+						getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
+					} catch (Exception e) {
+						handleError(event, nbSeries, cpt, serie, e);						
+					}
 					cpt++;
 				}
 			}
+		}
+	}
+
+	private void handleError(ShanoirEvent event, int nbSeries, int cpt, Serie serie, Exception e) {
+		LOG.error("Error while processing serie: {} {} {}", serie.toString(), e.getMessage(), e.getStackTrace());
+		serie.setErroneous(true);
+		serie.setErrorMessage(e.getMessage() + ", " + e.toString());
+		serie.setSelected(false);
+		if(event != null){
+			event.setMessage("Error with serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
+			eventService.publishEvent(event);
 		}
 	}
 
