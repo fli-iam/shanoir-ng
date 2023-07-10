@@ -109,6 +109,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 						LOG.error("Error while processing serie: {} {} {}", serie.toString(), e.getMessage(), e.getStackTrace());
 						serie.setErroneous(true);
 						serie.setErrorMessage(e.getMessage() + ", " + e.toString());
+						serie.setSelected(false);
 						if(event != null){
 							event.setMessage("Error with serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
 							eventService.publishEvent(event);

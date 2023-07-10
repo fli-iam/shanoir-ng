@@ -118,7 +118,8 @@ public class DicomDirToModelService {
 			}
 		} else {
 			LOG.warn("Serie found with non imaging modality and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
-			serie.setIgnored(true);			
+			serie.setIgnored(true);
+			serie.setSelected(false);
 		}
 		series.add(serie);
 	}
