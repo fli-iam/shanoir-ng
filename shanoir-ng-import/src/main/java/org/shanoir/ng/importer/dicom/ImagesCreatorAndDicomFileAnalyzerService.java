@@ -106,9 +106,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 						filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
 						getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
 					} catch (Exception e) { // one serie/file could cause problems, log but continue with next serie
-						LOG.error("Error while processing serie: {}", serie.toString(), e.getMessage(), e.getStackTrace());
+						LOG.error("Error while processing serie: {} {} {}", serie.toString(), e.getMessage(), e.getStackTrace());
 						serie.setErroneous(true);
-						serie.setErrorMessage(e.getMessage() + "," + e.getStackTrace());
+						serie.setErrorMessage(e.getMessage() + ", " + e.getStackTrace());
 						if(event != null){
 							event.setMessage("Error with serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
 							eventService.publishEvent(event);
@@ -216,7 +216,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 */
 	private void processOneDicomFileForAllInstances(File dicomFile, List<Image> images, String folderFileAbsolutePath) throws Exception {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
-			Attributes attributes = dIS.readDatasetUntilPixelData();
+			Attributes attributes = dIS.readDataset();
 			// Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
 			if (dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
 				// do nothing here as instances list will be emptied after split between images and non-images
@@ -268,11 +268,11 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param datasetAttributes
 	 */
 	private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
-		String sOPClassUID = attributes.getString(Tag.SOPClassUID);
-		if (UID.EnhancedMRImageStorage.equals(sOPClassUID)
-			|| UID.EnhancedMRColorImageStorage.equals(sOPClassUID)
-			|| UID.EnhancedCTImageStorage.equals(sOPClassUID)
-			|| UID.EnhancedPETImageStorage.equals(sOPClassUID)) {
+		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
+		if (UID.EnhancedMRImageStorage.equals(sopClassUID)
+			|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
+			|| UID.EnhancedCTImageStorage.equals(sopClassUID)
+			|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
 		}
