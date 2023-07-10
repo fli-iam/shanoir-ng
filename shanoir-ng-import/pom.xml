@@ -27,7 +27,7 @@
 	<description>Shanoir-NG Import Microservice</description>
 
 	<properties>
-		<dcm4che.version>5.14.1</dcm4che.version>
+		<dcm4che.version>5.30.0</dcm4che.version>
 		<weasis.version>5.14.1</weasis.version>
 	</properties>
 
