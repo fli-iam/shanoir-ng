@@ -104,8 +104,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 					}
 					try {
 						filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
-						getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
-					} catch (Exception e) { // one serie/file could cause problems, log but continue with next serie
+					} catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
 						LOG.error("Error while processing serie: {} {} {}", serie.toString(), e.getMessage(), e.getStackTrace());
 						serie.setErroneous(true);
 						serie.setErrorMessage(e.getMessage() + ", " + e.toString());
@@ -115,6 +114,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 							eventService.publishEvent(event);
 						}
 					}
+					getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS); // outside try-catch as less error prone and to show at least series name for error series
 					cpt++;
 				}
 			}
@@ -257,7 +257,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			addSeriesEquipment(serie, attributes);
 			addSeriesCenter(serie, attributes);
 		} catch (IOException e) {
-			LOG.error("Error during processing of DICOM file:", e);
+			LOG.error("Error during processing of DICOM file " + dicomFile.getAbsolutePath() + ":", e);
 		}
 	}
 
