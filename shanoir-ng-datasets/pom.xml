@@ -27,7 +27,6 @@
 	<description>Dataset project for Shanoir NG</description>
 
 	<properties>
-		<dcm4che.version>5.30.0</dcm4che.version>
 		<resteasy.version>3.1.0.Final</resteasy.version>
 		<solr-spring.version>4.3.8</solr-spring.version>
 	</properties>
