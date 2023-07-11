@@ -50,7 +50,7 @@ export class ExecutionComponent implements OnInit {
     fileInputs = [];
     inputDatasets: Dataset[] = [];
     execDefaultName= "";
-    fileFormat="nii";
+    exportFormat="nii";
 
     constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
         this.breadcrumbsService.nameStep('2. Executions');
@@ -103,7 +103,8 @@ export class ExecutionComponent implements OnInit {
 
     initExecutionForm() {
         this.executionForm = new UntypedFormGroup({
-            "execution_name": new UntypedFormControl('', Validators.required)
+            "execution_name": new UntypedFormControl('', Validators.required),
+            "export_format": new UntypedFormControl('', Validators.required)
         });
 
         this.pipeline.parameters.forEach(
@@ -174,7 +175,7 @@ export class ExecutionComponent implements OnInit {
 
                     // TODO the format should be selected depending on the pipeline.
                     // File ad md5 values should be selected automcatically depending on the pipeline.
-                    execution.inputValues[parameter.name] = this.getDatasetsValue(datasetsToSet);
+                    execution.inputValues[parameter.name] = this.getDatasetsUris(datasetsToSet);
                 } else if (parameter.type == ParameterType.Boolean) {
                     execution.inputValues[parameter.name] = this.executionForm.get(parameter.name).value ? true : false;
                 } else {
@@ -185,14 +186,18 @@ export class ExecutionComponent implements OnInit {
         this.parametersApplied = true;
     }
 
-    getDatasetsValue(datasets) {
+    getDatasetUri(dataset) {
+        let extension = ".nii.gz"
+        if(this.exportFormat == "dcm") {
+            extension = ".zip"
+        }
+        let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g, "_")}${extension}`
+        return `shanoir:/${dataset_name}?format=${this.exportFormat}&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+    }
+
+    getDatasetsUris(datasets) {
         return datasets.forEach(dataset => {
-            let extension = ".nii.gz"
-            if(this.fileFormat == "dcm") {
-                extension = ".zip"
-            }
-            let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g, "_")}${extension}`
-            return `shanoir:/${dataset_name}?format=${this.fileFormat}&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+            return this.getDatasetUri(dataset);
         })
     }
 
@@ -228,7 +233,7 @@ export class ExecutionComponent implements OnInit {
 
                         // TODO the format should be selected depending on the pipeline.
                         // File ad md5 values should be selected automcatically depending on the pipeline.
-                        execution.inputValues[parameter.name].push(`shanoir:/${dataset_name}?format=nii&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`);
+                        execution.inputValues[parameter.name].push(this.getDatasetUri(dataset));
                         this.inputDatasets.push(dataset);
                     })
                 } else {
@@ -314,6 +319,6 @@ export class ExecutionComponent implements OnInit {
     }
 
     test() {
-        console.log("test : " + this.fileFormat);
+        console.log("test : " + this.exportFormat);
     }
 }
