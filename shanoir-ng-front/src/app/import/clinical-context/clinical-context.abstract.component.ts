@@ -540,7 +540,10 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         subjectWithSubjectStudy.id = subject.id;
         subjectWithSubjectStudy.name = subject.name;
         subjectWithSubjectStudy.identifier = subject.identifier;
-        subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
+        if(subject.subjectStudyList){
+            subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
+        }
+
         return subjectWithSubjectStudy;
     }
 
