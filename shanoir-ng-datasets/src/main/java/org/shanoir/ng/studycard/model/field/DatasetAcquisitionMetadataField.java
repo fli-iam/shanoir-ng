@@ -37,7 +37,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
 				MrProtocol mrProtocol = mrDsAcq.getMrProtocol();
 				if (mrProtocol != null) {
-					if (mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+					if (mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getName() != null) {
 						return mrDsAcq.getMrProtocol().getUpdatedMetadata().getName();
 					} else if (mrDsAcq.getMrProtocol().getOriginMetadata() != null) {
 						return mrDsAcq.getMrProtocol().getOriginMetadata().getName();
@@ -217,7 +217,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		public String get(DatasetAcquisition datasetAcquisition) {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
 				MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
-				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null) {
+				if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata() != null && mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceName() != null) {
 					return mrDsAcq.getMrProtocol().getUpdatedMetadata().getMrSequenceName();
 				} else if (mrDsAcq.getMrProtocol() != null && mrDsAcq.getMrProtocol().getOriginMetadata() != null) {
                     return mrDsAcq.getMrProtocol().getOriginMetadata().getMrSequenceName();
