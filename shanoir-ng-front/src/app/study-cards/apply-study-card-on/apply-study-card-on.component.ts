@@ -30,6 +30,7 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { Location } from '@angular/common';
 
 export type Status = 'default' | 'loading' | 'done' | 'error';
 @Component({
@@ -65,7 +66,8 @@ export class ApplyStudyCardOnComponent implements OnInit {
             private confirmService: ConfirmDialogService,
             private router : Router,
             private keycloakService: KeycloakService,
-            private activatedRoute: ActivatedRoute) {
+            private activatedRoute: ActivatedRoute,
+            private location: Location) {
                 
         breadcrumbsService.nameStep('Reapply Study Card');
 
@@ -82,7 +84,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
 
     ngOnInit(): void {
         const studyCardId: number = parseInt(this.activatedRoute.snapshot.paramMap.get('id'));
-        let datasetIds: number[] = this.breadcrumbsService.currentStep.data.datasetIds;
+        let datasetIds: number[] = Array.from(this.breadcrumbsService.currentStep.data.datasetIds || []);
         let acquisitionPromise: Promise<DatasetAcquisition[]>;
         let studycardPromise: Promise<StudyCard[] | StudyCard>;
         if (datasetIds?.length > 0) {
@@ -92,7 +94,8 @@ export class ApplyStudyCardOnComponent implements OnInit {
             acquisitionPromise = this.datasetAcquisitionService.getByStudycardId(studyCardId);
             studycardPromise = this.studycardService.get(studyCardId);
         } else {
-            throw new Error('no input argument provided');
+            this.location.back();
+            return;
         }
         
         let rightsPromise: Promise<Map<number, StudyUserRight[]>> = this.studyRightsService.getMyRights().then(rights => this.studyRights = rights);
