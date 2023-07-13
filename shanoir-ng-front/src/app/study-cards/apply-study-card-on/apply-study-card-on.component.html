@@ -26,12 +26,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </li>
         <li>
             <span class="label">Study card : </span>
-            <span *ngIf="status == 'default'"><select-box [(ngModel)]="studycard" [options]="studycardOptions" (userChange)="updateStudyCard()" (onViewClick)="showStudyCard()" [viewDisabled]="!studycard"></select-box></span>
+            <span *ngIf="status == 'default'"><select-box [(ngModel)]="studycard" [options]="studycardOptions" (userChange)="updateStudyCard()" [viewRoute]="'/study-card/details/' + this.studycard?.id" [viewDisabled]="!studycard" [readOnly]="!studyCards"></select-box></span>
             <span *ngIf="status != 'default'"class="value">{{studycard?.name}}</span>
         </li>
-        <li *ngIf="status == 'default'">
+        <li *ngIf="status == 'default' && studyCards">
             <span class="label">Show incompatible studycards : </span>
-            <span><checkbox [(ngModel)]="showIncompatibles" (onChange)="updateShowIncompatible()"></checkbox></span>
+            <span><input type="checkbox" [(ngModel)]="showIncompatibles" (onChange)="updateShowIncompatible()"/></span>
         </li>
     </ul>
     <ul class="form sc-box" *ngIf="studycard" @slideRight>
@@ -81,7 +81,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     Done<i class="fa-solid fa-check"></i>
 </div>
 
-<div *ngIf="status == 'error'" class="button-div done right-icon">
+<div *ngIf="status == 'error'" class="button-div error right-icon">
     Error<i class="fa-solid fa-exclamation-triangle"></i>
 </div>
 

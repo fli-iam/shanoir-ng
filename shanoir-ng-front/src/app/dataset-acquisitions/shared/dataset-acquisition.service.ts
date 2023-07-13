@@ -68,13 +68,18 @@ export class DatasetAcquisitionService extends EntityService<DatasetAcquisition>
             });
     }
 
-    getAllForExamination(examinationId: number): Promise<ExaminationDatasetAcquisitionDTO[]> {
+    getAllForExamination(examinationId: number): Promise<ExaminationDatasetAcquisitionDTO[]> { // TODO : services shouldn't return dtos
         return this.http.get<ExaminationDatasetAcquisitionDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/examination/' + examinationId)
             .toPromise();
     }
 
     getAllForDatasets(datasetIds: number[]): Promise<DatasetAcquisition[]> {
         return this.http.post<DatasetAcquisitionDatasetsDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/byDatasetIds', Array.from(datasetIds))
+            .toPromise().then(dtos => this.mapEntityList(dtos));
+    }
+
+    getByStudycardId(studycardId: number): Promise<DatasetAcquisition[]> {
+        return this.http.get<DatasetAcquisitionDatasetsDTO[]>(AppUtils.BACKEND_API_DATASET_ACQUISITION_URL + '/byStudyCard/' + studycardId)
             .toPromise().then(dtos => this.mapEntityList(dtos));
     }
 

@@ -145,7 +145,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [disabled]="loading || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject();"
-                        (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
+                        [viewRoute]="'/subject/details/' + this.subject?.id" [viewDisabled]="!subject"
                         (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
                         [optionArr]="subjects">
                 </select-box>
