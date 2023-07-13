@@ -124,6 +124,10 @@ public class Serie {
 		this.numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
 		this.modality = attributes.getString(Tag.Modality);
 		this.protocolName = attributes.getString(Tag.ProtocolName);
+		this.isEnhanced = Boolean.FALSE;
+		this.isMultiFrame = Boolean.FALSE;
+		this.isSpectroscopy = Boolean.FALSE;
+		this.isCompressed = Boolean.FALSE;
 		final EquipmentDicom equipmentDicom = new EquipmentDicom(
 				attributes.getString(Tag.Manufacturer),
 				attributes.getString(Tag.ManufacturerModelName),

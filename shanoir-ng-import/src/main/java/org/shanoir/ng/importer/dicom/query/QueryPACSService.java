@@ -301,6 +301,8 @@ public class QueryPACSService {
 						dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 					} else {
 						LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
+						serie.setIgnored(true);
+						serie.setSelected(false);
 					}
 				} else {
 					LOG.warn("Serie found with non imaging modality and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
