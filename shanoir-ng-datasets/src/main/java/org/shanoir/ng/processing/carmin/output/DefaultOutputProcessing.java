@@ -34,6 +34,7 @@ import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -87,13 +88,13 @@ public class DefaultOutputProcessing extends OutputProcessing {
 			}
 
 			List<File> outputFiles = new ArrayList<>();
-			List<Dataset> inputDatasets = new ArrayList<>();
+
+			File resultJson = null;
 
 			// first, find "result.json" file
 			while ((entry = fin.getNextTarEntry()) != null) {
 
 				String parsedEntry = entry.getName();
-				LOG.info("Tar entry [{}]", parsedEntry);
 
 				if (entry.isDirectory()) {
 					continue;
@@ -103,27 +104,23 @@ public class DefaultOutputProcessing extends OutputProcessing {
 				IOUtils.copy(fin, Files.newOutputStream(currentFile.toPath()));
 
 				if (parsedEntry.endsWith(this.resultFileName)) {
-
-					LOG.info("Processing result JSON [{}]...", parsedEntry);
-					try {
-						inputDatasets = this.getDatasetsFromResultJSON(currentFile);
-
-						if(inputDatasets.isEmpty()){
-							LOG.warn("No datasets found in result JSON [{}].", parsedEntry);
-						}
-
-					} catch (Exception e) {
-						LOG.error("Could not read result JSON file", e);
-					}
-
+					resultJson = currentFile;
 				} else {
 					// For all other files that are not a result.json or a folder, create a processed dataset and a dataset processing
 					outputFiles.add(currentFile);
+					LOG.info("Output file [{}] found in archive.", parsedEntry);
 				}
 			}
 
+			List<Dataset> inputDatasets = this.getInputDatasets(resultJson, in.getName());
+
+
+			if(inputDatasets.isEmpty()) {
+				throw new Exception("No input datasets found.");
+			}
+
 			if(outputFiles.isEmpty()){
-				LOG.warn("No processable file found in Tar result.");
+				throw new Exception("No processable file found in Tar result.");
 			}
 
 			this.createProcessedDatasets(outputFiles, processing, inputDatasets);
@@ -131,12 +128,34 @@ public class DefaultOutputProcessing extends OutputProcessing {
 			this.deleteCacheDir(Paths.get(cacheFolder.getAbsolutePath()));
 
 		} catch (Exception e) {
-			LOG.error("An error occured while extracting result from tar.gz file: ", e);
+			LOG.error("An error occured while extracting result from result archive.", e);
+			importerService.createFailedJob(in.getPath());
 		}
 	}
 
 
-	private List<Dataset> getDatasetsFromResultJSON(File resultJson) throws IOException, JSONException {
+	private List<Dataset> getInputDatasets(File resultJson, String tarName) throws IOException, JSONException {
+
+		ArrayList<Dataset> inputDatasets = new ArrayList<>();
+
+		if (resultJson == null) {
+			LOG.info("No result JSON found in archive. Dataset id will be parsed from archive name.");
+
+			Long id = getDatasetIdFromFilename(tarName);
+
+			if(id == null){
+				LOG.error("No dataset id could be parsed from archive name [{}].", tarName);
+				return new ArrayList<>();
+			}
+
+			inputDatasets.add(datasetService.findById(id));
+
+			return inputDatasets;
+
+		}
+
+		LOG.info("Processing result JSON [{}]...", resultJson.getName());
+
 
 		InputStream is = new FileInputStream(resultJson);
 		JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
@@ -145,7 +164,7 @@ public class DefaultOutputProcessing extends OutputProcessing {
 
 		List<String> filenames = new ArrayList<>();
 
-		if(!json.has(JSON_INFILE)){
+		if (!json.has(JSON_INFILE)) {
 			LOG.error("No key [{}] found in [{}]", JSON_INFILE, resultJson.getAbsolutePath());
 			return new ArrayList<>();
 		}
@@ -155,7 +174,7 @@ public class DefaultOutputProcessing extends OutputProcessing {
 		if (infiles instanceof JSONArray) {
 			// case "["id+XXX+filename.nii", "YYY+filename.nii"]"
 			JSONArray array = (JSONArray) infiles;
-			for (int i=0 ; i < array.length(); i++) {
+			for (int i = 0; i < array.length(); i++) {
 				filenames.add(array.getString(i));
 			}
 		} else {
@@ -165,17 +184,26 @@ public class DefaultOutputProcessing extends OutputProcessing {
 		}
 
 		for (String name : filenames) {
-			// Ugly pattern to get dataset id
-			// TODO: check that the "+" is mandatory. What if no ? What if not a file but a number ?
-			Pattern p = Pattern.compile("id\\+(\\d+)\\+.*");
-			Matcher m = p.matcher(name);
-			// If there is not match, it's not a file parameter => Do not search dataset
-			if (m.matches()) {
-				datasetIds.add(Long.valueOf(m.group(1)));
+			Long id = this.getDatasetIdFromFilename(name);
+
+			if (id != null) {
+				datasetIds.add(id);
 			}
 		}
 
 		return datasetService.findByIdIn(datasetIds);
+	}
+
+	private Long getDatasetIdFromFilename(String name){
+		// Ugly pattern to get dataset id
+		// TODO: check that the "+" is mandatory. What if no ? What if not a file but a number ?
+		Pattern p = Pattern.compile("id\\+(\\d+)\\+.*");
+		Matcher m = p.matcher(name);
+		// If there is not match, it's not a file parameter => Do not search dataset
+		if (m.matches()) {
+			return Long.valueOf(m.group(1));
+		}
+		return null;
 	}
 
 	/**
