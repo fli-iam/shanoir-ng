@@ -201,16 +201,17 @@ public class RabbitMQSubjectService {
 
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 
-			Optional<Subject> subject = subjectRepository.findById(Long.valueOf(event.getObjectId()));
+			Long id = Long.valueOf(event.getObjectId());
+
+			Optional<Subject> subject = subjectRepository.findById(id);
 
 			if(subject.isEmpty()){
 				return;
 			}
 
-			String id = subject.get().getId().toString();
-			subjectRepository.delete(subject.get());
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, id, KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-			LOG.info("Subject [{}] has been deleted following deletion of preclinical subject [{}]", id, id);
+			subjectService.deleteById(subject.get().getId());
+
+			LOG.info("Subject [{}] has been deleted following deletion of preclinical subject [{}]", subject.get().getId(), id);
 
 
 		} catch (Exception e) {

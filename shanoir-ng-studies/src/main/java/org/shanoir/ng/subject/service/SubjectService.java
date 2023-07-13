@@ -166,7 +166,7 @@ public interface SubjectService {
 	 * @param id subject id.
 	 * @throws EntityNotFoundException
 	 */
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#id, 'CAN_ADMINISTRATE')")
+	@PreAuthorize("hasAnyRole('ADMIN') or hasAnyRole('EXPERT') and @studySecurityService.hasRightOnSubjectForEveryStudy(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException;
 
 
