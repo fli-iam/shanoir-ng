@@ -69,14 +69,10 @@ public class BrukerApiControllerTest {
 	
 	public static String tempFolderPath;
 	
-	@BeforeAll
+	@BeforeEach
 	public void beforeClass() {
 		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
 	    System.setProperty("preclinical.uploadBrukerFolder", tempFolderPath);
-	}
-
-	@BeforeEach
-	public void setup() throws ShanoirException {
 	}
 
 	@Test

@@ -115,16 +115,13 @@ public class ExtraDataApiControllerTest {
 	public File tempFolder;
 	
 	public String tempFolderPath;
-	
-	@BeforeAll
-	public void beforeClass() {
-		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
-	}
 
 	@BeforeEach
 	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
+	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
+
+	    gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(extraDataServiceMock).deleteById(1L);
 		given(extraDataServiceMock.findAllByExaminationId(1L)).willReturn(Arrays.asList(new ExaminationExtraData()));
