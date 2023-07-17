@@ -17,7 +17,7 @@
 use preclinical;
 
 INSERT INTO reference
-(id, reftype, value, category)
+(id, reftype, refvalue, category)
 VALUES (1,'specie','Rat','subject'),
 		(2,'specie','Mouse','subject'),
 		(3,'biotype','Wild','subject'),

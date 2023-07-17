@@ -34,6 +34,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Anesthetics service test.
@@ -42,11 +43,11 @@ import org.springframework.boot.test.context.SpringBootTest;
  * 
  */
 @SpringBootTest
+@ActiveProfiles("test")
 public class AnestheticServiceTest {
 
 	private static final Long ANESTHETIC_ID = 1L;
 	private static final String UPDATED_ANESTHETIC_DATA = "Injection 2%";
-	
 
 	@Mock
 	private AnestheticRepository anestheticRepository;
@@ -56,8 +57,6 @@ public class AnestheticServiceTest {
 
 	@InjectMocks
 	private AnestheticServiceImpl anestheticsService;
-	
-			
 	
 	@BeforeEach
 	public void setup() {
@@ -101,8 +100,6 @@ public class AnestheticServiceTest {
 		Mockito.verify(anestheticRepository, Mockito.times(1)).findAllByAnestheticType(AnestheticType.GAS);
 	}
 	
-	
-
 	@Test
 	public void saveTest() throws ShanoirException {
 		anestheticsService.save(createAnesthetic());

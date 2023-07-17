@@ -16,12 +16,6 @@ package org.shanoir.ng.preclinical.references;
 
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.PostLoad;
-import jakarta.persistence.Table;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -30,15 +24,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.PostLoad;
+
 /**
  * Reference
  */
 @Entity
-@Table(name = "reference")
 @JsonPropertyOrder({ "_links", "category" ,"reftype", "value" })
 public class Reference extends HalEntity   {
 	
-
   @JsonProperty("category")
   private String category = "common";
 	
@@ -46,8 +44,8 @@ public class Reference extends HalEntity   {
   private String reftype = null;
 
   @JsonProperty("value")
+  @Column(name = "refvalue")
   private String value = null;
-
   
   /**
 	 * Init HATEOAS links
@@ -155,5 +153,5 @@ public class Reference extends HalEntity   {
     }
     return o.toString().replace("\n", "\n    ");
   }
-}
 
+}

@@ -11,7 +11,7 @@
 -- along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 INSERT INTO reference
-(id, reftype, value, category)
+(id, reftype, refvalue, category)
 VALUES (1,'specie','Rat','subject'),
 		(2,'specie','Mouse','subject'),
 		(3,'biotype','Wild','subject'),
