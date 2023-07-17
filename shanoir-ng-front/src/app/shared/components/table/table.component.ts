@@ -247,7 +247,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         if (result == null || this.isValueBoolean(result)) {
             return "";
         } else if (col.type == 'date') {
-            return new Date(result).toLocaleString();
+            return new Date(result).toLocaleDateString();
         } else if (result.text) {
             return result;
         } else {
