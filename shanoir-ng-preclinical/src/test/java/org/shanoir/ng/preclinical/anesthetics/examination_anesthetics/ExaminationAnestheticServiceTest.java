@@ -45,7 +45,6 @@ public class ExaminationAnestheticServiceTest {
 	private static final Long EXAM_ANESTHETIC_ID = 1L;
 	private static final Long EXAMINATION_ID = 1L;
 	private static final Long UPDATED_EXAM_ANESTHETIC_ANESTHETIC_ID = 3L;
-	
 
 	@Mock
 	private ExaminationAnestheticRepository examAnestheticRepository;
@@ -55,8 +54,6 @@ public class ExaminationAnestheticServiceTest {
 
 	@InjectMocks
 	private ExaminationAnestheticServiceImpl examAnestheticsService;
-	
-			
 	
 	@BeforeEach
 	public void setup() {
@@ -99,8 +96,6 @@ public class ExaminationAnestheticServiceTest {
 
 		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findByExaminationId(1L);
 	}
-	
-	
 
 	@Test
 	public void saveTest() throws ShanoirException {

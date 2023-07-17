@@ -34,6 +34,7 @@ import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Anesthetic ingredients service test.
@@ -42,6 +43,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * 
  */
 @SpringBootTest
+@ActiveProfiles("test")
 public class AnestheticIngredientServiceTest {
 
 	private static final Long INGREDIENT_ID = 1L;
