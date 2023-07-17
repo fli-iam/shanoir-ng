@@ -71,6 +71,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	private static final String EXAMINATION_DATE_FACET = "examinationDate";
 	private static final String SUBJECT_NAME_FACET = "subjectName";
 	private static final String SUBJECT_ID_FACET = "subjectId";
+	private static final String SUBJECT_TYPE_FACET = "subjectType";
 	private static final String STUDY_NAME_FACET = "studyName";
 	private static final String STUDY_ID_FACET = "studyId";
 	private static final String CENTER_NAME_FACET = "centerName";
@@ -95,6 +96,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			CENTER_NAME_FACET,
 			STUDY_ID_FACET,
 			SUBJECT_ID_FACET,
+			SUBJECT_TYPE_FACET,
 			CENTER_ID_FACET,
 			SLICE_THICKNESS_FACET,
 			PIXEL_BANDWIDTH_FACET,
@@ -108,6 +110,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			DATASET_NATURE_FACET,
 			EXAMINATION_COMMENT_FACET,
 			SUBJECT_NAME_FACET,
+			SUBJECT_TYPE_FACET,
 			STUDY_NAME_FACET,
 			CENTER_NAME_FACET,
 			TAGS_FACET,	
@@ -272,6 +275,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		/* add user's filtering */
 		addFilterQuery(query, STUDY_NAME_FACET, shanoirQuery.getStudyName());
 		addFilterQuery(query, SUBJECT_NAME_FACET, shanoirQuery.getSubjectName());
+		addFilterQuery(query, SUBJECT_TYPE_FACET, shanoirQuery.getSubjectType());
 		addFilterQuery(query, EXAMINATION_COMMENT_FACET, shanoirQuery.getExaminationComment());
 		addFilterQuery(query, DATASET_NAME_FACET, shanoirQuery.getDatasetName());
 		addFilterQuery(query, DATASET_TYPE_FACET, shanoirQuery.getDatasetType());
@@ -311,6 +315,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
 			solrDoc.setSubjectId((Long) document.getFirstValue("subjectId"));
 			solrDoc.setStudyName((String) document.getFirstValue("studyName"));
+			solrDoc.setSubjectType((String) document.getFirstValue("subjectType"));
 			solrDoc.setStudyId((Long) document.getFirstValue("studyId"));
 			solrDoc.setCenterName((String) document.getFirstValue("centerName"));
 			solrDoc.setCenterId((Long) document.getFirstValue("centerId"));

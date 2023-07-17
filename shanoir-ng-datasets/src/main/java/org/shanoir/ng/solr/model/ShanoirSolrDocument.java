@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.solr.client.solrj.beans.Field;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.core.mapping.Indexed;
 import org.springframework.data.solr.core.mapping.SolrDocument;
@@ -73,10 +74,14 @@ public class ShanoirSolrDocument {
 
 	@Indexed
 	private Date examinationDate;
-	
+
 	@Field
 	@Indexed
 	private String subjectName;
+
+	@Field
+	@Indexed
+	private String subjectType;
 
 	@Field
 	@Indexed
@@ -120,7 +125,7 @@ public class ShanoirSolrDocument {
 	
 	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
 			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate,
-			String subjectName, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
+			String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
 			Double pixelBandwidth, Double magneticFieldStrength) {
 		this.id = id;
 		this.datasetId = datasetId;
@@ -132,6 +137,7 @@ public class ShanoirSolrDocument {
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
 		this.subjectName = subjectName;
+		this.subjectType = subjectType;
 		this.subjectId = subjectId;
 		this.studyName = studyName;
 		this.studyId = studyId;
@@ -270,6 +276,14 @@ public class ShanoirSolrDocument {
 		this.subjectName = subjectName;
 	}
 
+	public String getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(String subjectType) {
+		this.subjectType = subjectType;
+	}
+
 	/**
 	 * @return the studyName
 	 */
@@ -283,6 +297,8 @@ public class ShanoirSolrDocument {
 	public void setStudyName(String studyName) {
 		this.studyName = studyName;
 	}
+
+
 
 	/**
 	 * @return the studyId

@@ -41,7 +41,7 @@ import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, 
 import { SolrService } from "./solr.service";
 import { Clipboard } from '@angular/cdk/clipboard';
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({

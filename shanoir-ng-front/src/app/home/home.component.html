@@ -24,7 +24,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </div>
 
 <div *ngIf="loaded && (admin || !challengeDua)">
-   
+
     <challenge-block *ngFor="let challengeStudy of challengeStudies" [challengeStudy]="challengeStudy">
     </challenge-block>
     <div class="block solr">
@@ -63,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </table>
                 </div>
             </td>
-        </tr></table>        
+        </tr></table>
     </div>
     <div class="block jobs" *ngIf="jobs && jobs.length > 0">
         <table><tr>
@@ -82,12 +82,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </table>
                 </div>
             </td>
-        </tr></table>        
+        </tr></table>
     </div>
     <div class="block import">
         <div class="import-link link dicom" routerLink="/imports/upload">
             <i class="fas fa-compact-disc"></i>
-            <div class="title">Import Dicom</div> 
+            <div class="title">Import Dicom</div>
         </div>
         <div class="import-link link bruker" routerLink="/imports/bruker">
             <i class="fas fa-atom"></i>
@@ -129,7 +129,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </table>
                 </div>
             </td>
-        </tr></table>        
+        </tr></table>
     </div>
 
     <div class="block doc">
@@ -149,6 +149,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <li><a href="https://shanoir.irisa.fr/shanoir-ng/preclinical/swagger-ui.html" target="_blank"><i class="fas fa-cog"></i>Preclinical MS REST API</a></li>
                 </ul>
             </td>
-        </tr></table>        
+        </tr></table>
     </div>
 </div>

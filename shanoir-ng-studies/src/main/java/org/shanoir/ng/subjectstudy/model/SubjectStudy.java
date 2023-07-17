@@ -32,7 +32,7 @@ import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subject.model.SubjectType;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.tag.model.Tag;
 
 /**
