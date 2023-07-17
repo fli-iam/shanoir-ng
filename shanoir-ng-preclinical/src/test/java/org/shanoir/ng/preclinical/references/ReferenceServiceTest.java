@@ -30,6 +30,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * References service test.
@@ -37,6 +38,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @author sloury
  */
 @SpringBootTest
+@ActiveProfiles("test")
 public class ReferenceServiceTest {
 
 	private static final Long REFERENCE_ID = 1L;

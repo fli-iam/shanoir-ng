@@ -34,6 +34,7 @@ import org.shanoir.ng.utils.PathologyModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Subject Pathology service test.
@@ -42,6 +43,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * 
  */
 @SpringBootTest
+@ActiveProfiles("test")
 public class SubjectPathologyServiceTest {
 
 	private static final Long SPATHO_ID = 1L;

@@ -35,6 +35,7 @@ import org.shanoir.ng.utils.ContrastAgentModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 
 /**
@@ -44,6 +45,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * 
  */
 @SpringBootTest
+@ActiveProfiles("test")
 public class ContrastAgentServiceTest {
 
 	private static final Long AGENT_ID = 1L;

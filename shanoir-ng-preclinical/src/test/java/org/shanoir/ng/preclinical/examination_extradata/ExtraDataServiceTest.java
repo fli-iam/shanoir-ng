@@ -34,6 +34,7 @@ import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.shanoir.ng.utils.ExtraDataModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Examination anesthetics service test.
@@ -42,6 +43,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * 
  */
 @SpringBootTest
+@ActiveProfiles("test")
 public class ExtraDataServiceTest {
 
 	public static final Long EXAMINATION_ID = 1L;
