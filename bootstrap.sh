@@ -91,8 +91,8 @@ if [ -n "$build" ] ; then
 	# 1. build a docker image with the java toolchain
 	DEV_IMG=shanoir-ng-dev
 	docker build -t "$DEV_IMG" - <<EOF
-FROM debian:buster
-RUN apt-get update && apt-get install -qqy --no-install-recommends openjdk-11-jdk-headless maven bzip2 git
+FROM debian:bullseye
+RUN apt-get update && apt-get install -qqy --no-install-recommends openjdk-17-jdk-headless maven bzip2 git
 EOF
 	# 2. run the maven build
 	mkdir -p /tmp/home
