@@ -32,6 +32,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.TherapyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Subject Therapy service test.
@@ -39,7 +40,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  * 
  */
-
+@SpringBootTest
 public class SubjectTherapyServiceTest {
 
 	private static final Long STHERAPY_ID = 1L;

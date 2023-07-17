@@ -33,6 +33,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.shanoir.ng.utils.ExtraDataModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Examination anesthetics service test.
@@ -40,7 +41,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  * 
  */
-
+@SpringBootTest
 public class ExtraDataServiceTest {
 
 	public static final Long EXAMINATION_ID = 1L;

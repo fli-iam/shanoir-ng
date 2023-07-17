@@ -33,6 +33,7 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Anesthetic ingredients service test.
@@ -40,7 +41,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  * 
  */
-
+@SpringBootTest
 public class AnestheticIngredientServiceTest {
 
 	private static final Long INGREDIENT_ID = 1L;

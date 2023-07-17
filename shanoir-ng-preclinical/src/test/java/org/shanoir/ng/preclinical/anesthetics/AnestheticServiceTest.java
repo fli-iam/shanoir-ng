@@ -33,6 +33,7 @@ import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Anesthetics service test.
@@ -40,7 +41,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  * 
  */
-
+@SpringBootTest
 public class AnestheticServiceTest {
 
 	private static final Long ANESTHETIC_ID = 1L;

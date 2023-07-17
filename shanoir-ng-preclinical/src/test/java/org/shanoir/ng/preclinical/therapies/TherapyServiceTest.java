@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.TherapyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Therapies service test.
@@ -36,7 +37,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  * 
  */
-
+@SpringBootTest
 public class TherapyServiceTest {
 
 	private static final Long THERAPY_ID = 1L;

@@ -31,6 +31,7 @@ import org.shanoir.ng.preclinical.pathologies.PathologyServiceImpl;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Pathology models service test.
@@ -38,7 +39,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  * 
  */
-
+@SpringBootTest
 public class PathologyModelServiceTest {
 
 	private static final Long MODEL_ID = 1L;

@@ -29,6 +29,7 @@ import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
 
 /**
  * Pathologies service test.
@@ -36,7 +37,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  * 
  */
-
+@SpringBootTest
 public class PathologyServiceTest {
 
 	private static final Long PATHOLOGY_ID = 1L;
