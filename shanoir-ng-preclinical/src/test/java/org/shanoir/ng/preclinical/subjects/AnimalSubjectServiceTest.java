@@ -26,13 +26,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.references.RefsRepository;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Subjects service test.
@@ -41,6 +41,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * 
  */
 @SpringBootTest
+@ActiveProfiles("test")
 public class AnimalSubjectServiceTest {
 
 	private static final Long SUBJECT_ID = 1L;

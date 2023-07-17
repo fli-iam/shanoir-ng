@@ -34,7 +34,6 @@ import org.springframework.test.context.ContextConfiguration;
  * @author sloury
  *
  */
-
 @DataJpaTest
 @ActiveProfiles("test")
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)

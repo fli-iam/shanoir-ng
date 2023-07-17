@@ -33,6 +33,7 @@ import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.TherapyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Subject Therapy service test.
@@ -41,6 +42,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * 
  */
 @SpringBootTest
+@ActiveProfiles("test")
 public class SubjectTherapyServiceTest {
 
 	private static final Long STHERAPY_ID = 1L;
