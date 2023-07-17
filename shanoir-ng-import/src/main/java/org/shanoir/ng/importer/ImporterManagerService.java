@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
-import org.shanoir.ng.importer.dcm2nii.DatasetsCreatorAndNIfTIConverterService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.DicomStoreSCPServer;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
@@ -91,9 +90,6 @@ public class ImporterManagerService {
 	@Autowired
 	private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
 		
-	@Autowired
-	private DatasetsCreatorAndNIfTIConverterService datasetsCreatorAndNIfTIConverter;
-	
 	@Autowired
     private RabbitTemplate rabbitTemplate;
 	
@@ -170,8 +166,10 @@ public class ImporterManagerService {
 						throw new ShanoirException("Error during pseudonymization.");
 					}
 				}
-				Long converterId = importJob.getConverterId();
-				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
+				
+				// Do not convert anymore
+				//Long converterId = importJob.getConverterId();
+				//datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
 			}
 			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
 			long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());

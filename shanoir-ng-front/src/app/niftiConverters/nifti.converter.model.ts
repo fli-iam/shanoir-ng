@@ -12,11 +12,10 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Entity } from "../shared/components/entity/entity.abstract";
-
-export class NiftiConverter extends Entity{
-    id: number;
-    name: string;
-    isActive: boolean;
-    // TODO: add version and type(enum)
+export enum NiftiConverter {
+    DCM2NII = 1,
+    MCVERTER = 2,
+    CLIDCM = 3,
+    DICOM2NIFTI = 4,
+    DICOMIFIER = 5
 }

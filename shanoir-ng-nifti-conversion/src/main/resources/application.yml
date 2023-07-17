@@ -42,7 +42,6 @@ logging:
     name: /var/log/shanoir-ng-logs/shanoir-ng-nifti-conversion.log
   level:
     org.springframework.web: ERROR
-    org.hibernate: ERROR
     org.shanoir: INFO
 # Shanoir configurations
 shanoir:

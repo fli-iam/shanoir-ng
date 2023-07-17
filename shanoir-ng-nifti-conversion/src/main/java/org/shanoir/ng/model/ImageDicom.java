@@ -12,35 +12,19 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-/**
- * 
- */
-package org.shanoir.ng.importer.dcm2nii;
+package org.shanoir.ng.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author yyao
  *
  */
-public class NIfTIConverterDTO {
+public class ImageDicom {
 	
-	private Long id;
+	@JsonProperty("imageId")
+	private Integer imageId = null;
 
-	private String name;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
+	@JsonProperty("imageFilePath")
+	private String imageFilePath = null;
 }

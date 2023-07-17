@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class FindByRepositoryImpl<T extends AbstractEntity> implements FindByRepository<T> {
 
-	@PersistenceContext
+	//@PersistenceContext
 	private EntityManager em;
 
 

@@ -17,13 +17,10 @@ package org.shanoir.ng.studycard.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.dcm4che3.data.Attributes;
-import org.shanoir.ng.configuration.amqp.RabbitMQSendService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
@@ -43,9 +40,14 @@ import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class CardsProcessingService {
@@ -57,12 +59,15 @@ public class CardsProcessingService {
 	
 	@Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
-	
+
 	@Autowired
-    private RabbitMQSendService rabbitSender;
+    private RabbitTemplate rabbitTemplate;
 	
 	@Autowired
     private WADODownloaderService downloader;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 	
 	@Autowired
 	private SubjectStudyService subjectStudyService;
@@ -133,7 +138,11 @@ public class CardsProcessingService {
 			        throw new IllegalStateException("Could not update subject-studies", e);
 			    }
 			    List<SubjectStudyQualityTagDTO> subjectStudyTagDTOs = getSubjectStudyTagDTOs(result.getUpdatedSubjectStudies());
-			    rabbitSender.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);			    
+			    try {
+			    	this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG, objectMapper.writeValueAsString(subjectStudyTagDTOs));
+			    } catch (AmqpException | JsonProcessingException e) {
+			        throw new MicroServiceCommunicationException("Error while communicating with MS studies to send study card tags.", e);
+			    }
 			}
 			return result;
 		} else {

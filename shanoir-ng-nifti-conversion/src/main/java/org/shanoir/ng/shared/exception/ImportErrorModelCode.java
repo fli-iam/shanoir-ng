@@ -12,19 +12,20 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.importer.dcm2nii;
+package org.shanoir.ng.shared.exception;
 
-import java.util.List;
-
-import org.springframework.data.repository.CrudRepository;
-
-public interface NIfTIConverterRepository extends CrudRepository<NIfTIConverter, Long> {
+/**
+ * List of error codes for current microservice.
+ * 
+ * @author msimon
+ *
+ */
+public class ImportErrorModelCode extends ErrorModelCode {
 	
-	/**
-	 * Get all nifti converters
-	 * 
-	 * @return list of nifti converters.
-	 */
-	List<NIfTIConverter> findAll();
+	/** User has no right to perform an action */
+	public static final Integer NO_RIGHT_FOR_ACTION = 11;
 
+	/** Login - bad credentials */
+	public static final Integer SC_MS_COMM_FAILURE = 51;
+	
 }

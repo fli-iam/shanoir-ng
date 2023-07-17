@@ -13,7 +13,6 @@
  */
 
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
@@ -24,8 +23,7 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { NiftiConverter } from 'src/app/niftiConverters/nifti.converter.model';
-import { NiftiConverterService } from 'src/app/niftiConverters/nifti.converter.service';
-import { MrDataset, MrDatasetMetadata } from './mr/dataset.mr.model';
+import { MrDataset } from './mr/dataset.mr.model';
 
 
 @Component({
@@ -43,7 +41,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private hasAdministrateRight: boolean = false;
     public downloading: boolean = false;
     public papayaLoaded: boolean = false;
-    public converters: NiftiConverter[];
+    public converters: NiftiConverter;
     public converterId: number;
     public menuOpened = false;
     isMRS: boolean = false; // MR Spectroscopy
@@ -52,10 +50,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         private datasetService: DatasetService,
         private route: ActivatedRoute,
         private dicomArchiveService: DicomArchiveService,
-        private studyRightsService: StudyRightsService,
-        private niftiConverterService: NiftiConverterService) {
+        private studyRightsService: StudyRightsService) {
         super(route, 'dataset');
-        niftiConverterService.getAll().then(result => this.converters = result);
     }
 
     get dataset(): Dataset { return this.entity; }
