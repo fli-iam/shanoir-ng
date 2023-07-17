@@ -17,6 +17,7 @@ package org.shanoir.ng.preclinical.subjects.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.security.auth.Subject;
 import javax.validation.Valid;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -94,18 +95,21 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 		try {
 
-			Long subjectId = this.createSubject(dto.getSubject());
+			SubjectDto createdSubjectDto = this.createSubject(dto.getSubject());
 
 			AnimalSubject animalSubject = dtoService.getAnimalSubjectFromPreclinicalDto(dto);
-			animalSubject.setSubjectId(subjectId);
+			animalSubject.setSubjectId(createdSubjectDto.getId());
 
 			this.validateAnimalSubjectCreation(animalSubject, result);
 
-			final AnimalSubject createdSubject = subjectService.save(animalSubject);
+			final AnimalSubject createdAnimal = subjectService.save(animalSubject);
 
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_PRECLINICAL_SUBJECT_EVENT, createdSubject.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_PRECLINICAL_SUBJECT_EVENT, createdAnimal.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 
-			return new ResponseEntity<>(dtoService.getPreclinicalDtoFromAnimalSubject(createdSubject), HttpStatus.OK);
+			PreclinicalSubjectDto preclinicalDto = dtoService.getPreclinicalDtoFromAnimalSubject(createdAnimal);
+			preclinicalDto.setSubject(createdSubjectDto);
+
+			return new ResponseEntity<>(preclinicalDto, HttpStatus.OK);
 
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e,
@@ -113,7 +117,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 		}
 	}
 
-	private Long createSubject(SubjectDto dto) throws ShanoirException, RestServiceException {
+	private SubjectDto createSubject(SubjectDto dto) throws ShanoirException, RestServiceException {
 
 		dto.setPreclinical(true);
 
@@ -135,7 +139,9 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errorMap)));
 		}
 
-		return subjectId;
+		dto.setId(subjectId);
+
+		return dto;
 	}
 
 	private void validateAnimalSubjectCreation(AnimalSubject animalSubject, BindingResult result) throws RestServiceException {

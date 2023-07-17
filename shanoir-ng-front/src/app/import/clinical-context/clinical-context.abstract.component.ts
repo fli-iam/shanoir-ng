@@ -43,6 +43,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import {PreclinicalSubject} from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
 
 @Directive()
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
@@ -514,7 +515,14 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+
+                    let sub: Subject;
+                    if(entity instanceof Subject){
+                        sub = entity;
+                    }else if(entity instanceof PreclinicalSubject){
+                        sub = entity.subject;
+                    }
+                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(sub);
                 })
             );
         });
@@ -554,6 +562,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+
                     this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
                 })
             );

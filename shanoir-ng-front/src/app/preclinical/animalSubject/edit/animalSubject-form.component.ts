@@ -348,11 +348,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                     return;
                 }
                 this.onSave.next(this.preclinicalSubject);
-                if (this.breadcrumbsService.previousStep && this.breadcrumbsService.previousStep.isWaitingFor(this.breadcrumbsService.currentStep)) {
-                    this.chooseRouteAfterSave(this.preclinicalSubject.subject);
-                } else {
-                    this.chooseRouteAfterSave(this.preclinicalSubject.animalSubject);
-                }
+                this.chooseRouteAfterSave(this.preclinicalSubject);
                 this.consoleService.log('info', 'New preclinical subject successfully saved with n° ' + this.preclinicalSubject.animalSubject.id);
                 return subject;
             }).catch(reason => {

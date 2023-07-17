@@ -129,15 +129,13 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
             ).then(res => {
                 if (res) {
                     this.animalSubjectService.delete(entity.id).then((res) => {
-                        this.subjectService.delete(entity.id).then((res2) => {
-                            this.onDelete.next({entity: entity});
-                            const index: number = this.preclinicalSubjects.indexOf(entity);
-                            if (index !== -1) {
-                                this.preclinicalSubjects.splice(index);
-                            }
-                            this.table.refresh();
-                            this.consoleService.log('info', 'The preclinical-subject n°' + entity.id + ' sucessfully deleted');
-                        })
+                        this.onDelete.next({entity: entity});
+                        const index: number = this.preclinicalSubjects.indexOf(entity);
+                        if (index !== -1) {
+                            this.preclinicalSubjects.splice(index);
+                        }
+                        this.table.refresh();
+                        this.consoleService.log('info', 'The preclinical-subject n°' + entity.id + ' sucessfully deleted');
                     }
                     ).catch(reason => {
                         if (reason && reason.error) {

@@ -33,6 +33,7 @@ public class PreclinicalSubjectDtoService {
         dto.getAnimalSubject().setId(dto.getId());
         SubjectDto subDto = new SubjectDto();
         subDto.setId(dto.getId());
+        subDto.setPreclinical(true);
         dto.setSubject(subDto);
         dto.getAnimalSubject().setBiotype(subject.getBiotype());
         dto.getAnimalSubject().setProvider(subject.getProvider());
