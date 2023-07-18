@@ -87,6 +87,11 @@ public class DatasetDownloaderServiceImpl {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
 		}
+		
+		if (!dataset.isDownloadable()) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNAUTHORIZED.value(), "Dataset cannot be downloaded for security reasons.", null));
+		}
 
 		String subjectName = "unknownSubject";
 		Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
@@ -205,6 +210,9 @@ public class DatasetDownloaderServiceImpl {
 		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 
 			for (Dataset dataset : datasets) {
+				if (!dataset.isDownloadable()) {
+					continue;
+				}
 				try {
 
 					List<String> datasetFiles = new ArrayList<>();

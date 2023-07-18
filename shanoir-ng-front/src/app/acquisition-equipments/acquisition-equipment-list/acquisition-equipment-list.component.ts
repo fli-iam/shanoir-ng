@@ -68,13 +68,6 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
-
         let columnDefs: ColumnDefinition[] = [
             {
                 headerName: "Acquisition equipment", field: "name", cellRenderer: function (params: any) {
