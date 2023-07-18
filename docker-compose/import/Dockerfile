@@ -58,6 +58,8 @@ ENV LC_ALL fr_FR.UTF-8
 ENV LANG fr_FR.UTF-8
 ENV LANGUAGE fr_FR.UTF-8
 
+ENV DISPLAY :0.0
+
 WORKDIR /usr/local/
 RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCMCOMMIT_VERSION.zip | bsdtar -xf- -C .
 WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}
