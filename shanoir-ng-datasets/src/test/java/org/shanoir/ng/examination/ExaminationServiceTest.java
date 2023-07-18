@@ -16,8 +16,10 @@ package org.shanoir.ng.examination;
 
 import static org.mockito.BDDMockito.given;
 
+import java.io.IOException;
 import java.util.Optional;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,9 +85,8 @@ public class ExaminationServiceTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void deleteByIdTest() throws ShanoirException {
+	public void deleteByIdTest() throws ShanoirException, SolrServerException, IOException {
 		examinationService.deleteById(EXAMINATION_ID);
-
 		Mockito.verify(examinationRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 

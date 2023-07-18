@@ -15,6 +15,7 @@
 package org.shanoir.ng.examination.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.util.Pair;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -87,7 +89,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	private String dataDir;
 	
 	@Override
-	public void deleteById(final Long id) throws EntityNotFoundException, ShanoirException {
+	public void deleteById(final Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException {
 		Optional<Examination> examinationOpt = examinationRepository.findById(id);
 		if (!examinationOpt.isPresent()) {
 			throw new EntityNotFoundException(Examination.class, id);
@@ -112,7 +114,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException {
+	public void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException {
 		Long tokenUserId = KeycloakUtil.getTokenUserId();
 		String studyIdAsString = exam.getStudyId().toString();
 		// Iterate over datasets acquisitions and datasets to send events and remove them from solr

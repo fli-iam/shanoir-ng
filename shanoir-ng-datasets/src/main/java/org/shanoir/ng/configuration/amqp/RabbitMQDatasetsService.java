@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -221,7 +222,7 @@ public class RabbitMQDatasetsService {
 	 * Updates all the solr references for this subject.
 	 * @param subjectId the subject ID updated
 	 */
-	private void updateSolr(final List<Long> subjectIds) {
+	private void updateSolr(final List<Long> subjectIds) throws SolrServerException, IOException {
 		Set<Long> datasetsToUpdate = new HashSet<>();
 		for (Examination exam : examinationRepository.findBySubjectIdIn(subjectIds)) {
 			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {

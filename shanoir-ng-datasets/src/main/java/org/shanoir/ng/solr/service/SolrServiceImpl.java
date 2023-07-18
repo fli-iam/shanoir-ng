@@ -43,6 +43,7 @@ import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
+import org.shanoir.ng.solr.repository.SolrRepository;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -69,6 +70,9 @@ public class SolrServiceImpl implements SolrService {
 
 	@Autowired
 	private SolrClient solrClient;
+	
+	@Autowired
+	private SolrRepository solrRepository;
 
 	@Autowired
 	private ShanoirMetadataRepository shanoirMetadataRepository;
@@ -248,7 +252,7 @@ public class SolrServiceImpl implements SolrService {
 	}
 
 	@Override
-	public Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) {
+	public Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) throws RestServiceException {
 		if (datasetIds.isEmpty()) {
 			return new PageImpl<>();
 		}

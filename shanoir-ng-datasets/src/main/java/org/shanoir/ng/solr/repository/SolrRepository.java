@@ -21,37 +21,27 @@ package org.shanoir.ng.solr.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
+import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
-import org.springframework.data.solr.repository.Facet;
-import org.springframework.data.solr.repository.Query;
-import org.springframework.data.solr.repository.SolrCrudRepository;
 
 /**
  * @author yyao
  *
  */
-public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository<ShanoirSolrDocument, Long>, CrudRepository<ShanoirSolrDocument, Long> {
-	
-	@Query(value = "*:*")
-	@Facet(fields = {"studyName", "subjectName", "datasetName", "centerName", "examinationComment",
-			"datasetType", "datasetNature", "tags"}, limit = 200)
-	public SolrResultPage<ShanoirSolrDocument> findAllDocsAndFacets(Pageable pageable);
-	
-	@Facet(fields = {"studyName", "subjectName", "datasetName", "centerName", "examinationComment",
-			"datasetType", "datasetNature", "tags"}, limit = 200)
-	public SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
-	
-	public void deleteByDatasetId(Long datasetId);
-
-	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable);
+public interface SolrRepository {
+			
+	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
 	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn( List<Long> studyIds, Collection<Long> datasetIds, Pageable pageable);
-
-	public void deleteByDatasetIdIn(List<Long> datasetIds);
+	
+	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException;
+	
+	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Map<Long, List<String>> studiesCenter, ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 
 }

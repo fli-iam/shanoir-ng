@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -134,7 +135,7 @@ public class ExaminationApiControllerTest {
 	ObjectMapper objectMapper;
 
 	@BeforeEach
-	public void setup() throws ShanoirException {
+	public void setup() throws ShanoirException, SolrServerException, IOException {
 		doNothing().when(examinationServiceMock).deleteById(1L);
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));
 		Examination exam = new Examination();

@@ -18,8 +18,7 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
-import jakarta.validation.Valid;
-
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
@@ -61,6 +60,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 @Controller
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
@@ -188,13 +188,12 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	public ResponseEntity<Void> deleteDatasetAcquisition(
 			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
 			throws RestServiceException {
-
 		try {
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (ShanoirException e) {
+		} catch (IOException | SolrServerException | ShanoirException e) {
 			LOG.error("Error while deleting dataset acquisition: ", e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}

@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.dataset.service;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -40,7 +42,7 @@ public interface DatasetService {
 	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
 	
 	/**
 	 * Delete several datasets.
@@ -49,7 +51,7 @@ public interface DatasetService {
 	 * @throws EntityNotFoundException
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#ids, 'CAN_ADMINISTRATE'))")
-	void deleteByIdIn(List<Long> ids) throws EntityNotFoundException;
+	void deleteByIdIn(List<Long> ids) throws EntityNotFoundException, SolrServerException, IOException;
 
 	/**
 	 * Find dataset by its id.
@@ -78,7 +80,7 @@ public interface DatasetService {
 	 * @return created dataset.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnNewDataset(#dataset, 'CAN_IMPORT'))")
-	Dataset create(Dataset dataset);
+	Dataset create(Dataset dataset) throws SolrServerException, IOException;
 
 	/**
 	 * Update a dataset.

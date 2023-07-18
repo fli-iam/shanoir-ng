@@ -670,7 +670,6 @@ public class ImporterService {
 			event.setMessage("Unexpected error during the import of the processed dataset: " + e.getMessage() + ", please contact an administrator.");
 			event.setProgress(1f);
 			eventService.publishEvent(event);
-			throw e;
 		}
 	}
 	

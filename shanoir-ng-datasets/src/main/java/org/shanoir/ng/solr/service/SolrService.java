@@ -54,6 +54,6 @@ public interface SolrService {
 
 	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 
-	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable);
+	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
 }

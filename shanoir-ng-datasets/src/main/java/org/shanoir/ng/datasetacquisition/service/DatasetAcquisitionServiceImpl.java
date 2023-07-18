@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.math3.util.Pair;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -31,11 +33,8 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.study.rights.StudyUser;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +42,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
@@ -164,7 +162,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
 	@Override
 	@Transactional
-	public void deleteById(Long id) throws EntityNotFoundException, ShanoirException {
+	public void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException {
 		final DatasetAcquisition entity = repository.findById(id).orElse(null);
 		if (entity == null) {
 			throw new EntityNotFoundException("Cannot find entity with id = " + id);

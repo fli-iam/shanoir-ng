@@ -17,7 +17,6 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.beans.Field;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -41,18 +40,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.solr.core.query.Field;
 import org.springframework.data.solr.core.query.SimpleField;
 import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SimpleFacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 /**
  * @author yyao
  *
  */
-public class SolrRepositoryImpl implements SolrRepositoryCustom {
+@Component
+public class SolrRepositoryImpl implements SolrRepository {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SolrRepositoryImpl.class);
 
@@ -240,7 +242,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		QueryResponse response;
 		try {
 			LOG.debug("Solr search : " + query);
-			response = solrClient.query("shanoir", query);
+			response = solrClient.query(query);
 			LOG.debug("Solr response : " + response);
 		} catch (IOException e) {
 			throw new RestServiceException(e, new ErrorModel(500, "Error querying Solr"));
@@ -332,7 +334,6 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 
 	private void addExpertClause(SolrQuery query, String searchStr) {
 		LOG.warn("Solr expert research : " + searchStr);
-		//searchStr = searchStr.replace(STUDY_ID_FACET, "");
 		query.addFilterQuery(searchStr);
 	}
 
@@ -381,6 +382,19 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 				}
 			}
 		}
+	}
+
+	@Override
+	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException {
+		ShanoirSolrQuery query = new ShanoirSolrQuery();
+		return getSearchResultsWithFacets(query, pageable, null);
+	}
+
+	@Override
+	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(List<Long> studyIds, Collection<Long> datasetIds,
+			Pageable pageable) {
+		
+		return null;
 	}
 
 }
