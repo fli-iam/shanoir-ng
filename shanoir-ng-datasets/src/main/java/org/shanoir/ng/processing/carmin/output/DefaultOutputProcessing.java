@@ -5,11 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -114,7 +110,6 @@ public class DefaultOutputProcessing extends OutputProcessing {
 
 			List<Dataset> inputDatasets = this.getInputDatasets(resultJson, in.getName());
 
-
 			if(inputDatasets.isEmpty()) {
 				throw new Exception("No input datasets found.");
 			}
@@ -136,57 +131,40 @@ public class DefaultOutputProcessing extends OutputProcessing {
 
 	private List<Dataset> getInputDatasets(File resultJson, String tarName) throws IOException, JSONException {
 
-		ArrayList<Dataset> inputDatasets = new ArrayList<>();
+		List<Long> datasetIds = new ArrayList<>();
+		List<String> candidates = new ArrayList<>();
+
+		candidates.add(tarName);
 
 		if (resultJson == null) {
-			LOG.info("No result JSON found in archive. Dataset id will be parsed from archive name.");
-
-			Long id = getDatasetIdFromFilename(tarName);
-
-			if(id == null){
-				LOG.error("No dataset id could be parsed from archive name [{}].", tarName);
-				return new ArrayList<>();
-			}
-
-			inputDatasets.add(datasetService.findById(id));
-
-			return inputDatasets;
-
-		}
-
-		LOG.info("Processing result JSON [{}]...", resultJson.getName());
-
-
-		InputStream is = new FileInputStream(resultJson);
-		JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
-
-		List<Long> datasetIds = new ArrayList<>();
-
-		List<String> filenames = new ArrayList<>();
-
-		if (!json.has(JSON_INFILE)) {
-			LOG.error("No key [{}] found in [{}]", JSON_INFILE, resultJson.getAbsolutePath());
-			return new ArrayList<>();
-		}
-
-		Object infiles = json.get(JSON_INFILE);
-
-		if (infiles instanceof JSONArray) {
-			// case "["id+XXX+filename.nii", "YYY+filename.nii"]"
-			JSONArray array = (JSONArray) infiles;
-			for (int i = 0; i < array.length(); i++) {
-				filenames.add(array.getString(i));
-			}
+			LOG.info("No result JSON found in archive.");
 		} else {
-			// Case "id+XXX+filename.nii"
-			String value = (String) infiles;
-			filenames.add(value);
+			LOG.info("Processing result JSON [{}]...", resultJson.getName());
+
+			InputStream is = new FileInputStream(resultJson);
+			JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
+
+			Iterator<String> keys = json.keys();
+			while (keys.hasNext()) {
+				String key = keys.next();
+				Object value = json.get(key);
+				if (value instanceof JSONArray) {
+					// case "["id+XXX+filename.nii", "YYY+filename.nii", ...]"
+					JSONArray array = (JSONArray) value;
+					for (int i = 0; i < array.length(); i++) {
+						candidates.add(array.getString(i));
+					}
+				} else {
+					// Case "id+XXX+filename.nii"
+					candidates.add((String) value);
+				}
+			}
 		}
 
-		for (String name : filenames) {
+		for (String name : candidates) {
 			Long id = this.getDatasetIdFromFilename(name);
 
-			if (id != null) {
+			if (id != null && !datasetIds.contains(id)) {
 				datasetIds.add(id);
 			}
 		}
