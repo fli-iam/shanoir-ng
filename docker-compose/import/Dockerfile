@@ -83,11 +83,10 @@ RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-
 
 WORKDIR /opt/nifti-converters
 RUN mkdir mriconverter
-RUN curl -#L  https://github.com/populse/mri_conv/archive/refs/heads/devpt.zip | bsdtar -xf- -C mriconverter --strip-components 1
+RUN curl -#L  https://github.com/populse/mri_conv/archive/refs/heads/master.zip | bsdtar -xf- -C mriconverter --strip-components 1
 
 RUN chmod 777 /opt/nifti-converters/mriconverter
-RUN mv /opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar /opt/nifti-converters/mriconverter/MRIManager.jar 
-RUN chmod 777 /opt/nifti-converters/mriconverter/MRIManager.jar
+RUN chmod 777 /opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar
 
 WORKDIR /
 

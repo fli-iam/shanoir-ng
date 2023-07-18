@@ -334,7 +334,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 * @param boolean is convert to clidcm
 	 *
 	 */
-	private void convertToNiftiExec(NIfTIConverter converter, String inputFolder, String outputFolder, boolean is4D) {
+	private void convertToNiftiExec(NIfTIConverter converter, String inputFolder, String outputFolder, boolean is4D, boolean reconversion) {
 		if (converter == null) {
 			return;
 		}
@@ -363,7 +363,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		} else if (converter.isDicomifier()) {
 			conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder);
 		} else if (converter.isMriConverter()) {
-			conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder);
+			conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, reconversion);
 		} else {
 			is4D = true;
 			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converterPath, outputFolder, is4D);
@@ -542,7 +542,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			conversionLogs = "";
 		}
 		NIfTIConverter converter = findById(converterId);
-		convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D);
+		convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D, false);
 		LOG.debug("conversionLogs : {}", conversionLogs);
 		return converter;
 	}
@@ -918,7 +918,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 		result.mkdirs();
 
-		this.convertToNiftiExec(converter, workFolder, workFolderResult, false);
+		this.convertToNiftiExec(converter, workFolder, workFolderResult, false, true);
 		
 		if (converter.isDicomifier()) {
 			Dataset dataset = new Dataset();

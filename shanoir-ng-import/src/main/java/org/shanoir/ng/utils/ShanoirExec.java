@@ -628,12 +628,12 @@ public class ShanoirExec {
 	 * @param outputFolder the output folder
 	 * @return the olg to display.
 	 */
-	public String mriConverter(String inputFolder, String outputFolder) {
+	public String mriConverter(String inputFolder, String outputFolder, boolean reconversion) {
 		String logs = "mriConverter: ";
 		StringBuffer buffer = new StringBuffer();
 		
 		// We force the dataset0 folder here as MRIConverter does not search recursively in the files..
-		if (!inputFolder.contains("dataset")) {
+		if (!reconversion && !inputFolder.contains("dataset")) {
 			inputFolder = inputFolder.concat("/dataset0");
 		}
 		
