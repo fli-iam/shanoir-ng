@@ -19,6 +19,7 @@ RUN set -ex && \
     apt install -t \
       bullseye-backports \
       openjdk-11-jre-headless \
+      xorg-xhost \
       ca-certificates-java -y
 
 #32 bits packages are necessary
@@ -57,8 +58,6 @@ ENV DCMCOMMIT=1.0.20210317
 ENV LC_ALL fr_FR.UTF-8
 ENV LANG fr_FR.UTF-8
 ENV LANGUAGE fr_FR.UTF-8
-
-ENV DISPLAY :0
 
 WORKDIR /usr/local/
 RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCMCOMMIT_VERSION.zip | bsdtar -xf- -C .
