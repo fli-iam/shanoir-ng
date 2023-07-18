@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -32,9 +33,9 @@ import org.springframework.test.context.ActiveProfiles;
  * @author ifakhfakh
  *
  */
-
 @DataJpaTest
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class ExaminationRepositoryTest {
 
 	private static final String EXAMINATION_TEST_1_NOTE = "examination1";
