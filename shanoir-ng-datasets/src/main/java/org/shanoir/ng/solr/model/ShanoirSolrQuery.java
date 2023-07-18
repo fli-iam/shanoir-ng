@@ -21,8 +21,6 @@ import java.util.Map;
 import org.shanoir.ng.shared.paging.FacetPageable;
 import org.shanoir.ng.utils.Range;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * @author yyao
  *

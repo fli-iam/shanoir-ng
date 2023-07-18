@@ -24,14 +24,15 @@
 	<packaging>jar</packaging>
 
 	<name>shanoir-ng-datasets</name>
-	<description>Dataset project for Shanoir NG</description>
+	<description>Dataset microservice for Shanoir NG</description>
 
 	<properties>
 		<dcm4che.version>5.27.0</dcm4che.version>
-		<solr-spring.version>4.3.8</solr-spring.version>
+		<solrj.version>9.2.1</solrj.version>
 	</properties>
 
 	<dependencies>
+		<!-- Shanoir dependencies -->
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
@@ -48,7 +49,7 @@
 			<version>3.0.2</version>
 		</dependency>
 
-		<!-- AMQP -->
+		<!-- gson -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
@@ -92,6 +93,8 @@
 		    <artifactId>dcm4che-json</artifactId>
 		    <version>${dcm4che.version}</version>
 		</dependency>
+
+		<!-- Apache dependencies -->
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
@@ -100,17 +103,15 @@
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
 		</dependency>
-		<!-- Solr -->
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-solr</artifactId>
-			<version>${solr-spring.version}</version>
-		</dependency>
-
 		<dependency>
    			<groupId>org.apache.commons</groupId>
    			<artifactId>commons-compress</artifactId>
    			<version>1.21</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.solr</groupId>
+		    <artifactId>solr-solrj</artifactId>
+		    <version>${solrj.version}</version>
 		</dependency>
 	</dependencies>
 

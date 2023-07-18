@@ -13,12 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.annotation.Resource;
-
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.beans.Field;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -31,7 +30,6 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.paging.FacetPageable;
 import org.shanoir.ng.shared.paging.FacetPageable.FacetOrder;
 import org.shanoir.ng.shared.paging.PageImpl;
-import org.shanoir.ng.solr.config.SolrConfig;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -43,8 +41,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.solr.core.SolrTemplate;
-import org.springframework.data.solr.core.query.Field;
 import org.springframework.data.solr.core.query.SimpleField;
 import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SimpleFacetFieldEntry;
@@ -107,12 +103,8 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 			TAGS_FACET,	
 	};
 
-	@Resource
-	private SolrTemplate solrTemplate;
-
-	@Autowired 
-	private SolrConfig solrConfig;
-
+	@Autowired
+	private SolrClient solrClient;
 
 	@Override
 	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
@@ -205,7 +197,6 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 	}
 
 	private SolrResultPage<ShanoirSolrDocument> getSearchResultsWithFacets(ShanoirSolrQuery shanoirQuery, Pageable pageable, Map<Long, List<String>> studyIds) throws RestServiceException {
-		SolrClient client = solrConfig.solrClient();
 		final SolrQuery query = new SolrQuery("*:*");
 
 		/* add user's filtering */
@@ -249,7 +240,7 @@ public class SolrRepositoryImpl implements SolrRepositoryCustom {
 		QueryResponse response;
 		try {
 			LOG.debug("Solr search : " + query);
-			response = client.query("shanoir", query);
+			response = solrClient.query("shanoir", query);
 			LOG.debug("Solr response : " + response);
 		} catch (IOException e) {
 			throw new RestServiceException(e, new ErrorModel(500, "Error querying Solr"));

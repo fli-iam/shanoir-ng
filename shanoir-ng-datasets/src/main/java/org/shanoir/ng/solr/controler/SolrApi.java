@@ -19,8 +19,10 @@
  */
 package org.shanoir.ng.solr.controler;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
@@ -47,6 +49,7 @@ import jakarta.validation.Valid;
 @Tag(name = "solr", description = "the Solr API")
 @RequestMapping("/solr")
 public interface SolrApi {
+	
 	@Operation(summary = "", description = "Index all data to Solr")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "indexed data"),
@@ -56,7 +59,7 @@ public interface SolrApi {
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/index", produces = { "application/json" }, method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<Void> indexAll() throws RestServiceException;
+    ResponseEntity<Void> indexAll() throws RestServiceException, SolrServerException, IOException;
 
 	@Operation(summary = "", description = "Search with facets and returns solr documents and facets page")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found documents and facets"),

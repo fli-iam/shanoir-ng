@@ -85,7 +85,6 @@ public class ShanoirMetadata {
 	private Long subjectId;
 	
 	public ShanoirMetadata () {
-		
 	}
 	
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,

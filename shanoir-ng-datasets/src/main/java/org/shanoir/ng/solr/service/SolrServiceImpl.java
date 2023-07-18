@@ -19,7 +19,7 @@
  */
 package org.shanoir.ng.solr.service;
 
-import java.time.Duration;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Center;
@@ -41,7 +43,6 @@ import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
-import org.shanoir.ng.solr.repository.SolrRepository;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -66,10 +67,8 @@ import org.springframework.util.CollectionUtils;
 @Service
 public class SolrServiceImpl implements SolrService {
 
-	//	private static final Logger LOG = LoggerFactory.getLogger(SolrServiceImpl.class);
-
 	@Autowired
-	private SolrRepository solrRepository;
+	private SolrClient solrClient;
 
 	@Autowired
 	private ShanoirMetadataRepository shanoirMetadataRepository;
@@ -85,40 +84,44 @@ public class SolrServiceImpl implements SolrService {
 
 	@Transactional
 	@Override
-	public void addToIndex (final ShanoirSolrDocument document) {
-		solrRepository.save(document, Duration.ZERO);
+	public void addToIndex (final ShanoirSolrDocument document) throws SolrServerException, IOException {
+		solrClient.addBean(document);
+		solrClient.commit();
 	}
 
 	@Transactional
 	@Override
-	public void addAllToIndex (final List<ShanoirSolrDocument> documents) {
-		solrRepository.saveAll(documents, Duration.ZERO);
+	public void addAllToIndex (final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
+		solrClient.addBeans(documents);
+		solrClient.commit();
 	}
 
 	@Transactional
 	@Override
-	public void deleteFromIndex(Long datasetId) {
-		solrRepository.deleteByDatasetId(datasetId);
+	public void deleteFromIndex(Long datasetId) throws SolrServerException, IOException {
+		solrClient.deleteById(Long.toString(datasetId));
+		solrClient.commit();
 	}
 
 	@Transactional
 	@Override
-	public void deleteFromIndex(List<Long> datasetIds) {
-		solrRepository.deleteByDatasetIdIn(datasetIds);
+	public void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException {
+		solrClient.deleteById(datasetIds.stream().map(String::valueOf).collect(Collectors.toList()), 0);
+		solrClient.commit();
 	}
 
 	@Transactional
-	public void deleteAll() {
-		solrRepository.deleteAll();
+	public void deleteAll() throws SolrServerException, IOException {
+		solrClient.deleteByQuery("*:*");
+		solrClient.commit();
 	}
 
 	@Transactional
 	@Override
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
-	public void indexAll() {
+	public void indexAll() throws SolrServerException, IOException {
 		// 1. delete all
 		deleteAll();
-
 		// 2. get all datasets
 		List<ShanoirMetadata> documents = shanoirMetadataRepository.findAllAsSolrDoc();
 		indexDocumentsInSolr(documents);
@@ -126,7 +129,7 @@ public class SolrServiceImpl implements SolrService {
 
 	@Transactional
 	@Override
-	public void indexDatasets(List<Long> datasetIds) {
+	public void indexDatasets(List<Long> datasetIds) throws SolrServerException, IOException {
 		// Get all associated datasets and index them to solr
 		List<ShanoirMetadata> shanoirMetadatas = shanoirMetadataRepository.findSolrDocs(datasetIds);
 		indexDocumentsInSolr(shanoirMetadatas);
@@ -134,14 +137,13 @@ public class SolrServiceImpl implements SolrService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
-	public void indexDataset(Long datasetId) {
+	public void indexDataset(Long datasetId) throws SolrServerException, IOException {
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
 		if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
 		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
 
 		// Get tags
 		List<SubjectStudy> list = subjectStudyRepo.findByStudyIdInAndSubjectIdIn(Collections.singletonList(shanoirMetadata.getStudyId()), Collections.singletonList(shanoirMetadata.getSubjectId()));
-
 		List<String> tags = new ArrayList<>();
 		if (list != null) {
 			for (SubjectStudy susu : list) {
@@ -152,13 +154,13 @@ public class SolrServiceImpl implements SolrService {
 				}
 			}
 		}
-
 		doc.setTags(tags);
 
-		solrRepository.save(doc, Duration.ZERO);
+		solrClient.addBean(doc);
+		solrClient.commit();
 	}
 
-	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas) {
+	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas) throws SolrServerException, IOException {
 		Iterator<ShanoirMetadata> docIt = metadatas.iterator();
 
 		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();

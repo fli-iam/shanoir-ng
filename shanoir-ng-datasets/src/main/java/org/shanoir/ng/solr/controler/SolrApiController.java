@@ -19,10 +19,12 @@
  */
 package org.shanoir.ng.solr.controler;
 
+import java.io.IOException;
 import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
@@ -49,7 +51,7 @@ public class SolrApiController implements SolrApi {
 	private SolrService solrService;
 	
 	@Override
-	public ResponseEntity<Void> indexAll() throws RestServiceException {
+	public ResponseEntity<Void> indexAll() throws RestServiceException, SolrServerException, IOException {
 		solrService.indexAll();		
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
