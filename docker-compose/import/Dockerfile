@@ -19,7 +19,6 @@ RUN set -ex && \
     apt install -t \
       bullseye-backports \
       openjdk-11-jre-headless \
-      xorg-xhost \
       ca-certificates-java -y
 
 #32 bits packages are necessary
