@@ -254,7 +254,7 @@ export class ExecutionComponent implements OnInit {
 
                 let carminDatasetProcessing: CarminDatasetProcessing = new CarminDatasetProcessing(execution.identifier, execution.name, execution.pipelineIdentifier, resultPath, execution.status, execution.timeout, execution.startDate, execution.endDate);
 
-                carminDatasetProcessing.comment = execution.identifier;
+                carminDatasetProcessing.comment = execution.name;
                 carminDatasetProcessing.studyId = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
                 carminDatasetProcessing.datasetProcessingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
                 carminDatasetProcessing.outputProcessing = this.pipeline.outputProcessing;
