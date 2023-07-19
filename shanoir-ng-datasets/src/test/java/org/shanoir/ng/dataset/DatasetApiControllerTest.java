@@ -120,7 +120,7 @@ public class DatasetApiControllerTest {
 	private ControlerSecurityService controlerSecurityService;
 	
     @TempDir
-    public File datasetFile;
+    private File datasetDir;
 
 	@MockBean
 	private EegDatasetMapper eegDatasetMapper;
@@ -201,7 +201,8 @@ public class DatasetApiControllerTest {
 	public void testMassiveDownloadByStudyIdNifti() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
-		FileUtils.write(datasetFile, "test");
+		File tempFile = new File(datasetDir, "test.nii");
+		FileUtils.write(tempFile, "test");
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
@@ -214,7 +215,7 @@ public class DatasetApiControllerTest {
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
-		dsFile.setPath("file:///" + datasetFile.getAbsolutePath());
+		dsFile.setPath("file:///" + tempFile.getAbsolutePath());
 		expr.setDatasetFiles(Collections.singletonList(dsFile));
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
@@ -245,7 +246,8 @@ public class DatasetApiControllerTest {
 	public void testMassiveDownloadByDatasetsId() throws Exception {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
-		FileUtils.write(datasetFile, "test");
+		File tempFile = new File(datasetDir, "test.nii");
+		FileUtils.write(tempFile, "test");
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
@@ -258,7 +260,7 @@ public class DatasetApiControllerTest {
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
-		dsFile.setPath("file:///" + datasetFile.getAbsolutePath());
+		dsFile.setPath("file:///" + tempFile.getAbsolutePath());
 		expr.setDatasetFiles(Collections.singletonList(dsFile));
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
@@ -271,7 +273,6 @@ public class DatasetApiControllerTest {
 				.param("datasetIds", "1"))
 		.andExpect(status().isOk())
 		.andExpect(content().string(containsString("name_comment_2_1_2_0.nii")));
-
 
 		// THEN all datasets are exported
 		
@@ -355,7 +356,8 @@ public class DatasetApiControllerTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text
-		FileUtils.write(datasetFile, "test");
+		File tempFile = new File(datasetDir, "test.nii");
+		FileUtils.write(tempFile, "test");
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
@@ -367,7 +369,7 @@ public class DatasetApiControllerTest {
 		DatasetExpression expr = new DatasetExpression();
 		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		DatasetFile dsFile = new DatasetFile();
-		dsFile.setPath(datasetFile.getAbsolutePath());
+		dsFile.setPath(tempFile.getAbsolutePath());
 		expr.setDatasetFiles(Collections.singletonList(dsFile));
 		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
 		dataset.setDatasetExpressions(datasetExpressions);
@@ -383,7 +385,6 @@ public class DatasetApiControllerTest {
 	} catch (Exception e) {
 		assertEquals("Request processing failed; nested exception is {\"code\":422,\"message\":\"Please choose either nifti, dicom or eeg file type.\",\"details\":null}", e.getMessage());
 	}
-
 		// THEN we expect a failure
 	}
 
@@ -393,4 +394,5 @@ public class DatasetApiControllerTest {
 		// datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 		assertEquals("abc_ABC___123.-tru____", "abc ABCé('123.-tru_ç&ù".replaceAll("[^a-zA-Z0-9\\.\\-]", "_"));
 	}
+
 }
