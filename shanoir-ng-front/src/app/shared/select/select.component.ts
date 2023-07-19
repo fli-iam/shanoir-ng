@@ -577,7 +577,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     public onInputFocus() {
-        this.textInput.nativeElement.select();
+        this.textInput?.nativeElement.select();
     }    
     
     registerOnChange(fn: any): void {
