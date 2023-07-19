@@ -37,6 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
@@ -45,9 +47,9 @@ import org.springframework.test.context.ActiveProfiles;
  * @author jlouis
  * 
  */
-
 @SpringBootTest
 @ActiveProfiles("test")
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class StudyCardServiceSecurityTest {
 
 	private static final long LOGGED_USER_ID = 2L;
@@ -62,7 +64,6 @@ public class StudyCardServiceSecurityTest {
 	
 	@MockBean
 	private StudyUserRightsRepository rightsRepository;
-	
 	
 	@BeforeEach
 	public void setup() {
@@ -221,4 +222,5 @@ public class StudyCardServiceSecurityTest {
 	private StudyCard mockStudyCard() {
 		return mockStudyCard(null);
 	}
+
 }
