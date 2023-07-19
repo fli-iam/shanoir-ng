@@ -18,6 +18,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
@@ -48,7 +49,12 @@ public class AcqMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcqu
     public boolean fulfilled(DatasetAcquisition acquisition) {
         DatasetAcquisitionMetadataField field = this.getShanoirField();
         if (field != null) {
-            String valueFromDb = field.get(acquisition);
+            String valueFromDb;
+            try {
+                valueFromDb = field.get(acquisition);
+            } catch (CheckedIllegalClassException e) {
+                valueFromDb = null;
+            }
             if (valueFromDb != null) {
                 // get all possible values, that can fulfill the condition
                 for (String value : this.getValues()) {
