@@ -32,9 +32,8 @@ import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Study card service test.
@@ -43,6 +42,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * 
  */
 @SpringBootTest
+@ActiveProfiles("test")
 public class StudyCardServiceTest {
 
 	private static final Long TEMPLATE_ID = 1L;
@@ -50,9 +50,6 @@ public class StudyCardServiceTest {
 
 	@Mock
 	private StudyCardRepository studyCardRepository;
-
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks
 	private StudyCardServiceImpl studyCardService;
