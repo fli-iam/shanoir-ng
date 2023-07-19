@@ -269,7 +269,10 @@ public class SolrServiceImpl implements SolrService {
 	 */
 	@Override
 	public void updateDatasets(List<Long> datasetIds) {
-		this.solrRepository.deleteByDatasetIdIn(datasetIds);
+		if (CollectionUtils.isEmpty(datasetIds)) {
+			return;
+		}
+		this.deleteFromIndex(datasetIds);
 		this.indexDatasets(datasetIds);;		
 	}
 
