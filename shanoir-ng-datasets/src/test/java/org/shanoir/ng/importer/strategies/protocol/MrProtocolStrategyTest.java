@@ -23,6 +23,8 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.importer.dto.Serie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Tests the implementation of MrProtocolStrategy.
@@ -30,7 +32,8 @@ import org.slf4j.LoggerFactory;
  * @author mkain
  *
  */
-
+@SpringBootTest
+@ActiveProfiles("test")
 public class MrProtocolStrategyTest {
 
 	/** Logger. */
