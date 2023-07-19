@@ -40,6 +40,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -112,13 +113,15 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)
 	@RabbitHandler
 	@Transactional
+	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
 	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
-		ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
+	    ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {
 			createAllDatasetAcquisitions(importJob, importJob.getUserId());
 		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new AmqpRejectAndDontRequeueException(e);
+			// finally is called even if we throw an exception here
 		} finally {
 			// if the json could not be parsed, no way to know workFolder
 			// so better to throw the exception, as no possibility to clean

@@ -271,7 +271,8 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
-
+import { ClipboardModule } from '@angular/cdk/clipboard';
+import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 
 @NgModule({
     imports: [
@@ -284,7 +285,8 @@ import { AccessRequestListComponent } from './users/access-request/access-reques
         NgxJsonViewerModule,
         AppRoutingModule,
         PreclinicalRoutingModule,
-        RouterModule
+        RouterModule,
+        ClipboardModule
     ],
     declarations: [
         AccountRequestComponent,
@@ -459,7 +461,8 @@ import { AccessRequestListComponent } from './users/access-request/access-reques
         QualityControlComponent,
         QualityCardListComponent,
         QualityCardComponent,
-        QualityCardRuleComponent
+        QualityCardRuleComponent,
+        TaskStatusComponent
     ],
     // Not required anymore with Angular > 9.0
     // entryComponents: [

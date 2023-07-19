@@ -1,0 +1,6 @@
+h2 { margin-bottom: 30px; }
+code { display: block; }
+.tab { margin-left: 20px; }
+.message-li { display: flex; }
+.message-li label { min-width: 250px; }
+.message { border: 1px solid lightgrey; border-radius: 3px; padding: 0 6px; }

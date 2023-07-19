@@ -246,6 +246,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         let result: any = this.getCellValue(item, col);
         if (result == null || this.isValueBoolean(result)) {
             return "";
+        } else if (col.type == 'date') {
+            return new Date(result).toLocaleString();
         } else if (result.text) {
             return result;
         } else {

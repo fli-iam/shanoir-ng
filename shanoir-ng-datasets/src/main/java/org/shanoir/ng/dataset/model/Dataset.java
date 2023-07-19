@@ -150,6 +150,9 @@ public abstract class Dataset extends AbstractEntity {
 	/** Subject. */
 	private Long subjectId;
 
+	/** Can we download the subject ? */
+	private boolean downloadable = true;
+
 	/** Metadata updated by study card. */
 	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata updatedMetadata;
@@ -406,6 +409,14 @@ public abstract class Dataset extends AbstractEntity {
 	@Deprecated
 	public void setImportedStudyId(Long importedStudyId) {
 		this.importedStudyId = importedStudyId;
+	}
+
+	public boolean isDownloadable() {
+		return downloadable;
+	}
+
+	public void setDownloadable(boolean downloadable) {
+		this.downloadable = downloadable;
 	}
 
 }

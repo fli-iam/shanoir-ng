@@ -24,7 +24,10 @@ public class ShanoirEvent {
 	protected Float progress;
 
 	protected Long studyId;
+	
+	private Long timestamp;
 
+   
 	public ShanoirEvent() {
 	}
 
@@ -164,6 +167,14 @@ public class ShanoirEvent {
 	 */
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
-	}
+	}   
+    
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
 
 }

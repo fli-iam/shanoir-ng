@@ -275,7 +275,7 @@ public class ImporterApiController implements ImporterApi {
 
 			removeUnselectedSeries(importJob);
 			LOG.info("Starting import job for user {} (userId: {}) with import job folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
-			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
+			importerManagerService.manageImportJob(importJob);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} else {
 			LOG.error("Missing importJobDir.");
@@ -762,7 +762,7 @@ public class ImporterApiController implements ImporterApi {
 			// handle creation of study and study cards later here
 		}
 		final Long userId = KeycloakUtil.getTokenUserId();
-		importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
+		importerManagerService.manageImportJob(importJob);
 		return null;
 	}
 
@@ -866,7 +866,7 @@ public class ImporterApiController implements ImporterApi {
 				if (subject == null) {
 
 					// Create subject
-					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(subject.getId(), subject.getName()), new IdName(studyId, studyName))));
+					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
 
 					LOG.debug("We found a subject " + subjectName);
 

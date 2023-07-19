@@ -92,6 +92,7 @@ export class StudyDTOService {
         entity.protocolFilePaths = dto.protocolFilePaths;
         entity.profile = dto.profile;
         entity.description = dto.description;
+        entity.license = dto.license;
         entity.dataUserAgreementPaths = dto.dataUserAgreementPaths;
         entity.startDate = dto.startDate ? new Date(dto.startDate) : null;
         if (dto.studyCenterList) {
@@ -136,6 +137,9 @@ export class StudyDTOService {
         //entity.timepoints = dto.timepoints;
         entity.visibleByDefault = dto.visibleByDefault;
         entity.withExamination = dto.withExamination;
+        if (dto.studyUserList) {
+            entity.nbMembers = dto.studyUserList.length;
+        }
         if (dto.studyCards) {
             entity.studyCardList = dto.studyCards.map(studyCardDTO => StudyCardDTOServiceAbstract.mapSyncFields(studyCardDTO, new StudyCard()));
         } else {
@@ -207,6 +211,7 @@ export class StudyDTOService {
             studyCenter.center = new Center();
             studyCenter.center.id = dtoStudyCenter.center.id;
             studyCenter.center.name = dtoStudyCenter.center.name;
+            studyCenter.subjectNamePrefix = dtoStudyCenter.subjectNamePrefix;
         }
         return studyCenter;
     }
@@ -244,6 +249,7 @@ export class StudyDTO {
     name: string;
     nbExaminations: number;
     nbSujects: number;
+    nbMembers: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
     profile: Profile;
@@ -260,6 +266,7 @@ export class StudyDTO {
     studyTags: Tag[];
     studyCards: StudyCardDTO[];
     description: string;
+    license: string;
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
@@ -296,6 +303,7 @@ export class StudyDTO {
         this.tags = study.tags;
         this.studyTags = study.studyTags;
         this.description = study.description;
+        this.license = study.license;
     }
 
 }
@@ -337,5 +345,6 @@ export class PublicStudyData {
   studyStatus: "IN_PROGRESS" | "FINISHED";
   studyType: StudyType;
   description: string;
+  license: string;
   studyTags: Tag[];
 }
