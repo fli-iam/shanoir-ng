@@ -420,7 +420,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             event.preventDefault();
         } else if (' ' == event.key) {
             if (!this.isOpen()) this.open();
-        }  else if (this.search && event.keyCode >= 65 && event.keyCode <= 90) {
+        }  else if (this.search && event.keyCode >= 65 && event.keyCode <= 90 && this.textInput) {
             if (this.textInput.nativeElement != document.activeElement) {
                 this.inputText = null;
                 this.textInput.nativeElement.focus();
