@@ -394,8 +394,8 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Void> deleteStudyUser (
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "id of the userId", required = true) @PathVariable("userId") Long userId) throws IOException {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "id of the userId", required = true) @PathVariable("userId") Long userId) throws IOException {
 		studyService.removeStudyUserFromStudy(studyId, userId);
 		List<StudyUserRight> surList = studyUserService.getRightsForStudy(studyId);
 
