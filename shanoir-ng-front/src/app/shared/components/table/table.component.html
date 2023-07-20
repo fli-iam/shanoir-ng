@@ -19,8 +19,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 route: col.route ? col.route(item) : null,
                 boolean: isFieldBoolean(col),
                 editable: cellEditable(item, col),
+                rowRoute: rowRoute ? rowRoute(item) : null,
                 possibleValues: (page?._savedContentRendering && page?._savedContentRendering[itemIndex]) ? page._savedContentRendering[itemIndex][colIndex]?.possibleValues : null,
-                cellValue: getCellValue(item, col)
+                cellValue: getCellValue(item, col),
+                cellGraphics: getCellGraphics(item, col)
         } as vars">
             <td
                     *ngIf="!col.hidden"
@@ -28,66 +30,81 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [class.bool]="vars.boolean"
                     [class.progress]="col.type == 'progress'"
                     [attr.title]="col.tip != undefined ? col.tip : (vars.render.text ? vars.render.text : '')"
-                    [style.color]="vars.render.color"
+                    [style.color]="vars.render?.color"
+                    [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
                     #refTd
                     >
+                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.table-edit]="editMode" *ngIf="col.type != 'button'" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi" [class.wrap]="col.wrap">
 
-                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi">
                     <!-- default display -->
-                    <ng-container *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi">{{vars.render.text ? vars.render.text : vars.render}}</ng-container>
+                    <a class="cell-new-tab" [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi && col.type != 'button'">
+                        <span
+                            [style.color]="vars.cellGraphics?.color"
+                            [style.border-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.color : null"
+                            [style.background-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.backgroundColor : null"
+                            [class.block]="vars.cellGraphics?.tag"
+                        >
+                            <i *ngIf="vars.cellGraphics?.awesome" class="{{vars.cellGraphics.awesome}}"></i>
+                            {{vars.render.text ? vars.render.text : vars.render}}
+                        </span>
+                    </a>
 
                     <!-- link -->
-                    <a class="link" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi"
-                        [routerLink]="vars.route" routerLinkActive="active">{{vars.render.text ? vars.render.text : vars.render}}<i class="fas fa-external-link-alt"></i></a>
+                    <a [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && vars.route && !col.multi" class="cell-new-tab">
+                        <a class="link" [routerLink]="vars.route" routerLinkActive="active">{{vars.render.text ? vars.render.text : vars.render}}
+                            <i *ngIf="!col.awesome" class="fas fa-external-link-alt"></i>
+                            <span *ngIf="col.awesome" class="awesome"><i *ngIf="col.awesome" [class]="col.awesome"></i></span>
+                        </a>
+                    </a>
 
-                    <!--  -->
-                    <ng-container *ngIf="!editMode && col.multi">
+                    <!-- multi -->
+                    <a [routerLink]="vars.rowRoute" *ngIf="!editMode && col.multi"  class="cell-new-tab">
                         <span *ngFor="let oneVal of getFieldRawValue(item, col['field'])" class="block" [style.color]="oneVal.backgroundColor" [style.background-color]="oneVal.color" [class.dark]="getFontColor(oneVal.color)">
                             <span class="label">
                                 {{oneVal.label ? oneVal.label : (oneVal.name ? oneVal.name : oneVal)}}
                             </span>
                         </span>
-                    </ng-container>
-
-                    <!-- editable text / number -->
-                    <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !vars.possibleValues">
-                        <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
-                    </ng-container>
-
-                    <!-- editable with dropdown -->
-                    <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues">
-                        <select *ngIf="!col.multi" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
-                            <option *ngFor="let possibleValue of vars.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
-                        </select>
-                        <ng-container *ngIf="col.multi">
-                            <multi-select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" [options]="vars.possibleValues"></multi-select>
-                        </ng-container>
-                    </ng-container>
+                    </a>
 
                     <!-- display a boolean -->
-                    <ng-container *ngIf="vars.boolean && (!editMode || !vars.editable)">
+                    <a [routerLink]="vars.rowRoute" *ngIf="vars.boolean && (!editMode || !vars.editable)"  class="cell-new-tab">
                         <span *ngIf="vars.cellValue == true && !col.awesome && !col.awesomeFalse" class="bool-true"><i class="fas fa-check"></i></span>
                         <span *ngIf="vars.cellValue == false && !col.awesome && !col.awesomeFalse" class="bool-false"><i class="fas fa-times"></i></span>
                         <span *ngIf="vars.cellValue == true && col.awesome" class="bool-true"><i [class]="col.awesome" [style.color]="col.color"></i></span>
-                        <span *ngIf="vars.cellValue == false && col.awesomeFalse" class="bool-false"><i [class]="col.awesomeFalse" [style.color]="col.colorFalse"></i></span>
-                    </ng-container>
-
-                    <!-- editable boolean -->
-                    <ng-container *ngIf="vars.boolean && editMode && vars.editable">
-                        <checkbox [ngModel]="vars.cellValue" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox>
-                    </ng-container>
-
-                    <!-- display a button -->
-                    <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item) && col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
-                        <img *ngIf="col.img" src="{{col.img}}" />
-                        <span *ngIf="col.awesome" class="awesome"><i [class]="col.awesome"></i></span>
-                    </span>
-
-                    <!-- display a progress bar -->
-                    <ng-container *ngIf="col.type == 'progress'">
-                        <progress-bar [progress]="vars.render" width="100"></progress-bar>
-                    </ng-container>
+                        <span *ngIf="!vars.cellValue && col.awesomeFalse" class="bool-false"><i [class]="col.awesomeFalse" [style.color]="col.colorFalse"></i></span>
+                    </a>
                 </div>
+
+                <!-- editable boolean -->
+                <ng-container *ngIf="vars.boolean && editMode && vars.editable">
+                  <checkbox [ngModel]="vars.cellValue" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox>
+                </ng-container>
+
+                <!-- editable text / number -->
+                <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !vars.possibleValues">
+                  <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
+                </ng-container>
+
+                <!-- editable with dropdown -->
+                <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues">
+                  <select *ngIf="!col.multi" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
+                    <option *ngFor="let possibleValue of vars.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
+                  </select>
+                  <ng-container *ngIf="col.multi">
+                    <multi-select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" [options]="vars.possibleValues"></multi-select>
+                  </ng-container>
+                </ng-container>
+
+                <!-- display a button -->
+                <span class="button" *ngIf="col.type == 'button' && !rowDisabled(item) && col.action && (!col.condition || col.condition(item))" (click)="col.action(item)">
+                    <img *ngIf="col.img" src="{{col.img}}" />
+                    <span *ngIf="col.awesome" class="awesome"><i [class]="col.awesome"></i></span>
+                </span>
+
+                <!-- display a progress bar -->
+                <ng-container *ngIf="col.type == 'progress'">
+                    <progress-bar [progress]="vars.render" width="100"></progress-bar>
+                </ng-container>
                 <div *ngIf="colIndex < columnDefs.length - 1" class="resizer" (mousedown)="startDrag(colIndex, refTd, $event, columnDefs)" (mouseup)="stopDrag()"></div>
             </td>
         </ng-container>
@@ -119,7 +136,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 
 <!-- Control bar -->
-<caption class="controls">
+<caption class="controls" *ngIf="selectionAllowed || browserSearch || (customActionDefs?.length > 0)">
     <span *ngIf="selectionAllowed" class="select-ctrl" [class.with-sub]="subRowsDefs">
         <checkbox [(ngModel)]="selectAll" (ngModelChange)="onSelectAllChange()"></checkbox>
     </span>
@@ -161,7 +178,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [class.even]="i%2==0"
     [class.disabled]="rowDisabled(item)"
     [class.edit]="editMode"
-    [class.selected]="(selectionAllowed && isSelected(item)) || selectedId == item.id"
+    [class.selected]="(selectionAllowed && isSelected(item)) || (!!item.id && selectedId == item.id)"
     [class.opened]="subRowsDefs && subRowOpen[i]">
     <td *ngIf="subRowsDefs" class="checkbox-cell deploy-cell">
         <i *ngIf="!subRowOpen[i]" (click)="deploy(i)" class="fa-solid fa-plus"></i>
@@ -191,7 +208,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 </ng-container>
 <!-- Pager : don't insert new lines between a span closing tag and the next span opening tag, it would result as a "space" between them -->
-<tr *ngIf="items?.length > 0" class="full-row">
+<tr *ngIf="items?.length > 0 && page?.totalPages > 1" class="full-row">
     <th class="pager" [attr.colspan]="nbColumns">
         <shanoir-pager
             [currentPage]="currentPage"
@@ -200,7 +217,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         ></shanoir-pager>
     </th>
 </tr>
-<tr>
+<tr [class.collapsable]="collapseControls">
     <th class="status-bar controls" [attr.colspan]="nbColumns">
         <!-- Nb results per page input -->
         <span class="options">

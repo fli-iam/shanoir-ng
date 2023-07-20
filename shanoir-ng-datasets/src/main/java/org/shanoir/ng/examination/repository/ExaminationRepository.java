@@ -54,7 +54,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 * @param studyId
 	 * @return list of examinations.
 	 */
-	List<Examination> findBySubjectIdAndStudyId(Long subjectId, Long studyId);
+	List<Examination> findBySubjectIdAndStudy_Id(Long subjectId, Long studyId);
 
 	
 	/**
@@ -75,7 +75,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 *            subject id.
 	 * @return list of examinations.
 	 */
-	List<Examination> findByStudyId(Long studyId);
+	List<Examination> findByStudy_Id(Long studyId);
 	
 	/**
 	 * Get all examinations, clinical or preclinical.

@@ -134,6 +134,16 @@ public interface StudyApi {
 			@Parameter(name = "study to create", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
 
+	@Operation(summary = "", description = "If exists, returns the size of the study files corresponding to the given id")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Size of the study files in bytes"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no study found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/sizeByStudyId/{studyId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	ResponseEntity<Long> getStudyFilesSize(@PathVariable("studyId") Long studyId);
+
 	@Operation(summary = "", description = "Updates a study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study updated"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -272,6 +282,20 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> deleteDataUserAgreement(
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws IOException;
+
+	@Operation(summary = "", description = "Deletes the user of a study")
+	@ApiResponses(value = { @ApiResponse(responseCode = " 204", description = "user removed from study"),
+			@ApiResponse(responseCode = " 401", description = "unauthorized"),
+			@ApiResponse(responseCode = " 403", description = "forbidden"),
+			@ApiResponse(responseCode = " 404", description = "no study or user found"),
+			@ApiResponse(responseCode = " 500", description = "unexpected error") })
+	@RequestMapping(value = "studyUser/{studyId}/{userId}", produces = {
+			"application/json" }, method = RequestMethod.DELETE)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
+	ResponseEntity<Void> deleteStudyUser(
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "id of the user", required = true) @PathVariable("userId") Long userId)
 			throws IOException;
 
 	@Operation(summary = "", description = "If exists, returns the studies that are publicly available for a given user")

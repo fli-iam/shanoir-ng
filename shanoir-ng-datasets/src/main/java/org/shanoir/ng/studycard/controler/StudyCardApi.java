@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -17,6 +17,7 @@ package org.shanoir.ng.studycard.controler;
 import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdList;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -41,7 +42,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 @Tag(name = "studycards", description = "the studyCard API")
 @RequestMapping("/studycards")
 public interface StudyCardApi {
-
+    
 	@Operation(summary = "", description = "Deletes a study card")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study card deleted"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -73,10 +74,10 @@ public interface StudyCardApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
-	
+		
 	@Operation(summary = "", description = "If exists, returns the study cards corresponding to the given equipment id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study cards"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -85,10 +86,10 @@ public interface StudyCardApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byAcqEq/{acqEqId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
+    @PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyCard>> findStudyCardByAcqEqId(
 			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId);
-
+	
 	@Operation(summary = "", description = "Returns all the study Cards")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study cards"),
 			@ApiResponse(responseCode = "204", description = "no study card found"),
@@ -97,9 +98,9 @@ public interface StudyCardApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<StudyCard>> findStudyCards();
-
+	
 	@Operation(summary = "", description = "Saves a new study card")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created study card"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -112,7 +113,7 @@ public interface StudyCardApi {
 	ResponseEntity<StudyCard> saveNewStudyCard(
 			@Parameter(name = "study Card to create", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException;
-
+		
 	// Attention: used by ShanoirUploader!
 	@Operation(summary = "", description = "If exists, returns searched study cards")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found study cards"),
@@ -123,9 +124,9 @@ public interface StudyCardApi {
 	@RequestMapping(value = "/search", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or ( hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterStudyCardList(returnObject.getBody(), 'CAN_SEE_ALL') )")
+	@PostAuthorize("hasRole('ADMIN') or ( hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.filterCardList(returnObject.getBody(), 'CAN_SEE_ALL') )")
 	ResponseEntity<List<StudyCard>> searchStudyCards(
-			@Parameter(name = "study ids", required = true) @RequestBody IdList studyIds);
+			@Parameter(name = "study ids", required = true) @RequestBody IdList studyIds);	
 	
 	@Operation(summary = "", description = "Updates a study card")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study card updated"),
@@ -140,7 +141,7 @@ public interface StudyCardApi {
 			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@Parameter(name = "study card to update", required = true) @RequestBody StudyCard studyCard,
 			final BindingResult result) throws RestServiceException;
-	
+
 	@Operation(summary = "", description = "Returns all the dicom tags")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "available tags"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
@@ -158,6 +159,6 @@ public interface StudyCardApi {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDatasetAcquisition(#studyCardApplyObject.datasetAcquisitionIds, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> applyStudyCard(
-			@Parameter(name = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException;
+			@Parameter(name = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException, PacsException;
 
 }

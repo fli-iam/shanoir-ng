@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.subject.controler;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -92,11 +93,22 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<List<SubjectDTO>> findSubjects() {
-		final List<Subject> subjects = subjectService.findAll();
+	public ResponseEntity<List<SubjectDTO>> findSubjects(boolean preclinical, boolean clinical) {
+
+		List<Subject> subjects = new ArrayList<>();
+
+		if(preclinical && clinical){
+			subjects = subjectService.findAll();
+		} else if (preclinical) {
+			subjects = subjectService.findByPreclinical(true);
+		} else if (clinical) {
+			subjects = subjectService.findByPreclinical(false);
+		}
+
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
+
 		return new ResponseEntity<>(subjectMapper.subjectsToSubjectDTOs(subjects), HttpStatus.OK);
 	}
 

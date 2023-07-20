@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <form class="row" [formGroup]="form">
-    
+
     <div class="left">
         <h2>Solr Search</h2>
 
@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.studyName"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable('studyName')"> 
+                (onChange)="updateSelections(); refreshTable('studyName')">
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -40,7 +40,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.subjectName"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable('subjectName')"> 
+                (onChange)="updateSelections(); refreshTable('subjectName')">
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -50,7 +50,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.datasetName"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable('datasetName')"> 
+                (onChange)="updateSelections(); refreshTable('datasetName')">
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -60,7 +60,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.tags"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable('tags')"> 
+                (onChange)="updateSelections(); refreshTable('tags')">
         </solr-paging-criterion>
 
         <div class="dates">
@@ -92,7 +92,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.examinationComment"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable('examinationComment')"> 
+                (onChange)="updateSelections(); refreshTable('examinationComment')">
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -102,7 +102,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.centerName"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable('centerName')"> 
+                (onChange)="updateSelections(); refreshTable('centerName')">
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -112,7 +112,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.datasetType"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable('datasetType')"> 
+                (onChange)="updateSelections(); refreshTable('datasetType')">
         </solr-paging-criterion>
 
         <solr-paging-criterion
@@ -122,7 +122,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [getPage]="getFacetFieldPage.bind(this)"
                 [(ngModel)]="solrRequest.datasetNature"
                 [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable('datasetNature')"> 
+                (onChange)="updateSelections(); refreshTable('datasetNature')">
         </solr-paging-criterion>
 
         <solr-range-criterion
@@ -148,10 +148,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </div>
     <div class="right">
 
-        <solr-text-search 
+        <solr-text-search
                 [(ngModel)]="solrRequest.searchText"
-                [ngModelOptions]="{standalone: true}" 
-                (onType)="syntaxError = false" 
+                [ngModelOptions]="{standalone: true}"
+                (onType)="syntaxError = false"
                 (onChange)="refreshTable()"
                 [syntaxError]="syntaxError"
                 [expertMode]="solrRequest.expertMode">
@@ -173,7 +173,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
 
         <div [hidden]="progressBar.progress == 0">
-            <progress-bar #progressBar [text]="'Preparing download'"></progress-bar>
+            <progress-bar #progressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
         </div>
 
         <div class="tabs">
@@ -187,11 +187,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
             <div class="tab-body" [hidden]="tab != 'results'" *ngIf="loaded">
                 <shanoir-table #table
-                    [getPage]="getPage.bind(this)" 
+                    [getPage]="getPage.bind(this)"
                     [maxResults]="50"
-                    [columnDefs]="columnDefs" 
+                    [columnDefs]="columnDefs"
                     [customActionDefs]="customActionDefs"
                     [browserSearch]="false"
+                    [rowRoute]="rowClick.bind(this)"
                     [selectionAllowed]="true"
                     [selection]="selectedDatasetIds"
                     (selectionChange)="onSelectionChange($event)">
@@ -199,11 +200,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </div>
             <div class="tab-body selected" [hidden]="tab != 'selected'" *ngIf="loaded">
                 <shanoir-table #selectionTable
-                    [getPage]="getSelectedPage.bind(this)" 
+                    [getPage]="getSelectedPage.bind(this)"
                     [maxResults]="50"
-                    [columnDefs]="selectionColumnDefs" 
+                    [columnDefs]="selectionColumnDefs"
                     [customActionDefs]="selectionCustomActionDefs"
-                    (rowClick)="onRowClick($event)"
+                    [rowRoute]="rowClick.bind(this)"
                     [browserSearch]="false">
                 </shanoir-table>
             </div>

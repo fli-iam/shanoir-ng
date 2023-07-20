@@ -32,6 +32,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -46,8 +48,10 @@ import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.UserPersonalCommentSubject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.utils.ModelsUtil;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -60,12 +64,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author msimon
  *
  */
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class SubjectServiceTest {
 
 	private static final Long SUBJECT_ID = 1L;
-	private static final String UPDATED_SUBJECT_DATA = "subject1";
 
 	@Mock
 	private SubjectRepository subjectRepository;
@@ -83,6 +86,9 @@ public class SubjectServiceTest {
 	private ObjectMapper objectMapper;
 	
 	@Mock
+	private ShanoirEventService eventService;
+	
+	@Mock
 	private StudyExaminationRepository studyExaminationRepository;
 
 	@BeforeEach
@@ -94,10 +100,12 @@ public class SubjectServiceTest {
 	}
 
 	@Test
+	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void deleteByIdTest() throws EntityNotFoundException {
 		subjectService.deleteById(SUBJECT_ID);
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+		Mockito.verify(eventService, Mockito.times(1)).publishEvent(Mockito.any(ShanoirEvent.class));
 	}
 
 	@Test

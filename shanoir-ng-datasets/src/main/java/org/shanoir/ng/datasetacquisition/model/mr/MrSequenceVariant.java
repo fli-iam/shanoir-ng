@@ -44,7 +44,10 @@ public enum MrSequenceVariant {
 	OSP(7),
 	
 	// no sequence variant
-	NONE(8);
+	NONE(8),
+	
+	// Cannot parse correctly
+	UNKNOWN(9);
 	
 	private static final String TOF = "TOF";
 	
@@ -75,7 +78,7 @@ public enum MrSequenceVariant {
 				return sequenceVariant;
 			}
 		}
-		throw new IllegalArgumentException("No matching scanning sequence for id " + id);
+		return UNKNOWN;
 	}
 	
 	/**

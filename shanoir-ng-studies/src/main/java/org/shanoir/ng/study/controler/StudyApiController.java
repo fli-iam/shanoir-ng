@@ -198,6 +198,11 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
+	public ResponseEntity<Long> getStudyFilesSize(@PathVariable("studyId") final Long studyId) {
+		return new ResponseEntity<>(studyService.getStudyFilesSize(studyId), HttpStatus.OK);
+	}
+
+	@Override
 	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
 			final BindingResult result) throws RestServiceException {
 
@@ -369,11 +374,12 @@ public class StudyApiController implements StudyApi {
 			response.flushBuffer();
 		}
 	}
-		
+
 	@Override
 	public ResponseEntity<Void> deleteDataUserAgreement (
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
 		Study study = studyService.findById(studyId);
+
 		if (study.getDataUserAgreementPaths() == null || study.getDataUserAgreementPaths().isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -383,6 +389,19 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		Files.delete(Paths.get(filePath));
+		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Void> deleteStudyUser (
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "id of the userId", required = true) @PathVariable("userId") Long userId) throws IOException {
+		studyService.removeStudyUserFromStudy(studyId, userId);
+		List<StudyUserRight> surList = studyUserService.getRightsForStudy(studyId);
+
+		if (surList.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 

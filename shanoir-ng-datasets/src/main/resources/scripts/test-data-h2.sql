@@ -12,40 +12,83 @@
 
 -- Populates database for test
 
+INSERT INTO study
+	(id, name)
+VALUES
+	(1, 'DemoStudy1'),
+	(2, 'DemoStudy2'),
+	(3, 'DemoStudy3');
+
 INSERT INTO study_cards
 	(id, acquisition_equipment_id, disabled, last_edit_timestamp, name, nifti_converter_id, study_id)
 VALUES 
 	(1,1,false,0,'StudyCard1',1,1),
 	(2,1,false,0,'StudyCard2',1,1),
 	(3,3,false,0,'StudyCard3',1,2),
-	(4,4,false,0,'StudyCard4',1,3);
+	(4,4,false,0,'StudyCard4',1,3),
+	(5,null,false,0,'QualityCard1',null,1);
 	
-INSERT INTO study_card_rule 
-VALUES (3,1),(4,1),(5,1),(6,1);
+INSERT INTO study_card_rule
+	(id, scope, study_card_id)
+VALUES (3,'DatasetAcquisition',1),(4,'DatasetAcquisition',1),(5,'DatasetAcquisition',1),(6,'DatasetAcquisition',1),(7,'Dataset',5),(8,'Dataset',5);
 
 INSERT INTO study_card_assignment 
+    (id, field, value, scope)
 VALUES 
-	(3,11,'WORKED !!!!!',3),
-	(4,14,'TIME_OF_FLIGHT_MR_DATASET',4),
-	(5,5,'5',4),
-	(6,11,'ERROR',5),
-	(7,11,'OVERRIDEN',6),
-	(8,4,'4',6);
+	(3,11,'WORKED !!!!!','DatasetAcquisition'),
+	(4,14,'TIME_OF_FLIGHT_MR_DATASET','DatasetAcquisition'),
+	(5,5,'5','DatasetAcquisition'),
+	(6,11,'ERROR','DatasetAcquisition'),
+	(7,11,'OVERRIDEN','Dataset'),
+	(8,4,'4','Dataset');
 
-INSERT INTO study_card_condition 
+
+CREATE TABLE study_card_condition (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    dicom_tag int(11) DEFAULT NULL,
+    operation int(11) NOT NULL,
+    shanoir_field int(11) DEFAULT NULL,
+    scope varchar(65) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+INSERT INTO study_card_condition
+	(id, shanoir_field, operation, scope, dicom_tag)
 VALUES 
-	(2,528446,'tse_vfl_WIP607',2,3),
-	(3,1573009,'200',6,5),
-	(4,1573009,'150',5,5),
-	(5,1573009,'150',5,6),
-	(6,1573013,'781.00',2,6);
+	(1,2,4,'AcqMetadataCondOnAcq', null),
+	(2,2,4,'AcqMetadataCondOnAcq', null),
+	(3,1573009,5,'AcqMetadataCondOnAcq', null),
+	(4,1573009,6,'AcqMetadataCondOnAcq', null),
+	(5,1573013,6,'AcqMetadataCondOnAcq', null);
+
+INSERT INTO study_card_condition_values
+	(value, study_card_condition_id)
+VALUES 
+	('TOF',1),
+	('flight',1),
+	('gadolinium',2),
+	('contrast',2),
+	('enhanced',2),
+	('Gd',2),
+	('150',3),
+	('150',4),
+	('781.00',5);
+
+INSERT INTO study_card_condition_join
+	(study_card_rule_id, condition_id) 
+VALUES
+	(7,1),
+	(7,2),
+	(8,3),
+	(8,4),
+	(8,5);
 	
 INSERT INTO subject
 	(id, name)
 VALUES
 	(1, 'Subject One'),
 	(2, 'Subject Two'),
-	(3, 'Subject three');
+	(3, 'Subject Three');
 
 INSERT INTO examination
 	(id, center_id, examination_date, investigator_external, investigator_id, note, study_id, subject_id)
@@ -104,11 +147,11 @@ VALUES
 	(3, 1, 'CTDataset1');
 
 INSERT INTO dataset
-	(id, dataset_acquisition_id, origin_metadata_id) 
+	(id, dataset_acquisition_id, origin_metadata_id, downloadable) 
 VALUES 
-	(1, 1, 1),
-	(2, 2, 2),
-	(3, 3, 3);
+	(1, 1, 1, 1),
+	(2, 2, 2, 1),
+	(3, 3, 3, 1);
 
 INSERT INTO mr_dataset_metadata
 	(id, mr_dataset_nature) 

@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, Input, KeyValueDiffer, KeyValueDiffers, ViewChild } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import * as shajs from 'sha.js';
 
@@ -265,7 +265,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
                 && this.preclinicalSubject.subject.imagedObjectCategory.toString() != "ANATOMICAL_PIECE");
     }
 
-    buildForm(): FormGroup {
+    buildForm(): UntypedFormGroup {
         let animal: boolean = this.animalSelected();
         let subjectForm = this.formBuilder.group({
             'imagedObjectCategory': [this.preclinicalSubject.subject.imagedObjectCategory, [Validators.required]],
@@ -289,7 +289,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         return subjectForm;
     }
 
-    onChangeImagedObjectCategory(formGroup: FormGroup){
+    onChangeImagedObjectCategory(formGroup: UntypedFormGroup){
         let newCategory: ImagedObjectCategory = formGroup.get('imagedObjectCategory').value;
         if (newCategory != 'PHANTOM' && newCategory != 'ANATOMICAL_PIECE' && this.mode != 'view') {
             formGroup.get('specie').setValidators([Validators.required]);
@@ -343,6 +343,9 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             });
         }else{
             return this.addSubject().then(subject => {
+                if (subject == null) {
+                    return;
+                }
                 this.onSave.next(this.preclinicalSubject);
                 if (this.breadcrumbsService.previousStep && this.breadcrumbsService.previousStep.isWaitingFor(this.breadcrumbsService.currentStep)) {
                     this.chooseRouteAfterSave(this.preclinicalSubject.subject);

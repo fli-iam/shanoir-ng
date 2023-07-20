@@ -22,7 +22,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { Autosize } from 'ng-autosize';
-import { MyDatePickerModule } from 'mydatepicker';
 import { NgxJsonViewerModule } from 'ngx-json-viewer';
 import { AcquisitionEquipmentListComponent } from './acquisition-equipments/acquisition-equipment-list/acquisition-equipment-list.component';
 import { AcquisitionEquipmentComponent } from './acquisition-equipments/acquisition-equipment/acquisition-equipment.component';
@@ -260,10 +259,18 @@ import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.comp
 import { ExecutionComponent } from './processing/execution/execution.component';
 import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
 import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { QualityControlComponent } from './quality-control/quality-control.component';
+import { QualityCardService } from './study-cards/shared/quality-card.service';
+import { QualityCardDTOService } from './study-cards/shared/quality-card.dto';
+import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
+import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
+import { QualityCardRuleComponent } from './study-cards/study-card-rules/quality-card-rule.component';
 import { WelcomeComponent } from './welcome/welcome.component';
-import {LoginGuard} from "./shared/roles/login-guard";
+import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
-
+import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
+import { ClipboardModule } from '@angular/cdk/clipboard';
+import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 
 @NgModule({
     imports: [
@@ -272,12 +279,12 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         CommonModule,
         FormsModule,
         HttpClientModule,
-        MyDatePickerModule,
         ReactiveFormsModule,
         NgxJsonViewerModule,
         AppRoutingModule,
         PreclinicalRoutingModule,
-        RouterModule
+        RouterModule,
+        ClipboardModule
     ],
     declarations: [
         AccountRequestComponent,
@@ -378,34 +385,34 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         AutoAdjustInputComponent,
         SolrSearchComponent,
         CheckboxListComponent,
-    	AnimalSubjectsListComponent,
-    	AnimalSubjectFormComponent,
-    	ReferencesListComponent,
-    	ReferenceFormComponent,
-    	PathologiesListComponent,
-    	PathologyFormComponent,
-    	PathologyModelsListComponent,
-    	PathologyModelFormComponent,
-    	SubjectPathologiesListComponent,
-    	SubjectPathologyFormComponent,
-    	TherapiesListComponent,
-    	TherapyFormComponent,
-    	SubjectTherapiesListComponent,
-    	SubjectTherapyFormComponent,
-    	AnestheticsListComponent,
-    	AnestheticFormComponent,
-    	AnestheticIngredientsListComponent,
-    	AnestheticIngredientFormComponent,
-    	ExaminationAnestheticFormComponent,
-    	ExaminationAnestheticsListComponent,
-    	ContrastAgentsListComponent,
-    	ContrastAgentFormComponent,
-    	AnimalExaminationFormComponent,
-    	AnimalExaminationListComponent,
-    	FileUploadComponent,
-    	PhysiologicalDataFormComponent,
-    	BloodGasDataFormComponent,
-    	BrukerUploadComponent,
+        AnimalSubjectsListComponent,
+        AnimalSubjectFormComponent,
+        ReferencesListComponent,
+        ReferenceFormComponent,
+        PathologiesListComponent,
+        PathologyFormComponent,
+        PathologyModelsListComponent,
+        PathologyModelFormComponent,
+        SubjectPathologiesListComponent,
+        SubjectPathologyFormComponent,
+        TherapiesListComponent,
+        TherapyFormComponent,
+        SubjectTherapiesListComponent,
+        SubjectTherapyFormComponent,
+        AnestheticsListComponent,
+        AnestheticFormComponent,
+        AnestheticIngredientsListComponent,
+        AnestheticIngredientFormComponent,
+        ExaminationAnestheticFormComponent,
+        ExaminationAnestheticsListComponent,
+        ContrastAgentsListComponent,
+        ContrastAgentFormComponent,
+        AnimalExaminationFormComponent,
+        AnimalExaminationListComponent,
+        FileUploadComponent,
+        PhysiologicalDataFormComponent,
+        BloodGasDataFormComponent,
+        BrukerUploadComponent,
         BrukerSelectSeriesComponent,
         LoaderComponent,
         SubjectNodeComponent,
@@ -446,11 +453,13 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         PipelineComponent,
         ExecutionComponent,
         CarminDatasetProcessingsComponent,
-        WelcomeComponent
-    ],
-    entryComponents: [
-        ConfirmDialogComponent,
-        ModalsComponent
+        WelcomeComponent,
+        AccessRequestListComponent,
+        QualityControlComponent,
+        QualityCardListComponent,
+        QualityCardComponent,
+        QualityCardRuleComponent,
+        TaskStatusComponent
     ],
     // Not required anymore with Angular > 9.0
     // entryComponents: [
@@ -494,22 +503,22 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         DatasetProcessingService,
         DatasetProcessingPipe,
         MsgBoxService,
-    	PathologyService,
+        PathologyService,
         AnimalSubjectService,
         ReferenceService,
-    	PathologyModelService,
-    	SubjectPathologyService,
-    	TherapyService,
-    	SubjectTherapyService,
-    	AnestheticIngredientService,
-    	ExaminationAnestheticService,
-    	ContrastAgentService,
+        PathologyModelService,
+        SubjectPathologyService,
+        TherapyService,
+        SubjectTherapyService,
+        AnestheticIngredientService,
+        ExaminationAnestheticService,
+        ContrastAgentService,
         AnimalExaminationService,
         AnestheticService,
-    	ImportBrukerService,
-    	EnumUtils,
+        ImportBrukerService,
+        EnumUtils,
         { provide: HTTP_INTERCEPTORS, useClass: KeycloakHttpInterceptor, multi: true },
-	    BreadcrumbsService,
+        BreadcrumbsService,
         GlobalService,
         ImportDataService,
         NiftiConverterService,
@@ -540,9 +549,11 @@ import { AccessRequestService } from './users/access-request/access-request.serv
         SubjectStudyPipe,
         KeycloakSessionService,
         ConsoleService,
-		ExtraDataService,
+        ExtraDataService,
         StudyDTOService,
         SubjectDTOService,
+        QualityCardService,
+        QualityCardDTOService,
         { provide: HTTP_INTERCEPTORS, useClass: ShanoirHttpInterceptor, multi: true }
     ],
     bootstrap: [AppComponent]
@@ -551,5 +562,10 @@ export class AppModule {
 
     constructor(private injector: Injector) {
         ServiceLocator.injector = injector;
+    }
+}
+declare global {
+    interface Navigator {
+        msSaveBlob?: (blob: any, defaultName?: string) => boolean
     }
 }

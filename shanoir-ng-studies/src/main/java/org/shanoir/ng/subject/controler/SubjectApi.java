@@ -42,6 +42,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @Tag(name = "subject")
 @RequestMapping("/subjects")
@@ -67,7 +68,11 @@ public interface SubjectApi {
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterSubjectDTOsHasRightInOneStudy(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<SubjectDTO>> findSubjects();
+	ResponseEntity<List<SubjectDTO>> findSubjects(
+			@Parameter(name = "Include preclinical subject") @Valid
+			@RequestParam(value = "preclinical", required = false, defaultValue = "true") boolean preclinical,
+			@Parameter(name = "Include non-preclinical subject") @Valid
+			@RequestParam(value = "clinical", required = false, defaultValue = "true") boolean clinical);
 
 	@Operation(summary = "", description = "Returns the subjects as Pageable with corresponding name")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),
@@ -98,7 +103,7 @@ public interface SubjectApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{subjectId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForOneStudy(returnObject.getBody().getId(), 'CAN_SEE_ALL')")
+	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.hasRightOnSubjectForEveryStudies(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<SubjectDTO> findSubjectById(
 			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 

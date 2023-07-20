@@ -77,7 +77,7 @@ public class ExaminationServiceTest {
 
 	@BeforeEach
 	public void setup() throws ShanoirException {
-		// given(examinationRepository.findByStudyIdIn(Mockito.anyListOf(Long.class), Mockito.any(Pageable.class)))
+		// given(examinationRepository.findByStudy_IdIn(Mockito.anyListOf(Long.class), Mockito.any(Pageable.class)))
 		// 		.willReturn(Arrays.asList(ModelsUtil.createExamination()));
 		given(examinationRepository.findById(EXAMINATION_ID)).willReturn(Optional.of(ModelsUtil.createExamination()));
 		given(examinationRepository.save(Mockito.any(Examination.class))).willReturn(ModelsUtil.createExamination());
@@ -137,7 +137,7 @@ public class ExaminationServiceTest {
 		examination.setId(EXAMINATION_ID);
 		examination.setComment(UPDATED_EXAMINATION_COMMENT);
 		examination.setCenterId(oldExam.getCenterId());
-		examination.setStudyId(oldExam.getStudyId());
+		examination.setStudy(oldExam.getStudy());
 		examination.setSubject(oldExam.getSubject());
 
 		return examination;

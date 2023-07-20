@@ -25,7 +25,10 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.IdName;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -57,6 +60,11 @@ public class Study extends IdName {
 	/** Relations between the subjects and the studies. */
 	@OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudy> subjectStudyList;
+	
+	/** Relations between the subjects and the studies. */
+    @OneToMany(mappedBy = "study", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Examination> examinations;
+	
 
 	/**
 	 * @return the tags
@@ -130,5 +138,13 @@ public class Study extends IdName {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+    public List<Examination> getExaminations() {
+        return examinations;
+    }
+
+    public void setExaminations(List<Examination> examinations) {
+        this.examinations = examinations;
+    }
 	
 }

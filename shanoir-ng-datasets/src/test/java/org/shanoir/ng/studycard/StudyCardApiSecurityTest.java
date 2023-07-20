@@ -45,9 +45,9 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
-import org.shanoir.ng.studycard.controler.StudyCardApi;
+import org.shanoir.ng.studycard.controler.StudyCardApiController;
 import org.shanoir.ng.studycard.model.StudyCardApply;
-import org.shanoir.ng.studycard.service.StudyCardProcessingService;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.Utils;
@@ -77,7 +77,7 @@ public class StudyCardApiSecurityTest {
 	private static final String LOGGED_USER_USERNAME = "logged";
 	
 	@Autowired
-	private StudyCardApi api;
+	private StudyCardApiController api;
 	
 	@MockBean
 	private StudyCardService studyCardService;
@@ -86,7 +86,7 @@ public class StudyCardApiSecurityTest {
 //	private StudyCardUniqueConstraintManager uniqueConstraintManager;
 	
 	@MockBean
-	private StudyCardProcessingService studyCardProcessingService;
+	private CardsProcessingService studyCardProcessingService;
 	
 	@MockBean
 	private DatasetAcquisitionService datasetAcquisitionService;
@@ -189,7 +189,7 @@ public class StudyCardApiSecurityTest {
 	private Examination mockExam(Long id, Long centerId, Long studyId) {
 		Examination exam = mockExam(id);
 		exam.setCenterId(centerId);
-		exam.setStudyId(studyId);
+		exam.setStudy(mockStudy(studyId));
 		return exam;
 	}
 	
@@ -269,13 +269,13 @@ public class StudyCardApiSecurityTest {
 		Examination exam4 = mockExam(4L, 4L, 4L);
 		given(examinationRepository.findById(4L)).willReturn(Optional.of(exam4));
 		// exam 1 & 3 are in study 1 > subject 1 (but in different centers)
-		given(examinationRepository.findBySubjectIdAndStudyId(1L, 1L)).willReturn(Utils.toList(exam1, exam3));
+		given(examinationRepository.findBySubjectIdAndStudy_Id(1L, 1L)).willReturn(Utils.toList(exam1, exam3));
 		given(examinationRepository.findBySubjectId(1L)).willReturn(Utils.toList(exam1, exam3));
 		// exam 2 is in study 2 > subject 2
-		given(examinationRepository.findBySubjectIdAndStudyId(2L, 2L)).willReturn(Utils.toList(exam2));
+		given(examinationRepository.findBySubjectIdAndStudy_Id(2L, 2L)).willReturn(Utils.toList(exam2));
 		given(examinationRepository.findBySubjectId(2L)).willReturn(Utils.toList(exam2));
 		//exam 4 is in study 4 > subject 4
-		given(examinationRepository.findBySubjectIdAndStudyId(4L, 4L)).willReturn(Utils.toList(exam4));
+		given(examinationRepository.findBySubjectIdAndStudy_Id(4L, 4L)).willReturn(Utils.toList(exam4));
 		given(examinationRepository.findBySubjectId(4L)).willReturn(Utils.toList(exam4));
 		//given(examinationRepository.findByPreclinicalAndStudyIdIn(Mockito.anyBoolean(), Mockito.anyList(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new Examination[]{exam1})));
 		

@@ -34,6 +34,7 @@ public interface DatasetAcquisitionRepository extends PagingAndSortingRepository
 	
 	List<DatasetAcquisition> findDistinctByDatasetsIdIn(Long[] datasetIds);
 
+    boolean existsByStudyCard_Id(Long studyCardId);
 }
 
 

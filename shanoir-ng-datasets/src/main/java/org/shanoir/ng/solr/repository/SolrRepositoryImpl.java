@@ -64,12 +64,15 @@ public class SolrRepositoryImpl implements SolrRepository {
 	private static final String DATASET_TYPE_FACET = "datasetType";
 	private static final String DATASET_NATURE_FACET = "datasetNature";
 	private static final String DATASET_CREATION_DATE_FACET = "datasetCreationDate";
+	private static final String EXAMINATION_ID_FACET = "examinationId";
 	private static final String EXAMINATION_COMMENT_FACET = "examinationComment";
 	private static final String EXAMINATION_DATE_FACET = "examinationDate";
 	private static final String SUBJECT_NAME_FACET = "subjectName";
+	private static final String SUBJECT_ID_FACET = "subjectId";
 	private static final String STUDY_NAME_FACET = "studyName";
 	private static final String STUDY_ID_FACET = "studyId";
 	private static final String CENTER_NAME_FACET = "centerName";
+	private static final String CENTER_ID_FACET = "centerId";
 	private static final String SLICE_THICKNESS_FACET = "sliceThickness";
 	private static final String PIXEL_BANDWIDTH_FACET = "pixelBandwidth";
 	private static final String MAGNETIC_FIELD_STRENGHT_FACET = "magneticFieldStrength";
@@ -82,12 +85,15 @@ public class SolrRepositoryImpl implements SolrRepository {
 			DATASET_TYPE_FACET,
 			DATASET_NATURE_FACET,
 			DATASET_CREATION_DATE_FACET,
+			EXAMINATION_ID_FACET,
 			EXAMINATION_COMMENT_FACET,
 			EXAMINATION_DATE_FACET,
 			SUBJECT_NAME_FACET,
 			STUDY_NAME_FACET,
-			STUDY_ID_FACET,
 			CENTER_NAME_FACET,
+			STUDY_ID_FACET,
+			SUBJECT_ID_FACET,
+			CENTER_ID_FACET,
 			SLICE_THICKNESS_FACET,
 			PIXEL_BANDWIDTH_FACET,
 			MAGNETIC_FIELD_STRENGHT_FACET,
@@ -292,12 +298,15 @@ public class SolrRepositoryImpl implements SolrRepository {
 			solrDoc.setDatasetType((String) document.getFirstValue("datasetType"));
 			solrDoc.setDatasetNature((String) document.getFirstValue("datasetNature"));
 			solrDoc.setDatasetCreationDate((Date) document.getFirstValue("datasetCreationDate"));
+			solrDoc.setExaminationId((Long) document.getFirstValue("examinationId"));
 			solrDoc.setExaminationComment((String) document.getFirstValue("examinationComment"));
 			solrDoc.setExaminationDate((Date) document.getFirstValue("examinationDate"));
 			solrDoc.setSubjectName((String) document.getFirstValue("subjectName"));
+			solrDoc.setSubjectId((Long) document.getFirstValue("subjectId"));
 			solrDoc.setStudyName((String) document.getFirstValue("studyName"));
 			solrDoc.setStudyId((Long) document.getFirstValue("studyId"));
 			solrDoc.setCenterName((String) document.getFirstValue("centerName"));
+			solrDoc.setCenterId((Long) document.getFirstValue("centerId"));
 			solrDoc.setSliceThickness((Double) document.getFirstValue("sliceThickness")); 
 			solrDoc.setPixelBandwidth((Double) document.getFirstValue("pixelBandwidth"));
 			solrDoc.setMagneticFieldStrength((Double) document.getFirstValue("magneticFieldStrength"));

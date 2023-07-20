@@ -16,8 +16,6 @@ package org.shanoir.ng.preclinical.subjects;
 
 import java.util.List;
 
-import jakarta.validation.Valid;
-
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -28,11 +26,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @Tag(name = "subject")
 @RequestMapping("/subject")
@@ -84,6 +85,15 @@ public interface AnimalSubjectApi {
 			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/all", produces = { "application/json" })
 	ResponseEntity<List<AnimalSubject>> getAnimalSubjects();
+
+	@Operation(summary = "", description = "If exists, returns the animal subjects corresponding to the given subjects ids")
+	@ApiResponses(value = { @ApiResponse(responseCode = " 200", description = "An array of Preclinical AnimalSubject"),
+			@ApiResponse(responseCode = " 401", description = "unauthorized"),
+			@ApiResponse(responseCode = " 403", description = "forbidden"),
+			@ApiResponse(responseCode = " 500", description = "unexpected error") })
+	@PostMapping(value = "/allBySubjectId", produces = { "application/json" })
+	ResponseEntity<List<AnimalSubject>> findAnimalSubjectsBySubjectIds(
+			@RequestParam(value = "subjectIds", required = true) List<Long> subjectIds);
 
 	@Operation(summary = "Update an existing animalSubject", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),

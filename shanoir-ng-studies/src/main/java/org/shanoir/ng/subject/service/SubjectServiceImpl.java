@@ -22,6 +22,9 @@ import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -86,13 +89,17 @@ public class SubjectServiceImpl implements SubjectService {
 	@Autowired
 	private StudyUserRepository studyUserRepository;
 
-	@Autowired SubjectMapper subjectMapper;
+	@Autowired
+	private SubjectMapper subjectMapper;
 	
 	@Autowired
 	private ObjectMapper objectMapper;
 
 	@Autowired
 	private StudyExaminationRepository studyExaminationRepository;
+	
+	@Autowired
+	private ShanoirEventService eventService;
 	
 	private static final Logger LOG = LoggerFactory.getLogger(SubjectServiceImpl.class);
 
@@ -108,6 +115,9 @@ public class SubjectServiceImpl implements SubjectService {
 		studyExaminationRepository.deleteBySubject(subject.get());
 		
 		subjectRepository.deleteById(id);
+
+		// Propagate deletion
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
 	}
 
 	@Override
@@ -313,6 +323,11 @@ public class SubjectServiceImpl implements SubjectService {
 	@Override
 	public Page<Subject> getFilteredPageByStudies(Pageable page, String name, List<Study> studies) {
 		Iterable<Long> studyIds = studies.stream().map(study -> study.getId()).collect(Collectors.toList());
-		return subjectRepository.findByNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
+		return subjectRepository.findDistinctByNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
+	}
+
+	@Override
+	public List<Subject> findByPreclinical(boolean preclinical) {
+		return subjectRepository.findByPreclinical(preclinical);
 	}
 }

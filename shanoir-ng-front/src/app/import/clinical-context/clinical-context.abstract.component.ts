@@ -381,13 +381,20 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     }
 
     public onSelectStudyCard(): Promise<any> {
-        this.loading++;
-        this.center = this.acquisitionEquipment = null;
-        this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
-        this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
-        return this.selectDataFromStudyCard(this.studycard, this.study?.studyCenterList)
-            .finally(() => this.loading--)
-            .then(() => this.onContextChange());
+        if (this.studycard) {
+            this.loading++;
+            this.center = this.acquisitionEquipment = null;
+            this.scHasCoilToUpdate = this.hasCoilToUpdate(this.studycard);
+            this.scHasDifferentModality = this.hasDifferentModality(this.studycard);
+            return this.selectDataFromStudyCard(this.studycard, this.study?.studyCenterList)
+              .finally(() => this.loading--)
+              .then(() => this.onContextChange());
+        }
+    }
+
+    onClearStudyCard() {
+        this.studycard = null;
+        // this.useStudyCard = true;
     }
 
     onToggleUseStudyCard() {
@@ -488,6 +495,9 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
     public openCreateAcqEqt() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
+
+            this.breadcrumbsService.currentStep.addPrefilled('center', this.center);
+
             this.fillCreateAcqEqStep(this.breadcrumbsService.currentStep);
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
@@ -624,7 +634,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             .updateSubjectStudyValues(context.subject.subjectStudy)
             .then(() => {
                 let that = this;
-                this.importData()
+                this.importData(this.stepTs)
                     .then(() => {
                         this.importDataService.reset();
                         setTimeout(() => {
@@ -639,13 +649,13 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             });
     }
 
-    abstract importData(): Promise<any>;
+    abstract importData(timestamp: number): Promise<any>;
 
     private hasCoilToUpdate(studycard: StudyCard): boolean {
         if (!studycard) return false;
         for (let rule of studycard.rules) {
             for (let ass of rule.assignments) {
-                if (ass.field.endsWith('_COIL') && !(ass.value instanceof Coil)) {
+                if (ass.field?.endsWith('_COIL') && !(ass.value instanceof Coil)) {
                     return true;
                 }
             }

@@ -16,7 +16,7 @@ import { Observable, Subscription } from 'rxjs';
 
 import { Mode } from '../../../shared/components/entity/entity.component.abstract';
 import { Option } from '../../../shared/select/select.component';
-import { StudyCardAssignment } from '../../shared/study-card.model';
+import { MetadataFieldScope, StudyCardAssignment } from '../../shared/study-card.model';
 import { of } from 'rxjs';
 
 
@@ -25,12 +25,12 @@ import { of } from 'rxjs';
     templateUrl: 'action.component.html',
     styleUrls: ['action.component.css']
 })
-export class StudyCardActionComponent implements OnChanges, OnDestroy {  
+export class StudyCardActionComponent implements OnChanges, OnDestroy {
     @Input() assignment: StudyCardAssignment;
     @Output() actionChange: EventEmitter<StudyCardAssignment> = new EventEmitter();
     @Input() mode: Mode = 'view';
     @Input() fieldOptions: Option<string>[];
-    @Input() fields: AssignmentField[];
+    @Input() fields: ShanoirMetadataField[];
     assigmentOptions: Option<any>[];
     @Output() delete: EventEmitter<void> = new EventEmitter();
     fieldLabel: string;
@@ -62,9 +62,9 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
                 this.assignmentChangeSubscription.unsubscribe();
                 this.assignmentChangeSubscription = null;
             }
-            let assignmentField: AssignmentField = this.fields.find(assF => assF.field == this.assignment.field);
+            let assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
             if (this.mode == 'view') {
-                this.fieldLabel = assignmentField.label;
+                this.fieldLabel = assignmentField?.label;
                 if (assignmentField && assignmentField.options) {
                     this.assignmentChangeSubscription = assignmentField.options.subscribe(opts => {
                         if (opts && opts.length > 0) {
@@ -114,18 +114,25 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
             this.computeAssignmentOptionsSubscription.unsubscribe();
             this.computeAssignmentOptionsSubscription = null;
         }
-        let assignmentField: AssignmentField = this.fields.find(assF => assF.field == this.assignment.field);
-            if (assignmentField && assignmentField.options) {
-                this.computeAssignmentOptionsSubscription = assignmentField.options.subscribe(opts => {
-                    this.assigmentOptions = opts;
-                });
-            } else {
-                this.assigmentOptions = null;
-            }    
+        let assignmentField: ShanoirMetadataField = this.fields.find(assF => assF.field == this.assignment.field);
+        if (assignmentField && assignmentField.options) {
+            this.computeAssignmentOptionsSubscription = assignmentField.options.subscribe(opts => {
+                this.assigmentOptions = opts;
+            });
+        } else {
+            this.assigmentOptions = null;
+        }    
     }
 
     onSelectFieldOption(option: Option<any>) {
-        if (option) option.disabled = true;
+        if (option) {
+            option.disabled = true;
+            if (option.section == 'Dataset') {
+                this.assignment.scope = 'Dataset';
+            } else if (option.section == 'DatasetAcquisition') {
+                this.assignment.scope = 'DatasetAcquisition';
+            }
+        }
     }
 
     onDeSelectFieldOption(option: Option<any>) {
@@ -151,14 +158,15 @@ export class StudyCardActionComponent implements OnChanges, OnDestroy {
     }
 }
 
-export class AssignmentField {
+export class ShanoirMetadataField {
 
-    public options?: Observable<any[]>;
+    public options?: Observable<Option<any>[]>;
 
     constructor(
             public label: string, 
             public field: string,
-            options?: Observable<any[]> | any[]) {
+            public scope: MetadataFieldScope, 
+            options?: Observable<Option<any>[]> | Option<any>[]) {
 
         if (options instanceof Observable) {
             this.options = options;
@@ -167,5 +175,4 @@ export class AssignmentField {
         }
     }
 }
-
 

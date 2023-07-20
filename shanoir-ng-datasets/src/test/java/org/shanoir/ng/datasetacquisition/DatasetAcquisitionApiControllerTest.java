@@ -13,6 +13,7 @@ import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitio
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.service.DicomSRImporterService;
+import org.shanoir.ng.importer.service.EegImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -34,7 +35,10 @@ public class DatasetAcquisitionApiControllerTest {
 
 	@MockBean
 	private ImporterService importerService;
-	
+
+	@MockBean
+	private EegImporterService eegImporterService;
+
 	@MockBean
 	private DicomSRImporterService dicomSRImporterService;
 	

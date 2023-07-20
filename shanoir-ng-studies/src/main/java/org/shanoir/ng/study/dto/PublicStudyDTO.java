@@ -52,6 +52,8 @@ public class PublicStudyDTO {
 
 	private String description;
 
+	private String license;
+
 	private List<StudyTagDTO> studyTags;
 
 	/**
@@ -203,6 +205,15 @@ public class PublicStudyDTO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	public String getLicense() {
+		return license;
+	}
+
+	public void setLicense(String license) {
+		this.license = license;
+	}
+
 	public List<StudyTagDTO> getStudyTags() {
 		return studyTags;
 	}

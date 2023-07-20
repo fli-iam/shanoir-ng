@@ -64,4 +64,5 @@ public interface DatasetAcquisitionService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
 	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
 
+    boolean existsByStudyCardId(Long studyCardId);
 }

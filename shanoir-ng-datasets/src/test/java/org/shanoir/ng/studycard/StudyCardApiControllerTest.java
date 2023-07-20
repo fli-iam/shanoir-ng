@@ -33,7 +33,8 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.validation.FindByRepository;
 import org.shanoir.ng.studycard.controler.StudyCardApiController;
 import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.service.StudyCardProcessingService;
+import org.shanoir.ng.studycard.service.CardsProcessingService;
+import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.studycard.service.StudyCardService;
 import org.shanoir.ng.studycard.service.StudyCardUniqueConstraintManager;
 import org.shanoir.ng.utils.ModelsUtil;
@@ -74,7 +75,10 @@ public class StudyCardApiControllerTest {
 	private StudyCardService studyCardServiceMock;
 	
 	@MockBean
-	private StudyCardProcessingService studyCardProcessingServiceMock;
+    private QualityCardService qualityCardServiceMock;
+	
+	@MockBean
+	private CardsProcessingService studyCardProcessingServiceMock;
 	
 	@MockBean
 	private DatasetAcquisitionService datasetAcquisitionServiceMock;
@@ -101,7 +105,7 @@ public class StudyCardApiControllerTest {
 		given(studyCardServiceMock.findById(1L)).willReturn(studyCardMock);
 		given(studyCardServiceMock.save(Mockito.mock(StudyCard.class))).willReturn(new StudyCard());
 		given(findByRepositoryMock.findBy(Mockito.anyString(), Mockito.any(), Mockito.any())).willReturn(new ArrayList<StudyCard>());
-		given(datasetSecurityService.filterStudyCardList(Mockito.any(), Mockito.anyString())).willReturn(true);
+		given(datasetSecurityService.filterCardList(Mockito.any(), Mockito.anyString())).willReturn(true);
 		given(datasetSecurityService.hasRightOnStudy(Mockito.any(), Mockito.anyString())).willReturn(true);
 	}
 

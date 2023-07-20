@@ -67,6 +67,31 @@ public class Serie {
 
 	@JsonProperty("imagesNumber")
 	private Integer imagesNumber;
+	
+	@JsonProperty("images")
+	private List<Image> images;
+	
+	@JsonProperty("nonImages")
+	private List<Object> nonImages;
+
+	@JsonProperty("nonImagesNumber")
+	private Integer nonImagesNumber;
+	
+	@JsonProperty("isCompressed")
+	private Boolean isCompressed;
+
+	@JsonProperty("isSpectroscopy")
+	private Boolean isSpectroscopy;
+
+	@JsonProperty("isEnhanced")
+	private Boolean isEnhanced;
+
+	@JsonProperty("isMultiFrame")
+	private Boolean isMultiFrame;
+	
+	// TODO rename to frameCount, as can be 1 too
+	@JsonProperty("multiFrameCount")
+	private Integer multiFrameCount;
 
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
 	public Serie() {}
@@ -145,6 +170,14 @@ public class Serie {
 		this.numberOfSeriesRelatedInstances = numberOfSeriesRelatedInstances;
 	}
 
+	public List<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(List<Image> images) {
+		this.images = images;
+	}
+
 	public String getSopClassUID() {
 		return sopClassUID;
 	}
@@ -175,6 +208,62 @@ public class Serie {
 
 	public void setSequenceName(String sequenceName) {
 		this.sequenceName = sequenceName;
+	}
+
+	public Boolean getIsCompressed() {
+		return isCompressed;
+	}
+
+	public void setIsCompressed(Boolean isCompressed) {
+		this.isCompressed = isCompressed;
+	}
+
+	public Boolean getIsSpectroscopy() {
+		return isSpectroscopy;
+	}
+
+	public void setIsSpectroscopy(Boolean isSpectroscopy) {
+		this.isSpectroscopy = isSpectroscopy;
+	}
+
+	public Boolean getIsEnhanced() {
+		return isEnhanced;
+	}
+
+	public void setIsEnhanced(Boolean isEnhanced) {
+		this.isEnhanced = isEnhanced;
+	}
+
+	public Boolean getIsMultiFrame() {
+		return isMultiFrame;
+	}
+
+	public void setIsMultiFrame(Boolean isMultiFrame) {
+		this.isMultiFrame = isMultiFrame;
+	}
+
+	public Integer getMultiFrameCount() {
+		return multiFrameCount;
+	}
+
+	public void setMultiFrameCount(Integer multiFrameCount) {
+		this.multiFrameCount = multiFrameCount;
+	}
+
+	public List<Object> getNonImages() {
+		return nonImages;
+	}
+
+	public void setNonImages(List<Object> nonImages) {
+		this.nonImages = nonImages;
+	}
+
+	public Integer getNonImagesNumber() {
+		return nonImagesNumber;
+	}
+
+	public void setNonImagesNumber(Integer nonImagesNumber) {
+		this.nonImagesNumber = nonImagesNumber;
 	}
 
 }

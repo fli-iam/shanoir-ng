@@ -25,6 +25,7 @@ import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitio
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -76,7 +77,8 @@ public class DatasetAcquisitionMapperTest {
 		datasetAcquisition.setId(DATASET_ACQUISITION_ID);
 		datasetAcquisition.setDatasets(new ArrayList<>());
 		datasetAcquisition.setExamination(new Examination());
-		datasetAcquisition.getExamination().setStudyId(1L);
+		datasetAcquisition.getExamination().setStudy(new Study());
+		datasetAcquisition.getExamination().getStudy().setId(1L);
 		return datasetAcquisition;
 	}
 

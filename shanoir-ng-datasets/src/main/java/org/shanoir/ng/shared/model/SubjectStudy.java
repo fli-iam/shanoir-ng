@@ -2,7 +2,12 @@ package org.shanoir.ng.shared.model;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.quality.QualityTag;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -11,8 +16,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "study_id", "subject_id" }, name = "study_subject_idx") })
@@ -23,7 +26,7 @@ public class SubjectStudy {
 	private Long id;
 
 	/** Study. */
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "study_id")
 	@NotNull
 	private Study study;
@@ -39,7 +42,10 @@ public class SubjectStudy {
     @JoinTable( name = "subject_study_tag",
                 joinColumns = @JoinColumn( name = "subject_study_id" ))
 	private List<Tag> tags;
+    
+    private Integer qualityTag;
 
+    
 	/**
 	 * @return the study
 	 */
@@ -97,4 +103,13 @@ public class SubjectStudy {
 	public void setId(Long id) {
 		this.id = id;
 	}
+	
+	public QualityTag getQualityTag() {
+        return QualityTag.get(qualityTag);
+    }
+    
+    public void setQualityTag(QualityTag tag) {
+        this.qualityTag = tag != null ? tag.getId() : null;
+    }
+
 }

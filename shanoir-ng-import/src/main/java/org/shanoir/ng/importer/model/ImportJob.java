@@ -28,6 +28,8 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 public class ImportJob implements Serializable {
 
 	private static final long serialVersionUID = 8804929608059674037L;
+	
+	private long timestamp;
 
     private boolean fromDicomZip;
 
@@ -66,7 +68,15 @@ public class ImportJob implements Serializable {
 
 	private Long centerId;
 
-	public String getArchive() {
+	public long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getArchive() {
 		return archive;
 	}
 

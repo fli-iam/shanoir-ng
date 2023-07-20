@@ -96,7 +96,7 @@ public class DatasetServiceImpl implements DatasetService {
 		repository.deleteById(id);
 		solrService.deleteFromIndex(id);
 		this.deleteDatasetFromPacs(datasetDb);
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 	}
 
 	@Override
@@ -139,7 +139,7 @@ public class DatasetServiceImpl implements DatasetService {
 		repository.deleteByIdIn(ids);
 		solrService.deleteFromIndex(ids);
 		for (Long id : ids) {
-			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, datasetStudyMap.get(id)));
+			shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetStudyMap.get(id)));
 		}
 	}
 
@@ -160,7 +160,7 @@ public class DatasetServiceImpl implements DatasetService {
 		if (ds.getDatasetProcessing() == null) {
 			solrService.indexDataset(ds.getId());
 		}
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		return ds;
 	}
 
@@ -172,7 +172,7 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 		updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
-		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
+		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 		return ds;
 	}
 
@@ -230,7 +230,7 @@ public class DatasetServiceImpl implements DatasetService {
 			}
 			// If yes, get all examinations and filter by centers
 			if (hasRestrictions) {
-				List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable.getSort()));
+				List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudy_IdIn(studyIds, pageable.getSort()));
 				
 				if (CollectionUtils.isEmpty(datasets)) {
 					return new PageImpl<>(datasets);
@@ -247,14 +247,19 @@ public class DatasetServiceImpl implements DatasetService {
 				Page<Dataset> page = new PageImpl<>(datasets, pageable, size);
 				return page;
 			} else {
-				return repository.findByDatasetAcquisitionExaminationStudyIdIn(studyIds, pageable);
+				return repository.findByDatasetAcquisitionExaminationStudy_IdIn(studyIds, pageable);
 			}
 		}
 	}
 
 	@Override
 	public List<Dataset> findByStudyId(Long studyId) {
-		return Utils.toList(repository.findByDatasetAcquisitionExaminationStudyId(studyId));
+		return Utils.toList(repository.findByDatasetAcquisition_Examination_Study_Id(studyId));
+	}
+
+	@Override
+	public Long getExpressionSizeByStudyId(Long studyId) {
+		return repository.getExpressionSizeByStudyId(studyId);
 	}
 
 	@Override
@@ -270,11 +275,16 @@ public class DatasetServiceImpl implements DatasetService {
 			Long userId = KeycloakUtil.getTokenUserId();
 			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			
-			return Utils.toList(repository.findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudyIdIn(studycardId, studyIds));
+			return Utils.toList(repository.findByDatasetAcquisitionStudyCardIdAndDatasetAcquisitionExaminationStudy_IdIn(studycardId, studyIds));
 		}
 	}
-	
-  @Override
+
+	@Override
+	public List<Dataset> findByExaminationId(Long examinationId) {
+		return Utils.toList(repository.findByDatasetAcquisitionExaminationId(examinationId));
+	}
+
+	@Override
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}

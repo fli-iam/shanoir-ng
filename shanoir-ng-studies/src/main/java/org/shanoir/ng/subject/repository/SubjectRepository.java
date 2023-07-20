@@ -21,6 +21,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 /**
  * Repository for Subject.
  * 
@@ -60,7 +62,7 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	
 	Page<Subject> findByNameContaining(String name, Pageable pageable);
 	
-	Page<Subject> findByNameContainingAndSubjectStudyListStudyIdIn(String name, Pageable pageable, Iterable<Long> studyIds);
+	Page<Subject> findDistinctByNameContainingAndSubjectStudyListStudyIdIn(String name, Pageable pageable, Iterable<Long> studyIds);
 	
 	/**
 	 * Returns all instances of the type.
@@ -69,4 +71,5 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	 */
 	Iterable<Subject> findBySubjectStudyListStudyIdIn(Iterable<Long> studyIds);
 
+	List<Subject> findByPreclinical(boolean preclinical);
 }

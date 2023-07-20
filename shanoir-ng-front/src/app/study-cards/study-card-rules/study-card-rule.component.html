@@ -12,18 +12,21 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<div class="conditions">
+<div class="conditions" [class.dataset]="rule.scope == 'Dataset'" [class.acquisition]="rule.scope == 'DatasetAcquisition'">
 	<div *ngFor="let condition of rule.conditions; let i = index" class="condition">	
 		<condition 
+				[ruleScope]="rule.scope"
 				[(condition)]="rule.conditions[i]" 
-				[mode]="mode" 
+				[mode]="mode"
+				[fieldOptions]="conditionFieldOptions" 
+				[fields]="conditionFields" 
 				[class.edit]="mode != 'view'" 
 				(conditionChange)="change.emit(rule)"
 				(delete)="deleteCondition(i)"
 				[showErrors]="showErrors">
 		</condition>
 	</div>
-	<div *ngIf="rule.conditions.length == 0">
+	<div *ngIf="rule.conditions?.length == 0">
 		<span class="always"><i class="fas fa-infinity"></i>Always</span>
 	</div>
 	<div>
@@ -33,7 +36,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="separator">
 	<span class="rule-controls top" *ngIf="mode != 'view'" >
-		<span (click)="copy.emit()"><i class="far fa-copy"></i></span>
+		<span (click)="onCopy.emit()"><i class="far fa-copy"></i></span>
 		<span (click)="moveUp.emit()"><i class="fas fa-long-arrow-alt-up"></i></span>
 	</span>
 	<span class="sep-symbol"><i class="fas fa-angle-double-right"></i></span>
@@ -43,13 +46,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	</span>
 </div>
 
-<div class="actions">
+<div class="actions" [class.dataset]="rule.scope == 'Dataset'" [class.acquisition]="rule.scope == 'DatasetAcquisition'">
 	<div *ngFor="let action of rule.assignments; let i = index" class="action">
 		<action 
 				[(assignment)]="rule.assignments[i]" 
 				[mode]="mode" 
-				[fieldOptions]="fieldOptions" 
-				[fields]="fields" 
+				[fieldOptions]="assignmentFieldOptions" 
+				[fields]="assignmentFields" 
 				[class.edit]="mode != 'view'"
 				(actionChange)="change.emit(rule)"
 				(delete)="deleteAction(i)"
@@ -57,6 +60,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</action>
 	</div>
 	<div *ngIf="mode != 'view'">
-		<span class="add" (click)="addNewAction()" [class.error]="rule.assignments.length == 0 && (showErrors || touched)"><i class="fas fa-plus"></i>Add an action</span>
+		<span class="add" (click)="addNewAction()" [class.error]="rule.assignments?.length == 0 && (showErrors || touched)"><i class="fas fa-plus"></i>Add an action</span>
 	</div>
 </div>

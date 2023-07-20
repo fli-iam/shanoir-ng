@@ -15,14 +15,14 @@
 package org.shanoir.ng.importer.strategies.datasetexpression;
 
 
-import java.net.MalformedURLException;
-
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
 
 /**
  * In the context of the strategy pattern this class represents the context.
@@ -58,7 +58,7 @@ public class DatasetExpressionContext implements DatasetExpressionStrategy {
 
 	@Override
 	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
-			ExpressionFormat expressionFormat) throws MalformedURLException {
+			ExpressionFormat expressionFormat) throws IOException {
 		if (datasetExpressionStrategy != null) {
 			return datasetExpressionStrategy.generateDatasetExpression(serie, importJob, expressionFormat);
 		}

@@ -61,15 +61,27 @@ public interface AccessRequestApi {
 			@Parameter(name = "Accept or refuse the request", required = true) @RequestBody boolean validation,
 			BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException;
 
-	@Operation(summary = "byUser", description = "Find all the access requests for the given user")
+	@Operation(summary = "byAdmin", description = "Find all the access request managed by the given adminstrator")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "resolved access request"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "422", description = "bad parameters"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "byUser", produces = { "application/json" })
-	ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException;
+	@GetMapping(value = "byAdmin", produces = { "application/json" }, consumes = {
+			"application/json" })
+	ResponseEntity<List<AccessRequest>> findAllByAdminId() throws RestServiceException;
+	
+	@Operation(summary = "byUser", description = "Find all the access request by the given user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "resolved access request"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "byUser", produces = { "application/json" }, consumes = {
+            "application/json" })
+    ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException;
 
 	@Operation(summary = "byStudy", description = "Find all the access request for the given study")
 	@ApiResponses(value = {
@@ -108,6 +120,7 @@ public interface AccessRequestApi {
 			@RequestParam(value = "studyId", required = true) Long studyId,
 			@Parameter(name = "Study name the user is invited in", required = true) 
 			@RequestParam(value = "studyName", required = true) String studyName,
-			@Parameter(name = "The email of the invited user.") 
-    		@RequestParam(value = "email", required = true) String email) throws RestServiceException, JsonProcessingException, AmqpException;
+			@Parameter(name = "The email or login of the invited user.") 
+    		@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException;
+
 }

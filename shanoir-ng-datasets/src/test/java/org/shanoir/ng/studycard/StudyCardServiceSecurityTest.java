@@ -85,7 +85,7 @@ public class StudyCardServiceSecurityTest {
 		assertAccessDenied(service::search, Arrays.asList(1L, 2L));
 		assertAccessDenied(service::findAll);
 		assertAccessDenied(service::findStudyCardsByAcqEq, 1L);
-		assertAccessDenied(service::findStudyCardsOfStudy, 1L);
+		assertAccessDenied(service::findByStudy, 1L);
 
 		// Write
 		assertAccessDenied(service::deleteById, 4L);
@@ -122,10 +122,10 @@ public class StudyCardServiceSecurityTest {
 		assertEquals(0, service.findStudyCardsByAcqEq(3L).size());
 		assertEquals(0, service.findStudyCardsByAcqEq(4L).size());
 		
-		assertAccessAuthorized(service::findStudyCardsOfStudy, 1L);
-		assertEquals(2, service.findStudyCardsOfStudy(1L).size());
-		assertEquals(0, service.findStudyCardsOfStudy(2L).size());
-		assertEquals(0, service.findStudyCardsOfStudy(3L).size());
+		assertAccessAuthorized(service::findByStudy, 1L);
+		assertEquals(3, service.findByStudy(1L).size());
+		assertEquals(0, service.findByStudy(2L).size());
+		assertEquals(0, service.findByStudy(3L).size());
 		
 		// Write
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
@@ -165,10 +165,10 @@ public class StudyCardServiceSecurityTest {
 		assertEquals(0, service.findStudyCardsByAcqEq(3L).size());
 		assertEquals(0, service.findStudyCardsByAcqEq(4L).size());
 		
-		assertAccessAuthorized(service::findStudyCardsOfStudy, 1L);
-		assertEquals(2, service.findStudyCardsOfStudy(1L).size());
-		assertEquals(0, service.findStudyCardsOfStudy(2L).size());
-		assertEquals(0, service.findStudyCardsOfStudy(3L).size());
+		assertAccessAuthorized(service::findByStudy, 1L);
+		assertEquals(3, service.findByStudy(1L).size());
+		assertEquals(0, service.findByStudy(2L).size());
+		assertEquals(0, service.findByStudy(3L).size());
 		
 		// Write
 		given(rightsService.hasRightOnStudy(1L, "CAN_SEE_ALL")).willReturn(true);
@@ -204,7 +204,7 @@ public class StudyCardServiceSecurityTest {
 		assertAccessAuthorized(service::search, Arrays.asList(1L, 2L));
 		assertAccessAuthorized(service::findAll);
 		assertAccessAuthorized(service::findStudyCardsByAcqEq, 1L);
-		assertAccessAuthorized(service::findStudyCardsOfStudy, 1L);
+		assertAccessAuthorized(service::findByStudy, 1L);
 		
 		// Write
 		StudyCard sc = mockStudyCard();

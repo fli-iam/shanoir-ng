@@ -271,7 +271,7 @@ export class StudyUserListComponent implements ControlValueAccessor, OnChanges {
                 this.addUser(request.user);
             }
         }).catch(exception =>  {
-            this.consoleService.log('error', "An internal error occured while adding the user. Please try again later or contact an administrator.");
+            this.consoleService.log('error', "No user found with such login, please check the user information or use its email.");
         });
     }
 

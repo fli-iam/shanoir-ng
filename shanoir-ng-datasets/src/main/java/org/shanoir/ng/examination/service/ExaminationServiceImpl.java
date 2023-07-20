@@ -184,7 +184,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public List<Examination> findByStudyId(Long studyId) {
-		return examinationRepository.findByStudyId(studyId);
+		return examinationRepository.findByStudy_Id(studyId);
 	}
 
 	@Override
@@ -245,7 +245,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		examinationDb.setComment(examination.getComment());
 		examinationDb.setExaminationDate(examination.getExaminationDate());
 		examinationDb.setNote(examination.getNote());
-		examinationDb.setStudyId(examination.getStudyId());
+		examinationDb.setStudy(examination.getStudy());
 		examinationDb.setSubjectWeight(examination.getSubjectWeight());
 		examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
 		examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
@@ -254,7 +254,24 @@ public class ExaminationServiceImpl implements ExaminationService {
 
 	@Override
 	public List<Examination> findBySubjectIdStudyId(Long subjectId, Long studyId) {
-		return examinationRepository.findBySubjectIdAndStudyId(subjectId, studyId);
+		return examinationRepository.findBySubjectIdAndStudy_Id(subjectId, studyId);
+	}
+
+	@Override
+	public Long getExtraDataSizeByStudyid(Long studyId){
+
+		List<Examination> exams = this.findByStudyId(studyId);
+
+		long size = 0L;
+		for(Examination exam : exams){
+			for(String path : exam.getExtraDataFilePathList()){
+				File f = new File(this.getExtraDataFilePath(exam.getId(), path));
+				if(f.exists()){
+					size += f.length();
+				}
+			}
+		}
+		return size;
 	}
 
 	@Override

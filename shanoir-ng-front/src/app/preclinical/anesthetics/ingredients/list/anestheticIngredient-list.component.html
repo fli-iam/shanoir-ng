@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2 i18n="Manage ingredients|Title@@ingredientsListTitle">Manage ingredients</h2>
-    
+
     <div [ngSwitch]="mode">
 		<ng-template [ngSwitchCase]="'edit'" *ngIf="canModify">
 			<button *ngIf="toggleFormAI==false" (click)="toggleIngredientForm()">Add an ingredient</button>
@@ -22,20 +22,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<button *ngIf="toggleFormAI==false" (click)="toggleIngredientForm()">Add an ingredient</button>
 		</ng-template>
 	</div>
-   
+
  <!--  <div>
-    	<anesthetic-ingredient-form [anesthetic]="anesthetic" [createAIMode]="createAIMode"  
+    	<anesthetic-ingredient-form [anesthetic]="anesthetic" [createAIMode]="createAIMode"
 			[toggleForm]="toggleFormAI" [ingredientSelected]="ingredientSelected" (onEvent)="refreshDisplay($event)"></anesthetic-ingredient-form>
-	</div>-->  
-  
-  	
+	</div>-->
+
+
 <shanoir-table #ingredientsTable
-    [getPage]="getPage.bind(this)" 
-    [columnDefs]="columnDefs" 
-    [customActionDefs]="customActionDefs" 
-    (rowClick)="onRowClick($event)">
-</shanoir-table> 
-  	
-
-
+    [getPage]="getPage.bind(this)"
+    [columnDefs]="columnDefs"
+    [customActionDefs]="customActionDefs"
+    [rowRoute]="getRowRoute.bind(this)">
+</shanoir-table>
 

@@ -26,12 +26,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
+import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -54,6 +56,8 @@ public class ShanoirUploaderServiceClient {
 	private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.names.centers";
 
 	private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
+
+	private static final String SERVICE_STUDYCARDS_APPLY_ON_STUDY = "service.studycards.apply.on.study";
 
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS = "service.acquisition.equipments";
 	
@@ -84,6 +88,8 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLStudiesNamesAndCenters;
 	
 	private String serviceURLStudyCardsByStudyIds;
+
+	private String serviceURLStudyCardsApplyOnStudy;
 	
 	private String serviceURLAcquisitionEquipments;
 	
@@ -128,6 +134,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
 		this.serviceURLStudyCardsByStudyIds = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
+		this.serviceURLStudyCardsApplyOnStudy = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_APPLY_ON_STUDY);
 		this.serviceURLAcquisitionEquipments = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
@@ -272,8 +280,7 @@ public class ShanoirUploaderServiceClient {
 
 	public List<StudyCard> findStudyCardsByStudyIds(IdList studyIds) throws IOException {
 		try {
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-			String json = ow.writeValueAsString(studyIds);
+			String json = Util.objectWriter.writeValueAsString(studyIds);
 			long startTime = System.currentTimeMillis();
 			try (CloseableHttpResponse response = httpService.post(this.serviceURLStudyCardsByStudyIds, json, false)) {
 				long stopTime = System.currentTimeMillis();
@@ -428,15 +435,18 @@ public class ShanoirUploaderServiceClient {
 		}
 	}
 	
-	public void uploadDicom(File file) throws Exception {
+	public ImportJob uploadDicom(File file) throws Exception {
 		try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterUploadDicom, file)) {
-			int code = response.getCode();
-			if (code == HttpStatus.SC_OK) {
-			} else {
-				logger.error("Error in uploadDicom: with file (path: "
-						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
-						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
-				throw new Exception("Error in uploadDicom");
+			try (response) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					ImportJob importJob = Util.getMappedObject(response, ImportJob.class);
+					return importJob;
+				} else {
+					logger.error("Error in uploadDicom: "
+						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+					throw new Exception("Error in uploadDicom");
+				}
 			}
 		}		
 	}
@@ -520,8 +530,7 @@ public class ShanoirUploaderServiceClient {
 			final boolean modeSubjectCommonNameManual,
 			final Long centerId) {
 		try {
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-			String json = ow.writeValueAsString(subject);
+			String json = Util.objectWriter.writeValueAsString(subject);
 			CloseableHttpResponse response;
 			if (modeSubjectCommonNameManual) {
 				response = httpService.post(this.serviceURLSubjectsCreate, json, false);
@@ -556,8 +565,7 @@ public class ShanoirUploaderServiceClient {
 	public Subject createSubjectStudy(
 			final Subject subject) {
 		try {
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-			String json = ow.writeValueAsString(subject);
+			String json = Util.objectWriter.writeValueAsString(subject);
 			try (CloseableHttpResponse response = httpService.put(this.serviceURLSubjectsCreate + "/" + subject.getId(), json)) {
 				int code = response.getCode();
 				if (code == HttpStatus.SC_NO_CONTENT) {
@@ -583,8 +591,7 @@ public class ShanoirUploaderServiceClient {
 	 */
 	public Examination createExamination(final Examination examinationDTO) {
 		try {
-			ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
-			String json = ow.writeValueAsString(examinationDTO);
+			String json = Util.objectWriter.writeValueAsString(examinationDTO);
 			try (CloseableHttpResponse response = httpService.post(this.serviceURLExaminationsCreate, json, false)) {
 				int code = response.getCode();
 				if (code == HttpStatus.SC_OK) {
@@ -604,6 +611,21 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
+	public List<StudyCardOnStudyResultDTO> applyStudyCardOnStudy(Long studyCardId) throws Exception {
+		logger.info("Apply studycard on study, started on server.");
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLStudyCardsApplyOnStudy + studyCardId)) {
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				List<StudyCardOnStudyResultDTO> results = Util.getMappedList(response, StudyCardOnStudyResultDTO.class);
+				return results;
+			} else {
+				logger.error("Error in applyStudyCardOnStudy: (status code: " + code
+						+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				throw new Exception("Error in applyStudyCardOnStudy");
+			}
+		}
+	}
+
 	public void postDicomSR(File file) throws Exception {
 		try (CloseableHttpResponse response = httpService.postFileMultipartRelated(this.serviceURLDatasetsDicomWebStudies, file)) {
 			int code = response.getCode();
@@ -616,5 +638,5 @@ public class ShanoirUploaderServiceClient {
 			}
 		}		
 	}
-	
+
 }

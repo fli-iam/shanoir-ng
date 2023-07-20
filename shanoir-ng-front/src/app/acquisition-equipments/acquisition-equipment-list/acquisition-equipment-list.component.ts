@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -23,6 +23,8 @@ import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
 import { AcquisitionEquipment } from '../shared/acquisition-equipment.model';
 import { AcquisitionEquipmentService } from '../shared/acquisition-equipment.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import {ShanoirError} from "../../shared/models/error.model";
+import {Center} from "../../centers/shared/center.model";
 
 @Component({
     selector: 'acquisition-equipment-list',
@@ -49,12 +51,12 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
     getService(): EntityService<AcquisitionEquipment> {
         return this.acqEquipService;
     }
-    
+
     getOptions() {
         return {
             new: true,
-            view: true, 
-            edit: this.keycloakService.isUserAdminOrExpert(), 
+            view: true,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
@@ -66,13 +68,6 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
-
         let columnDefs: ColumnDefinition[] = [
             {
                 headerName: "Acquisition equipment", field: "name", cellRenderer: function (params: any) {
@@ -100,18 +95,17 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
             columnDefs.push({
-                headerName: "", 
-                type: "button", 
-                awesome: "fa-solid fa-magnet", 
+                headerName: "",
+                type: "button",
+                awesome: "fa-solid fa-magnet",
                 tip: "Add coil",
                 action: (acqEquip) => this.openCreateCoil(acqEquip)
             });
         }
         return columnDefs;
     }
-    
 
-    openCreateCoil(acqEquip: AcquisitionEquipment) { 
+    openCreateCoil(acqEquip: AcquisitionEquipment) {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/coil/create'], ).then(success => {
             this.breadcrumbsService.currentStep.addPrefilled('center', acqEquip.center);

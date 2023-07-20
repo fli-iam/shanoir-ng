@@ -46,12 +46,11 @@ export class HomeComponent {
     accountRequests: User[];
     jobs: Task[];
     solrInput: string;
-    notifications: any[];
+    notifications: any[] = [];
     loaded: boolean = false;
     nbAccountRequests: number;
     nbExtensionRequests: number;
-    accessRequests: AccessRequest[];
-    nbAccessRequest: number;
+    accessRequests: AccessRequest[] = [];
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
@@ -86,17 +85,13 @@ export class HomeComponent {
                 }
                 this.fetchJobs();
             }
-        }).then(() =>{
-            // Load access requests
-            if (this.isUserAtLeastExpert()) {
-                this.userService.getAccessRequests().then(acs => {
-                    if (acs) {
-                        this.accessRequests = acs;
-                        this.nbAccessRequest = acs.length;
-                    }
-                });
-            }
         });
+        // Load access requests
+        if (this.isUserAtLeastExpert()) {
+            this.userService.getAccessRequestsForAdmin().then(acs => {
+                this.accessRequests = acs;
+            });
+        }
     }
 
     onSign() {

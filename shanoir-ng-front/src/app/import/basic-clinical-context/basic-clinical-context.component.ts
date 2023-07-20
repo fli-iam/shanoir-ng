@@ -37,7 +37,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     patient: PatientDicom;
 
     postConstructor() {
-        this.patient = this.importDataService.patients[0];
+        this.patient = this.getFirstSelectedPatient();
         this.modality = this.getFirstSelectedSerie().modality.toString();
         this.useStudyCard = this.modality.toUpperCase() == "MR";
     }
@@ -50,12 +50,12 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return '/imports/upload';
     }
 
-    importData(): Promise<any> {
-        let importJob = this.buildImportJob();
+    importData(timestamp: number): Promise<any> {
+        let importJob = this.buildImportJob(timestamp);
         return this.importService.startImportJob(importJob);
     }
 
-    protected buildImportJob(): ImportJob {
+    protected buildImportJob(timestamp: number): ImportJob {
         let importJob = new ImportJob();
         let context = this.importDataService.contextData;
         importJob.patients = new Array<PatientDicom>();
@@ -81,7 +81,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         importJob.converterId = context.niftiConverter.id;
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
-        importJob.anonymisationProfileToUse = context.study.profile.profileName;
+        importJob.anonymisationProfileToUse = context.study.profile?.profileName;
+        importJob.timestamp = timestamp;
         return importJob;
     }
 
@@ -111,7 +112,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         subjectStudy.study = this.study;
         subjectStudy.physicallyInvolved = false;
         let newSubject = new Subject();
-        newSubject.birthDate = this.patient.patientBirthDate;
+        newSubject.birthDate = this.patient?.patientBirthDate ? new Date(this.patient.patientBirthDate) : null;
         if (this.patient.patientSex) {
             if (this.patient.patientSex == 'F' || this.patient.patientSex == 'M') {
                 newSubject.sex = this.patient.patientSex;
@@ -138,7 +139,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.subject = new Subject();
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
-        newExam.examinationDate = this.getFirstSelectedSerie().seriesDate;
+        newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
         newExam.comment = this.getFirstSelectedStudy().studyDescription;
         return newExam;
     }
@@ -170,22 +171,29 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return names;
     }
 
-    protected getFirstSelectedSerie(): SerieDicom {
-        if (!this.patient) return null;
-        for (let study of this.patient.studies) {
-            for (let serie of study.series) {
-                if (serie.selected) return serie;
-            }
-        }
+  protected getFirstSelectedPatient(): PatientDicom {
+       for(let patient of this.importDataService.patients){
+         for(let study of patient.studies){
+           if (study.selected) return patient;
+         }
+       }
        return null;
-    }
+  }
+
+  protected getFirstSelectedSerie(): SerieDicom {
+      if (!this.patient) return null;
+      for (let study of this.patient.studies) {
+          for (let serie of study.series) {
+              if (serie.selected) return serie;
+          }
+      }
+     return null;
+  }
 
     protected getFirstSelectedStudy(): StudyDicom {
         if (!this.patient) return null;
         for (let study of this.patient.studies) {
-            for (let serie of study.series) {
-                if (serie.selected) return study;
-            }
+            if(study.selected) return study;
         }
        return null;
     }

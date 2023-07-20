@@ -118,12 +118,14 @@ public class CenterServiceImpl implements CenterService {
 	@Override
 	public List<IdName> findIdsAndNames(Long studyId) {
 		List<IdName> centers =  centerRepository.findIdsAndNames(studyId);
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) return centers;
+		
 		StudyUser studyUser = studyUserRepo.findByUserIdAndStudy_Id(KeycloakUtil.getTokenUserId(), studyId);
+		if (studyUser == null) return new ArrayList<>();
 		
 		if (!CollectionUtils.isEmpty(studyUser.getCenters())) {
 			centers = centers.stream().filter(center -> studyUser.getCenterIds().contains(center.getId())).collect(Collectors.toList());
 		}
-
 		return centers;
 	}
 

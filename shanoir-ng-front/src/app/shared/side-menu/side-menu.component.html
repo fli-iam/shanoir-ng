@@ -39,16 +39,50 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <ul class="menu-list">
     <li routerLink="/" routerLinkActive="active"><i class="fas fa-home"></i>Home</li>
-    <li *ngIf="duasToSign() > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>
-        Notifications<span class="counter">{{duasToSign()}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
+    <li *ngIf="(duasToSign() + accessRequestsToValidate) > 0" (click)="state.notifOpened = !state.notifOpened; saveState();"><i class="far fa-flag"></i>
+        Notifications<span class="counter">{{duasToSign() + accessRequestsToValidate}}</span><span class="chevron"><i class="fas fa-chevron-down"></i></span>
     </li>
     <div *ngIf="state.notifOpened && duasToSign() > 0" class="sub-menu" [@slideDown]="state.notifOpened">
         <li routerLink="/dua" routerLinkActive="active"><i class="fas fa-pen-alt"></i>Data User Agreement<span class="counter">{{duasToSign()}}</span></li>
     </div>
-    <li routerLink="/task" routerLinkActive="active">
-        <i class="fas fa-tasks"></i>Jobs
-        <span *ngIf="notificationsService.nbProcess > 0" class="notif">( {{notificationsService.nbProcess}} pending - {{notificationsService.totalProgress() * 100 | number:'0.0-0'}}%)</span>
+    <div *ngIf="state.notifOpened && accessRequestsToValidate > 0" class="sub-menu" [@slideDown]="state.notifOpened">
+        <li routerLink="/access-request/list" routerLinkActive="active"><i class="fa-solid fa-user-lock"></i>Access Requests<span class="counter">{{accessRequestsToValidate}}</span></li>
+    </div>
+    <li>
+        <a routerLink="/task" routerLinkActive="active" class="menu-link">
+            <i class="fas fa-tasks"></i>Jobs
+            <span *ngIf="!state.jobsOpened && notificationsService.tasksInProgress.length > 0 && notificationsService.totalProgress() < 1">
+                <progress-bar [progress]="notificationsService.totalProgress()" [width]="70"></progress-bar>
+            </span>
+            <span *ngIf="notificationsService.nbNew" class="notif">
+                <i class="fa-regular fa-bell"></i>
+                {{notificationsService.nbNew}}
+            </span>
+            <span *ngIf="notificationsService.nbNewError" class="notif error">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                {{notificationsService.nbNewError}}
+            </span>
+        </a>
+        <!-- <span *ngIf="notificationsService.tasksInProgress.length > 0" (click)="state.jobsOpened = !state.jobsOpened; saveState();" class="chevron"><i class="fas fa-chevron-down"></i></span> -->
     </li>
+    <!-- *ngIf="state.jobsOpened" -->
+    <div class="sub-menu jobs" [@slideDown]="state.jobsOpened">
+        <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress)" [ngSwitch]="task.eventType" [@disapearUp] [@.disabled]="task.status == 2">
+            <a routerLink="/task"  routerLinkActive="active">
+                <progress-bar [progress]="task.progress" [width]="50"></progress-bar>
+                <ng-template [ngSwitchCase]="'downloadDataset.event'">
+                    <i class="fa-solid fa-download"></i>
+                </ng-template>
+                <ng-template [ngSwitchCase]="'importDataset.event'">
+                    <i class="fa-solid fa-upload"></i>
+                </ng-template>
+                <ng-template ngSwitchDefault>
+                    <i class="fa-regular fa-clock"></i>
+                </ng-template>
+                {{task.creationDate | date: 'HH:mm:ss'}} - {{task.eventLabel}}
+            </a>
+        </li>
+    </div>
     <!-- <li routerLink="/carmin-dataset-processings" routerLinkActive="active">
         <i class="fas fa-solid fa-microchip"></i>VIP dataset processings
     </li> -->
@@ -68,6 +102,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/acquisition-equipment/list" routerLinkActive="active"><i class="fas fa-microscope"></i>Acquisition equipments</li>
         <li routerLink="/coil/list" routerLinkActive="active"><i class="fas fa-magnet"></i>Coils</li>
         <li routerLink="/study-card/list" routerLinkActive="active"><i class="fa-solid fa-shuffle"></i>Study Cards</li>
+        <li routerLink="/quality-card/list" routerLinkActive="active"><i class="fa-solid fa-shuffle"></i>Quality Cards</li>
     </div>
 
     <li (click)="state.precOpened = !state.precOpened; saveState();"><i class="fas fa-cat"></i>Preclinical<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
@@ -100,7 +135,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </ul>
 
 <div class="bottom-info">
-    <div>{{VERSION.raw}}</div>
-    <div>Copyright (C) 2009-2022 Inria</div>
-    <div><a href="https://www.inria.fr/">https://www.inria.fr/</a></div>
+    <div><a href="https://github.com/fli-iam/shanoir-ng/commit/{{VERSION.hash?.substring(1)}}" target="_blank" [style.text-decoration]="'none'">{{VERSION.raw}}</a></div>
+    <div>Copyright (C) 2009-2023 Inria</div>
+    <div><a href="https://www.inria.fr/" target="_blank">https://www.inria.fr/</a></div>
 </div>

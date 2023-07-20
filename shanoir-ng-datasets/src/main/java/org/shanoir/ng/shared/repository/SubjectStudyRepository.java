@@ -7,8 +7,8 @@ import org.springframework.data.repository.CrudRepository;
 
 public interface SubjectStudyRepository extends CrudRepository<SubjectStudy, Long>{
 
-	public List<SubjectStudy> findByStudyIdInAndSubjectIdIn(List<Long> studiesId, List<Long> subjectIds);
+	public List<SubjectStudy> findByStudy_IdInAndSubjectIdIn(List<Long> studiesId, List<Long> subjectIds);
 
-	public List<SubjectStudy> findByStudyId(Long studyId);
+	public List<SubjectStudy> findByStudy_Id(Long studyId);
 
 }

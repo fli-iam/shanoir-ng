@@ -28,7 +28,6 @@ public class SubjectStudyTagPk implements Serializable {
 		this.subjectStudy = subjectStudy;
 	}
 
-
 	@Override
     public boolean equals(Object obj) {
     	return obj != null 
@@ -63,6 +62,5 @@ public class SubjectStudyTagPk implements Serializable {
 	public void setSubjectStudy(SubjectStudy subjectStudy) {
 		this.subjectStudy = subjectStudy;
 	}
-
 
 }

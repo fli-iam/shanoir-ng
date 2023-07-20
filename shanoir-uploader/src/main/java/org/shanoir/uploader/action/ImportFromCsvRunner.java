@@ -325,7 +325,11 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			dicomData = new DicomDataTransferObject(null, pat, stud);
 
 			// Calculate identifier
-			subjectIdentifier = this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
+
+			// #1609 we encounter problems when using same subject data accross multiple studies.
+			// We add study id in front of identifier to correct this
+			subjectIdentifier = stud.getId() +  this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
+
 			dicomData.setSubjectIdentifier(subjectIdentifier);
 
 			// Change birth date to first day of year

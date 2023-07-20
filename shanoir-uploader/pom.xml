@@ -99,6 +99,16 @@
 			<artifactId>jackson-databind</artifactId>
 			<version>${jackson.version}</version>
 		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.datatype</groupId>
+    		<artifactId>jackson-datatype-jsr310</artifactId>
+    		<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.datatype</groupId>
+		    <artifactId>jackson-datatype-jdk8</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>
 		<!-- dependency log4j -->
 		<dependency>
 			<groupId>log4j</groupId>
@@ -145,7 +155,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20190722</version>
+			<version>20230227</version>
 		</dependency>
 		<!-- dependency for Apache commons-lang library -->
 		<dependency>

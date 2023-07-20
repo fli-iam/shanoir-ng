@@ -1,12 +1,12 @@
 /**
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -75,7 +75,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 	private static final String WRONG_CONTENT_FILE_UPLOAD = "Wrong content type of file upload, .zip required.";
 
 	private static final String NO_FILE_UPLOADED = "No file uploaded.";
-	
+
 	private static final String NOT_SUBJECT_BASED_SUBJECT = "The zip has to contain an unique 'sub-XXX' subject folder with data following the BIDS specification.";
 
 	private static final String SUBJECT_CREATION_ERROR = "An error occured during the subject creation, please check your rights.";
@@ -98,7 +98,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BidsImporterApiController.class);
 
-	
+
 	/**
 	 * This method import a BIDS subject folder.
 	 */
@@ -120,12 +120,12 @@ public class BidsImporterApiController implements BidsImporterApi {
 		ImportJob importJob = new ImportJob();
 		importJob.setStudyId(studyId);
 		importJob.setUserId(KeycloakUtil.getTokenUserId());
-		
+
 		// Create tmp folder and unzip archive
 		final File userImportDir = ImportUtils.getUserImportDir(importDir);
 		File tempFile = ImportUtils.saveTempFile(userImportDir, bidsFile);
 		File importJobDir = ImportUtils.saveTempFileCreateFolderAndUnzip(tempFile, bidsFile, false);
-		
+
 		// Get equipment from file if existing, otherwise, set the "UNKNOWN EQUIPMENT"
 		importJob.setAcquisitionEquipmentId(0L);
 		importJob.setWorkFolder(importJobDir.getAbsolutePath());
@@ -140,7 +140,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 				subjectName = studyName + "_" + subjectFile.getName().split("sub-")[1];
 				Subject subject = new Subject();
 				subject.setName(subjectName);
-				subject.setSubjectStudyList(Collections.singletonList(new SubjectStudy(subject, new IdName(studyId, studyName))));
+				subject.setSubjectStudyList(Collections.singletonList(new SubjectStudy(new IdName(subject.getId(), subject.getName()), new IdName(studyId, studyName))));
 				importJob.setSubjectName(subjectName);
 
 				LOG.debug("We found a subject " + subjectName);
@@ -194,12 +194,12 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 					// Create multiple examinations for every session folder
 					examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
-					
+
 					if (examId == null) {
 						throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
 					}
 					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
-					
+
 					LOG.debug("We found a session " + sessionFile.getName());
 					importJob.setExaminationId(examId);
 
@@ -218,12 +218,12 @@ public class BidsImporterApiController implements BidsImporterApi {
 						}
 						examination = ImportUtils.createExam(studyId, centerId, subjectId, null, examDate, subjectName);
 						examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
-						
+
 						if (examId == null) {
 							throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), EXAMINATION_CREATION_ERROR, null));
 						}
 						eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "" + examination.getStudyId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
-						
+
 						importJob.setExaminationId(examId);
 						examCreated = true;
 					}
@@ -232,7 +232,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 				}
 			}
 		}
-		
+
 		return new ResponseEntity<>(null, HttpStatus.OK);
 	}
 
@@ -347,7 +347,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 		} else {
 			LOG.debug("We found an examination extra-data " + dataTypeFile.getAbsolutePath());
 			IdName extraData = new IdName(importJob.getExaminationId(), dataTypeFile.getAbsolutePath());
-			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, objectMapper.writeValueAsString(extraData));			
+			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.EXAMINATION_EXTRA_DATA_QUEUE, objectMapper.writeValueAsString(extraData));
 		}
 	}
 

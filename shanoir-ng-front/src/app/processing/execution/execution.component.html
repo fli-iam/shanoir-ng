@@ -3,33 +3,61 @@
 
     <div>
         <label for="execution_name">Execution Name *</label>
-        <input type="text" id="execution_name" formControlName="execution_name" required>
+        <input type="text" id="execution_name" formControlName="execution_name" required [(ngModel)]="execDefaultName">
+    </div>
+
+    <div>
+    Default execution parameters: please choose default parameters value for every parameter.<br/>
+    Please note that for file parameters, the text box is used for regular expression if you want to organize dataset in different arguments
     </div>
 
     <div *ngFor="let parameter of pipeline.parameters">
-        
         <div *ngIf="parameter.name != 'executable'">
-             <label for="{{parameter.name}}">{{parameter.name}} {{parameter.isOptional ? '' : '*'}}</label>
-             <input *ngIf="!isAFile(parameter.type)" [type]="getParameterType(parameter.type)"
-                    formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+             <label>{{parameter.name}}{{!parameter.isOptional && parameter.type != 'Boolean' ? '*' : ''}} <tool-tip> {{parameter.description}} </tool-tip></label>
+             <input *ngIf="!isAFile(parameter.type) && parameter.type != 'Boolean'" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+             <span *ngIf="parameter.type == 'Boolean'">
+                 <checkbox formControlName="{{parameter.name}}" id="{{parameter.name}}"></checkbox>
+             </span>
              <span *ngIf="isAFile(parameter.type)">
-                 <select *ngIf="selectedDatasets else loading" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
-                    <option *ngFor="let dataset of selectedDatasets" [ngValue]="dataset">
-                      {{dataset.id}}_{{dataset.name}}
-                    </option>
-                 </select>
+                 <input *ngIf="isAFile(parameter.type)"
+                    formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
                  <ng-template #loading>Loading datasets...</ng-template>
              </span>
-	</div>    
-
+	   </div>
     </div>
-    <!-- <div *ngIf="selectedDatasets">
-        <p>
-            Selected Dataset :
-            <span class="dataset-id" *ngFor="let dataset of selectedDatasets">
-                {{dataset.name}}.
-            </span>
-        </p>
-    </div> -->
-    <button type="submit" [disabled]="!executionForm.valid">Run</button>
 </form>
+<button type='button' (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
+
+<div *ngIf="parametersApplied" class="block-div">
+<legend> List of datasets selected for the given parameters: </legend>
+    <div *ngFor="let parameter of fileInputs" class="parent-div">
+        <div *ngIf="parameter.type == 'File'" class="file-parameter-div">
+            <input type="hidden" [(ngModel)]="datasets[parameter.name]"/>
+            <b>{{parameter.name}} :</b>
+               <select-box placeholder="Available datasets" (onAddClick)="addDataset($event, parameter.name)" [options]="datasetOptions">
+               </select-box>
+            <table>
+                <tr>
+                  <th>
+                  Name (id)
+                  </th>
+                  <th>
+                     Subject
+                     </th>
+                </tr>
+                <tr *ngFor="let dataset of datasets[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
+                    <td>{{dataset.name}} ({{dataset.id}})</td>
+                    <td>{{dataset.subject.name}}</td>
+                    <td *ngIf="datasets[parameter.name].length > 1" class="icon icon-clickable" (click)="removeDataset(dataset, parameter.name)">
+                        <i class="fas fa-times"></i>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br/>
+    </div>
+</div>
+<div *ngIf="parametersApplied">
+    <button type="button" (click)="onSubmitExecutionForm()">Run all</button>
+</div>
+

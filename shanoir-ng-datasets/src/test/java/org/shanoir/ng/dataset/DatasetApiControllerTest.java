@@ -38,6 +38,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -49,6 +51,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
+import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -67,6 +70,7 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
+import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -146,6 +150,9 @@ public class DatasetApiControllerTest {
 	@MockBean
 	private DicomSRImporterService dicomSRImporterService;
 	
+	@MockBean
+	private DatasetDownloaderServiceImpl datasetDownloaderService;
+	
 	@Autowired
 	private ObjectMapper mapper;
 
@@ -166,7 +173,8 @@ public class DatasetApiControllerTest {
 		dsAcq.setRank(2);
 		dsAcq.setSortingIndex(2);
 		exam.setId(1L);
-		exam.setStudyId(1L);
+		exam.setStudy(new Study());
+		exam.getStudy().setId(1L);
 		dsAcq.setExamination(exam);
 		updatedMetadata.setComment("comment");
 		updatedMetadata.setName("test 1");
@@ -305,13 +313,12 @@ public class DatasetApiControllerTest {
 		// THEN we expect an error
 	}
 
-
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsIdToMuchIds() {
 		// GIVEN a list of datasets to export
 		StringBuilder strb = new StringBuilder();
-		for (int i = 0; i < 55 ; i++) {
+		for (int i = 0; i < 505 ; i++) {
 			strb.append(i).append(",");
 		}
 		String ids = strb.substring(0, strb.length() -1);
@@ -325,8 +332,6 @@ public class DatasetApiControllerTest {
 		} catch (Exception e) {
 			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"You can't download more than 50 datasets.\",\"details\":null}");
 		}
-
-
 		// THEN we expect an error
 	}
 
@@ -336,7 +341,7 @@ public class DatasetApiControllerTest {
 		// GIVEN a study with more then 50 datasets to export
 
 		List<Dataset> hugeList = new ArrayList<Dataset>();
-		for (int i = 0; i < 51 ; i++) {
+		for (int i = 0; i < 501 ; i++) {
 			hugeList.add(new MrDataset());
 		}
 		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(hugeList);

@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -44,6 +45,7 @@ import org.shanoir.ng.user.security.UserFieldEditionSecurityManager;
 import org.shanoir.ng.user.security.UserPrivacySecurityService;
 import org.shanoir.ng.user.service.UserService;
 import org.shanoir.ng.user.service.UserUniqueConstraintManager;
+import org.shanoir.ng.user.service.VIPUserService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -59,7 +61,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 /**
  * Unit tests for user controller.
- *
+ *S
  * @author msimon
  *
  */
@@ -94,6 +96,14 @@ public class UserApiControllerTest {
 
 	@MockBean
 	private ShanoirEventService eventService;
+
+	@MockBean
+	private VIPUserService vipUserService;
+	
+	@BeforeAll
+	public static void beforeClass() {
+	    System.setProperty("vip.enabled", "false");
+	}
 
 	@BeforeEach
 	public void setup() throws EntityNotFoundException, AccountNotOnDemandException, SecurityException  {

@@ -10,15 +10,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM debian:stretch
+FROM debian:bullseye
 
 RUN set -ex && \
-    echo 'deb http://deb.debian.org/debian stretch-backports main' \
-      > /etc/apt/sources.list.d/stretch-backports.list && \
+    echo 'deb http://deb.debian.org/debian bullseye-backports main' \
+      > /etc/apt/sources.list.d/bullseye-backports.list && \
     apt update -y && \
     apt install -t \
-      stretch-backports \
-      openjdk-11-jre-headless \
+      bullseye-backports \
+      openjdk-17-jre-headless \
       ca-certificates-java -y
 
 #32 bits packages are necessary
@@ -32,8 +32,8 @@ RUN apt-get update -qq \
     build-essential \
     cmake \
     pkg-config \
-    libgdcm-tools=2.6.6-3 \
-    bsdtar \
+    libgdcm-tools \
+    libarchive-tools \
     unzip \
     pigz \
     gzip \

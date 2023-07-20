@@ -57,8 +57,12 @@ public class DatasetExpression extends AbstractEntity {
 	@JoinColumn(name = "dataset_id")
 	private Dataset dataset;
 
+
 	/** Dataset expression format. */
 	private Integer datasetExpressionFormat;
+
+	/** size of the associated dataset files. */
+	private Long size;
 
 	/** Set of files. */
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetExpression", cascade = { CascadeType.MERGE,
@@ -313,5 +317,13 @@ public class DatasetExpression extends AbstractEntity {
 
 	public void setLastImageAcquisitionTime(LocalDateTime lastImageAcquisitionTime) {
 		this.lastImageAcquisitionTime = lastImageAcquisitionTime;
+	}
+
+	public Long getSize() {
+		return size;
+	}
+
+	public void setSize(Long size) {
+		this.size = size;
 	}
 }

@@ -17,6 +17,7 @@ package org.shanoir.ng.accountrequest;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -67,6 +68,11 @@ public class AccountRequestApiControllerTest {
 	
 	@MockBean
 	private UserUniqueConstraintManager uniqueConstraintManager;
+
+	@BeforeAll
+	public static void beforeAll() {
+	    System.setProperty("vip.enabled", "false");
+	}
 
 	@BeforeEach
 	public void setup() throws SecurityException {

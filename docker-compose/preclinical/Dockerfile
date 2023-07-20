@@ -1,12 +1,12 @@
-FROM debian:stretch
+FROM debian:bullseye
 
 RUN set -ex && \
-    echo 'deb http://deb.debian.org/debian stretch-backports main' \
-      > /etc/apt/sources.list.d/stretch-backports.list && \
+    echo 'deb http://deb.debian.org/debian bullseye-backports main' \
+      > /etc/apt/sources.list.d/bullseye-backports.list && \
     apt update -y && \
     apt install -t \
-      stretch-backports \
-      openjdk-11-jre-headless \
+      bullseye-backports \
+      openjdk-17-jre-headless \
       ca-certificates-java -y
 
 RUN apt-get update

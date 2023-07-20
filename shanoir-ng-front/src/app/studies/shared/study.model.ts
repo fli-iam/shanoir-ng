@@ -33,23 +33,30 @@ export class Study extends Entity {
     monoCenter: boolean;
     name: string;
     nbExaminations: number;
+    nbSubjects: number;
     nbSujects: number;
+    nbMembers: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
     startDate: Date;
     studyCenterList: StudyCenter[] = [];
     studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
     profile: Profile;
+    size: number = null;
     studyType: StudyType;
     subjectStudyList: SubjectStudy[] = [];
     studyUserList: StudyUser[] = [];
     timepoints: Timepoint[];
-    visibleByDefault: boolean;
+    visibleByDefault: boolean = false;
     withExamination: boolean;
     studyCardList: StudyCard[];
     tags: Tag[];
     studyTags: Tag[];
     description: string;
+
+    license: string;
+    accessRequestedByCurrentUser: boolean = false;
+    locked: boolean = false; // current user has no access
 
     private completeMembers(users: User[]) {
         return Study.completeMembers(this, users);

@@ -14,17 +14,14 @@
 
 package org.shanoir.ng.datasetacquisition.controler;
 
+import java.io.IOException;
 import java.util.List;
-
-import jakarta.validation.Valid;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.importer.dto.EegImportJob;
 import org.shanoir.ng.importer.dto.ImportJob;
-import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,11 +35,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @Tag(name = "datasetacquisition", description = "the datasetacquisition API")
 public interface DatasetAcquisitionApi {
@@ -73,7 +71,7 @@ public interface DatasetAcquisitionApi {
         consumes = { "application/json" },
         method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> createNewEegDatasetAcquisition(@Parameter(name = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob);
+    ResponseEntity<Void> createNewEegDatasetAcquisition(@Parameter(name = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) throws IOException;
 	
 	@Operation(summary = "", description = "If exists, returns the dataset acquisitions corresponding to the given study card")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),

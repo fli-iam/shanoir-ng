@@ -29,6 +29,7 @@ import { StudyCardService } from '../shared/study-card.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
+import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 
 export type Status = 'default' | 'loading' | 'done' | 'error';
 @Component({
@@ -62,7 +63,8 @@ export class ApplyStudyCardOnComponent implements OnInit {
             private studycardService: StudyCardService,
             private breadcrumbsService: BreadcrumbsService,
             private confirmService: ConfirmDialogService,
-            private router : Router) {
+            private router : Router,
+            private keycloakService: KeycloakService) {
                 
         breadcrumbsService.nameStep('Reapply Study Card');
 
@@ -93,7 +95,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
         }
 
         let filteredAcquisitionsPromise: Promise<DatasetAcquisition[]> = Promise.all([acquisitionPromise, rightsPromise]).then(([acquisitions, rights]) => {
-            let nonAdminAcquisitions: DatasetAcquisition[] = acquisitions?.filter(acq => 
+            let nonAdminAcquisitions: DatasetAcquisition[] = this.keycloakService.isUserAdmin() ? [] : acquisitions?.filter(acq => 
                 !rights.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
             );
             this.nonAdminStudies = new Set();
@@ -101,7 +103,7 @@ export class ApplyStudyCardOnComponent implements OnInit {
                 this.nonAdminStudies.add(acq.examination?.study?.name);
             });
             this.nbNonAdminAcquisitions = nonAdminAcquisitions?.length;
-            this.datasetAcquisitions = acquisitions?.filter(acq => 
+            this.datasetAcquisitions = this.keycloakService.isUserAdmin() ? acquisitions : acquisitions?.filter(acq => 
                 rights.get(acq.examination?.study?.id)?.includes(StudyUserRight.CAN_ADMINISTRATE)
             );
             this.browserPaging = new BrowserPaging(this.datasetAcquisitions, this.columnsDefs);
@@ -162,16 +164,16 @@ export class ApplyStudyCardOnComponent implements OnInit {
             { headerName: 'Id', field: 'id', type: 'number', width: '30px', defaultSortCol: true, defaultAsc: false},
             { headerName: 'Type', field: 'type', width: '22px'},
             { headerName: "Acquisition Equipment", field: "acquisitionEquipment", orderBy: ['acquisitionEquipmentId'],
-                cellRenderer: (params: any) => this.transformAcqEq(params.data.acquisitionEquipment),
-                route: (dsAcq: DatasetAcquisition) => '/acquisition-equipment/details/' + dsAcq.acquisitionEquipment.id
+                cellRenderer: (params: any) => this.transformAcqEq(params.data?.acquisitionEquipment),
+                route: (dsAcq: DatasetAcquisition) => '/acquisition-equipment/details/' + dsAcq?.acquisitionEquipment?.id
             },
             { headerName: "Study", field: "examination.study.name", defaultField: 'examination.study.id', orderBy: ['examination.studyId'],
-				route: (dsAcq: DatasetAcquisition) => '/study/details/' + dsAcq.examination.study.id},
+				route: (dsAcq: DatasetAcquisition) => '/study/details/' + dsAcq?.examination?.study?.id},
             { headerName: "Examination date", type: 'date', field: 'examination.examinationDate', cellRenderer: (params: any) => {
-                return this.dateRenderer(params.data.examination.examinationDate);
+                return this.dateRenderer(params.data.examination?.examinationDate);
             }},    
             { headerName: "Center", field: "acquisitionEquipment.center.name", disableSorting: true,
-				route: (dsAcq: DatasetAcquisition) => dsAcq.acquisitionEquipment.center? '/center/details/' + dsAcq.acquisitionEquipment.center.id : null
+				route: (dsAcq: DatasetAcquisition) => dsAcq?.acquisitionEquipment?.center? '/center/details/' + dsAcq?.acquisitionEquipment?.center?.id : null
 			},
             { headerName: "Last StudyCard", field: "studyCard.name"},
             { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.router.navigate(['/dataset-acquisition/details/' + item.id]) }

@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.model.SubjectType;
@@ -74,19 +75,29 @@ public class SubjectStudy extends AbstractEntity {
 	/** Tags associated to the subject. */
 	@OneToMany(mappedBy = "subjectStudy", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<SubjectStudyTag> subjectStudyTags;
+	
+	/** StudyCard tags associated to the subject. */
+	private Integer qualityTag;
 
 	/**
 	 * @return the tags
 	 */
 	public List<Tag> getTags() {
-		if (getSubjectStudyTags() == null) return null;
-		return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
-	}
+        if (getSubjectStudyTags() == null) return null;
+        return getSubjectStudyTags().stream().map((subjectStudyTag) -> subjectStudyTag.getTag()).collect(Collectors.toList());
+    }
 	
-
 	public List<SubjectStudyTag> getSubjectStudyTags() {
 		return subjectStudyTags;
 	}
+	
+	public QualityTag getQualityTag() {
+		return QualityTag.get(qualityTag);
+	}
+	
+	public void setQualityTag(QualityTag tag) {
+        this.qualityTag = tag != null ? tag.getId() : null;
+    }
 
 	public void setSubjectStudyTags(List<SubjectStudyTag> subjectStudyTags) {
 		if (this.subjectStudyTags != null) {

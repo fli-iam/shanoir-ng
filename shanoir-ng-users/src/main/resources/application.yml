@@ -107,6 +107,17 @@ logging:
     org.springframework.web: ERROR
     org.hibernate: ERROR
 
+vip:
+  enabled: false
+  uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/vip/rest/register
+service-account:
+  token:
+    uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng/protocol/openid-connect/token
+  client:
+    id: service-account
+    credential-secret: <credential-secret>
+
+
 ---
 ######################################
 # DO NOT COMMIT VALUES MODIFICATIONS #

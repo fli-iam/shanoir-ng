@@ -17,6 +17,7 @@ package org.shanoir.ng.subjectstudy.dto;
 import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.subject.model.SubjectType;
 import org.shanoir.ng.tag.model.TagDTO;
 
@@ -41,6 +42,8 @@ public class SubjectStudyDTO {
 	private boolean physicallyInvolved;
 	
 	private List<TagDTO> tags;
+	
+	private QualityTag qualityTag;
 
 	public Long getId() {
 		return id;
@@ -124,4 +127,13 @@ public class SubjectStudyDTO {
 	public void setTags(List<TagDTO> tags) {
 		this.tags = tags;
 	}
+	
+
+    public QualityTag getQualityTag() {
+        return qualityTag;
+    }
+
+    public void setQualityTag(QualityTag qualityTag) {
+        this.qualityTag = qualityTag;
+    }
 }
