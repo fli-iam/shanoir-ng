@@ -297,7 +297,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
         this.noResult = this.displayedOptions.length == 0;
     }
     
-    public onUserSelectedOption(option: Option<any>) {
+    public onUserSelectedOption(option: Option<any>, event) {
+        event.stopPropagation();
         if (option.disabled) return;
         let index: number = this.options.findIndex(eachOpt => this.valuesEqual(eachOpt.value, option.value));
         this.onUserSelectedOptionIndex(index);
@@ -414,7 +415,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
                 this.open();
             } else {
                 if (this.focusedOptionIndex != null) {
-                    this.onUserSelectedOption(this.displayedOptions[this.focusedOptionIndex]);
+                    this.onUserSelectedOption(this.displayedOptions[this.focusedOptionIndex], event);
                 }
             }
             event.preventDefault();

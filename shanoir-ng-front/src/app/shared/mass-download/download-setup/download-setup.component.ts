@@ -16,6 +16,7 @@ import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } 
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Format } from 'src/app/datasets/shared/dataset.service';
 import { GlobalService } from '../../services/global.service';
+import { Option } from '../../select/select.component';
 
 @Component({
     selector: 'download-setup',
@@ -29,6 +30,12 @@ export class DownloadSetupComponent {
     @Output() close: EventEmitter<void> = new EventEmitter();
     form: UntypedFormGroup;
     @ViewChild('window') window: ElementRef;
+    formatOptions: Option<Format>[] = [
+        new Option<Format>('nii', 'Nifti'),
+        new Option<Format>('dcm', 'Dicom'),
+        new Option<Format>('eeg', 'EEG'),
+        new Option<Format>('BIDS', 'BIDS'),
+    ];
         
     constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
         this.form = this.buildForm();

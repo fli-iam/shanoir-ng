@@ -12,7 +12,7 @@
                 <li>
                     <label>Dataset files format ({{form.get('format').value}})</label>
                     <span class="right-col">
-                        <select-box formControlName="format" [options]="[{value: 'nii', label: 'Nifti'}, {value: 'dcm', label: 'Dicom'}]"></select-box>
+                        <select-box formControlName="format" [options]="formatOptions"></select-box>
                     </span>
                 </li>
             </ol>

@@ -21,6 +21,7 @@ import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service'
 import { ServiceLocator } from 'src/app/utils/locator.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { DownloadSetupComponent } from './download-setup/download-setup.component';
+import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
 
 declare var JSZip: any;
 
@@ -44,14 +45,20 @@ export class MassDownloadService {
 
     constructor(
         private datasetService: DatasetService,
-        private notificationService: NotificationsService) {
+        private notificationService: NotificationsService,
+        private dialogService: ConfirmDialogService) {
     }
 
     downloadByIds(datasetIds: number[]) {
-        let modalRef: ComponentRef<DownloadSetupComponent> = this.openModal();
-        modalRef.instance.go.subscribe(options => {
-            return this._downloadByIds(datasetIds, options.format, options.nbQueues);
-        });
+        if (window.showDirectoryPicker) { // test compatibility
+            let modalRef: ComponentRef<DownloadSetupComponent> = this.openModal();
+            modalRef.instance.go.subscribe(options => {
+                return this._downloadByIds(datasetIds, options.format, options.nbQueues);
+            });
+        } else {
+            this.dialogService.error('Browser incompatibility', 'Sorry, your browser does not allow this advanced download functionality.'
+                    + ' See the list of compatible browsers : https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility');
+        }
     }
 
     private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4): Promise<void> {
@@ -90,10 +97,15 @@ export class MassDownloadService {
     }
 
     downloadDatasets(datasets: Dataset[]) {
-        let modalRef: ComponentRef<DownloadSetupComponent> = this.openModal();
-        modalRef.instance.go.subscribe(options => {
-            this._downloadDatasets(datasets, options.format, options.nbQueues);
-        });
+        if (window.showDirectoryPicker) { // test compatibility
+            let modalRef: ComponentRef<DownloadSetupComponent> = this.openModal();
+            modalRef.instance.go.subscribe(options => {
+                this._downloadDatasets(datasets, options.format, options.nbQueues);
+            });
+        } else {
+            this.dialogService.error('Browser incompatibility', 'Sorry, your browser does not allow this advanced download functionality.'
+                    + ' See the list of compatible browsers : https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility');
+        }
     }
 
     _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4): Promise<void> {
