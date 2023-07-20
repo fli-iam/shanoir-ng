@@ -54,7 +54,6 @@ public class ShanoirSolrDocument {
 	private Date datasetCreationDate;
 
 	@Field
-	@Indexed
 	private Long examinationId;
 
 	@Field
@@ -67,7 +66,6 @@ public class ShanoirSolrDocument {
 	private String subjectName;
 
 	@Field
-	@Indexed
 	private Long subjectId;
 
 	@Field
@@ -80,7 +78,6 @@ public class ShanoirSolrDocument {
 	private String centerName;
 
 	@Field
-	@Indexed
 	private Long centerId;
 
 	@Field

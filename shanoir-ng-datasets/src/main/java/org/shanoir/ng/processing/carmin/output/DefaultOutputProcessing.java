@@ -185,7 +185,7 @@ public class DefaultOutputProcessing extends OutputProcessing {
 	 * @throws EntityNotFoundException 
 	 * @throws IOException 
 	 */
-	private void createProcessedDatasets(List<File> processedFiles, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws EntityNotFoundException, IOException {
+	private void createProcessedDatasets(List<File> processedFiles, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws EntityNotFoundException, IOException, Exception {
 
 		List<Dataset> outputDatasets = new ArrayList<>();
 		

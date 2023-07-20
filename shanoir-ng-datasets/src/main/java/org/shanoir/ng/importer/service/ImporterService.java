@@ -406,7 +406,7 @@ public class ImporterService {
      * Create a processed dataset dataset associated with a dataset processing.
      * @param importJob the import job from importer MS.
      */
-    public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws Exception {
+    public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws IOException, Exception {
 
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
         eventService.publishEvent(event);

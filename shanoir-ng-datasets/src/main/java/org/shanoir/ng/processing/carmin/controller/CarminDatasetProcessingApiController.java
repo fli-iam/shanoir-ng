@@ -115,8 +115,8 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
     @Override
     public ResponseEntity<List<CarminDatasetProcessing>> findCarminDatasetProcessingsByStudyIdAndSubjectId(
-            @ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+    		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+    		@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
         List<CarminDatasetProcessing> carminDatasetProcessings = carminDatasetProcessingService.findAll();
         if (carminDatasetProcessings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

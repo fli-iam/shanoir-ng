@@ -203,7 +203,6 @@ public interface DatasetApi {
     ResponseEntity<String> getDicomMetadataByDatasetId(
     		@Parameter(name = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws MalformedURLException, IOException, MessagingException;
 
-    
 	@Operation(summary = "", description = "Creates a processed dataset")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "204", description = "created Processed Dataset"),
@@ -216,7 +215,7 @@ public interface DatasetApi {
 		consumes = { "application/json" },
 		method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
-	ResponseEntity<Void> createProcessedDataset(@Parameter(name = "co to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException, IOException;
+	ResponseEntity<Void> createProcessedDataset(@Parameter(name = "co to create" ,required=true )  @Valid @RequestBody ProcessedDatasetImportJob importJob) throws RestServiceException, IOException, Exception;
 	
     @Operation(summary = "massiveDownloadDatasetsByIds", description = "If exists, returns a zip file of the datasets corresponding to the given ids")
     @ApiResponses(value = {
