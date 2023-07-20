@@ -16,8 +16,8 @@ package org.shanoir.ng.studycard.model.condition;
 
 import java.util.List;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
