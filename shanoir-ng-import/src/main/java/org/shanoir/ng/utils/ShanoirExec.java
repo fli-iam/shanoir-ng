@@ -640,7 +640,9 @@ public class ShanoirExec {
 		LOG.error(outputFolder);
 		
 		// java -classpath MRIManager.jar DicomToNifti Subject4/ /tmp/ "PatientName-SerialNumber-Protocol" "[ExportOptions] 00000"
-		buffer.append("java")
+		buffer.append("xvfb-run")
+			.append(" ")
+			.append("java")
 			.append(" ")
 			.append("-classpath")
 			.append(" ")

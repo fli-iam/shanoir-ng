@@ -49,6 +49,7 @@ RUN apt-get update -qq \
     locales \
     locales-all \
     openjdk-11-jdk \
+    xvfb \
     python
 
 # Compile DCM2NIIX from source
@@ -57,8 +58,6 @@ ENV DCMCOMMIT=1.0.20210317
 ENV LC_ALL fr_FR.UTF-8
 ENV LANG fr_FR.UTF-8
 ENV LANGUAGE fr_FR.UTF-8
-
-ENV DISPLAY :0.0
 
 WORKDIR /usr/local/
 RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCMCOMMIT_VERSION.zip | bsdtar -xf- -C .
