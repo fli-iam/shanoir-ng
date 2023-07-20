@@ -113,7 +113,6 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)
 	@RabbitHandler
 	@Transactional
-	@WithMockKeycloakUser(authorities = { "ROLE_ADMIN" })
 	public void createNewDatasetAcquisition(Message importJobStr) throws JsonParseException, JsonMappingException, IOException, AmqpRejectAndDontRequeueException {
 	    ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 		try {

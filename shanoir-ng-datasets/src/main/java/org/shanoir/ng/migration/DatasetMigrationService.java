@@ -465,7 +465,9 @@ public class DatasetMigrationService {
 		entityManager.detach(ds);
 
 		for (DatasetExpression expression : expressions) {
-			migrateDatasetExpression(expression, createdDataset, oldExamId, job);
+			if (!DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
+				migrateDatasetExpression(expression, createdDataset, oldExamId, job);
+			}
 		}
 		return null;
 	}
