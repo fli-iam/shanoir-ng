@@ -636,6 +636,8 @@ public class ShanoirExec {
 		if (!reconversion && !inputFolder.contains("dataset")) {
 			inputFolder = inputFolder.concat("/dataset0");
 		}
+		LOG.error(inputFolder);
+		LOG.error(outputFolder);
 		
 		// java -classpath MRIManager.jar DicomToNifti Subject4/ /tmp/ "PatientName-SerialNumber-Protocol" "[ExportOptions] 00000"
 		buffer.append("java")
@@ -657,6 +659,8 @@ public class ShanoirExec {
 		logs.concat(buffer.toString());
 		
 		final String result = exec(buffer.toString().split(" "));
+		
+		LOG.error(result);
 		
 		return logs.concat("\n Result: " + result);
 		}

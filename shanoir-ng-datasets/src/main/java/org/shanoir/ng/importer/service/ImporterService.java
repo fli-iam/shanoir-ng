@@ -384,6 +384,7 @@ public class ImporterService {
     }
 
     public void cleanTempFiles(String workFolder) {
+    	/*
         if (workFolder != null) {
             // delete workFolder.upload file
             File uploadZipFile = new File(workFolder.concat(UPLOAD_EXTENSION));
@@ -400,6 +401,7 @@ public class ImporterService {
         } else {
             LOG.error("cleanTempFiles: workFolder is null");
         }
+        */
     }
 
     /**
