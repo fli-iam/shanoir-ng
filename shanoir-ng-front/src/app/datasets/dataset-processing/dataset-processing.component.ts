@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,6 +33,9 @@ import { ColumnDefinition } from '../../shared/components/table/column.definitio
 import { CarminDatasetProcessingService } from 'src/app/carmin/shared/carmin-dataset-processing.service';
 import { CarminDatasetProcessing } from 'src/app/carmin/models/CarminDatasetProcessing';
 import { SuperPromise } from '../../utils/super-promise';
+import {CarminClientService} from "../../carmin/shared/carmin-client.service";
+import {HttpResponse} from "@angular/common/http";
+import * as AppUtils from "../../utils/app.utils";
 
 @Component({
     selector: 'dataset-processing-detail',
@@ -64,12 +67,13 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             private studyService: StudyService,
             private datasetService: DatasetService,
             private datasetProcessingService: DatasetProcessingService,
-            private carminDatasetProcessingService: CarminDatasetProcessingService
+            private carminDatasetProcessingService: CarminDatasetProcessingService,
+            private carminClientService: CarminClientService
             ) {
 
         super(route, 'dataset-processing');
     }
-    
+
     ngOnInit(): void {
         super.ngOnInit();
         this.createColumnDefs();
@@ -222,7 +226,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.subscribtions.push(
             formGroup.get('study').valueChanges.subscribe(studyVal => {
                 if (!!this.prefilledSubject || !studyVal) formGroup.get('subject').disable();
-                else formGroup.get('subject').enable();    
+                else formGroup.get('subject').enable();
             }), formGroup.get('subject').valueChanges.subscribe(subjectVal => {
                 if (!subjectVal) {
                     formGroup.get('inputDatasetList').disable();
@@ -254,9 +258,37 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         this.outputDatasetsColumnDefs = [...this.inputDatasetsColumnDefs];
     }
 
-    private isCarminDatasetProcessing(datasetProcessing: DatasetProcessing){
-        if(datasetProcessing.comment == null || !datasetProcessing.comment.startsWith("workflow-")) return false;
-        return true;
+    public downloadStdout() {
+
+        if(!this.carminDatasetProcessing){
+            return;
+        }
+
+        let filename = this.carminDatasetProcessing.name + ".stdout.log";
+
+        this.carminClientService.getStdout(this.carminDatasetProcessing.identifier).toPromise().then(response => {
+            console.log(response);
+            this.downloadLogIntoBrowser(response, filename );
+        });
     }
 
+    public downloadStderr() {
+
+        if(!this.carminDatasetProcessing){
+            return;
+        }
+
+        let filename = this.carminDatasetProcessing.name + ".stderr.log";
+
+        this.carminClientService.getStderr(this.carminDatasetProcessing.identifier).toPromise().then(response => {
+            this.downloadLogIntoBrowser(response, filename );
+        });
+    }
+
+    private downloadLogIntoBrowser(response: string, filename: string){
+        let blob = new Blob([response], {
+            type: 'text/plain'
+        });
+        AppUtils.browserDownloadFile(blob, filename);
+    }
 }
