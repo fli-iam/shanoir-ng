@@ -1,9 +1,8 @@
 package org.shanoir.ng.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,22 +17,20 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
 public class DatasetFileUtilsTest {
 
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
+    @TempDir
+    public File testFolder;
 
     @Test
     public void writeInputFileForExport() throws IOException {
       
         File sample = new File("src/test/resources/input.json");
-        assertTrue("Sample file " + sample.getAbsolutePath() + " does not exists !", sample.exists());
 
         Map<Long, List<String>> files2AcquisitionId = new HashMap<>();
 
