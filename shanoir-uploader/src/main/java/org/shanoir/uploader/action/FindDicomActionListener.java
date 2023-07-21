@@ -18,13 +18,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
+import org.dcm4che2.data.DicomObject;
+import org.dcm4che2.data.Tag;
 import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
-import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.Serie;
+import org.shanoir.uploader.dicom.ShanoirDicomDirReader;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.Patient;
 import org.shanoir.uploader.gui.DicomTree;
@@ -98,9 +98,9 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							dicomDirGenerated = true;
 							logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
 						}
-//						final ShanoirDicomDirReader dicomDir = new ShanoirDicomDirReader(dicomDirFile);
-//						fillMediaFromCD(media, selectedRootDir, dicomDir);
-//						dicomDir.close();
+						final ShanoirDicomDirReader dicomDir = new ShanoirDicomDirReader(dicomDirFile);
+						fillMediaFromCD(media, selectedRootDir, dicomDir);
+						dicomDir.close();
 						// clean up in case of dicomdir generated
 						if (dicomDirGenerated) {
 							dicomDirFile.delete();
@@ -238,35 +238,35 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	 * @param dicomDir
 	 */
 	private void fillMediaFromCD(Media media, File selectedRootDir,
-			final DicomDirToModelService dicomDir) {
+			final ShanoirDicomDirReader dicomDir) {
 		// Run through all patients
-//		for (final Iterator<Attributes> itePatient = dicomDir.getPatients().iterator(); itePatient.hasNext();) {
-//			final Attributes patientAttributes = itePatient.next();
-//			final DicomTreeNode patient = media.initChildTreeNode(patientAttributes);
-//			logger.info("Patient info read from DICOMDIR: " + ((Patient) patient).toString());
-//			// add patients
-//			media.addTreeNode(patient.getId(), patient);
-//			// Run through all studies
-//			for (final Iterator<Attributes> iteStudy = dicomDir.getStudiesFromPatients(patientAttributes).iterator(); iteStudy.hasNext();) {
-//				final Attributes studyAttributes = iteStudy.next();
-//				final DicomTreeNode study = patient.initChildTreeNode(studyAttributes);
-//				// add studies
-//				patient.addTreeNode(study.getId(), study);
-//				// Run through all series
-//				for (final Iterator<Attributes> iteSerie = dicomDir.getSeriesFromStudy(studyAttributes).iterator(); iteSerie.hasNext();) {
-//					final Attributes seriesAttributes = iteSerie.next();
-//					try {
-//						DicomTreeNode serie = study.initChildTreeNode(seriesAttributes);
-//						processSerie(selectedRootDir, dicomDir, study, seriesAttributes, serie);
-//						// permits to display MRI info for CD
-//						Util.processSerieMriInfo(selectedRootDir, serie);
-//					} catch (Exception e) {
-//						logger.error(e.getMessage(), e);
-//					}
-//				}
-//			}
-//			logger.debug("populate : getting next patient");
-//		}
+		for (final Iterator<DicomObject> itePatient = dicomDir.getPatients().iterator(); itePatient.hasNext();) {
+			final DicomObject patientDicomObject = itePatient.next();
+			final DicomTreeNode patient = media.initChildTreeNode(patientDicomObject);
+			logger.info("Patient info read from DICOMDIR: " + ((Patient) patient).toString());
+			// add patients
+			media.addTreeNode(patient.getId(), patient);
+			// Run through all studies
+			for (final Iterator<DicomObject> iteStudy = dicomDir.getStudiesFromPatients(patientDicomObject).iterator(); iteStudy.hasNext();) {
+				final DicomObject studyDicomObject = iteStudy.next();
+				final DicomTreeNode study = patient.initChildTreeNode(studyDicomObject);
+				// add studies
+				patient.addTreeNode(study.getId(), study);
+				// Run through all series
+				for (final Iterator<DicomObject> iteSerie = dicomDir.getSeriesFromStudy(studyDicomObject).iterator(); iteSerie.hasNext();) {
+					final DicomObject seriesDicomObject = iteSerie.next();
+					try {
+						DicomTreeNode serie = study.initChildTreeNode(seriesDicomObject);
+						processSerie(selectedRootDir, dicomDir, study, seriesDicomObject, serie);
+						// permits to display MRI info for CD
+						Util.processSerieMriInfo(selectedRootDir, serie);
+					} catch (Exception e) {
+						logger.error(e.getMessage(), e);
+					}
+				}
+			}
+			logger.debug("populate : getting next patient");
+		}
 	}
 
 	/**
@@ -274,47 +274,47 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	 * @param selectedRootDir
 	 * @param dicomDir
 	 * @param study
-	 * @param seriesAttributes
+	 * @param seriesDicomObject
 	 * @param serie
 	 */
-	private void processSerie(File selectedRootDir, final DicomDirToModelService dicomDir,
-			final DicomTreeNode study, final Attributes seriesAttributes,
+	private void processSerie(File selectedRootDir, final ShanoirDicomDirReader dicomDir,
+			final DicomTreeNode study, final DicomObject seriesDicomObject,
 			DicomTreeNode serie) {
 		final String modality = serie.getDescriptionMap().get("modality");
-//		if (modality != null) {
-//			List<String> imageFileNames = new ArrayList<String>();
-//			// Add all images path to the serie
-//			for (final Iterator<Attributes> iteImages =
-//					dicomDir.getImagesFromSeries(seriesAttributes).iterator(); iteImages.hasNext();) {
-//				final Attributes imageAttributes = iteImages.next();
-//				if (!"PR".equals(modality)) {
-//					final String[] imagesPathArray = imageAttributes.getStrings(Tag.ReferencedFileID);
-//					if (imagesPathArray != null) {
-//						filePathDicomDir = selectedRootDir.toString();
-//						StringBuffer fileName = new StringBuffer();
-//						for (int i = 0; i < imagesPathArray.length; i++) {
-//							// do not append File.separator in case of last segment
-//							if (i == imagesPathArray.length - 1) {
-//								fileName.append(imagesPathArray[i]);
-//							} else {
-//								fileName.append(imagesPathArray[i] + File.separator);
-//							}
-//						}
-//						imageFileNames.add(fileName.toString());
-//					}
-//				}
-//			}
-//			((Serie)serie).setFileNames(imageFileNames);
-//			((Serie)serie).setImagesCount(imageFileNames.size());
-//			if (!"PR".equals(modality) && !"SR".equals(modality)) {
-//				if (logger.isDebugEnabled()) {
-//					logger.debug("populate : adding serie " + serie);
-//				}
-//				study.addTreeNode(serie.getId(), serie);
-//			} else {
-//				logger.debug("populate : not adding serie " + serie + " because it is of modality " + modality);
-//			}
-//		}
+		if (modality != null) {
+			List<String> imageFileNames = new ArrayList<String>();
+			// Add all images path to the serie
+			for (final Iterator<DicomObject> iteImages =
+					dicomDir.getImagesFromSeries(seriesDicomObject).iterator(); iteImages.hasNext();) {
+				final DicomObject imageDicomObject = iteImages.next();
+				if (!"PR".equals(modality)) {
+					final String[] imagesPathArray = imageDicomObject.getStrings(Tag.ReferencedFileID);
+					if (imagesPathArray != null) {
+						filePathDicomDir = selectedRootDir.toString();
+						StringBuffer fileName = new StringBuffer();
+						for (int i = 0; i < imagesPathArray.length; i++) {
+							// do not append File.separator in case of last segment
+							if (i == imagesPathArray.length - 1) {
+								fileName.append(imagesPathArray[i]);
+							} else {
+								fileName.append(imagesPathArray[i] + File.separator);
+							}
+						}
+						imageFileNames.add(fileName.toString());
+					}
+				}
+			}
+			((Serie)serie).setFileNames(imageFileNames);
+			((Serie)serie).setImagesCount(imageFileNames.size());
+			if (!"PR".equals(modality) && !"SR".equals(modality)) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("populate : adding serie " + serie);
+				}
+				study.addTreeNode(serie.getId(), serie);
+			} else {
+				logger.debug("populate : not adding serie " + serie + " because it is of modality " + modality);
+			}
+		}
 	}
 
 	public String getFilePathDicomDir() {

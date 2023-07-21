@@ -8,15 +8,14 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.tree.TreeNode;
-
-import org.apache.log4j.Logger;
-import org.dcm4che3.data.Attributes;
-import org.shanoir.uploader.utils.Util;
-
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+
+import org.apache.log4j.Logger;
+import org.dcm4che2.data.DicomObject;
+import org.shanoir.uploader.utils.Util;
 
 /**
  * The Class Serie.
@@ -343,7 +342,7 @@ public class Serie implements DicomTreeNode {
 		return new HashMap<String, DicomTreeNode>();
 	}
 
-	public DicomTreeNode initChildTreeNode(Attributes attributes) {
+	public DicomTreeNode initChildTreeNode(DicomObject arg0) {
 		return null;
 	}
 
