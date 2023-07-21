@@ -35,6 +35,7 @@ export class Study extends Entity {
     nbExaminations: number;
     nbSubjects: number;
     nbSujects: number;
+    nbMembers: number;
     protocolFilePaths: string[];
     dataUserAgreementPaths: string[];
     startDate: Date;
@@ -52,6 +53,8 @@ export class Study extends Entity {
     tags: Tag[];
     studyTags: Tag[];
     description: string;
+
+    license: string;
     accessRequestedByCurrentUser: boolean = false;
     locked: boolean = false; // current user has no access
 

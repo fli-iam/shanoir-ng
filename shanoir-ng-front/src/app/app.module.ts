@@ -264,9 +264,9 @@ import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 import { MassDownloadService } from './shared/mass-download/mass-download.service';
+import { ClipboardModule } from '@angular/cdk/clipboard';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 import { DownloadSetupComponent } from './shared/mass-download/download-setup/download-setup.component';
-
 
 @NgModule({
     imports: [
@@ -279,7 +279,8 @@ import { DownloadSetupComponent } from './shared/mass-download/download-setup/do
         NgxJsonViewerModule,
         AppRoutingModule,
         PreclinicalRoutingModule,
-        RouterModule
+        RouterModule,
+        ClipboardModule
     ],
     declarations: [
         AccountRequestComponent,

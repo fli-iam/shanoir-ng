@@ -40,6 +40,7 @@ import { StudyUserRight } from '../studies/shared/study-user-right.enum';
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { SolrService } from "./solr.service";
+import { Clipboard } from '@angular/cdk/clipboard';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -79,7 +80,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
-            private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private downloadService: MassDownloadService,
+            private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private downloadService: MassDownloadService, private clipboard: Clipboard,
             private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
 
         this.getRole();
@@ -464,7 +465,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true },
-            {title: "Download (experimental)", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true}
+            {title: "Download (experimental)", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true},
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoSelected: true },
+            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
         );
         return customActionDefs;
     }
@@ -484,7 +487,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true },
-            {title: "Download (experimental)", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true}
+            {title: "Download (experimental)", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true},
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoResult: true },
+            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
         );
         return customActionDefs;
     }
@@ -520,9 +525,14 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getFacetFieldPage(pageable: FacetPageable, facetName: string): Promise<FacetResultPage> {
         return this.solrService.getFacet(facetName, pageable, this.solrRequest);
     }
-    initExecutionMode(){
+
+    initExecutionMode() {
         this.processingService.setDatasets(this.selectedDatasetIds);
         this.router.navigate(['/processing']);
+    }
+
+    copyIds() {
+        this.clipboard.copy(Array.from(this.selectedDatasetIds || []).toString());
     }
 
 }

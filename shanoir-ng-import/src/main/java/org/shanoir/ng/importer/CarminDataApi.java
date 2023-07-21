@@ -38,7 +38,7 @@ public interface CarminDataApi {
         @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
         ResponseEntity<Void> deletePath();
 
-        @ApiOperation(value = "Upload data to a path", tags = "A request without content creates a directory (an error should be returned if the path already exists). A request with a specific content type (\"application/carmin+json\") allows to upload data encoded in base64. The base64 content (part of a json payload) can either be an encoded file, are an encoded zip archive that will create a directory. All other content (with any content type) will be considered as a raw file and will override the existing path content. If the parent directory of the file/directory to create does not exist, an error must be returned.")
+        @ApiOperation(value = "Upload data to a path", notes = "A request without content creates a directory (an error should be returned if the path already exists). A request with a specific content type (\"application/carmin+json\") allows to upload data encoded in base64. The base64 content (part of a json payload) can either be an encoded file, are an encoded zip archive that will create a directory. All other content (with any content type) will be considered as a raw file and will override the existing path content. If the parent directory of the file/directory to create does not exist, an error must be returned.", tags = {})
         @ApiResponses(value = {
                         @ApiResponse(code = 200, message = "The upload is successful and finished.", response = Path.class),
                         @ApiResponse(code = 500, message = "A functional or internal error occured processing the request") })

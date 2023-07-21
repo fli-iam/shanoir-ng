@@ -74,6 +74,8 @@ export class Task extends Entity {
                 return '/examination/details/' + this.message.slice(this.message.lastIndexOf('for examination ') + ('for examination '.length));
             } else if (this.message.indexOf('in dataset') != -1) {
                 return '/dataset/details/' + this.message.slice(this.message.lastIndexOf('in dataset ') + ('in dataset '.length));
+            } else if (this.message.indexOf('VIP Execution') != -1) {
+               return '/dataset-processing/details/' + this.objectId
             }
         }
         return null;
