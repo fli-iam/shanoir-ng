@@ -43,7 +43,7 @@ public class ShanoirExec {
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirExec.class);
 	
-	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.lib}")
+	@Value("${shanoir.conversion.converters.clidcm.path.lib}")
     private String clidcmPathLib;
 
 	@Value("${ms.url.dicom2nifti}")
