@@ -43,7 +43,6 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -79,9 +78,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 
 	@Autowired
 	private ShanoirEventService eventService;
-
-	@Value("${shanoir.import.upload.folder}")
-	private String uploadFolder;
 
 	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event)
 			throws FileNotFoundException {
