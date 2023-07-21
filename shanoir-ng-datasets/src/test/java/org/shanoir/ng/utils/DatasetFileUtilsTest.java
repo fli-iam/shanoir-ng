@@ -54,8 +54,8 @@ public class DatasetFileUtilsTest {
         ByteArrayInputStream bytesInputStream = new ByteArrayInputStream(bytesOutputStream.toByteArray());
         ZipInputStream in = new ZipInputStream(bytesInputStream, StandardCharsets.UTF_8);
         ZipEntry readEntry = in.getNextEntry();
-        assertNull(readEntry.getComment());
         assertNotNull(readEntry);
+        assertNull(readEntry.getComment());
         assertEquals("input.json", readEntry.getName());
         in.close();
     }
