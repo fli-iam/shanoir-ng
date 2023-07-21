@@ -110,9 +110,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	@Value("${shanoir.import.series.seriesProperties}")
 	private String seriesProperties;
 
-	@Value("${shanoir.import.series.donotseparatedatasetsinserie}")
-	private String doNotSeparateDatasetsInSerie;
-
 	@Value("${shanoir.conversion.converters.convertwithclidcm}")
 	private String convertWithClidcm;
 	
