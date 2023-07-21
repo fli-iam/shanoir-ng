@@ -14,32 +14,23 @@
 
 package org.shanoir.ng.dataset;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
 import org.shanoir.ng.dataset.controler.DatasetApiController;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -47,30 +38,24 @@ import org.shanoir.ng.dataset.modality.EegDatasetMapper;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrDatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.importer.service.ImporterService;
-import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
-import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -124,7 +109,7 @@ public class DatasetApiControllerTest {
 	private ControlerSecurityService controlerSecurityService;
 	
     @TempDir
-    private File datasetDir;
+    private File tempDir;
 
 	@MockBean
 	private EegDatasetMapper eegDatasetMapper;
@@ -206,96 +191,6 @@ public class DatasetApiControllerTest {
 
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testMassiveDownloadByStudyIdNifti() throws Exception {
-		// GIVEN a study with some datasets to export in nii format
-		// Create a file with some text
-		File tempFile = new File(datasetDir, "test.nii");
-		FileUtils.write(tempFile, "test");
-
-		// Link it to datasetExpression in a dataset in a study
-		Dataset dataset = new MrDataset();
-		dataset.setId(1L);
-		dataset.setSubjectId(3L);
-		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
-		dataset.setDatasetAcquisition(dsAcq);
-		dataset.setUpdatedMetadata(updatedMetadata);
-
-		DatasetExpression expr = new DatasetExpression();
-		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-		DatasetFile dsFile = new DatasetFile();
-		dsFile.setPath("file:///" + tempFile.getAbsolutePath());
-		expr.setDatasetFiles(Collections.singletonList(dsFile));
-		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
-		dataset.setDatasetExpressions(datasetExpressions);
-
-		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
-
-		// WHEN we export all the datasets
-		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
-				.param("format", "nii")
-				.param("studyId", "1"))
-		.andExpect(status().isOk())
-		.andExpect(content().string(containsString("name_comment_2_1_2_0.nii")));
-
-		// THEN all datasets are exported
-		
-		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(eventService, times(2)).publishEvent(eventCatcher.capture());
-		
-		ShanoirEvent event = eventCatcher.getValue();
-		assertNotNull(event);
-		assertEquals(dataset.getId().toString()  + "." + "nii", event.getMessage());
-		assertEquals(dataset.getId().toString(), event.getObjectId());
-		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testMassiveDownloadByDatasetsId() throws Exception {
-		// GIVEN a list of datasets to export
-		// Create a file with some text
-		File tempFile = new File(datasetDir, "test.nii");
-		FileUtils.write(tempFile, "test");
-
-		// Link it to datasetExpression in a dataset in a study
-		Dataset dataset = new MrDataset();
-		dataset.setId(1L);
-		dataset.setSubjectId(3L);
-		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
-		dataset.setDatasetAcquisition(dsAcq);
-		dataset.setUpdatedMetadata(updatedMetadata);
-
-		DatasetExpression expr = new DatasetExpression();
-		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-		DatasetFile dsFile = new DatasetFile();
-		dsFile.setPath("file:///" + tempFile.getAbsolutePath());
-		expr.setDatasetFiles(Collections.singletonList(dsFile));
-		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
-		dataset.setDatasetExpressions(datasetExpressions);
-
-		Mockito.when(datasetServiceMock.findByIdIn(Mockito.anyList())).thenReturn(Collections.singletonList(dataset));
-		
-		// WHEN we export all the datasets
-		mvc.perform(MockMvcRequestBuilders.post("/datasets/massiveDownload")
-				.param("format", "nii")
-				.param("datasetIds", "1"))
-		.andExpect(status().isOk())
-		.andExpect(content().string(containsString("name_comment_2_1_2_0.nii")));
-
-		// THEN all datasets are exported
-		
-		ArgumentCaptor<ShanoirEvent> eventCatcher = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(eventService, times(2)).publishEvent(eventCatcher.capture());
-		
-		ShanoirEvent event = eventCatcher.getValue();
-		assertNotNull(event);
-		assertEquals(dataset.getId().toString() + ".nii", event.getMessage());
-		assertEquals(dataset.getId().toString(), event.getObjectId());
-		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByDatasetsIdNoIds() {
 		// GIVEN a list of datasets to export
 
@@ -355,42 +250,6 @@ public class DatasetApiControllerTest {
 		} catch (Exception e) {
 			assertEquals(e.getMessage(), "Request processing failed; nested exception is {\"code\":403,\"message\":\"This study has more than 50 datasets, that is the limit. Please download them from solr search.\",\"details\":null}");
 		}
-	}
-
-	@Test
-	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
-	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
-		// Create a file with some text
-		File tempFile = new File(datasetDir, "test.nii");
-		FileUtils.write(tempFile, "test");
-
-		// Link it to datasetExpression in a dataset in a study
-		Dataset dataset = new MrDataset();
-		dataset.setSubjectId(3L);
-		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
-		dataset.setDatasetAcquisition(dsAcq);
-		dataset.setUpdatedMetadata(updatedMetadata);
-
-		DatasetExpression expr = new DatasetExpression();
-		expr.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-		DatasetFile dsFile = new DatasetFile();
-		dsFile.setPath(tempFile.getAbsolutePath());
-		expr.setDatasetFiles(Collections.singletonList(dsFile));
-		List<DatasetExpression> datasetExpressions = Collections.singletonList(expr);
-		dataset.setDatasetExpressions(datasetExpressions);
-
-		// GIVEN a study with some datasets to export in nii format
-		Mockito.when(datasetServiceMock.findByStudyId(1L)).thenReturn(Collections.singletonList(dataset));
-	try {
-		// WHEN we export all the datasets
-		mvc.perform(MockMvcRequestBuilders.get("/datasets/massiveDownloadByStudy")
-				.param("format", "otherWRONG")
-				.param("studyId", "1"))
-		.andExpect(status().isUnprocessableEntity());
-	} catch (Exception e) {
-		assertEquals("Request processing failed; nested exception is {\"code\":422,\"message\":\"Please choose either nifti, dicom or eeg file type.\",\"details\":null}", e.getMessage());
-	}
-		// THEN we expect a failure
 	}
 
 	@Test

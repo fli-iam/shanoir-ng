@@ -88,7 +88,7 @@ public class DatasetDownloaderServiceTest {
 	private ControlerSecurityService controlerSecurityService;
 	
     @TempDir
-    public File testFolder;
+    public File tempDir;
 
 	@MockBean
 	private EegDatasetMapper eegDatasetMapper;
@@ -139,7 +139,7 @@ public class DatasetDownloaderServiceTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text
-		File datasetFile = new File(testFolder, "test.nii");
+		File datasetFile = new File(tempDir, "test.nii");
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 
@@ -177,7 +177,7 @@ public class DatasetDownloaderServiceTest {
 	public void testMassiveDownloadByExaminationIdNifti() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
-		File datasetFile = new File(testFolder, "test.nii");
+		File datasetFile = new File(tempDir, "test.nii");
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 
@@ -221,7 +221,7 @@ public class DatasetDownloaderServiceTest {
 	public void testMassiveDownloadByDatasetsId() throws Exception {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
-		File datasetFile = new File(testFolder, "test.nii");
+		File datasetFile = new File(tempDir, "test.nii");
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 
@@ -256,4 +256,5 @@ public class DatasetDownloaderServiceTest {
 		assertEquals(dataset.getId().toString(), event.getObjectId());
 		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
 	}
+
 }
