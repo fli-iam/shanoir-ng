@@ -153,16 +153,12 @@ export class MassDownloadService {
     }
 
     private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, dataset?: Dataset): Promise<void> {
-        const metadataPromise: Promise<Dataset> = (dataset?.id == id) ? Promise.resolve(dataset) : this.datasetService.get(id, 'lazy');
+        const metadataPromise: Promise<Dataset> = (dataset?.id == id && dataset.datasetAcquisition?.examination?.subject) ? Promise.resolve(dataset) : this.datasetService.get(id, 'lazy');
         const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format);
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
-            const path: string =
-                dataset.datasetAcquisition?.examination?.comment
-                + '_' + dataset.datasetAcquisition?.examination?.id
-                + '/'
-                + filename;
+            const path: string = this.buildDatasetPath(dataset) + filename;
 
             // Check ERRORS file in zip
             var zip = new JSZip();
@@ -201,6 +197,15 @@ export class MassDownloadService {
             task.progress = (report.nbSuccess + report.nbError) / report.requestedDatasetIds.length;
             this.notificationService.pushLocalTask(task);
         });
+    }
+
+    private buildDatasetPath(dataset: Dataset): string {
+        return dataset.datasetAcquisition?.examination?.subject?.name
+                + '_' + dataset.datasetAcquisition?.examination?.subject?.id
+                + '/'
+                + dataset.datasetAcquisition?.examination?.comment
+                + '_' + dataset.datasetAcquisition?.examination?.id
+                + '/';
     }
 
     private writeMyFile(path: string, content: any, userFolderHandle: FileSystemDirectoryHandle): Promise<void> {
