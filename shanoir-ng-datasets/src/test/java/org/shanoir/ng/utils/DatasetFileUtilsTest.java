@@ -2,7 +2,6 @@ package org.shanoir.ng.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -54,7 +53,7 @@ public class DatasetFileUtilsTest {
         ByteArrayInputStream bytesInputStream = new ByteArrayInputStream(bytesOutputStream.toByteArray());
         ZipInputStream in = new ZipInputStream(bytesInputStream, StandardCharsets.UTF_8);
         ZipEntry readEntry = in.getNextEntry();
-        assertNull("ZipInputStream must not retrieve comments", readEntry.getComment());
+        assertEquals("ZipInputStream must not retrieve comments", readEntry.getComment());
         assertNotNull(readEntry);
         assertEquals("input stream does not exists !", "input.json", readEntry.getName());
         in.close();
