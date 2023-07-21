@@ -42,12 +42,16 @@ VALUES
 	(7,11,'OVERRIDEN','Dataset'),
 	(8,4,'4','Dataset');
 
-
+-- Attention, by MK: I had to adapt this table to make the Unit tests run with the new version of Spring Boot, 3.0.2.
+-- There was an issue/bug in a version of Liquibase, that seems to be used by SB, that translates wrong all precision
+-- on bigint(xx) and int(xx) to H2 statements, see https://github.com/liquibase/liquibase/issues/3300. So I had to
+-- change to BIGINT and INTEGER to make it run, without precision of the length. Maybe with new version of SB3 this
+-- can be set back as before, when they upgrade their internal Liquibase version.
 CREATE TABLE study_card_condition (
-    id bigint(20) NOT NULL AUTO_INCREMENT,
-    dicom_tag int(11) DEFAULT NULL,
-    operation int(11) NOT NULL,
-    shanoir_field int(11) DEFAULT NULL,
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    dicom_tag INTEGER DEFAULT NULL,
+    operation INTEGER NOT NULL,
+    shanoir_field INTEGER DEFAULT NULL,
     scope varchar(65) NOT NULL,
     PRIMARY KEY (id)
 );
