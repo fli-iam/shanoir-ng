@@ -21,9 +21,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.Card;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Component;
 
-@Component
 public interface CardService<T extends Card> {
 
 	void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
@@ -38,8 +36,8 @@ public interface CardService<T extends Card> {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	List<T> findAll();
 	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("returnObject == null || @datasetSecurityService.hasRightOnStudy(returnObject.getStudyId(), 'CAN_SEE_ALL')")
+	// MK: had to move down annotation to -ServiceImpls as Spring Sec throws a duplicate
+	// annotation exception, because of 2 interface hierarchy, that is not well managed.
 	T findById(Long id);
 	
 	/**
