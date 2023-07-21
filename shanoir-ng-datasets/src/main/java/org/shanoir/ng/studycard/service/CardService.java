@@ -22,38 +22,25 @@ import org.shanoir.ng.studycard.model.Card;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+// MK: had to move down all sec annotations (Pre-/PostAuthorize) to -ServiceImpls as Spring Sec throws a duplicate
+// annotation exception, because of 2 interface hierarchy, that is not well managed by Spring Sec, so I could not
+// keep the annotations here.
 public interface CardService<T extends Card> {
 
 	void deleteById(Long id) throws EntityNotFoundException, MicroServiceCommunicationException;
 
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#card.getStudyId(), 'CAN_ADMINISTRATE'))")
 	T save(T card) throws MicroServiceCommunicationException;
 	
-	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnCard(#card, 'CAN_ADMINISTRATE'))")
 	T update(T card) throws EntityNotFoundException, MicroServiceCommunicationException;
 	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	List<T> findAll();
 	
-	// MK: had to move down annotation to -ServiceImpls as Spring Sec throws a duplicate
-	// annotation exception, because of 2 interface hierarchy, that is not well managed.
 	T findById(Long id);
 	
-	/**
-	 * Find template by its id.
-	 *
-	 * @param id template id.
-	 * @return a template or null.
-	 */
 	T findByName(String name);
 
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	List<T> search(List<Long> studyIdList);
 	
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	List<T> findByStudy (Long studyId);
 
 }

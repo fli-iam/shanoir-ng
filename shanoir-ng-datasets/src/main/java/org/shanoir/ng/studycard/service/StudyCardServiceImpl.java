@@ -50,6 +50,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	public List<StudyCard> findAll() {
 		return Utils.toList(studyCardRepository.findAll());
 	}
@@ -62,6 +64,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnStudy(#card.getStudyId(), 'CAN_ADMINISTRATE'))")
 	public StudyCard save(final StudyCard card) throws MicroServiceCommunicationException {
 	    card.setLastEditTimestamp(System.currentTimeMillis());
 		StudyCard savedStudyCard = studyCardRepository.save(card);
@@ -69,11 +72,14 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	public List<StudyCard> search(final List<Long> studyIdList) {
 		return studyCardRepository.findByStudyIdIn(studyIdList);
 	}
 
 	@Override
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnCard(#card, 'CAN_ADMINISTRATE'))")
 	public StudyCard update(final StudyCard card) throws EntityNotFoundException, MicroServiceCommunicationException {
 		final StudyCard studyCardDb = studyCardRepository.findById(card.getId()).orElse(null);
 		if (studyCardDb == null) throw new EntityNotFoundException(StudyCard.class, card.getId());
@@ -105,6 +111,8 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterCardList(returnObject, 'CAN_SEE_ALL')")
 	public List<StudyCard> findByStudy(Long studyId) {
 		return this.studyCardRepository.findByStudyId(studyId);
 	}
@@ -115,6 +123,7 @@ public class StudyCardServiceImpl implements StudyCardService {
 	}
 
 	@Override
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public StudyCard findByName(String name) {
 		return studyCardRepository.findByName(name);
 	}
