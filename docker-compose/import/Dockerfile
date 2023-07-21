@@ -18,7 +18,7 @@ RUN set -ex && \
     apt update -y && \
     apt install -t \
       bullseye-backports \
-      openjdk-17-jre-headless \
+      openjdk-17-jre \
       ca-certificates-java -y
 
 #32 bits packages are necessary

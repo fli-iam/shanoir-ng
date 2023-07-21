@@ -6,7 +6,7 @@ RUN set -ex && \
     apt update -y && \
     apt install -t \
       bullseye-backports \
-      openjdk-17-jre-headless \
+      openjdk-17-jre \
       ca-certificates-java -y
 
 RUN apt-get update
