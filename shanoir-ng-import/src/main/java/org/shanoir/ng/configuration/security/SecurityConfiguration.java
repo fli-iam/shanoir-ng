@@ -14,6 +14,10 @@
 
 package org.shanoir.ng.configuration.security;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -23,8 +27,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
@@ -45,7 +49,7 @@ public class SecurityConfiguration {
 
 	@Value("${front.server.url}")
 	private String frontServerUrl;
-
+	
 	/**
 	 * Defines the session authentication strategy.
 	 */
@@ -55,22 +59,24 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().csrf().disable()
-				.authorizeHttpRequests()
-				.requestMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
-				.anyRequest().authenticated().and().oauth2ResourceServer().jwt()
-				.jwtAuthenticationConverter(jwtAuthenticationConverter());
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http
+			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+		.and()
+			.csrf().disable()
+		.authorizeHttpRequests()
+			.requestMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
+			.anyRequest().authenticated()
+		.and()
+			.oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
+                Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access");
+                Collection<String> roles = realmAccess.get("roles");
+                var grantedAuthorities = roles.stream()
+                        .map(role -> new SimpleGrantedAuthority(role))
+                        .collect(Collectors.toList());
+                return new JwtAuthenticationToken(jwt, grantedAuthorities);
+            })));
 		return http.build();
-	}
-
-	private JwtAuthenticationConverter jwtAuthenticationConverter() {
-		JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-		jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
-		jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
-		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-		return jwtAuthenticationConverter;
 	}
 
 	@Bean
