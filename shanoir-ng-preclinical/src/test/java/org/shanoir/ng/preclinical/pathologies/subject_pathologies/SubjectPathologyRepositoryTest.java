@@ -23,7 +23,7 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
-import org.shanoir.ng.preclinical.subjects.AnimalSubjectRepository;
+import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.PathologyModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;

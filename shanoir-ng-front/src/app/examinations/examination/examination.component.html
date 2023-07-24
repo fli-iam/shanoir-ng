@@ -58,7 +58,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<label i18n="Examination detail|Subject label@@examinationDetailSubject">Subject</label>
 						  <span class="right-col">
                             <ng-template [ngIf]="mode=='view' || (mode=='edit' && !isAdmin())">
-                                <a [routerLink]="['/subject/details/', examination.subject?.id]">
+                                <a [routerLink]="[getSubjectLink()]">
                                     {{examination?.subject?.name}}
                                 </a>
                             </ng-template>
