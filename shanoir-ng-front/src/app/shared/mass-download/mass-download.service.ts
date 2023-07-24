@@ -61,6 +61,25 @@ export class MassDownloadService {
         }
     }
 
+
+    downloadDatasets(datasets: Dataset[]) {
+        if (window.showDirectoryPicker) { // test compatibility
+            let modalRef: ComponentRef<DownloadSetupComponent> = this.openModal();
+            modalRef.instance.go.subscribe(options => {
+                this._downloadDatasets(datasets, options.format, options.nbQueues);
+            });
+        } else {
+            this.dialogService.error('Browser incompatibility', 'Sorry, your browser does not allow this advanced download functionality.'
+                    + ' See the list of compatible browsers : https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility');
+        }
+    }
+
+    downloadAllByStudyId(studyId): Promise<void> {
+        return this.datasetService.getByStudyId(studyId).then(datasets => {
+            return this.downloadDatasets(datasets);
+        })
+    }
+
     private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4): Promise<void> {
         if (datasetIds.length == 0) return;
         return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
@@ -96,19 +115,7 @@ export class MassDownloadService {
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
 
-    downloadDatasets(datasets: Dataset[]) {
-        if (window.showDirectoryPicker) { // test compatibility
-            let modalRef: ComponentRef<DownloadSetupComponent> = this.openModal();
-            modalRef.instance.go.subscribe(options => {
-                this._downloadDatasets(datasets, options.format, options.nbQueues);
-            });
-        } else {
-            this.dialogService.error('Browser incompatibility', 'Sorry, your browser does not allow this advanced download functionality.'
-                    + ' See the list of compatible browsers : https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility');
-        }
-    }
-
-    _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4): Promise<void> {
+    private _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4): Promise<void> {
         if (datasets.length == 0) return;
         return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
             let task: Task = this.createTask(datasets.length);
@@ -133,12 +140,6 @@ export class MassDownloadService {
                 this.notificationService.pushLocalTask(task);
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
-    }
-
-    downloadAllByStudyId(studyId): Promise<void> {
-        return this.datasetService.getByStudyId(studyId).then(datasets => {
-            return this.downloadDatasets(datasets);
-        })
     }
 
     private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, datasets?: Dataset[]): Promise<void> {

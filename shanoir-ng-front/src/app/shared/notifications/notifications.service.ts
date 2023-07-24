@@ -91,14 +91,14 @@ export class NotificationsService {
 
     updateStatusVars() {
         let tmpTasksInProgress = [];
-        for (let task of this.allTasks) {
+        for (let task of this.allTasks.concat(this.newLocalTasksQueue)) {
             if (task.status == -1) {
-                let freshError: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
+                let freshError: Task = this.tasksInProgress.concat(this.newLocalTasksQueue).find(tip => tip.status == 2 && task.id == tip.id);
                 if (freshError) {
                     this.pushToFreshError(task);
                 }
             } else if (task.status == 1) {
-                let freshDone: Task = this.tasksInProgress.find(tip => tip.status == 2 && task.id == tip.id);
+                let freshDone: Task = this.tasksInProgress.concat(this.newLocalTasksQueue).find(tip => tip.status == 2 && task.id == tip.id);
                 if (freshDone) {
                     this.pushToFreshCompleted(task);
                 }
