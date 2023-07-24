@@ -19,10 +19,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.representations.AccessToken;
 import org.shanoir.ng.shared.exception.TokenNotFoundException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -30,6 +28,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 /**
  * Utility class for Keycloak requests.
@@ -39,6 +38,8 @@ import org.springframework.security.core.userdetails.User;
  */
 public final class KeycloakUtil {
 
+	private static final String CAN_IMPORT_FROM_PACS = "canImportFromPACS";
+	
 	public static final String USER_ID_TOKEN_ATT = "userId";
 
 	/**
@@ -48,12 +49,11 @@ public final class KeycloakUtil {
 	 * @throws ShanoirStudiesException
 	 */
 	public static Set<String> getTokenRoles() {
-		final KeycloakSecurityContext context = getKeycloakSecurityContext();
-		final AccessToken accessToken = context.getToken();
-		if (accessToken == null) {
-			throw new TokenNotFoundException("Access token not found");
+		final JwtAuthenticationToken jwt = getJwtAuthenticationToken();
+		if (jwt == null) {
+			throw new TokenNotFoundException("JwtAuthenticationToken not found");
 		}
-		return accessToken.getRealmAccess().getRoles();
+		return jwt.getAuthorities().stream().map( a -> a.toString()).collect(Collectors.toSet());
 	}
 	
 	/**
@@ -62,9 +62,8 @@ public final class KeycloakUtil {
 	 * @return a boolean
 	 */
 	public static boolean canImportFromPACS() {
-		final KeycloakSecurityContext context = getKeycloakSecurityContext();
-		final AccessToken accessToken = context.getToken();
-		return Boolean.parseBoolean(accessToken.getOtherClaims().get("canImportFromPACS").toString());
+		final JwtAuthenticationToken jwt = getJwtAuthenticationToken();
+		return Boolean.parseBoolean(jwt.getToken().getClaims().get(CAN_IMPORT_FROM_PACS).toString());
 	}
 	
 	/**
@@ -72,7 +71,6 @@ public final class KeycloakUtil {
 	 * 
 	 * @return roles
 	 */
-	@SuppressWarnings("rawtypes")
 	public static Collection<String> getConnectedUserRoles() {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
 			return new ArrayList<String>();
@@ -88,7 +86,7 @@ public final class KeycloakUtil {
 				}
 				return userRoles;
 			}
-			return ((KeycloakPrincipal) principal).getKeycloakSecurityContext().getToken().getRealmAccess().getRoles();
+			return getJwtAuthenticationToken().getAuthorities().stream().map( a -> a.toString()).collect(Collectors.toSet());
 		}
 	}
 
@@ -99,25 +97,23 @@ public final class KeycloakUtil {
 	 * @throws ShanoirStudiesException
 	 */
 	public static Long getTokenUserId() {
-		final KeycloakSecurityContext context = getKeycloakSecurityContext();
-		final AccessToken accessToken = context.getToken();
-		if (accessToken == null) {
-			throw new TokenNotFoundException("Access token not found.");
+		final JwtAuthenticationToken jwt = getJwtAuthenticationToken();
+		if (jwt == null) {
+			throw new TokenNotFoundException("JwtAuthenticationToken not found.");
 		}
-		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
-		if (otherClaims.containsKey(USER_ID_TOKEN_ATT)) {
-			return Long.valueOf(otherClaims.get(USER_ID_TOKEN_ATT).toString());
+		final Map<String, Object> claims = jwt.getToken().getClaims();
+		if (claims.containsKey(USER_ID_TOKEN_ATT)) {
+			return Long.valueOf(claims.get(USER_ID_TOKEN_ATT).toString());
 		}
 		return null;
 	}
 	
 	public static String getTokenUserName() {
-		final KeycloakSecurityContext context = getKeycloakSecurityContext();
-		final AccessToken accessToken = context.getToken();
-		if (accessToken == null) {
-			throw new TokenNotFoundException("Access token not found.");
+		final JwtAuthenticationToken jwt = getJwtAuthenticationToken();
+		if (jwt == null) {
+			throw new TokenNotFoundException("JwtAuthenticationToken not found.");
 		}
-		return accessToken.getPreferredUsername();
+		return jwt.getName();
 	}
 
 	/**
@@ -140,10 +136,10 @@ public final class KeycloakUtil {
 	 * @throws ShanoirStudiesException
 	 */
 	public static HttpHeaders getKeycloakHeader() {
-		final KeycloakSecurityContext context = getKeycloakSecurityContext();
+		final JwtAuthenticationToken jwt = getJwtAuthenticationToken();
 		final HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.add("Authorization", "Bearer " + context.getTokenString());
+		headers.add("Authorization", "Bearer " + jwt.getToken());
 		return headers;
 	}
 
@@ -153,14 +149,11 @@ public final class KeycloakUtil {
 	 * @return access token.
 	 * @throws ShanoirStudiesException
 	 */
-	@SuppressWarnings("rawtypes")
-	private static KeycloakSecurityContext getKeycloakSecurityContext() throws SecurityException {
+	private static JwtAuthenticationToken getJwtAuthenticationToken() throws SecurityException {
 		if (SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
 			throw new SecurityException("Anonymous user");
 		}
-		final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext().getAuthentication()
-				.getPrincipal();
-		return principal.getKeycloakSecurityContext();
+		return (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
 	}
 
 	public static boolean isUserAnonymous() {
