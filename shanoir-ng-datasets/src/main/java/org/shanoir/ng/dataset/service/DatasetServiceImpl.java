@@ -17,6 +17,7 @@ package org.shanoir.ng.dataset.service;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
+import org.shanoir.ng.dataset.dto.SizeByFormatDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -255,8 +257,16 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Long getExpressionSizeByStudyId(Long studyId) {
-		return repository.getExpressionSizeByStudyId(studyId);
+	public List<SizeByFormatDTO> getExpressionSizesByStudyId(Long studyId) {
+		List<Object[]> results = repository.findExpressionSizeByStudyIdGroupByFormat(studyId);
+		List<SizeByFormatDTO> sizesByFormat = new ArrayList<>();
+
+		for(Object[] result : results){
+			sizesByFormat.add(new SizeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[0]), (Long) result[1]));
+		}
+
+		return sizesByFormat;
+
 	}
 
 	@Override

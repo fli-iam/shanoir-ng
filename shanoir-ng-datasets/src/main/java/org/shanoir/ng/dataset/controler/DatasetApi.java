@@ -25,6 +25,7 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.StudyVolumeStorageDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -304,8 +305,8 @@ public interface DatasetApi {
 			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
 			@ApiResponse(code = 404, message = "no study found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@GetMapping(value = "/sizeByStudyId/{studyId}", produces = { "application/json" })
+	@GetMapping(value = "/sizesByStudyId/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-    ResponseEntity<Long> getSizeByStudyId(
+    ResponseEntity<StudyVolumeStorageDTO> getSizesByStudyId(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 }

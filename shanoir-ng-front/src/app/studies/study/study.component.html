@@ -138,7 +138,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li>
 						<label i18n="Study detail|Status label@@studyDetailStatus">Storage volume</label>
 						<span class="right-col" *ngIf="!uploading">
-							{{ studySizeStr(study.size) }}
+                            <table class="no-spacing">
+                                <tr *ngFor="let item of study.sizes | keyvalue: valueDescOrder">
+                                    <td class="volume-storage-left">
+                                        {{ item.key }}
+                                    </td>
+                                    <td>
+                                        {{ studySizeStr(item.value) }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                     <td class="volume-storage-left volume-storage-total">
+                                        Total
+                                    </td>
+                                    <td class="volume-storage-total" >
+                                        {{ studySizeStr(study.totalSize) }}
+                                    </td>
+                                </tr>
+                            </table>
 						</span>
 						<span class="right-col" *ngIf="uploading">
 							<i class="fas fa-spinner fa-pulse"></i>

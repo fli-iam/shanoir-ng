@@ -22,7 +22,7 @@ import { LoadingBarComponent } from '../../shared/components/loading-bar/loading
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
-import { DatasetDTO, DatasetDTOService } from './dataset.dto';
+import {DatasetDTO, DatasetDTOService, StudyVolumeStorageDTO} from './dataset.dto';
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
 
@@ -81,8 +81,8 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
-    getSizeByStudyId(id: number): Promise<number> {
-      return this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/sizeByStudyId/' + id)
+    getSizesByStudyId(id: number): Promise<StudyVolumeStorageDTO> {
+      return this.http.get<StudyVolumeStorageDTO>(AppUtils.BACKEND_API_DATASET_URL + '/sizesByStudyId/' + id)
         .toPromise();
     }
 

@@ -46,6 +46,9 @@ import { AccessRequest } from 'src/app/users/access-request/access-request.model
 import { ProcessingService } from 'src/app/processing/processing.service';
 import {Dataset} from "../../datasets/shared/dataset.model";
 import {DatasetService} from "../../datasets/shared/dataset.service";
+import {StudyVolumeStorageDTO} from "../../datasets/shared/dataset.dto";
+import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
+import {KeyValue} from "@angular/common";
 
 @Component({
     selector: 'study-detail',
@@ -84,6 +87,10 @@ export class StudyComponent extends EntityComponent<Study> {
         new Option<string>('IN_PROGRESS', 'In Progress'),
         new Option<string>('FINISHED', 'Finished')
     ];
+
+    valueDescOrder = (a: KeyValue<String, number>, b: KeyValue<String, number>): number => {
+        return b.value - a.value;
+    };
 
     constructor(
             private route: ActivatedRoute,
@@ -132,8 +139,10 @@ export class StudyComponent extends EntityComponent<Study> {
                     return aname.localeCompare(bname);
                 });
 
-            this.getTotalSize(study.id).then(size => {
-                study.size = size;
+            this.getLabeledSizes(study.id).then(sizes => {
+                study.totalSize = sizes.get("Total");
+                sizes.delete("Total");
+                study.sizes = sizes;
             });
 
             this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
@@ -167,8 +176,8 @@ export class StudyComponent extends EntityComponent<Study> {
               this.study.profile = profile;
             }
 
-            this.getTotalSize(study.id).then(size => {
-                study.size = size;
+            this.getLabeledSizes(study.id).then(size => {
+                study.sizes = size;
             });
 
             this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
@@ -250,18 +259,37 @@ export class StudyComponent extends EntityComponent<Study> {
         return formGroup;
     }
 
-    private getTotalSize(id: number): Promise<number> {
+    private getLabeledSizes(id: number): Promise<Map<String, number>> {
         let waitUploads: Promise<void> = this.studyService.fileUploadings.has(id)
             ? this.studyService.fileUploadings.get(id)
-            : Promise.resolve(); 
-        
+            : Promise.resolve();
+
         this.uploading = true;
         return waitUploads.then(() => {
             return Promise.all([
                 this.studyService.getSizeByStudyId(id),
-                this.datasetService.getSizeByStudyId(id)
-            ]).then(([studySize, datasetSize]) => {
-                return studySize + datasetSize;
+                this.datasetService.getSizesByStudyId(id)
+            ]).then(([studySize, dto]) => {
+
+                let datasetSizes = dto as StudyVolumeStorageDTO;
+                let sizesByLabel = new Map<String, number>()
+
+                for(let sizeByFormat of datasetSizes.sizesByExpressionFormat){
+                    if(sizeByFormat.size > 0){
+                        sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+                    }
+                }
+
+                let others = studySize + datasetSizes.extraDataSize;
+
+                if(others > 0){
+                    sizesByLabel.set("Other files (DUA, protocol...)", others);
+                }
+                
+                let total = datasetSizes.total + studySize;
+                sizesByLabel.set("Total", total);
+
+                return sizesByLabel;
             });
         }).finally(() => {
             this.uploading = false;

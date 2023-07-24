@@ -25,11 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -42,6 +38,7 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.StudyVolumeStorageDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
@@ -226,16 +223,13 @@ public class DatasetApiController implements DatasetApi {
 	}
 
     @Override
-    public ResponseEntity<Long> getSizeByStudyId(Long studyId) {
-		Long size = datasetService.getExpressionSizeByStudyId(studyId);
+    public ResponseEntity<StudyVolumeStorageDTO> getSizesByStudyId(Long studyId) {
 
-		if(size == null){
-			size = 0L;
-		}
+		StudyVolumeStorageDTO dto = new StudyVolumeStorageDTO(
+				datasetService.getExpressionSizesByStudyId(studyId),
+				examinationService.getExtraDataSizeByStudyid(studyId));
 
-		size += examinationService.getExtraDataSizeByStudyid(studyId);
-
-		return new ResponseEntity<>(size, HttpStatus.OK);
+		return new ResponseEntity<>(dto, HttpStatus.OK);
 
 	}
 

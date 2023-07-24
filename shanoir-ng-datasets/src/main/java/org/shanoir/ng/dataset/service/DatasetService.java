@@ -15,8 +15,11 @@
 package org.shanoir.ng.dataset.service;
 
 import java.util.List;
+import java.util.Map;
 
+import org.shanoir.ng.dataset.dto.SizeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
@@ -114,7 +117,7 @@ public interface DatasetService {
 	List<Dataset> findByStudyId(Long studyId);
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	Long getExpressionSizeByStudyId(Long studyId);
+	List<SizeByFormatDTO> getExpressionSizesByStudyId(Long studyId);
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
