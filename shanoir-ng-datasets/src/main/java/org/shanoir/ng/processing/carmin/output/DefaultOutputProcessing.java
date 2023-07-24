@@ -141,8 +141,10 @@ public class DefaultOutputProcessing extends OutputProcessing {
 		} else {
 			LOG.info("Processing result JSON [{}]...", resultJson.getName());
 
-			InputStream is = new FileInputStream(resultJson);
-			JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
+			JSONObject json;
+			try (InputStream is = new FileInputStream(resultJson)) {
+				json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
+			}
 
 			Iterator<String> keys = json.keys();
 			while (keys.hasNext()) {
@@ -173,11 +175,9 @@ public class DefaultOutputProcessing extends OutputProcessing {
 	}
 
 	private Long getDatasetIdFromFilename(String name){
-		// Ugly pattern to get dataset id
-		// TODO: check that the "+" is mandatory. What if no ? What if not a file but a number ?
+		// "id+[dataset id]+whatever.nii"
 		Pattern p = Pattern.compile("id\\+(\\d+)\\+.*");
 		Matcher m = p.matcher(name);
-		// If there is not match, it's not a file parameter => Do not search dataset
 		if (m.matches()) {
 			return Long.valueOf(m.group(1));
 		}

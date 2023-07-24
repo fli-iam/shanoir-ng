@@ -173,7 +173,6 @@ export class ExecutionComponent implements OnInit {
 
                     this.datasets[parameter.name] = datasetsToSet;
 
-                    // TODO the format should be selected depending on the pipeline.
                     // File ad md5 values should be selected automcatically depending on the pipeline.
                     execution.inputValues[parameter.name] = this.getDatasetsUris(datasetsToSet);
                 } else if (parameter.type == ParameterType.Boolean) {
@@ -228,10 +227,6 @@ export class ExecutionComponent implements OnInit {
                     execution.inputValues[parameter.name] = [];
                     let datasetsOf = this.datasets[parameter.name];
                     datasetsOf.forEach(dataset => {
-                        // TODO the dataset extension format should be selected depending on the pipeline.
-                        let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g, "_")}.nii.gz`
-
-                        // TODO the format should be selected depending on the pipeline.
                         // File ad md5 values should be selected automcatically depending on the pipeline.
                         execution.inputValues[parameter.name].push(this.getDatasetUri(dataset));
                         this.inputDatasets.push(dataset);
@@ -316,9 +311,5 @@ export class ExecutionComponent implements OnInit {
 
     private cleanExecutionName(name: string): string {
         return name.replace(/[^0-9A-Za-z_-]/g, '_')
-    }
-
-    test() {
-        console.log("test : " + this.exportFormat);
     }
 }

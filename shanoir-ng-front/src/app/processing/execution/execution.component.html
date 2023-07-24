@@ -28,8 +28,8 @@
     <div>
     <label>Dataset export format</label>
     <span class="right-col">
-        <input id="nii" type="radio" formControlName="export_format" name="export_format" [(ngModel)]="exportFormat" value="nii" (change)="test()" />NIfTI
-        <input id="dcm" type="radio" formControlName="export_format" name="export_format" [(ngModel)]="exportFormat" value="dcm" (change)="test()" />DICOM
+        <input id="nii" type="radio" formControlName="export_format" name="export_format" [(ngModel)]="exportFormat" value="nii" />NIfTI
+        <input id="dcm" type="radio" formControlName="export_format" name="export_format" [(ngModel)]="exportFormat" value="dcm" />DICOM
     </span>
     </div>
 </form>
