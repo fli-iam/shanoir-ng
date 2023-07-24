@@ -74,6 +74,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
@@ -93,13 +97,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<!-- do not put scope test here: compile errors -->
-		</dependency>
-
-		<!-- to be removed later, after migration -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-properties-migrator</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 
 		<!-- Spring dependencies -->
@@ -143,10 +140,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<!-- Keycloak -->
 		<dependency>
 			<groupId>org.keycloak</groupId>
-			<artifactId>keycloak-spring-boot-starter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.keycloak</groupId>
 			<artifactId>keycloak-admin-client</artifactId>
 			<version>${keycloak.version}</version>
 			<exclusions>
@@ -163,7 +156,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 
-		<!-- SpringFox Swagger UI -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-joda</artifactId>

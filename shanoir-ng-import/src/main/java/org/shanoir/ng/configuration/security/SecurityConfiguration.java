@@ -14,8 +14,6 @@
 
 package org.shanoir.ng.configuration.security;
 
-import org.keycloak.adapters.KeycloakConfigResolver;
-import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +23,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.session.NullAuthenticatedSessionStrategy;
 import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
@@ -55,23 +55,22 @@ public class SecurityConfiguration {
 	}
 
 	@Bean
-    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-			.sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			.and()
-			.csrf()
-				.disable()
-			.authorizeHttpRequests()
+	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().csrf().disable()
+				.authorizeHttpRequests()
 				.requestMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
-			.anyRequest()
-				.authenticated();
+				.anyRequest().authenticated().and().oauth2ResourceServer().jwt()
+				.jwtAuthenticationConverter(jwtAuthenticationConverter());
 		return http.build();
 	}
 
-	@Bean
-	public KeycloakConfigResolver keycloakConfigResolver() {
-		return new KeycloakSpringBootConfigResolver();
+	private JwtAuthenticationConverter jwtAuthenticationConverter() {
+		JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+		jwtGrantedAuthoritiesConverter.setAuthoritiesClaimName("roles");
+		jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+		JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+		jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+		return jwtAuthenticationConverter;
 	}
 
 	@Bean
