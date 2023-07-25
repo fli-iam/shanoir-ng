@@ -58,7 +58,7 @@ public class MockKeycloakUserContextFactory implements WithSecurityContextFactor
 				+" with authorities attribute "+ Arrays.asList(withUser.authorities()));
 		}
 		
-		Map<String, Object> claims = Map.of("preferred_username", "username", "userId", 1);
+		Map<String, Object> claims = Map.of("preferred_username", username, "userId", withUser.id());
 		Jwt jwt = new Jwt("MOCK-TOKEN-VALUE", Instant.now(), Instant.now().plusSeconds(30), Map.of("alg", "none"), claims);
 		Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
