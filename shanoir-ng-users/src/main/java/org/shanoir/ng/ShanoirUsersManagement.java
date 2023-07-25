@@ -102,7 +102,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	@Value("${SHANOIR_KEYCLOAK_PASSWORD}")
 	private String kcAdminClientPassword;
 
-	@Value("${keycloak.realm}")
+	@Value("${kc.admin.client.realm.users}")
 	private String keycloakRealm;
 	
 	private Keycloak keycloak;
