@@ -14,21 +14,19 @@
 
 package org.shanoir.ng.utils.usermock;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.AccessToken.Access;
-import org.shanoir.ng.utils.KeycloakUtil;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 import org.springframework.util.StringUtils;
 
@@ -59,28 +57,15 @@ public class MockKeycloakUserContextFactory implements WithSecurityContextFactor
 			throw new IllegalStateException("You cannot define roles attribute "+ Arrays.asList(withUser.roles())
 				+" with authorities attribute "+ Arrays.asList(withUser.authorities()));
 		}
-
-		@SuppressWarnings("rawtypes")
-		KeycloakPrincipal principal = mockKeycloakPrincipal(withUser.id(), username, withUser.authorities());
 		
-		Authentication authentication = new UsernamePasswordAuthenticationToken(principal, withUser.password(), grantedAuthorities);
+		Map<String, Object> claims = Map.of("preferred_username", "username", "userId", 1);
+		Jwt jwt = new Jwt("MOCK-TOKEN-VALUE", Instant.now(), Instant.now().plusSeconds(30), Map.of("alg", "none"), claims);
+		Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);
 		return context;
     }
-    
-    private KeycloakPrincipal<KeycloakSecurityContext> mockKeycloakPrincipal(long id, String username, String[] roles) {    	
-    	Access realmAccess = new Access();
-		for (String role : roles) {
-			realmAccess.addRole(role);
-		}
-		AccessToken accessToken = new AccessToken();
-		accessToken.getOtherClaims().put(KeycloakUtil.USER_ID_TOKEN_ATT, id);
-		accessToken.setRealmAccess(realmAccess);
-		KeycloakSecurityContext context = new KeycloakSecurityContext(null, accessToken, null, null);
-		KeycloakPrincipal<KeycloakSecurityContext> principal = new KeycloakPrincipal<>(username, context);
-		return principal;
-    }
+
 }
 
 
