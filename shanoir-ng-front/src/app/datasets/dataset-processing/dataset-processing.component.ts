@@ -267,7 +267,6 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
         let filename = this.carminDatasetProcessing.name + ".stdout.log";
 
         this.carminClientService.getStdout(this.carminDatasetProcessing.identifier).toPromise().then(response => {
-            console.log(response);
             this.downloadLogIntoBrowser(response, filename );
         });
     }
