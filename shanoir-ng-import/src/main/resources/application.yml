@@ -70,9 +70,11 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
+
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
+
 # microservices url
 ms.url:
   shanoir-ng-datasets: http://${SHANOIR_PREFIX}datasets:9904/datasetacquisition
@@ -158,9 +160,6 @@ spring:
 front.server:
   address: https://shanoir-ng-nginx/shanoir-ng/
   url: https://shanoir-ng-nginx
-keycloak:
-  jwt:
-    issuerUri: https://shanoir-ng-nginx/auth/realms/shanoir-ng
 ms.url:
   shanoir-ng-datasets: http://localhost:9904/datasetacquisition
   shanoir-ng-datasets-eeg: http://localhost:9904/datasetacquisition_eeg

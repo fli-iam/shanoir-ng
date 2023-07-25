@@ -65,35 +65,16 @@ spring:
     port: 25
     properties:
       mail.smtp.from: do-not-reply@inria.fr
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
 
 front:
   server:
     address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
     url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
-##### Keycloak #####
-keycloak:
-  # attention: this config for the token issuer needs to match the domain of the frontend
-  # used for token creation AND the server url needs to be known from inside the docker network:
-  auth-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth
-  cors: true
-  realm: shanoir-ng
-  resource: shanoir-ng-users
-  ssl-required: external
-  credentials.secret: a0be59b0-5a8d-4a11-82fd-5d8e5358444e
-  securityConstraints:
-    - authRoles: 
-      - ROLE_ADMIN
-      - ROLE_EXPERT
-      - ROLE_USER
-    - securityCollections:
-      - name: user secured api
-      - patterns:
-        - /user/*
-    - securityCollections:
-      - name: role secured api
-      - patterns:
-        - /role/*
 ##### Keycloak admin client, that ms users can directly communicate with keycloak #####
 kc.admin.client:
   server.url: http://${SHANOIR_PREFIX}keycloak:8080/auth

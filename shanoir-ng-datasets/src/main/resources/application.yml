@@ -67,28 +67,16 @@ spring:
       enabled: true
       max-file-size: 5000MB
       max-request-size: 5000MB
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
+
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
-##### Keycloak #####
-keycloak:
-  # attention: this config for the token issuer needs to match the domain of the frontend
-  # used for token creation AND the server url needs to be known from inside the docker network:
-  auth-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth
-  cors: true
-  realm: shanoir-ng
-  resource: shanoir-ng-datasets
-  ssl-required: external
-  securityConstraints:
-    - authRoles: 
-      - ROLE_ADMIN
-      - ROLE_EXPERT
-      - ROLE_GUEST
-      - ROLE_USER
-    - securityCollections:
-      - name: datasets secured api
-      - patterns:
-        - /*
+
 # Solr
 solr.host: http://${SHANOIR_PREFIX}solr:8983/solr/shanoir
 # microservices url
