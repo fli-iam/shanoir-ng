@@ -57,7 +57,6 @@ public class UserServiceSecurityTest {
 	private static final long USER_ID = 1L;
 	private static final long LOGGED_USER_ID = 2L;
 	private static final String LOGGED_USER_USERNAME = "logged";
-	private static final String UPDATED_USER_FIRSTNAME = "test";
 	private static final String USER_USERNAME = "name";
 	private static final String USER_EMAIL = "test@shanoir.fr";
 

@@ -36,7 +36,7 @@ public class IsMeSecurityService {
 
     public boolean isMe(String username) {
     	final JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
-		return username.equals(authentication.getName());
+		return username.equals(authentication.getToken().getClaimAsString("preferred_username"));
     }
     
     public boolean isMe(User user) {
