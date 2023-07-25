@@ -80,6 +80,7 @@ kc.admin.client:
   server.url: http://${SHANOIR_PREFIX}keycloak:8080/auth
   realm: master
   client.id: admin-cli
+  realm.users: shanoir-ng
 # logging configuration
 logging:
   file:
