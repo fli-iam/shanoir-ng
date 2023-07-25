@@ -61,15 +61,18 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-		.and()
-			.csrf().disable()
-		.authorizeHttpRequests()
-			.requestMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
-			.anyRequest().authenticated()
-		.and()
+			.sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+			.and()
+			.csrf()
+				.disable()
+			.authorizeHttpRequests()
+				.requestMatchers("/v2/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**").permitAll()
+			.anyRequest()
+				.authenticated()
+			.and()
 			.oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
-                Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access");
+                Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access"); // manage Keycloak specific JWT structure here
                 Collection<String> roles = realmAccess.get("roles");
                 var grantedAuthorities = roles.stream()
                         .map(role -> new SimpleGrantedAuthority(role))
