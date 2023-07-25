@@ -33,8 +33,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-04-03T09:59:20.168Z")
-
 @Tag(name = "acquisitionequipment", description = "the acquisitionequipment API")
 @RequestMapping("/acquisitionequipments")
 public interface AcquisitionEquipmentApi {

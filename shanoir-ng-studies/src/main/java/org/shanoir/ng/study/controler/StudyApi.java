@@ -48,8 +48,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-23T10:35:29.288Z")
-
 @Tag(name = "studies", description = "the studies API")
 @RequestMapping("/studies")
 public interface StudyApi {

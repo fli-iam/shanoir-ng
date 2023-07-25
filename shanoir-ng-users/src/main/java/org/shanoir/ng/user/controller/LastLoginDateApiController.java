@@ -14,9 +14,6 @@
 
 package org.shanoir.ng.user.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
-
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -27,8 +24,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import io.swagger.v3.oas.annotations.Parameter;
-
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-16T08:28:10.257Z")
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 
 @Controller
 public class LastLoginDateApiController extends AbstractUserRequestApiController implements LastLoginDateApi {
