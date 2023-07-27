@@ -12,11 +12,17 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.preclinical.subjects;
+package org.shanoir.ng.preclinical.subjects.service;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.preclinical.references.Reference;
+import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
@@ -43,9 +49,15 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	@Autowired
 	private AnimalSubjectRepository subjectsRepository;
 
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private ObjectMapper mapper;
+
 	@Override
-	public void deleteById(final Long id) throws ShanoirException {
-		subjectsRepository.deleteById(id);
+	public void deleteBySubjectId(final Long id) {
+		subjectsRepository.deleteBySubjectId(id);
 	}
 
 	@Override
@@ -54,13 +66,13 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	}
 
 	@Override
-	public AnimalSubject findById(final Long id) {
-		return subjectsRepository.findById(id).orElse(null);
+	public AnimalSubject getBySubjectId(final Long id) {
+		return subjectsRepository.getBySubjectId(id);
 	}
 
 	@Override
 	public AnimalSubject save(final AnimalSubject subject) throws ShanoirException {
-		AnimalSubject savedSubject = null;
+		AnimalSubject savedSubject;
 		try {
 			savedSubject = subjectsRepository.save(subject);
 		} catch (DataIntegrityViolationException dive) {
@@ -84,7 +96,7 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	}
 
 	private AnimalSubject updateSubjectValues(final AnimalSubject subjectDb, final AnimalSubject subject) {
-		subjectDb.setSubjectId(subject.getSubjectId());
+		subjectDb.setId(subject.getId());
 		subjectDb.setBiotype(subject.getBiotype());
 		subjectDb.setProvider(subject.getProvider());
 		subjectDb.setSpecie(subject.getSpecie());
@@ -99,13 +111,25 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	}
 
 	@Override
-	public List<AnimalSubject> findBySubjectId(Long id) {
-		return this.subjectsRepository.findBySubjectId(id);
+	public Long getIdBySubjectId(long subjectId) {
+		AnimalSubject sub = subjectsRepository.getBySubjectId(subjectId);
+
+		return sub != null ? sub.getId() : null;
+	}
+
+	@Override
+	public boolean isSubjectIdAlreadyUsed(Long subjectId){
+		return subjectsRepository.existsAnimalSubjectBySubjectId(subjectId);
 	}
 
     @Override
-    public List<AnimalSubject> findBySubjectIdIn(List<Long> subjectIds) {
-		return this.subjectsRepository.findBySubjectIdIn(subjectIds);
-    }
+	public Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException {
+		Long subjectId;
+		subjectId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_QUEUE, mapper.writeValueAsString(dto));
+		if(subjectId == null){
+			throw new ShanoirException("Created subject id is null.");
+		}
+		return subjectId;
+	}
 
 }

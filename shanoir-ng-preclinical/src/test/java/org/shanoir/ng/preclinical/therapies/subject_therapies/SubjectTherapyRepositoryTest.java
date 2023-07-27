@@ -22,7 +22,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
-import org.shanoir.ng.preclinical.subjects.AnimalSubjectRepository;
+import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.TherapyModelUtil;
 import org.springframework.beans.factory.annotation.Autowired;

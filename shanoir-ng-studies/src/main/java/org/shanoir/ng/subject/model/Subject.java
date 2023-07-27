@@ -21,7 +21,6 @@ import java.util.List;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
@@ -32,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -83,6 +83,7 @@ public class Subject extends HalEntity {
 
 	/** Manual Hemispheric dominance. */
 	private Integer manualHemisphericDominance;
+
 
 	/** Flag to set the subject as pre-clinical subject */
 	@Column(nullable=false)
@@ -216,5 +217,4 @@ public class Subject extends HalEntity {
 	public void setPreclinical(boolean preclinical) {
 		this.preclinical = preclinical;
 	}
-
 }

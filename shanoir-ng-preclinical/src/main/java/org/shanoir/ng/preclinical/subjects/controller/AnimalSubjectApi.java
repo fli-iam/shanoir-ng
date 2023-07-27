@@ -12,10 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.preclinical.subjects;
+package org.shanoir.ng.preclinical.subjects.controller;
 
 import java.util.List;
 
+import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
+import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -26,7 +28,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -47,8 +48,8 @@ public interface AnimalSubjectApi {
 			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
-	ResponseEntity<AnimalSubject> createAnimalSubject(
-			@Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final AnimalSubject animalSubject,
+	ResponseEntity<PreclinicalSubjectDto> createAnimalSubject(
+			@Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto animalSubject,
 			final BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "Deletes an animalSubject", description = "")
@@ -59,41 +60,23 @@ public interface AnimalSubjectApi {
 	ResponseEntity<Void> deleteAnimalSubject(
 			@Parameter(name = "AnimalSubject id to delete", required = true) @PathVariable("id") Long id);
 
-	@Operation(summary = "Find animalSubject by ID", description = "Returns a subject")
+	@Operation(summary  = "Find animalSubject by subject Id", description = "Returns a subject")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
-			@ApiResponse(responseCode = "400", description = "Invalid ID supplied"),
-			@ApiResponse(responseCode = "404", description = "Subject not found"),
-			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
+		@ApiResponse(responseCode = "400", description = "Invalid ID supplied"),
+		@ApiResponse(responseCode = "404", description = "Subject not found"),
+		@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@GetMapping(value = "/{id}", produces = { "application/json" })
-	ResponseEntity<AnimalSubject> getAnimalSubjectById(
+	ResponseEntity<AnimalSubjectDto> getAnimalSubjectBySubjectId(
 			@Parameter(name = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
-
-	@Operation(summary = "Find animalSubject by SubjectID", description = "Returns a subject")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
-			@ApiResponse(responseCode = "400", description = "Invalid ID supplied"),
-			@ApiResponse(responseCode = "404", description = "Subject not found"),
-			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
-	@GetMapping(value = "/find/{id}", produces = { "application/json" })
-	ResponseEntity<AnimalSubject> getAnimalSubjectBySubjectId(
-			@Parameter(name = "ID of subject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
 	@Operation(summary = "List all animalSubjects", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(responseCode = "200", description = "An array of Preclinical AnimalSubject"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "Unexpected error") })
+		@ApiResponse(responseCode = "200", description = "An array of Preclinical AnimalSubject"),
+		@ApiResponse(responseCode = "401", description = "unauthorized"),
+		@ApiResponse(responseCode = "403", description = "forbidden"),
+		@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/all", produces = { "application/json" })
-	ResponseEntity<List<AnimalSubject>> getAnimalSubjects();
-
-	@Operation(summary = "", description = "If exists, returns the animal subjects corresponding to the given subjects ids")
-	@ApiResponses(value = { @ApiResponse(responseCode = " 200", description = "An array of Preclinical AnimalSubject"),
-			@ApiResponse(responseCode = " 401", description = "unauthorized"),
-			@ApiResponse(responseCode = " 403", description = "forbidden"),
-			@ApiResponse(responseCode = " 500", description = "unexpected error") })
-	@PostMapping(value = "/allBySubjectId", produces = { "application/json" })
-	ResponseEntity<List<AnimalSubject>> findAnimalSubjectsBySubjectIds(
-			@RequestParam(value = "subjectIds", required = true) List<Long> subjectIds);
+	ResponseEntity<List<AnimalSubjectDto>> getAllAnimalSubjects();
 
 	@Operation(summary = "Update an existing animalSubject", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
@@ -103,8 +86,8 @@ public interface AnimalSubjectApi {
 	@PutMapping(value = "/{id}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<Void> updateAnimalSubject(
-			@Parameter(name = "ID of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
-			@Parameter(name = "AnimalSubject object that needs to be updated", required = true) @RequestBody AnimalSubject animalSubject,
+			@Parameter(name = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "AnimalSubject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto dto,
 			final BindingResult result) throws RestServiceException;
 
 }

@@ -27,7 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.preclinical.references.RefsRepository;
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.PathologyModelUtil;
@@ -149,8 +149,7 @@ public class SubjectPathologyServiceTest {
 		Assertions.assertTrue(PathologyModelUtil.MODEL_NAME.equals(spatho.getPathologyModel().getName()));
 		Assertions.assertTrue(PathologyModelUtil.PATHOLOGY_NAME.equals(spatho.getPathology().getName()));
 		Assertions.assertTrue(ReferenceModelUtil.REFERENCE_LOCATION_VALUE.equals(spatho.getLocation().getValue()));
-		Assertions.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(spatho.getAnimalSubject().getId()));
-
+		Assertions.assertTrue(AnimalSubjectModelUtil.ID.equals(spatho.getAnimalSubject().getId()));
 		Mockito.verify(spathosRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 

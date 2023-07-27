@@ -192,6 +192,7 @@ export class StudyDTOService {
             subjectStudy.subject.id = subjectStudyDto.subject.id;
             subjectStudy.subjectId = subjectStudyDto.subject.id;
             subjectStudy.subject.name = subjectStudyDto.subject.name;
+            subjectStudy.subject.preclinical = subjectStudyDto.subjectPreclinical;
         }
         subjectStudy.subjectStudyIdentifier = subjectStudyDto.subjectStudyIdentifier;
         subjectStudy.subjectType = subjectStudyDto.subjectType;

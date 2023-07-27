@@ -19,7 +19,7 @@ import java.util.List;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.springframework.stereotype.Component;
 
 @Component

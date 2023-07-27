@@ -74,15 +74,15 @@ public interface SubjectApi {
 			@Parameter(name = "Include non-preclinical subject") @Valid
 			@RequestParam(value = "clinical", required = false, defaultValue = "true") boolean clinical);
 
-	@Operation(summary = "", description = "Returns the subjects as Pageable with corresponding name")
+	@Operation(summary = "", description = "Returns the clinical subjects as Pageable with corresponding name")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found subjects"),
-			@ApiResponse(responseCode = "204", description = "no subject found"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
+		@ApiResponse(responseCode = "204", description = "no subject found"),
+		@ApiResponse(responseCode = "401", description = "unauthorized"),
+		@ApiResponse(responseCode = "403", description = "forbidden"),
+		@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/filter", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name);
+	ResponseEntity<Page<SubjectDTO>> findClinicalSubjectsPageByName(Pageable page, String name);
 
 	@Operation(summary = "", description = "Returns id and name for all the subjects")
 	@ApiResponses(value = {

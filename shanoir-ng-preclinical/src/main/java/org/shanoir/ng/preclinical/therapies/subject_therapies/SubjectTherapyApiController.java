@@ -16,8 +16,8 @@ package org.shanoir.ng.preclinical.therapies.subject_therapies;
 
 import java.util.List;
 
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
-import org.shanoir.ng.preclinical.subjects.AnimalSubjectService;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.preclinical.therapies.Therapy;
 import org.shanoir.ng.preclinical.therapies.TherapyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -64,7 +64,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 			BindingResult result) throws RestServiceException {
 
 		// First check if given user exists
-		AnimalSubject animalSubject = subjectService.findById(id);
+		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
@@ -107,7 +107,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 			throws RestServiceException {
 
 		// First check if given user exists
-		AnimalSubject animalSubject = subjectService.findById(id);
+		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
@@ -130,7 +130,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 	public ResponseEntity<Void> deleteSubjectTherapies(
 			@Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
-		AnimalSubject animalSubject = subjectService.findById(id);
+		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		} else {
@@ -149,7 +149,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
 			@Parameter(name = "ID of subject therapy that needs to be fetched", required = true) @PathVariable("tid") Long tid)
 			throws RestServiceException {
-		AnimalSubject animalSubject = subjectService.findById(id);
+		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), ANIMAL_SUBJECT_NOT_FOUND, new ErrorDetails()));
@@ -164,8 +164,8 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 
 	@Override
 	public ResponseEntity<List<SubjectTherapy>> getSubjectTherapies(
-			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException {
-		AnimalSubject animalSubject = subjectService.findById(id);
+		@Parameter(name = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException {
+		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Subject not found", new ErrorDetails()));

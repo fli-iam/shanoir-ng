@@ -17,11 +17,12 @@ import { Subject }    from '../../../subjects/shared/subject.model';
 import { SubjectPathology } from '../../pathologies/subjectPathology/shared/subjectPathology.model';
 import { SubjectTherapy } from '../../therapies/subjectTherapy/shared/subjectTherapy.model';
 import { Entity } from "../../../shared/components/entity/entity.abstract";
+import {SubjectDTO} from "../../../subjects/shared/subject.dto";
 
 export class PreclinicalSubject extends Entity {
   id: number;
-  subject: Subject;
   animalSubject: AnimalSubject;
+  subject: Subject;
   pathologies: SubjectPathology[];
   therapies: SubjectTherapy[];
 }
@@ -30,13 +31,15 @@ export class PreclinicalSubjectDTO {
 
     id: number;
 	animalSubject: AnimalSubject;
+    subject: SubjectDTO;
 	pathologies: SubjectPathology[];
 	therapies: SubjectTherapy[];
 
-    constructor(subject: PreclinicalSubject) {
-        this.id = subject.id;
-		this.animalSubject = subject.animalSubject;
-		this.pathologies = subject.pathologies;
-		this.therapies = subject.therapies;
+    constructor(entity: PreclinicalSubject) {
+        this.id = entity.id;
+		this.animalSubject = entity.animalSubject;
+        this.subject = new SubjectDTO(entity.subject);
+		this.pathologies = entity.pathologies;
+		this.therapies = entity.therapies;
     }
 }
