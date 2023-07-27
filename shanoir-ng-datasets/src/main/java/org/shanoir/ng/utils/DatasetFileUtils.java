@@ -110,9 +110,9 @@ public class DatasetFileUtils {
 		return files;
 	}
 
-	public static void writeInputFileForExport(final ZipOutputStream zipOutputStream, Map<Long, List<String>> files2AcquisitionId) throws IOException {
+	public static void writeManifestForExport(final ZipOutputStream zipOutputStream, Map<Long, List<String>> filesByAcquisitionId) throws IOException {
 		InputDTO input = new InputDTO();
-		for (Map.Entry<Long, List<String>> entry : files2AcquisitionId.entrySet()) {
+		for (Map.Entry<Long, List<String>> entry : filesByAcquisitionId.entrySet()) {
 			InputDTO.InputSerieDTO serie = new InputDTO.InputSerieDTO();
 			serie.setId(entry.getKey());
 			for(String file : entry.getValue()){

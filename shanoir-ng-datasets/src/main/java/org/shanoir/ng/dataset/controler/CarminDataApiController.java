@@ -51,7 +51,7 @@ public class CarminDataApiController implements CarminDataApi{
             case "properties":
                 return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
             case "content":{
-            	datasetDownloaderService.downloadDatasetById(Long.parseLong(completePath),null, format, response);
+            	datasetDownloaderService.downloadDatasetById(Long.parseLong(completePath),null, format, response, true);
                 return new ResponseEntity<Void>(HttpStatus.OK);
             }
         }

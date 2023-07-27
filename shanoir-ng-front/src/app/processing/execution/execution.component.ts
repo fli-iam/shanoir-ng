@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
 import {
     AbstractControl,
     UntypedFormControl,
@@ -26,6 +26,7 @@ import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
 import {ProcessingService} from '../processing.service';
 import {Option} from '../../shared/select/select.component';
 import { formatDate } from '@angular/common';
+import {Mode} from "../../shared/components/entity/entity.component.abstract";
 
 @Component({
     selector: 'app-execution',
@@ -49,6 +50,7 @@ export class ExecutionComponent implements OnInit {
     fileInputs = [];
     inputDatasets: Dataset[] = [];
     execDefaultName= "";
+    exportFormat="nii";
 
     constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
         this.breadcrumbsService.nameStep('2. Executions');
@@ -101,7 +103,8 @@ export class ExecutionComponent implements OnInit {
 
     initExecutionForm() {
         this.executionForm = new UntypedFormGroup({
-            "execution_name": new UntypedFormControl('', Validators.required)
+            "execution_name": new UntypedFormControl('', Validators.required),
+            "export_format": new UntypedFormControl('', Validators.required)
         });
 
         this.pipeline.parameters.forEach(
@@ -170,9 +173,8 @@ export class ExecutionComponent implements OnInit {
 
                     this.datasets[parameter.name] = datasetsToSet;
 
-                    // TODO the format should be selected depending on the pipeline.
                     // File ad md5 values should be selected automcatically depending on the pipeline.
-                    execution.inputValues[parameter.name] = this.getDatasetsValue(datasetsToSet);
+                    execution.inputValues[parameter.name] = this.getDatasetsUris(datasetsToSet);
                 } else if (parameter.type == ParameterType.Boolean) {
                     execution.inputValues[parameter.name] = this.executionForm.get(parameter.name).value ? true : false;
                 } else {
@@ -183,11 +185,18 @@ export class ExecutionComponent implements OnInit {
         this.parametersApplied = true;
     }
 
-    getDatasetsValue(datasets) {
-        // TODO the dataset extension format should be selected depending on the pipeline.
+    getDatasetUri(dataset) {
+        let extension = ".nii.gz"
+        if(this.exportFormat == "dcm") {
+            extension = ".zip"
+        }
+        let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g, "_")}${extension}`
+        return `shanoir:/${dataset_name}?format=${this.exportFormat}&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+    }
+
+    getDatasetsUris(datasets) {
         return datasets.forEach(dataset => {
-            let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g, "_")}.nii.gz`
-            return `shanoir:/${dataset_name}?format=nii&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+            return this.getDatasetUri(dataset);
         })
     }
 
@@ -218,12 +227,8 @@ export class ExecutionComponent implements OnInit {
                     execution.inputValues[parameter.name] = [];
                     let datasetsOf = this.datasets[parameter.name];
                     datasetsOf.forEach(dataset => {
-                        // TODO the dataset extension format should be selected depending on the pipeline.
-                        let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g, "_")}.nii.gz`
-
-                        // TODO the format should be selected depending on the pipeline.
                         // File ad md5 values should be selected automcatically depending on the pipeline.
-                        execution.inputValues[parameter.name].push(`shanoir:/${dataset_name}?format=nii&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`);
+                        execution.inputValues[parameter.name].push(this.getDatasetUri(dataset));
                         this.inputDatasets.push(dataset);
                     })
                 } else {
@@ -244,7 +249,7 @@ export class ExecutionComponent implements OnInit {
 
                 let carminDatasetProcessing: CarminDatasetProcessing = new CarminDatasetProcessing(execution.identifier, execution.name, execution.pipelineIdentifier, resultPath, execution.status, execution.timeout, execution.startDate, execution.endDate);
 
-                carminDatasetProcessing.comment = execution.identifier;
+                carminDatasetProcessing.comment = execution.name;
                 carminDatasetProcessing.studyId = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
                 carminDatasetProcessing.datasetProcessingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
                 carminDatasetProcessing.outputProcessing = this.pipeline.outputProcessing;
