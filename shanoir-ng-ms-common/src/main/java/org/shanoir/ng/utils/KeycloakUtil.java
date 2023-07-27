@@ -37,6 +37,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
  *
  */
 public final class KeycloakUtil {
+	
+	private static final String PREFERRED_USERNAME = "preferred_username";
 
 	private static final String CAN_IMPORT_FROM_PACS = "canImportFromPACS";
 	
@@ -113,7 +115,7 @@ public final class KeycloakUtil {
 		if (jwt == null) {
 			throw new TokenNotFoundException("JwtAuthenticationToken not found.");
 		}
-		return jwt.getName();
+		return jwt.getToken().getClaim(PREFERRED_USERNAME);
 	}
 
 	/**
