@@ -14,17 +14,18 @@
 
 package org.shanoir.ng.utils;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.KeycloakSecurityContext;
-import org.keycloak.representations.AccessToken;
-import org.keycloak.representations.AccessToken.Access;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 /**
  * Utility class for security context.
@@ -33,13 +34,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
  *
  */
 public abstract class SecurityContextUtil {
-	
+
 	/**
 	 * Clear the authentication
 	 */
 	public static void clearAuthentication() {
-        SecurityContextHolder.getContext().setAuthentication(null);
-    }
+		SecurityContextHolder.getContext().setAuthentication(null);
+	}
 
 	/**
 	 * Set a @Principal in authentication context.
@@ -48,17 +49,13 @@ public abstract class SecurityContextUtil {
 	 */
 	public static void initAuthenticationContext(String role) {
 		List<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
-
 		GrantedAuthority auth = new SimpleGrantedAuthority("ROLE_ADMIN");
-		grantedAuthorities.add(auth );
-		Access realmAccess = new Access();
-		realmAccess.addRole(role);
-		AccessToken accessToken = new AccessToken();
-		accessToken.getOtherClaims().put(KeycloakUtil.USER_ID_TOKEN_ATT, 1);
-		accessToken.setRealmAccess(realmAccess);
-		KeycloakSecurityContext context = new KeycloakSecurityContext(null, accessToken, null, null);
-		KeycloakPrincipal<KeycloakSecurityContext> principal = new KeycloakPrincipal<>("rabbitMQ", context);
-		SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, "password", grantedAuthorities));
+		grantedAuthorities.add(auth);
+		Map<String, Object> claims = Map.of("preferred_username", "shanoir", "userId", 92233720L, "realm_access", grantedAuthorities);
+		Jwt jwt = new Jwt("mock-token-value", Instant.now(), Instant.now().plusSeconds(300), Map.of("header", "mock"), claims);
+		Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);
+		SecurityContext context = SecurityContextHolder.createEmptyContext();
+		context.setAuthentication(authentication);
 	}
 
 }

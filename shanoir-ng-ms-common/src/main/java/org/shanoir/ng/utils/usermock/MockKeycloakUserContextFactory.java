@@ -57,7 +57,7 @@ public class MockKeycloakUserContextFactory implements WithSecurityContextFactor
 		}
 
 		Map<String, Object> claims = Map.of("preferred_username", username, "userId", withUser.id(), "realm_access", grantedAuthorities);
-		Jwt jwt = new Jwt("MOCK-TOKEN-VALUE", Instant.now(), Instant.now().plusSeconds(30), Map.of("alg", "none"), claims);
+		Jwt jwt = new Jwt("mock-token-value", Instant.now(), Instant.now().plusSeconds(300), Map.of("header", "mock"), claims);
 		Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authentication);

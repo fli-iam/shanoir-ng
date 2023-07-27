@@ -132,7 +132,6 @@ public interface DatasetAcquisitionApi {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
 			@Parameter(name = "ids of the datasets", required = true) @RequestBody Long[] datasetIds);
-
 	
 	@Operation(summary = "", description = "Returns a dataset acquisitions page")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
