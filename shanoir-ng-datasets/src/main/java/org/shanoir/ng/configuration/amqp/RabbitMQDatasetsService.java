@@ -283,7 +283,7 @@ public class RabbitMQDatasetsService {
 			)
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public void createDatasetAcquisition(final String studyStr) {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
 			DatasetAcquisition acq = datasetAcquisitionService.findById(Long.valueOf(event.getObjectId()));
@@ -312,7 +312,7 @@ public class RabbitMQDatasetsService {
 			)
 	@Transactional
 	public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 
 			ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
@@ -350,7 +350,7 @@ public class RabbitMQDatasetsService {
 			)
 	@Transactional
 	public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
 		try {
 			ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);

@@ -55,7 +55,6 @@ public class MockKeycloakUserContextFactory implements WithSecurityContextFactor
 			throw new IllegalStateException("You cannot define roles attribute " + Arrays.asList(withUser.roles())
 					+ " with authorities attribute " + Arrays.asList(withUser.authorities()));
 		}
-
 		Map<String, Object> claims = Map.of("preferred_username", username, "userId", withUser.id(), "realm_access", grantedAuthorities);
 		Jwt jwt = new Jwt("mock-token-value", Instant.now(), Instant.now().plusSeconds(300), Map.of("header", "mock"), claims);
 		Authentication authentication = new JwtAuthenticationToken(jwt, grantedAuthorities);

@@ -150,7 +150,7 @@ public class ImporterService {
         ShanoirEvent event = importJob.getShanoirEvent();
         event.setMessage("Creating datasets...");
         eventService.publishEvent(event);
-        SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         Set<DatasetAcquisition> generatedAcquisitions = null;
         try {
             Examination examination = examinationRepository.findById(importJob.getExaminationId()).orElse(null);

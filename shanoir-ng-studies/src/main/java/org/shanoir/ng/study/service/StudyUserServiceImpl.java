@@ -98,7 +98,7 @@ public class StudyUserServiceImpl implements StudyUserService {
 	@Transactional
 	@Override
 	public void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 			Long userId = Long.valueOf(event.getObjectId());
