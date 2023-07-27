@@ -516,8 +516,21 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     initExecutionMode() {
-        this.processingService.setDatasets(this.selectedDatasetIds);
-        this.router.navigate(['/processing']);
+        let noAdminStudies: Set<string> = new Set();
+        this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
+            acquisitions.forEach(acq => {
+                if (!this.hasAdminRight(acq.examination?.study?.id)) {
+                    noAdminStudies.add(acq.examination?.study?.name);
+                }
+            });
+            if(noAdminStudies.size > 0){
+                this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to run pipelines on studies you don\'t administrate. '
+                    + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...noAdminStudies].join(', '));
+            }else{
+                this.processingService.setDatasets(this.selectedDatasetIds);
+                this.router.navigate(['/processing']);
+            }
+        });
     }
 
     copyIds() {

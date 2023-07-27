@@ -44,14 +44,6 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
             .toPromise();
     }
 
-    getAnimalSubjectsBySubjectIds(ids: number[]) {
-        const formData: FormData = new FormData();
-        formData.set('subjectIds', ids.join(","));
-        return this.http
-            .post<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL + "/allBySubjectId", formData)
-            .toPromise()
-    }
-
     updateAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
       const url = `${PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL}/`+animalSubject.id;
       return this.http
@@ -59,14 +51,8 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
         .toPromise();
     }
 
-    createAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
-        return this.http.post<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, JSON.stringify(animalSubject))
-            .toPromise();
-    }
-
-
-    findAnimalSubjectBySubjectId(subjectId: number){
-        return this.http.get<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECT_FIND_URL+"/"+subjectId)
+    createPreclinicalSubject(preclinicalSubject: PreclinicalSubject): Promise<PreclinicalSubject> {
+        return this.http.post<PreclinicalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, this.stringify(preclinicalSubject))
             .toPromise();
     }
 
