@@ -66,7 +66,6 @@ public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<Manufac
 
 	@Override
 	protected ManufacturerModel updateValues(ManufacturerModel from, ManufacturerModel to) {
-		System.out.println("manufacturer model update values");
 		to.setDatasetModalityType(from.getDatasetModalityType());
 		to.setMagneticField(from.getMagneticField());
 		to.setManufacturer(from.getManufacturer());
@@ -89,8 +88,6 @@ public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<Manufac
 				IdName acEq = new IdName();
 				acEq.setId(acEqItem.getId());
 				acEq.setName(acEqItem.getManufacturerModel().getManufacturer().getName() + " " + manuModelName);
-				System.out.println("ManuModel == acEq name : " + acEq.getId() + " / " + acEq.getName());
-				System.out.println("ManuModel == objectMapper.writeValueAsString(acEq) : " + objectMapper.writeValueAsString(acEq));
 					rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
 						objectMapper.writeValueAsString(acEq));
 			}

@@ -62,7 +62,6 @@ public class ManufacturerServiceImpl extends BasicEntityServiceImpl<Manufacturer
 
 	@Override
 	protected Manufacturer updateValues(Manufacturer manu, Manufacturer manuDb) {
-		System.out.println("manufacturer update values from : " + manuDb.getName() + " / to : " + manu.getName());
 		manuDb.setName(manu.getName());
 
 		try {
@@ -75,23 +74,16 @@ public class ManufacturerServiceImpl extends BasicEntityServiceImpl<Manufacturer
 
 	private boolean updateManufacturerName(Manufacturer manufacturer) throws MicroServiceCommunicationException {
 		try {
-			System.out.println("Manu == updateManufacturerName : " + manufacturer.getName());
-
 			String manuName = manufacturer.getName();
 			List<ManufacturerModel> listManuModel = manufacturerModelRepository.findByManufacturerId(manufacturer.getId());
 			for (ManufacturerModel manuModel : listManuModel) {
-				System.out.println("Manu == manuModel : " + manuModel.getName());
 				List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manuModel.getId());
 				for (AcquisitionEquipment acEqItem : listAcEq) {
-					System.out.println("Manu == acEq manumodel : " + acEqItem.getManufacturerModel().getName());
 					IdName acEq = new IdName();
 					acEq.setId(acEqItem.getId());
 					acEq.setName(manuName.trim() + " " + acEqItem.getManufacturerModel().getName());
-					System.out.println("Manu == acEqDb name : " + acEq.getId() + " / " + acEq.getName());
-					System.out.println("Manu == objectMapper.writeValueAsString(acEq) : " + objectMapper.writeValueAsString(acEq));
 					rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
 							objectMapper.writeValueAsString(acEq));
-					System.out.println("Manu == sent");
 				}
 			}
 
