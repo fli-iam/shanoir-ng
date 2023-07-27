@@ -14,12 +14,22 @@
 
 package org.shanoir.ng.manufacturermodel.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
+import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
+import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +45,14 @@ public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<Manufac
 	@Autowired
 	private ManufacturerModelRepository manufacturerModelRepository;
 
+	@Autowired
+	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	@Override
 	public List<IdName> findIdsAndNames() {
@@ -48,11 +66,39 @@ public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<Manufac
 
 	@Override
 	protected ManufacturerModel updateValues(ManufacturerModel from, ManufacturerModel to) {
+		System.out.println("manufacturer model update values");
 		to.setDatasetModalityType(from.getDatasetModalityType());
 		to.setMagneticField(from.getMagneticField());
 		to.setManufacturer(from.getManufacturer());
 		to.setName(from.getName());
+
+		try {
+			updateManufacturerModelName(from);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RuntimeException(e);
+		}
+
 		return to;
 	}
 
+	private boolean updateManufacturerModelName(ManufacturerModel manufacturerModel) throws MicroServiceCommunicationException {
+		try {
+			String manuModelName = manufacturerModel.getName();
+			List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manufacturerModel.getId());
+			for (AcquisitionEquipment acEqItem : listAcEq) {
+				IdName acEq = new IdName();
+				acEq.setId(acEqItem.getId());
+				acEq.setName(acEqItem.getManufacturerModel().getManufacturer().getName() + " " + manuModelName);
+				System.out.println("ManuModel == acEq name : " + acEq.getId() + " / " + acEq.getName());
+				System.out.println("ManuModel == objectMapper.writeValueAsString(acEq) : " + objectMapper.writeValueAsString(acEq));
+					rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
+						objectMapper.writeValueAsString(acEq));
+			}
+
+			return true;
+		} catch (AmqpException | JsonProcessingException e) {
+			throw new MicroServiceCommunicationException(
+					"Error while communicating with datasets MS to update manufacturer model name.", e);
+		}
+	}
 }

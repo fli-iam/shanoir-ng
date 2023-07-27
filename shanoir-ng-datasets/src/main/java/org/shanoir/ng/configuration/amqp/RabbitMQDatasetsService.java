@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -31,11 +32,8 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.model.Center;
-import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.model.SubjectStudy;
-import org.shanoir.ng.shared.model.Tag;
+import org.shanoir.ng.shared.model.*;
+import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -82,6 +80,9 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private CenterRepository centerRepository;
+
+	@Autowired
+	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
 	@Autowired
 	private SolrService solrService;
@@ -236,6 +237,13 @@ public class RabbitMQDatasetsService {
 	}
 
 	@Transactional
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE)
+	@RabbitHandler
+	public void receiveAcEqUpdate(final String acEqStr) {
+		receiveAndUpdateIdNameEntity(acEqStr, AcquisitionEquipment.class, acquisitionEquipmentRepository);
+	}
+
+	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public void receiveCenterNameUpdate(final String centerStr) {
@@ -299,10 +307,11 @@ public class RabbitMQDatasetsService {
 		}
 	}
 
+
 	/**
-	 * Receives a shanoirEvent as a json object, concerning a subject deletion
-	 * @param commandArrStr the task as a json string.
-	 */
+         * Receives a shanoirEvent as a json object, concerning a subject deletion
+         * @param commandArrStr the task as a json string.
+         */
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),

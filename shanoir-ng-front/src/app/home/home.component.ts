@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -38,7 +38,7 @@ export class HomeComponent {
     @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
     shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
-    
+
     challengeDua: DataUserAgreement;
     challengeStudies: Study[];
     studies: Study[];
@@ -51,6 +51,7 @@ export class HomeComponent {
     nbAccountRequests: number;
     nbExtensionRequests: number;
     accessRequests: AccessRequest[] = [];
+
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
@@ -124,7 +125,7 @@ export class HomeComponent {
     get admin(): boolean {
         return this.keycloakService.isUserAdmin();
     }
-    
+
     private isUserAtLeastExpert() {
         return this.keycloakService.isUserAdminOrExpert();
     }

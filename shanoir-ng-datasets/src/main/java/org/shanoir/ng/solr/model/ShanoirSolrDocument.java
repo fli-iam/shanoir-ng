@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.solr.client.solrj.beans.Field;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.core.mapping.Indexed;
 import org.springframework.data.solr.core.mapping.SolrDocument;
@@ -73,10 +74,18 @@ public class ShanoirSolrDocument {
 
 	@Indexed
 	private Date examinationDate;
-	
+
+	@Field
+	@Indexed
+	private String acquisitionEquipmentName;
+
 	@Field
 	@Indexed
 	private String subjectName;
+
+	@Field
+	@Indexed
+	private String subjectType;
 
 	@Field
 	@Indexed
@@ -119,8 +128,8 @@ public class ShanoirSolrDocument {
 	}
 	
 	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
-			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate,
-			String subjectName, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
+			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate, String acquisitionEquipmentName,
+			String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
 			Double pixelBandwidth, Double magneticFieldStrength) {
 		this.id = id;
 		this.datasetId = datasetId;
@@ -131,7 +140,9 @@ public class ShanoirSolrDocument {
 		this.examinationId = examinationId;
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
+		this.acquisitionEquipmentName = acquisitionEquipmentName;
 		this.subjectName = subjectName;
+		this.subjectType = subjectType;
 		this.subjectId = subjectId;
 		this.studyName = studyName;
 		this.studyId = studyId;
@@ -256,6 +267,14 @@ public class ShanoirSolrDocument {
 		this.examinationDate = examinationDate;
 	}
 
+	public String getAcquisitionEquipmentName() {
+		return acquisitionEquipmentName;
+	}
+
+	public void setAcquisitionEquipmentName(String acquisitionEquipmentName) {
+		this.acquisitionEquipmentName = acquisitionEquipmentName;
+	}
+
 	/**
 	 * @return the subjectName
 	 */
@@ -268,6 +287,14 @@ public class ShanoirSolrDocument {
 	 */
 	public void setSubjectName(String subjectName) {
 		this.subjectName = subjectName;
+	}
+
+	public String getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(String subjectType) {
+		this.subjectType = subjectType;
 	}
 
 	/**
@@ -283,6 +310,8 @@ public class ShanoirSolrDocument {
 	public void setStudyName(String studyName) {
 		this.studyName = studyName;
 	}
+
+
 
 	/**
 	 * @return the studyId

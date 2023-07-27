@@ -21,6 +21,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
@@ -49,6 +50,7 @@ public class AcquisitionEquipment extends HalEntity {
 	@ManyToOne
 	@NotNull
 	@JoinColumn(name = "center_id")
+	@JsonIgnore
 	private Center center;
 
 	@ManyToOne

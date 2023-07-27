@@ -76,6 +76,7 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
      */
     private SubjectStudy updateSubjectStudyValues(final SubjectStudy subjectStudyDb, final SubjectStudy subjectStudy) {
         subjectStudyDb.setId(subjectStudy.getId());
+        subjectStudyDb.setSubjectType(subjectStudy.getSubjectType());
         subjectStudyDb.setQualityTag(subjectStudy.getQualityTag());
         return subjectStudyDb;
     }

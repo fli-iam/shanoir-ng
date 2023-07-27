@@ -15,10 +15,13 @@
 package org.shanoir.ng.solr.model;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.paging.FacetPageable;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.utils.Range;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,14 +35,18 @@ public class ShanoirSolrQuery {
 	private Collection<String> studyName;
 
 	private Collection<Long> studyId;
-	
+
 	private Collection<String> subjectName;
+
+	private Collection<String> subjectType;
 
 	private Collection<Long> subjectId;
 
 	private Collection<Long> examinationId;
 
 	private Collection<String> examinationComment;
+
+	private Collection<String> acquisitionEquipmentName;
 	
 	private	Collection<String> datasetName;
 	
@@ -97,6 +104,14 @@ public class ShanoirSolrQuery {
 		this.subjectName = subjectName;
 	}
 
+	public Collection<String> getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(Collection<String> subjectType) {
+		this.subjectType = subjectType;
+	}
+
 	public Collection<Long> getExaminationId() {
 		return examinationId;
 	}
@@ -117,6 +132,14 @@ public class ShanoirSolrQuery {
 	 */
 	public void setExaminationComment(Collection<String> examinationComment) {
 		this.examinationComment = examinationComment;
+	}
+
+	public Collection<String> getAcquisitionEquipmentName() {
+		return acquisitionEquipmentName;
+	}
+
+	public void setAcquisitionEquipmentName(Collection<String> acquisitionEquipmentName) {
+		this.acquisitionEquipmentName = acquisitionEquipmentName;
 	}
 
 	/**

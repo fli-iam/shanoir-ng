@@ -27,6 +27,7 @@ import javax.persistence.PostLoad;
 import javax.persistence.SqlResultSetMapping;
 import javax.validation.constraints.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;

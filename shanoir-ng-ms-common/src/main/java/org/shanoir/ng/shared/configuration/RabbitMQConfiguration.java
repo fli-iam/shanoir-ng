@@ -96,6 +96,8 @@ public class RabbitMQConfiguration {
 
 	/** Queue to retrieve the center ID from an acquisition equipement ID. */
 	public static final String ACQUISITION_EQUIPEMENT_CENTER_QUEUE = "acquisition-equipement-center-queue";
+	/** Queue to retrieve the center ID from an acquisition equipement ID. */
+	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipement-update-queue";
 	
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
@@ -163,10 +165,6 @@ public class RabbitMQConfiguration {
 	private static final String DELETE_CENTER_QUEUE_NAME_OUT = "delete_center_queue_from_ng";
 
 	private static final String DELETE_COIL_QUEUE_NAME_OUT = "delete_coil_queue_from_ng";
-	
-	private static final String MANUFACTURER_MODEL_QUEUE_NAME_OUT = "manufacturer_model_queue_from_ng";
-
-	private static final String MANUFACTURER_QUEUE_NAME_OUT = "manufacturer_queue_from_ng";
 
 	private static final String STUDY_QUEUE_NAME_IN = "study_queue_to_ng";
 
@@ -265,7 +263,7 @@ public class RabbitMQConfiguration {
 	public static Queue studyNameUpdateQueue() {
 		return new Queue(STUDY_NAME_UPDATE_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue subjectNameUpdateQueue() {
 		return new Queue(SUBJECT_NAME_UPDATE_QUEUE, true);
@@ -285,10 +283,14 @@ public class RabbitMQConfiguration {
 	public static Queue findStudyCardQueue() {
 		return new Queue(FIND_STUDY_CARD_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue acquisitionEquipementCenterQueue() {
 		return new Queue(ACQUISITION_EQUIPEMENT_CENTER_QUEUE, true);
+	}
+	@Bean
+	public static Queue acquisitionEquipementUpdateQueue() {
+		return new Queue(ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, true);
 	}
 	
 	@Bean

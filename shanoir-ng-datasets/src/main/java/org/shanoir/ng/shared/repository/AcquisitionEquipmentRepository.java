@@ -11,22 +11,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
+package org.shanoir.ng.shared.repository;
 
-package org.shanoir.ng.manufacturermodel.repository;
-
-import org.shanoir.ng.manufacturermodel.model.Manufacturer;
-import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
+import org.shanoir.ng.shared.model.AcquisitionEquipment;
+import org.shanoir.ng.shared.model.Center;
 import org.springframework.data.repository.CrudRepository;
 
-import java.util.List;
-
 /**
- * Implementation of custom repository for centers.
- * 
- * @author msimon
+ * @author yyao
  *
  */
-public interface ManufacturerModelRepository extends CrudRepository<ManufacturerModel, Long>, ManufacturerModelRepositoryCustom {
+public interface AcquisitionEquipmentRepository extends CrudRepository<AcquisitionEquipment, Long> {
 
-    List<ManufacturerModel> findByManufacturerId(Long id);
 }
