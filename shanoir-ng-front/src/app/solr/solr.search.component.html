@@ -126,6 +126,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </solr-paging-criterion>
 
         <solr-paging-criterion
+            label="Acquisition equipment"
+            awesome="fa-solid fa-x-ray"
+            facetName="acquisitionEquipmentName"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.acquisitionEquipmentName"
+            [ngModelOptions]="{standalone: true}"
+            (onChange)="updateSelections(); refreshTable('acquisitionEquipmentName')">
+        </solr-paging-criterion>
+
+        <solr-paging-criterion
             label="Subject type"
             awesome="fa-solid fa-head-side-mask"
             facetName="subjectType"

@@ -24,12 +24,12 @@ export class SolrDocument {
     examinationId: string;
     examinationComment: string;
     centerName: string;
-
     centerId: string;
     tags: string;
     examinationDate: Date;
     subjectName: string;
     subjectType: string;
+    acquisitionEquipmentName: string;
     subjectId: string;
     studyName: string;
     studyId: string;
@@ -42,6 +42,7 @@ export class SolrRequest {
     subjectName: string[];
     subjectId: string[];
     subjectType: string[];
+    acquisitionEquipmentName: string[];
     examinationId: string[];
     examinationComment: string[];
     centerName: string[];

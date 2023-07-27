@@ -30,7 +30,6 @@ import javax.persistence.SqlResultSetMapping;
 import org.shanoir.ng.dataset.modality.MrDatasetNature;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
 
 /**
  * @author yyao
@@ -42,7 +41,7 @@ import org.shanoir.ng.shared.subjectstudy.SubjectType;
 				@ColumnResult(name="datasetType", type = Integer.class), @ColumnResult(name="datasetNature", type = Integer.class),
 				@ColumnResult(name="datasetCreationDate", type = LocalDate.class),
 				@ColumnResult(name="examinationId", type = Long.class), @ColumnResult(name="examinationComment", type = String.class),
-				@ColumnResult(name="examinationDate", type = LocalDate.class),
+				@ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="acquisitionEquipmentName", type = String.class),
 				@ColumnResult(name="subjectName", type = String.class), @ColumnResult(name="subjectType", type = Integer.class),
 				@ColumnResult(name="subjectId", type = Long.class),
 				@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
@@ -79,6 +78,8 @@ public class ShanoirMetadata {
 
 	private Integer subjectType;
 
+	private String acquisitionEquipmentName;
+
 	private String studyName;
 
 	private Long studyId;
@@ -100,7 +101,7 @@ public class ShanoirMetadata {
 	}
 
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
-							LocalDate datasetCreationDate, Long examinationId, String examinationComment, LocalDate examinationDate,
+							LocalDate datasetCreationDate, Long examinationId, String examinationComment, LocalDate examinationDate, String acquisitionEquipmentName,
 							String subjectName, Integer subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
 							Double pixelBandwidth, Double magneticFieldStrength) {
 		this.datasetId = datasetId;
@@ -111,6 +112,7 @@ public class ShanoirMetadata {
 		this.examinationId = examinationId;
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
+		this.acquisitionEquipmentName = acquisitionEquipmentName;
 		this.subjectName = subjectName;
 		this.subjectType = subjectType;
 		this.subjectId = subjectId;
@@ -243,6 +245,14 @@ public class ShanoirMetadata {
 	 */
 	public void setExaminationDate(LocalDate examinationDate) {
 		this.examinationDate = examinationDate;
+	}
+
+	public String getAcquisitionEquipmentName() {
+		return acquisitionEquipmentName;
+	}
+
+	public void setAcquisitionEquipmentName(String acquisitionEquipmentName) {
+		this.acquisitionEquipmentName = acquisitionEquipmentName;
 	}
 
 	/**

@@ -452,6 +452,7 @@
   <field name="examinationId" type="plong"/>
   <field name="examinationComment" type="lowercase"/>
   <field name="examinationDate" type="pdate"/>
+  <field name="acquisitionEquipmentName" type="lowercase"/>
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
   <field name="magneticFieldStrength" type="pdouble"/>
   <field name="pixelBandwidth" type="pdouble"/>

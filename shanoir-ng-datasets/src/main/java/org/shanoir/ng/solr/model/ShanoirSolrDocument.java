@@ -77,6 +77,10 @@ public class ShanoirSolrDocument {
 
 	@Field
 	@Indexed
+	private String acquisitionEquipmentName;
+
+	@Field
+	@Indexed
 	private String subjectName;
 
 	@Field
@@ -124,7 +128,7 @@ public class ShanoirSolrDocument {
 	}
 	
 	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
-			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate,
+			Date datasetCreationDate, Long examinationId, String examinationComment, Date examinationDate, String acquisitionEquipmentName,
 			String subjectName, String subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
 			Double pixelBandwidth, Double magneticFieldStrength) {
 		this.id = id;
@@ -136,6 +140,7 @@ public class ShanoirSolrDocument {
 		this.examinationId = examinationId;
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
+		this.acquisitionEquipmentName = acquisitionEquipmentName;
 		this.subjectName = subjectName;
 		this.subjectType = subjectType;
 		this.subjectId = subjectId;
@@ -260,6 +265,14 @@ public class ShanoirSolrDocument {
 	 */
 	public void setExaminationDate(Date examinationDate) {
 		this.examinationDate = examinationDate;
+	}
+
+	public String getAcquisitionEquipmentName() {
+		return acquisitionEquipmentName;
+	}
+
+	public void setAcquisitionEquipmentName(String acquisitionEquipmentName) {
+		this.acquisitionEquipmentName = acquisitionEquipmentName;
 	}
 
 	/**
