@@ -12,11 +12,14 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.preclinical.subjects;
+package org.shanoir.ng.preclinical.subjects.service;
 
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.shanoir.ng.preclinical.references.Reference;
+import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.shared.exception.ShanoirException;
 
 /**
@@ -34,7 +37,7 @@ public interface AnimalSubjectService {
 	 *            animalSubject id.
 	 * @throws ShanoirException
 	 */
-	void deleteById(Long id) throws ShanoirException;
+	void deleteBySubjectId(Long id) throws ShanoirException;
 
 	/**
 	 * Get all the AnimalSubject.
@@ -50,7 +53,7 @@ public interface AnimalSubjectService {
 	 *            AnimalSubject id.
 	 * @return a AnimalSubject or null.
 	 */
-	AnimalSubject findById(Long id);
+	AnimalSubject getBySubjectId(Long id);
 
 	/**
 	 * Save a AnimalSubject.
@@ -74,7 +77,10 @@ public interface AnimalSubjectService {
 
 	List<AnimalSubject> findByReference(Reference reference);
 
-	List<AnimalSubject> findBySubjectId(Long id);
+	Long getIdBySubjectId(long subjectId);
 
-	List<AnimalSubject> findBySubjectIdIn(List<Long> subjectIds);
+
+	boolean isSubjectIdAlreadyUsed(Long subjectId);
+
+    Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException;
 }

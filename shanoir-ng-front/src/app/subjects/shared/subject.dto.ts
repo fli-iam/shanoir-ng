@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -21,6 +21,7 @@ import { ImagedObjectCategory } from './imaged-object-category.enum';
 import { SubjectStudyDTO } from './subject-study.dto';
 import { Subject } from './subject.model';
 import { Sex } from './subject.types';
+import {formatDate} from "@angular/common";
 
 
 @Injectable()
@@ -34,7 +35,7 @@ export class SubjectDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntity(dto: SubjectDTO, result?: Subject): Promise<Subject> {        
+    public toEntity(dto: SubjectDTO, result?: Subject): Promise<Subject> {
         if (!result) result = new Subject();
         SubjectDTOService.mapSyncFields(dto, result);
         return Promise.resolve(result);
@@ -78,7 +79,7 @@ export class SubjectDTOService {
         }
         return entity;
     }
-    
+
     static tagDTOToTag(tagDTO: any): Tag {
         let tag: Tag = new Tag();
         tag.id = tagDTO.id;
@@ -94,7 +95,7 @@ export class SubjectDTO {
     examinations: Id[];
     name: string;
     identifier: string;
-    birthDate: Date;
+    birthDate: string;
     languageHemisphericDominance: "Left" | "Right";
     manualHemisphericDominance: "Left" | "Right";
     imagedObjectCategory: ImagedObjectCategory;
@@ -102,13 +103,13 @@ export class SubjectDTO {
     selected: boolean = false;
     subjectStudyList: SubjectStudyDTO[] = [];
     preclinical: boolean;
-	
+
     constructor(subject: Subject) {
         this.id = subject.id;
         if (subject.examinations) this.examinations = Id.toIdList(subject.examinations);
         this.name = subject.name;
         this.identifier = subject.identifier;
-        this.birthDate = subject.birthDate;
+        this.birthDate = formatDate(subject.birthDate, 'yyyy-MM-dd', 'en');
         this.languageHemisphericDominance = subject.languageHemisphericDominance;
         this.manualHemisphericDominance = subject.manualHemisphericDominance;
         this.imagedObjectCategory = subject.imagedObjectCategory;

@@ -43,6 +43,7 @@ import { SubjectService } from '../../subjects/shared/subject.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import { ContextData, ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
+import {PreclinicalSubject} from "../../preclinical/animalSubject/shared/preclinicalSubject.model";
 
 @Directive()
 export abstract class AbstractClinicalContextComponent implements OnDestroy, OnInit {
@@ -514,7 +515,14 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.fillCreateSubjectStep(this.breadcrumbsService.currentStep as Step);
             this.subscribtions.push(
                 importStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
-                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(entity as Subject);
+
+                    let sub: Subject;
+                    if(entity instanceof Subject){
+                        sub = entity;
+                    }else if(entity instanceof PreclinicalSubject){
+                        sub = entity.subject;
+                    }
+                    this.importDataService.contextBackup(this.stepTs).subject = this.subjectToSubjectWithSubjectStudy(sub);
                 })
             );
         });
@@ -540,7 +548,10 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         subjectWithSubjectStudy.id = subject.id;
         subjectWithSubjectStudy.name = subject.name;
         subjectWithSubjectStudy.identifier = subject.identifier;
-        subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
+        if(subject.subjectStudyList){
+            subjectWithSubjectStudy.subjectStudy = subject.subjectStudyList[0];
+        }
+
         return subjectWithSubjectStudy;
     }
 
@@ -551,6 +562,7 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
             this.fillCreateExaminationStep(this.breadcrumbsService.currentStep);
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep, false).subscribe(entity => {
+
                     this.importDataService.contextBackup(this.stepTs).examination = this.examToSubjectExam(entity as Examination);
                 })
             );
@@ -583,30 +595,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
 
     get importedEquipmentDataStr(): string {
         return null;
-    }
-
-    public showStudyDetails() {
-        window.open('study/details/' + this.study.id, '_blank');
-    }
-
-    public showStudyCardDetails() {
-        window.open('study-card/details/' + this.studycard.id, '_blank');
-    }
-
-    public showCenterDetails() {
-        window.open('center/details/' + this.center.id, '_blank');
-    }
- vali
-    public showAcquistionEquipmentDetails() {
-        window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
-    }
-
-    public showSubjectDetails() {
-        window.open('subject/details/' + this.subject.id, '_blank');
-    }
-
-    public showExaminationDetails() {
-        window.open('examination/details/' + this.examination.id, '_blank');
     }
 
     get valid(): boolean {

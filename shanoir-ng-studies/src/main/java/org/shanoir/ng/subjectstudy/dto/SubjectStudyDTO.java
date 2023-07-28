@@ -33,6 +33,8 @@ public class SubjectStudyDTO {
 
 	private IdName subject;
 
+	private boolean subjectPreclinical;
+
 	private StudyTagsDTO study;
 
 	private String subjectStudyIdentifier;
@@ -59,6 +61,15 @@ public class SubjectStudyDTO {
 
 	public void setSubject(IdName subject) {
 		this.subject = subject;
+	}
+
+
+	public boolean isSubjectPreclinical() {
+		return subjectPreclinical;
+	}
+
+	public void setSubjectPreclinical(boolean subjectPreclinical) {
+		this.subjectPreclinical = subjectPreclinical;
 	}
 
 	public StudyTagsDTO getStudy() {

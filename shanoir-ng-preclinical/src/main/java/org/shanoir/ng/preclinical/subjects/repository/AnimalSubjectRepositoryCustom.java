@@ -12,15 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.preclinical.subjects;
+package org.shanoir.ng.preclinical.subjects.repository;
 
 import java.util.List;
 
-import org.springframework.data.repository.CrudRepository;
+import org.shanoir.ng.preclinical.references.Reference;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 
-public interface AnimalSubjectRepository extends CrudRepository<AnimalSubject, Long>, AnimalSubjectRepositoryCustom {
+/**
+ * Custom repository for subjects.
+ * 
+ * @author sloury
+ *
+ */
+public interface AnimalSubjectRepositoryCustom {
 
-	List<AnimalSubject> findBySubjectId(Long id);
+	List<AnimalSubject> findByReference(Reference reference);
 
-    List<AnimalSubject> findBySubjectIdIn(List<Long> subjectIds);
 }
