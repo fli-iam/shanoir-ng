@@ -6,7 +6,7 @@
 	<groupId>org.shanoir-ng</groupId>
 	<artifactId>shanoir-ng-exchange</artifactId>
 	<packaging>jar</packaging>
-	<version>3.0.2</version>
+	<version>3.1.2</version>
 
 	<name>shanoir-ng-exchange</name>
 	<description>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>3.0.2</version>
+			<version>3.1.2</version>
 		</dependency>
 		<!-- Spring framework, for dependency injection -->
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->

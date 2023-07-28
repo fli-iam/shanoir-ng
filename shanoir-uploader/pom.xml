@@ -25,7 +25,7 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
-			<version>3.0.2</version>
+			<version>3.1.2</version>
 			<exclusions>
 			    <exclusion>
 			        <groupId>*</groupId>
@@ -36,7 +36,7 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>3.0.2</version>
+			<version>3.1.2</version>
 			<exclusions>
 			    <exclusion>
 			        <groupId>*</groupId>
@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
 			<artifactId>anonymization</artifactId>
-			<version>3.0.2</version>
+			<version>3.1.2</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
