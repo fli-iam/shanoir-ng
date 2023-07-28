@@ -21,20 +21,16 @@ import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentReposi
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
-import org.shanoir.ng.manufacturermodel.repository.ManufacturerRepository;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.study.dto.StudyDTO;
-import org.shanoir.ng.study.repository.StudyUserRepository;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
