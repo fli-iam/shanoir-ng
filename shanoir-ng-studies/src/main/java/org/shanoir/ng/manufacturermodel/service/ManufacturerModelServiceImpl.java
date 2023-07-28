@@ -89,8 +89,6 @@ public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<Manufac
 				IdName acEq = new IdName();
 				acEq.setId(acEqItem.getId());
 				acEq.setName(acEqItem.getManufacturerModel().getManufacturer().getName() + " " + manuModelName);
-				System.out.println("ManuModel == acEq name : " + acEq.getId() + " / " + acEq.getName());
-				System.out.println("ManuModel == objectMapper.writeValueAsString(acEq) : " + objectMapper.writeValueAsString(acEq));
 					rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
 						objectMapper.writeValueAsString(acEq));
 			}
