@@ -597,30 +597,6 @@ export abstract class AbstractClinicalContextComponent implements OnDestroy, OnI
         return null;
     }
 
-    public showStudyDetails() {
-        window.open('study/details/' + this.study.id, '_blank');
-    }
-
-    public showStudyCardDetails() {
-        window.open('study-card/details/' + this.studycard.id, '_blank');
-    }
-
-    public showCenterDetails() {
-        window.open('center/details/' + this.center.id, '_blank');
-    }
- vali
-    public showAcquistionEquipmentDetails() {
-        window.open('acquisition-equipment/details/' + this.acquisitionEquipment.id, '_blank');
-    }
-
-    public showSubjectDetails() {
-        window.open('subject/details/' + this.subject.id, '_blank');
-    }
-
-    public showExaminationDetails() {
-        window.open('examination/details/' + this.examination.id, '_blank');
-    }
-
     get valid(): boolean {
         let context = this.getContext();
         return (

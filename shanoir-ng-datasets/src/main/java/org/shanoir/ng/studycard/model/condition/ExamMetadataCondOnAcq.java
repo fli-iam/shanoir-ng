@@ -21,6 +21,7 @@ import javax.persistence.Entity;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
@@ -59,7 +60,12 @@ public class ExamMetadataCondOnAcq extends StudyCardMetadataConditionWithCardina
         int nbOk = 0; int total = 0;
         for (DatasetAcquisition acquisition : acquisitions) {
             total++;
-            String valueFromDb = field.get(acquisition);
+            String valueFromDb;
+            try {
+                valueFromDb = field.get(acquisition);
+            } catch (CheckedIllegalClassException e) {
+                valueFromDb = null;
+            }
             if (valueFromDb != null) {
                 // get all possible values, that can fulfill the condition
                 for (String value : this.getValues()) {
