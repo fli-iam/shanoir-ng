@@ -809,8 +809,7 @@ public class ImporterApiController implements ImporterApi {
 														 @ApiParam(value = "studyId", required = true) @PathVariable("studyId") Long studyId,
 														 @ApiParam(value = "studyName", required = true) @PathVariable("studyName") String studyName,
 														 @ApiParam(value = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
-														 @ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId,
-														 @ApiParam(value = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException {
+														 @ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId) throws RestServiceException {
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
@@ -921,7 +920,6 @@ public class ImporterApiController implements ImporterApi {
 				for (Patient pat : job.getPatients()) {
 					pat.setSubject(subject);
 				}
-				job.setConverterId(converterId);
 
 				// STEP 4.4 Select all series
 				for(Study study : job.getPatients().get(0).getStudies()) {

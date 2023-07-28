@@ -35,7 +35,13 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 
+/**
+ * Deprecated, no more nifti dataset expression ?
+ * @author jcome
+ *
+ */
 @Component
+@Deprecated
 public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy {
 
 	private static final String SUB_PREFIX = "sub-";
@@ -54,12 +60,14 @@ public class NiftiDatasetExpressionStrategy implements DatasetExpressionStrategy
 	public DatasetExpression generateDatasetExpression(Serie serie, ImportJob importJob,
 			ExpressionFormat expressionFormat) throws IOException {
 		
+		// TODO: This methods should not be used anymore.
+		
 		DatasetExpression niftiDatasetExpression = new DatasetExpression();
 		niftiDatasetExpression.setCreationDate(LocalDateTime.now());
 		niftiDatasetExpression.setDatasetExpressionFormat(DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 		niftiDatasetExpression.setDatasetProcessingType(DatasetProcessingType.FORMAT_CONVERSION);
 		
-		niftiDatasetExpression.setNiftiConverterId(importJob.getConverterId());
+		// TODO: remove this niftiDatasetExpression.setNiftiConverterId(importJob.getConverterId());
 				
 		niftiDatasetExpression.setOriginalNiftiConversion(true);
 		if (Boolean.TRUE.equals(serie.getIsMultiFrame())) {

@@ -13,7 +13,6 @@
  */
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { Coil } from '../../coils/shared/coil.model';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { Study } from '../../studies/shared/study.model';
 import { StudyCardDTO } from './study-card.dto.model';
 import { DicomTag, Operation, StudyCard, StudyCardAssignment, StudyCardCondition, StudyCardRule } from './study-card.model';
@@ -39,10 +38,6 @@ export abstract class StudyCardDTOServiceAbstract {
         if (dto.acquisitionEquipmentId) {
             entity.acquisitionEquipment = new AcquisitionEquipment();
             entity.acquisitionEquipment.id = dto.acquisitionEquipmentId;
-        }
-        if (dto.niftiConverterId) {
-            entity.niftiConverter = new NiftiConverter();
-            entity.niftiConverter.id = dto.niftiConverterId;
         }
         entity.rules = [];
         if (dto.rules) {

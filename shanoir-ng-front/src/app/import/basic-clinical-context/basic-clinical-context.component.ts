@@ -78,7 +78,6 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         importJob.studyId = context.study.id;
         importJob.studyCardId = context.studyCard ? context.studyCard.id : null;
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
-        importJob.converterId = context.niftiConverter.id;
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
         importJob.anonymisationProfileToUse = context.study.profile?.profileName;

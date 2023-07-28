@@ -21,8 +21,6 @@ import java.util.Map;
 
 import org.shanoir.ng.shared.event.ShanoirEvent;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * @author atouboul
  *
@@ -57,8 +55,6 @@ public class ImportJob implements Serializable {
 
 	private String anonymisationProfileToUse;
 
-	private Long converterId;
-
 	private String archive;
 
 	private String subjectName;
@@ -77,7 +73,7 @@ public class ImportJob implements Serializable {
 		this.userId = userId;
 	}
 
-	private Map<String, String> properties = new HashMap();
+	private Map<String, String> properties = new HashMap<>();
 
 	public String getArchive() {
 		return archive;
@@ -166,14 +162,6 @@ public class ImportJob implements Serializable {
 
 	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
 		this.acquisitionEquipmentId = acquisitionEquipmentId;
-	}
-
-	public Long getConverterId() {
-		return converterId;
-	}
-
-	public void setConverterId(Long ConverterId) {
-		this.converterId = ConverterId;
 	}
 
 	public String getAnonymisationProfileToUse() {

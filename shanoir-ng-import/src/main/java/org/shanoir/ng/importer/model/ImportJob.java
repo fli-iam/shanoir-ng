@@ -43,8 +43,6 @@ public class ImportJob implements Serializable {
     
     private Long studyCardId;
     
-    private Long converterId;
-    
     private Long studyId;
     
 	private String studyCardName;
@@ -155,14 +153,6 @@ public class ImportJob implements Serializable {
 		this.studyCardId = studyCardId;
 	}
 
-	public Long getConverterId() {
-		return converterId;
-	}
-
-	public void setConverterId(Long converterId) {
-		this.converterId = converterId;
-	}
-
     public String getAnonymisationProfileToUse() {
 		return anonymisationProfileToUse;
 	}
@@ -243,7 +233,7 @@ public class ImportJob implements Serializable {
 		}
 		return 	"userId=" + userId + ",studyName=" + studyName + ",studyCardId=" + studyCardId + ",type=" + importType +
 				",workFolder=" + workFolder + ",pseudoProfile=" + anonymisationProfileToUse + ",modality=" + modality + ",enhanced=" + enhanced +
-				",subjectName=" + subjectName + ",examId=" + examinationId  + ",converterId=" + converterId + ",numberOfSeries=" + numberOfSeries +
+				",subjectName=" + subjectName + ",examId=" + examinationId + ",numberOfSeries=" + numberOfSeries +
 				",seriesNames=" + seriesNames.toString();
 	}
 
