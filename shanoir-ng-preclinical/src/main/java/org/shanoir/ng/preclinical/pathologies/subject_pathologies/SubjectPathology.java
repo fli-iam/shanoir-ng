@@ -29,7 +29,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
 import org.shanoir.ng.preclinical.references.Reference;
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.RefValueExists;

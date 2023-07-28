@@ -21,6 +21,7 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.KeycloakControllerTestIT;
 import org.springframework.beans.factory.annotation.Autowired;

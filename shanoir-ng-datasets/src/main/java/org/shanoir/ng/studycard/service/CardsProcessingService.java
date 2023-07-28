@@ -76,7 +76,7 @@ public class CardsProcessingService {
 	public void applyStudyCard(StudyCard studyCard, List<DatasetAcquisition> acquisitions) throws PacsException {
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
-            if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && studyCard.getRules() != null) {
+            if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && CollectionUtils.isNotEmpty(studyCard.getRules())) {
                 Attributes dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
                 changeInAtLeastOneAcquisition = studyCard.apply(acquisition, dicomAttributes);
             }

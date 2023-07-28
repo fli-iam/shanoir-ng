@@ -504,12 +504,13 @@ public class ImporterService {
             File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 
             // Save file
-            Path location = null;
+            Path location;
             try {
                 destFile.getParentFile().mkdirs();
                 location = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 LOG.error("IOException generating Processed Dataset Expression", e);
+                throw e;
             }
             DatasetFile datasetFile = new DatasetFile();
             datasetFile.setPacs(false);
@@ -555,6 +556,11 @@ public class ImporterService {
             eventService.publishEvent(event);
             throw e;
         }
+    }
+
+    public void createFailedJob(String datasetFilePath){
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, datasetFilePath, KeycloakUtil.getTokenUserId(), "Import of dataset failed.", ShanoirEvent.ERROR, -1f);
+        eventService.publishEvent(event);
     }
     
 }

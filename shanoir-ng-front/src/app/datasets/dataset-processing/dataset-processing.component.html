@@ -122,9 +122,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 
-			</ol>
+                <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="downloadStdout()">Download stdout logs<i class="fas fa-download"></i></button>
+                <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="downloadStderr()">Download stderr logs<i class="fas fa-download"></i></button>
 
-			<ol>
+            </ol>
+            <ol>
 				<legend>
 					Input datasets
 					<tool-tip>Datasets given as input of this dataset processing.</tool-tip>

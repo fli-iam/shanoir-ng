@@ -1,5 +1,7 @@
 package org.shanoir.ng.datasetacquisition.repository;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -72,4 +74,35 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 		return new PageImpl<DatasetAcquisition>(query.getResultList(), pageable, total);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<DatasetAcquisition> findByStudyCardIdAndStudyCenterOrStudyIdIn(Long studyCardId,
+			Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds) {
+		
+		String queryEndStr = "from DatasetAcquisition as da "
+				+ "join da.examination as ex "
+				+ "where (ex.study.id in ?1 ";
+		int i = 2;
+		for (Pair<Long, Long> studyCenter : studyCenterIds) {
+			queryEndStr += "or (ex.study.id = ?" + i + " and ex.centerId = ?" + (i + 1) + ") ";
+			i += 2;
+		}
+		queryEndStr += ") and da.studyCard.id = ?" + i;
+		i++;
+		
+		String queryStr = "select da " + queryEndStr;
+		
+		Query query = entityManager.createQuery(queryStr);
+		
+		query.setParameter(1, studyIds);
+		i = 2;
+		for (Pair<Long, Long> studyCenter : studyCenterIds) {
+			query.setParameter(i, studyCenter.getFirst());
+			query.setParameter(i + 1, studyCenter.getSecond());
+			i += 2;
+		}
+		query.setParameter(i, studyCardId);
+
+		return query.getResultList();
+	}
 }
