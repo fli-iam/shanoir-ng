@@ -59,7 +59,7 @@ public class DicomJsonUtils {
     public static final String SERIES = "series";
     public static final String INSTANCES = "instances";
     
-    public static String inflfateDCM4CheeJSON(String json) throws JSONException {
+    public static String inflateDCM4CheeJSON(String json) throws JSONException {
         JSONArray flat = new JSONArray(json);
         
         // 1st part : create the studies / seies / instances tree
@@ -177,4 +177,5 @@ public class DicomJsonUtils {
         if (values.length() == 0) throw new JSONException("Could not find values in  tag " + tag + " for obj : " + subObj.toString());
         return values.getString(0);
     }
+
 }

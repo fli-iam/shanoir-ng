@@ -33,7 +33,6 @@ public abstract class BasicEntityServiceImpl<T extends AbstractEntity> implement
 
 	@Autowired
 	private CrudRepository<T, Long> repository;
-		
 	
 	/**
 	 * Update an entity with the values of another.
