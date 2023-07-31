@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,9 @@ import org.mockito.Mockito;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentServiceImpl;
+import org.shanoir.ng.center.model.Center;
+import org.shanoir.ng.manufacturermodel.model.Manufacturer;
+import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -46,33 +50,38 @@ public class AcquisitionEquipmentServiceTest {
 
 	private static final Long ACQ_EQPT_ID = 1L;
 	private static final String UPDATED_ACQ_EQPT_SERIAL_NUMBER = "test";
+	private static final String MANUFACTURER_MODEL_NAME = "test";
+	private static final String MANUFACTURER_NAME = "test";
 
 	@Mock
-	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
+	private AcquisitionEquipmentRepository repository;
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
+
+	@Mock
+	private ObjectMapper objectMapper;
 
 	@InjectMocks
 	private AcquisitionEquipmentServiceImpl acquisitionEquipmentService;
 
 	@Before
 	public void setup() {
-		given(acquisitionEquipmentRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createAcquisitionEquipment()));
-		given(acquisitionEquipmentRepository.findById(ACQ_EQPT_ID)).willReturn(Optional.of(ModelsUtil.createAcquisitionEquipment()));
-		given(acquisitionEquipmentRepository.save(Mockito.any(AcquisitionEquipment.class))).willReturn(createAcquisitionEquipment());
+		given(repository.findAll()).willReturn(Arrays.asList(ModelsUtil.createAcquisitionEquipment()));
+		given(repository.findById(ACQ_EQPT_ID)).willReturn(Optional.of(ModelsUtil.createAcquisitionEquipment()));
+		given(repository.save(Mockito.any(AcquisitionEquipment.class))).willReturn(createAcquisitionEquipment());
 	}
 
 	@Test(expected = EntityNotFoundException.class)
 	public void deleteByBadIdTest() throws EntityNotFoundException  {
 		acquisitionEquipmentService.deleteById(2L);
 	}
-	
+
 	@Test
 	public void deleteByIdTest() throws EntityNotFoundException {
 		acquisitionEquipmentService.deleteById(ACQ_EQPT_ID);
-		
-		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+
+		Mockito.verify(repository, Mockito.times(1)).deleteById(Mockito.anyLong());
 	}
 
 	@Test
@@ -81,7 +90,7 @@ public class AcquisitionEquipmentServiceTest {
 		Assert.assertNotNull(equipments);
 		Assert.assertTrue(equipments.size() == 1);
 
-		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).findAll();
+		Mockito.verify(repository, Mockito.times(1)).findAll();
 	}
 
 	@Test
@@ -90,14 +99,14 @@ public class AcquisitionEquipmentServiceTest {
 		Assert.assertNotNull(equipment);
 		Assert.assertTrue(ModelsUtil.ACQ_EQPT_SERIAL_NUMBER.equals(equipment.getSerialNumber()));
 
-		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).findById(Mockito.anyLong());
+		Mockito.verify(repository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test
 	public void saveTest() {
 		acquisitionEquipmentService.create(createAcquisitionEquipment());
 
-		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).save(Mockito.any(AcquisitionEquipment.class));
+		Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(AcquisitionEquipment.class));
 	}
 
 	@Test
@@ -106,13 +115,19 @@ public class AcquisitionEquipmentServiceTest {
 		Assert.assertNotNull(updatedEquipment);
 		Assert.assertTrue(UPDATED_ACQ_EQPT_SERIAL_NUMBER.equals(updatedEquipment.getSerialNumber()));
 
-		Mockito.verify(acquisitionEquipmentRepository, Mockito.times(1)).save(Mockito.any(AcquisitionEquipment.class));
+		Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(AcquisitionEquipment.class));
 	}
 
 	private AcquisitionEquipment createAcquisitionEquipment() {
 		final AcquisitionEquipment equipment = new AcquisitionEquipment();
 		equipment.setId(ACQ_EQPT_ID);
 		equipment.setSerialNumber(UPDATED_ACQ_EQPT_SERIAL_NUMBER);
+		final ManufacturerModel model = new ManufacturerModel();
+		model.setName(MANUFACTURER_MODEL_NAME);
+		final Manufacturer manu = new Manufacturer();
+		manu.setName(MANUFACTURER_NAME);
+		model.setManufacturer(manu);
+		equipment.setManufacturerModel(model);
 		return equipment;
 	}
 

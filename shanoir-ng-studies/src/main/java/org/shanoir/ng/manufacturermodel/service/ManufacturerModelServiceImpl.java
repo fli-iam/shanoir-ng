@@ -82,6 +82,9 @@ public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<Manufac
 		try {
 			String manuModelName = manufacturerModel.getName();
 			List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manufacturerModel.getId());
+			if (listAcEq == null) {
+				return true;
+			}
 			for (AcquisitionEquipment acEqItem : listAcEq) {
 				IdName acEq = new IdName();
 				acEq.setId(acEqItem.getId());

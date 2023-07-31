@@ -61,28 +61,35 @@ public class ManufacturerServiceImpl extends BasicEntityServiceImpl<Manufacturer
 		manuDb.setName(manu.getName());
 
 		try {
-			updateManufacturerName(manu);
+			updateManufacturer(manu);
 		} catch (MicroServiceCommunicationException e) {
 			throw new RuntimeException(e);
 		}
 		return manuDb;
 	}
 
-	private boolean updateManufacturerName(Manufacturer manufacturer) throws MicroServiceCommunicationException {
+	public boolean updateManufacturer(Manufacturer manufacturer) throws MicroServiceCommunicationException {
 		try {
 			String manuName = manufacturer.getName();
-			List<ManufacturerModel> listManuModel = manufacturerModelRepository.findByManufacturerId(manufacturer.getId());
+			if (manufacturer.getId() == null) {
+				return true;
+			}
+			List<ManufacturerModel> listManuModel = manufacturerModelRepository.findByManufacturerId(manufacturer.getId()).orElse(null);
+			if (listManuModel == null) {
+				return true;
+			}
 			for (ManufacturerModel manuModel : listManuModel) {
 				List<AcquisitionEquipment> listAcEq = acquisitionEquipmentRepository.findByManufacturerModelId(manuModel.getId());
-				for (AcquisitionEquipment acEqItem : listAcEq) {
-					IdName acEq = new IdName();
-					acEq.setId(acEqItem.getId());
-					acEq.setName(manuName.trim() + " " + acEqItem.getManufacturerModel().getName());
-					rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
-							objectMapper.writeValueAsString(acEq));
+				if (listAcEq != null) {
+					for (AcquisitionEquipment acEqItem : listAcEq) {
+						IdName acEq = new IdName();
+						acEq.setId(acEqItem.getId());
+						acEq.setName(manuName.trim() + " " + acEqItem.getManufacturerModel().getName());
+						rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
+								objectMapper.writeValueAsString(acEq));
+					}
 				}
 			}
-
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
