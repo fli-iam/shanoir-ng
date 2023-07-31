@@ -39,6 +39,7 @@ import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyServ
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -53,8 +54,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for subjects controller.
@@ -72,8 +71,6 @@ public class AnimalSubjectApiControllerTest {
 	private static final String REQUEST_PATH = "/subject";
 	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/2";
-
-	private Gson gson;
 
 	@Autowired
 	private MockMvc mvc;
@@ -107,8 +104,6 @@ public class AnimalSubjectApiControllerTest {
 
 	@BeforeEach
 	public void setup() throws ShanoirException, JsonProcessingException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
 		doNothing().when(subjectsServiceMock).deleteBySubjectId(1L);
 		given(subjectsServiceMock.findAll()).willReturn(Arrays.asList(new AnimalSubject()));
 		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(new AnimalSubject());
@@ -155,7 +150,7 @@ public class AnimalSubjectApiControllerTest {
 	public void saveNewSubjectTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(gson.toJson(AnimalSubjectModelUtil.createPreclinicalSubjectDto())))
+						.content(JacksonUtils.serialize(AnimalSubjectModelUtil.createPreclinicalSubjectDto())))
 				.andExpect(status().isOk());
 	}
 
@@ -164,7 +159,7 @@ public class AnimalSubjectApiControllerTest {
 	public void updateSubjectTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
-						.content(gson.toJson(AnimalSubjectModelUtil.createAnimalSubjectDto())))
+						.content(JacksonUtils.serialize(AnimalSubjectModelUtil.createAnimalSubjectDto())))
 				.andExpect(status().isOk());
 	}
 
