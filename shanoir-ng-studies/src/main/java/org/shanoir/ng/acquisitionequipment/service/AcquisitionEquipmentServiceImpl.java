@@ -15,10 +15,12 @@
 package org.shanoir.ng.acquisitionequipment.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
-import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,27 +31,50 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<AcquisitionEquipment> implements AcquisitionEquipmentService {
+public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentService {
 
 	@Autowired
-	AcquisitionEquipmentRepository repository;
+	private AcquisitionEquipmentRepository repository;
 
-	@Override
+	public Optional<AcquisitionEquipment> findById(final Long id) {
+		return repository.findById(id);
+	}
 	protected AcquisitionEquipment updateValues(AcquisitionEquipment from, AcquisitionEquipment to) {
 		to.setCenter(from.getCenter());
 		to.setManufacturerModel(from.getManufacturerModel());
 		to.setSerialNumber(from.getSerialNumber());
 		return to;
 	}
-
-	@Override
+	
+	public List<AcquisitionEquipment> findAll() {
+		return Utils.toList(repository.findAll());
+	}
+	
 	public List<AcquisitionEquipment> findAllByCenterId(Long centerId) {
 		return this.repository.findByCenterId(centerId);
 	}
 	
-	@Override
 	public List<AcquisitionEquipment> findAllByStudyId(Long studyId) {
 		return this.repository.findByCenterStudyCenterListStudyId(studyId);
+	}
+	
+	public AcquisitionEquipment create(final AcquisitionEquipment entity) {
+		AcquisitionEquipment savedEntity = repository.save(entity);
+		return savedEntity;
+	}
+	
+	public AcquisitionEquipment update(final AcquisitionEquipment entity) throws EntityNotFoundException {
+		final Optional<AcquisitionEquipment> entityDbOpt = repository.findById(entity.getId());
+		final AcquisitionEquipment entityDb = entityDbOpt.orElseThrow(
+				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+		updateValues(entity, entityDb);
+		return repository.save(entityDb);
+	}
+
+	public void deleteById(final Long id) throws EntityNotFoundException  {
+		final Optional<AcquisitionEquipment> entity = repository.findById(id);
+		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+		repository.deleteById(id);
 	}
 	
 }
