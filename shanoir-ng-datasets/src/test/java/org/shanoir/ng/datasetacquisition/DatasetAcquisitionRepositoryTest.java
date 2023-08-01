@@ -67,7 +67,7 @@ public class DatasetAcquisitionRepositoryTest {
 	@Test
 	public void findPageByStudyCenterOrStudyIdInTest() throws Exception {
 		List<Pair<Long, Long>> studyCentersList = new ArrayList<>();
-		studyCentersList.add(new Pair<Long, Long>(1L, 1L));
+		studyCentersList.add(Pair.of(1L, 1L));
 		Set<Long> studyIds = new HashSet<>();
 		studyIds.add(3L);
 		

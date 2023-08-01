@@ -403,7 +403,7 @@ public class DatasetAcquisitionApiSecurityTest {
 		
 		given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{}), PageRequest.of(0, 10), 0));
 		List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
-		studyCenterIds.add(new Pair<Long, Long>(1L, 1L));
+		studyCenterIds.add(Pair.of(1L, 1L));
 		given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newSet(new Long[]{}), PageRequest.of(0, 10)))
 			.willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
 		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId()))
