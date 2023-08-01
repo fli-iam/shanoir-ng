@@ -50,7 +50,7 @@ public class SecurityService {
 				unrestrictedStudies.add(studyUser.getStudyId());
 			} else {
 				for (Long centerId : studyUser.getCenterIds()) {
-					studyCenters.add(new Pair<Long, Long>(studyUser.getStudyId(), centerId));						
+					studyCenters.add(Pair.of(studyUser.getStudyId(), centerId));						
 				}
 			}
 		}

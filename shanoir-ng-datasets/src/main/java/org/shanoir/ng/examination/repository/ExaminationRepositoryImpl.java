@@ -140,7 +140,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 		
 		LOG.debug("examination paging query : " + query);
 
-		return new Pair<>(query.getResultList(), total);
+		return Pair.of(query.getResultList(), total);
 	}
 	
 }
