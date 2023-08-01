@@ -82,7 +82,7 @@ public interface DatasetAcquisitionApi {
 	@RequestMapping(value = "/datasetacquisition/byStudyCard/{studyCardId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<DatasetAcquisitionDTO>> findByStudyCard(
+	ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
 			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
 	
 	@Operation(summary = "", description = "Deletes a datasetAcquisition")

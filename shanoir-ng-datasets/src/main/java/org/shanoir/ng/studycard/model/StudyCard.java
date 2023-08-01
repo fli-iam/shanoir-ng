@@ -52,125 +52,125 @@ import jakarta.persistence.Table;
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class StudyCard extends HalEntity implements Card {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 1751168445500120935L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = 1751168445500120935L;
 
-	/** The acquisition equipment. */
-	private Long acquisitionEquipmentId;
+    /** The acquisition equipment. */
+    private Long acquisitionEquipmentId;
 
-	/** A studycard might be disabled */
-	private boolean disabled;
+    /** A studycard might be disabled */
+    private boolean disabled;
 
-	/** The name of the study card. */
-	@NotBlank
-	@Column(unique = true)
-	@Unique
-	private String name;
+    /** The name of the study card. */
+    @NotBlank
+    @Column(unique = true)
+    @Unique
+    private String name;
 
-	/** The nifti converter of the study card. */
-	private Long niftiConverterId;
+    /** The nifti converter of the study card. */
+    private Long niftiConverterId;
 
-	/** The study for which is defined the study card. */
-	private Long studyId;
-	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	@JoinColumn(name="study_card_id")
-	private List<StudyCardRule<?>> rules;
-	
-	private Long lastEditTimestamp;
+    /** The study for which is defined the study card. */
+    private Long studyId;
+    
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name="study_card_id")
+    private List<StudyCardRule<?>> rules;
+    
+    private Long lastEditTimestamp;
 
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "studycard/" + getId());
-	}
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "studycard/" + getId());
+    }
 
-	public Long getAcquisitionEquipmentId() {
-		return acquisitionEquipmentId;
-	}
+    public Long getAcquisitionEquipmentId() {
+        return acquisitionEquipmentId;
+    }
 
-	public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
-		this.acquisitionEquipmentId = acquisitionEquipmentId;
-	}
+    public void setAcquisitionEquipmentId(Long acquisitionEquipmentId) {
+        this.acquisitionEquipmentId = acquisitionEquipmentId;
+    }
 
-	public boolean isDisabled() {
-		return disabled;
-	}
+    public boolean isDisabled() {
+        return disabled;
+    }
 
-	public void setDisabled(boolean disabled) {
-		this.disabled = disabled;
-	}
+    public void setDisabled(boolean disabled) {
+        this.disabled = disabled;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public Long getNiftiConverterId() {
-		return niftiConverterId;
-	}
+    public Long getNiftiConverterId() {
+        return niftiConverterId;
+    }
 
-	public void setNiftiConverterId(Long niftiConverterId) {
-		this.niftiConverterId = niftiConverterId;
-	}
+    public void setNiftiConverterId(Long niftiConverterId) {
+        this.niftiConverterId = niftiConverterId;
+    }
 
-	public Long getStudyId() {
-		return studyId;
-	}
+    public Long getStudyId() {
+        return studyId;
+    }
 
-	public void setStudyId(Long studyId) {
-		this.studyId = studyId;
-	}
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
+    }
 
-	public List<StudyCardRule<?>> getRules() {
-		return rules;
-	}
+    public List<StudyCardRule<?>> getRules() {
+        return rules;
+    }
 
-	public void setRules(List<StudyCardRule<?>> rules) {
-		this.rules = rules;
-	}
+    public void setRules(List<StudyCardRule<?>> rules) {
+        this.rules = rules;
+    }
 
-	public Long getLastEditTimestamp() {
-		return lastEditTimestamp;
-	}
+    public Long getLastEditTimestamp() {
+        return lastEditTimestamp;
+    }
 
-	public void setLastEditTimestamp(Long lastEditTimestamp) {
-		this.lastEditTimestamp = lastEditTimestamp;
-	}
-	
-   /**
+    public void setLastEditTimestamp(Long lastEditTimestamp) {
+        this.lastEditTimestamp = lastEditTimestamp;
+    }
+    
+    /**
     * Application during import, when dicoms are present in tmp directory.
     * @param acquisition
     * @param dicomAttributes
     * @return true if the application had any effect on acquisitions
     */
-   public boolean apply(DatasetAcquisition acquisition, Attributes dicomAttributes) {
-       boolean changeInAtLeastOneAcquisition = false;
-       if (this.getRules() != null) {
-           for (StudyCardRule<?> rule : this.getRules()) {
-               if (rule instanceof DatasetAcquisitionRule) {
-                   changeInAtLeastOneAcquisition = true;
-                   ((DatasetAcquisitionRule) rule).apply(acquisition, dicomAttributes);
-               } else if (rule instanceof DatasetRule && acquisition.getDatasets() != null) {
-                   for (Dataset dataset : acquisition.getDatasets()) {
-                       changeInAtLeastOneAcquisition = true;
-                       ((DatasetRule) rule).apply(dataset, dicomAttributes);                       
-                   }
-               } else {
-                   throw new IllegalStateException("unknown type of rule");
-               }
-           }
-       }
-       acquisition.setStudyCard(this);
-       acquisition.setStudyCardTimestamp(this.getLastEditTimestamp());
-       return changeInAtLeastOneAcquisition;
-   }
+    public boolean apply(DatasetAcquisition acquisition, Attributes dicomAttributes) {
+        boolean changeInAtLeastOneAcquisition = false;
+        if (this.getRules() != null) {
+            for (StudyCardRule<?> rule : this.getRules()) {
+                if (rule instanceof DatasetAcquisitionRule) {
+                    changeInAtLeastOneAcquisition = true;
+                    ((DatasetAcquisitionRule) rule).apply(acquisition, dicomAttributes);
+                } else if (rule instanceof DatasetRule && acquisition.getDatasets() != null) {
+                    for (Dataset dataset : acquisition.getDatasets()) {
+                        changeInAtLeastOneAcquisition = true;
+                        ((DatasetRule) rule).apply(dataset, dicomAttributes);                       
+                    }
+                } else {
+                    throw new IllegalStateException("unknown type of rule");
+                }
+            }
+        }
+        acquisition.setStudyCard(this);
+        acquisition.setStudyCardTimestamp(this.getLastEditTimestamp());
+        return changeInAtLeastOneAcquisition;
+    }
    
 }

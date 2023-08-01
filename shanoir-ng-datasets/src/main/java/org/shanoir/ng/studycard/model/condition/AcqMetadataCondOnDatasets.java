@@ -20,6 +20,7 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
@@ -53,7 +54,12 @@ public class AcqMetadataCondOnDatasets extends StudyCardMetadataConditionWithCar
         if (field == null) throw new IllegalArgumentException("field can not be null");
         int nbOk = 0;
         for (Dataset dataset : datasets) {
-            String valueFromDb = field.get(dataset);
+            String valueFromDb;
+            try {
+                valueFromDb = field.get(dataset);
+            } catch (CheckedIllegalClassException e) {
+                valueFromDb = null;
+            }
             if (valueFromDb != null) {
                 // get all possible values, that can fulfill the condition
                 for (String value : this.getValues()) {

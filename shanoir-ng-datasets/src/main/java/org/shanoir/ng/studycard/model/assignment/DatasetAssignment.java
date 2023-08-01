@@ -18,6 +18,7 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
@@ -54,6 +55,10 @@ public class DatasetAssignment extends StudyCardAssignment<Dataset> {
         DatasetMetadataField field = this.getField();
         if (field == null) throw new IllegalStateException("Error in assignment " + this.getId() + " : " + this.getField() 
                 + " is not a valid DatasetMetadataField id value");
-        field.update(dataset, this.getValue());
+        try {
+            field.update(dataset, this.getValue());
+        } catch (CheckedIllegalClassException e) {
+            // do nothing
+        }
     }
 }

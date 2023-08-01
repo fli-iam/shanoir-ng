@@ -313,7 +313,7 @@ public class DatasetApiController implements DatasetApi {
 			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
 			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response)
 					throws RestServiceException, IOException {
-		this.datasetDownloaderService.downloadDatasetById(datasetId, converterId, format, response);
+		this.datasetDownloaderService.downloadDatasetById(datasetId, converterId, format, response, false);
 	}
 
 	@Override

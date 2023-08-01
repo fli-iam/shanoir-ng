@@ -64,7 +64,14 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
-        return repository.findByStudyCardId(studyCardId);
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return repository.findByStudyCardId(studyCardId);
+        } else {
+            List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+            Set<Long> unrestrictedStudies = new HashSet<Long>();
+            securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+            return repository.findByStudyCardIdAndStudyCenterOrStudyIdIn(studyCardId, studyCenters, unrestrictedStudies);
+        }
     }
 
     @Override

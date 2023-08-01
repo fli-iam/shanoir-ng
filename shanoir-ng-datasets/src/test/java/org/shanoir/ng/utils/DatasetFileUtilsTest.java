@@ -47,7 +47,7 @@ public class DatasetFileUtilsTest {
         ByteArrayOutputStream bytesOutputStream = new ByteArrayOutputStream();
         ZipOutputStream out = new ZipOutputStream(bytesOutputStream, StandardCharsets.UTF_8);
 
-        DatasetFileUtils.writeInputFileForExport(out, files2AcquisitionId);
+        DatasetFileUtils.writeManifestForExport(out, files2AcquisitionId);
 
         out.close();
 
