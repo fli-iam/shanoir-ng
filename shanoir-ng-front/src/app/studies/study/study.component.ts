@@ -176,8 +176,10 @@ export class StudyComponent extends EntityComponent<Study> {
               this.study.profile = profile;
             }
 
-            this.getLabeledSizes(study.id).then(size => {
-                study.sizes = size;
+            this.getLabeledSizes(study.id).then(sizes => {
+                study.totalSize = sizes.get("Total");
+                sizes.delete("Total");
+                study.sizes = sizes;
             });
 
             this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
