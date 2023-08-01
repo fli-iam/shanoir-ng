@@ -21,6 +21,7 @@ import java.util.stream.Stream;
 
 import javax.transaction.Transactional;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -31,6 +32,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
@@ -668,7 +670,48 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public Long getStudyFilesSize(Long studyId){
+	public StudyStorageVolumeDTO getStudyDetailedStorageVolume(Long studyId){
+
+		StudyStorageVolumeDTO dto;
+		try {
+			String dtoAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, studyId);
+			dto = objectMapper.readValue(dtoAsString, StudyStorageVolumeDTO.class);
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Error while fetching study [{}] datasets volume storage details.", studyId, e);
+			return null;
+		}
+
+		long filesSize = this.getStudyFilesSize(studyId);
+
+		dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
+		dto.setTotal(filesSize + dto.getTotal());
+
+		return dto;
+
+	}
+
+	@Override
+	public Map<Long, Long> getStudiesTotalStorageVolume(List<Long> studyIds) {
+		List<StudyStorageVolumeDTO> dtos;
+		try {
+			String dtosAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyIds);
+			dtos = objectMapper.readValue(dtosAsString, new TypeReference<>(){});
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Error while fetching studies [{}] datasets volume storage total.", studyIds, e);
+			return null;
+		}
+
+		Map<Long, Long> sizeById = new HashMap<>();
+
+		for(StudyStorageVolumeDTO dto : dtos){
+			sizeById.put(dto.getStudyId(),
+					dto.getTotal() + this.getStudyFilesSize(dto.getStudyId()));
+		}
+
+		return sizeById;
+	}
+
+	private long getStudyFilesSize(Long studyId){
 		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
 		if (studyOpt.isEmpty()) {
 			return 0L;
@@ -688,6 +731,5 @@ public class StudyServiceImpl implements StudyService {
 		}
 
 		return size;
-
 	}
 }

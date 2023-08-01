@@ -44,6 +44,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -199,13 +200,34 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<Long> getStudyFilesSize(@PathVariable("studyId") final Long studyId) {
-		return new ResponseEntity<>(studyService.getStudyFilesSize(studyId), HttpStatus.OK);
+	public ResponseEntity<StudyStorageVolumeDTO> getStudyDetailedStorageVolume(@PathVariable("studyId") final Long studyId) throws RestServiceException {
+		StudyStorageVolumeDTO dto = studyService.getStudyDetailedStorageVolume(studyId);
+		if(dto == null){
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+							"Error while fetching study datasets storage volume details.", null)
+			);
+		}
+
+		return new ResponseEntity<>(dto, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Map<Long, Long>> getStudiesTotalStorageVolume(@PathVariable("studiesIds") final List<Long> studiesIds) throws RestServiceException {
+		Map<Long, Long> sizeById = studyService.getStudiesTotalStorageVolume(studiesIds);
+		if(sizeById == null){
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+							"Error while fetching study datasets storage volume total.", null)
+			);
+		}
+
+		return new ResponseEntity<>(sizeById, HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
-			final BindingResult result) throws RestServiceException {
+											final BindingResult result) throws RestServiceException {
 
 		validate(study, result);
 

@@ -29,6 +29,7 @@ import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.dto.SizeByFormatDTO;
+import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -258,7 +259,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public List<SizeByFormatDTO> getExpressionSizesByStudyId(Long studyId) {
-		List<Object[]> results = repository.findExpressionSizeByStudyIdGroupByFormat(studyId);
+		List<Object[]> results = repository.findExpressionSizesByStudyIdGroupByFormat(studyId);
 		List<SizeByFormatDTO> sizesByFormat = new ArrayList<>();
 
 		for(Object[] result : results){
@@ -266,6 +267,19 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 
 		return sizesByFormat;
+
+	}
+
+	@Override
+	public Map<Long, Long> getExpressionTotalSizesByStudyId(List<Long> studyIds) {
+		List<Object[]> results =  repository.findExpressionTotalSizesByStudyIdGroupByStudyId(studyIds);
+		Map<Long, Long> volumeByStudyId = new HashMap<>();
+
+		for(Object[] result : results){
+			volumeByStudyId.put((Long) result[0], (Long) result[1]);
+		}
+
+		return volumeByStudyId;
 
 	}
 

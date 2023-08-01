@@ -38,7 +38,7 @@ import javax.validation.Valid;
 
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
-import org.shanoir.ng.dataset.dto.StudyVolumeStorageDTO;
+import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
@@ -220,17 +220,6 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
-	}
-
-    @Override
-    public ResponseEntity<StudyVolumeStorageDTO> getSizesByStudyId(Long studyId) {
-
-		StudyVolumeStorageDTO dto = new StudyVolumeStorageDTO(
-				datasetService.getExpressionSizesByStudyId(studyId),
-				examinationService.getExtraDataSizeByStudyid(studyId));
-
-		return new ResponseEntity<>(dto, HttpStatus.OK);
-
 	}
 
     @Override

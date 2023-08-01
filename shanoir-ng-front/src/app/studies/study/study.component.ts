@@ -266,12 +266,9 @@ export class StudyComponent extends EntityComponent<Study> {
 
         this.uploading = true;
         return waitUploads.then(() => {
-            return Promise.all([
-                this.studyService.getSizeByStudyId(id),
-                this.datasetService.getSizesByStudyId(id)
-            ]).then(([studySize, dto]) => {
+            return this.studyService.getStudyDetailedStorageVolume(id).then(dto => {
 
-                let datasetSizes = dto as StudyVolumeStorageDTO;
+                let datasetSizes = dto;
                 let sizesByLabel = new Map<String, number>()
 
                 for(let sizeByFormat of datasetSizes.sizesByExpressionFormat){
@@ -280,13 +277,11 @@ export class StudyComponent extends EntityComponent<Study> {
                     }
                 }
 
-                let others = studySize + datasetSizes.extraDataSize;
-
-                if(others > 0){
-                    sizesByLabel.set("Other files (DUA, protocol...)", others);
+                if(datasetSizes.extraDataSize > 0){
+                    sizesByLabel.set("Other files (DUA, protocol...)", datasetSizes.extraDataSize);
                 }
-                
-                let total = datasetSizes.total + studySize;
+
+                let total = datasetSizes.total;
                 sizesByLabel.set("Total", total);
 
                 return sizesByLabel;

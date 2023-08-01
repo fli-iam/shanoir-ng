@@ -70,6 +70,10 @@ public class RabbitMQConfiguration {
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
+	public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
+
+	public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
+
 	/** Get the type of dataset from a given study. */
 	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
 	
@@ -226,6 +230,16 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue datasetSubjectQueue() {
 		return new Queue(DATASET_SUBJECT_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue studyDatasetsDetailedStorageVolumeQueue() {
+		return new Queue(STUDY_DATASETS_DETAILED_STORAGE_VOLUME, true);
+	}
+
+	@Bean
+	public static Queue studyDatasetsTotalStorageVolumeQueue() {
+		return new Queue(STUDY_DATASETS_TOTAL_STORAGE_VOLUME, true);
 	}
 
 	@Bean

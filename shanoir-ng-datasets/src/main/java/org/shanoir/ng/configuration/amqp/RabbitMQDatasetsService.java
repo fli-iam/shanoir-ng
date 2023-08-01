@@ -15,13 +15,13 @@
 package org.shanoir.ng.configuration.amqp;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
@@ -70,6 +70,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RabbitMQDatasetsService {
 	
 	private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the event.";
+
+	@Autowired
+	private DatasetService datasetService;
 
 	@Autowired
 	private RabbitMqStudyUserService listener;
@@ -368,6 +371,48 @@ public class RabbitMQDatasetsService {
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
+		}
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME)
+	@RabbitHandler
+	@Transactional
+	public String getTotalStudiesStorageVolume(List<Long> studyIds) {
+
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+
+		List<StudyStorageVolumeDTO> results = new ArrayList<>();
+
+		Map<Long, Long> volumeByStudyId = datasetService.getExpressionTotalSizesByStudyId(studyIds);
+
+		volumeByStudyId.forEach((key, value) -> {
+			results.add(new StudyStorageVolumeDTO(key,
+					value + examinationService.getExtraDataSizeByStudyId(key)));
+		});
+		try {
+			return objectMapper.writeValueAsString(results);
+		} catch (JsonProcessingException e) {
+			LOG.error("Error while serializing list of StudyVolumeStorageDTO.", e);
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME)
+	@RabbitHandler
+	@Transactional
+	public String getDetailedStudyStorageVolume(Long studyId) {
+
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+
+		StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(studyId,
+				datasetService.getExpressionSizesByStudyId(studyId),
+				examinationService.getExtraDataSizeByStudyId(studyId));
+
+		try {
+			return objectMapper.writeValueAsString(dto);
+		} catch (JsonProcessingException e) {
+			LOG.error("Error while serializing StudyVolumeStorageDTO.", e);
+			throw new AmqpRejectAndDontRequeueException(e);
 		}
 	}
 }

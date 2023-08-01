@@ -1,11 +1,10 @@
 package org.shanoir.ng.dataset.dto;
 
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-
 import java.util.List;
-import java.util.Map;
 
-public class StudyVolumeStorageDTO {
+public class StudyStorageVolumeDTO {
+
+    private Long studyId;
 
     private Long total = 0L;
 
@@ -13,7 +12,8 @@ public class StudyVolumeStorageDTO {
 
     private Long extraDataSize;
 
-    public StudyVolumeStorageDTO(List<SizeByFormatDTO> sizesByExpressionFormat, Long extraDataSize) {
+    public StudyStorageVolumeDTO(Long studyId, List<SizeByFormatDTO> sizesByExpressionFormat, Long extraDataSize) {
+        this.studyId = studyId;
         this.sizesByExpressionFormat = sizesByExpressionFormat;
         if (sizesByExpressionFormat != null){
             sizesByExpressionFormat.forEach(dto -> this.total += dto.getSize());
@@ -23,7 +23,11 @@ public class StudyVolumeStorageDTO {
             this.total += extraDataSize;
         }
 
+    }
 
+    public StudyStorageVolumeDTO(Long studyId, Long total) {
+        this.studyId = studyId;
+        this.total = total;
     }
 
     public List<SizeByFormatDTO> getSizesByExpressionFormat() {
@@ -48,5 +52,13 @@ public class StudyVolumeStorageDTO {
 
     public void setTotal(Long total) {
         this.total = total;
+    }
+
+    public Long getStudyId() {
+        return studyId;
+    }
+
+    public void setStudyId(Long studyId) {
+        this.studyId = studyId;
     }
 }

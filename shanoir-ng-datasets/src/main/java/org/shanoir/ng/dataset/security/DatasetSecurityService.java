@@ -101,6 +101,26 @@ public class DatasetSecurityService {
 		}
         return commService.hasRightOnStudy(studyId, rightStr);
     }
+
+	/**
+	 * Check that the connected user has the given right for all the given studies.
+	 *
+	 * @param studyIds the studies ids
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+	public boolean hasRightOnStudies(List<Long> studyIds, String rightStr) {
+		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+		if (studyIds == null|| studyIds.isEmpty()) {
+			return false;
+		}
+
+		Set<Long> givenIds = new HashSet<>(studyIds);
+
+		return givenIds.size() == commService.hasRightOnStudies(givenIds, rightStr).size();
+	}
     
     /**
      * Check that the connected user has the given right for the given subject.

@@ -15,7 +15,6 @@
 package org.shanoir.ng.dataset.repository;
 
 import java.util.List;
-import java.util.Map;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.springframework.data.domain.Page;
@@ -45,6 +44,11 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 	@Query("SELECT expr.datasetExpressionFormat, SUM(expr.size) FROM DatasetExpression expr " +
 			"WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL " +
 			"GROUP BY expr.datasetExpressionFormat")
-	List<Object[]> findExpressionSizeByStudyIdGroupByFormat(Long studyId);
+	List<Object[]> findExpressionSizesByStudyIdGroupByFormat(Long studyId);
+
+	@Query("SELECT expr.dataset.datasetAcquisition.examination.study.id, SUM(expr.size) FROM DatasetExpression expr " +
+			"WHERE expr.dataset.datasetAcquisition.examination.study.id IN (:studyIds) AND expr.size IS NOT NULL " +
+			"GROUP BY expr.dataset.datasetAcquisition.examination.study.id")
+	List<Object[]> findExpressionTotalSizesByStudyIdGroupByStudyId(List<Long> studyIds);
 
 }

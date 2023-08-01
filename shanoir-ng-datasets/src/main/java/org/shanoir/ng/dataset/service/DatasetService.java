@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.dataset.dto.SizeByFormatDTO;
+import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
@@ -119,6 +119,8 @@ public interface DatasetService {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	List<SizeByFormatDTO> getExpressionSizesByStudyId(Long studyId);
 
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudies(#studyIds, 'CAN_SEE_ALL'))")
+	Map<Long, Long> getExpressionTotalSizesByStudyId(List<Long> studyIds);
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
 	List<Dataset> findByExaminationId(Long examinationId);

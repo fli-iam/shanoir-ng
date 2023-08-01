@@ -81,11 +81,6 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
-    getSizesByStudyId(id: number): Promise<StudyVolumeStorageDTO> {
-      return this.http.get<StudyVolumeStorageDTO>(AppUtils.BACKEND_API_DATASET_URL + '/sizesByStudyId/' + id)
-        .toPromise();
-    }
-
     getByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<Dataset[]> {
 		if (!subjectId) {
 			return this.getByStudyId(studyId);

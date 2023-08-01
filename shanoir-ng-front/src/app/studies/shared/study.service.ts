@@ -30,6 +30,7 @@ import { StudyUserRight } from './study-user-right.enum';
 import { CenterStudyDTO, PublicStudyData, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
 import { Study } from './study.model';
 import { combineAll } from 'rxjs/operators';
+import {StudyVolumeStorageDTO} from "../../datasets/shared/dataset.dto";
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -140,7 +141,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         }
         return promise;
     }
-    
+
 
     deleteFile(studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
         const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId;
@@ -263,8 +264,16 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         }
     }
 
-    getSizeByStudyId(id: number): Promise<number> {
-        return this.http.get<number>(AppUtils.BACKEND_API_STUDY_URL + '/sizeByStudyId/' + id)
-        .toPromise();
+    getStudyDetailedStorageVolume(id: number): Promise<StudyVolumeStorageDTO> {
+        return this.http.get<StudyVolumeStorageDTO>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume/' + id)
+            .toPromise();
+    }
+
+    getStudiesTotalStorageVolume(ids: Set<number>): Promise<StudyVolumeStorageDTO[]> {
+        const formData: FormData = new FormData();
+        formData.set('studyIds', Array.from(ids).join(","));
+
+        return this.http.post<StudyVolumeStorageDTO[]>(AppUtils.BACKEND_API_STUDY_URL + '/totalStorageVolume', formData)
+            .toPromise();
     }
 }
