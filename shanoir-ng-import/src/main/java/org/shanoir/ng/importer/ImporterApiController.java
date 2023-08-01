@@ -275,7 +275,7 @@ public class ImporterApiController implements ImporterApi {
 
 			removeUnselectedSeries(importJob);
 			LOG.info("Starting import job for user {} (userId: {}) with import job folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
-			importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
+			importerManagerService.manageImportJob(importJob);
 			return new ResponseEntity<>(HttpStatus.OK);
 		} else {
 			LOG.error("Missing importJobDir.");
@@ -762,7 +762,7 @@ public class ImporterApiController implements ImporterApi {
 			// handle creation of study and study cards later here
 		}
 		final Long userId = KeycloakUtil.getTokenUserId();
-		importerManagerService.manageImportJob(userId, KeycloakUtil.getKeycloakHeader(), importJob);
+		importerManagerService.manageImportJob(importJob);
 		return null;
 	}
 

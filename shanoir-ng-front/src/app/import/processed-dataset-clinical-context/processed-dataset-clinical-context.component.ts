@@ -56,7 +56,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
         return !this.importDataService.processedDatasetImportJob;
     }
 
-    importData(): Promise<any> {
+    importData(timestamp: number): Promise<any> {
         let context = this.importDataService.contextData;
         let importJob = new ProcessedDatasetImportJob();
         importJob.subjectId = context.subject.id;
@@ -69,6 +69,7 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
         importJob.processedDatasetName = context.processedDatasetName;
         importJob.processedDatasetComment = context.processedDatasetComment;
         importJob.datasetProcessing = context.datasetProcessing;
+        importJob.timestamp = timestamp;
         return this.importService.startProcessedDatasetImportJob(importJob);
     }
 
@@ -93,10 +94,6 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
                 })
             );
         });
-    }
-
-    public showDatasetProcessingDetails() {
-        this.router.navigate(['dataset-processing/details/' + this.datasetProcessing.id]);
     }
 
     protected reloadSavedData(): Promise<void> {

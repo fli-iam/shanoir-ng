@@ -31,7 +31,7 @@ export class PacsClinicalContextComponent extends BasicClinicalContextComponent 
     }
 
     protected buildImportJob(): ImportJob {
-        let importJob: ImportJob = super.buildImportJob();
+        let importJob: ImportJob = super.buildImportJob(Date.now());
         importJob.fromPacs = true;
         return importJob
     }

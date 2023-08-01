@@ -30,8 +30,8 @@ import org.shanoir.ng.preclinical.pathologies.PathologyService;
 import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModelService;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.references.RefsService;
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
-import org.shanoir.ng.preclinical.subjects.AnimalSubjectService;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
@@ -101,7 +101,7 @@ public class SubjectPathologyApiControllerTest {
 
 		doNothing().when(subPathosServiceMock).deleteById(1L);
 		given(subPathosServiceMock.findAll()).willReturn(Arrays.asList(new SubjectPathology()));
-		given(subjectsServiceMock.findById(1L)).willReturn(new AnimalSubject());
+		given(subjectsServiceMock.getBySubjectId(1L)).willReturn(new AnimalSubject());
 		given(pathologiesServiceMock.findById(1L)).willReturn(new Pathology());
 		given(refsServiceMock.findById(1L)).willReturn(new Reference());
 		given(subPathosServiceMock.findByAnimalSubject(new AnimalSubject()))

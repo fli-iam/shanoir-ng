@@ -25,8 +25,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
-import org.shanoir.ng.preclinical.subjects.AnimalSubjectService;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.preclinical.therapies.Therapy;
 import org.shanoir.ng.preclinical.therapies.TherapyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -94,7 +94,7 @@ public class SubjectTherapyApiControllerTest {
 
 		doNothing().when(subTherapiesServiceMock).deleteById(1L);
 		given(subTherapiesServiceMock.findAll()).willReturn(Arrays.asList(new SubjectTherapy()));
-		given(subjectsServiceMock.findById(1L)).willReturn(new AnimalSubject());
+		given(subjectsServiceMock.getBySubjectId(1L)).willReturn(new AnimalSubject());
 		given(therapiesServiceMock.findById(1L)).willReturn(new Therapy());
 		given(subTherapiesServiceMock.findById(1L)).willReturn(new SubjectTherapy());
 		given(subTherapiesServiceMock.findAllByTherapy(new Therapy())).willReturn(Arrays.asList(new SubjectTherapy()));

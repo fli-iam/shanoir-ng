@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
-import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;

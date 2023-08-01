@@ -80,13 +80,20 @@ public class DatasetDownloaderServiceImpl {
 	@Autowired
 	ShanoirEventService eventService;
 
-	public void downloadDatasetById(Long datasetId, Long converterId, String format,HttpServletResponse response) throws RestServiceException {
+	public void downloadDatasetById(Long datasetId, Long converterId, String format, HttpServletResponse response, boolean withManifest) throws RestServiceException {
 
 		final Dataset dataset = datasetService.findById(datasetId);
 		if (dataset == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
 		}
+		
+		if (!dataset.isDownloadable()) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNAUTHORIZED.value(), "Dataset cannot be downloaded for security reasons.", null));
+		}
+
+		Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
 		String subjectName = "unknownSubject";
 		Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
@@ -120,7 +127,13 @@ public class DatasetDownloaderServiceImpl {
 			switch (format) {
 			case DCM:
 				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-				downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, null);
+				List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, null);
+
+				if(withManifest){
+					filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
+					filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(files);
+				}
+
 				break;
 			case NII:
 				// Check if we want a specific converter -> nifti reconversion
@@ -176,6 +189,10 @@ public class DatasetDownloaderServiceImpl {
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for this dataset(s)."));
 			}
 
+			if(!filesByAcquisitionId.isEmpty()){
+				DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
+			}
+
 			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.SUCCESS);
 			eventService.publishEvent(event);
 		} catch (Exception e) {
@@ -195,7 +212,7 @@ public class DatasetDownloaderServiceImpl {
 		// Get the data
 		List<Dataset> failingDatasets = new ArrayList<Dataset>();
 
-		Map<Long, List<String>> files2AcquisitionId = new HashMap<>();
+		Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
 		response.setContentType("application/zip");
 		// Add timestamp to get a difference
@@ -205,6 +222,9 @@ public class DatasetDownloaderServiceImpl {
 		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 
 			for (Dataset dataset : datasets) {
+				if (!dataset.isDownloadable()) {
+					continue;
+				}
 				try {
 
 					List<String> datasetFiles = new ArrayList<>();
@@ -255,8 +275,8 @@ public class DatasetDownloaderServiceImpl {
 						datasetFiles.addAll(files);
 
 						if(withInputFile){
-							files2AcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
-							files2AcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(datasetFiles);
+							filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
+							filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(datasetFiles);
 						}
 
 					} else if (NII.equals(format)) {
@@ -311,8 +331,8 @@ public class DatasetDownloaderServiceImpl {
 				zipOutputStream.closeEntry();
 			}
 
-			if(!files2AcquisitionId.isEmpty()){
-				DatasetFileUtils.writeInputFileForExport(zipOutputStream, files2AcquisitionId);
+			if(!filesByAcquisitionId.isEmpty()){
+				DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
 			}
 
 			String ids = String.join(",", datasets.stream().map(dataset -> dataset.getId().toString()).collect(Collectors.toList()));

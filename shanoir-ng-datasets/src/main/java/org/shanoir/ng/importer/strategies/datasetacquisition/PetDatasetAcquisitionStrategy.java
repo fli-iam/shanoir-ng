@@ -13,7 +13,6 @@
  */
 package org.shanoir.ng.importer.strategies.datasetacquisition;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,14 +24,11 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetProtocol;
-import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.dataset.DatasetStrategy;
 import org.shanoir.ng.importer.strategies.protocol.PetProtocolStrategy;
-import org.shanoir.ng.studycard.model.StudyCard;
-import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,45 +46,26 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 	private static final Logger LOG = LoggerFactory.getLogger(PetDatasetAcquisitionStrategy.class);
 	
 	@Autowired
-	private DicomProcessing dicomProcessing;
-	
-	@Autowired
 	private PetProtocolStrategy protocolStrategy;
 	
 	@Autowired
 	private DatasetStrategy<PetDataset> datasetStrategy;
-
-	@Autowired
-	private StudyCardRepository studyCardRepository;
-
+	
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob)
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, Attributes dicomAttributes)
 			throws Exception {
 		
 		PetDatasetAcquisition datasetAcquisition = new PetDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
-		Attributes dicomAttributes = null;
-		try {
-			// TODO ATO : should always be a dicom: add check
-			dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), false);
-		} catch (IOException e) {
-			LOG.error("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(),e);
-		}
+
 		datasetAcquisition.setCreationDate(LocalDate.now());
 		datasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
 		datasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));
-		StudyCard studyCard = null;
-		if (importJob.getStudyCardId() != null) {
-			studyCard = getStudyCard(importJob.getStudyCardId());
-			datasetAcquisition.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
-			importJob.setStudyCardName(studyCard.getName());
-		} else {
-			LOG.warn("No studycard given for this import");
-		}
+		
 		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes);
 		datasetAcquisition.setPetProtocol(protocol);
 	
@@ -99,24 +76,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 			dataset.setDatasetAcquisition(datasetAcquisition);
 			genericizedList.add(dataset);
 		}
-		datasetAcquisition.setDatasets(genericizedList);
-		
-		if (studyCard != null) {
-		    studyCard.apply(datasetAcquisition, dicomAttributes);
-		}
-		
+		datasetAcquisition.setDatasets(genericizedList);		
 		return datasetAcquisition;
 	}
-	
-	private StudyCard getStudyCard(Long studyCardId) {
-		StudyCard studyCard = studyCardRepository.findById(studyCardId).orElse(null);
-		if (studyCard == null) {
-			throw new IllegalArgumentException("No study card found with id " + studyCardId);
-		}
-		if (studyCard.getAcquisitionEquipmentId() == null) {
-			throw new IllegalArgumentException("No acq eq id found for the study card " + studyCardId);
-		}
-		return studyCard;
-	}
-
 }
