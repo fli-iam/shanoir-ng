@@ -23,17 +23,18 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerModelServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Manufacturer model service test.
@@ -41,8 +42,8 @@ import org.springframework.test.context.ActiveProfiles;
  * @author msimon
  * 
  */
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class ManufacturerModelServiceTest {
 
 	private static final Long MANUFACTURER_MODEL_ID = 1L;
@@ -50,9 +51,6 @@ public class ManufacturerModelServiceTest {
 
 	@Mock
 	private ManufacturerModelRepository manufacturerModelRepository;
-
-	@Mock
-	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks
 	private ManufacturerModelServiceImpl manufacturerModelService;

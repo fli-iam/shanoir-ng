@@ -24,18 +24,19 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.shanoir.ng.coil.dto.mapper.CoilMapper;
 import org.shanoir.ng.coil.model.Coil;
 import org.shanoir.ng.coil.repository.CoilRepository;
 import org.shanoir.ng.coil.service.CoilServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Coil service test.
@@ -43,8 +44,8 @@ import org.springframework.test.context.ActiveProfiles;
  * @author msimon
  * 
  */
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CoilServiceTest {
 
 	private static final Long COIL_ID = 1L;
@@ -55,9 +56,6 @@ public class CoilServiceTest {
 
 	@Mock
 	private CoilRepository coilRepository;
-
-	@Mock
-	private RabbitTemplate rabbitTemplate;
 
 	@InjectMocks
 	private CoilServiceImpl coilService;
@@ -103,7 +101,6 @@ public class CoilServiceTest {
 	@Test
 	public void saveTest() {
 		coilService.create(createCoil());
-
 		Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
 	}
 
@@ -113,7 +110,6 @@ public class CoilServiceTest {
 		final Coil updatedCoil = coilService.update(coil);
 		Assertions.assertNotNull(updatedCoil);
 		Assertions.assertTrue(UPDATED_COIL_NAME.equals(coil.getName()));
-
 		Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
 	}
 

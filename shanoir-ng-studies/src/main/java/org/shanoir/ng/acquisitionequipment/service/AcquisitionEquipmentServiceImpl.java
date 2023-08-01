@@ -39,6 +39,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	public Optional<AcquisitionEquipment> findById(final Long id) {
 		return repository.findById(id);
 	}
+	
 	protected AcquisitionEquipment updateValues(AcquisitionEquipment from, AcquisitionEquipment to) {
 		to.setCenter(from.getCenter());
 		to.setManufacturerModel(from.getManufacturerModel());

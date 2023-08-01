@@ -23,17 +23,18 @@ import java.util.Optional;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerRepository;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Manufacturer service test.
@@ -41,21 +42,18 @@ import org.springframework.test.context.ActiveProfiles;
  * @author msimon
  * 
  */
-@SpringBootTest
-@ActiveProfiles("test")
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class ManufacturerServiceTest {
 
 	private static final Long MANUFACTURER_ID = 1L;
 	private static final String UPDATED_MANUFACTURER_NAME = "test";
 
 	@Mock
-	private ManufacturerRepository manufacturerRepository;
-
-	@Mock
-	private RabbitTemplate rabbitTemplate;
+	ManufacturerRepository manufacturerRepository;
 
 	@InjectMocks
-	private ManufacturerServiceImpl manufacturerService;
+	ManufacturerServiceImpl manufacturerService;
 
 	@BeforeEach
 	public void setup() {
@@ -69,7 +67,6 @@ public class ManufacturerServiceTest {
 		final List<Manufacturer> manufacturers = manufacturerService.findAll();
 		Assertions.assertNotNull(manufacturers);
 		Assertions.assertTrue(manufacturers.size() == 1);
-
 		Mockito.verify(manufacturerRepository, Mockito.times(1)).findAll();
 	}
 
@@ -85,7 +82,6 @@ public class ManufacturerServiceTest {
 	@Test
 	public void saveTest() {
 		manufacturerService.create(createManufacturer());
-
 		Mockito.verify(manufacturerRepository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
 	}
 
@@ -94,7 +90,6 @@ public class ManufacturerServiceTest {
 		final Manufacturer updatedManufacturer = manufacturerService.update(createManufacturer());
 		Assertions.assertNotNull(updatedManufacturer);
 		Assertions.assertTrue(UPDATED_MANUFACTURER_NAME.equals(updatedManufacturer.getName()));
-
 		Mockito.verify(manufacturerRepository, Mockito.times(1)).save(Mockito.any(Manufacturer.class));
 	}
 
