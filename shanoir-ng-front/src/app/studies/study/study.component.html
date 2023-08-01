@@ -147,12 +147,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                                         {{ studySizeStr(item.value) }}
                                     </td>
                                 </tr>
-                                <tr>
+                                <tr *ngIf="study.totalSize > 0">
                                      <td class="volume-storage-left volume-storage-total">
                                         Total
                                     </td>
                                     <td class="volume-storage-total" >
                                         {{ studySizeStr(study.totalSize) }}
+                                    </td>
+                                </tr>
+                                <tr *ngIf="!study.totalSize || study.totalSize == 0" >
+                                    <td>
+                                        0 Bytes
                                     </td>
                                 </tr>
                             </table>
