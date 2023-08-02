@@ -108,16 +108,10 @@ public class ImporterService {
     private DatasetService datasetService;
 
     @Autowired
-    private DatasetAcquisitionRepository datasetAcquisitionRepository;
-
-    @Autowired
     private DicomPersisterService dicomPersisterService;
 
     @Autowired
     private ShanoirEventService eventService;
-
-    @Autowired
-    private SolrService solrService;
 
     @Autowired
     private ImporterMailService mailService;
@@ -174,7 +168,7 @@ public class ImporterService {
                     } catch (Exception e) { // if error in pacs
                         // revert dataset acquisitions
                         for (DatasetAcquisition acquisition : generatedAcquisitions) {
-                            datasetAcquisitionRepository.deleteById(acquisition.getId());
+                            datasetAcquisitionService.deleteById(acquisition.getId());
                         }
                         throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved");
                     }
