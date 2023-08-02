@@ -34,6 +34,8 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
+      id:
+        db_structure_naming_strategy: legacy
     properties:
       hibernate:
         connection:
