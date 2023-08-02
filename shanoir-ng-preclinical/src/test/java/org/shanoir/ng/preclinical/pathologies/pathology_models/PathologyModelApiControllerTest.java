@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.File;
 import java.util.Arrays;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -90,12 +89,11 @@ public class PathologyModelApiControllerTest {
 	@TempDir
 	public File tempFolder;
 	
-	public String tempFolderPath;
-	
 	@BeforeEach
 	public void setup() throws ShanoirException {
-		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
+		File tmpFolder = new File(tempFolder, "/tmp/");
+		tmpFolder.mkdirs();
+	    System.setProperty("preclinical.uploadExtradataFolder", tmpFolder.getAbsolutePath());
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(modelServiceMock).deleteById(1L);
