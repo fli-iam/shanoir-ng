@@ -174,9 +174,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             for (let su of studyUsers) {
                 if (su.userId == this.keycloakService.getUserId()) {
                     this.accessRequestValidated = true;
-                    if (su.confirmed) {
-                        this.isSuConfirmed = true;
-                    }
+                    this.isSuConfirmed = su.confirmed;
                 }
             }
             if (study.visibleByDefault && study.locked && !this.keycloakService.isUserAdmin()) {
@@ -190,19 +188,15 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                             this.router.navigate(['/access-request/study/' + study.id]);
                         }
                     });
-                } else if (this.hasDUA) {
-                    if (!this.isSuConfirmed) {
-                        const title: string = 'Data User Agreement awaiting for signing';
-                        const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
-                            + 'Until you have agreed those terms you cannot access to any data from these studies. '
-                            + 'Would you like to review those terms now?';
-                        const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
-                        this.confirmService.confirm(title, text, buttons).then(response => {
-                            if (response == true) this.router.navigate(['/dua']);
-                        });
-                    } else {
-                        super.goToViewFromEntity(study);
-                    }
+                } else if (this.hasDUA && !this.isSuConfirmed) {
+                    const title: string = 'Data User Agreement awaiting for signing';
+                    const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
+                        + 'Until you have agreed those terms you cannot access to any data from these studies. '
+                        + 'Would you like to review those terms now?';
+                    const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
+                    this.confirmService.confirm(title, text, buttons).then(response => {
+                        if (response == true) this.router.navigate(['/dua']);
+                    });
                 } else {
                     super.goToViewFromEntity(study);
                 }

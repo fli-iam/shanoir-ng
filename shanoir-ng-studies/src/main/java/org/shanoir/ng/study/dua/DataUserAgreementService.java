@@ -88,7 +88,6 @@ public class DataUserAgreementService {
 	}
 
 	public DataUserAgreement findDUAByUserIdAndStudyId(Long userId, Long studyId) {
-		DataUserAgreement dua = repository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, studyId);
-		return dua;
+		return repository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, studyId);
 	}
 }

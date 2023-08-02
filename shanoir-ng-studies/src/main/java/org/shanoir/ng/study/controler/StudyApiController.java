@@ -324,11 +324,7 @@ public class StudyApiController implements StudyApi {
 
 		DataUserAgreement dua = this.dataUserAgreementService.findDUAByUserIdAndStudyId(KeycloakUtil.getTokenUserId(), studyId);
 
-		if (dua != null) {
-			return new ResponseEntity<>(true, HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(false, HttpStatus.OK);
-		}
+		return new ResponseEntity<>(dua != null, HttpStatus.OK);
 	}
 
 	@Override
@@ -441,9 +437,9 @@ public class StudyApiController implements StudyApi {
 		List<StudyUser> studyUserList = this.studyUserService.findStudyUsersByStudyId(studyId);
 		if (!studyUserList.isEmpty()) {
 			return new ResponseEntity<>(studyUserList, HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override
