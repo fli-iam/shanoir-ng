@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -63,4 +64,6 @@ public interface DatasetAcquisitionService {
 	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
 
     boolean existsByStudyCardId(Long studyCardId);
+
+	Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
 }

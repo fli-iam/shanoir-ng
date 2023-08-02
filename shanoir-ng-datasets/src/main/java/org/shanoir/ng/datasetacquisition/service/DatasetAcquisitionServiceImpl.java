@@ -15,6 +15,7 @@
 package org.shanoir.ng.datasetacquisition.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +41,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.google.common.collect.Lists;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
@@ -113,6 +115,15 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
             return repository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
         }
+    }
+    
+    @Override
+    public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
+    	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
+    	for (DatasetAcquisition acquisition: result) {
+            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+    	}
+    	return Lists.newArrayList(result);
     }
 
     @Override

@@ -49,6 +49,7 @@ import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.examination.model.Examination;
@@ -126,6 +127,9 @@ public class ImporterService {
 
     @Autowired
     private QualityCardService qualityCardService;
+   
+    @Autowired
+    private DatasetAcquisitionService datasetAcquisitionService;
 
     @Autowired
     private DicomProcessing dicomProcessing;
@@ -164,7 +168,7 @@ public class ImporterService {
                 if (qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
                 } else { // Then do the import
-                    datasetAcquisitionRepository.saveAll(generatedAcquisitions);
+                	generatedAcquisitions = new HashSet<DatasetAcquisition>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
                         persistPatientInPacs(importJob.getPatients(), event);
                     } catch (Exception e) { // if error in pacs
@@ -174,7 +178,7 @@ public class ImporterService {
                         }
                         throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved");
                     }
-                }	
+                }
             } else {
                 throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
             }

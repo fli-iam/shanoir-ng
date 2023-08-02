@@ -265,4 +265,17 @@ public class SolrServiceImpl implements SolrService {
 		return result;
 	}
 
+	/**
+	 * Updates a list of datasets in Solr.
+	 * @param datasetIds the list of dataset IDs to update
+	 */
+	@Override
+	public void updateDatasets(List<Long> datasetIds) {
+		if (CollectionUtils.isEmpty(datasetIds)) {
+			return;
+		}
+		this.deleteFromIndex(datasetIds);
+		this.indexDatasets(datasetIds);;		
+	}
+
 }
