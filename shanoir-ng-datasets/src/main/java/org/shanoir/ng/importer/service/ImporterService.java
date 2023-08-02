@@ -533,8 +533,6 @@ public class ImporterService {
 
             dataset = datasetService.create(dataset);
             
-            solrService.indexDataset(dataset.getId());
-            
             event.setStatus(ShanoirEvent.SUCCESS);
             event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
                     +": Successfully created processed dataset for subject " + importJob.getSubjectName() + " in dataset "
