@@ -14,10 +14,12 @@
 
 package org.shanoir.ng.studycard.controler;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -219,7 +221,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> applyStudyCard(
-			@Parameter(name = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException {
+			@Parameter(name = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException, SolrServerException, IOException {
         if (studyCardApplyObject == null
                 || studyCardApplyObject.getDatasetAcquisitionIds() == null
                 || studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()

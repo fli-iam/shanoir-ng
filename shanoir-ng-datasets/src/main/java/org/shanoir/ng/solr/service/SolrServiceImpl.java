@@ -278,7 +278,7 @@ public class SolrServiceImpl implements SolrService {
 	 * @param datasetIds the list of dataset IDs to update
 	 */
 	@Override
-	public void updateDatasets(List<Long> datasetIds) {
+	public void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException {
 		if (CollectionUtils.isEmpty(datasetIds)) {
 			return;
 		}

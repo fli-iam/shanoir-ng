@@ -56,6 +56,6 @@ public interface SolrService {
 
 	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
-	void updateDatasets(List<Long> datasetIds);
+	void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException;
 
 }

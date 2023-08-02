@@ -14,8 +14,10 @@
 
 package org.shanoir.ng.studycard.controler;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -157,6 +159,6 @@ public interface StudyCardApi {
 			"application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDatasetAcquisition(#studyCardApplyObject.datasetAcquisitionIds, 'CAN_ADMINISTRATE'))")
 	ResponseEntity<Void> applyStudyCard(
-			@Parameter(name = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException, PacsException;
+			@Parameter(name = "study card id and acquisition ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws RestServiceException, PacsException, SolrServerException, IOException;
 
 }
