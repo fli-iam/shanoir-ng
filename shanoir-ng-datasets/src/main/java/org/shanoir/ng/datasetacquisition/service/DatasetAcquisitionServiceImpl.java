@@ -22,6 +22,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -43,7 +45,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.google.common.collect.Lists;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
@@ -125,7 +126,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
     	for (DatasetAcquisition acquisition: result) {
             shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
     	}
-    	return Lists.newArrayList(result);
+    	return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
     }
 
     @Override
