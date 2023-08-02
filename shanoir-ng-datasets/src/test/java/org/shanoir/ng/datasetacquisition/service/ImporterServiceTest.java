@@ -168,7 +168,7 @@ public class ImporterServiceTest {
 		
 		// THEN datasets are created
 		// Check what we save at the end
-		verify(datasetAcquisitionRepository).saveAll(any());
+		verify(datasetAcquisitionService).createAll(any());
 		//verify(datasetAcquisitionService).create(datasetAcq);
 		verify(dicomPersisterService).persistAllForSerie(any());
 

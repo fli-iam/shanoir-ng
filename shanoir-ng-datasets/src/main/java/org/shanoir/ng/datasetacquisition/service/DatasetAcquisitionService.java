@@ -15,6 +15,7 @@
 package org.shanoir.ng.datasetacquisition.service;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.solr.client.solrj.SolrServerException;
@@ -65,4 +66,6 @@ public interface DatasetAcquisitionService {
 	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
 
     boolean existsByStudyCardId(Long studyCardId);
+
+	Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
 }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dcm4che3.data.Tag;
+import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.shared.core.model.IdList;
@@ -29,6 +30,7 @@ import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.StudyCardApply;
@@ -65,6 +67,9 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Autowired
     private CardsProcessingService cardProcessingService;
+    
+    @Autowired
+    private SolrService solrService;
 
     @Override
     public ResponseEntity<Void> deleteStudyCard(
@@ -225,6 +230,18 @@ public class StudyCardApiController implements StudyCardApi {
         LOG.debug("re-apply studycard n° " + studyCard.getId());
         List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());
         cardProcessingService.applyStudyCard(studyCard, acquisitions);
+        
+        // Get all updated dataset ids
+        List<Long> datasetIds = new ArrayList<Long>();
+        for (DatasetAcquisition acquisition : acquisitions) {
+        	for (Dataset ds : acquisition.getDatasets()) {
+        		datasetIds.add(ds.getId());
+        	}
+        }
+        
+        // Update solr metadata
+        solrService.updateDatasets(datasetIds);
+        
         return new ResponseEntity<Void>(HttpStatus.OK);
     }
 
