@@ -130,7 +130,7 @@ public abstract class Dataset extends AbstractEntity {
 	 * Parent dataset with the same sampling grid, ie that can be superimposed
 	 * with this dataset.
 	 */
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "referenced_dataset_for_superimposition_id")
 	private Dataset referencedDatasetForSuperimposition;
 
