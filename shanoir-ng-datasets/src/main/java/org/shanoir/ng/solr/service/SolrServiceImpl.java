@@ -43,7 +43,7 @@ import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
-import org.shanoir.ng.solr.repository.SolrJWrapper;
+import org.shanoir.ng.solr.solrj.SolrJWrapper;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -183,7 +183,7 @@ public class SolrServiceImpl implements SolrService {
 			}
 		}
 
-		this.addAllToIndex(solrDocuments);
+		solrJWrapper.addAllToIndex(solrDocuments);
 	}
 
 	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
@@ -266,8 +266,8 @@ public class SolrServiceImpl implements SolrService {
 		if (CollectionUtils.isEmpty(datasetIds)) {
 			return;
 		}
-		solrJWrapper.deleteFromIndex(datasetIds);
-		solrJWrapper.indexDatasets(datasetIds);		
+		this.deleteFromIndex(datasetIds);
+		this.indexDatasets(datasetIds);		
 	}
 
 }

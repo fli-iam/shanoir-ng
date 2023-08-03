@@ -1,7 +1,7 @@
 /**
  * 
  */
-package org.shanoir.ng.solr.repository;
+package org.shanoir.ng.solr.solrj;
 
 import java.io.IOException;
 import java.time.LocalDate;

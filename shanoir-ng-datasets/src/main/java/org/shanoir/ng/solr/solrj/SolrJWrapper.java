@@ -17,7 +17,7 @@
  * https://github.com/swagger-api/swagger-codegen
  * Do not edit the class manually.
  */
-package org.shanoir.ng.solr.repository;
+package org.shanoir.ng.solr.solrj;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -41,13 +41,7 @@ public interface SolrJWrapper {
 	void addToIndex(ShanoirSolrDocument document) throws SolrServerException, IOException;
 	
 	void addAllToIndex(List<ShanoirSolrDocument> documents) throws SolrServerException, IOException;
-
-	void indexAll() throws SolrServerException, IOException;
-
-	void indexDataset(Long datasetId) throws SolrServerException, IOException;
 	
-	void indexDatasets(List<Long> datasetIds) throws SolrServerException, IOException;
-
 	void deleteFromIndex(Long datasetId) throws SolrServerException, IOException;
 
 	void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException;
