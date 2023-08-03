@@ -14,7 +14,7 @@ from preclinical.entities.anesthetic import test_preclinical_anesthetic
 from preclinical.entities.pathology import test_preclinical_pathology
 from core.entities.coil import test_core_coil
 from core.entities.center import test_core_center
-from core.entities.acquisition_equipement import test_core_acquisition_equipement
+from core.entities.acquisition_equipment import test_core_acquisition_equipment
 from core.entities.study import test_core_study
 from preclinical.imports.import_bruker import test_shanoir_import_dicom
 from utils.shanoir_util import *
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         
         if args.shanoir in ["entities", "all"]:
             shanoir_utility.login(args.user, args.password)
-#             test_core_acquisition_equipement(driver, shanoir_utility)
+#             test_core_acquisition_equipment(driver, shanoir_utility)
 #             test_core_center(driver, shanoir_utility)
 #             test_core_coil(driver, shanoir_utility)
             test_core_study(driver, shanoir_utility)

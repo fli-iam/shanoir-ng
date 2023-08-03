@@ -279,7 +279,7 @@ public class DICOMWebService {
 		if (url.contains("requestType=WADO")) {
 			instanceId = this.extractInstanceUID(url, null);
 			studyId = this.extractStudyUID(url, null);
-			serieId = this.extractSeriesUIDUID(url, null);
+			serieId = this.extractSeriesUID(url, null);
 			// http://localhost:8081/dcm4chee-arc/aets/AS_RECEIVED/rs/studies//series//instances//reject/113001%5EDCM
 			rejectURL = url.substring(0, url.indexOf("wado?")) + "rs/studies/" + studyId + "/series/" + serieId
 					+ "/instances/" + instanceId + REJECT_SUFFIX;
@@ -362,7 +362,7 @@ public class DICOMWebService {
 	 * @param defaultUID
 	 * @return the seriesUID
 	 */
-	private String extractSeriesUIDUID(String url, String seriesUID) {
+	private String extractSeriesUID(String url, String seriesUID) {
 		return extractUidPattern(url, "seriesUID", "&objectUID", seriesUID);
 	}
 

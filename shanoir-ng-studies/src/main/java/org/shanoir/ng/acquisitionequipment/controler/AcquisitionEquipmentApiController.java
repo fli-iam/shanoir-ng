@@ -123,10 +123,10 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		/* Save acquisition equipment in db. */
 		try {
 			AcquisitionEquipment newAcqEquipment = acquisitionEquipmentService.create(acquisitionEquipment);
-			AcquisitionEquipmentDTO equipementCreated = acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(newAcqEquipment);
+			AcquisitionEquipmentDTO equipmentCreated = acquisitionEquipmentMapper.acquisitionEquipmentToAcquisitionEquipmentDTO(newAcqEquipment);
 			
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EQUIPEMENT_EVENT, equipementCreated.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-			return new ResponseEntity<>(equipementCreated, HttpStatus.OK);
+			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EQUIPEMENT_EVENT, equipmentCreated.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+			return new ResponseEntity<>(equipmentCreated, HttpStatus.OK);
 		} catch (DataIntegrityViolationException e) {
 			checkDataIntegrityException(e, acquisitionEquipment);
 			throw e;

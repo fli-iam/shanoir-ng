@@ -45,7 +45,7 @@ public class CommonServiceImpl implements CommonService {
 	private CenterRepository centerRepository;
 
 	@Autowired
-	private AcquisitionEquipmentRepository equipementRepository;
+	private AcquisitionEquipmentRepository equipmentRepository;
 
 	@Override
 	public CommonIdNamesDTO findByIds(final CommonIdsDTO commonIdsDTO) {
@@ -68,10 +68,10 @@ public class CommonServiceImpl implements CommonService {
 				names.setSubject(new IdName(commonIdsDTO.getSubjectId(), subject.getName()));
 			}
 		}
-		if (commonIdsDTO.getEquipementId() != null) {
-			final AcquisitionEquipment equipement = equipementRepository.findById(commonIdsDTO.getEquipementId()).orElse(null);
-			if (equipement != null) {
-				names.setEquipement(new IdName(commonIdsDTO.getEquipementId(), equipement.getSerialNumber()));
+		if (commonIdsDTO.getEquipmentId() != null) {
+			final AcquisitionEquipment equipment = equipmentRepository.findById(commonIdsDTO.getEquipmentId()).orElse(null);
+			if (equipment != null) {
+				names.setEquipment(new IdName(commonIdsDTO.getEquipmentId(), equipment.getSerialNumber()));
 			}
 		}
 		return names;

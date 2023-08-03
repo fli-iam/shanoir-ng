@@ -32,10 +32,10 @@ public class ShanoirEventType {
 	public static final String UPDATE_DATASET_ACQUISITION_EVENT = "updateDatasetAcquisition.event";
 	public static final String DELETE_DATASET_ACQUISITION_EVENT = "deleteDatasetAcquisition.event";
 
-	/** Equipement **/
-	public static final String CREATE_EQUIPEMENT_EVENT = "createEquipement.event";
-	public static final String UPDATE_EQUIPEMENT_EVENT = "updateEquipement.event";
-	public static final String DELETE_EQUIPEMENT_EVENT = "deleteEquipement.event";
+	/** Equipment **/
+	public static final String CREATE_EQUIPEMENT_EVENT = "createEquipment.event";
+	public static final String UPDATE_EQUIPEMENT_EVENT = "updateEquipment.event";
+	public static final String DELETE_EQUIPEMENT_EVENT = "deleteEquipment.event";
 
 	/** Coil **/
 	public static final String CREATE_COIL_EVENT = "createCoil.event";

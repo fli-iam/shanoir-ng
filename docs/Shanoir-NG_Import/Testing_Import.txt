@@ -4,7 +4,7 @@ Testing of new import
 - dicom zip upload and import testing
 ----  sampleArchiveHealthy1.zip
 -------- ExamCard appear empty in the tree, remove their series (fixed)
--------- DicomEquipement is empty (fixed, now DicomEquipment is displayed)
+-------- DicomEquipment is empty (fixed, now DicomEquipment is displayed)
 -------- But with only one serie: bug?, maybe selected == null? (fixed, yes, related, check added), still bug in ms datasets now, to test tomorrow (fixed in ms datasets)
 -------- Test single serie: T2 HR 3 MM , 1 image (MREnhanced)
 ----------- Result: worked, as imported and visible in datasets, dicom download works, 1 big image; nii download and display in medInria works as well; preview works as well

@@ -27,7 +27,7 @@ public class CommonIdNamesDTO {
 	private IdName center;
 	private IdName study;
 	private IdName subject;
-	private IdName equipement;
+	private IdName equipment;
 
 	/**
 	 * @return the center
@@ -75,17 +75,17 @@ public class CommonIdNamesDTO {
 	}
 
 	/**
-	 * @return the equipement
+	 * @return the equipment
 	 */
-	public IdName getEquipement() {
-		return equipement;
+	public IdName getEquipment() {
+		return equipment;
 	}
 
 	/**
-	 * @param equipement the equipement to set
+	 * @param equipment the equipment to set
 	 */
-	public void setEquipement(IdName equipement) {
-		this.equipement = equipement;
+	public void setEquipment(IdName equipment) {
+		this.equipment = equipment;
 	}
 
 }

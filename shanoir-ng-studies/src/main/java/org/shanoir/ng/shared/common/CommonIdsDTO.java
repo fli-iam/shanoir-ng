@@ -28,7 +28,7 @@ public class CommonIdsDTO {
 
 	private Long subjectId;
 
-	private Long equipementId;
+	private Long equipmentId;
 
 	/**
 	 * @return the centerId
@@ -76,16 +76,16 @@ public class CommonIdsDTO {
 	}
 
 	/**
-	 * @return the equipementId
+	 * @return the equipmentId
 	 */
-	public Long getEquipementId() {
-		return equipementId;
+	public Long getEquipmentId() {
+		return equipmentId;
 	}
 
 	/**
-	 * @param equipementId the equipementId to set
+	 * @param equipmentId the equipmentId to set
 	 */
-	public void setEquipementId(Long equipementId) {
-		this.equipementId = equipementId;
+	public void setEquipmentId(Long equipmentId) {
+		this.equipmentId = equipmentId;
 	}
 }

@@ -28,14 +28,14 @@ public class CommonIdsDTO {
 
 	private Long subjectId;
 
-	private Long equipementId;
+	private Long equipmentId;
 
-	public CommonIdsDTO(Long centerId, Long studyId, Long subjectId, Long equipementId) {
+	public CommonIdsDTO(Long centerId, Long studyId, Long subjectId, Long equipmentId) {
 		super();
 		this.centerId = centerId;
 		this.studyId = studyId;
 		this.subjectId = subjectId;
-		this.equipementId = equipementId;
+		this.equipmentId = equipmentId;
 	}
 
 	/**
@@ -84,16 +84,16 @@ public class CommonIdsDTO {
 	}
 
 	/**
-	 * @return the equipementId
+	 * @return the equipmentId
 	 */
-	public Long getEquipementId() {
-		return equipementId;
+	public Long getEquipmentId() {
+		return equipmentId;
 	}
 
 	/**
-	 * @param equipementId the equipementId to set
+	 * @param equipmentId the equipmentId to set
 	 */
-	public void setEquipementId(Long equipementId) {
-		this.equipementId = equipementId;
+	public void setEquipmentId(Long equipmentId) {
+		this.equipmentId = equipmentId;
 	}
 }

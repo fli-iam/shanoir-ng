@@ -1,4 +1,4 @@
-def test_core_acquisition_equipement(driver, shanoir_util_to_use):
+def test_core_acquisition_equipment(driver, shanoir_util_to_use):
     # Acquisition equipment
     fields = [{
         'name': 'serialNumber',

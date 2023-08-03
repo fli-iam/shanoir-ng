@@ -97,8 +97,8 @@ public class RabbitMQConfiguration {
 	/** Queue to retrieve informations about studyc cards. */
 	public static final String FIND_STUDY_CARD_QUEUE = "find-study-card-queue";
 
-	/** Queue to retrieve the center ID from an acquisition equipement ID. */
-	public static final String ACQUISITION_EQUIPEMENT_CENTER_QUEUE = "acquisition-equipement-center-queue";
+	/** Queue to retrieve the center ID from an acquisition equipment ID. */
+	public static final String ACQUISITION_EQUIPEMENT_CENTER_QUEUE = "acquisition-equipment-center-queue";
 	
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
@@ -290,7 +290,7 @@ public class RabbitMQConfiguration {
 	}
 	
 	@Bean
-	public static Queue acquisitionEquipementCenterQueue() {
+	public static Queue acquisitionEquipmentCenterQueue() {
 		return new Queue(ACQUISITION_EQUIPEMENT_CENTER_QUEUE, true);
 	}
 	
