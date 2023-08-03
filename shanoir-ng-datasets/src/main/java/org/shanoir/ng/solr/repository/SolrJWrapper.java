@@ -34,7 +34,7 @@ import org.springframework.data.solr.core.query.result.SolrResultPage;
  * @author yyao
  *
  */
-public interface SolrRepository {
+public interface SolrJWrapper {
 			
 	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
 

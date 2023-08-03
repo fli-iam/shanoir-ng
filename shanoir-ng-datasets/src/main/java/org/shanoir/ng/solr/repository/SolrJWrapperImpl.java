@@ -55,9 +55,9 @@ import org.springframework.util.CollectionUtils;
  *
  */
 @Component
-public class SolrRepositoryImpl implements SolrRepository {
+public class SolrJWrapperImpl implements SolrJWrapper {
 
-	private static final Logger LOG = LoggerFactory.getLogger(SolrRepositoryImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(SolrJWrapperImpl.class);
 
 	private static final String DOCUMENT_ID_FACET = "id";
 	private static final String DATASET_ID_FACET = "datasetId";

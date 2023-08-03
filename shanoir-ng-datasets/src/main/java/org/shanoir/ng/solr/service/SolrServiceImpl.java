@@ -43,7 +43,7 @@ import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
-import org.shanoir.ng.solr.repository.SolrRepository;
+import org.shanoir.ng.solr.repository.SolrJWrapper;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -72,7 +72,7 @@ public class SolrServiceImpl implements SolrService {
 	private SolrClient solrClient;
 	
 	@Autowired
-	private SolrRepository solrRepository;
+	private SolrJWrapper solrRepository;
 
 	@Autowired
 	private ShanoirMetadataRepository shanoirMetadataRepository;
