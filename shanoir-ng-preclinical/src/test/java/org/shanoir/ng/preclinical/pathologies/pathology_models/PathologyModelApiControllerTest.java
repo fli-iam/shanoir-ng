@@ -99,11 +99,12 @@ public class PathologyModelApiControllerTest {
 		doNothing().when(modelServiceMock).deleteById(1L);
 		given(modelServiceMock.findAll()).willReturn(Arrays.asList(new PathologyModel()));
 		given(modelServiceMock.findByPathology(new Pathology())).willReturn(Arrays.asList(new PathologyModel()));
-		given(modelServiceMock.findById(1L)).willReturn(new PathologyModel());
-		given(pathologyServiceMock.findById(1L)).willReturn(new Pathology());
 		PathologyModel patho = new PathologyModel();
+		patho.setId(1L);
+		given(modelServiceMock.findById(1L)).willReturn(patho);
+		given(pathologyServiceMock.findById(1L)).willReturn(new Pathology());
 		patho.setId(Long.valueOf(123));
-		given(modelServiceMock.save(Mockito.any(PathologyModel.class))).willReturn(patho );
+		given(modelServiceMock.save(Mockito.any(PathologyModel.class))).willReturn(patho);
 		
 		given(uniqueValidator.validate(Mockito.any(PathologyModel.class))).willReturn(new FieldErrorMap());
 		given(editableOnlyValidator.validate(Mockito.any(PathologyModel.class))).willReturn(new FieldErrorMap());
