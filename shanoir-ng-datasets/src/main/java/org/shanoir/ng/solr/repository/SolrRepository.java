@@ -38,7 +38,7 @@ public interface SolrRepository {
 			
 	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
-	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn( List<Long> studyIds, Collection<Long> datasetIds, Pageable pageable);
+	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Map<Long, List<String>> studiesCenter, Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
 	
 	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException;
 	

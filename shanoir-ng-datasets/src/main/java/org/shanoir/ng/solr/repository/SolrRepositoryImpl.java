@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -114,7 +115,6 @@ public class SolrRepositoryImpl implements SolrRepository {
 	@Autowired
 	private SolrClient solrClient;
 
-	@Override
 	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return getSearchResultsWithFacetsForAdmin(facet, pageable);			
@@ -123,7 +123,6 @@ public class SolrRepositoryImpl implements SolrRepository {
 		}
 	}
 
-	@Override
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Map<Long, List<String>> studyIds,
 			ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
 		if (studyIds == null || studyIds.isEmpty()) {
@@ -132,6 +131,39 @@ public class SolrRepositoryImpl implements SolrRepository {
 			return getSearchResultsWithFacets(facet, pageable, studyIds);			
 		}
 
+	}
+
+	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException {
+		final SolrQuery query = new SolrQuery();
+		final StringBuffer queryString = new StringBuffer();
+		queryString.append("id:(");
+		for (Iterator iterator = datasetIds.iterator(); iterator.hasNext();) {
+			Long datasetId = (Long) iterator.next();
+			queryString.append(datasetId);
+			queryString.append(" ");
+		}
+		queryString.append(")");
+		query.setQuery(queryString.toString());
+
+		/* query Solr server */
+		QueryResponse response;
+		try {
+			LOG.debug("Solr search : " + query);
+			response = solrClient.query(query);
+			LOG.debug("Solr response : " + response);
+		} catch (IOException e) {
+			throw new RestServiceException(e, new ErrorModel(500, "Error querying Solr"));
+		} catch (SolrException | SolrServerException e) {
+			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");
+			throw new RestServiceException(e, error);
+		}
+		return buildShanoirSolrPage(response, pageable, null);
+	}
+
+	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Map<Long, List<String>> studiesCenter, Collection<Long> datasetIds,
+			Pageable pageable) throws RestServiceException {
+		ShanoirSolrQuery query = new ShanoirSolrQuery();
+		return getSearchResultsWithFacets(query, pageable, studiesCenter);
 	}
 
 	private void addFilterQuery(SolrQuery query, String fieldName, Collection<String> values) {
@@ -391,19 +423,6 @@ public class SolrRepositoryImpl implements SolrRepository {
 				}
 			}
 		}
-	}
-
-	@Override
-	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException {
-		ShanoirSolrQuery query = new ShanoirSolrQuery();
-		return getSearchResultsWithFacets(query, pageable, null);
-	}
-
-	@Override
-	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(List<Long> studyIds, Collection<Long> datasetIds,
-			Pageable pageable) {
-		
-		return null;
 	}
 
 }

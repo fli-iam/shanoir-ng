@@ -220,17 +220,22 @@ public class SolrServiceImpl implements SolrService {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			result = solrRepository.findByFacetCriteriaForAdmin(query, pageable);
 		} else {
-			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(KeycloakUtil.getTokenUserId()));
-			Map<Long, List<String>> studiesCenter = new HashMap<>();
-			List<Center> centers = Utils.toList(centerRepository.findAll());
-			for(StudyUser su : studyUsers) {
-				if (su.isConfirmed()) {
-					studiesCenter.put(su.getStudyId(), su.getCenterIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
-				}
-			}
+			Map<Long, List<String>> studiesCenter = getStudiesCenter();
 			result = solrRepository.findByStudyIdInAndFacetCriteria(studiesCenter, query, pageable);
 		}
 		return result;
+	}
+
+	private Map<Long, List<String>> getStudiesCenter() {
+		List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(KeycloakUtil.getTokenUserId()));
+		Map<Long, List<String>> studiesCenter = new HashMap<>();
+		List<Center> centers = Utils.toList(centerRepository.findAll());
+		for(StudyUser su : studyUsers) {
+			if (su.isConfirmed()) {
+				studiesCenter.put(su.getStudyId(), su.getCenterIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
+			}
+		}
+		return studiesCenter;
 	}
 	
 	private String findCenterName(List<Center> centers, Long id) {
@@ -264,11 +269,8 @@ public class SolrServiceImpl implements SolrService {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			result = solrRepository.findByDatasetIdIn(datasetIds, pageable);
 		} else {
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			if (studyIds.isEmpty()) {
-				return new PageImpl<>();
-			}
-			result = solrRepository.findByStudyIdInAndDatasetIdIn(studyIds, datasetIds, pageable);
+			Map<Long, List<String>> studiesCenter = getStudiesCenter();
+			result = solrRepository.findByStudyIdInAndDatasetIdIn(studiesCenter, datasetIds, pageable);
 		}
 		return result;
 	}

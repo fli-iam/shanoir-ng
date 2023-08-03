@@ -294,4 +294,5 @@ public class ShanoirSolrQuery {
 	public void setCenterId(Collection<Long> centerId) {
 		this.centerId = centerId;
 	}
+
 }
