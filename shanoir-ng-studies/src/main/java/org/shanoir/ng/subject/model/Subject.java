@@ -47,7 +47,6 @@ import jakarta.persistence.PostLoad;
 import jakarta.persistence.SqlResultSetMapping;
 
 
-@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 @Entity
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
 	"preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
@@ -105,13 +104,6 @@ public class Subject extends HalEntity {
 	@PostLoad
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "subject/" + getId());
-	}
-
-	@Override
-	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy = "increment") // strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
-	public Long getId() {
-		return super.getId();
 	}
 
 	public LocalDate getBirthDate() {
