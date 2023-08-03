@@ -152,19 +152,6 @@ public interface StudyApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	ResponseEntity<StudyStorageVolumeDTO> getStudyDetailedStorageVolume(@PathVariable("studyId") Long studyId) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "If exists, returns the total sizes of the studies files corresponding to the given id", response = Map.class, tags={})
-	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "total sizes of the studies files in bytes", response = Map.class),
-			@ApiResponse(code = 401, message = "unauthorized"),
-			@ApiResponse(code = 403, message = "forbidden"),
-			@ApiResponse(code = 404, message = "no study found"),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
-	@PostMapping(value = "/totalStorageVolume")
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	ResponseEntity<Map<Long, Long>> getStudiesTotalStorageVolume(
-			@ApiParam(value = "ids of the studies", required=true) @Valid
-			@RequestParam(value = "studyIds", required = true) List<Long> studyIds) throws RestServiceException, EntityNotFoundException, MalformedURLException, IOException;
-
 	@ApiOperation(value = "", notes = "Updates a study", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "study updated", response = Void.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),

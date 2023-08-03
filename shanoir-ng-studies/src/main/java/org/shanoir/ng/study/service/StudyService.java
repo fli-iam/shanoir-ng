@@ -146,6 +146,4 @@ public interface StudyService {
 	List<Study> findPublicStudies();
 
     StudyStorageVolumeDTO getStudyDetailedStorageVolume(Long studyId);
-
-	Map<Long, Long> getStudiesTotalStorageVolume(List<Long> studiesId);
 }

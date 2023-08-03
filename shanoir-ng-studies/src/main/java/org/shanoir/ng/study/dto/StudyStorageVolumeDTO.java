@@ -1,16 +1,14 @@
 package org.shanoir.ng.study.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class StudyStorageVolumeDTO {
-
-    private Long studyId;
-
     private Long total = 0L;
 
-    private List<SizeByFormatDTO> sizesByExpressionFormat;
+    private List<SizeByFormatDTO> sizesByExpressionFormat = new ArrayList<>();
 
-    private Long extraDataSize;
+    private Long extraDataSize = 0L;
 
     public StudyStorageVolumeDTO() {
     }
@@ -39,11 +37,4 @@ public class StudyStorageVolumeDTO {
         this.total = total;
     }
 
-    public Long getStudyId() {
-        return studyId;
-    }
-
-    public void setStudyId(Long studyId) {
-        this.studyId = studyId;
-    }
 }

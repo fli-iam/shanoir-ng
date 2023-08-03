@@ -694,27 +694,6 @@ public class StudyServiceImpl implements StudyService {
 
 	}
 
-	@Override
-	public Map<Long, Long> getStudiesTotalStorageVolume(List<Long> studyIds) {
-		List<StudyStorageVolumeDTO> dtos;
-		try {
-			String dtosAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyIds);
-			dtos = objectMapper.readValue(dtosAsString, new TypeReference<>(){});
-		} catch (AmqpException | JsonProcessingException e) {
-			LOG.error("Error while fetching studies [{}] datasets volume storage total.", studyIds, e);
-			return null;
-		}
-
-		Map<Long, Long> sizeById = new HashMap<>();
-
-		for(StudyStorageVolumeDTO dto : dtos){
-			sizeById.put(dto.getStudyId(),
-					dto.getTotal() + this.getStudyFilesSize(dto.getStudyId()));
-		}
-
-		return sizeById;
-	}
-
 	private long getStudyFilesSize(Long studyId){
 		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
 		if (studyOpt.isEmpty()) {

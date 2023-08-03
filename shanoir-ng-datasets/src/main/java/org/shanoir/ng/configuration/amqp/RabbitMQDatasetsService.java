@@ -374,29 +374,6 @@ public class RabbitMQDatasetsService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME)
-	@RabbitHandler
-	@Transactional
-	public String getTotalStudiesStorageVolume(List<Long> studyIds) {
-
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-
-		List<StudyStorageVolumeDTO> results = new ArrayList<>();
-
-		Map<Long, Long> volumeByStudyId = datasetService.getExpressionTotalSizesByStudyId(studyIds);
-
-		volumeByStudyId.forEach((key, value) -> {
-			results.add(new StudyStorageVolumeDTO(key,
-					value + examinationService.getExtraDataSizeByStudyId(key)));
-		});
-		try {
-			return objectMapper.writeValueAsString(results);
-		} catch (JsonProcessingException e) {
-			LOG.error("Error while serializing list of StudyVolumeStorageDTO.", e);
-			throw new AmqpRejectAndDontRequeueException(e);
-		}
-	}
-
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME)
 	@RabbitHandler
 	@Transactional
@@ -404,8 +381,7 @@ public class RabbitMQDatasetsService {
 
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 
-		StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(studyId,
-				datasetService.getExpressionSizesByStudyId(studyId),
+		StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(datasetService.getExpressionSizesByStudyId(studyId),
 				examinationService.getExtraDataSizeByStudyId(studyId));
 
 		try {

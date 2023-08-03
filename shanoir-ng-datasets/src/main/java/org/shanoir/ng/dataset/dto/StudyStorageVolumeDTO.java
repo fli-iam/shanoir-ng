@@ -4,16 +4,13 @@ import java.util.List;
 
 public class StudyStorageVolumeDTO {
 
-    private Long studyId;
-
     private Long total = 0L;
 
     private List<SizeByFormatDTO> sizesByExpressionFormat;
 
     private Long extraDataSize;
 
-    public StudyStorageVolumeDTO(Long studyId, List<SizeByFormatDTO> sizesByExpressionFormat, Long extraDataSize) {
-        this.studyId = studyId;
+    public StudyStorageVolumeDTO(List<SizeByFormatDTO> sizesByExpressionFormat, Long extraDataSize) {
         this.sizesByExpressionFormat = sizesByExpressionFormat;
         if (sizesByExpressionFormat != null){
             sizesByExpressionFormat.forEach(dto -> this.total += dto.getSize());
@@ -23,11 +20,6 @@ public class StudyStorageVolumeDTO {
             this.total += extraDataSize;
         }
 
-    }
-
-    public StudyStorageVolumeDTO(Long studyId, Long total) {
-        this.studyId = studyId;
-        this.total = total;
     }
 
     public List<SizeByFormatDTO> getSizesByExpressionFormat() {
@@ -52,13 +44,5 @@ public class StudyStorageVolumeDTO {
 
     public void setTotal(Long total) {
         this.total = total;
-    }
-
-    public Long getStudyId() {
-        return studyId;
-    }
-
-    public void setStudyId(Long studyId) {
-        this.studyId = studyId;
     }
 }

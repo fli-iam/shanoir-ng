@@ -231,19 +231,6 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<Map<Long, Long>> getStudiesTotalStorageVolume(@PathVariable("studiesIds") final List<Long> studiesIds) throws RestServiceException {
-		Map<Long, Long> sizeById = studyService.getStudiesTotalStorageVolume(studiesIds);
-		if(sizeById == null){
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-							"Error while fetching study datasets storage volume total.", null)
-			);
-		}
-
-		return new ResponseEntity<>(sizeById, HttpStatus.OK);
-	}
-
-	@Override
 	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
 											final BindingResult result) throws RestServiceException {
 
