@@ -22,9 +22,9 @@ import { LoadingBarComponent } from '../../shared/components/loading-bar/loading
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
-import {DatasetDTO, DatasetDTOService, StudyVolumeStorageDTO} from './dataset.dto';
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
+import {DatasetDTO, DatasetDTOService} from "./dataset.dto";
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> implements OnDestroy {

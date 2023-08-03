@@ -44,9 +44,7 @@ import { AccessRequestService } from 'src/app/users/access-request/access-reques
 import { Profile } from "../../shared/models/profile.model";
 import { AccessRequest } from 'src/app/users/access-request/access-request.model';
 import { ProcessingService } from 'src/app/processing/processing.service';
-import {Dataset} from "../../datasets/shared/dataset.model";
 import {DatasetService} from "../../datasets/shared/dataset.service";
-import {StudyVolumeStorageDTO} from "../../datasets/shared/dataset.dto";
 import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
 import {KeyValue} from "@angular/common";
 
@@ -123,7 +121,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
-        let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id, true).then(study => {
 
           this.study = study;
 
@@ -138,12 +136,6 @@ export class StudyComponent extends EntityComponent<Study> {
                     let bname = b.subjectStudyIdentifier ? b.subjectStudyIdentifier : b.subject.name;
                     return aname.localeCompare(bname);
                 });
-
-            this.getLabeledSizes(study.id).then(sizes => {
-                study.totalSize = sizes.get("Total");
-                sizes.delete("Total");
-                study.sizes = sizes;
-            });
 
             this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
@@ -167,7 +159,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
-        let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id, true).then(study => {
             this.study = study;
 
             if (this.study.profile == null) {
@@ -175,12 +167,6 @@ export class StudyComponent extends EntityComponent<Study> {
               profile.profileName = "Profile Neurinfo";
               this.study.profile = profile;
             }
-
-            this.getLabeledSizes(study.id).then(sizes => {
-                study.totalSize = sizes.get("Total");
-                sizes.delete("Total");
-                study.sizes = sizes;
-            });
 
             this.hasStudyAdminRight().then(val => this.isStudyAdmin = val);
 
@@ -462,23 +448,6 @@ export class StudyComponent extends EntityComponent<Study> {
       return capitalsAndUnderscoresToDisplayable(studyStatus);
     }
 
-    studySizeStr(size: number) {
-
-      const base: number = 1024;
-      const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-      if(size == null || size == 0){
-        return "0 " + units[0];
-      }
-
-      const exponent: number = Math.floor(Math.log(size) / Math.log(base));
-      let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
-      let unit: string = units[exponent];
-
-      return value + " " + unit;
-
-    }
-
     public click() {
         this.fileInput.nativeElement.click();
     }
@@ -679,5 +648,9 @@ export class StudyComponent extends EntityComponent<Study> {
                 this.study.subjectStudyList = study.subjectStudyList;
             });
         }, 1000);
+    }
+
+    storageVolumePrettyPrint(size: number) {
+        return this.studyService.storageVolumePrettyPrint(size);
     }
 }

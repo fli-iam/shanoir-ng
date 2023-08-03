@@ -238,19 +238,3 @@ export class EegDatasetDTO extends DatasetDTO {
 export class MrDatasetMetadataDTO {
     mrDatasetNature: MrDatasetNature;
 }
-
-export class StudyVolumeStorageDTO {
-
-    total: number;
-    sizesByExpressionFormat: SizeByFormatDTO[];
-    extraDataSize: number;
-
-}
-
-
-export class SizeByFormatDTO {
-
-    format: DatasetExpressionFormat;
-    size: number;
-
-}

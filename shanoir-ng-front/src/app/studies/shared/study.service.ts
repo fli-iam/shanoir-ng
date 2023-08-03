@@ -27,10 +27,16 @@ import { Profile } from '../../shared/models/profile.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { StudyUserRight } from './study-user-right.enum';
-import { CenterStudyDTO, PublicStudyData, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
+import {
+    CenterStudyDTO,
+    PublicStudyData,
+    StudyDTO,
+    StudyDTOService,
+    StudyStorageVolumeDTO,
+    SubjectWithSubjectStudyDTO
+} from './study.dto';
 import { Study } from './study.model';
 import { combineAll } from 'rxjs/operators';
-import {StudyVolumeStorageDTO} from "../../datasets/shared/dataset.dto";
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -264,16 +270,33 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         }
     }
 
-    getStudyDetailedStorageVolume(id: number): Promise<StudyVolumeStorageDTO> {
-        return this.http.get<StudyVolumeStorageDTO>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume/' + id)
+    getStudyDetailedStorageVolume(id: number): Promise<StudyStorageVolumeDTO> {
+        return this.http.get<StudyStorageVolumeDTO>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume/' + id)
             .toPromise();
     }
 
-    getStudiesTotalStorageVolume(ids: Set<number>): Promise<StudyVolumeStorageDTO[]> {
+    getStudiesTotalStorageVolume(ids: Set<number>): Promise<StudyStorageVolumeDTO[]> {
         const formData: FormData = new FormData();
         formData.set('studyIds', Array.from(ids).join(","));
 
-        return this.http.post<StudyVolumeStorageDTO[]>(AppUtils.BACKEND_API_STUDY_URL + '/totalStorageVolume', formData)
+        return this.http.post<StudyStorageVolumeDTO[]>(AppUtils.BACKEND_API_STUDY_URL + '/totalStorageVolume', formData)
             .toPromise();
+    }
+
+    storageVolumePrettyPrint(size: number) {
+
+        const base: number = 1024;
+        const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+        if(size == null || size == 0){
+            return "0 " + units[0];
+        }
+
+        const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+        let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
+        let unit: string = units[exponent];
+
+        return value + " " + unit;
+
     }
 }

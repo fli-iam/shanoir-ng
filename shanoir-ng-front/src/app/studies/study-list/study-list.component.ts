@@ -48,7 +48,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
     getEntities(): Promise<Study[]> {
         let earlyResult: Promise<Study[]> = Promise.all([
-            this.studyService.getAll(),
+            this.studyService.getAll(true),
             this.studyService.getPublicStudiesData()
         ]).then(([studies, publicStudies]) => {
             if (!studies) studies = [];
@@ -120,6 +120,11 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             },
             {
                 headerName: "Members", field: "nbMembers", type: "number", width: '30px'
+            },
+            {
+                headerName: "Storage volume", field: "totalSize", disableSearch: true,
+                tip: (study: any) => { return this.printDetailedStorageVolume(study.detailedSizes)},
+                cellRenderer: (params: any) => { return this.studyService.storageVolumePrettyPrint(params.data.totalSize); }
             }
         ];
         return colDef;
@@ -161,5 +166,14 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 super.goToViewFromEntity(study);
             }
         }
+    }
+
+    private printDetailedStorageVolume(detailedSizes: Map<String, number>) {
+        let detail = "";
+        let sortedSizes = new Map([...detailedSizes.entries()].sort((a, b) => b[1] - a[1]));
+        sortedSizes.forEach((size: number, format: String) => {
+            detail += format + " : " + this.studyService.storageVolumePrettyPrint(size) + "\n";
+        });
+        return detail;
     }
 }

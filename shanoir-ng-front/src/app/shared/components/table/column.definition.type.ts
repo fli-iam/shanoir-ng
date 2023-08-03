@@ -2,20 +2,20 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 export type ColumnDefinition = {
-    /** the header for that column */ 
+    /** the header for that column */
     headerName?: string,
 
-    /** the row item's field displayed in this column, ie if the item is 'car' you can set 'owner' or 'owner.name' as field */ 
+    /** the row item's field displayed in this column, ie if the item is 'car' you can set 'owner' or 'owner.name' as field */
     field?: string,
 
     /** used if field gives nothing */
@@ -36,7 +36,7 @@ export type ColumnDefinition = {
     /** disable the possibility of sorting the table based on that column */
     disableSorting?: boolean,
 
-    /** disable the possibility of sorting the table based on that column */
+    /** disable the possibility search based on that column */
     disableSearch?: boolean,
 
     /** default width of the column as a css representation (20px, 15%, ...) */
@@ -60,25 +60,25 @@ export type ColumnDefinition = {
     /** perform an action when clicking a button type cell */
     action?: (item: any) => void,
 
-    /** condition for displaying a button */ 
+    /** condition for displaying a button */
     condition?: (item: any) => boolean,
 
     /** boolean true value icon representation or button icon. See https://fontawesome.com/icons/ */
     awesome?: `fa${string} fa${string}`,
 
-    /** css color the the awesome icon */ 
+    /** css color the the awesome icon */
     color?: string,
 
     /** boolean false value icon */
     awesomeFalse?: `fa${string} fa${string}`,
 
-    /** css color the the awesome icon */ 
+    /** css color the the awesome icon */
     colorFalse?: string,
 
     awesomeFunction?: (item: any) => { awesome: `fa${string} fa${string}`, color: string }
 
     /** add a descrption when cursor stands still a few second over the column */
-    tip?: string,
+    tip?: (item: any) => string,
 
     /** is this field editable in edit mode ? */
     editable?: boolean | ((item: any) => boolean),

@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}"
                     [class.bool]="vars.boolean"
                     [class.progress]="col.type == 'progress'"
-                    [attr.title]="col.tip != undefined ? col.tip : (vars.render.text ? vars.render.text : '')"
+                    [attr.title]="col.tip != undefined ? col.tip(item) : (vars.render.text ? vars.render.text : '')"
                     [style.color]="vars.render?.color"
                     [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
                     #refTd

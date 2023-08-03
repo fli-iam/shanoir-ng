@@ -136,13 +136,23 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<StudyDTO>> findStudies() {
+	public ResponseEntity<List<StudyDTO>> findStudies(boolean withStorageVolume) {
 		List<Study> studies = studyService.findAll();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} else {
-			return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
 		}
+
+		List<StudyDTO> dtos = studyMapper.studiesToStudyDTOs(studies);
+
+		if(!withStorageVolume){
+			return new ResponseEntity<>(dtos, HttpStatus.OK);
+		}
+
+		for(StudyDTO dto : dtos){
+			dto.setStorageVolume(studyService.getStudyDetailedStorageVolume(dto.getId()));
+		}
+
+		return new ResponseEntity<>(dtos, HttpStatus.OK);
 	}
 
 	@Override
@@ -172,13 +182,21 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId) {
+	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId, boolean withStorageVolume) {
 		Study study = studyService.findById(studyId);
+
 		if (study == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} else {
-			return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
 		}
+
+		StudyDTO dto = studyMapper.studyToStudyDTO(study);
+
+		if(withStorageVolume){
+			dto.setStorageVolume(studyService.getStudyDetailedStorageVolume(dto.getId()));
+		}
+
+		return new ResponseEntity<>(dto, HttpStatus.OK);
+
 	}
 
 	@Override

@@ -74,7 +74,11 @@ public interface StudyApi {
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<StudyDTO>> findStudies();
+	ResponseEntity<List<StudyDTO>> findStudies(
+			@ApiParam(value = "Fetch total storage volume of studies", allowableValues = "true, false", defaultValue = "false")
+			@Valid
+			@RequestParam(value = "withStorageVolume", required = false, defaultValue="false") boolean withStorageVolume
+	);
 
 	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available", response = Study.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
@@ -119,7 +123,10 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudyDTO(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<StudyDTO> findStudyById(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@ApiParam(value = "Fetch detailed storage volume of study", allowableValues = "true, false", defaultValue = "false")
+			@Valid
+			@RequestParam(value = "withStorageVolume", required = false, defaultValue="false") boolean withStorageVolume);
 
 	@ApiOperation(value = "", notes = "Saves a new study", response = Study.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "created study", response = Study.class),
