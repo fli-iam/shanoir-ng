@@ -675,7 +675,11 @@ public class StudyServiceImpl implements StudyService {
 		StudyStorageVolumeDTO dto;
 		try {
 			String dtoAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, studyId);
-			dto = objectMapper.readValue(dtoAsString, StudyStorageVolumeDTO.class);
+			if(dtoAsString != null && !dtoAsString.isEmpty()){
+				dto = objectMapper.readValue(dtoAsString, StudyStorageVolumeDTO.class);
+			}else{
+				dto = new StudyStorageVolumeDTO();
+			}
 		} catch (AmqpException | JsonProcessingException e) {
 			LOG.error("Error while fetching study [{}] datasets volume storage details.", studyId, e);
 			return null;

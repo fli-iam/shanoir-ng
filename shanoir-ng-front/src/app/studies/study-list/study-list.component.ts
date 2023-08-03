@@ -169,6 +169,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
     }
 
     private printDetailedStorageVolume(detailedSizes: Map<String, number>) {
+        if(!detailedSizes){
+            return "";
+        }
         let detail = "";
         let sortedSizes = new Map([...detailedSizes.entries()].sort((a, b) => b[1] - a[1]));
         sortedSizes.forEach((size: number, format: String) => {

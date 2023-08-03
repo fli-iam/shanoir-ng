@@ -12,17 +12,7 @@ public class StudyStorageVolumeDTO {
 
     private Long extraDataSize;
 
-    public StudyStorageVolumeDTO(List<SizeByFormatDTO> sizesByExpressionFormat, Long extraDataSize) {
-        this.sizesByExpressionFormat = sizesByExpressionFormat;
-        if (sizesByExpressionFormat != null){
-            sizesByExpressionFormat.forEach(dto -> this.total += dto.getSize());
-        }
-        this.extraDataSize = extraDataSize;
-        if (extraDataSize != null){
-            this.total += extraDataSize;
-        }
-
-
+    public StudyStorageVolumeDTO() {
     }
 
     public List<SizeByFormatDTO> getSizesByExpressionFormat() {
