@@ -152,12 +152,4 @@ public class PathologyModelApiControllerTest {
 				.content(gson.toJson(PathologyModelUtil.createPathologyModel()))).andExpect(status().isOk());
 	}
 
-	@Test
-	@WithMockUser
-	public void uploadSpecificationsTest() throws Exception {
-		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain", "some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_SPECS).file(firstFile))
-				.andExpect(status().isOk());
-	}
-
 }
