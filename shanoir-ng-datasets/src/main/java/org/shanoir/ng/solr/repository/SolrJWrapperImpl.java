@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -114,6 +115,31 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 
 	@Autowired
 	private SolrClient solrClient;
+	
+	public void addToIndex (final ShanoirSolrDocument document) throws SolrServerException, IOException {
+		solrClient.addBean(document);
+		solrClient.commit();
+	}
+
+	public void addAllToIndex (final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
+		solrClient.addBeans(documents);
+		solrClient.commit();
+	}
+
+	public void deleteFromIndex(Long datasetId) throws SolrServerException, IOException {
+		solrClient.deleteById(Long.toString(datasetId));
+		solrClient.commit();
+	}
+
+	public void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException {
+		solrClient.deleteById(datasetIds.stream().map(String::valueOf).collect(Collectors.toList()), 0);
+		solrClient.commit();
+	}
+
+	public void deleteAll() throws SolrServerException, IOException {
+		solrClient.deleteByQuery("*:*");
+		solrClient.commit();
+	}
 
 	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException {
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {

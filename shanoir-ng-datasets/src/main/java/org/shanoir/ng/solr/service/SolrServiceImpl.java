@@ -67,12 +67,9 @@ import org.springframework.util.CollectionUtils;
  */
 @Service
 public class SolrServiceImpl implements SolrService {
-
-	@Autowired
-	private SolrClient solrClient;
 	
 	@Autowired
-	private SolrJWrapper solrRepository;
+	private SolrJWrapper solrJWrapper;
 
 	@Autowired
 	private ShanoirMetadataRepository shanoirMetadataRepository;
@@ -86,40 +83,26 @@ public class SolrServiceImpl implements SolrService {
 	@Autowired
 	private CenterRepository centerRepository;
 
-	@Transactional
-	@Override
 	public void addToIndex (final ShanoirSolrDocument document) throws SolrServerException, IOException {
-		solrClient.addBean(document);
-		solrClient.commit();
+		solrJWrapper.addToIndex(document);
 	}
 
-	@Transactional
-	@Override
 	public void addAllToIndex (final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
-		solrClient.addBeans(documents);
-		solrClient.commit();
+		solrJWrapper.addAllToIndex(documents);
 	}
 
-	@Transactional
-	@Override
 	public void deleteFromIndex(Long datasetId) throws SolrServerException, IOException {
-		solrClient.deleteById(Long.toString(datasetId));
-		solrClient.commit();
+		solrJWrapper.deleteFromIndex(datasetId);
 	}
 
-	@Transactional
-	@Override
 	public void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException {
-		solrClient.deleteById(datasetIds.stream().map(String::valueOf).collect(Collectors.toList()), 0);
-		solrClient.commit();
+		solrJWrapper.deleteFromIndex(datasetIds);
 	}
 
-	@Transactional
 	public void deleteAll() throws SolrServerException, IOException {
-		solrClient.deleteByQuery("*:*");
-		solrClient.commit();
+		solrJWrapper.deleteAll();
 	}
-
+	
 	@Transactional
 	@Override
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
@@ -161,8 +144,7 @@ public class SolrServiceImpl implements SolrService {
 		}
 		doc.setTags(tags);
 
-		solrClient.addBean(doc);
-		solrClient.commit();
+		solrJWrapper.addToIndex(doc);
 	}
 
 	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas) throws SolrServerException, IOException {
@@ -218,10 +200,10 @@ public class SolrServiceImpl implements SolrService {
 		SolrResultPage<ShanoirSolrDocument> result = null;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByFacetCriteriaForAdmin(query, pageable);
+			result = solrJWrapper.findByFacetCriteriaForAdmin(query, pageable);
 		} else {
 			Map<Long, List<String>> studiesCenter = getStudiesCenter();
-			result = solrRepository.findByStudyIdInAndFacetCriteria(studiesCenter, query, pageable);
+			result = solrJWrapper.findByStudyIdInAndFacetCriteria(studiesCenter, query, pageable);
 		}
 		return result;
 	}
@@ -267,10 +249,10 @@ public class SolrServiceImpl implements SolrService {
 		Page<ShanoirSolrDocument> result;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByDatasetIdIn(datasetIds, pageable);
+			result = solrJWrapper.findByDatasetIdIn(datasetIds, pageable);
 		} else {
 			Map<Long, List<String>> studiesCenter = getStudiesCenter();
-			result = solrRepository.findByStudyIdInAndDatasetIdIn(studiesCenter, datasetIds, pageable);
+			result = solrJWrapper.findByStudyIdInAndDatasetIdIn(studiesCenter, datasetIds, pageable);
 		}
 		return result;
 	}
@@ -284,8 +266,8 @@ public class SolrServiceImpl implements SolrService {
 		if (CollectionUtils.isEmpty(datasetIds)) {
 			return;
 		}
-		this.deleteFromIndex(datasetIds);
-		this.indexDatasets(datasetIds);;		
+		solrJWrapper.deleteFromIndex(datasetIds);
+		solrJWrapper.indexDatasets(datasetIds);		
 	}
 
 }

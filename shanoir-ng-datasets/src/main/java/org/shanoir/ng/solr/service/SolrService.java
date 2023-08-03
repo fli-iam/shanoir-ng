@@ -50,7 +50,7 @@ public interface SolrService {
 
 	void deleteFromIndex(Long datasetId) throws SolrServerException, IOException;
 	
-	public void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException;
+	void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException;
 
 	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 

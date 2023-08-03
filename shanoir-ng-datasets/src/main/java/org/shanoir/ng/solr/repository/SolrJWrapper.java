@@ -19,10 +19,12 @@
  */
 package org.shanoir.ng.solr.repository;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
@@ -35,7 +37,23 @@ import org.springframework.data.solr.core.query.result.SolrResultPage;
  *
  */
 public interface SolrJWrapper {
-			
+	
+	void addToIndex(ShanoirSolrDocument document) throws SolrServerException, IOException;
+	
+	void addAllToIndex(List<ShanoirSolrDocument> documents) throws SolrServerException, IOException;
+
+	void indexAll() throws SolrServerException, IOException;
+
+	void indexDataset(Long datasetId) throws SolrServerException, IOException;
+	
+	void indexDatasets(List<Long> datasetIds) throws SolrServerException, IOException;
+
+	void deleteFromIndex(Long datasetId) throws SolrServerException, IOException;
+
+	void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException;
+	
+	void deleteAll() throws SolrServerException, IOException;
+
 	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
 	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Map<Long, List<String>> studiesCenter, Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
