@@ -133,19 +133,17 @@ public class SolrRepositoryImpl implements SolrRepository {
 
 	}
 
+	/**
+	 * Used by the frontend, when clicking on the selection tab.
+	 */
 	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException {
 		final SolrQuery query = new SolrQuery();
-		final StringBuffer queryString = new StringBuffer();
-		queryString.append("id:(");
-		for (Iterator iterator = datasetIds.iterator(); iterator.hasNext();) {
-			Long datasetId = (Long) iterator.next();
-			queryString.append(datasetId);
-			queryString.append(" ");
-		}
-		queryString.append(")");
-		query.setQuery(queryString.toString());
+		filterByDatasetIds(datasetIds, query);
+		QueryResponse response = querySolrServer(query);
+		return buildShanoirSolrPage(response, pageable, null);
+	}
 
-		/* query Solr server */
+	private QueryResponse querySolrServer(final SolrQuery query) throws RestServiceException {
 		QueryResponse response;
 		try {
 			LOG.debug("Solr search : " + query);
@@ -157,13 +155,28 @@ public class SolrRepositoryImpl implements SolrRepository {
 			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");
 			throw new RestServiceException(e, error);
 		}
-		return buildShanoirSolrPage(response, pageable, null);
+		return response;
+	}
+
+	private void filterByDatasetIds(Collection<Long> datasetIds, final SolrQuery query) {
+		final StringBuffer queryString = new StringBuffer();
+		queryString.append("id:(");
+		for (Iterator iterator = datasetIds.iterator(); iterator.hasNext();) {
+			Long datasetId = (Long) iterator.next();
+			queryString.append(datasetId);
+			queryString.append(" ");
+		}
+		queryString.append(")");
+		query.setQuery(queryString.toString());
 	}
 
 	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Map<Long, List<String>> studiesCenter, Collection<Long> datasetIds,
 			Pageable pageable) throws RestServiceException {
-		ShanoirSolrQuery query = new ShanoirSolrQuery();
-		return getSearchResultsWithFacets(query, pageable, studiesCenter);
+		final SolrQuery query = new SolrQuery();
+		filterByDatasetIds(datasetIds, query);
+		addFilterQueryForCenterStudy(query, studiesCenter);
+		QueryResponse response = querySolrServer(query);
+		return buildShanoirSolrPage(response, pageable, null);
 	}
 
 	private void addFilterQuery(SolrQuery query, String fieldName, Collection<String> values) {
@@ -276,18 +289,7 @@ public class SolrRepositoryImpl implements SolrRepository {
 		/* configure the returned facet values */
 		addFacetPaging(query, shanoirQuery);
 
-		/* query Solr server */
-		QueryResponse response;
-		try {
-			LOG.debug("Solr search : " + query);
-			response = solrClient.query(query);
-			LOG.debug("Solr response : " + response);
-		} catch (IOException e) {
-			throw new RestServiceException(e, new ErrorModel(500, "Error querying Solr"));
-		} catch (SolrException | SolrServerException e) {
-			ErrorModel error = new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "solr query failed");
-			throw new RestServiceException(e, error);
-		}
+		QueryResponse response = querySolrServer(query);
 
 		/* build the page object */
 		return buildShanoirSolrPage(response, pageable, shanoirQuery.getFacetPaging());
