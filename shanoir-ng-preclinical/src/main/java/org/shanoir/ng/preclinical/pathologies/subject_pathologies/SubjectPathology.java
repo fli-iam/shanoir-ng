@@ -17,15 +17,6 @@ package org.shanoir.ng.preclinical.pathologies.subject_pathologies;
 import java.util.Date;
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PostLoad;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
 import org.shanoir.ng.preclinical.references.Reference;
@@ -40,6 +31,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Subject Pathology
@@ -85,13 +81,6 @@ public class SubjectPathology extends HalEntity {
 	@PostLoad
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "subject/" + getAnimalSubject().getId() + "/pathology/" + getId());
-	}
-
-	@Override
-	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-	public Long getId() {
-		return super.getId();
 	}
 
 	public SubjectPathology subject(AnimalSubject animalSubject) {

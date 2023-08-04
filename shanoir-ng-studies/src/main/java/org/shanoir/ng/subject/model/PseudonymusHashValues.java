@@ -23,8 +23,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -192,14 +190,6 @@ public class PseudonymusHashValues  extends HalEntity implements Serializable {
 		return result;
 	}
 	
-	
-	@Override
-	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy="org.shanoir.ng.shared.model.UseIdOrGenerate")
-	public Long getId() {
-		return super.getId();
-	}
-
 	public Subject getSubject() {
 		return subject;
 	}

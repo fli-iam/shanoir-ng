@@ -16,17 +16,6 @@ package org.shanoir.ng.preclinical.contrast_agent;
 
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PostLoad;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.preclinical.references.InjectionInterval;
 import org.shanoir.ng.preclinical.references.InjectionSite;
 import org.shanoir.ng.preclinical.references.InjectionType;
@@ -38,6 +27,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 /**
  * Contrast Agent
  */
@@ -94,15 +90,6 @@ public class ContrastAgent extends HalEntity   {
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "contrastagent/" + getId());
   }
-	
-  @Override
-  @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-  @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-  public Long getId() {
-	return super.getId();
-  }
-  
-  
   
   public Long getProtocolId() {
 	return protocolId;

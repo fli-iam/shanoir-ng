@@ -16,15 +16,6 @@ package org.shanoir.ng.preclinical.pathologies.pathology_models;
 
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PostLoad;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -35,6 +26,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 /**
  * PathologyModel
  */
@@ -73,14 +69,6 @@ public class PathologyModel extends HalEntity   {
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "pathology/model/" + getId());
   }
-
-  @Override
-  @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-  @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-  public Long getId() {
-	return super.getId();
-  }
- 
   
   public PathologyModel name(String name) {
     this.name = name;

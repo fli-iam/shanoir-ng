@@ -16,7 +16,6 @@ package org.shanoir.ng.preclinical.references;
 
 import java.util.Objects;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
@@ -26,8 +25,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.PostLoad;
 
 /**
@@ -53,13 +50,6 @@ public class Reference extends HalEntity   {
   @PostLoad
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "reference/" + getId());
-  }
-
-  @Override
-  @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-  @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-  public Long getId() {
-	return super.getId();
   }
   
   public Reference category(String category) {
