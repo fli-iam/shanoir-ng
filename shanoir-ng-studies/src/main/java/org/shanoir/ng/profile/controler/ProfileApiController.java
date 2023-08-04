@@ -25,13 +25,13 @@ import org.springframework.stereotype.Controller;
 
 @Controller
 public class ProfileApiController implements ProfileApi {
+
 	@Autowired
 	private ProfileService profileService;
 
 	@Override
 	public ResponseEntity<List<Profile>> findProfiles() {
 		List<Profile> profiles = profileService.findAll();
-
 		if (profiles.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

@@ -21,6 +21,7 @@ import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.profile.repository.ProfileRepository;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProfileServiceImpl implements ProfileService {
 
+	@Autowired
 	private ProfileRepository repository;
 
 	public Optional<Profile> findById(final Long id) {
