@@ -397,6 +397,8 @@ public class RabbitMQDatasetsService {
 	@Transactional
 	public Long getTotalStudyStorageVolume(Long studyId) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
-		return datasetService.getExpressionSizesTotalByStudyId(studyId) + examinationService.getExtraDataSizeByStudyId(studyId);
+
+		return datasetService.getExpressionSizesTotalByStudyId(studyId)
+				+ examinationService.getExtraDataSizeByStudyId(studyId) ;
 	}
 }

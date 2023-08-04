@@ -272,7 +272,8 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public Long getExpressionSizesTotalByStudyId(Long studyId) {
-		return repository.findExpressionSizesTotalByStudyId(studyId);
+		Long total = repository.findExpressionSizesTotalByStudyId(studyId);
+		return total != null ? total : 0L;
 	}
 
 	@Override
