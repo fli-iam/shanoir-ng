@@ -39,7 +39,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class StudyCardRepositoryTest {
 
 	private static final String STUDYCARD_TEST_1_DATA = "StudyCard1";
