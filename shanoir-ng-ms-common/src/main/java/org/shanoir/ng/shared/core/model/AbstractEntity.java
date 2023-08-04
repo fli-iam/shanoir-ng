@@ -16,9 +16,6 @@ package org.shanoir.ng.shared.core.model;
 
 import java.io.Serializable;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -39,17 +36,7 @@ public abstract class AbstractEntity implements Serializable {
 	private static final long serialVersionUID = -3276989363792089822L;
 
 	@Id
-    @GeneratedValue(
-    		strategy = GenerationType.SEQUENCE,
-    		generator = "sequence-generator"
-    )
-    @GenericGenerator(
-    		name = "sequence-generator",
-    		type = org.hibernate.id.enhanced.SequenceStyleGenerator.class,
-    		parameters = {
-    				@Parameter(name = "increment_size", value = "1")
-    		}
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**
