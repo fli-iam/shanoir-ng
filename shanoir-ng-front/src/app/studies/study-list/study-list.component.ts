@@ -122,8 +122,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 headerName: "Members", field: "nbMembers", type: "number", width: '30px'
             },
             {
-                headerName: "Storage volume", field: "totalSize", disableSearch: true,
-                tip: (study: any) => { return this.printDetailedStorageVolume(study.detailedSizes)},
+                headerName: "Storage volume", field: "totalSize", disableSearch: true, orderBy: ['totalSize'],
                 cellRenderer: (params: any) => { return this.studyService.storageVolumePrettyPrint(params.data.totalSize); }
             }
         ];
@@ -166,17 +165,5 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 super.goToViewFromEntity(study);
             }
         }
-    }
-
-    private printDetailedStorageVolume(detailedSizes: Map<String, number>) {
-        if(!detailedSizes){
-            return "";
-        }
-        let detail = "";
-        let sortedSizes = new Map([...detailedSizes.entries()].sort((a, b) => b[1] - a[1]));
-        sortedSizes.forEach((size: number, format: String) => {
-            detail += format + " : " + this.studyService.storageVolumePrettyPrint(size) + "\n";
-        });
-        return detail;
     }
 }

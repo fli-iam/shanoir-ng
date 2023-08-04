@@ -13,6 +13,10 @@ public class StudyStorageVolumeDTO {
     public StudyStorageVolumeDTO() {
     }
 
+    public StudyStorageVolumeDTO(Long total) {
+        this.total = total;
+    }
+
     public List<SizeByFormatDTO> getSizesByExpressionFormat() {
         return sizesByExpressionFormat;
     }

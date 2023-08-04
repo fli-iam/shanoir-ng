@@ -149,7 +149,7 @@ public class StudyApiController implements StudyApi {
 		}
 
 		for(StudyDTO dto : dtos){
-			dto.setStorageVolume(studyService.getStudyDetailedStorageVolume(dto.getId()));
+			dto.setStorageVolume(studyService.getStudyTotalStorageVolume(dto.getId()));
 		}
 
 		return new ResponseEntity<>(dtos, HttpStatus.OK);

@@ -46,9 +46,7 @@ public interface DatasetRepository extends PagingAndSortingRepository<Dataset, L
 			"GROUP BY expr.datasetExpressionFormat")
 	List<Object[]> findExpressionSizesByStudyIdGroupByFormat(Long studyId);
 
-	@Query("SELECT expr.dataset.datasetAcquisition.examination.study.id, SUM(expr.size) FROM DatasetExpression expr " +
-			"WHERE expr.dataset.datasetAcquisition.examination.study.id IN (:studyIds) AND expr.size IS NOT NULL " +
-			"GROUP BY expr.dataset.datasetAcquisition.examination.study.id")
-	List<Object[]> findExpressionTotalSizesByStudyIdGroupByStudyId(List<Long> studyIds);
-
+	@Query("SELECT SUM(expr.size) FROM DatasetExpression expr " +
+			"WHERE expr.dataset.datasetAcquisition.examination.study.id = :studyId AND expr.size IS NOT NULL")
+	Long findExpressionSizesTotalByStudyId(Long studyId);
 }

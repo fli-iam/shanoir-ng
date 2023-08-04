@@ -391,4 +391,12 @@ public class RabbitMQDatasetsService {
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
 	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME)
+	@RabbitHandler
+	@Transactional
+	public Long getTotalStudyStorageVolume(Long studyId) {
+		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		return datasetService.getExpressionSizesTotalByStudyId(studyId) + examinationService.getExtraDataSizeByStudyId(studyId);
+	}
 }

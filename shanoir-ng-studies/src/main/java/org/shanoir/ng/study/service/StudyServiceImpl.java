@@ -694,6 +694,21 @@ public class StudyServiceImpl implements StudyService {
 
 	}
 
+	@Override
+	public StudyStorageVolumeDTO getStudyTotalStorageVolume(Long studyId) {
+		Long total;
+		try {
+			total = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyId);
+		} catch (AmqpException e) {
+			LOG.error("Error while fetching study [{}] total datasets volume storage details.", studyId, e);
+			return null;
+		}
+
+		return new StudyStorageVolumeDTO(
+				this.getStudyFilesSize(studyId)
+						+ (total != null ? total : 0L));
+	}
+
 	private long getStudyFilesSize(Long studyId){
 		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
 		if (studyOpt.isEmpty()) {

@@ -77,7 +77,7 @@ export type ColumnDefinition = {
 
     awesomeFunction?: (item: any) => { awesome: `fa${string} fa${string}`, color: string }
 
-    /** add a descrption when cursor stands still a few second over the column */
+    /** add a description when cursor stands still a few second over the column */
     tip?: (item: any) => string,
 
     /** is this field editable in edit mode ? */

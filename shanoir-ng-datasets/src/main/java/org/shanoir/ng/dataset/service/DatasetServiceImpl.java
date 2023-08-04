@@ -271,16 +271,8 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Map<Long, Long> getExpressionTotalSizesByStudyId(List<Long> studyIds) {
-		List<Object[]> results =  repository.findExpressionTotalSizesByStudyIdGroupByStudyId(studyIds);
-		Map<Long, Long> volumeByStudyId = new HashMap<>();
-
-		for(Object[] result : results){
-			volumeByStudyId.put((Long) result[0], (Long) result[1]);
-		}
-
-		return volumeByStudyId;
-
+	public Long getExpressionSizesTotalByStudyId(Long studyId) {
+		return repository.findExpressionSizesTotalByStudyId(studyId);
 	}
 
 	@Override
