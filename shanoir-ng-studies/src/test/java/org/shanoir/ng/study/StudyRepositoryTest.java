@@ -26,6 +26,7 @@ import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -34,6 +35,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
 @WebAppConfiguration
 @DataJpaTest
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class StudyRepositoryTest {
 
 	private static final Long STUDY_TEST_1_ID = 1L;
