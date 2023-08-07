@@ -31,15 +31,15 @@ Shanoir-NG is copyrighted by [Inria](https://www.inria.fr/) and is now open sour
 
 Many thanks to all these giants, on their shoulders we are standing to develop Shanoir-NG !
 
-# Access to REST-API on using Swagger2
+# Access to REST-API on using Swagger3/OpenAPI
 
-You can easily connect and investigate the REST-interface of Shanoir-NG using Swagger2.
+You can easily connect and investigate the REST-interface of Shanoir-NG using Swagger3.
 Depending on your server domain just call (e.g. for Neurinfo server):
 
-* MS Studies: https://shanoir.irisa.fr/shanoir-ng/studies/swagger-ui.html
-* MS Import: https://shanoir.irisa.fr/shanoir-ng/import/swagger-ui.html
-* MS Datasets: https://shanoir.irisa.fr/shanoir-ng/datasets/swagger-ui.html
-* MS Preclinical: https://shanoir.irisa.fr/shanoir-ng/preclinical/swagger-ui.html
+* MS Studies: https://shanoir.irisa.fr/shanoir-ng/studies/swagger-ui/index.html and explore /api-docs
+* MS Import: https://shanoir.irisa.fr/shanoir-ng/import/swagger-ui/index.html and explore /api-docs
+* MS Datasets: https://shanoir.irisa.fr/shanoir-ng/datasets/swagger-ui/index.html and explore /api-docs
+* MS Preclinical: https://shanoir.irisa.fr/shanoir-ng/preclinical/swagger-ui/index.html and explore /api-docs
 
 ## Intialize Shanoir Downloader
 
