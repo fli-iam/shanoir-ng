@@ -72,7 +72,7 @@ public class SecurityConfiguration {
 			.csrf(AbstractHttpConfigurer::disable)
 			.addFilterAfter(multipartRelatedRequestFilter, FilterSecurityInterceptor.class)
 			.authorizeHttpRequests(
-				matcher -> matcher.requestMatchers("/swagger-ui/**", "/v3/api-docs")
+				matcher -> matcher.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")
 					.permitAll()
 				.anyRequest()
 					.authenticated()

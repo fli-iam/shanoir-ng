@@ -26,12 +26,15 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+
 /**
  * Shanoir-NG microservice datasets application.
  */
 @SpringBootApplication
 @EnableSpringDataWebSupport
 @EnableScheduling
+@OpenAPIDefinition
 public class ShanoirDatasetApplication {
 
 	public static void main(String[] args) {

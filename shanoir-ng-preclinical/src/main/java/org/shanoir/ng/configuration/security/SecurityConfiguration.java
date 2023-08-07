@@ -65,7 +65,7 @@ public class SecurityConfiguration {
 			.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(
-				matcher -> matcher.requestMatchers("/swagger-ui/**", "/v3/api-docs")
+				matcher -> matcher.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**")
 					.permitAll()
 				.anyRequest()
 					.authenticated()
