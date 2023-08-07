@@ -344,6 +344,7 @@ public class StudyApiController implements StudyApi {
 	public ResponseEntity<Void> uploadDataUserAgreement(
 			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@ApiParam(value = "dua to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+		LOG.info("DUA TEST studyId : {}", studyId);
 		try {
 			if (!file.getOriginalFilename().endsWith(".pdf")  || file.getSize() > 50000000) {
 				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
@@ -356,7 +357,9 @@ public class StudyApiController implements StudyApi {
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
 			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
+			LOG.info("DUA TEST filePath : {}", filePath);
 			File fileToCreate = new File(filePath);
+			LOG.info("DUA TEST file exists: {}", fileToCreate.exists());
 			fileToCreate.getParentFile().mkdirs();
 			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
 			file.transferTo(new File(filePath));

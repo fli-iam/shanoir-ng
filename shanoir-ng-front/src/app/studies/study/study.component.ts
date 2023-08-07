@@ -568,6 +568,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     getFileName(element): string {
+        console.log("getFileName : " + element)
         return element.split('\\').pop().split('/').pop();
     }
 

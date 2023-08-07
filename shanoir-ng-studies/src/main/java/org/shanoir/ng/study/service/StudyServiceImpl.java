@@ -426,6 +426,7 @@ public class StudyServiceImpl implements StudyService {
 	 */
 	@Override
 	public String getStudyFilePath(Long studyId, String fileName) {
+		System.out.println("getStudyFilePath : studyId = " + studyId + " / fileName = " + fileName);
 		return dataDir + "/study-" + studyId + "/" + fileName;
 	}
 
