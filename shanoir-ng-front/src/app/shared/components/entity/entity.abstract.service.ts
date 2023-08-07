@@ -40,8 +40,8 @@ export abstract class EntityService<T extends Entity> {
         protected http: HttpClient) {
     }
 
-    getAll(withStorageVolume = false): Promise<T[]> {
-        return this.http.get<any[]>(this.API_URL + (withStorageVolume ? '/?withStorageVolume=true' : ''))
+    getAll(): Promise<T[]> {
+        return this.http.get<any[]>(this.API_URL)
             .toPromise()
             .then(this.mapEntityList);
     }

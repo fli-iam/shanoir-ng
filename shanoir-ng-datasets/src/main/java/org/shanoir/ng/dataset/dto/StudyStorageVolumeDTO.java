@@ -6,14 +6,14 @@ public class StudyStorageVolumeDTO {
 
     private Long total = 0L;
 
-    private List<SizeByFormatDTO> sizesByExpressionFormat;
+    private List<VolumeByFormatDTO> volumeByFormat;
 
     private Long extraDataSize;
 
-    public StudyStorageVolumeDTO(List<SizeByFormatDTO> sizesByExpressionFormat, Long extraDataSize) {
-        this.sizesByExpressionFormat = sizesByExpressionFormat;
-        if (sizesByExpressionFormat != null){
-            sizesByExpressionFormat.forEach(dto -> this.total += dto.getSize());
+    public StudyStorageVolumeDTO(List<VolumeByFormatDTO> volumeByFormat, Long extraDataSize) {
+        this.volumeByFormat = volumeByFormat;
+        if (volumeByFormat != null){
+            volumeByFormat.forEach(dto -> this.total += dto.getSize());
         }
         this.extraDataSize = extraDataSize;
         if (extraDataSize != null){
@@ -22,12 +22,12 @@ public class StudyStorageVolumeDTO {
 
     }
 
-    public List<SizeByFormatDTO> getSizesByExpressionFormat() {
-        return sizesByExpressionFormat;
+    public List<VolumeByFormatDTO> getVolumeByFormat() {
+        return volumeByFormat;
     }
 
-    public void setSizesByExpressionFormat(List<SizeByFormatDTO> sizesByExpressionFormat) {
-        this.sizesByExpressionFormat = sizesByExpressionFormat;
+    public void setVolumeByFormat(List<VolumeByFormatDTO> volumeByFormat) {
+        this.volumeByFormat = volumeByFormat;
     }
 
     public Long getExtraDataSize() {

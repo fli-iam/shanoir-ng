@@ -6,7 +6,7 @@ import java.util.List;
 public class StudyStorageVolumeDTO {
     private Long total = 0L;
 
-    private List<SizeByFormatDTO> sizesByExpressionFormat = new ArrayList<>();
+    private List<VolumeByFormatDTO> volumeByFormat = new ArrayList<>();
 
     private Long extraDataSize = 0L;
 
@@ -17,12 +17,12 @@ public class StudyStorageVolumeDTO {
         this.total = total;
     }
 
-    public List<SizeByFormatDTO> getSizesByExpressionFormat() {
-        return sizesByExpressionFormat;
+    public List<VolumeByFormatDTO> getVolumeByFormat() {
+        return volumeByFormat;
     }
 
-    public void setSizesByExpressionFormat(List<SizeByFormatDTO> sizesByExpressionFormat) {
-        this.sizesByExpressionFormat = sizesByExpressionFormat;
+    public void setVolumeByFormat(List<VolumeByFormatDTO> volumeByFormat) {
+        this.volumeByFormat = volumeByFormat;
     }
 
     public Long getExtraDataSize() {

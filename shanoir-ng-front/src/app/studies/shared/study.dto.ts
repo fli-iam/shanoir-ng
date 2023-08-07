@@ -170,7 +170,7 @@ export class StudyDTOService {
         let datasetSizes = dto;
         let sizesByLabel = new Map<String, number>()
 
-        for(let sizeByFormat of datasetSizes.sizesByExpressionFormat){
+        for(let sizeByFormat of datasetSizes.volumeByFormat){
             if(sizeByFormat.size > 0){
                 sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
             }
@@ -378,13 +378,13 @@ export class PublicStudyData {
 export class StudyStorageVolumeDTO {
 
     total: number;
-    sizesByExpressionFormat: SizeByFormatDTO[];
+    volumeByFormat: VolumeByFormatDTO[];
     extraDataSize: number;
 
 }
 
 
-export class SizeByFormatDTO {
+export class VolumeByFormatDTO {
 
     format: DatasetExpressionFormat;
     size: number;

@@ -275,12 +275,15 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise();
     }
 
-    getStudiesTotalStorageVolume(ids: Set<number>): Promise<StudyStorageVolumeDTO[]> {
+    getStudiesStorageVolume(ids: Set<number>): Promise<Map<number, StudyStorageVolumeDTO>> {
         const formData: FormData = new FormData();
         formData.set('studyIds', Array.from(ids).join(","));
 
-        return this.http.post<StudyStorageVolumeDTO[]>(AppUtils.BACKEND_API_STUDY_URL + '/totalStorageVolume', formData)
-            .toPromise();
+        return this.http.post<Map<number, StudyStorageVolumeDTO>>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume', formData)
+            .toPromise()
+            .then(volumes => {
+                return volumes ? Object.entries(volumes).reduce((map: Map<number, StudyStorageVolumeDTO>, entry) => map.set(parseInt(entry[0]), entry[1]), new Map()) : new Map();
+            });
     }
 
     storageVolumePrettyPrint(size: number) {

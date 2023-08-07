@@ -28,8 +28,7 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
-import org.shanoir.ng.dataset.dto.SizeByFormatDTO;
-import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
+import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -258,12 +257,12 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public List<SizeByFormatDTO> getExpressionSizesByStudyId(Long studyId) {
+	public List<VolumeByFormatDTO> getVolumeByFormat(Long studyId) {
 		List<Object[]> results = repository.findExpressionSizesByStudyIdGroupByFormat(studyId);
-		List<SizeByFormatDTO> sizesByFormat = new ArrayList<>();
+		List<VolumeByFormatDTO> sizesByFormat = new ArrayList<>();
 
 		for(Object[] result : results){
-			sizesByFormat.add(new SizeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[0]), (Long) result[1]));
+			sizesByFormat.add(new VolumeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[0]), (Long) result[1]));
 		}
 
 		return sizesByFormat;
@@ -271,9 +270,19 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Long getExpressionSizesTotalByStudyId(Long studyId) {
-		Long total = repository.findExpressionSizesTotalByStudyId(studyId);
-		return total != null ? total : 0L;
+	public Map<Long, List<VolumeByFormatDTO>> getVolumeByFormatByStudyId(List<Long> studyIds) {
+		List<Object[]> results = repository.findExpressionSizesTotalByStudyIdGroupByFormat(studyIds);
+		Map<Long, List<VolumeByFormatDTO>> sizesByFormatAndStudy = new HashMap<>();
+
+		for(Object[] result : results){
+			Long studyId = (Long) result[0];
+			sizesByFormatAndStudy.putIfAbsent(studyId, new ArrayList<>());
+
+			sizesByFormatAndStudy.get(studyId).add(new VolumeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[1]), (Long) result[2]));
+		}
+
+		return sizesByFormatAndStudy;
+
 	}
 
 	@Override

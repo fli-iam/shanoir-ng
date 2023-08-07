@@ -670,7 +670,7 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public StudyStorageVolumeDTO getStudyDetailedStorageVolume(Long studyId){
+	public StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId){
 
 		StudyStorageVolumeDTO dto;
 		try {
@@ -707,6 +707,30 @@ public class StudyServiceImpl implements StudyService {
 		return new StudyStorageVolumeDTO(
 				this.getStudyFilesSize(studyId)
 						+ (total != null ? total : 0L));
+	}
+
+	@Override
+	public Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyIds) {
+		Map<Long, StudyStorageVolumeDTO> detailedStorageVolumes;
+		try {
+			String resultAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyIds);
+			if(resultAsString != null && !resultAsString.isEmpty()){
+				detailedStorageVolumes = objectMapper.readValue(resultAsString,  new TypeReference<HashMap<Long, StudyStorageVolumeDTO>>() {});
+			}else{
+				detailedStorageVolumes = new HashMap<>();
+			}
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Error while fetching studies [{}] datasets volume storage details.", studyIds, e);
+			return null;
+		}
+
+		detailedStorageVolumes.forEach((id, dto) -> {
+			long filesSize = this.getStudyFilesSize(id);
+			dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
+			dto.setTotal(filesSize + dto.getTotal());
+		});
+
+		return detailedStorageVolumes;
 	}
 
 	private long getStudyFilesSize(Long studyId){

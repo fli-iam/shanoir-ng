@@ -15,7 +15,6 @@
 package org.shanoir.ng.study.controler;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
@@ -23,7 +22,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -74,11 +72,7 @@ public interface StudyApi {
 	@RequestMapping(value = "", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @studySecurityService.filterStudyDTOsHasRight(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<StudyDTO>> findStudies(
-			@ApiParam(value = "Fetch total storage volume of studies", allowableValues = "true, false", defaultValue = "false")
-			@Valid
-			@RequestParam(value = "withStorageVolume", required = false, defaultValue="false") boolean withStorageVolume
-	);
+	ResponseEntity<List<StudyDTO>> findStudies();
 
 	@ApiOperation(value = "", notes = "If exists, returns the studies that are publicly available", response = Study.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found studies", response = StudyDTO.class),
@@ -150,7 +144,21 @@ public interface StudyApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@GetMapping(value = "/detailedStorageVolume/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	ResponseEntity<StudyStorageVolumeDTO> getStudyDetailedStorageVolume(@PathVariable("studyId") Long studyId) throws RestServiceException;
+	ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") Long studyId) throws RestServiceException;
+
+	@ApiOperation(value = "", notes = "If exists, returns the sizes of the study files detailed by format corresponding to the given id", response = Long.class, tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(code = 200, message = "Sizes of the study files in bytes by format", response = Long.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
+			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
+			@ApiResponse(code = 404, message = "no study found", response = Void.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@PostMapping(value = "/detailedStorageVolume", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudies(#studyIds, 'CAN_SEE_ALL'))")
+	ResponseEntity<Map<Long, StudyStorageVolumeDTO>> getDetailedStorageVolumeByStudy(
+			@ApiParam("studyIds") @RequestParam List<Long> studyIds
+	) throws RestServiceException;
+
 
 	@ApiOperation(value = "", notes = "Updates a study", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "study updated", response = Void.class),

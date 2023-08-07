@@ -20,6 +20,7 @@ import java.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
+import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -381,7 +382,7 @@ public class RabbitMQDatasetsService {
 
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 
-		StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(datasetService.getExpressionSizesByStudyId(studyId),
+		StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(datasetService.getVolumeByFormat(studyId),
 				examinationService.getExtraDataSizeByStudyId(studyId));
 
 		try {
@@ -395,10 +396,20 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME)
 	@RabbitHandler
 	@Transactional
-	public Long getTotalStudyStorageVolume(Long studyId) {
+	public String getDetailedStorageVolumeByStudy(List<Long> studyIds) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 
-		return datasetService.getExpressionSizesTotalByStudyId(studyId)
-				+ examinationService.getExtraDataSizeByStudyId(studyId) ;
+		Map<Long, StudyStorageVolumeDTO> studyStorageVolumes = new HashMap<>();
+
+		datasetService.getVolumeByFormatByStudyId(studyIds).forEach((id, volumeByFormat) -> {
+			studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
+		});
+
+		try {
+			return objectMapper.writeValueAsString(studyStorageVolumes);
+		} catch (JsonProcessingException e) {
+			LOG.error("Error while serializing HashMap<Long, StudyVolumeStorageDTO>.", e);
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
 	}
 }

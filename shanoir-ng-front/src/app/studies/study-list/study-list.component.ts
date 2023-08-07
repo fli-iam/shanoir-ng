@@ -23,6 +23,9 @@ import { StudyService } from '../shared/study.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { UserService } from '../../users/shared/user.service';
 import {StudyCardComponent} from "../../study-cards/study-card/study-card.component";
+import {PublicStudyData} from "../shared/study.dto";
+import {User} from "../../users/shared/user.model";
+import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
 
 
 @Component({
@@ -46,9 +49,10 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         return this.studyService;
     }
 
+
     getEntities(): Promise<Study[]> {
         let earlyResult: Promise<Study[]> = Promise.all([
-            this.studyService.getAll(true),
+            this.studyService.getAll(),
             this.studyService.getPublicStudiesData()
         ]).then(([studies, publicStudies]) => {
             if (!studies) studies = [];
@@ -76,7 +80,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         })
         Promise.all([
             earlyResult,
-            this.userService.getAccessRequests()
+            this.userService.getAccessRequests(),
         ]).then(([studies, accessRequests]) => {
             if (accessRequests?.length > 0) {
                 for (let accessRequest of accessRequests) {
@@ -85,6 +89,29 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
+            let ids = new Set<number>();
+            studies.forEach(study => {
+               ids.add(study.id);
+            });
+            this.studyService.getStudiesStorageVolume(ids).then(volumes => {
+                studies.forEach( study => {
+                    (study as Study).totalSize = volumes.get(study.id)?.total;
+                    let sizesByLabel = new Map<String, number>()
+                    if(volumes.get(study.id)?.volumeByFormat){
+                        for(let sizeByFormat of volumes.get(study.id)?.volumeByFormat){
+                            if(sizeByFormat.size > 0){
+                                sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+                            }
+                        }
+                    }
+
+                    if(volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0){
+                        sizesByLabel.set("Other files (DUA, protocol...)", volumes.get(study.id)?.extraDataSize);
+                    }
+
+                    (study as Study).detailedSizes = sizesByLabel;
+                });
+            })
         });
         return earlyResult;
     }
@@ -123,7 +150,20 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             },
             {
                 headerName: "Storage volume", field: "totalSize", disableSearch: true, orderBy: ['totalSize'],
-                cellRenderer: (params: any) => { return this.studyService.storageVolumePrettyPrint(params.data.totalSize); }
+                cellRenderer: (params: any) => {
+                    if(!params.data.totalSize){
+                        return "Fetching...";
+                    }
+                    return this.studyService.storageVolumePrettyPrint(params.data.totalSize); },
+                tip: (data: any) => {
+                    let tip = ""
+                    if(data.detailedSizes){
+                        data.detailedSizes.forEach((size: number, label: string) => {
+                            tip += label + " : " + this.studyService.storageVolumePrettyPrint(size) + "\n";
+                        });
+                    }
+                    return tip;
+                }
             }
         ];
         return colDef;

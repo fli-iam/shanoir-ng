@@ -1,13 +1,12 @@
-package org.shanoir.ng.dataset.dto;
+package org.shanoir.ng.study.dto;
 
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 
-public class SizeByFormatDTO {
+public class VolumeByFormatDTO {
 
     private DatasetExpressionFormat format;
     private Long size;
 
-    public SizeByFormatDTO(DatasetExpressionFormat format, Long size) {
+    public VolumeByFormatDTO(DatasetExpressionFormat format, Long size) {
         this.format = format;
         this.size = size;
     }

@@ -136,23 +136,13 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<List<StudyDTO>> findStudies(boolean withStorageVolume) {
+	public ResponseEntity<List<StudyDTO>> findStudies() {
 		List<Study> studies = studyService.findAll();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 
-		List<StudyDTO> dtos = studyMapper.studiesToStudyDTOs(studies);
-
-		if(!withStorageVolume){
-			return new ResponseEntity<>(dtos, HttpStatus.OK);
-		}
-
-		for(StudyDTO dto : dtos){
-			dto.setStorageVolume(studyService.getStudyTotalStorageVolume(dto.getId()));
-		}
-
-		return new ResponseEntity<>(dtos, HttpStatus.OK);
+		return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
 	}
 
 	@Override
@@ -192,7 +182,7 @@ public class StudyApiController implements StudyApi {
 		StudyDTO dto = studyMapper.studyToStudyDTO(study);
 
 		if(withStorageVolume){
-			dto.setStorageVolume(studyService.getStudyDetailedStorageVolume(dto.getId()));
+			dto.setStorageVolume(studyService.getDetailedStorageVolume(dto.getId()));
 		}
 
 		return new ResponseEntity<>(dto, HttpStatus.OK);
@@ -218,8 +208,8 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<StudyStorageVolumeDTO> getStudyDetailedStorageVolume(@PathVariable("studyId") final Long studyId) throws RestServiceException {
-		StudyStorageVolumeDTO dto = studyService.getStudyDetailedStorageVolume(studyId);
+	public ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") final Long studyId) throws RestServiceException {
+		StudyStorageVolumeDTO dto = studyService.getDetailedStorageVolume(studyId);
 		if(dto == null){
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
@@ -228,6 +218,11 @@ public class StudyApiController implements StudyApi {
 		}
 
 		return new ResponseEntity<>(dto, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Map<Long, StudyStorageVolumeDTO>> getDetailedStorageVolumeByStudy(List<Long> studyIds) {
+		return new ResponseEntity<>(studyService.getDetailedStorageVolumeByStudy(studyIds), HttpStatus.OK);
 	}
 
 	@Override

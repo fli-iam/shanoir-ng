@@ -259,7 +259,7 @@ export class StudyComponent extends EntityComponent<Study> {
                 let datasetSizes = dto;
                 let sizesByLabel = new Map<String, number>()
 
-                for(let sizeByFormat of datasetSizes.sizesByExpressionFormat){
+                for(let sizeByFormat of datasetSizes.volumeByFormat){
                     if(sizeByFormat.size > 0){
                         sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
                     }
