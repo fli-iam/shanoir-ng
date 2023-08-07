@@ -171,6 +171,10 @@ public class StudyServiceImpl implements StudyService {
 					studyUser.setConfirmed(true);
 				}
 				studyUser.setStudy(study);
+				// The user that creates a study is confirmed (he's the one uploading the DUA, he doesn't have to sign it)
+				if (KeycloakUtil.getTokenUserId().equals(studyUser.getUserId())) {
+					studyUser.setConfirmed(true);
+				}
 			}
 		}
 
@@ -463,6 +467,10 @@ public class StudyServiceImpl implements StudyService {
 					if (studyDb.getDataUserAgreementPaths() == null || studyDb.getDataUserAgreementPaths().isEmpty()) {
 						su.setConfirmed(false);
 						dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
+					}
+					// The user that creates a study is confirmed (he's the one uploading the DUA, he doesn't have to sign it)
+					if (KeycloakUtil.getTokenUserId().equals(su.getUserId())) {
+						su.setConfirmed(true);
 					}
 				} else {
 					// existing DUA removed from study

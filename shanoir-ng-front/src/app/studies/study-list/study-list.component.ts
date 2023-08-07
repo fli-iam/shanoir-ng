@@ -159,9 +159,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         });
     }
 
-    private fetchHasDUA(study: any): Promise<void> {
+    private fetchHasDUA(study: any): Promise<boolean> {
         return this.studyService.hasDUAByStudyId(study.id).then(hasDUA => {
-            this.hasDUA = hasDUA;
+            return hasDUA;
         });
     }
 
@@ -170,7 +170,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         Promise.all([
             this.fetchHasDUA(study),
             this.fetchStudyUsers(study),
-        ]).then(([boolean, studyUsers]) => {
+        ]).then(([hasDUA, studyUsers]) => {
             for (let su of studyUsers) {
                 if (su.userId == this.keycloakService.getUserId()) {
                     this.accessRequestValidated = true;
@@ -188,7 +188,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                             this.router.navigate(['/access-request/study/' + study.id]);
                         }
                     });
-                } else if (this.hasDUA && !this.isSuConfirmed) {
+                } else if (hasDUA && !this.isSuConfirmed) {
                     const title: string = 'Data User Agreement awaiting for signing';
                     const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
                         + 'Until you have agreed those terms you cannot access to any data from these studies. '
