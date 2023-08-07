@@ -396,7 +396,7 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME)
 	@RabbitHandler
 	@Transactional
-	public String getDetailedStorageVolumeByStudy(List<Long> studyIds) {
+	public String getDetailedStorageVolumeByStudy(List<Long> studyIds) throws InterruptedException {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 
 		Map<Long, StudyStorageVolumeDTO> studyStorageVolumes = new HashMap<>();
@@ -404,6 +404,9 @@ public class RabbitMQDatasetsService {
 		datasetService.getVolumeByFormatByStudyId(studyIds).forEach((id, volumeByFormat) -> {
 			studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
 		});
+
+		// !!! DEBUG !!!
+		Thread.sleep(10000);
 
 		try {
 			return objectMapper.writeValueAsString(studyStorageVolumes);

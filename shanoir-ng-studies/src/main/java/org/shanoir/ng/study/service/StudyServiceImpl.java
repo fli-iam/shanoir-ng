@@ -57,8 +57,12 @@ import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -692,21 +696,6 @@ public class StudyServiceImpl implements StudyService {
 
 		return dto;
 
-	}
-
-	@Override
-	public StudyStorageVolumeDTO getStudyTotalStorageVolume(Long studyId) {
-		Long total;
-		try {
-			total = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyId);
-		} catch (AmqpException e) {
-			LOG.error("Error while fetching study [{}] total datasets volume storage details.", studyId, e);
-			return null;
-		}
-
-		return new StudyStorageVolumeDTO(
-				this.getStudyFilesSize(studyId)
-						+ (total != null ? total : 0L));
 	}
 
 	@Override

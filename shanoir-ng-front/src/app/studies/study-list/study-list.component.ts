@@ -97,6 +97,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 studies.forEach( study => {
                     (study as Study).totalSize = volumes.get(study.id)?.total;
                     let sizesByLabel = new Map<String, number>()
+
                     if(volumes.get(study.id)?.volumeByFormat){
                         for(let sizeByFormat of volumes.get(study.id)?.volumeByFormat){
                             if(sizeByFormat.size > 0){
@@ -151,10 +152,12 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             {
                 headerName: "Storage volume", field: "totalSize", disableSearch: true, orderBy: ['totalSize'],
                 cellRenderer: (params: any) => {
-                    if(!params.data.totalSize){
-                        return "Fetching...";
+                    if(params.data.totalSize){
+                        return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
+                    }else{
+                       return "Fetching..."
                     }
-                    return this.studyService.storageVolumePrettyPrint(params.data.totalSize); },
+                },
                 tip: (data: any) => {
                     let tip = ""
                     if(data.detailedSizes){
