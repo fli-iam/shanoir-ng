@@ -404,10 +404,7 @@ public class RabbitMQDatasetsService {
 		datasetService.getVolumeByFormatByStudyId(studyIds).forEach((id, volumeByFormat) -> {
 			studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
 		});
-
-		// !!! DEBUG !!!
-		Thread.sleep(10000);
-
+		
 		try {
 			return objectMapper.writeValueAsString(studyStorageVolumes);
 		} catch (JsonProcessingException e) {
