@@ -26,6 +26,7 @@ import org.springframework.core.Ordered;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -62,19 +63,15 @@ public class SecurityConfiguration {
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			.sessionManagement()
-				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-			.and()
-			.csrf()
-				.disable()
-			.authorizeHttpRequests()
-				.requestMatchers("/accountrequest").permitAll()
-				.requestMatchers("/extensionrequest").permitAll()
-				.requestMatchers("/last_login_date").permitAll()
-				// the swagger API is not exposed here for security reasons (MK)
-			.anyRequest()
-				.authenticated()
-			.and()
+			.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+			.csrf(AbstractHttpConfigurer::disable)
+			.authorizeHttpRequests(
+				matcher -> matcher.requestMatchers("/accountrequest", "/extensionrequest", "/last_login_date")
+					// the swagger API is not exposed here for security reasons (MK)
+					.permitAll()
+				.anyRequest()
+					.authenticated()
+			)
 			.oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(jwt -> {
 				Map<String, Collection<String>> realmAccess = jwt.getClaim("realm_access"); // manage Keycloak specific JWT structure here
 				Collection<String> roles = realmAccess.get("roles");
