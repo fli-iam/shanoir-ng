@@ -163,6 +163,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 },
                 tip: (data: any) => {
                     let tip = ""
+                    if(this.isStudyVolumesFetching){
+                        return "Calculating the detailed study storage volume, this may take up to a minute"
+                    }
                     if(data.detailedSizes){
                         data.detailedSizes.forEach((size: number, label: string) => {
                             tip += label + " : " + this.studyService.storageVolumePrettyPrint(size) + "\n";

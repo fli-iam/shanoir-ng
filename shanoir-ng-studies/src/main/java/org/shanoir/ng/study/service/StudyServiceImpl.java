@@ -709,21 +709,26 @@ public class StudyServiceImpl implements StudyService {
 			return null;
 		}
 
-		detailedStorageVolumes.forEach((id, dto) -> {
-			long filesSize = this.getStudyFilesSize(id);
-			dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
-			dto.setTotal(filesSize + dto.getTotal());
-		});
+
+		this.studyRepository.findAllById(studyIds).forEach( study -> {
+				Long filesSize = this.getStudyFilesSize(study);
+				StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
+				dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
+				dto.setTotal(filesSize + dto.getTotal());
+			}
+		);
 
 		return detailedStorageVolumes;
 	}
 
 	private long getStudyFilesSize(Long studyId){
-		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
-		if (studyOpt.isEmpty()) {
-			return 0L;
-		}
-		Study study = studyOpt.get();
+		Optional<Study> study = this.studyRepository.findById(studyId);
+		return study.map(this::getStudyFilesSize).orElse(0L);
+
+	}
+
+	private long getStudyFilesSize(Study study){
+
 		List<String> paths = Stream.of(study.getDataUserAgreementPaths(), study.getProtocolFilePaths())
 				.flatMap(Collection::stream)
 				.collect(Collectors.toList());
@@ -731,7 +736,7 @@ public class StudyServiceImpl implements StudyService {
 		long size = 0L;
 
 		for (String path : paths) {
-			File f = new File(this.getStudyFilePath(studyId, path));
+			File f = new File(this.getStudyFilePath(study.getId(), path));
 			if(f.exists()){
 				size += f.length();
 			}
