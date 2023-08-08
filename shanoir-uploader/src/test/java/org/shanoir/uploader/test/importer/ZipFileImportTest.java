@@ -34,15 +34,17 @@ public class ZipFileImportTest extends AbstractTest {
 	@Test
 	public void importDicomZipTest() throws Exception {
 		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
-		study.setId(Long.valueOf(1));
+		study.setId(Long.valueOf(3));
 		study.setName("DemoStudy");
 		for (int i = 0; i < 1; i++) {
 			ImportJob importJob = step1UploadDicom("acr_phantom_t1.zip");
 			if (CollectionUtils.isNotEmpty(importJob.getPatients())) {
 				selectAllSeriesForImport(importJob);
-				Subject subject = step2CreateSubject(importJob, study);
-				Examination examination = step3CreateExamination(subject);
-				step4StartImport(importJob, subject, examination, study);
+				for (int j = 0; j < 100; j++) {
+					Subject subject = step2CreateSubject(importJob, study);
+					Examination examination = step3CreateExamination(subject);
+					step4StartImport(importJob, subject, examination, study);
+				}
 			}
 		}
 	}
@@ -62,7 +64,7 @@ public class ZipFileImportTest extends AbstractTest {
 			throws JsonProcessingException, Exception {
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
-		importJob.setStudyCardId(Long.valueOf(1));
+		importJob.setStudyCardId(Long.valueOf(3));
 		importJob.setStudyCardName("StudyCard1");
 		importJob.setAcquisitionEquipmentId(Long.valueOf(1));
 		importJob.setSubjectName(subject.getName());
@@ -75,7 +77,7 @@ public class ZipFileImportTest extends AbstractTest {
 
 	private Examination step3CreateExamination(Subject subject) {
 		Examination examination = new Examination();
-		examination.setStudyId(Long.valueOf(1));
+		examination.setStudyId(subject.getSubjectStudyList().get(0).getStudy().getId());
 		examination.setSubjectId(subject.getId());
 		examination.setCenterId(Long.valueOf(1));
 		examination.setExaminationDate(new Date());
@@ -103,6 +105,7 @@ public class ZipFileImportTest extends AbstractTest {
 		subject.setSubjectStudyList(new ArrayList<SubjectStudy>());
 		subject = shUpClient.createSubject(subject, true, Long.valueOf(1));
 		createSubjectStudy(study, subject);
+		subject.setImagedObjectCategory(null);
 		patient.setSubject(subject);
 		return subject;
 	}
