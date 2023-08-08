@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -355,16 +356,24 @@ public class StudyApiController implements StudyApi {
 				studyService.update(study);
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
-			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
-			LOG.info("filePath: {}", filePath);
-			File fileToCreate = new File(filePath);
-			LOG.info("fileToCreate getParentFile: {}", fileToCreate.getParentFile());
-			fileToCreate.getParentFile().mkdirs();
-			LOG.info("fileToCreate exists: {}", fileToCreate.exists());
-			fileToCreate.createNewFile();
-			LOG.info("fileToCreate exists: {}", fileToCreate.exists());
-			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
-			file.transferTo(fileToCreate);
+			String parentDir = dataDir + "/study-" + studyId;
+			Path path = Paths.get( parentDir);
+			Files.createDirectories(path);
+			LOG.info("path: {}", path.getFileName());
+			Path newFilePath = Paths.get(parentDir + "/" + file.getOriginalFilename());
+			Files.createFile(newFilePath);
+			LOG.info("newFilePath: {}", newFilePath.getFileName());
+			file.transferTo(newFilePath);
+
+
+//			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
+//			File fileToCreate = new File(filePath);
+//			fileToCreate.getParentFile().mkdirs();
+//			LOG.info("fileToCreate exists: {}", fileToCreate.exists());
+//			fileToCreate.createNewFile();
+//			LOG.info("fileToCreate exists: {}", fileToCreate.exists());
+//			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
+//			file.transferTo(fileToCreate);
 		} catch (Exception e) {
 			LOG.error("Error while loading files on study: {}. File not uploaded. {}", studyId, e);
 		}
