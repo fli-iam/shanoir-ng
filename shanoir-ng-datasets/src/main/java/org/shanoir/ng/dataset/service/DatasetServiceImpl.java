@@ -274,10 +274,12 @@ public class DatasetServiceImpl implements DatasetService {
 		List<Object[]> results = repository.findExpressionSizesTotalByStudyIdGroupByFormat(studyIds);
 		Map<Long, List<VolumeByFormatDTO>> sizesByFormatAndStudy = new HashMap<>();
 
+		for(Long id : studyIds){
+			sizesByFormatAndStudy.putIfAbsent(id, new ArrayList<>());
+		}
+
 		for(Object[] result : results){
 			Long studyId = (Long) result[0];
-			sizesByFormatAndStudy.putIfAbsent(studyId, new ArrayList<>());
-
 			sizesByFormatAndStudy.get(studyId).add(new VolumeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[1]), (Long) result[2]));
 		}
 

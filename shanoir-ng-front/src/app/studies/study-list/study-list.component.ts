@@ -36,6 +36,8 @@ import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
+    private isStudyVolumesFetching = true;
+
     @ViewChild('table', { static: false }) table: TableComponent;
 
     constructor(
@@ -51,6 +53,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
 
     getEntities(): Promise<Study[]> {
+        this.isStudyVolumesFetching = true;
         let earlyResult: Promise<Study[]> = Promise.all([
             this.studyService.getAll(),
             this.studyService.getPublicStudiesData()
@@ -111,6 +114,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
 
                     (study as Study).detailedSizes = sizesByLabel;
+                    this.isStudyVolumesFetching = false;
                 });
             })
         });
@@ -150,13 +154,12 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 headerName: "Members", field: "nbMembers", type: "number", width: '30px'
             },
             {
-                headerName: "Storage volume", field: "totalSize", disableSearch: true, orderBy: ['totalSize'],
+                headerName: "Storage volume", field: "totalSize", disableSearch: true, type: "number", orderBy: ["totalSize"],
                 cellRenderer: (params: any) => {
-                    if(params.data.totalSize){
-                        return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
-                    }else{
-                       return "Fetching..."
+                    if (this.isStudyVolumesFetching) {
+                        return "Fetching..."
                     }
+                    return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
                 },
                 tip: (data: any) => {
                     let tip = ""

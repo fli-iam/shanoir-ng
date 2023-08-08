@@ -154,7 +154,7 @@ public interface StudyApi {
 			@ApiResponse(code = 404, message = "no study found", response = Void.class),
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PostMapping(value = "/detailedStorageVolume", produces = { "application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudies(#studyIds, 'CAN_SEE_ALL'))")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.filterVolumesHasRightOnStudies(#studyIds, 'CAN_SEE_ALL'))")
 	ResponseEntity<Map<Long, StudyStorageVolumeDTO>> getDetailedStorageVolumeByStudy(
 			@ApiParam("studyIds") @RequestParam List<Long> studyIds
 	) throws RestServiceException;

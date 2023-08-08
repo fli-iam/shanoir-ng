@@ -20,7 +20,6 @@ import java.util.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
-import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -396,7 +395,7 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME)
 	@RabbitHandler
 	@Transactional
-	public String getDetailedStorageVolumeByStudy(List<Long> studyIds) throws InterruptedException {
+	public String getDetailedStorageVolumeByStudy(List<Long> studyIds) {
 		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 
 		Map<Long, StudyStorageVolumeDTO> studyStorageVolumes = new HashMap<>();

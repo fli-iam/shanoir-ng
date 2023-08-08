@@ -291,7 +291,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         const base: number = 1024;
         const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-        if(size == null || size == 0){
+        if(size == null){
+            return "";
+        }
+        
+        if(size == 0){
             return "0 " + units[0];
         }
 
