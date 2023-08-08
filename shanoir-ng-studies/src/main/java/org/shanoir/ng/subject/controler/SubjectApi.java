@@ -77,7 +77,7 @@ public interface SubjectApi {
 			@RequestParam(value = "clinical", required = false, defaultValue = "true") boolean clinical);
 
 
-	@ApiOperation(value = "", notes = "Returns the subjects as Pageable with corresponding name", response = Subject.class, responseContainer = "List", tags = {})
+	@ApiOperation(value = "", notes = "Returns the clinical subjects as Pageable with corresponding name", response = Subject.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found subjects", response = Subject.class),
 			@ApiResponse(code = 204, message = "no subject found", response = Subject.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = Subject.class),
@@ -85,7 +85,7 @@ public interface SubjectApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = Subject.class) })
 	@GetMapping(value = "/filter", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<Page<SubjectDTO>> findSubjectsPageByName(Pageable page, String name);
+	ResponseEntity<Page<SubjectDTO>> findClinicalSubjectsPageByName(Pageable page, String name);
 
 	@ApiOperation(value = "", notes = "Returns id and name for all the subjects", response = IdName.class, responseContainer = "List", tags = {})
 	@ApiResponses(value = {

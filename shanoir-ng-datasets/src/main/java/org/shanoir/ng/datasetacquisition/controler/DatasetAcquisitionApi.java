@@ -85,8 +85,7 @@ public interface DatasetAcquisitionApi {
 	@RequestMapping(value = "/datasetacquisition/byStudyCard/{studyCardId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<DatasetAcquisitionDTO>> findByStudyCard(
-			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
+	ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId);
 	
 	@ApiOperation(value = "", notes = "Deletes a datasetAcquisition", response = Void.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 204, message = "datasetAcquisition deleted", response = Void.class),
@@ -135,7 +134,6 @@ public interface DatasetAcquisitionApi {
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
 			@ApiParam(value = "ids of the datasets", required = true) @RequestBody Long[] datasetIds);
-
 	
 	@ApiOperation(value = "", notes = "Returns a dataset acquisitions page", response = Page.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found dataset acquisitions", response = Page.class),

@@ -20,21 +20,31 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
+import org.shanoir.ng.preclinical.subjects.controller.AnimalSubjectApiController;
+import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
+import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
+import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDtoService;
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.preclinical.references.RefsService;
+import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectUniqueValidator;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -64,8 +74,7 @@ public class AnimalSubjectApiControllerTest {
 
 	private static final String REQUEST_PATH = "/subject";
 	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
-	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-	private static final String REQUEST_PATH_WITH_SUBJECT_ID = REQUEST_PATH + "/find/1";
+	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/2";
 
 	private Gson gson;
 
@@ -93,19 +102,34 @@ public class AnimalSubjectApiControllerTest {
 	@MockBean
 	private AnimalSubjectEditableByManager editableOnlyValidator;
 
+	@MockBean
+	private RabbitTemplate rabbitTemplate;
+
+	@MockBean
+	private PreclinicalSubjectDtoService dtoServiceMock;
+
 
 	@Before
-	public void setup() throws ShanoirException {
+	public void setup() throws ShanoirException, JsonProcessingException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
-		doNothing().when(subjectsServiceMock).deleteById(1L);
+		doNothing().when(subjectsServiceMock).deleteBySubjectId(1L);
 		given(subjectsServiceMock.findAll()).willReturn(Arrays.asList(new AnimalSubject()));
-		given(subjectsServiceMock.findById(1L)).willReturn(new AnimalSubject());
-		List<AnimalSubject> subjects = new ArrayList<AnimalSubject>();
-		subjects.add(new AnimalSubject());
-		given(subjectsServiceMock.findBySubjectId(1L)).willReturn(subjects);
+		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(new AnimalSubject());
+		given(subjectsServiceMock.createSubject(Mockito.any(SubjectDto.class))).willReturn(1L);
+		given(subjectsServiceMock.isSubjectIdAlreadyUsed(2L)).willReturn(false);
+		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(new AnimalSubject());
+		PreclinicalSubjectDto dto = new PreclinicalSubjectDto();
+		dto.setAnimalSubject(new AnimalSubjectDto());
+		given(dtoServiceMock.getPreclinicalDtoFromAnimalSubject(Mockito.any(AnimalSubject.class))).willReturn(dto);
+		given(dtoServiceMock.getAnimalSubjectDtoFromAnimalSubject(Mockito.any(AnimalSubject.class))).willReturn(dto.getAnimalSubject());
+		given(dtoServiceMock.getAnimalSubjectDtoListFromAnimalSubjectList(Mockito.anyList())).willReturn(Arrays.asList(dto.getAnimalSubject()));
+		given(dtoServiceMock.getAnimalSubjectFromAnimalSubjectDto(Mockito.any(AnimalSubjectDto.class))).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
+		given(dtoServiceMock.getAnimalSubjectFromPreclinicalDto(Mockito.any(PreclinicalSubjectDto.class))).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
+		AnimalSubject subject = new AnimalSubject();
+		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(subject);
 		AnimalSubject anSubj = new AnimalSubject();
-		anSubj.setId(Long.valueOf(123));
+		anSubj.setId(1L);
 		given(subjectsServiceMock.save(Mockito.any(AnimalSubject.class))).willReturn(anSubj );
 		given(uniqueValidator.validate(Mockito.any(AnimalSubject.class))).willReturn(new FieldErrorMap());
 		given(editableOnlyValidator.validate(Mockito.any(AnimalSubject.class))).willReturn(new FieldErrorMap());
@@ -135,21 +159,17 @@ public class AnimalSubjectApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewSubjectTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(AnimalSubjectModelUtil.createAnimalSubject()))).andExpect(status().isOk());
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(gson.toJson(AnimalSubjectModelUtil.createPreclinicalSubjectDto())))
+				.andExpect(status().isOk());
 	}
 
 	@Test
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateSubjectTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(AnimalSubjectModelUtil.createAnimalSubject()))).andExpect(status().isOk());
-	}
-
-	@Test
-	public void findSubjectBySubjectIdTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_SUBJECT_ID).accept(MediaType.APPLICATION_JSON))
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(gson.toJson(AnimalSubjectModelUtil.createAnimalSubjectDto())))
 				.andExpect(status().isOk());
 	}
 

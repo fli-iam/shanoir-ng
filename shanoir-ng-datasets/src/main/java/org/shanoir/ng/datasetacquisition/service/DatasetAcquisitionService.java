@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -36,7 +37,7 @@ public interface DatasetAcquisitionService {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
-	List<DatasetAcquisition> findByStudyCard(Long id);
+	public List<DatasetAcquisition> findByStudyCard(Long studyCardId);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
@@ -63,4 +64,6 @@ public interface DatasetAcquisitionService {
 	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
 
     boolean existsByStudyCardId(Long studyCardId);
+
+	Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
 }

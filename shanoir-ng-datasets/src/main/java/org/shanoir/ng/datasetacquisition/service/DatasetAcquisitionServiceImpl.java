@@ -15,6 +15,7 @@
 package org.shanoir.ng.datasetacquisition.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,11 +32,8 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.study.rights.StudyUser;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +41,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
+import com.google.common.collect.Lists;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
@@ -66,7 +64,14 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
-        return repository.findByStudyCardId(studyCardId);
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return repository.findByStudyCardId(studyCardId);
+        } else {
+            List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+            Set<Long> unrestrictedStudies = new HashSet<Long>();
+            securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+            return repository.findByStudyCardIdAndStudyCenterOrStudyIdIn(studyCardId, studyCenters, unrestrictedStudies);
+        }
     }
 
     @Override
@@ -110,6 +115,15 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
             return repository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
         }
+    }
+    
+    @Override
+    public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
+    	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
+    	for (DatasetAcquisition acquisition: result) {
+            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+    	}
+    	return Lists.newArrayList(result);
     }
 
     @Override

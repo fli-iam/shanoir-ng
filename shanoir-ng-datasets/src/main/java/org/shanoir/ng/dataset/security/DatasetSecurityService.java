@@ -837,6 +837,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterDatasetAcquisitionList(List<DatasetAcquisition> list, String rightStr) {
+        if (list == null) return true;
     	Set<DatasetAcquisition> toRemove = new HashSet<>();
     	list.forEach((DatasetAcquisition ds) -> {
         	if (!this.hasRightOnStudyCenter(ds.getExamination().getCenterId(), ds.getExamination().getStudyId(), rightStr)) {
