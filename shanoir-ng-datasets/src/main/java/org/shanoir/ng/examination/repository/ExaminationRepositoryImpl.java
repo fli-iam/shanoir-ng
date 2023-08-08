@@ -67,7 +67,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 		if (preclinical != null) {
 			nbPreParams++;
 			preclinicalIndex = nbPreParams;
-			queryEndStr +=  "where ex.preclinical is ?" + preclinicalIndex + " ";
+			queryEndStr +=  "where ex.preclinical = ?" + preclinicalIndex + " ";
 		}
 		if (subjectName != null) {
 			nbPreParams++;
