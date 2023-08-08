@@ -358,8 +358,9 @@ public class StudyApiController implements StudyApi {
 			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
 			File fileToCreate = new File(filePath);
 			fileToCreate.getParentFile().mkdirs();
+			fileToCreate.createNewFile();
 			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
-			file.transferTo(new File(filePath));
+			file.transferTo(fileToCreate);
 		} catch (Exception e) {
 			LOG.error("Error while loading files on study: {}. File not uploaded. {}", studyId, e);
 		}
