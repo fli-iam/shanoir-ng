@@ -277,11 +277,14 @@ public class StudyApiController implements StudyApi {
 			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException {
 		try {
-			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
-			File fileToCreate = new File(filePath);
-			fileToCreate.getParentFile().mkdirs();
-			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
-			file.transferTo(new File(filePath));
+			String parentDir = dataDir + "/study-" + studyId;
+			Path path = Paths.get( parentDir);
+			Files.createDirectories(path);
+			LOG.info("path: {}", path.getFileName());
+			Path newFilePath = Paths.get(parentDir + "/" + file.getOriginalFilename());
+			Files.createFile(newFilePath);
+			LOG.info("newFilePath: {}", newFilePath.getFileName());
+			file.transferTo(newFilePath);
 		} catch (Exception e) {
 			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", studyId, e);
 		}
@@ -364,16 +367,6 @@ public class StudyApiController implements StudyApi {
 			Files.createFile(newFilePath);
 			LOG.info("newFilePath: {}", newFilePath.getFileName());
 			file.transferTo(newFilePath);
-
-
-//			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
-//			File fileToCreate = new File(filePath);
-//			fileToCreate.getParentFile().mkdirs();
-//			LOG.info("fileToCreate exists: {}", fileToCreate.exists());
-//			fileToCreate.createNewFile();
-//			LOG.info("fileToCreate exists: {}", fileToCreate.exists());
-//			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
-//			file.transferTo(fileToCreate);
 		} catch (Exception e) {
 			LOG.error("Error while loading files on study: {}. File not uploaded. {}", studyId, e);
 		}
