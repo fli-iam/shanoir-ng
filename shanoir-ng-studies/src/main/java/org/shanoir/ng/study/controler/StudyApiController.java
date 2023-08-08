@@ -356,9 +356,13 @@ public class StudyApiController implements StudyApi {
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
 			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
+			LOG.info("filePath: {}", filePath);
 			File fileToCreate = new File(filePath);
+			LOG.info("fileToCreate getParentFile: {}", fileToCreate.getParentFile());
 			fileToCreate.getParentFile().mkdirs();
+			LOG.info("fileToCreate exists: {}", fileToCreate.exists());
 			fileToCreate.createNewFile();
+			LOG.info("fileToCreate exists: {}", fileToCreate.exists());
 			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
 			file.transferTo(fileToCreate);
 		} catch (Exception e) {
