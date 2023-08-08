@@ -74,7 +74,9 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                     preSubject.animalSubject = aSub;
                     preSubject.id = aSub.id;
                     preSubject.subject = subMap.get(preSubject.id);
-                    this.preclinicalSubjects.push(preSubject);
+                    if(preSubject.subject){
+                        this.preclinicalSubjects.push(preSubject);
+                    }
                 }
                 return this.preclinicalSubjects;
             });
@@ -86,6 +88,9 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         let colDef: ColumnDefinition[] = [
             {headerName: "Common name", field: "subject.name"},
             {headerName: "Imaged object category", field: "subject.imagedObjectCategory", cellRenderer: function (params: any) {
+                    if(!params.data.subject){
+                        return "";
+                    }
                     let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory> params.data.subject.imagedObjectCategory;
                     if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.PHANTOM) {
                     	return 'Phantom';
