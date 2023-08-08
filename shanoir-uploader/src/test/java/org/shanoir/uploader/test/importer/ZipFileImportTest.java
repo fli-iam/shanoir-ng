@@ -36,15 +36,13 @@ public class ZipFileImportTest extends AbstractTest {
 		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
 		study.setId(Long.valueOf(3));
 		study.setName("DemoStudy");
-		for (int i = 0; i < 1; i++) {
+		for (int i = 0; i < 100; i++) {
 			ImportJob importJob = step1UploadDicom("acr_phantom_t1.zip");
 			if (CollectionUtils.isNotEmpty(importJob.getPatients())) {
 				selectAllSeriesForImport(importJob);
-				for (int j = 0; j < 100; j++) {
-					Subject subject = step2CreateSubject(importJob, study);
-					Examination examination = step3CreateExamination(subject);
-					step4StartImport(importJob, subject, examination, study);
-				}
+				Subject subject = step2CreateSubject(importJob, study);
+				Examination examination = step3CreateExamination(subject);
+				step4StartImport(importJob, subject, examination, study);
 			}
 		}
 	}
@@ -64,13 +62,13 @@ public class ZipFileImportTest extends AbstractTest {
 			throws JsonProcessingException, Exception {
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
-		importJob.setStudyCardId(Long.valueOf(3));
+		importJob.setStudyCardId(Long.valueOf(3)); // @todo better create one on your own
 		importJob.setStudyCardName("StudyCard1");
 		importJob.setAcquisitionEquipmentId(Long.valueOf(1));
 		importJob.setSubjectName(subject.getName());
 		importJob.setExaminationId(examination.getId());
 		importJob.setConverterId(Long.valueOf(6));
-		importJob.setAnonymisationProfileToUse("Neurinfo"); // yes we are in ShUp, but use the standard import API
+		importJob.setAnonymisationProfileToUse("Profile Neurinfo"); // yes we are in ShUp, but use the standard import API
 		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		shUpClient.startImportJob(importJobJson);
 	}
@@ -105,7 +103,7 @@ public class ZipFileImportTest extends AbstractTest {
 		subject.setSubjectStudyList(new ArrayList<SubjectStudy>());
 		subject = shUpClient.createSubject(subject, true, Long.valueOf(1));
 		createSubjectStudy(study, subject);
-		subject.setImagedObjectCategory(null);
+		subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
 		patient.setSubject(subject);
 		return subject;
 	}
