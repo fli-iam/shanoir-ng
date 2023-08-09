@@ -14,9 +14,8 @@
 
 package org.shanoir.ng.importer;
 
-import java.io.IOException;
-
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
@@ -35,16 +34,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "importer", description = "Importer API")
 @RequestMapping("/importer")
 public interface ImporterApi {
 
+    // used by ShanoirUploader!!! 1. step: create a tempDir for the import
     @Operation(summary = "Create a temp directory (random long), as sub-dir of a user specific dir, for one import and return the name == tempDirId",
     		description = "Create a temp directory (random long), as sub-dir of a user specific dir, for one import and return the name == tempDirId")
 	@ApiResponses(value = {
@@ -56,6 +56,7 @@ public interface ImporterApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<String> createTempDir() throws RestServiceException;
     
+    // used by ShanoirUploader!!! 2. step: called for each DICOM file
     @Operation(summary = "Upload a file into a specific temp dir", description = "Upload a file into a specific temp dir")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "file uploaded"),
@@ -74,7 +75,6 @@ public interface ImporterApi {
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
         @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = "/start_import/", consumes = { "application/json" })
-
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<Void> startImport(@Parameter(name = "Exchange", required=true) @RequestBody Exchange exchange) throws RestServiceException, FileNotFoundException, IOException;
     
@@ -138,19 +138,17 @@ public interface ImporterApi {
 			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
 			@ApiResponse(responseCode = "409", description = "Already exists - conflict"),
 			@ApiResponse(responseCode = "200", description = "Unexpected Error") })
-	@PostMapping(value = "/import_dicom/", produces = { "application/json" }, consumes = {
-			"application/json" })
+	@PostMapping(value = "/import_dicom/", produces = { "application/json" }, consumes = { "application/json" })
 	ResponseEntity<ImportJob> importDicomZipFile(@Parameter(name = "file path") @RequestBody String dicomZipFilename)
 			throws RestServiceException;
     
+    // used by ShanoirUploader!!! 3. step
     @Operation(summary = "Start import job", description = "Start import job")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "import job started"),
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
         @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @PostMapping(value = "/start_import_job/",
-        produces = { "application/json" },
-        consumes = { "application/json" })
+    @PostMapping(value = "/start_import_job/", consumes = { "application/json" }, produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
 
@@ -186,7 +184,6 @@ public interface ImporterApi {
         consumes = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT') and @importSecurityService.canImportFromPACS())")
     ResponseEntity<ImportJob> queryPACS(@Parameter(name = "DicomQuery", required=true) @RequestBody DicomQuery dicomQuery) throws RestServiceException;
-
     
     @Operation(summary = "Get dicom image", description = "Get dicom image")
     @ApiResponses(value = {
@@ -196,6 +193,5 @@ public interface ImporterApi {
     @GetMapping(value = "/get_dicom/", produces = { "application/dicom" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required=true) @RequestParam(value = "path", required = true) String path) throws RestServiceException, IOException;
-
 
 }

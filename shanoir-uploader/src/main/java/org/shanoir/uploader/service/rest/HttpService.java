@@ -104,7 +104,7 @@ public class HttpService {
 		try {
 			HttpPost httpPost = new HttpPost(url);
 			if (isLoginPost) {
-				httpPost.setHeader("Content-type", "application/x-www-form-urlencoded");
+				httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
 			} else {
 				httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			}
@@ -120,7 +120,7 @@ public class HttpService {
 
 	public CloseableHttpResponse postFile(String url, String tempDirId, File file) {
 		try {
-			HttpPost httpPost = new HttpPost(url + tempDirId);
+			HttpPost httpPost = new HttpPost(url + "/" + tempDirId);
 			httpPost.addHeader("Authorization", "Bearer " + ShUpOnloadConfig.getTokenString());
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 			builder.addBinaryBody("file", file, ContentType.create("application/octet-stream"), file.getName());
