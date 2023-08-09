@@ -49,6 +49,7 @@ public final class AnimalSubjectModelUtil {
 	// Subject data
 	public static final Long ID = 1L;
 	public static final Long SUBJECT_ID = 2L;
+	public static final String SUBJECT_NAME = "subject_name";
 
 	/**
 	 * Create animal subject.
@@ -81,6 +82,7 @@ public final class AnimalSubjectModelUtil {
 	public static PreclinicalSubjectDto createPreclinicalSubjectDto() {
 		final PreclinicalSubjectDto dto = new PreclinicalSubjectDto();
 		dto.setSubject(new SubjectDto());
+		dto.getSubject().setName(SUBJECT_NAME);
 		dto.setAnimalSubject(createAnimalSubjectDto());
 		dto.setId(SUBJECT_ID);
 		return dto;
