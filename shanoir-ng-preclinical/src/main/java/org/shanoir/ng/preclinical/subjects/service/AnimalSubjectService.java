@@ -83,4 +83,6 @@ public interface AnimalSubjectService {
 	boolean isSubjectIdAlreadyUsed(Long subjectId);
 
     Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException;
+
+	List<AnimalSubject> findBySubjectIds(List<Long> subjectIds);
 }

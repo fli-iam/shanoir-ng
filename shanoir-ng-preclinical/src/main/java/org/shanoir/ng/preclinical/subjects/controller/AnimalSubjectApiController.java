@@ -175,8 +175,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<List<AnimalSubjectDto>> getAllAnimalSubjects() {
-		final List<AnimalSubjectDto> subjects = dtoService.getAnimalSubjectDtoListFromAnimalSubjectList(subjectService.findAll());
+	public ResponseEntity<List<AnimalSubjectDto>> findBySubjectIds(List<Long> subjectIds) {
+		final List<AnimalSubjectDto> subjects = dtoService.getAnimalSubjectDtoListFromAnimalSubjectList(subjectService.findBySubjectIds(subjectIds));
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

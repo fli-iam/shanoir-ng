@@ -21,6 +21,7 @@ import javax.validation.Valid;
 import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -66,15 +67,16 @@ public interface AnimalSubjectApi {
 	ResponseEntity<AnimalSubjectDto> getAnimalSubjectBySubjectId(
 			@ApiParam(value = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
-	@ApiOperation(value = "List all animalSubjects", notes = "", response = AnimalSubject.class, responseContainer = "List", tags = {
-			"AnimalSubject", })
+	@ApiOperation(value = "", notes = "List animalSubjects linked to the given subject ids", response = Long.class, tags = {})
 	@ApiResponses(value = {
 			@ApiResponse(code = 200, message = "An array of Preclinical AnimalSubject", response = AnimalSubjectDto.class),
 			@ApiResponse(code = 401, message = "unauthorized", response = AnimalSubjectDto.class),
 			@ApiResponse(code = 403, message = "forbidden", response = AnimalSubjectDto.class),
 			@ApiResponse(code = 500, message = "Unexpected error", response = AnimalSubjectDto.class) })
-	@GetMapping(value = "/all", produces = { "application/json" })
-	ResponseEntity<List<AnimalSubjectDto>> getAllAnimalSubjects();
+	@PostMapping(value = "/find", produces = { "application/json" })
+	ResponseEntity<List<AnimalSubjectDto>> findBySubjectIds(
+			@ApiParam("studyIds") @RequestParam List<Long> subjectIds
+	);
 
 	@ApiOperation(value = "Update an existing animalSubject", notes = "", response = Void.class, tags = {
 			"AnimalSubject", })

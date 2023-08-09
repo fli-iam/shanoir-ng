@@ -205,12 +205,11 @@ public class RabbitMQSubjectService {
 
 			Optional<Subject> subject = subjectRepository.findById(id);
 
-			if(subject.isEmpty()){
+			if(subject.isEmpty() || !subject.get().isPreclinical()){
 				return;
 			}
 
 			subjectService.deleteById(subject.get().getId());
-
 			LOG.info("Subject [{}] has been deleted following deletion of preclinical subject [{}]", subject.get().getId(), id);
 
 

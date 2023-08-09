@@ -63,7 +63,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                 subMap.set(sub.id, sub);
             }
 
-            return this.animalSubjectService.getAnimalSubjects().then(animalSubject => {
+            return this.animalSubjectService.getAnimalSubjects(subMap.keys()).then(animalSubject => {
 
                 if (!animalSubject) {
                     return [];
@@ -74,9 +74,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                     preSubject.animalSubject = aSub;
                     preSubject.id = aSub.id;
                     preSubject.subject = subMap.get(preSubject.id);
-                    if(preSubject.subject){
-                        this.preclinicalSubjects.push(preSubject);
-                    }
+                    this.preclinicalSubjects.push(preSubject);
                 }
                 return this.preclinicalSubjects;
             });

@@ -132,4 +132,9 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 		return subjectId;
 	}
 
+	@Override
+	public List<AnimalSubject> findBySubjectIds(List<Long> subjectIds) {
+		return subjectsRepository.findBySubjectIdIn(subjectIds);
+	}
+
 }
