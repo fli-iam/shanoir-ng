@@ -101,7 +101,7 @@ public class DicomServerClient implements IDicomServerClient {
 			final String studyInstanceUID = serie.getStudyInstanceUID();
 			try {
 				// move files from server directly into uploadFolder
-				boolean noError = getFilesFromServer(dcmqr, dQH, studyInstanceUID, seriesInstanceUID);
+				boolean noError = getFilesFromServer(dcmqr, dQH, studyInstanceUID, seriesInstanceUID, serie.getDescription());
 				if(noError) {
 					// create file name filter for old files
 					final FilenameFilter oldFileNamesFilter = new FilenameFilter() {
@@ -125,11 +125,11 @@ public class DicomServerClient implements IDicomServerClient {
 					retrievedDicomFiles.addAll(fileNamesForSerie);
 					oldFileNames.addAll(fileNamesForSerie);
 					logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-							+ " DICOM files for serie " + seriesInstanceUID
+							+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getDisplayString()
 							+ " was successful.\n\n");
 				} else {
 					logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-							+ " DICOM files for serie " + seriesInstanceUID
+							+ " DICOM files for serie " + seriesInstanceUID + ": " + serie.getDisplayString()
 							+ " has failed.\n\n");
 					return null;
 				}
@@ -148,13 +148,15 @@ public class DicomServerClient implements IDicomServerClient {
 	 * @param seriesInstanceUID
 	 * @return
 	 */
-	private boolean getFilesFromServer(DcmQR dcmqr, DicomQueryHelper dQH, final String studyInstanceUID, final String seriesInstanceUID) throws Exception {
+	private boolean getFilesFromServer(DcmQR dcmqr, DicomQueryHelper dQH, final String studyInstanceUID,
+			final String seriesInstanceUID, final String seriesDescription) throws Exception {
 		final List<DicomObject> list;
-		try{
+		try {
 			String[] argsArray = dQH.buildCommand("-S", true, null, studyInstanceUID, seriesInstanceUID);
-			logger.info("\n\n C_MOVE, serie command: launching dcmqr with args: " + Util.arrayToString(argsArray)+"\n\n");
+			logger.info("\n\n C_MOVE, serie (" + seriesDescription + ") command: launching dcmqr with args: "
+					+ Util.arrayToString(argsArray) + "\n\n");
 			list = dcmqr.query(argsArray);
-			logger.debug("\n\n Dicom Query list:\n "+list.toString()+"\n");
+			logger.debug("\n\n Dicom Query list:\n " + list.toString() + "\n");
 		} catch (final Exception e) {
 			logger.error(e.getMessage(), e);
 			return false;
