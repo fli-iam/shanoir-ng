@@ -30,7 +30,6 @@ import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -42,7 +41,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class DefaultOutputProcessing extends OutputProcessing {
+public class ProcessedDatasetProcessing extends OutputProcessing {
 
 	public static final String JSON_INFILE = "infile";
 	@Value("${vip.result-file-name}")
@@ -66,7 +65,7 @@ public class DefaultOutputProcessing extends OutputProcessing {
 	@Autowired
 	private DatasetService datasetService;
 
-	private static final Logger LOG = LoggerFactory.getLogger(DefaultOutputProcessing.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ProcessedDatasetProcessing.class);
 
 	@Override
 	public void manageTarGzResult(File in, File parent, CarminDatasetProcessing processing) {
