@@ -80,7 +80,7 @@ public interface AnimalSubjectService {
 	Long getIdBySubjectId(long subjectId);
 
 
-	boolean isSubjectIdAlreadyUsed(Long subjectId);
+	boolean isSubjectNameAlreadyUsed(String name);
 
     Long createSubject(SubjectDto dto) throws JsonProcessingException, ShanoirException;
 

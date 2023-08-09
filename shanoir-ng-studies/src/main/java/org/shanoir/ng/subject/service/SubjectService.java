@@ -197,4 +197,6 @@ public interface SubjectService {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostFilter("hasRole('ADMIN') or @studySecurityService.hasRightOnTrustedSubjectForOneStudy(filterObject, 'CAN_SEE_ALL')")
 	List<Subject> findByPreclinical(boolean preclinical);
+
+	boolean existsSubjectWithName(String name);
 }

@@ -18,7 +18,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -117,7 +116,7 @@ public class AnimalSubjectApiControllerTest {
 		given(subjectsServiceMock.findAll()).willReturn(Arrays.asList(new AnimalSubject()));
 		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(new AnimalSubject());
 		given(subjectsServiceMock.createSubject(Mockito.any(SubjectDto.class))).willReturn(1L);
-		given(subjectsServiceMock.isSubjectIdAlreadyUsed(2L)).willReturn(false);
+		given(subjectsServiceMock.isSubjectNameAlreadyUsed(2L)).willReturn(false);
 		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(new AnimalSubject());
 		PreclinicalSubjectDto dto = new PreclinicalSubjectDto();
 		dto.setAnimalSubject(new AnimalSubjectDto());

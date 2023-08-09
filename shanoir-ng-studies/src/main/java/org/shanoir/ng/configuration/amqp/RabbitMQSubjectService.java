@@ -137,6 +137,13 @@ public class RabbitMQSubjectService {
 		}
 	}
 
+	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_NAME_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public boolean existsSubjectName(String name){
+		return this.subjectService.existsSubjectWithName(name);
+	}
+
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE)
 	@RabbitHandler
 	@Transactional

@@ -20,6 +20,7 @@ import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.util.Objects;
@@ -29,7 +30,7 @@ import java.util.Objects;
  */
 
 @Entity
-@Table(name = "animal_subject")
+@Table(name = "animal_subject", indexes = @Index(name = "subject_id_idx", columnList = "subjectId", unique = true))
 @JsonPropertyOrder({ "_links", "subjectId", "specie", "strain", "biotype", "provider", "stabulation" })
 public class AnimalSubject extends HalEntity {
 

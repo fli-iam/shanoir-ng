@@ -38,6 +38,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 
 @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
 @Entity
+@Table(indexes = @Index(name = "subject_name_idx", columnList = "name", unique = true))
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
 	"preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
 "userPersonalCommentList" })

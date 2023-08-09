@@ -17,11 +17,8 @@ package org.shanoir.ng.preclinical.subjects.controller;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.security.auth.Subject;
 import javax.validation.Valid;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectUniqueValidator;
@@ -33,7 +30,6 @@ import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPatholo
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -47,7 +43,6 @@ import org.shanoir.ng.shared.validation.RefValueExistsValidator;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -119,6 +114,15 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	private SubjectDto createSubject(SubjectDto dto) throws ShanoirException, RestServiceException {
 
+		if(subjectService.isSubjectNameAlreadyUsed(dto.getName())){
+			FieldErrorMap errorMap = new FieldErrorMap();
+			List<FieldError> errors = new ArrayList();
+			errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", dto.getName()));
+			errorMap.put("name", errors);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errorMap)));
+		}
+
 		dto.setPreclinical(true);
 
 		Long subjectId;
@@ -129,16 +133,6 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 			LOG.error(msg, ex);
 			throw new ShanoirException(msg, ex);
 		}
-
-		if(subjectService.isSubjectIdAlreadyUsed(subjectId)){
-			FieldErrorMap errorMap = new FieldErrorMap();
-			List<FieldError> errors = new ArrayList();
-			errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", dto.getName()));
-			errorMap.put("name", errors);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errorMap)));
-		}
-
 		dto.setId(subjectId);
 
 		return dto;
