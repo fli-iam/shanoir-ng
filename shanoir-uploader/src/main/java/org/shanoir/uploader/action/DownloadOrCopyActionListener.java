@@ -17,7 +17,6 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
-import org.shanoir.uploader.gui.DicomTree;
 import org.shanoir.uploader.gui.MainWindow;
 
 /**
@@ -99,22 +98,12 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		Thread thread = new Thread(runnable);
 		thread.start();
 		
-		// erase information in the GUI result part
-		mainWindow.dicomTree.getSelectionModel().clearSelection();
-		mainWindow.dicomTree = new DicomTree(null);
-		mainWindow.dicomTreeJScrollPane.setViewportView(mainWindow.dicomTree);
-		// Data reset
+		// clear previous selection, but keep tree open in the tab
 		mainWindow.isDicomObjectSelected = false;
+		mainWindow.dicomTree.getSelectionModel().clearSelection();
 		mainWindow.getSAL().setDicomData(null);
 		mainWindow.getSAL().setSelectedSeries(null);
-		// erase query fields
-		mainWindow.patientNameTF.setText("");
-		mainWindow.patientIDTF.setText("");
-		mainWindow.studyDescriptionTF.setText("");
-		mainWindow.studyDate = "";
-		mainWindow.model.setValue(null);
-		mainWindow.studyModel.setValue(null);
-		
+	
 		JOptionPane.showMessageDialog(mainWindow.frame,
 			    resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.message"),
 			    resourceBundle.getString("shanoir.uploader.downloadOrCopy.confirmation.title"),
@@ -137,33 +126,14 @@ public class DownloadOrCopyActionListener implements ActionListener {
 				dicomData.setSex("M");
 			if (mainWindow.fSexR.isSelected())
 				dicomData.setSex("F");
-			if (mainWindow.noAnonR.isSelected()) {
-				return completeDicomDataForNoAnon(dicomData);					
-			} else {
-				return completeDicomDataForYesAnon(dicomData);
-			}
+			return completeDicomData(dicomData);					
 		} catch (ParseException e) {
 			logger.error("Unable to convert BirthDate using formatter", e);
 			return null;
 		}
 	}
 
-	private DicomDataTransferObject completeDicomDataForYesAnon(DicomDataTransferObject dicomData) {
-		if (mainWindow.newPatientIDTF.getText().isEmpty()) {
-			JOptionPane.showMessageDialog(mainWindow.frame,
-				    resourceBundle.getString("shanoir.uploader.import.start.patient.id.empty"),
-				    resourceBundle.getString("shanoir.uploader.select.error.title"),
-				    JOptionPane.ERROR_MESSAGE);
-			return null;
-		}
-		dicomData.setNewPatientID(mainWindow.newPatientIDTF.getText());
-		dicomData.setLastName(mainWindow.newPatientIDTF.getText());
-		dicomData.setFirstName("");
-		dicomData.setBirthName("");
-		return dicomData;
-	}
-
-	private DicomDataTransferObject completeDicomDataForNoAnon(final DicomDataTransferObject dicomData) throws ParseException {
+	private DicomDataTransferObject completeDicomData(final DicomDataTransferObject dicomData) throws ParseException {
 		if (mainWindow.lastNameTF.getText().isEmpty()) {
 			JOptionPane.showMessageDialog(mainWindow.frame,
 				    resourceBundle.getString("shanoir.uploader.import.start.lastname.empty"),
@@ -193,22 +163,15 @@ public class DownloadOrCopyActionListener implements ActionListener {
 
 	private DicomDataTransferObject generateSubjectIdentifierAndHashValues(DicomDataTransferObject dicomData) throws PseudonymusException, UnsupportedEncodingException, NoSuchAlgorithmException {
 		String subjectIdentifier = null;
-		// mode: data are not yet anonymised: calculate identifier in real relation with patient
-		if (mainWindow.noAnonR.isSelected()) {
-			// OFSEP mode
-			if (ShUpConfig.isModePseudonymus()) {
-				dicomData = pseudonymizer.createHashValuesWithPseudonymus(dicomData);
-				subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(dicomData.getFirstNameHash1(), dicomData.getBirthNameHash1(), dicomData.getBirthDateHash());
-			// Neurinfo mode
-			} else {
-				subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
-			}
-			dicomData.setSubjectIdentifier(subjectIdentifier);
-		// if the data have already be anonymised: Neurinfo only today
+		// OFSEP mode
+		if (ShUpConfig.isModePseudonymus()) {
+			dicomData = pseudonymizer.createHashValuesWithPseudonymus(dicomData);
+			subjectIdentifier = identifierCalculator.calculateIdentifierWithHashs(dicomData.getFirstNameHash1(), dicomData.getBirthNameHash1(), dicomData.getBirthDateHash());
+		// Neurinfo mode
 		} else {
-			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getNewPatientID(), dicomData.getBirthDate());
-			dicomData.setSubjectIdentifier(subjectIdentifier);
+			subjectIdentifier = identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
 		}
+		dicomData.setSubjectIdentifier(subjectIdentifier);
 		return dicomData;
 	}
 

@@ -56,21 +56,17 @@ public class SelectionActionListener implements TreeSelectionListener {
 		dicomData = null;
 
 		// clean up editPanel when value changed
-		mainWindow.noAnonR.setEnabled(false);
-		mainWindow.yesAnonR.setEnabled(false);
 		mainWindow.lastNameTF.setEnabled(false);
 		mainWindow.birthNameCopyButton.setEnabled(false);
 		mainWindow.firstNameTF.setEnabled(false);
 		mainWindow.birthNameTF.setEnabled(false);
 		mainWindow.birthDateTF.setEnabled(false);
-		mainWindow.newPatientIDTF.setEnabled(false);
 		mainWindow.mSexR.setEnabled(false);
 		mainWindow.fSexR.setEnabled(false);
 		mainWindow.lastNameTF.setText("");
 		mainWindow.firstNameTF.setText("");
 		mainWindow.birthNameTF.setText("");
 		mainWindow.birthDateTF.setText("");
-		mainWindow.newPatientIDTF.setText("");
 
 		mainWindow.isDicomObjectSelected = true;
 		selectedSeries = new LinkedHashSet<Serie>();
@@ -161,8 +157,6 @@ public class SelectionActionListener implements TreeSelectionListener {
 			}
 
 			if (dicomData != null) {
-				mainWindow.noAnonR.setEnabled(true);
-				mainWindow.yesAnonR.setEnabled(true);
 				mainWindow.lastNameTF.setText(dicomData.getLastName());
 				mainWindow.lastNameTF.setEnabled(true);
 				mainWindow.birthNameCopyButton.setEnabled(true);
@@ -170,8 +164,6 @@ public class SelectionActionListener implements TreeSelectionListener {
 				mainWindow.firstNameTF.setEnabled(true);
 				mainWindow.birthNameTF.setText(dicomData.getBirthName());
 				mainWindow.birthNameTF.setEnabled(true);
-				mainWindow.newPatientIDTF.setText(dicomData.getLastName());
-				mainWindow.newPatientIDTF.setEnabled(true);
 				mainWindow.birthDateTF.setEnabled(true);
 				mainWindow.mSexR.setEnabled(true);
 				mainWindow.fSexR.setEnabled(true);

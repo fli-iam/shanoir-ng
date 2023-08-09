@@ -11,7 +11,6 @@ import java.awt.event.ItemListener;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -24,7 +23,6 @@ import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -36,7 +34,6 @@ import org.shanoir.uploader.action.CancelButtonActionListener;
 import org.shanoir.uploader.action.ImportCreateNewExamCBItemListener;
 import org.shanoir.uploader.gui.customcomponent.JComboBoxMandatory;
 import org.shanoir.uploader.gui.customcomponent.JTextFieldMandatory;
-import org.shanoir.uploader.model.rest.StudyCard;
 
 /**
  * This is the view class for the Study, StudyCard, Subject and MR Examination

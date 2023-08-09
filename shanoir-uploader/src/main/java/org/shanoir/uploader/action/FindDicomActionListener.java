@@ -74,7 +74,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		mainWindow.lastNameTF.setText("");
 		mainWindow.firstNameTF.setText("");
 		mainWindow.birthNameTF.setText("");
-		mainWindow.newPatientIDTF.setText("");
 		mainWindow.birthDateTF.setText("");
 		mainWindow.mSexR.setSelected(true);
 		mainWindow.fSexR.setSelected(false);
