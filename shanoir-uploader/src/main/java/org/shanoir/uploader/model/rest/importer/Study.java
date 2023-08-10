@@ -17,9 +17,6 @@ package org.shanoir.uploader.model.rest.importer;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
-import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -47,12 +44,6 @@ public class Study {
 
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
 	public Study() {}
-
-	public Study(final Attributes attributes) {
-		this.studyInstanceUID = attributes.getString(Tag.StudyInstanceUID);
-		this.studyDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.StudyDate));
-		this.studyDescription = attributes.getString(Tag.StudyDescription);
-	}
 
 	public String getStudyInstanceUID() {
 		return studyInstanceUID;

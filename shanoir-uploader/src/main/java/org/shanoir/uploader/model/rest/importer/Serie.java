@@ -17,9 +17,6 @@ package org.shanoir.uploader.model.rest.importer;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
-import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -95,16 +92,6 @@ public class Serie {
 
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
 	public Serie() {}
-
-	public Serie(Attributes attributes) {
-		this.seriesInstanceUID = attributes.getString(Tag.SeriesInstanceUID);
-		this.seriesDescription = attributes.getString(Tag.SeriesDescription);
-		this.seriesDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate));
-		this.seriesNumber = attributes.getString(Tag.SeriesNumber);
-		this.numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
-		this.modality = attributes.getString(Tag.Modality);
-		this.protocolName = attributes.getString(Tag.ProtocolName);
-	}
 
 	public Boolean getSelected() {
 		return selected;

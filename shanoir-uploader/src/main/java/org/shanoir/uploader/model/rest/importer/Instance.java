@@ -14,9 +14,6 @@
 
 package org.shanoir.uploader.model.rest.importer;
 
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -40,12 +37,6 @@ public class Instance {
     
     public Instance() {}
     
-    public Instance(Attributes attributes) {
-    		this.sopInstanceUID = attributes.getString(Tag.SOPInstanceUID);
-    		this.instanceNumber = attributes.getString(Tag.InstanceNumber);
-    		this.referencedSOPClassUIDInFile = attributes.getString(Tag.ReferencedSOPClassUIDInFile);
-    }
-
 	public String getInstanceNumber() {
 		return instanceNumber;
 	}

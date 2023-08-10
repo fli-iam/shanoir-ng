@@ -17,9 +17,6 @@ package org.shanoir.uploader.model.rest.importer;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
-import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.uploader.model.rest.Subject;
 
@@ -54,14 +51,6 @@ public class Patient {
 
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
 	public Patient() {}
-
-	public Patient(final Attributes attributes) {
-		this.patientID = attributes.getString(Tag.PatientID);
-		this.patientName = attributes.getString(Tag.PatientName);
-		this.patientBirthName = attributes.getString(Tag.PatientBirthName);
-		this.patientBirthDate = DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate));
-		this.patientSex = attributes.getString(Tag.PatientSex);
-	}
 
 	@JsonProperty("studies")
 	private List<Study> studies;

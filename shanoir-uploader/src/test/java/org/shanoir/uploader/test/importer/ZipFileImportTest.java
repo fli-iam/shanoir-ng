@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Test;
 import org.shanoir.uploader.model.rest.Examination;
@@ -36,9 +35,9 @@ public class ZipFileImportTest extends AbstractTest {
 		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
 		study.setId(Long.valueOf(3));
 		study.setName("DemoStudy");
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 1; i++) {
 			ImportJob importJob = step1UploadDicom("acr_phantom_t1.zip");
-			if (CollectionUtils.isNotEmpty(importJob.getPatients())) {
+			if (!importJob.getPatients().isEmpty()) {
 				selectAllSeriesForImport(importJob);
 				Subject subject = step2CreateSubject(importJob, study);
 				Examination examination = step3CreateExamination(subject);

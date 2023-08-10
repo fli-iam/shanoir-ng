@@ -2,7 +2,6 @@ package org.shanoir.uploader.action;
 
 import java.io.File;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,8 +19,8 @@ import java.util.Set;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.uploader.ShUpOnloadConfig;
