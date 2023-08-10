@@ -14,6 +14,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>17</java.version>
 		<lombok.version>1.18.26</lombok.version>
+		<dcm4che.version>5.30.0</dcm4che.version>
 		<keycloak.version>20.0.0</keycloak.version>
 		<jackson.version>2.13.4</jackson.version>
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
@@ -56,6 +57,18 @@
 			</exclusions>
 		</dependency>
 		
+		<!-- DCM4CHE dependencies -->
+		<dependency>
+			<groupId>org.dcm4che</groupId>
+			<artifactId>dcm4che-core</artifactId>
+			<version>${dcm4che.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		<!-- Used by local DICOM server: DICOM Weasis Tools, based on dcm4che3 -->
 		<dependency>
 			<groupId>org.weasis</groupId>

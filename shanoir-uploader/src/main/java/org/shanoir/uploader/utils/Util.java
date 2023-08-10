@@ -41,9 +41,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.log4j.Logger;
-import org.dcm4che2.data.DicomObject;
-import org.dcm4che2.data.Tag;
-import org.dcm4che2.io.DicomInputStream;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShanoirUploader;
 import org.shanoir.uploader.dicom.DicomTreeNode;
@@ -58,7 +58,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
@@ -493,30 +492,22 @@ public final class Util {
 				String imageFileName = iteImages.next();
 				if (!"PR".equals(modality) && !"SR".equals(modality)) {
 					String imageFilePath = rootDir.toString() + File.separator + imageFileName;
-					// create the MRI Object containing MRI information
-					DicomObject dcmObj;
-					DicomInputStream din = null;
-					MRI mriInformation = new MRI();
-					try {
-						din = new DicomInputStream(new File(imageFilePath));
-						dcmObj = din.readDicomObject();
-						mriInformation.setInstitutionName(dcmObj.getString(Tag.InstitutionName));
-						mriInformation.setInstitutionAddress(dcmObj.getString(Tag.InstitutionAddress));
-						mriInformation.setStationName(dcmObj.getString(Tag.StationName));
-						mriInformation.setManufacturer(dcmObj.getString(Tag.Manufacturer));
-						mriInformation.setManufacturersModelName(dcmObj.getString(Tag.ManufacturerModelName));
-						mriInformation.setMagneticFieldStrength(dcmObj.getString(Tag.MagneticFieldStrength));
-						mriInformation.setDeviceSerialNumber(dcmObj.getString(Tag.DeviceSerialNumber));
+					File dicomFile = new File(imageFilePath);
+					try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
+						Attributes attributes = dIS.readDatasetUntilPixelData();
+						MRI mriInformation = new MRI();
+						mriInformation.setInstitutionName(attributes.getString(Tag.InstitutionName));
+						mriInformation.setInstitutionAddress(attributes.getString(Tag.InstitutionAddress));
+						mriInformation.setStationName(attributes.getString(Tag.StationName));
+						mriInformation.setManufacturer(attributes.getString(Tag.Manufacturer));
+						mriInformation.setManufacturersModelName(attributes.getString(Tag.ManufacturerModelName));
+						mriInformation.setMagneticFieldStrength(attributes.getString(Tag.MagneticFieldStrength));
+						mriInformation.setDeviceSerialNumber(attributes.getString(Tag.DeviceSerialNumber));
+						((Serie) serie).setMriInformation(mriInformation);
 					} catch (IOException e) {
 						logger.error(e.getMessage(), e);
 						return;
-					} finally {
-						try {
-							din.close();
-						} catch (IOException ignore) {
-						}
 					}
-					((Serie) serie).setMriInformation(mriInformation);
 					return;
 				}
 			}
