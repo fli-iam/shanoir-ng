@@ -37,6 +37,7 @@ import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -53,7 +54,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
 
-import com.github.fge.jackson.JacksonUtils;
 
 /**
  * Unit tests for importer controller.
