@@ -10,15 +10,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang3.StringUtils;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.model.Execution;
 import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
-import org.shanoir.ng.processing.carmin.output.ProcessedDatasetProcessing;
 import org.shanoir.ng.processing.carmin.output.OutputProcessing;
+import org.shanoir.ng.processing.carmin.output.OutputProcessingException;
+import org.shanoir.ng.processing.carmin.output.OutputProcessingService;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -79,21 +77,13 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	private ObjectMapper mapper;
 
 	@Autowired
-	private ProcessedDatasetProcessing processedDatasetProcessing;
+	private List<OutputProcessing> outputProcessings;
 
 	@Autowired
 	private ShanoirEventService eventService;
-	
-	// Map of output methods to execute.
-    private static Map<String, OutputProcessing> outputProcessingMap;
 
-	@PostConstruct
-	public void Initialize() {
-		// Init output map
-        Map<String, OutputProcessing> aMap =  new HashMap<>();
-        aMap.put(DEFAULT_OUTPUT, processedDatasetProcessing);
-        outputProcessingMap = Collections.unmodifiableMap(aMap);
-	}
+	@Autowired
+	private OutputProcessingService outputProcessingService;
 
 	@Async
 	@Override
@@ -130,76 +120,48 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 		while (!stop.get()) {
 
-			// init headers with the active access token
-			HttpHeaders headers = new HttpHeaders();
-			headers.set("Authorization", "Bearer " + token);
-			HttpEntity entity = new HttpEntity(headers);
+			try{
 
-			// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
-			if(attempts >= 3){
-				String msg = "Failed to get execution details from VIP in " + attempts + " attempts";
-				LOG.error(msg);
-				LOG.error("Stopping the thread...");
-				stop.set(true);
-				this.setJobInError(event, execLabel + " : " + msg);
-				break;
-			}
+				Execution execution = this.getExecutionFromVIP(token, attempts, restTemplate, uri);
 
-			Execution execution;
-			try {
-				ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
-				execution = executionResponseEntity.getBody();
-				// init attempts due to successful response
-				attempts = 1;
-			} catch (HttpStatusCodeException e) {
-				// in case of an error with response payload
-				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-					LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
+				if(execution == null){
 					token = this.refreshServiceAccountAccessToken();
-					// inc attempts.
 					attempts++;
-				} else {
-					String msg = "Failed to get execution details from VIP in " + attempts + " attempts";
-					LOG.error(msg , e);
-					this.setJobInError(event, execLabel + " : " + msg);
-					stop.set(true);
+					continue;
 				}
-				continue;
-			} catch (RestClientException e) {
-				// in case of an error with no response payload
-				String msg = "No response payload in execution infos from VIP";
-				LOG.error(msg, e);
-				this.setJobInError(event, execLabel + " : " + msg);
-				stop.set(true);
-				continue;
-			}
 
-			switch (execution.getStatus()) {
-			case FINISHED:
+				attempts = 1;
 
-				this.processFinishedJob(processing, event);
-				break;
+				switch (execution.getStatus()) {
+					case FINISHED:
 
-			case UNKOWN:
-			case EXECUTION_FAILED:
-			case KILLED:
+						this.processFinishedJob(processing, event);
+						break;
 
-				this.processKilledJob(processing, event, execution);
-				break;
+					case UNKOWN:
+					case EXECUTION_FAILED:
+					case KILLED:
 
-			case RUNNING:
-				try{
-					Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
-				} catch (InterruptedException e) {
-					String msg = "Thread exception";
-					LOG.error(msg, e);
-					this.setJobInError(event, execLabel + " : " + msg);
-					stop.set(true);
+						this.processKilledJob(processing, event, execution);
+						break;
+
+					case RUNNING:
+						try{
+							Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
+						} catch (InterruptedException e) {
+							throw new OutputProcessingException("Thread exception", e);
+						}
+						break;
+					default:
+						stop.set(true);
+						break;
 				}
-				break;
-			default:
+
+			}catch (OutputProcessingException e){
+				LOG.error(e.getMessage(), e.getCause());
+				this.setJobInError(event, execLabel + " : " + e.getMessage());
+				LOG.warn("Stopping thread...");
 				stop.set(true);
-				break;
 			}
 		}
 	}
@@ -225,7 +187,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				+ (execution.getErrorCode() != null ? " (Error code : " + execution.getErrorCode() + ")" : ""));
 	}
 
-	private void processFinishedJob(CarminDatasetProcessing processing, ShanoirEvent event) throws EntityNotFoundException {
+	private void processFinishedJob(CarminDatasetProcessing processing, ShanoirEvent event) throws EntityNotFoundException, OutputProcessingException {
 
 		String execLabel = this.getExecLabel(processing);
 		processing.setStatus(ExecutionStatus.FINISHED);
@@ -237,16 +199,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		event.setMessage(execLabel + " : Finished. Processing imported results...");
 		eventService.publishEvent(event);
 
-		// untar the .tgz files
-		final File userImportDir = new File(
-				this.importDir + File.separator +
-						processing.getResultsLocation());
-
-		String outputProcessingKey = StringUtils.isEmpty(processing.getOutputProcessing()) ? DEFAULT_OUTPUT : processing.getOutputProcessing();
-
-		for(File file : this.getFilesToProcess(userImportDir, execLabel, event)){
-			outputProcessingMap.get(outputProcessingKey).manageTarGzResult(file, userImportDir.getAbsoluteFile(), processing);
-		}
+		this.outputProcessingService.process(processing);
 
 		LOG.info("Execution status updated, stopping job...");
 
@@ -258,25 +211,32 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		eventService.publishEvent(event);
 	}
 
-	private List<File> getFilesToProcess(File userImportDir,String execLabel, ShanoirEvent event){
+	private Execution getExecutionFromVIP(String token, int attempts, RestTemplate restTemplate, String uri) throws OutputProcessingException {
 
-		LOG.info("Processing result in import directory [{}]...", userImportDir.getAbsolutePath());
-
-		final PathMatcher matcher = userImportDir.toPath().getFileSystem()
-				.getPathMatcher("glob:**/*.{tgz,tar.gz}");
-
-		try (Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath())) {
-
-			return  stream.filter(matcher::matches).map(Path::toFile).collect(Collectors.toList());
-
-		} catch (IOException e) {
-			String msg = "I/O error while listing files in import directory";
-			LOG.error(msg, e);
-			this.setJobInError(event, execLabel + " : " + msg);
-			stop.set(true);
-			return new ArrayList<>();
+		// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
+		if(attempts >= 3){
+			throw new OutputProcessingException("Failed to get execution details from VIP in " + attempts + " attempts", null);
 		}
 
+		// init headers with the active access token
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity entity = new HttpEntity(headers);
+
+		try {
+			ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
+			return executionResponseEntity.getBody();
+		} catch (HttpStatusCodeException e) {
+			// in case of an error with response payload
+			if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+				LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
+				return null;
+			} else {
+				throw new OutputProcessingException("Failed to get execution details from VIP in " + attempts + " attempts", e);
+			}
+		} catch (RestClientException e) {
+			throw new OutputProcessingException("No response payload in execution infos from VIP", e);
+		}
 	}
 
 	/**

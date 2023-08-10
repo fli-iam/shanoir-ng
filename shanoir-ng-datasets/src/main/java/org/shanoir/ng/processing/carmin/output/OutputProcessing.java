@@ -11,12 +11,14 @@ import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
  */
 public abstract class OutputProcessing {
 
+	public abstract boolean canProcess(CarminDatasetProcessing processing);
+
 	/**
 	 * This methods manages the single result of a Carmin  dataset processing
 	 * @param resultFile the result file as tar.gz of the processing
 	 * @param parentFolder the temporary arent folder in which we are currently working
 	 * @param processing the corresponding dataset processing.
 	 */
-	public abstract void manageTarGzResult(File resultFile, File parentFolder, CarminDatasetProcessing processing);
+	public abstract void manageTarGzResult(File resultFile, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException;
 
 }

@@ -67,10 +67,14 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ProcessedDatasetProcessing.class);
 
-	@Override
-	public void manageTarGzResult(File in, File parent, CarminDatasetProcessing processing) {
 
-		LOG.info("Processing result file [{}]...", in.getAbsolutePath());
+	@Override
+	public boolean canProcess(CarminDatasetProcessing processing) {
+		return true;
+	}
+
+	@Override
+	public void manageTarGzResult(File in, File parent, CarminDatasetProcessing processing) throws OutputProcessingException {
 
 		try (TarArchiveInputStream fin = new TarArchiveInputStream(
 				new GzipCompressorInputStream(new FileInputStream(in)))) {
@@ -122,8 +126,8 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 			this.deleteCacheDir(Paths.get(cacheFolder.getAbsolutePath()));
 
 		} catch (Exception e) {
-			LOG.error("An error occured while extracting result from result archive.", e);
 			importerService.createFailedJob(in.getPath());
+			throw new OutputProcessingException("An error occured while extracting result from result archive.", e);
 		}
 	}
 
