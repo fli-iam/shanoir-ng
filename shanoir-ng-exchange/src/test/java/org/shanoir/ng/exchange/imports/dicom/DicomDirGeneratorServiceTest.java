@@ -1,22 +1,21 @@
 package org.shanoir.ng.exchange.imports.dicom;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DicomDirGeneratorServiceTest {
 
 	@Autowired
 	private DicomDirGeneratorService dicomDirGeneratorService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		dicomDirGeneratorService = new DicomDirGeneratorService();
 	}
