@@ -52,6 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<resteasy.version>3.14.0.Final</resteasy.version>
 		<springfox.version>2.5.0</springfox.version>
 		<powermock.version>2.0.9</powermock.version>
+		<dcm4che.version>5.30.0</dcm4che.version>
 	</properties>
 
 	<dependencyManagement>

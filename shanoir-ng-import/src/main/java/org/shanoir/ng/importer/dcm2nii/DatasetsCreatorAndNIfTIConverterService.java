@@ -187,7 +187,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					serie.setDatasets(new ArrayList<Dataset>());
 					constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
 					// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
-					if (!serie.getIsSpectroscopy()) {
+					if (serie.getIsSpectroscopy() != null && !serie.getIsSpectroscopy()) {
 						constructNifti(serieIDFolderFile, serie, converterId);
 					}
 				} catch (NoSuchFieldException | SecurityException e) {

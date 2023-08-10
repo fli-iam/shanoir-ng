@@ -299,13 +299,17 @@ public class QueryPACSService {
 					if (!serie.getInstances().isEmpty()) {
 						dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
 						dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
-						series.add(serie);
 					} else {
 						LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
+						serie.setIgnored(true);
+						serie.setSelected(false);
 					}
 				} else {
 					LOG.warn("Serie found with non imaging modality and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
+					serie.setIgnored(true);
+					serie.setSelected(false);
 				}
+				series.add(serie);
 			}
 			series.sort(new SeriesNumberSorter());
 			study.setSeries(series);
