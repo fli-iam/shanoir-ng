@@ -18,10 +18,21 @@
 		<jackson.version>2.13.4</jackson.version>
 		<junit.jupiter.version>5.8.2</junit.jupiter.version>
 		<junit.platform.version>1.8.2</junit.platform.version>
+		<weasis.version>5.14.1</weasis.version>
 	</properties>
 
 	<dependencies>
-		<!-- dependency Shanoir-NG exchange -->
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-ms-common</artifactId>
+			<version>3.1.2</version>
+			<exclusions>
+			    <exclusion>
+			        <groupId>*</groupId>
+			        <artifactId>*</artifactId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
@@ -34,8 +45,8 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>org.shanoir-ng</groupId>
-			<artifactId>shanoir-ng-ms-common</artifactId>
+			<groupId>org.shanoir.anonymization</groupId>
+			<artifactId>anonymization</artifactId>
 			<version>3.1.2</version>
 			<exclusions>
 			    <exclusion>
@@ -44,15 +55,16 @@
 			    </exclusion>
 			</exclusions>
 		</dependency>
-		<!-- dependency Shanoir ng anonymization -->
+		
+		<!-- Used by local DICOM server: DICOM Weasis Tools, based on dcm4che3 -->
 		<dependency>
-			<groupId>org.shanoir.anonymization</groupId>
-			<artifactId>anonymization</artifactId>
-			<version>3.1.2</version>
+			<groupId>org.weasis</groupId>
+			<artifactId>weasis-dicom-tools</artifactId>
+			<version>${weasis.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -158,55 +170,6 @@
 			<artifactId>jdatepicker</artifactId>
 			<version>1.3.4</version>
 		</dependency>
-		<!-- ********************************************************** ** DCM4CHE 
-			dependencies ********************************** ********************************************************** -->
-		<!-- dependency DCM4CHE core -->
-		<dependency>
-			<groupId>dcm4che</groupId>
-			<artifactId>dcm4che-core</artifactId>
-		</dependency>
-		<!-- dependency DCM4CHE tool echo -->
-		<dependency>
-			<groupId>dcm4che.tool</groupId>
-			<artifactId>dcm4che-tool-dcmecho</artifactId>
-		</dependency>
-		<!-- dependency DCM4CHE tool dcmqr custom -->
-		<dependency>
-			<groupId>dcm4che2.tool</groupId>
-			<artifactId>dcm4che2-tool-dcmqr-custom</artifactId>
-			<version>1.0.0</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/src/main/resources/dcm4che2-tool-dcmqr-custom-1.0.0.jar</systemPath>
-		</dependency>
-		<!-- dependency DCM4CHE tool dcmrcv -->
-		<dependency>
-			<groupId>dcm4che.tool</groupId>
-			<artifactId>dcm4che-tool-dcmrcv</artifactId>
-		</dependency>
-		<!-- dependency commons-cli used by DCM4CHE tool echo -->
-		<dependency>
-			<groupId>commons-cli</groupId>
-			<artifactId>commons-cli</artifactId>
-			<version>1.2</version>
-		</dependency>
-		<!-- dependency DCM4CHE net used by DCM4CHE tool echo -->
-		<dependency>
-			<groupId>dcm4che</groupId>
-			<artifactId>dcm4che-net</artifactId>
-			<version>2.0.22</version>
-		</dependency>
-		<!-- dependency slf4j-api used by DCM4CHE tool echo -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>1.6.0</version>
-		</dependency>
-		<!-- dependency slf4j-impl used by DCM4CHE tool echo -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>1.6.0</version>
-		</dependency>
 		<!-- dependency for unit testing of sh-ng rest api -->
 		<dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -234,37 +197,6 @@
         </dependency>
 	</dependencies>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>dcm4che</groupId>
-				<artifactId>dcm4che-core</artifactId>
-				<version>2.0.22</version>
-			</dependency>
-			<dependency>
-				<groupId>dcm4che.tool</groupId>
-				<artifactId>dcm4che-tool-dcmecho</artifactId>
-				<version>2.0.22</version>
-			</dependency>
-			<dependency>
-				<groupId>dcm4che.tool</groupId>
-				<artifactId>dcm4che-tool-dcmrcv</artifactId>
-				<version>2.0.22</version>
-			</dependency>
-			<dependency>
-				<groupId>org.dcm4che</groupId>
-				<artifactId>dcm4che-core</artifactId>
-				<version>5.10.6</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-log4j12</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<repositories>
 		<repository>
 			<id>jboss</id>
@@ -278,6 +210,14 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+		</repository>
+		<!-- used by Weasis tools -->
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>mvn-repo-master</id>
+			<url>https://raw.github.com/nroduit/mvn-repo/master/</url>
 		</repository>
 	</repositories>
 
