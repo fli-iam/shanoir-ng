@@ -56,8 +56,7 @@ public class DicomDirToModelService {
 	 * @throws IOException
 	 */
 	public List<Patient> readDicomDirToPatients(final File file) throws IOException {
-		final DicomDirReader dicomDirReader = new DicomDirReader(file);
-		try {
+		try (DicomDirReader dicomDirReader = new DicomDirReader(file)) {
 			// patient level
 			List<Patient> patients = new ArrayList<Patient>();
 			Attributes patientRecord = dicomDirReader.findPatientRecord();
@@ -87,14 +86,13 @@ public class DicomDirToModelService {
 			return patients;
 		} catch (IOException e) {
 			LOG.error("Error while reading first root record of DICOM file: {}", e.getMessage());
-		} finally {
-			dicomDirReader.close();
 		}
 		return Collections.emptyList();
 	}
 
 	/**
 	 * Handles Serie and Instance records.
+	 * 
 	 * @param series
 	 * @param serieRecord
 	 * @param dicomDirReader
@@ -115,13 +113,15 @@ public class DicomDirToModelService {
 			if (!instances.isEmpty()) {
 				instances.sort(new InstanceNumberSorter());
 				serie.setInstances(instances);
-				series.add(serie);
 			} else {
 				LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
 			}
 		} else {
 			LOG.warn("Serie found with non imaging modality and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
+			serie.setIgnored(true);
+			serie.setSelected(false);
 		}
+		series.add(serie);
 	}
 	
 }

@@ -95,14 +95,34 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
 					if(event != null){
-						event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] " + cpt + "/" + nbSeries + ")");
+						event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
 						eventService.publishEvent(event);
 					}
-					filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
-					getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
+					try {
+						filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
+					} catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
+						handleError(event, nbSeries, cpt, serie, e);
+					}
+					// use a second try here, in case error is on serie, to get at least the serie name for error tracing
+					try {
+						getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
+					} catch (Exception e) {
+						handleError(event, nbSeries, cpt, serie, e);						
+					}
 					cpt++;
 				}
 			}
+		}
+	}
+
+	private void handleError(ShanoirEvent event, int nbSeries, int cpt, Serie serie, Exception e) {
+		LOG.error("Error while processing serie: {} {} {}", serie.toString(), e.getMessage(), e.getStackTrace());
+		serie.setErroneous(true);
+		serie.setErrorMessage(e.getMessage() + ", " + e.toString());
+		serie.setSelected(false);
+		if(event != null){
+			event.setMessage("Error with serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
+			eventService.publishEvent(event);
 		}
 	}
 
@@ -130,14 +150,14 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @throws FileNotFoundException
 	 */
-	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS) throws FileNotFoundException {
+	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS) throws Exception {
 		List<Image> images = new ArrayList<Image>();
 		List<Object> nonImages = new ArrayList<Object>();
 		List<Instance> instances = serie.getInstances();
 		for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
 			Instance instance = instancesIt.next();
 			File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
-			processDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
+			processOneDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
 		}
 		serie.setNonImages(nonImages);
 		serie.setNonImagesNumber(nonImages.size());
@@ -200,9 +220,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processDicomFileForAllInstances(File dicomFile, List<Image> images, String folderFileAbsolutePath) {
-		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
-			Attributes attributes = dIS.readDataset(-1, -1);
+	private void processOneDicomFileForAllInstances(File dicomFile, List<Image> images, String folderFileAbsolutePath) throws Exception {
+		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
+			Attributes attributes = dIS.readDataset();
 			// Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
 			if (dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
 				// do nothing here as instances list will be emptied after split between images and non-images
@@ -218,8 +238,11 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				addImageSeparateDatasetsInfo(image, attributes);
 				images.add(image);
 			}
-		} catch (IOException e) {
-			LOG.error("Error during DICOM file process.", e);
+		} catch (IOException iOE) {
+			throw iOE;
+		} catch (Exception e) {
+			LOG.error("Error while processing DICOM file: " + dicomFile.getAbsolutePath());
+			throw e;
 		}
 	}
 	
@@ -233,13 +256,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void processDicomFileForFirstInstance(File dicomFile, Serie serie, Patient patient) {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			LOG.debug("Process first DICOM file of serie {} path {}", serie.getSeriesInstanceUID() + " " + serie.getSeriesDescription(), dicomFile.getAbsolutePath());
-			Attributes attributes = dIS.readDataset(-1, -1);
+			Attributes attributes = dIS.readDatasetUntilPixelData();
 			checkPatientData(patient, attributes);
 			checkSerieData(serie, attributes);
 			addSeriesEquipment(serie, attributes);
 			addSeriesCenter(serie, attributes);
 		} catch (IOException e) {
-			LOG.error("Error during processing of DICOM file:", e);
+			LOG.error("Error during processing of DICOM file " + dicomFile.getAbsolutePath() + ":", e);
 		}
 	}
 
@@ -250,8 +273,12 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param image
 	 * @param datasetAttributes
 	 */
-	private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) {
-		if (UID.EnhancedMRImageStorage.equals(attributes.getString(Tag.SOPClassUID))) {
+	private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
+		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
+		if (UID.EnhancedMRImageStorage.equals(sopClassUID)
+			|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
+			|| UID.EnhancedCTImageStorage.equals(sopClassUID)
+			|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
 		}

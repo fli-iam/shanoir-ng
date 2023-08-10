@@ -130,8 +130,8 @@ public class DicomSerieAndInstanceAnalyzer {
 		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
 		if (sopClassUID != null) {
 			if (UID.EnhancedMRImageStorage.equals(sopClassUID)
-				|| UID.MRSpectroscopyStorage.equals(sopClassUID) // enhanced by default
 				|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
+				|| UID.MRSpectroscopyStorage.equals(sopClassUID) // enhanced by default
 				|| UID.LegacyConvertedEnhancedMRImageStorage.equals(sopClassUID)
 				|| UID.EnhancedCTImageStorage.equals(sopClassUID)
 				|| UID.EnhancedPETImageStorage.equals(sopClassUID)

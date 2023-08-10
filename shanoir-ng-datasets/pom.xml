@@ -27,7 +27,6 @@
 	<description>Dataset microservice for Shanoir NG</description>
 
 	<properties>
-		<dcm4che.version>5.27.0</dcm4che.version>
 		<solrj.version>9.2.1</solrj.version>
 		<spring.data.solr.version>4.3.15</spring.data.solr.version>		
 	</properties>
