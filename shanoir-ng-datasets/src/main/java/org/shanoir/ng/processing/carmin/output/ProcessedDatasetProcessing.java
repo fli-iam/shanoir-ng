@@ -177,7 +177,7 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 		return datasetService.findByIdIn(datasetIds);
 	}
 
-	private Long getDatasetIdFromFilename(String name){
+	public Long getDatasetIdFromFilename(String name){
 		// "id+[dataset id]+whatever.nii"
 		Pattern p = Pattern.compile("id\\+(\\d+)\\+.*");
 		Matcher m = p.matcher(name);

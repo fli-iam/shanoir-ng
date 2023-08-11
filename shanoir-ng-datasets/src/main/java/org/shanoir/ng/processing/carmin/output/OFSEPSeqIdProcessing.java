@@ -29,9 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class OFSEPSeqIdOutputProcessing extends OutputProcessing {
+public class OFSEPSeqIdProcessing extends OutputProcessing {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OFSEPSeqIdOutputProcessing.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OFSEPSeqIdProcessing.class);
 
     public static final String PIPELINE_OUTPUT = "output.json";
 
@@ -83,7 +83,7 @@ public class OFSEPSeqIdOutputProcessing extends OutputProcessing {
 
     @Override
     public boolean canProcess(CarminDatasetProcessing processing) {
-        return processing.getName().equals("ofsep_sequences_identification");
+        return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification");
     }
 
     @Override
@@ -141,7 +141,9 @@ public class OFSEPSeqIdOutputProcessing extends OutputProcessing {
                     throw  e;
                 }
 
-                this.createDatasetProperties(ds, vol, processing);
+                List<DatasetProperty> properties = this.getDatasetPropertiesFromVolume(ds, vol, processing);
+                datasetPropertyService.create(properties);
+
             }
         }
     }
@@ -177,10 +179,14 @@ public class OFSEPSeqIdOutputProcessing extends OutputProcessing {
      * @param volume
      * @return
      */
-    private void createDatasetProperties(Dataset ds, JSONObject volume, CarminDatasetProcessing processing) throws JSONException {
+    private List<DatasetProperty> getDatasetPropertiesFromVolume(Dataset ds, JSONObject volume, CarminDatasetProcessing processing) throws JSONException {
         List<DatasetProperty> properties = new ArrayList<>();
 
         for(String name : SERIE_PROPERTIES){
+
+            if(!volume.has(name)){
+                continue;
+            }
 
             DatasetProperty property = new DatasetProperty();
             property.setDataset(ds);
@@ -192,6 +198,10 @@ public class OFSEPSeqIdOutputProcessing extends OutputProcessing {
 
         for(String name : VOLUME_PROPERTIES){
 
+            if(!volume.has(name)){
+                continue;
+            }
+
             DatasetProperty property = new DatasetProperty();
             property.setDataset(ds);
             property.setName("volume." + name);
@@ -200,7 +210,7 @@ public class OFSEPSeqIdOutputProcessing extends OutputProcessing {
             properties.add(property);
         }
 
-        datasetPropertyService.create(properties);
+        return properties;
 
     }
 
@@ -213,29 +223,42 @@ public class OFSEPSeqIdOutputProcessing extends OutputProcessing {
      * @return
      * @throws JSONException
      */
-    private JSONObject getMatchingVolume(Dataset dataset, JSONObject serie) throws JSONException, PacsException {
+    public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie) throws JSONException, PacsException {
 
         JSONArray volumes = serie.getJSONArray("volumes");
 
         Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(dataset);
 
-        String orientation = attributes.getString(Tag.ImageOrientationPatient);
+        double[] dsOrientation = attributes.getDoubles(Tag.ImageOrientationPatient);
 
         for (int i = 0 ; i < volumes.length(); i++) {
 
-            JSONObject volume;
-            String volOrientation;
+            JSONObject volume = volumes.getJSONObject(i);
+            JSONArray volOrientation = volume.getJSONArray("orientation");
 
-            volume = volumes.getJSONObject(i);
-            volOrientation = volume.getString("orientation");
-
-            if(orientation.equals(volOrientation)){
+            if(this.areOrientationsEquals(dsOrientation, volOrientation)){
                 return volume;
             }
 
         }
 
         return null;
+
+    }
+
+    public boolean areOrientationsEquals(double[] dsOrientation, JSONArray volOrientation) throws JSONException {
+
+        if(dsOrientation.length != volOrientation.length()){
+            return false;
+        }
+
+        for (int i = 0 ; i < dsOrientation.length; i++) {
+            if(dsOrientation[i] != volOrientation.getDouble(i)){
+                return false;
+            }
+        }
+
+        return true;
 
     }
 

@@ -157,7 +157,8 @@ export class ExecutionComponent implements OnInit {
                 if (parameter.type == ParameterType.File) {
                     // If we have a file, we try to set up the adapted dataset
                     // We try to find all adapted datasets
-                    let datasetFilter: RegExp = new RegExp(this.executionForm.get(parameter.name).value);
+                    let value = this.executionForm.get(parameter.name).value ? this.executionForm.get(parameter.name).value  : "";
+                    let datasetFilter: RegExp = new RegExp(value);
 
                     let datasetsToSet: Dataset[] = [];
 
