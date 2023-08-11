@@ -94,6 +94,7 @@ public class QueryPACSService {
 	public void setDicomNodes(DicomNode calling, DicomNode called) {
 		this.calling = calling;
 		this.called = called;
+		this.maxPatientsFromPACS = 10;
 	}
 	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws ShanoirImportException {
