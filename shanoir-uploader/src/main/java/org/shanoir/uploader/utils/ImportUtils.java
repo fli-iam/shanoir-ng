@@ -15,7 +15,7 @@ import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DicomDataTransferObject;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.Serie;
+import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -91,7 +91,7 @@ public class ImportUtils {
 	 * @param dicomData
 	 * @param uploadJob
 	 */
-	public static void initUploadJob(final Set<org.shanoir.uploader.dicom.Serie> selectedSeries,
+	public static void initUploadJob(final Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries,
 			final DicomDataTransferObject dicomData, UploadJob uploadJob) {
 		uploadJob.setUploadState(UploadState.READY);
 		uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
@@ -191,9 +191,9 @@ public class ImportUtils {
 		patient.setStudies(studiesImportJob);
 		importJob.setExaminationId(examinationId);
 		// handle series for study
-		final Collection<Serie> seriesShUp = uploadJob.getSeries();
+		final Collection<SerieTreeNode> seriesShUp = uploadJob.getSeries();
 		final List<org.shanoir.uploader.model.rest.importer.Serie> seriesImportJob = new ArrayList<org.shanoir.uploader.model.rest.importer.Serie>();
-		for (org.shanoir.uploader.dicom.Serie serieShUp : seriesShUp){
+		for (org.shanoir.uploader.dicom.SerieTreeNode serieShUp : seriesShUp){
 			org.shanoir.uploader.model.rest.importer.Serie serieImportJob = new org.shanoir.uploader.model.rest.importer.Serie();
 			serieImportJob.setSelected(true);
 			serieImportJob.setSeriesInstanceUID(serieShUp.getId());
@@ -219,13 +219,13 @@ public class ImportUtils {
 	 * Initializes UploadStatusServiceJob object
 	 * 
 	 */
-	public static void initDataUploadJob(final Set<org.shanoir.uploader.dicom.Serie> selectedSeries,
+	public static void initDataUploadJob(final Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries,
 			final DicomDataTransferObject dicomData, NominativeDataUploadJob dataUploadJob) {
 		dataUploadJob.setPatientName(dicomData.getFirstName() + " " + dicomData.getLastName());
 		dataUploadJob.setPatientPseudonymusHash(dicomData.getSubjectIdentifier());
 		dataUploadJob.setStudyDate(ShUpConfig.formatter.format(dicomData.getStudyDate()));
 		dataUploadJob.setIPP(dicomData.getIPP());
-		Serie firstSerie = selectedSeries.iterator().next();
+		SerieTreeNode firstSerie = selectedSeries.iterator().next();
 		dataUploadJob.setMriSerialNumber(firstSerie.getMriInformation().getManufacturer()
 				+ "(" + firstSerie.getMriInformation().getDeviceSerialNumber() + ")");
 		dataUploadJob.setUploadPercentage("");
@@ -250,7 +250,7 @@ public class ImportUtils {
 	 * @param filePathDicomDir
 	 * @return
 	 */
-	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, Set<Serie> selectedSeries, File uploadFolder, IDicomServerClient dicomServerClient, String filePathDicomDir) {
+	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, Set<SerieTreeNode> selectedSeries, File uploadFolder, IDicomServerClient dicomServerClient, String filePathDicomDir) {
 		List<String> allFileNames = null;
 		if (isFromPACS) {
 			allFileNames = dicomServerClient.retrieveDicomFiles(selectedSeries, uploadFolder);
@@ -270,9 +270,9 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static List<String> copyFilesToUploadFolder(Set<org.shanoir.uploader.dicom.Serie> selectedSeries, final File uploadFolder, String filePathDicomDir) {
+	public static List<String> copyFilesToUploadFolder(Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries, final File uploadFolder, String filePathDicomDir) {
 		List<String> allFileNames = new ArrayList<String>();
-		for (org.shanoir.uploader.dicom.Serie serie : selectedSeries) {
+		for (org.shanoir.uploader.dicom.SerieTreeNode serie : selectedSeries) {
 			List<String> newFileNamesOfSerie = new ArrayList<String>();
 			List<String> oldFileNamesOfSerie = serie.getFileNames();
 			File sourceFile;

@@ -12,7 +12,7 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.dicom.Serie;
+import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -84,7 +84,7 @@ public class ImportDialogOpener {
 	 * @param uploadJob
 	 */
 	private void updateImportDialogForMRICenter(final UploadJob uploadJob) {
-		Serie firstSerie = uploadJob.getSeries().iterator().next();
+		SerieTreeNode firstSerie = uploadJob.getSeries().iterator().next();
 		String institutionName = firstSerie.getMriInformation().getInstitutionName();
 		String institutionAddress = firstSerie.getMriInformation().getInstitutionAddress();
 		String stationName = firstSerie.getMriInformation().getStationName();
@@ -109,7 +109,7 @@ public class ImportDialogOpener {
 	 * @throws Exception 
 	 */
 	private List<Study> getStudiesWithStudyCards(final UploadJob uploadJob) throws Exception {
-		Serie firstSerie = uploadJob.getSeries().iterator().next();
+		SerieTreeNode firstSerie = uploadJob.getSeries().iterator().next();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
 		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
 		if (studies != null) {

@@ -38,12 +38,12 @@ import jakarta.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.exchange.model.ExExamination;
 import org.shanoir.ng.exchange.model.ExStudy;
 import org.shanoir.ng.exchange.model.ExStudyCard;
 import org.shanoir.ng.exchange.model.ExSubject;
 import org.shanoir.ng.exchange.model.Exchange;
+import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;

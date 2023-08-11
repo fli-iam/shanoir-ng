@@ -9,7 +9,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 import org.shanoir.uploader.dicom.PreImportData;
-import org.shanoir.uploader.dicom.Serie;
+import org.shanoir.uploader.dicom.SerieTreeNode;
 
 /**
  * This class contains all informations concerning an upload.
@@ -39,7 +39,7 @@ public class UploadJob {
 	
 	private UploadState uploadState;
 	
-	private Collection<Serie> series;
+	private Collection<SerieTreeNode> series;
 	
 	private String birthNameHash1;
 
@@ -81,13 +81,13 @@ public class UploadJob {
 
 	@XmlElementWrapper(name="series")
 	@XmlElement(name="serie")
-	public Collection<Serie> getSeries() {
+	public Collection<SerieTreeNode> getSeries() {
 		return series;
 	}
 	
-	public Serie getSerie(final String id) {
+	public SerieTreeNode getSerie(final String id) {
 		for (Iterator iterator = series.iterator(); iterator.hasNext();) {
-			Serie serie = (Serie) iterator.next();
+			SerieTreeNode serie = (SerieTreeNode) iterator.next();
 			if (id.equals(serie.getId())) {
 				return serie;
 			}
@@ -95,7 +95,7 @@ public class UploadJob {
 		return null;
 	}
 
-	public void setSeries(Collection<Serie> series) {
+	public void setSeries(Collection<SerieTreeNode> series) {
 		this.series = series;
 	}
 

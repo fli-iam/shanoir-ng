@@ -84,8 +84,10 @@ public class QueryPACSService {
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
 	
-	@Autowired
-	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
+	public QueryPACSService(DicomNode calling, DicomNode called) {
+		this.calling = calling;
+		this.called = called;
+	}
 	
 	@PostConstruct
 	private void initDicomNodes() {
@@ -126,8 +128,12 @@ public class QueryPACSService {
 		}
 		return importJob;
 	}
-	
+
 	public void queryCMOVE(Serie serie) {
+		queryCMOVE(serie.getSeriesInstanceUID());
+	}
+
+	public DicomState queryCMOVE(String seriesInstanceUID) {
 		DicomProgress progress = new DicomProgress();
 		progress.addProgressListener(new ProgressListener() {
 			@Override
@@ -136,10 +142,10 @@ public class QueryPACSService {
 			}
 		});
 		DicomParam[] params = { new DicomParam(Tag.QueryRetrieveLevel, "SERIES"),
-				new DicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID()) };
+				new DicomParam(Tag.SeriesInstanceUID, seriesInstanceUID) };
 		AdvancedParams options = new AdvancedParams();
 		options.getQueryOptions().add(QueryOption.RELATIONAL); // Required for QueryRetrieveLevel other than study
-		CMove.process(options, calling, called, calledNameSCP, progress, params);
+		return CMove.process(options, calling, called, calledNameSCP, progress, params);
 	}
 
 	/**
@@ -294,11 +300,11 @@ public class QueryPACSService {
 			for (int i = 0; i < attributesList.size(); i++) {
 				Attributes attributes = attributesList.get(i);
 				Serie serie = new Serie(attributes);
-				if (!dicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(attributes)) {
+				if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(attributes)) {
 					queryInstances(calling, called, serie, study);
 					if (!serie.getInstances().isEmpty()) {
-						dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
-						dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
+						DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
+						DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 					} else {
 						LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
 						serie.setIgnored(true);
@@ -335,7 +341,7 @@ public class QueryPACSService {
 			List<Instance> instances = new ArrayList<>();
 			for (int i = 0; i < attributes.size(); i++) {
 				Instance instance = new Instance(attributes.get(i));
-				if (!dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes.get(i))) {
+				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes.get(i))) {
 					instances.add(instance);
 				}
 			}

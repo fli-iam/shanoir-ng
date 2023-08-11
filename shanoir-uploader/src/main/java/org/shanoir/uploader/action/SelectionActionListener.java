@@ -18,9 +18,9 @@ import javax.swing.tree.TreePath;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.Serie;
-import org.shanoir.uploader.dicom.query.Patient;
-import org.shanoir.uploader.dicom.query.Study;
+import org.shanoir.uploader.dicom.SerieTreeNode;
+import org.shanoir.uploader.dicom.query.PatientTreeNode;
+import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.MainWindow;
 
 /**
@@ -39,7 +39,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 
 	private ResourceBundle resourceBundle;
 
-	private Set<Serie> selectedSeries;
+	private Set<SerieTreeNode> selectedSeries;
 
 	private DicomDataTransferObject dicomData;
 
@@ -69,55 +69,55 @@ public class SelectionActionListener implements TreeSelectionListener {
 		mainWindow.birthDateTF.setText("");
 
 		mainWindow.isDicomObjectSelected = true;
-		selectedSeries = new LinkedHashSet<Serie>();
+		selectedSeries = new LinkedHashSet<SerieTreeNode>();
 
 		// check if multiple subject have been selected and show error
-		Patient patientAlreadySelected = null;
+		PatientTreeNode patientAlreadySelected = null;
 		// check if multiple studies have been selected and show error
 		Boolean oneStudyIsSelected = true;
 		// save the correct study selected
-		Study selectedStudy = null;
+		StudyTreeNode selectedStudy = null;
 		// returns all selected paths, which can be patients, studies and/or series
 		TreePath[] paths = mainWindow.dicomTree.getSelectionModel().getSelectionPaths();
 		if (paths != null && paths.length > 0) {
 			for (int i = 0; i < paths.length; i++) {
 				TreePath tp = paths[i];
 				Object o = tp.getLastPathComponent();
-				Patient patient = null;
+				PatientTreeNode patient = null;
 				// handle if patient in paths has been found
-				if (o instanceof Patient) {
-					patient = (Patient) o;
+				if (o instanceof PatientTreeNode) {
+					patient = (PatientTreeNode) o;
 					Collection<DicomTreeNode> studies = patient.getTreeNodes().values();
 					int nbStudiesSelected = 0;
 					for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
 						nbStudiesSelected++;
-						Study study = (Study) studiesIt.next();
+						StudyTreeNode study = (StudyTreeNode) studiesIt.next();
 						addSeriesForStudy(selectedSeries, study);
 					}
 					if (nbStudiesSelected != 1)
 						oneStudyIsSelected = false;
-					selectedStudy = (Study) patient.getFirstTreeNode();
+					selectedStudy = (StudyTreeNode) patient.getFirstTreeNode();
 				}
 				// handle if study in paths has been found
-				if (o instanceof Study) {
-					Study study = (Study) o;
+				if (o instanceof StudyTreeNode) {
+					StudyTreeNode study = (StudyTreeNode) o;
 					addSeriesForStudy(selectedSeries, study);
-					patient = (Patient) tp.getParentPath().getLastPathComponent();
+					patient = (PatientTreeNode) tp.getParentPath().getLastPathComponent();
 					if (selectedStudy == null)
 						selectedStudy = study;
 					else
 						oneStudyIsSelected = false;
 				}
 				// handle if serie in paths has been found
-				if (o instanceof Serie) {
-					patient = (Patient) tp.getParentPath().getParentPath().getLastPathComponent();
-					Serie serie = (Serie) o;
+				if (o instanceof SerieTreeNode) {
+					patient = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
+					SerieTreeNode serie = (SerieTreeNode) o;
 					Collection<DicomTreeNode> studies = patient.getTreeNodes().values();
 					for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
-						Study study = (Study) studiesIt.next();
+						StudyTreeNode study = (StudyTreeNode) studiesIt.next();
 						for (Iterator studySeries = study.getChildren(); studySeries.hasNext();) {
 							Map.Entry pair = (Map.Entry) studySeries.next();
-							Serie s = (Serie) pair.getValue();
+							SerieTreeNode s = (SerieTreeNode) pair.getValue();
 							if (s.equals(o)) {
 								if (selectedStudy == null || selectedStudy.equals(study))
 									selectedStudy = study;
@@ -187,19 +187,19 @@ public class SelectionActionListener implements TreeSelectionListener {
 	 * @param selectedSeries
 	 * @param study
 	 */
-	private void addSeriesForStudy(Set<Serie> selectedSeries, Study study) {
+	private void addSeriesForStudy(Set<SerieTreeNode> selectedSeries, StudyTreeNode study) {
 		Collection<DicomTreeNode> series = study.getTreeNodes().values();
 		for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
-			Serie serie = (Serie) seriesIt.next();
+			SerieTreeNode serie = (SerieTreeNode) seriesIt.next();
 			selectedSeries.add(serie);
 		}
 	}
 
-	public Set<Serie> getSelectedSeries() {
+	public Set<SerieTreeNode> getSelectedSeries() {
 		return selectedSeries;
 	}
 
-	public void setSelectedSeries(Set<Serie> selectedSeries) {
+	public void setSelectedSeries(Set<SerieTreeNode> selectedSeries) {
 		this.selectedSeries = selectedSeries;
 	}
 

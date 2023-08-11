@@ -34,7 +34,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	private static final String SEMI_COLON = ";";
 	
 	@Value("${shanoir.import.series.isspectroscopy}")
-	private String isSpectroscopy;
+	private static String isSpectroscopy;
 	
 	/**
 	 * By default raw data storage and sub-types are ignored.
@@ -42,7 +42,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	 * @param attributes
 	 * @return
 	 */
-	public boolean checkInstanceIsIgnored(Attributes attributes) {
+	public static boolean checkInstanceIsIgnored(Attributes attributes) {
 		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
 		if (UID.RawDataStorage.equals(sopClassUID)
 			|| UID.SpatialRegistrationStorage.equals(sopClassUID)
@@ -69,7 +69,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	 * @param serie
 	 * @return
 	 */
-	public boolean checkSerieIsIgnored(Attributes attributes) {
+	public static boolean checkSerieIsIgnored(Attributes attributes) {
 		String modality = attributes.getString(Tag.Modality);
 		if (AcquisitionModality.codeOf(modality) != null || RTSTRUCT.equals(modality) || RTDOSE.equals(modality) || RTPLAN.equals(modality)) {
 			return false;
@@ -77,14 +77,14 @@ public class DicomSerieAndInstanceAnalyzer {
 		return true;
 	}
 
-	public void checkSerieIsSpectroscopy(Serie serie) {
+	public static void checkSerieIsSpectroscopy(Serie serie) {
 		final String sopClassUID = serie.getSopClassUID();
 		final String seriesDescription = serie.getSeriesDescription();	
 		boolean isSpectroscopy = checkSerieIsSpectroscopy(sopClassUID, seriesDescription);
 		serie.setIsSpectroscopy(isSpectroscopy);
 	}
 
-	public Serie checkSerieIsSpectroscopy(Serie serie, Attributes attributes) {
+	public static Serie checkSerieIsSpectroscopy(Serie serie, Attributes attributes) {
 		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
 		final String seriesDescription = attributes.getString(Tag.SeriesDescription);		
 		boolean isSpectroscopy = checkSerieIsSpectroscopy(sopClassUID, seriesDescription);
@@ -98,7 +98,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	 * Non-Image Storage is Original MR, as in the first version of the MR Image IOD MR spectroscopy
 	 * did not yet exist or was known during the creation of the standard.
 	 */
-	private boolean checkSerieIsSpectroscopy(final String sopClassUID, final String seriesDescription) {
+	private static boolean checkSerieIsSpectroscopy(final String sopClassUID, final String seriesDescription) {
 		if (UID.MRSpectroscopyStorage.equals(sopClassUID)) {
 			LOG.info("Serie found with MR Spectroscopy: {}", seriesDescription);
 			return true;
@@ -126,7 +126,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	 * @param serie
 	 * @param attributes
 	 */
-	public void checkSerieIsEnhanced(Serie serie, Attributes attributes) {
+	public static void checkSerieIsEnhanced(Serie serie, Attributes attributes) {
 		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
 		if (sopClassUID != null) {
 			if (UID.EnhancedMRImageStorage.equals(sopClassUID)

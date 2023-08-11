@@ -1,4 +1,4 @@
-package org.shanoir.ng.exchange.imports.dicom;
+package org.shanoir.ng.importer.dicom;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;

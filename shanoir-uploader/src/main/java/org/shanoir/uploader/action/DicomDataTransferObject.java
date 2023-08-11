@@ -5,8 +5,8 @@ import java.util.Date;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.shanoir.uploader.dicom.query.Patient;
-import org.shanoir.uploader.dicom.query.Study;
+import org.shanoir.uploader.dicom.query.PatientTreeNode;
+import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.utils.Util;
 
@@ -86,7 +86,7 @@ public class DicomDataTransferObject {
 	 * @param patient
 	 * @throws Exception
 	 */
-	public DicomDataTransferObject(final MainWindow mainWindow, final Patient patient, final Study study) throws Exception {
+	public DicomDataTransferObject(final MainWindow mainWindow, final PatientTreeNode patient, final StudyTreeNode study) throws Exception {
 		/**
 		 * Extract from Patient object.
 		 */

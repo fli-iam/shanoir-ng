@@ -9,8 +9,8 @@ import java.util.Map.Entry;
 
 import javax.swing.tree.TreeNode;
 
-import org.dcm4che2.data.DicomObject;
-import org.dcm4che2.data.Tag;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 
 /**
@@ -18,13 +18,11 @@ import org.shanoir.uploader.dicom.DicomTreeNode;
  *
  * @author mkain
  */
-public class Patient implements DicomTreeNode {
+public class PatientTreeNode implements DicomTreeNode {
 
-	/** Description map, contains data about this object. */
-	private HashMap<String, String> descriptionMap;
-
-	/** Parent node. */
 	private Media parent;
+
+	private Patient patient;
 
 	/** List of children. */
 	private HashMap<String, DicomTreeNode> relatedStudies;
@@ -41,13 +39,8 @@ public class Patient implements DicomTreeNode {
 	 * @param name
 	 *            the name
 	 */
-	public Patient(final String id, final String birthDate, final String sex, final String name, final String birthName) {
-		this.descriptionMap = new HashMap<String, String>();
-		this.descriptionMap.put("id", id);
-		this.descriptionMap.put("birthDate", birthDate);
-		this.descriptionMap.put("sex", sex);
-		this.descriptionMap.put("name", name);
-		this.descriptionMap.put("birthName", birthName);
+	public PatientTreeNode(final Patient patient) {
+		this.patient = patient;
 		this.relatedStudies = new HashMap<String, DicomTreeNode>();
 	}
 	
@@ -62,7 +55,7 @@ public class Patient implements DicomTreeNode {
 	 */
 	public void addTreeNode(final String id, final DicomTreeNode study) {
 		this.relatedStudies.put(id, study);
-		((Study)study).setParent(this);
+		study.setParent(this);
 	}
 
 	/**
@@ -100,36 +93,14 @@ public class Patient implements DicomTreeNode {
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see org.shanoir.dicom.model.DicomTreeNode#getDescriptionKeys()
-	 */
-	public List<String> getDescriptionKeys() {
-		ArrayList<String> keys = new ArrayList<String>();
-		for (final String key : getDescriptionMap().keySet()) {
-			keys.add(key);
-		}
-		return keys;
-	}
-
-	/**
-	 * No description for a media object.
-	 *
-	 * @return the description map
-	 */
-	public HashMap<String, String> getDescriptionMap() {
-		return descriptionMap;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
 	 * @see org.shanoir.dicom.model.DicomTreeNode#getDisplayString()
 	 */
 	public String getDisplayString() {
-		final String name = this.descriptionMap.get("name");
+		final String name = this.patient.getPatientName();
 		if (name != null && !"".equals(name)) {
 			return name;
 		}
-		return descriptionMap.get("id");
+		return this.patient.getPatientID();
 	}
 
 	/**
@@ -150,7 +121,7 @@ public class Patient implements DicomTreeNode {
 	 * @see org.shanoir.dicom.model.DicomTreeNode#getId()
 	 */
 	public String getId() {
-		return descriptionMap.get("id");
+		return patient.getPatientID();
 	}
 
 	/**
@@ -200,23 +171,13 @@ public class Patient implements DicomTreeNode {
 	}
 
 	/**
-	 * Sets the id.
-	 *
-	 * @param id
-	 *            the new id
-	 */
-	public void setId(final String id) {
-		descriptionMap.put("id", id);
-	}
-
-	/**
 	 * Sets the parent.
 	 *
 	 * @param parent
 	 *            parent
 	 */
-	public void setParent(final Media parent) {
-		this.parent = parent;
+	public void setParent(final DicomTreeNode parent) {
+		this.parent = (Media)parent;
 	}
 
 	/*
@@ -226,30 +187,16 @@ public class Patient implements DicomTreeNode {
 	 */
 	@Override
 	public String toString() {
-		String result = "[Patient : " + descriptionMap + "]";
-		final Iterator<DicomTreeNode> it = this.getTreeNodes().values().iterator();
-		while (it.hasNext()) {
-			result += ("\t" + it.next().toString());
-		}
-		result += "]";
+		String result = "[Patient : " + patient.toString() + "]";
 		return result;
 	}
 
 	public void addTreeNodes(DicomTreeNode firstLevelChild, DicomTreeNode secondLevelChild, DicomTreeNode thirdLevelChild) {
 	}
 
-	public DicomTreeNode initChildTreeNode(DicomObject dicomObject) {
-		final String studyDescriptionFromDicomTags = dicomObject.dataset().getString(Tag.StudyDescription);
-		final Study study = new Study(
-				dicomObject.dataset().getString(Tag.StudyInstanceUID),
-				dicomObject.dataset().getString(Tag.StudyDate),
-				dicomObject.dataset().getString(Tag.StudyTime),
-				studyDescriptionFromDicomTags);
-		study.setStudyDescriptionOverwrite(studyDescriptionFromDicomTags);
-		return study;
-	}
-
-	public void setImagesCount(int count) {
+	public StudyTreeNode initChildTreeNode(Study study) {
+		StudyTreeNode studyTreeNode = new StudyTreeNode(study);
+		return studyTreeNode;
 	}
 	
 }

@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.Map.Entry;
 
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.Serie;
+import org.shanoir.uploader.dicom.SerieTreeNode;
 
 /**
  * Dicom Serie comparator based on their serie number.
@@ -21,8 +21,8 @@ public class SeriesComparator implements Comparator<Entry<String, DicomTreeNode>
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	public int compare(Entry<String, DicomTreeNode> serie1, Entry<String, DicomTreeNode> serie2) {
-		final String seriesNumber1 = ((Serie) serie1.getValue()).getDescriptionMap().get("seriesNumber");
-		final String seriesNumber2 = ((Serie) serie2.getValue()).getDescriptionMap().get("seriesNumber");
+		final String seriesNumber1 = ((SerieTreeNode) serie1.getValue()).getDescriptionMap().get("seriesNumber");
+		final String seriesNumber2 = ((SerieTreeNode) serie2.getValue()).getDescriptionMap().get("seriesNumber");
 		if (seriesNumber1 != null && !seriesNumber1.equals("")) {
 			if (seriesNumber2 != null && !seriesNumber2.equals("")) {
 				return Integer.decode(seriesNumber1).compareTo(Integer.decode(seriesNumber2));

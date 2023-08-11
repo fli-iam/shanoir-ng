@@ -36,7 +36,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
-			<artifactId>shanoir-ng-exchange</artifactId>
+			<artifactId>shanoir-ng-import</artifactId>
 			<version>3.1.2</version>
 			<exclusions>
 			    <exclusion>

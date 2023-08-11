@@ -26,10 +26,10 @@ import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.Serie;
+import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.Media;
-import org.shanoir.uploader.dicom.query.Patient;
-import org.shanoir.uploader.dicom.query.Study;
+import org.shanoir.uploader.dicom.query.PatientTreeNode;
+import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.ImportFromCSVWindow;
 import org.shanoir.uploader.model.CsvImport;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -186,9 +186,9 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		// 2. Select series
 		logger.info("2 Select series");
 
-		Set<Serie> selectedSeries = new HashSet<>();
-		Patient pat = null;
-		Study stud = null;
+		Set<SerieTreeNode> selectedSeries = new HashSet<>();
+		PatientTreeNode pat = null;
+		StudyTreeNode stud = null;
 		if (media == null || media.getTreeNodes() == null || media.getTreeNodes().isEmpty()) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
@@ -197,8 +197,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		String serialNumber = null;
 		String modelName = null;
 		
-		Map<Study, Set<Serie>> selectedSeriesByStudy = new HashMap<>();
-		Study selectedStudy = null;
+		Map<StudyTreeNode, Set<SerieTreeNode>> selectedSeriesByStudy = new HashMap<>();
+		StudyTreeNode selectedStudy = null;
 
 		Date minDate;
 		Date selectedStudyDate = new Date();
@@ -223,14 +223,14 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 				// Get only one patient => Once we've selected a serie with interesting data, do not iterate more
 				break;
 			}
-			if (item instanceof Patient) {
-				Patient patient = (Patient) item;
+			if (item instanceof PatientTreeNode) {
+				PatientTreeNode patient = (PatientTreeNode) item;
 				pat = patient;
 				Collection<DicomTreeNode> studies = patient.getTreeNodes().values();
 				Date currentDate = new Date();
 				for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 					// Select the first study (comparing dates)
-					Study study = (Study) studiesIt.next();
+					StudyTreeNode study = (StudyTreeNode) studiesIt.next();
 					// get study date time
 					String[] acceptedFormats = {
 							"yyyyMMddHHmmSS.FFFFFF",
@@ -264,7 +264,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 					Collection<DicomTreeNode> series = study.getTreeNodes().values();
 					for (Iterator<DicomTreeNode> seriesIt = series.iterator(); seriesIt.hasNext();) {
 						// Filter on serie
-						Serie serie = (Serie) seriesIt.next();
+						SerieTreeNode serie = (SerieTreeNode) seriesIt.next();
 						if (searchField(serie.getDescription(), csvImport.getAcquisitionFilter())) {
 							selectedSeriesByStudy.get(stud).add(serie);
 							selectedStudy = stud;
@@ -362,8 +362,8 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		 */
 		logger.info("5 Fill MRI info");
 
-		for (Iterator<Serie> iterator = selectedSeries.iterator(); iterator.hasNext();) {
-			Serie serie = iterator.next();
+		for (Iterator<SerieTreeNode> iterator = selectedSeries.iterator(); iterator.hasNext();) {
+			SerieTreeNode serie = iterator.next();
 			Util.processSerieMriInfo(uploadFolder, serie);
 		}
 

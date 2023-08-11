@@ -36,7 +36,7 @@ public class DcmRcvManager {
 	
 	private DicomListener listener;
 
-	public void start(final ConfigBean configBean) {
+	public void configure(final ConfigBean configBean) {
 		logger.info("Configuring local DICOM server with params:"
 				+ " AET title: " + configBean.getLocalDicomServerAETCalling()
 				+ ", AET host: " + configBean.getLocalDicomServerHost()

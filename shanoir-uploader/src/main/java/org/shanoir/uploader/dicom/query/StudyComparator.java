@@ -19,8 +19,8 @@ public class StudyComparator implements Comparator<Entry<String, DicomTreeNode>>
 	 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
 	 */
 	public int compare(Entry<String, DicomTreeNode> study1, Entry<String, DicomTreeNode> study2) {
-		final String date1 = ((Study) study1.getValue()).getDescriptionMap().get("date");
-		final String date2 = ((Study) study2.getValue()).getDescriptionMap().get("date");
+		final String date1 = ((StudyTreeNode) study1.getValue()).getDescriptionMap().get("date");
+		final String date2 = ((StudyTreeNode) study2.getValue()).getDescriptionMap().get("date");
 		if (date1 != null && !date1.equals("")) {
 			if (date2 != null && !date2.equals("")) {
 				return Util.convertStringDicomDateToDate(date1).compareTo(Util.convertStringDicomDateToDate(date2));

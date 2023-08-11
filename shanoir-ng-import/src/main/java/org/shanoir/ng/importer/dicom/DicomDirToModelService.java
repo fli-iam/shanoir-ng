@@ -28,7 +28,6 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -45,9 +44,6 @@ import org.springframework.stereotype.Service;
 public class DicomDirToModelService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DicomDirToModelService.class);
-	
-	@Autowired
-	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
 
 	/**
 	 * This method reads a DICOMDIR and returns its higher-level content as a list of patients.
@@ -100,12 +96,12 @@ public class DicomDirToModelService {
 	 */
 	private void handleSerieAndInstanceRecords(List<Serie> series, Attributes serieRecord, DicomDirReader dicomDirReader) throws IOException {
 		Serie serie = new Serie(serieRecord);
-		if (!dicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieRecord)) {
+		if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(serieRecord)) {
 			List<Instance> instances = new ArrayList<Instance>();
 			Attributes instanceRecord = dicomDirReader.findLowerInstanceRecord(serieRecord, true);
 			while(instanceRecord != null) {
 				Instance instance = new Instance(instanceRecord);
-				if (!dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instanceRecord)) {
+				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(instanceRecord)) {
 					instances.add(instance);
 				}
 				instanceRecord = dicomDirReader.findNextInstanceRecord(instanceRecord, true);

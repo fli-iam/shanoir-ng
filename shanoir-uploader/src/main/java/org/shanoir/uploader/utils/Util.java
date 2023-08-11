@@ -48,7 +48,7 @@ import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShanoirUploader;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.MRI;
-import org.shanoir.uploader.dicom.Serie;
+import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -487,7 +487,7 @@ public final class Util {
 	public static void processSerieMriInfo(File rootDir, DicomTreeNode serie) {
 		final String modality = serie.getDescriptionMap().get("modality");
 		if (modality != null) {
-			List<String> imageFileNames = ((Serie) serie).getFileNames();
+			List<String> imageFileNames = ((SerieTreeNode) serie).getFileNames();
 			for (final Iterator<String> iteImages = imageFileNames.iterator(); iteImages.hasNext();) {
 				String imageFileName = iteImages.next();
 				if (!"PR".equals(modality) && !"SR".equals(modality)) {
@@ -503,7 +503,7 @@ public final class Util {
 						mriInformation.setManufacturersModelName(attributes.getString(Tag.ManufacturerModelName));
 						mriInformation.setMagneticFieldStrength(attributes.getString(Tag.MagneticFieldStrength));
 						mriInformation.setDeviceSerialNumber(attributes.getString(Tag.DeviceSerialNumber));
-						((Serie) serie).setMriInformation(mriInformation);
+						((SerieTreeNode) serie).setMriInformation(mriInformation);
 					} catch (IOException e) {
 						logger.error(e.getMessage(), e);
 						return;
