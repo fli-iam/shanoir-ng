@@ -80,6 +80,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>org.dcm4che</groupId>
+			<artifactId>dcm4che-dcmr</artifactId>
+			<version>${dcm4che.version}</version>
+		</dependency>
 		<!-- Used by local DICOM server: DICOM Weasis Tools, based on dcm4che3 -->
 		<dependency>
 			<groupId>org.weasis</groupId>

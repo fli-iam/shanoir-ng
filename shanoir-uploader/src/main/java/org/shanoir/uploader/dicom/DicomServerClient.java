@@ -12,9 +12,9 @@ import org.apache.log4j.Logger;
 import org.dcm4che3.net.Status;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
+import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.dicom.query.ConfigBean;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
-import org.shanoir.uploader.model.rest.importer.Patient;
 import org.weasis.dicom.param.DicomNode;
 import org.weasis.dicom.param.DicomState;
 
