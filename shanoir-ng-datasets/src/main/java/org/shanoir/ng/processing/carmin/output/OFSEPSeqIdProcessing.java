@@ -3,6 +3,7 @@ package org.shanoir.ng.processing.carmin.output;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.IOUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.json.JSONArray;
@@ -25,6 +26,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -102,9 +106,15 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
                 }
 
                 if (parsedEntry.endsWith(PIPELINE_OUTPUT)) {
-                    StringBuilder sb = new StringBuilder(parsedEntry);
-                    JSONObject json = new JSONObject(sb.toString());
-                    this.processSeries(json.getJSONArray("series"), processing);
+
+                    File jsonFile = new File(Paths.get(parsedEntry).getFileName().toString());
+
+                    try (InputStream is = new FileInputStream(jsonFile)) {
+                        JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
+                        this.processSeries(json.getJSONArray("series"), processing);
+                    }
+
+                    return;
 
                 }
             }
