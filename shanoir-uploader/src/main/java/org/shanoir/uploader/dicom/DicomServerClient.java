@@ -46,7 +46,8 @@ public class DicomServerClient implements IDicomServerClient {
 		// Initialize connection configuration parameters here: to be used for all queries
 		DicomNode calling = new DicomNode(config.getLocalDicomServerAETCalling(), config.getLocalDicomServerHost(), config.getLocalDicomServerPort());
 		DicomNode called = new DicomNode(config.getDicomServerAETCalled(), config.getDicomServerHost(), config.getDicomServerPort());
-		queryPACSService = new QueryPACSService(calling, called);
+		queryPACSService = new QueryPACSService();
+		queryPACSService.setDicomNodes(calling, called);
 		dcmRcvManager.configure(config);
 	}
 	

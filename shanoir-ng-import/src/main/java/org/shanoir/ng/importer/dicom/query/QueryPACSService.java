@@ -34,10 +34,8 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.weasis.dicom.op.CFind;
@@ -84,11 +82,6 @@ public class QueryPACSService {
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
 	
-	public QueryPACSService(DicomNode calling, DicomNode called) {
-		this.calling = calling;
-		this.called = called;
-	}
-	
 	@PostConstruct
 	private void initDicomNodes() {
 		// Initialize connection configuration parameters here: to be used for all queries
@@ -96,10 +89,13 @@ public class QueryPACSService {
 		this.called = new DicomNode(calledName, calledHost, calledPort);
 	}
 	
+	public void setDicomNodes(DicomNode calling, DicomNode called) {
+		this.calling = calling;
+		this.called = called;
+	}
+	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws ShanoirImportException {
 		ImportJob importJob = new ImportJob();
-		importJob.setUserId(KeycloakUtil.getTokenUserId());
-		importJob.setFromPacs(true);
 		/**
 		 * In case of any patient specific search field is filled, work on patient level. Highest priority.
 		 */

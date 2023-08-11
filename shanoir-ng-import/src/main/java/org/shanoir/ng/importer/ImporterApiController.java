@@ -311,6 +311,8 @@ public class ImporterApiController implements ImporterApi {
 			// string an import
 			importJob.setWorkFolder("");
 			importJob.setFromPacs(true);
+			importJob.setUserId(KeycloakUtil.getTokenUserId());
+
 		} catch (ShanoirException e) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), e.getMessage(), null));
