@@ -485,7 +485,7 @@ public final class Util {
 	 * @param serie
 	 */
 	public static void processSerieMriInfo(File rootDir, DicomTreeNode serie) {
-		final String modality = serie.getDescriptionMap().get("modality");
+		final String modality = ((SerieTreeNode)serie).getModality();
 		if (modality != null) {
 			List<String> imageFileNames = ((SerieTreeNode) serie).getFileNames();
 			for (final Iterator<String> iteImages = imageFileNames.iterator(); iteImages.hasNext();) {
@@ -503,7 +503,7 @@ public final class Util {
 						mriInformation.setManufacturersModelName(attributes.getString(Tag.ManufacturerModelName));
 						mriInformation.setMagneticFieldStrength(attributes.getString(Tag.MagneticFieldStrength));
 						mriInformation.setDeviceSerialNumber(attributes.getString(Tag.DeviceSerialNumber));
-						((SerieTreeNode) serie).setMriInformation(mriInformation);
+// @todo						((SerieTreeNode) serie).setMriInformation(mriInformation);
 					} catch (IOException e) {
 						logger.error(e.getMessage(), e);
 						return;

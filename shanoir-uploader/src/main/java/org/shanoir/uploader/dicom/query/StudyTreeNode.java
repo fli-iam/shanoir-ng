@@ -1,5 +1,6 @@
 package org.shanoir.uploader.dicom.query;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,11 +10,9 @@ import java.util.Map.Entry;
 
 import javax.swing.tree.TreeNode;
 
-import org.dcm4che3.data.Tag;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.SerieTreeNode;
 
 /**
@@ -23,7 +22,7 @@ import org.shanoir.uploader.dicom.SerieTreeNode;
  */
 public class StudyTreeNode implements DicomTreeNode {
 
-	private PatientTreeNode parent;
+	private DicomTreeNode parent;
 	
 	private Study study;
 
@@ -83,13 +82,8 @@ public class StudyTreeNode implements DicomTreeNode {
 		return child.iterator();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.richfaces.model.TreeNodeImpl#getData()
-	 */
-	public Object getData() {
-		return this;
+	public Study getStudy() {
+		return this.study;
 	}
 
 	/*
@@ -99,6 +93,10 @@ public class StudyTreeNode implements DicomTreeNode {
 	 */
 	public String getDisplayString() {
 		return study.getStudyDescription();
+	}
+	
+	public LocalDate getStudyDate() {
+		return study.getStudyDate();
 	}
 
 	/**
@@ -165,7 +163,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 * @param parent
 	 *            parent
 	 */
-	public void setParent(final PatientTreeNode parent) {
+	public void setParent(final DicomTreeNode parent) {
 		this.parent = parent;
 	}
 

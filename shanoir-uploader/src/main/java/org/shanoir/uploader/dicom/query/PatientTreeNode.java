@@ -86,8 +86,8 @@ public class PatientTreeNode implements DicomTreeNode {
 	 *
 	 * @see org.richfaces.model.TreeNodeImpl#getData()
 	 */
-	public Object getData() {
-		return this;
+	public Patient getPatient() {
+		return this.patient;
 	}
 	
 	/*

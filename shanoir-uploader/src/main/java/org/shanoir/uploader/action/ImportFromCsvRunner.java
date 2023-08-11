@@ -23,22 +23,23 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.SerieTreeNode;
-import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.ImportFromCSVWindow;
 import org.shanoir.uploader.model.CsvImport;
+import org.shanoir.uploader.model.Subject;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
@@ -165,18 +166,18 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		// 1. Request PACS to check the presence of data
 		logger.info("1 Request PACS");
-		Media media = null;
+		List<Patient> patients = null;
 		try {
 			if (!StringUtils.isEmpty(csvImport.getIpp())) {
-				media = dicomServerClient.queryDicomServer("", csvImport.getIpp(), "", "", null, null);
+				patients = dicomServerClient.queryDicomServer("", csvImport.getIpp(), "", "", null, null);
 			}
-			if (media == null) {
+			if (patients == null) {
 				String name = csvImport.getName().toUpperCase();
 				if (!StringUtils.isEmpty(csvImport.getSurname())) {
 					name+="^";
 					name+=csvImport.getSurname().toUpperCase();
 				}
-				media = dicomServerClient.queryDicomServer(name, "", "", "", null, null);
+				patients = dicomServerClient.queryDicomServer(name, "", "", "", null, null);
 			}
 		} catch (Exception e) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
@@ -189,7 +190,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Set<SerieTreeNode> selectedSeries = new HashSet<>();
 		PatientTreeNode pat = null;
 		StudyTreeNode stud = null;
-		if (media == null || media.getTreeNodes() == null || media.getTreeNodes().isEmpty()) {
+		if (patients == null || patients.isEmpty()) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
@@ -218,66 +219,60 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			minDate = cal.getTime();
 		}
 
-		for (DicomTreeNode item : media.getTreeNodes().values()) {
-			if (foundPatient) {
-				// Get only one patient => Once we've selected a serie with interesting data, do not iterate more
-				break;
-			}
-			if (item instanceof PatientTreeNode) {
-				PatientTreeNode patient = (PatientTreeNode) item;
-				pat = patient;
-				Collection<DicomTreeNode> studies = patient.getTreeNodes().values();
-				Date currentDate = new Date();
-				for (Iterator<DicomTreeNode> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-					// Select the first study (comparing dates)
-					StudyTreeNode study = (StudyTreeNode) studiesIt.next();
-					// get study date time
-					String[] acceptedFormats = {
-							"yyyyMMddHHmmSS.FFFFFF",
-							"yyyyMMddHHmmSS.FFFFF",
-							"yyyyMMddHHmmSS.FFFF",
-							"yyyyMMddHHmmSS.FFF",
-							"yyyyMMddHHmmSS.FF",
-							"yyyyMMddHHmmSS.F",
-							"yyyyMMddHHmmSS",
-							"yyyyMMddHHmmS",
-							"yyyyMMddHHmm",
-							"yyyyMMddHHm",
-							"yyyyMMddHH"};
-					Date studyDate = new Date();
-					try {
-						studyDate = DateUtils.parseDate(study.getDescriptionMap().get("date") + study.getDescriptionMap().get("time"), acceptedFormats);
-					} catch (ParseException e) {
-						logger.error("could not consider this study:", e);
-						// Could not get date => skip the study
-						continue;
-					}
-					if (studyDate.after(currentDate) || studyDate.before(minDate)) {
-						// We take the first valid date, if we are after on valid date, don't check the data
-						continue;
-					}
-					if (!searchField(study.getDisplayString(), csvImport.getStudyFilter())) {
-						continue;
-					}
-					stud = study;
-					selectedSeriesByStudy.put(stud, new HashSet<>());
-					Collection<DicomTreeNode> series = study.getTreeNodes().values();
-					for (Iterator<DicomTreeNode> seriesIt = series.iterator(); seriesIt.hasNext();) {
-						// Filter on serie
-						SerieTreeNode serie = (SerieTreeNode) seriesIt.next();
-						if (searchField(serie.getDescription(), csvImport.getAcquisitionFilter())) {
-							selectedSeriesByStudy.get(stud).add(serie);
-							selectedStudy = stud;
-							serialNumber = serie.getMriInformation().getDeviceSerialNumber();
-							modelName = serie.getMriInformation().getManufacturersModelName();
-							foundPatient = true;
-							currentDate = studyDate;
-							selectedStudyDate = studyDate;
-						}
-					}
-				}
-			}
-		}
+//		for (Patient patient : patients) {
+//			if (foundPatient) {
+//				// Get only one patient => Once we've selected a serie with interesting data, do not iterate more
+//				break;
+//			}
+//			List<Study> studies = patient.getStudies();
+//			Date currentDate = new Date();
+//			for (Study study : studies) {
+//				// get study date time
+//				String[] acceptedFormats = {
+//						"yyyyMMddHHmmSS.FFFFFF",
+//						"yyyyMMddHHmmSS.FFFFF",
+//						"yyyyMMddHHmmSS.FFFF",
+//						"yyyyMMddHHmmSS.FFF",
+//						"yyyyMMddHHmmSS.FF",
+//						"yyyyMMddHHmmSS.F",
+//						"yyyyMMddHHmmSS",
+//						"yyyyMMddHHmmS",
+//						"yyyyMMddHHmm",
+//						"yyyyMMddHHm",
+//						"yyyyMMddHH"};
+//				Date studyDate = new Date();
+//				try {
+//					studyDate = DateUtils.parseDate(study.getStudyDate(), acceptedFormats);
+//				} catch (ParseException e) {
+//					logger.error("could not consider this study:", e);
+//					// Could not get date => skip the study
+//					continue;
+//				}
+//				if (studyDate.after(currentDate) || studyDate.before(minDate)) {
+//					// We take the first valid date, if we are after on valid date, don't check the data
+//					continue;
+//				}
+//				if (!searchField(study.getDisplayString(), csvImport.getStudyFilter())) {
+//					continue;
+//				}
+//				stud = study;
+//				selectedSeriesByStudy.put(stud, new HashSet<>());
+//				Collection<DicomTreeNode> series = study.getTreeNodes().values();
+//				for (Iterator<DicomTreeNode> seriesIt = series.iterator(); seriesIt.hasNext();) {
+//					// Filter on serie
+//					SerieTreeNode serie = (SerieTreeNode) seriesIt.next();
+//					if (searchField(serie.getDescription(), csvImport.getAcquisitionFilter())) {
+//						selectedSeriesByStudy.get(stud).add(serie);
+//						selectedStudy = stud;
+//						serialNumber = serie.getMriInformation().getDeviceSerialNumber();
+//						modelName = serie.getMriInformation().getManufacturersModelName();
+//						foundPatient = true;
+//						currentDate = studyDate;
+//						selectedStudyDate = studyDate;
+//					}
+//				}
+//			}
+//		}
 		if (selectedStudy == null) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
@@ -332,15 +327,15 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 			dicomData.setSubjectIdentifier(subjectIdentifier);
 
 			// Change birth date to first day of year
-			final String dicomBirthDate = pat.getDescriptionMap().get("birthDate");
-			if (!StringUtils.isEmpty(dicomBirthDate)) {
-				Date dicomBirthDateAsDate = Util.convertStringDicomDateToDate(dicomBirthDate);
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(dicomBirthDateAsDate);
-				cal.set(Calendar.MONTH, Calendar.JANUARY);
-				cal.set(Calendar.DAY_OF_MONTH, 1);
-				dicomData.setBirthDate(cal.getTime());
-			}
+//			final String dicomBirthDate = pat.getDescriptionMap().get("birthDate");
+//			if (!StringUtils.isEmpty(dicomBirthDate)) {
+//				Date dicomBirthDateAsDate = Util.convertStringDicomDateToDate(dicomBirthDate);
+//				Calendar cal = Calendar.getInstance();
+//				cal.setTime(dicomBirthDateAsDate);
+//				cal.set(Calendar.MONTH, Calendar.JANUARY);
+//				cal.set(Calendar.DAY_OF_MONTH, 1);
+//				dicomData.setBirthDate(cal.getTime());
+//			}
 		} catch (Exception e) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
@@ -404,7 +399,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Subject subjectFound = null;
 		String subjectStudyIdentifier = null;
 		try {
-			subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subjectIdentifier);
+//			subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subjectIdentifier);
 			if (!subjectFound.getName().equals(csvImport.getCommonName())) {
 				// If the name does not match, change the subjectStudyIdentifier for this study
 				subjectStudyIdentifier = csvImport.getCommonName();
@@ -416,29 +411,29 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		if (subjectFound != null) {
 			logger.info("8 Subject exists, just use it");
 			subject = subjectFound;
-			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
-			subject = shanoirUploaderServiceClientNG.createSubjectStudy(subject);
+//			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
+//			subject = shanoirUploaderServiceClientNG.createSubjectStudy(subject);
 		} else {
 			logger.info("8 Creating a new subject");
 	
 			subject = new Subject();
 			subject.setName(csvImport.getCommonName());
-			if (!StringUtils.isEmpty(pat.getDescriptionMap().get("sex"))) {
-				subject.setSex(Sex.valueOf(pat.getDescriptionMap().get("sex")));
-			} else {
-				// Force feminine (girl power ?)
-				subject.setSex(Sex.F);
-			}
+//			if (!StringUtils.isEmpty(pat.getDescriptionMap().get("sex"))) {
+//				subject.setSex(Sex.valueOf(pat.getDescriptionMap().get("sex")));
+//			} else {
+//				// Force feminine (girl power ?)
+//				subject.setSex(Sex.F);
+//			}
 			subject.setIdentifier(subjectIdentifier);
 	
-			subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
-	
-			subject.setBirthDate(dicomData.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-	
-			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
-	
-			// Get center ID from study card
-			subject = shanoirUploaderServiceClientNG.createSubject(subject, true, centerId);
+//			subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
+//	
+//			subject.setBirthDate(dicomData.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+//	
+//			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
+//	
+//			// Get center ID from study card
+//			subject = shanoirUploaderServiceClientNG.createSubject(subject, true, centerId);
 		}
 		if (subject == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
