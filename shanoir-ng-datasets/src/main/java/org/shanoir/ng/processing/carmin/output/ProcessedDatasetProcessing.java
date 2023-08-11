@@ -74,59 +74,37 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 	}
 
 	@Override
-	public void manageTarGzResult(File in, File parent, CarminDatasetProcessing processing) throws OutputProcessingException {
+	public void manageTarGzResult(List<File> resultFiles, File parent, CarminDatasetProcessing processing) throws OutputProcessingException {
 
-		try (TarArchiveInputStream fin = new TarArchiveInputStream(
-				new GzipCompressorInputStream(new FileInputStream(in)))) {
-			TarArchiveEntry entry;
-
-			File cacheFolder = new File(parent.getAbsolutePath() + File.separator + "cache");
-
-			if (!cacheFolder.exists()) {
-				cacheFolder.mkdirs();
-			}
+		try {
 
 			List<File> outputFiles = new ArrayList<>();
-
 			File resultJson = null;
 
-			// first, find "result.json" file
-			while ((entry = fin.getNextTarEntry()) != null) {
-
-				String parsedEntry = entry.getName();
-
-				if (entry.isDirectory()) {
-					continue;
-				}
-
-				File currentFile = new File(cacheFolder, Paths.get(parsedEntry).getFileName().toString());
-				IOUtils.copy(fin, Files.newOutputStream(currentFile.toPath()));
-
-				if (parsedEntry.endsWith(this.resultFileName)) {
-					resultJson = currentFile;
+			for(File file : resultFiles){
+				if (file.getAbsolutePath().endsWith("/" + this.resultFileName)) {
+					resultJson = file;
 				} else {
 					// For all other files that are not a result.json or a folder, create a processed dataset and a dataset processing
-					outputFiles.add(currentFile);
-					LOG.info("Output file [{}] found in archive.", parsedEntry);
+					outputFiles.add(file);
+					LOG.info("Output file [{}] found in archive.", file.getAbsolutePath());
 				}
 			}
 
-			List<Dataset> inputDatasets = this.getInputDatasets(resultJson, in.getName());
+			List<Dataset> inputDatasets = this.getInputDatasets(resultJson, parent.getName());
 
 			if(inputDatasets.isEmpty()) {
-				throw new Exception("No input datasets found.");
+				throw new OutputProcessingException("No input datasets found.", null);
 			}
 
 			if(outputFiles.isEmpty()){
-				throw new Exception("No processable file found in Tar result.");
+				throw new OutputProcessingException("No processable file found in Tar result.", null);
 			}
 
 			this.createProcessedDatasets(outputFiles, processing, inputDatasets);
 
-			this.deleteCacheDir(Paths.get(cacheFolder.getAbsolutePath()));
-
 		} catch (Exception e) {
-			importerService.createFailedJob(in.getPath());
+			importerService.createFailedJob(parent.getPath());
 			throw new OutputProcessingException("An error occured while extracting result from result archive.", e);
 		}
 	}
@@ -259,17 +237,6 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 		processing.setOutputDatasets(new ArrayList<>());
 		processing = datasetProcessingService.create(processing);
 		return processing;
-	}
-
-	private void deleteCacheDir(Path directory) {
-		try {
-			Files.walk(directory)
-			.sorted(Comparator.reverseOrder())
-			.map(Path::toFile)
-			.forEach(File::delete);
-		} catch (IOException e) {
-			LOG.error("I/O error while deleting cache dir [{}]", directory.toString());
-		}
 	}
 
 	private String getNameWithoutExtension(String file) {

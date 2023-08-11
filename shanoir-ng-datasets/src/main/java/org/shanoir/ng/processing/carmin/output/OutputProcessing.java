@@ -1,6 +1,7 @@
 package org.shanoir.ng.processing.carmin.output;
 
 import java.io.File;
+import java.util.List;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 
@@ -15,10 +16,11 @@ public abstract class OutputProcessing {
 
 	/**
 	 * This methods manages the single result of a Carmin  dataset processing
-	 * @param resultFile the result file as tar.gz of the processing
+	 *
+	 * @param resultFiles  the result file as tar.gz of the processing
 	 * @param parentFolder the temporary arent folder in which we are currently working
-	 * @param processing the corresponding dataset processing.
+	 * @param processing   the corresponding dataset processing.
 	 */
-	public abstract void manageTarGzResult(File resultFile, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException;
+	public abstract void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException;
 
 }

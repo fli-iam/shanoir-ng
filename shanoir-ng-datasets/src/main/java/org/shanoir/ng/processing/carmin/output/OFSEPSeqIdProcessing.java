@@ -1,8 +1,5 @@
 package org.shanoir.ng.processing.carmin.output;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -13,6 +10,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.property.model.DatasetProperty;
@@ -28,8 +26,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,6 +73,8 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
     @Autowired
     private DatasetService datasetService;
+    @Autowired
+    private DatasetAcquisitionService datasetAcquisitionService;
 
     @Autowired
     private WADODownloaderService wadoDownloaderService;
@@ -92,43 +90,20 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     }
 
     @Override
-    public void manageTarGzResult(File resultFile, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException {
+    public void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException {
 
-        try (TarArchiveInputStream fin = new TarArchiveInputStream(
-                new GzipCompressorInputStream(new FileInputStream(resultFile)))) {
-            TarArchiveEntry entry;
+        for(File file : resultFiles){
+            if (file.getAbsolutePath().endsWith(PIPELINE_OUTPUT)) {
 
-            while ((entry = fin.getNextTarEntry()) != null) {
-
-                String parsedEntry = entry.getName();
-
-                if (entry.isDirectory()) {
-                    continue;
+                try (InputStream is = new FileInputStream(file)) {
+                    JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
+                    this.processSeries(json.getJSONArray("series"), processing);
+                }catch (Exception e) {
+                    throw new OutputProcessingException("An error occured while extracting result from result archive.", e);
                 }
 
-                if (parsedEntry.endsWith(PIPELINE_OUTPUT)) {
-
-                    File cacheFolder = new File(parentFolder.getAbsolutePath() + File.separator + "cache");
-
-                    if (!cacheFolder.exists()) {
-                        cacheFolder.mkdirs();
-                    }
-
-                    File jsonFile = new File(cacheFolder, Paths.get(parsedEntry).getFileName().toString());
-                    IOUtils.copy(fin, Files.newOutputStream(jsonFile.toPath()));
-
-                    try (InputStream is = new FileInputStream(jsonFile)) {
-                        JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
-                        this.processSeries(json.getJSONArray("series"), processing);
-                    }
-
-                    return;
-
-                }
+                return;
             }
-
-        } catch (Exception e) {
-            throw new OutputProcessingException("An error occured while extracting result from result archive.", e);
         }
 
     }
@@ -184,7 +159,10 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
                     .setMrSequenceName(serie.getString("type"));
         }
 
-        ds.getOriginMetadata().setName(vol.getString("type"));
+        datasetAcquisitionService.update(acq);
+
+        ds.setUpdatedMetadata(ds.getOriginMetadata());
+        ds.getUpdatedMetadata().setName(vol.getString("type"));
 
         datasetService.update(ds);
     }
