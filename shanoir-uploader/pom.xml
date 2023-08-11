@@ -56,6 +56,17 @@
 			    </exclusion>
 			</exclusions>
 		</dependency>
+		<dependency>
+			<groupId>org.shanoir-ng</groupId>
+			<artifactId>shanoir-ng-exchange</artifactId>
+			<version>3.1.2</version>
+			<exclusions>
+			    <exclusion>
+			        <groupId>*</groupId>
+			        <artifactId>*</artifactId>
+			    </exclusion>
+			</exclusions>
+		</dependency>
 		
 		<!-- DCM4CHE dependencies -->
 		<dependency>

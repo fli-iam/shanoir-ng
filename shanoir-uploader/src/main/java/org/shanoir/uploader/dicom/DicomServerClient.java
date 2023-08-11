@@ -95,7 +95,6 @@ public class DicomServerClient implements IDicomServerClient {
 		for (SerieTreeNode serieTreeNode : selectedSeries) {
 			List<String> fileNamesForSerie = new ArrayList<String>();
 			final String seriesInstanceUID = serieTreeNode.getId();
-			final String studyInstanceUID = serieTreeNode.getParent().getId();
 			try {
 				// move files from server directly into uploadFolder
 				boolean noError = getFilesFromServer(seriesInstanceUID, serieTreeNode.getDescription());

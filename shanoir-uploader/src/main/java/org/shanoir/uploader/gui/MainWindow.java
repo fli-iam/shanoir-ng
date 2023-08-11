@@ -825,9 +825,6 @@ public class MainWindow extends JFrame {
 		scrollPaneUpload.setBounds(0, 0, MAXIMIZED_HORIZ, MAXIMIZED_VERT);
 		scrollPaneUpload.setPreferredSize(new Dimension(898, 600));
 		currentUploadsPanel.add(scrollPaneUpload);
-		final DownloaderPanel downloaderPanel = new DownloaderPanel(frame, gBLPanel, resourceBundle, logger);
-		tabbedPane.addTab(resourceBundle.getString("shanoir.uploader.downloadDatasetsTab"), null, downloaderPanel,
-				resourceBundle.getString("shanoir.uploader.downloadDatasetsTab.tooltip"));
 		contentPane.add(tabbedPane, BorderLayout.CENTER);
 	}
 
