@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -150,7 +151,8 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @throws JSONException
      * @throws EntityNotFoundException
      */
-    private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, org.shanoir.ng.shared.exception.EntityNotFoundException {
+    @Transactional
+    public void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException {
         DatasetAcquisition acq = ds.getDatasetAcquisition();
 
         if(acq instanceof MrDatasetAcquisition){
