@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -107,7 +108,14 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
                 if (parsedEntry.endsWith(PIPELINE_OUTPUT)) {
 
-                    File jsonFile = new File(Paths.get(parsedEntry).getFileName().toString());
+                    File cacheFolder = new File(parentFolder.getAbsolutePath() + File.separator + "cache");
+
+                    if (!cacheFolder.exists()) {
+                        cacheFolder.mkdirs();
+                    }
+
+                    File jsonFile = new File(cacheFolder, Paths.get(parsedEntry).getFileName().toString());
+                    IOUtils.copy(fin, Files.newOutputStream(jsonFile.toPath()));
 
                     try (InputStream is = new FileInputStream(jsonFile)) {
                         JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
