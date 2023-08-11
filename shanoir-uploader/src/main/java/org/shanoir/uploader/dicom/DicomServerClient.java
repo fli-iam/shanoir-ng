@@ -56,6 +56,7 @@ public class DicomServerClient implements IDicomServerClient {
 	 */
 	@Override
 	public boolean echoDicomServer() {
+		// @todo add echo here
 		logger.info("Echoing of the DICOM server was successful? -> ");
 		return true;
 	}

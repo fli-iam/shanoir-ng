@@ -82,6 +82,8 @@ public class QueryPACSService {
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
 	
+	public QueryPACSService() {} // for ShUp usage
+	
 	@PostConstruct
 	private void initDicomNodes() {
 		// Initialize connection configuration parameters here: to be used for all queries
