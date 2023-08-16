@@ -110,11 +110,17 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     }
 
     private void processSeries(JSONArray series, CarminDatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException {
+
         for (int i = 0; i < series.length(); i++) {
 
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong("id");
             List<Dataset> datasets = datasetService.findByAcquisition(serieId);
+
+            if(datasets == null || datasets.isEmpty()){
+                LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
+                continue;
+            }
 
             for(Dataset ds : datasets){
 
@@ -126,13 +132,6 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
                 if(vol == null){
                     LOG.error("No volume from serie [{}] could be match with dataset [{}].", serieId, dsId);
                     continue;
-                }
-
-                try {
-                    this.updateDataset(serie, ds, vol);
-                } catch (EntityNotFoundException e) {
-                    LOG.error("Error while updating dataset [{}]", dsId, e);
-                    throw  e;
                 }
 
                 List<DatasetProperty> properties = this.getDatasetPropertiesFromVolume(ds, vol, processing);

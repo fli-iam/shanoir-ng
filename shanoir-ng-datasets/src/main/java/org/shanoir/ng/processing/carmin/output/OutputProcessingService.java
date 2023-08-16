@@ -49,11 +49,9 @@ public class OutputProcessingService {
 
             List<File> outputFiles = this.extractTarIntoCache(archive, cacheFolder);
 
-            LOG.info("Processing result file [{}]...", archive.getAbsolutePath());
-
             for (OutputProcessing outputProcessing : outputProcessings) {
                 if (outputProcessing.canProcess(processing)) {
-                    LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputProcessing.getClass().getName());
+                    LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputProcessing.getClass().getSimpleName());
                     outputProcessing.manageTarGzResult(outputFiles, userImportDir, processing);
                 }
             }

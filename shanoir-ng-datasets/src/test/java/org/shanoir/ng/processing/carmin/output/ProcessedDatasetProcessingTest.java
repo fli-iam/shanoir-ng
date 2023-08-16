@@ -36,13 +36,13 @@ public class ProcessedDatasetProcessingTest {
                 "id+[dataset id]+whatever.nii",""
         };
 
-        assertEquals(Long.valueOf(89546), outputProcessing.getDatasetIdFromFilename("id+89546+whatever.nii"));
+        assertEquals(Long.valueOf(89546), outputProcessing.getDatasetIdsFromFilename("id+89546+whatever.nii"));
 
-        assertEquals(Long.valueOf(123), outputProcessing.getDatasetIdFromFilename("id+123+[something].tar.gz"));
+        assertEquals(Long.valueOf(123), outputProcessing.getDatasetIdsFromFilename("id+123+[something].tar.gz"));
 
-        assertNull(outputProcessing.getDatasetIdFromFilename("prefix+id+89546+nothing.dcm"));
+        assertNull(outputProcessing.getDatasetIdsFromFilename("prefix+id+89546+nothing.dcm"));
 
-        assertNull(outputProcessing.getDatasetIdFromFilename("id+89546.dcm"));
+        assertNull(outputProcessing.getDatasetIdsFromFilename("id+89546.dcm"));
 
 
     }

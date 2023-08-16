@@ -2,9 +2,6 @@ package org.shanoir.ng.processing.carmin.output;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
@@ -13,9 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.NotFoundException;
 
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,6 +23,7 @@ import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
@@ -112,7 +107,7 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 
 	private List<Dataset> getInputDatasets(File resultJson, String tarName) throws IOException, JSONException {
 
-		List<Long> datasetIds = new ArrayList<>();
+		HashSet<Long> datasetIds = new HashSet<>();
 		List<String> candidates = new ArrayList<>();
 
 		candidates.add(tarName);
@@ -132,37 +127,42 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 				String key = keys.next();
 				Object value = json.get(key);
 				if (value instanceof JSONArray) {
-					// case "["id+XXX+filename.nii", "YYY+filename.nii", ...]"
+					// case "["object_id+XXX+filename.nii", "YYY+filename.nii", ...]"
 					JSONArray array = (JSONArray) value;
 					for (int i = 0; i < array.length(); i++) {
 						candidates.add(array.getString(i));
 					}
 				} else {
-					// Case "id+XXX+filename.nii"
+					// Case "object_id+XXX+filename.nii"
 					candidates.add((String) value);
 				}
 			}
 		}
 
 		for (String name : candidates) {
-			Long id = this.getDatasetIdFromFilename(name);
-
-			if (id != null && !datasetIds.contains(id)) {
-				datasetIds.add(id);
-			}
+			datasetIds.addAll(this.getDatasetIdsFromFilename(name));
 		}
 
-		return datasetService.findByIdIn(datasetIds);
+		return datasetService.findByIdIn(new ArrayList<>(datasetIds));
 	}
 
-	public Long getDatasetIdFromFilename(String name){
-		// "id+[dataset id]+whatever.nii"
-		Pattern p = Pattern.compile("id\\+(\\d+)\\+.*");
-		Matcher m = p.matcher(name);
-		if (m.matches()) {
-			return Long.valueOf(m.group(1));
+	public HashSet<Long> getDatasetIdsFromFilename(String name){
+		HashSet<Long> ids = new HashSet<>();
+		// "dataset_id+[dataset id]+whatever.nii"
+		Matcher matcher = Pattern.compile("dataset_id\\+(\\d+)\\+.*").matcher(name);
+		if (matcher.matches()) {
+			ids.add(Long.valueOf(matcher.group(1)));
+			return ids;
 		}
-		return null;
+
+		// "acquisition_id+[acquisition id]+whatever.nii"
+		matcher = Pattern.compile("acquisition_id\\+(\\d+)\\+.*").matcher(name);
+		if (matcher.matches()) {
+			List<Dataset> datasets = datasetService.findByAcquisition(Long.valueOf(matcher.group(1)));
+			return datasets.stream().map(AbstractEntity::getId).collect(Collectors.toCollection(HashSet::new));
+		}
+
+		return ids;
 	}
 
 	/**

@@ -27,6 +27,7 @@ import {ProcessingService} from '../processing.service';
 import {Option} from '../../shared/select/select.component';
 import { formatDate } from '@angular/common';
 import {Mode} from "../../shared/components/entity/entity.component.abstract";
+import {DatasetAcquisition} from "../../dataset-acquisitions/shared/dataset-acquisition.model";
 
 @Component({
     selector: 'app-execution',
@@ -39,6 +40,7 @@ export class ExecutionComponent implements OnInit {
     executionForm: UntypedFormGroup;
     selectedDatasets: Set<Dataset>;
     datasetOptions: Option<Dataset>[];
+    acquisitionOptions: Option<DatasetAcquisition>[];
     token: String;
     refreshToken: String;
     parametersApplied: boolean = false;
@@ -46,11 +48,14 @@ export class ExecutionComponent implements OnInit {
     execution: Execution;
     columnDefs: { [key: string]: ColumnDefinition[] } = {};
     datasets: { [key: string]: Dataset[] } = {};
+    acquisitions: { [key: string]: DatasetAcquisition[] } = {};
+
     tables = [];
     fileInputs = [];
     inputDatasets: Dataset[] = [];
     execDefaultName= "";
     exportFormat="nii";
+    groupBy: "dataset";
 
     constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
         this.breadcrumbsService.nameStep('2. Executions');
@@ -97,8 +102,16 @@ export class ExecutionComponent implements OnInit {
         this.datasets[paramName].push(event);
     }
 
+    addAcquisition(event, paramName) {
+        this.acquisitions[paramName].push(event);
+    }
+
     removeDataset(dataset, paramName) {
         this.datasets[paramName].splice(this.datasets[paramName].indexOf(dataset), 1);
+    }
+
+    removeAcquisition(acquisition, paramName) {
+        this.acquisitions[paramName].splice(this.acquisitions[paramName].indexOf(acquisition), 1);
     }
 
     initExecutionForm() {
@@ -134,6 +147,7 @@ export class ExecutionComponent implements OnInit {
     }
 
     // Here we create a bunch of executions with default parameters
+
     onApplyParameters() {
         this.parametersApplied = false;
 
@@ -151,6 +165,7 @@ export class ExecutionComponent implements OnInit {
         execution.pipelineIdentifier = this.pipeline.identifier;
         execution.timeout = 20;
         execution.inputValues = {};
+
 
         this.pipeline.parameters.forEach(
             parameter => {
@@ -170,12 +185,26 @@ export class ExecutionComponent implements OnInit {
 
                     datasetsToSet.forEach(dataset => {
                         availableDatasets.splice(availableDatasets.indexOf(dataset), 1);
-                    })
+                    });
 
                     this.datasets[parameter.name] = datasetsToSet;
 
-                    // File ad md5 values should be selected automcatically depending on the pipeline.
-                    execution.inputValues[parameter.name] = this.getDatasetsUris(datasetsToSet);
+                    let acquisitionToSet: DatasetAcquisition[] = [];
+                    datasetsToSet.forEach(dataset => {
+                        if(!acquisitionToSet.includes(dataset.datasetAcquisition)){
+                            acquisitionToSet.includes(dataset.datasetAcquisition);
+                        }
+                    });
+
+                    this.acquisitions[parameter.name] = acquisitionToSet;
+
+                    // File ad md5 values should be selected automatically depending on the pipeline.
+                    if(this.groupBy == 'dataset'){
+                        execution.inputValues[parameter.name] = this.getDatasetsUris(datasetsToSet);
+                    }else if(this.groupBy == 'acquisition'){
+                        execution.inputValues[parameter.name] = this.getAcquisitionsUris(datasetsToSet);
+                    }
+
                 } else if (parameter.type == ParameterType.Boolean) {
                     execution.inputValues[parameter.name] = this.executionForm.get(parameter.name).value ? true : false;
                 } else {
@@ -191,13 +220,28 @@ export class ExecutionComponent implements OnInit {
         if(this.exportFormat == "dcm") {
             extension = ".zip"
         }
-        let dataset_name = `id+${dataset.id}+${dataset.name.replace(/ /g, "_")}${extension}`
+        let dataset_name = `dataset_id+${dataset.id}+${dataset.name.replace(/ /g, "_")}${extension}`
         return `shanoir:/${dataset_name}?format=${this.exportFormat}&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
     }
 
     getDatasetsUris(datasets) {
         return datasets.forEach(dataset => {
             return this.getDatasetUri(dataset);
+        })
+    }
+
+    getAcquisitionUri(acquisition) {
+        let extension = ".nii.gz"
+        if(this.exportFormat == "dcm") {
+            extension = ".zip"
+        }
+        let acquisition_name = `acquisition_id+${acquisition.id}+${acquisition.type}_acquisition${extension}`
+        return `shanoir:/${acquisition_name}?format=${this.exportFormat}&acquisitionId=${acquisition.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+    }
+
+    getAcquisitionsUris(acquisitions) {
+        return acquisitions.forEach(acquisition => {
+            return this.getAcquisitionUri(acquisition);
         })
     }
 
@@ -226,12 +270,24 @@ export class ExecutionComponent implements OnInit {
             parameter => {
                 if (parameter.type == ParameterType.File) {
                     execution.inputValues[parameter.name] = [];
+
                     let datasetsOf = this.datasets[parameter.name];
                     datasetsOf.forEach(dataset => {
-                        // File ad md5 values should be selected automcatically depending on the pipeline.
-                        execution.inputValues[parameter.name].push(this.getDatasetUri(dataset));
+                        // File ad md5 values should be selected automatically depending on the pipeline.
+                        if(this.groupBy == 'dataset') {
+                            execution.inputValues[parameter.name].push(this.getDatasetUri(dataset));
+                        }
                         this.inputDatasets.push(dataset);
                     })
+
+                    if(this.groupBy == 'acquisition'){
+                        let acquisitionsOf = this.acquisitions[parameter.name];
+                        acquisitionsOf.forEach(acquisition => {
+                            // File ad md5 values should be selected automatically depending on the pipeline.
+                            execution.inputValues[parameter.name].push(this.getAcquisitionUri(acquisition));
+                        })
+                    }
+
                 } else {
                     execution.inputValues[parameter.name] = this.executionForm.get(parameter.name).value;
                 }
