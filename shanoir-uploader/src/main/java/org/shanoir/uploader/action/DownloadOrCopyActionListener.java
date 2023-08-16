@@ -13,6 +13,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
@@ -36,13 +37,16 @@ public class DownloadOrCopyActionListener implements ActionListener {
 	
 	// Introduced here to inject into DownloadOrCopyRunnable
 	private IDicomServerClient dicomServerClient;
+	
+	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
-	public DownloadOrCopyActionListener(final MainWindow mainWindow, final Pseudonymizer pseudonymizer, final IDicomServerClient dicomServerClient) {
+	public DownloadOrCopyActionListener(final MainWindow mainWindow, final Pseudonymizer pseudonymizer, final IDicomServerClient dicomServerClient, final ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer) {
 		this.mainWindow = mainWindow;
 		this.resourceBundle = mainWindow.resourceBundle;
 		this.pseudonymizer = pseudonymizer;
 		this.identifierCalculator = new IdentifierCalculator();
 		this.dicomServerClient = dicomServerClient;
+		this.dicomFileAnalyzer = dicomFileAnalyzer;
 	}
 
 	/**
@@ -94,7 +98,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		 */
 		final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
 		final Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries = mainWindow.getSAL().getSelectedSeries();
-		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, dicomServerClient, filePathDicomDir, selectedSeries, dicomData);
+		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, selectedSeries, dicomData);
 		Thread thread = new Thread(runnable);
 		thread.start();
 		

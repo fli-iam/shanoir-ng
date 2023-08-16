@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
@@ -55,13 +56,17 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	private String filePathDicomDir;
 	
 	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
+	
+	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
 	public FindDicomActionListener(final MainWindow mainWindow,
 			final JFileChooser fileChooser,
-			final IDicomServerClient dicomServerClient) {
+			final IDicomServerClient dicomServerClient,
+			final ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer) {
 		this.mainWindow = mainWindow;
 		this.fileChooser = fileChooser;
 		this.dicomServerClient = dicomServerClient;
+		this.dicomFileAnalyzer = dicomFileAnalyzer;
 	}
 
 	/**
@@ -99,16 +104,15 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 						}
 						final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
 						List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
+						dicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, selectedRootDir.getAbsolutePath(), false, null);
 						fillMediaWithPatients(media, patients);
+						filePathDicomDir = selectedRootDir.toString();
 						// clean up in case of dicomdir generated
 						if (dicomDirGenerated) {
 							dicomDirFile.delete();
 						}
-						filePathDicomDir = selectedRootDir.toString();
-						logger.debug("populate : Media populated : " + media);
-						logger.debug("populate : End");
 					} catch (Exception e) {
-						logger.error(e.getMessage());
+						logger.error(e.getMessage(), e);
 					}
 				} else {
 					logger.error("Please choose a directory.");

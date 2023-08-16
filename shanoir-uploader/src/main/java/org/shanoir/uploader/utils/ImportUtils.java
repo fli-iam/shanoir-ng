@@ -40,8 +40,6 @@ public class ImportUtils {
 	
 	private static Logger logger = Logger.getLogger(ImportUtils.class);
 	
-	private static ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
-
 	/**
 	 * Adds a subjectStudy to a given subject with the given study
 	 * @param study the added study
@@ -238,7 +236,7 @@ public class ImportUtils {
 	 * @return
 	 * @throws FileNotFoundException 
 	 */
-	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, Set<SerieTreeNode> selectedSeries, File uploadFolder, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> downloadOrCopyFilesIntoUploadFolder(boolean isFromPACS, Set<SerieTreeNode> selectedSeries, File uploadFolder, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, IDicomServerClient dicomServerClient, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = null;
 		if (isFromPACS) {
 			allFileNames = dicomServerClient.retrieveDicomFiles(selectedSeries, uploadFolder);
@@ -249,7 +247,7 @@ public class ImportUtils {
 				return null;
 			}
 		} else {
-			allFileNames = copyFilesToUploadFolder(selectedSeries, uploadFolder, filePathDicomDir);
+			allFileNames = copyFilesToUploadFolder(dicomFileAnalyzer, selectedSeries, uploadFolder, filePathDicomDir);
 			if(allFileNames != null) {
 				logger.info(uploadFolder.getName() + ": " + allFileNames.size() + " DICOM files copied from CD/DVD/local file system.");
 			} else {
@@ -259,7 +257,7 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static List<String> copyFilesToUploadFolder(Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> copyFilesToUploadFolder(ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = new ArrayList<String>();
 		for (SerieTreeNode serieTreeNode : selectedSeries) {
 			Serie serie = serieTreeNode.getSerie();

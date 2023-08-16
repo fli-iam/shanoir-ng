@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.SerieTreeNode;
@@ -16,7 +17,6 @@ import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
-import org.shanoir.uploader.utils.Util;
 
 /**
  * This class downloads the files from the PACS or copies
@@ -34,15 +34,18 @@ public class DownloadOrCopyRunnable implements Runnable {
 	
 	private IDicomServerClient dicomServerClient;
 	
+	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
+	
 	private String filePathDicomDir;
 
 	private Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries;
 
 	private DicomDataTransferObject dicomData;
 	
-	public DownloadOrCopyRunnable(boolean isFromPACS, final IDicomServerClient dicomServerClient, final String filePathDicomDir,
+	public DownloadOrCopyRunnable(boolean isFromPACS, final IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, final String filePathDicomDir,
 		final Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries, final DicomDataTransferObject dicomData) {
 		this.isFromPACS = isFromPACS;
+		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.dicomServerClient = dicomServerClient; // used with PACS import
 		if(!isFromPACS && filePathDicomDir != null) {
 			this.filePathDicomDir = new String(filePathDicomDir); // used with CD/DVD import
@@ -59,7 +62,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 		File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
 		List<String> allFileNames = null;
 		try {
-			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, selectedSeries, uploadFolder, dicomServerClient, filePathDicomDir);
+			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, selectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
 		} catch (FileNotFoundException e) {
 			logger.error(e.getMessage(), e);
 		}

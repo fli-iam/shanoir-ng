@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.ShUpOnloadConfig;
@@ -55,14 +56,16 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 	private ImportFromCSVWindow importFromCSVWindow;
 	private IdentifierCalculator identifierCalculator;
 	private IDicomServerClient dicomServerClient;
+	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	private ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
 
-	public ImportFromCsvRunner(List<CsvImport> csvImports, ResourceBundle ressourceBundle, ImportFromCSVWindow importFromCSVWindow, IDicomServerClient dicomServerClient, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
+	public ImportFromCsvRunner(List<CsvImport> csvImports, ResourceBundle ressourceBundle, ImportFromCSVWindow importFromCSVWindow, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.csvImports = csvImports;
 		this.resourceBundle = ressourceBundle;
 		this.importFromCSVWindow = importFromCSVWindow;
 		this.identifierCalculator = new IdentifierCalculator();
 		this.dicomServerClient = dicomServerClient;
+		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
 	}
 
@@ -336,7 +339,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
 		List<String> allFileNames = null;
 		try {
-			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeries, uploadFolder, this.dicomServerClient, null);
+			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeries, uploadFolder, this.dicomFileAnalyzer, this.dicomServerClient, null);
 		} catch (Exception e) {
 			logger.error("Could not copy data from PACS !");
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));

@@ -19,7 +19,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *
  * @author mkain
  */
-@XmlType(propOrder={"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames","mriInformation"})
+@XmlType(propOrder={"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "mriInformation"})
 public class SerieTreeNode implements DicomTreeNode {
 
 	private StudyTreeNode parent;
@@ -103,16 +103,6 @@ public class SerieTreeNode implements DicomTreeNode {
 	@SuppressWarnings("rawtypes")
 	public Iterator getChildren() {
 		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.richfaces.model.TreeNodeImpl#getData()
-	 */
-	@XmlTransient
-	public Object getData() {
-		return this;
 	}
 
 	/*
@@ -206,7 +196,8 @@ public class SerieTreeNode implements DicomTreeNode {
 	public DicomTreeNode initChildTreeNode(Object arg0) {
 		return null;
 	}
-	
+
+	@XmlElement
 	public EquipmentDicom getMriInformation() {
 		return this.serie.getEquipment();
 	}

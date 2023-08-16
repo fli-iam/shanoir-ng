@@ -45,6 +45,7 @@ import org.apache.log4j.Logger;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.action.DownloadOrCopyActionListener;
@@ -129,6 +130,8 @@ public class MainWindow extends JFrame {
 	public ShUpConfig shanoirUploaderConfiguration;
 	
 	private ImportDialogOpener importDialogOpener;
+	
+	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
 	/**
 	 * Create the frame.
@@ -138,6 +141,7 @@ public class MainWindow extends JFrame {
 			final UrlConfig urlConfig,
 			final ResourceBundle resourceBundle) {
 		this.dicomServerClient=dicomServerClient;
+		this.dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
 		this.shanoirUploaderFolder=shanoirUploaderFolder;
 		this.resourceBundle=resourceBundle;
 		String JFRAME_TITLE = "ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION + " Release: 2023-03-28";
@@ -180,7 +184,7 @@ public class MainWindow extends JFrame {
 
 		ImageIcon searchIcon = new ImageIcon(getClass().getClassLoader().getResource("images/search.png"));
 		JMenuItem mntmOpenDicomFromCD = new JMenuItem(resourceBundle.getString("shanoir.uploader.fileMenu.openCD"), searchIcon);
-		fAL = new FindDicomActionListener(this, fileChooser, dicomServerClient);
+		fAL = new FindDicomActionListener(this, fileChooser, dicomServerClient, dicomFileAnalyzer);
 		mntmOpenDicomFromCD.addActionListener(fAL);
 		mnFile.add(mntmOpenDicomFromCD);
 
@@ -196,7 +200,7 @@ public class MainWindow extends JFrame {
 		mnImportExcell.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ImportFromCSVWindow importcsv = new ImportFromCSVWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, ShUpOnloadConfig.getShanoirUploaderServiceClient());
+				ImportFromCSVWindow importcsv = new ImportFromCSVWindow(shanoirUploaderFolder, resourceBundle, scrollPaneUpload, dicomServerClient, dicomFileAnalyzer, ShUpOnloadConfig.getShanoirUploaderServiceClient());
 			}
 		});
 
@@ -733,7 +737,7 @@ public class MainWindow extends JFrame {
 		} catch (PseudonymusException e) {
 			logger.error(e.getMessage(), e);
 		}
-		dOCAL = new DownloadOrCopyActionListener(this, pseudonymizer, dicomServerClient);
+		dOCAL = new DownloadOrCopyActionListener(this, pseudonymizer, dicomServerClient, dicomFileAnalyzer);
 		downloadOrCopyButton.addActionListener(dOCAL);
 		downloadOrCopyButton.setEnabled(false);
 		
