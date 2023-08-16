@@ -75,7 +75,10 @@ public class SerieTreeNode implements DicomTreeNode {
 	
 	@XmlElement
 	public String getSeriesDate() {
-		return this.serie.getSeriesDate().toString();
+		if (this.serie.getSeriesDate() != null) {
+			this.serie.getSeriesDate().toString();
+		} 
+		return "";
 	}
 	
 	@XmlElement
@@ -85,7 +88,10 @@ public class SerieTreeNode implements DicomTreeNode {
 	
 	@XmlElement
 	public String getImagesCount() {
-		return this.serie.getImagesNumber().toString();
+		if (this.serie.getImagesNumber() != null) {
+			this.serie.getImagesNumber().toString();
+		} 
+		return "";
 	}
 
 	/**
