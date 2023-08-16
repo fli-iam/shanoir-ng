@@ -6,6 +6,7 @@ import java.util.Iterator;
 import javax.swing.tree.TreeNode;
 
 import org.shanoir.ng.importer.model.EquipmentDicom;
+import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 
@@ -26,7 +27,9 @@ public class SerieTreeNode implements DicomTreeNode {
 	private Serie serie;
 	
 	// constructor for JAXB
-	public SerieTreeNode() {}
+	public SerieTreeNode() {
+		this.serie = new Serie();
+	}
 
 	/**
 	 * Creates a new Serie object.
@@ -200,8 +203,18 @@ public class SerieTreeNode implements DicomTreeNode {
 	}
 
 	@XmlElement
-	public EquipmentDicom getMriInformation() {
-		return this.serie.getEquipment();
+	public MRI getMriInformation() {
+		MRI mriInformation = new MRI();
+		InstitutionDicom institutionDicom = this.serie.getInstitution();
+		mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
+		mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
+		EquipmentDicom equipmentDicom = this.serie.getEquipment();
+		mriInformation.setManufacturer(equipmentDicom.getManufacturer());
+		mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
+		mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
+		mriInformation.setStationName(equipmentDicom.getStationName());
+		mriInformation.setMagneticFieldStrength(equipmentDicom.getMagneticFieldStrength());
+		return mriInformation;
 	}
 
 	@Override

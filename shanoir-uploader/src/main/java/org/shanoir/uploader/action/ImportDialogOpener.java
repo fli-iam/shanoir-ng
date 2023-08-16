@@ -85,20 +85,19 @@ public class ImportDialogOpener {
 	 */
 	private void updateImportDialogForMRICenter(final UploadJob uploadJob) {
 		SerieTreeNode firstSerie = uploadJob.getSeries().iterator().next();
-
-// @todo		String institutionName = firstSerie.getMriInformation().getInstitutionName();
-//		String institutionAddress = firstSerie.getMriInformation().getInstitutionAddress();
-//		String stationName = firstSerie.getMriInformation().getStationName();
+ 		String institutionName = firstSerie.getMriInformation().getInstitutionName();
+		String institutionAddress = firstSerie.getMriInformation().getInstitutionAddress();
+		String stationName = firstSerie.getMriInformation().getStationName();
 		String manufacturer = firstSerie.getMriInformation().getManufacturer();
-//		String manufacturersModelName = firstSerie.getMriInformation().getManufacturersModelName();
-//		String magneticFieldStrength = firstSerie.getMriInformation().getMagneticFieldStrength();
+		String manufacturersModelName = firstSerie.getMriInformation().getManufacturersModelName();
+		String magneticFieldStrength = firstSerie.getMriInformation().getMagneticFieldStrength();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
-//		importDialog.mriCenterText.setText(institutionName);
-//		importDialog.mriCenterAddressText.setText(institutionAddress);
-//		importDialog.mriStationNameText.setText(stationName);
+		importDialog.mriCenterText.setText(institutionName);
+		importDialog.mriCenterAddressText.setText(institutionAddress);
+		importDialog.mriStationNameText.setText(stationName);
 		importDialog.mriManufacturerText.setText(manufacturer);
-//		importDialog.mriManufacturersModelNameText.setText(manufacturersModelName);
-//		importDialog.mriMagneticFieldStrengthText.setText(magneticFieldStrength);
+		importDialog.mriManufacturersModelNameText.setText(manufacturersModelName);
+		importDialog.mriMagneticFieldStrengthText.setText(magneticFieldStrength);
 		importDialog.mriDeviceSerialNumberText.setText(deviceSerialNumber);
 	}
 

@@ -327,7 +327,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			String manufacturer = attributes.getString(Tag.Manufacturer);
 			String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
 			String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
-			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber));
+			String stationName = attributes.getString(Tag.StationName);
+			String magneticFieldStrength = attributes.getString(Tag.MagneticFieldStrength);
+			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
 		}
 	}
 
