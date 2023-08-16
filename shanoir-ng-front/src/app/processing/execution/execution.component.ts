@@ -55,7 +55,7 @@ export class ExecutionComponent implements OnInit {
     inputDatasets: Dataset[] = [];
     execDefaultName= "";
     exportFormat="nii";
-    groupBy: "dataset";
+    groupBy = "dataset";
 
     constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
         this.breadcrumbsService.nameStep('2. Executions');
