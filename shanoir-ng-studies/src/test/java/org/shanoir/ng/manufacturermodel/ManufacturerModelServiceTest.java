@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerModelServiceImpl;
@@ -48,20 +50,25 @@ public class ManufacturerModelServiceTest {
 	private static final String UPDATED_MANUFACTURER_MODEL_NAME = "test";
 
 	@Mock
-	private ManufacturerModelRepository manufacturerModelRepository;
+	private ManufacturerModelRepository repository;
+	@Mock
+	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
+
+	@Mock
+	private ObjectMapper objectMapper;
 
 	@InjectMocks
 	private ManufacturerModelServiceImpl manufacturerModelService;
 
 	@Before
 	public void setup() {
-		given(manufacturerModelRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturerModel()));
-		given(manufacturerModelRepository.findById(MANUFACTURER_MODEL_ID))
+		given(repository.findAll()).willReturn(Arrays.asList(ModelsUtil.createManufacturerModel()));
+		given(repository.findById(MANUFACTURER_MODEL_ID))
 				.willReturn(Optional.of(ModelsUtil.createManufacturerModel()));
-		given(manufacturerModelRepository.save(Mockito.any(ManufacturerModel.class)))
+		given(repository.save(Mockito.any(ManufacturerModel.class)))
 				.willReturn(createManufacturerModel());
 	}
 
@@ -71,7 +78,7 @@ public class ManufacturerModelServiceTest {
 		Assert.assertNotNull(manufacturerModels);
 		Assert.assertTrue(manufacturerModels.size() == 1);
 
-		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).findAll();
+		Mockito.verify(repository, Mockito.times(1)).findAll();
 	}
 
 	@Test
@@ -80,14 +87,14 @@ public class ManufacturerModelServiceTest {
 		Assert.assertNotNull(manufacturerModel);
 		Assert.assertTrue(ModelsUtil.MANUFACTURER_MODEL_NAME.equals(manufacturerModel.getName()));
 
-		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).findById(Mockito.anyLong());
+		Mockito.verify(repository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
 	@Test
 	public void saveTest() {
 		manufacturerModelService.create(createManufacturerModel());
 
-		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).save(Mockito.any(ManufacturerModel.class));
+		Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(ManufacturerModel.class));
 	}
 
 	@Test
@@ -96,7 +103,7 @@ public class ManufacturerModelServiceTest {
 		Assert.assertNotNull(updatedManufacturerModel);
 		Assert.assertTrue(UPDATED_MANUFACTURER_MODEL_NAME.equals(updatedManufacturerModel.getName()));
 
-		Mockito.verify(manufacturerModelRepository, Mockito.times(1)).save(Mockito.any(ManufacturerModel.class));
+		Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(ManufacturerModel.class));
 	}
 
 	private ManufacturerModel createManufacturerModel() {

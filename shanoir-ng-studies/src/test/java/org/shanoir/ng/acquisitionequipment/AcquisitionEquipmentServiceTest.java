@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,8 @@ import org.mockito.Mockito;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentServiceImpl;
+import org.shanoir.ng.manufacturermodel.model.Manufacturer;
+import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -45,13 +48,20 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class AcquisitionEquipmentServiceTest {
 
 	private static final Long ACQ_EQPT_ID = 1L;
+	private static final Long MANUFACTURER_ID = 1L;
+	private static final Long MANUFACTURER_MODEL_ID = 1L;
 	private static final String UPDATED_ACQ_EQPT_SERIAL_NUMBER = "test";
+	private static final String MANUFACTURER_NAME = "test";
+	private static final String MANUFACTURER_MODEL_NAME = "test";
 
 	@Mock
 	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
 	@Mock
 	private RabbitTemplate rabbitTemplate;
+
+	@Mock
+	private ObjectMapper objectMapper;
 
 	@InjectMocks
 	private AcquisitionEquipmentServiceImpl acquisitionEquipmentService;
@@ -113,6 +123,14 @@ public class AcquisitionEquipmentServiceTest {
 		final AcquisitionEquipment equipment = new AcquisitionEquipment();
 		equipment.setId(ACQ_EQPT_ID);
 		equipment.setSerialNumber(UPDATED_ACQ_EQPT_SERIAL_NUMBER);
+		final Manufacturer manu = new Manufacturer();
+		manu.setId(MANUFACTURER_ID);
+		manu.setName(MANUFACTURER_NAME);
+		final ManufacturerModel model = new ManufacturerModel();
+		model.setId(MANUFACTURER_MODEL_ID);
+		model.setName(MANUFACTURER_MODEL_NAME);
+		equipment.setManufacturerModel(model);
+		equipment.getManufacturerModel().setManufacturer(manu);
 		return equipment;
 	}
 

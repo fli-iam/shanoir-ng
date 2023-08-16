@@ -20,8 +20,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
-import org.shanoir.ng.center.model.Center;
-import org.shanoir.ng.center.service.CenterServiceImpl;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
@@ -43,7 +41,7 @@ import org.springframework.stereotype.Service;
 public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<AcquisitionEquipment> implements AcquisitionEquipmentService {
 
 	@Autowired
-	AcquisitionEquipmentRepository repository;
+	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
@@ -62,12 +60,12 @@ public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<Acqu
 
 	@Override
 	public List<AcquisitionEquipment> findAllByCenterId(Long centerId) {
-		return this.repository.findByCenterId(centerId);
+		return this.acquisitionEquipmentRepository.findByCenterId(centerId);
 	}
 	
 	@Override
 	public List<AcquisitionEquipment> findAllByStudyId(Long studyId) {
-		return this.repository.findByCenterStudyCenterListStudyId(studyId);
+		return this.acquisitionEquipmentRepository.findByCenterStudyCenterListStudyId(studyId);
 	}
 
 	@Override
