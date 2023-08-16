@@ -206,14 +206,18 @@ public class SerieTreeNode implements DicomTreeNode {
 	public MRI getMriInformation() {
 		MRI mriInformation = new MRI();
 		InstitutionDicom institutionDicom = this.serie.getInstitution();
-		mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
-		mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
+		if(institutionDicom != null) {
+			mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
+			mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
+		}
 		EquipmentDicom equipmentDicom = this.serie.getEquipment();
-		mriInformation.setManufacturer(equipmentDicom.getManufacturer());
-		mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
-		mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
-		mriInformation.setStationName(equipmentDicom.getStationName());
-		mriInformation.setMagneticFieldStrength(equipmentDicom.getMagneticFieldStrength());
+		if(equipmentDicom != null) {
+			mriInformation.setManufacturer(equipmentDicom.getManufacturer());
+			mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
+			mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
+			mriInformation.setStationName(equipmentDicom.getStationName());
+			mriInformation.setMagneticFieldStrength(equipmentDicom.getMagneticFieldStrength());
+		}
 		return mriInformation;
 	}
 
