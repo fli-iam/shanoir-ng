@@ -18,23 +18,21 @@ import org.springframework.stereotype.Component;
  * @author mkain
  *
  */
-@Component
 public class DicomSerieAndInstanceAnalyzer {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(DicomSerieAndInstanceAnalyzer.class);
+
 	private static final String RTPLAN = "RTPLAN";
 
 	private static final String RTDOSE = "RTDOSE";
 
 	private static final String RTSTRUCT = "RTSTRUCT";
 
-	private static final Logger LOG = LoggerFactory.getLogger(DicomSerieAndInstanceAnalyzer.class);
-
 	private static final String DOUBLE_EQUAL = "==";
 
 	private static final String SEMI_COLON = ";";
 	
-	@Value("${shanoir.import.series.isspectroscopy}")
-	private static String isSpectroscopy;
+	private static final String isSpectroscopy = "seriesDescription==*CSI*;seriesDescription==*csi*;seriesDescription==*SPECTRO*;seriesDescription==*spectro*;";
 	
 	/**
 	 * By default raw data storage and sub-types are ignored.
@@ -152,7 +150,7 @@ public class DicomSerieAndInstanceAnalyzer {
 	 * @param serie
 	 * @param attributes
 	 */
-	public void checkSerieIsMultiFrame(Serie serie, Attributes attributes) {
+	public static void checkSerieIsMultiFrame(Serie serie, Attributes attributes) {
 		int frameCount = 0;
 		if (serie.getIsEnhanced()) {
 			Attributes pFFGS = attributes.getNestedDataset(Tag.PerFrameFunctionalGroupsSequence);

@@ -111,7 +111,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 				// handle if serie in paths has been found
 				if (o instanceof SerieTreeNode) {
 					patient = (PatientTreeNode) tp.getParentPath().getParentPath().getLastPathComponent();
-					SerieTreeNode serie = (SerieTreeNode) o;
+					SerieTreeNode serieTreeNode = (SerieTreeNode) o;
 					Collection<DicomTreeNode> studies = patient.getTreeNodes().values();
 					for (Iterator studiesIt = studies.iterator(); studiesIt.hasNext();) {
 						StudyTreeNode study = (StudyTreeNode) studiesIt.next();
@@ -127,7 +127,8 @@ public class SelectionActionListener implements TreeSelectionListener {
 						}
 
 					}
-					selectedSeries.add(serie);
+					serieTreeNode.setSelected(true);
+					selectedSeries.add(serieTreeNode);
 				}
 				if (patientAlreadySelected != null && !patientAlreadySelected.equals(patient)) {
 					JOptionPane.showMessageDialog(mainWindow.frame,

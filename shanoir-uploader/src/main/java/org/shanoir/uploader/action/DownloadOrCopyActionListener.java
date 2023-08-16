@@ -16,6 +16,7 @@ import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.MainWindow;
@@ -97,7 +98,7 @@ public class DownloadOrCopyActionListener implements ActionListener {
 		 * 3. Download from PACS or copy from CD/DVD and write upload-job.xml + nominative-data-job.xml
 		 */
 		final String filePathDicomDir = mainWindow.getFindDicomActionListener().getFilePathDicomDir();
-		final Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries = mainWindow.getSAL().getSelectedSeries();
+		final Set<SerieTreeNode> selectedSeries = mainWindow.getSAL().getSelectedSeries();
 		Runnable runnable = new DownloadOrCopyRunnable(mainWindow.isFromPACS, dicomServerClient, dicomFileAnalyzer,  filePathDicomDir, selectedSeries, dicomData);
 		Thread thread = new Thread(runnable);
 		thread.start();

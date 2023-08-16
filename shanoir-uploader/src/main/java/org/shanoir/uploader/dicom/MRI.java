@@ -1,11 +1,13 @@
 package org.shanoir.uploader.dicom;
 
+import jakarta.xml.bind.annotation.XmlType;
+
 /**
  * The Class MRI contains information about the MRI Acquisition.
  *
  * @author ifakhfakh
  */
-
+@XmlType
 public class MRI {
 
 	private String manufacturer;
