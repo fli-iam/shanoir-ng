@@ -24,6 +24,7 @@ import org.apache.hc.core5.net.URIBuilder;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
@@ -34,7 +35,6 @@ import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
-import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;

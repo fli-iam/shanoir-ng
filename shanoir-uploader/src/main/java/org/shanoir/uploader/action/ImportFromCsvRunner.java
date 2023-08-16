@@ -1,11 +1,8 @@
 package org.shanoir.uploader.action;
 
 import java.io.File;
-import java.text.ParseException;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,10 +20,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.ShUpOnloadConfig;
-import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
@@ -37,11 +33,7 @@ import org.shanoir.uploader.model.Subject;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
-import org.shanoir.uploader.model.rest.ImagedObjectCategory;
-import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.StudyCard;
-import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -359,7 +351,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		for (Iterator<SerieTreeNode> iterator = selectedSeries.iterator(); iterator.hasNext();) {
 			SerieTreeNode serie = iterator.next();
-			Util.processSerieMriInfo(uploadFolder, serie);
+// @todo			Util.processSerieMriInfo(uploadFolder, serie);
 		}
 
 		/**
@@ -465,7 +457,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		logger.info("10 Import.json");
 
 		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), createdExam.getId(), study2, sc);
-		importJob.setFromCsv(true);
+		importJob.setFromShanoirUploader(true); // @todo: set from csv here for upload
 		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);
 		thread.start();

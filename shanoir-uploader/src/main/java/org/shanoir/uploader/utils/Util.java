@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -41,14 +40,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.log4j.Logger;
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
-import org.dcm4che3.io.DicomInputStream;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShanoirUploader;
-import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.MRI;
-import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -476,42 +469,6 @@ public final class Util {
 
 		}
 		return result;
-	}
-
-	/**
-	 * Add MRI info to Serie (MR series only) using the first DICOM file.
-	 * 
-	 * @param rootDir
-	 * @param serie
-	 */
-	public static void processSerieMriInfo(File rootDir, DicomTreeNode serie) {
-		final String modality = ((SerieTreeNode)serie).getModality();
-		if (modality != null) {
-			List<String> imageFileNames = ((SerieTreeNode) serie).getFileNames();
-			for (final Iterator<String> iteImages = imageFileNames.iterator(); iteImages.hasNext();) {
-				String imageFileName = iteImages.next();
-				if (!"PR".equals(modality) && !"SR".equals(modality)) {
-					String imageFilePath = rootDir.toString() + File.separator + imageFileName;
-					File dicomFile = new File(imageFilePath);
-					try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
-						Attributes attributes = dIS.readDatasetUntilPixelData();
-						MRI mriInformation = new MRI();
-						mriInformation.setInstitutionName(attributes.getString(Tag.InstitutionName));
-						mriInformation.setInstitutionAddress(attributes.getString(Tag.InstitutionAddress));
-						mriInformation.setStationName(attributes.getString(Tag.StationName));
-						mriInformation.setManufacturer(attributes.getString(Tag.Manufacturer));
-						mriInformation.setManufacturersModelName(attributes.getString(Tag.ManufacturerModelName));
-						mriInformation.setMagneticFieldStrength(attributes.getString(Tag.MagneticFieldStrength));
-						mriInformation.setDeviceSerialNumber(attributes.getString(Tag.DeviceSerialNumber));
-// @todo						((SerieTreeNode) serie).setMriInformation(mriInformation);
-					} catch (IOException e) {
-						logger.error(e.getMessage(), e);
-						return;
-					}
-					return;
-				}
-			}
-		}
 	}
 
 	/**

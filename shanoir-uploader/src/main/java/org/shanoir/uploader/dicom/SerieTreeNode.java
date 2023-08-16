@@ -2,17 +2,15 @@ package org.shanoir.uploader.dicom;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.swing.tree.TreeNode;
 
 import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 
 import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -27,8 +25,6 @@ public class SerieTreeNode implements DicomTreeNode {
 	private StudyTreeNode parent;
 
 	private Serie serie;
-	
-	private List<String> fileNames;
 
 	/**
 	 * Creates a new Serie object.
@@ -46,6 +42,10 @@ public class SerieTreeNode implements DicomTreeNode {
 	 */
 	public SerieTreeNode(final Serie serie) {
 		this.serie = serie;
+	}
+	
+	public Serie getSerie() {
+		return this.serie;
 	}
 
 	@XmlElement
@@ -100,6 +100,7 @@ public class SerieTreeNode implements DicomTreeNode {
 	 *
 	 * @see org.richfaces.model.TreeNodeImpl#getChildren()
 	 */
+	@SuppressWarnings("rawtypes")
 	public Iterator getChildren() {
 		return null;
 	}
@@ -204,16 +205,6 @@ public class SerieTreeNode implements DicomTreeNode {
 
 	public DicomTreeNode initChildTreeNode(Object arg0) {
 		return null;
-	}
-
-	@XmlElementWrapper(name="fileNames")
-	@XmlElement(name="fileName")
-	public List<String> getFileNames() {
-		return fileNames;
-	}
-	
-	public void setFileNames(List<String> fileNames) {
-		this.fileNames = fileNames;
 	}
 	
 	public EquipmentDicom getMriInformation() {

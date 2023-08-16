@@ -9,6 +9,10 @@ import java.util.UUID;
 
 import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
@@ -17,10 +21,6 @@ import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.model.rest.importer.ImportJob;
-import org.shanoir.uploader.model.rest.importer.Patient;
-import org.shanoir.uploader.model.rest.importer.Serie;
-import org.shanoir.uploader.model.rest.importer.Study;
 import org.shanoir.uploader.test.AbstractTest;
 import org.shanoir.uploader.utils.Util;
 
@@ -103,7 +103,10 @@ public class ZipFileImportTest extends AbstractTest {
 		subject = shUpClient.createSubject(subject, true, Long.valueOf(1));
 		createSubjectStudy(study, subject);
 		subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
-		patient.setSubject(subject);
+		org.shanoir.ng.importer.model.Subject subjectImportJob = new org.shanoir.ng.importer.model.Subject();
+		subjectImportJob.setId(subject.getId());
+		subjectImportJob.setName(subject.getName());
+		patient.setSubject(subjectImportJob);
 		return subject;
 	}
 

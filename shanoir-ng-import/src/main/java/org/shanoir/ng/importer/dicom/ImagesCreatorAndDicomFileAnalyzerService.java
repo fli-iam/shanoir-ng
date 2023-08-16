@@ -174,7 +174,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param images
 	 * @throws FileNotFoundException
 	 */
-	private File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
+	public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
 			throws FileNotFoundException {
 		StringBuilder instanceFilePath = new StringBuilder();
 		if (isImportFromPACS) {

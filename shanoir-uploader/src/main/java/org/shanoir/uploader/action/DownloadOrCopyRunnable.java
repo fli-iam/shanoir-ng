@@ -1,6 +1,7 @@
 package org.shanoir.uploader.action;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -56,7 +57,12 @@ public class DownloadOrCopyRunnable implements Runnable {
 		 * 1. Download from PACS or copy from CD/DVD
 		 */
 		File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
-		List<String> allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, selectedSeries, uploadFolder, dicomServerClient, filePathDicomDir);
+		List<String> allFileNames = null;
+		try {
+			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, selectedSeries, uploadFolder, dicomServerClient, filePathDicomDir);
+		} catch (FileNotFoundException e) {
+			logger.error(e.getMessage(), e);
+		}
 		
 		/**
 		 * 2. Fill MRI information into serie from first DICOM file of each serie
@@ -64,7 +70,7 @@ public class DownloadOrCopyRunnable implements Runnable {
 		 */
 		for (Iterator iterator = selectedSeries.iterator(); iterator.hasNext();) {
 			SerieTreeNode serie = (SerieTreeNode) iterator.next();
-			Util.processSerieMriInfo(uploadFolder, serie);
+// @todo			Util.processSerieMriInfo(uploadFolder, serie);
 		}
 			
 		/**
