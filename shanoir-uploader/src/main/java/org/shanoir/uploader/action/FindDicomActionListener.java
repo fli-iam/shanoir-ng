@@ -104,6 +104,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 						if (dicomDirGenerated) {
 							dicomDirFile.delete();
 						}
+						filePathDicomDir = selectedRootDir.toString();
 						logger.debug("populate : Media populated : " + media);
 						logger.debug("populate : End");
 					} catch (Exception e) {
