@@ -7,7 +7,6 @@ import javax.swing.tree.TreeNode;
 
 import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 
 import jakarta.xml.bind.annotation.XmlElement;
@@ -25,6 +24,9 @@ public class SerieTreeNode implements DicomTreeNode {
 	private StudyTreeNode parent;
 
 	private Serie serie;
+	
+	// constructor for JAXB
+	public SerieTreeNode() {}
 
 	/**
 	 * Creates a new Serie object.

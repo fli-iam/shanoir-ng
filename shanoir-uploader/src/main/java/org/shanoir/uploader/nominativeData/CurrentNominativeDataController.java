@@ -185,7 +185,8 @@ public class CurrentNominativeDataController {
 		Map<String, NominativeDataUploadJob> currentUploads = new HashMap<String, NominativeDataUploadJob>();
 		for (File f : folders) {
 			NominativeDataUploadJob nominativeDataUploadJob = processFolder(f);
-			currentUploads.put(f.getAbsolutePath(), nominativeDataUploadJob);
+			if (nominativeDataUploadJob != null)
+				currentUploads.put(f.getAbsolutePath(), nominativeDataUploadJob);
 		}
 		currentNominativeDataModel.setCurrentUploads(currentUploads);
 	}
