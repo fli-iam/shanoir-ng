@@ -1,1 +1,1 @@
-ALTER TABLE reference RENAME COLUMN value TO refvalue; 
+ALTER TABLE reference CHANGE value refvalue; 
