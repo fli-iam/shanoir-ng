@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.examination.model;
 
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ import jakarta.persistence.PostLoad;
 import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
@@ -107,7 +109,7 @@ public class Examination extends HalEntity {
     private Long investigatorId;
 
     /** Notes about this examination. */
-    @Lob
+	@JdbcTypeCode(Types.LONGVARCHAR)
     private String note;
 
     /** Study. */
