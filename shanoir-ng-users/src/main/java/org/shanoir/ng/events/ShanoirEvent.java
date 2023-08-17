@@ -1,15 +1,16 @@
 package org.shanoir.ng.events;
 
+import java.sql.Types;
 import java.util.Date;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
 
 /**
@@ -39,7 +40,7 @@ public class ShanoirEvent {
 	protected Long userId;
 
 	/** Message of the event, can be informative, or display an error **/
-	@Lob
+	@JdbcTypeCode(Types.LONGVARCHAR)
 	protected String message;
 
 	/** Creation date, automatically generated **/
