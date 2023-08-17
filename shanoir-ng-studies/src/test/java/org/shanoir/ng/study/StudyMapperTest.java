@@ -18,9 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.model.Study;
@@ -30,7 +29,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Study mapper test.
@@ -38,7 +36,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author msimon
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class StudyMapperTest {
@@ -55,16 +53,16 @@ public class StudyMapperTest {
 	@Test
 	public void studiesToStudyDTOsTest() {
 		final List<StudyDTO> studyDTOs = studyMapper.studiesToStudyDTOs(Arrays.asList(createStudy()));
-		Assert.assertNotNull(studyDTOs);
-		Assert.assertTrue(studyDTOs.size() == 1);
-		Assert.assertTrue(studyDTOs.get(0).getId().equals(STUDY_ID));
+		Assertions.assertNotNull(studyDTOs);
+		Assertions.assertTrue(studyDTOs.size() == 1);
+		Assertions.assertTrue(studyDTOs.get(0).getId().equals(STUDY_ID));
 	}
 
 	@Test
 	public void studyToStudyDTOTest() {
 		final StudyDTO studyDTO = studyMapper.studyToStudyDTO(createStudy());
-		Assert.assertNotNull(studyDTO);
-		Assert.assertTrue(studyDTO.getId().equals(STUDY_ID));
+		Assertions.assertNotNull(studyDTO);
+		Assertions.assertTrue(studyDTO.getId().equals(STUDY_ID));
 	}
 
 	private Study createStudy() {

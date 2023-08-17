@@ -23,9 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
@@ -41,7 +40,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * User security service test.
@@ -49,7 +47,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author jlouis
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class SubjectServiceSecurityTest {
@@ -70,7 +68,7 @@ public class SubjectServiceSecurityTest {
 	@MockBean
 	private StudyRepository studyRepository;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockNew = ModelsUtil.createSubject();
 		mockExisting = ModelsUtil.createSubject();

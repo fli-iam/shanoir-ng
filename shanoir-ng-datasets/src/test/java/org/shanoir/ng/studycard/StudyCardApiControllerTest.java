@@ -21,9 +21,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -47,7 +46,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -60,7 +58,7 @@ import com.google.gson.GsonBuilder;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = {StudyCardApiController.class, StudyCardUniqueConstraintManager.class})
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -101,7 +99,7 @@ public class StudyCardApiControllerTest {
 	@MockBean
 	private SolrService solrService;
 
-	@Before
+	@BeforeEach
 	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 		StudyCard studyCardMock = new StudyCard();

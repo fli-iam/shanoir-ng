@@ -12,7 +12,7 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.dicom.Serie;
+import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
@@ -60,11 +60,12 @@ public class ImportDialogOpener {
 			List<Study> studiesWithStudyCards = getStudiesWithStudyCards(uploadJob);
 			List<Examination> examinationDTOs = getExaminations(subject);
 			// init components of GUI and listeners
-			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate);
+			ImportStudyCardFilterDocumentListener importStudyCardFilterDocumentListener = new ImportStudyCardFilterDocumentListener(this.mainWindow);
+			ImportStudyAndStudyCardCBItemListener importStudyAndStudyCardCBIL = new ImportStudyAndStudyCardCBItemListener(this.mainWindow, subject, examinationDTOs, studyDate, importStudyCardFilterDocumentListener);
 			ImportFinishActionListener importFinishAL = new ImportFinishActionListener(this.mainWindow, uploadJob, uploadFolder, subject, importStudyAndStudyCardCBIL);
 			importDialog = new ImportDialog(this.mainWindow,
 					ShUpConfig.resourceBundle.getString("shanoir.uploader.preImportDialog.title"), true, resourceBundle,
-					importStudyAndStudyCardCBIL, importFinishAL);
+					importStudyAndStudyCardCBIL, importFinishAL, importStudyCardFilterDocumentListener);
 			// update import dialog with items from server
 			updateImportDialogForSubject(subject); // this has to be done after init of dialog
 			updateImportDialogForNewExamFields(studyDate, uploadJob.getStudyDescription());
@@ -83,33 +84,32 @@ public class ImportDialogOpener {
 	 * @param uploadJob
 	 */
 	private void updateImportDialogForMRICenter(final UploadJob uploadJob) {
-		Serie firstSerie = uploadJob.getSeries().iterator().next();
-		String institutionName = firstSerie.getMriInformation().getInstitutionName();
+		SerieTreeNode firstSerie = uploadJob.getSeries().iterator().next();
+ 		String institutionName = firstSerie.getMriInformation().getInstitutionName();
 		String institutionAddress = firstSerie.getMriInformation().getInstitutionAddress();
 		String stationName = firstSerie.getMriInformation().getStationName();
 		String manufacturer = firstSerie.getMriInformation().getManufacturer();
 		String manufacturersModelName = firstSerie.getMriInformation().getManufacturersModelName();
+		String magneticFieldStrength = firstSerie.getMriInformation().getMagneticFieldStrength();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
 		importDialog.mriCenterText.setText(institutionName);
 		importDialog.mriCenterAddressText.setText(institutionAddress);
 		importDialog.mriStationNameText.setText(stationName);
 		importDialog.mriManufacturerText.setText(manufacturer);
 		importDialog.mriManufacturersModelNameText.setText(manufacturersModelName);
+		importDialog.mriMagneticFieldStrengthText.setText(magneticFieldStrength);
 		importDialog.mriDeviceSerialNumberText.setText(deviceSerialNumber);
 	}
 
 	/**
 	 * This method calls the backend service and transforms DTO into model objects.
-	 * Maybe this step could be unified.
 	 * 
 	 * @param dicomData
 	 * @param equipmentDicom
 	 * @throws Exception 
 	 */
 	private List<Study> getStudiesWithStudyCards(final UploadJob uploadJob) throws Exception {
-		Serie firstSerie = uploadJob.getSeries().iterator().next();
-		String manufacturer = firstSerie.getMriInformation().getManufacturer();
-		String manufacturerModelName = firstSerie.getMriInformation().getManufacturersModelName();
+		SerieTreeNode firstSerie = uploadJob.getSeries().iterator().next();
 		String deviceSerialNumber = firstSerie.getMriInformation().getDeviceSerialNumber();
 		List<Study> studies = shanoirUploaderServiceClient.findStudiesNamesAndCenters();
 		if (studies != null) {
@@ -126,34 +126,38 @@ public class ImportDialogOpener {
 					List<StudyCard> studyCardsStudy = new ArrayList<StudyCard>();
 					for (Iterator<StudyCard> itStudyCards = studyCards.iterator(); itStudyCards.hasNext();) {
 						StudyCard studyCard = (StudyCard) itStudyCards.next();
+						// filter all study cards related to the selected study
 						if (study.getId().equals(studyCard.getStudyId())) {
 							studyCardsStudy.add(studyCard);
 							Long acquisitionEquipmentId = studyCard.getAcquisitionEquipmentId();
 							for (Iterator<AcquisitionEquipment> acquisitionEquipmentsIt = acquisitionEquipments.iterator(); acquisitionEquipmentsIt.hasNext();) {
 								AcquisitionEquipment acquisitionEquipment = (AcquisitionEquipment) acquisitionEquipmentsIt.next();
+								// find the correct equipment
 								if (acquisitionEquipment.getId().equals(acquisitionEquipmentId)) {
 									studyCard.setAcquisitionEquipment(acquisitionEquipment);
-									if (acquisitionEquipment != null && acquisitionEquipment.getManufacturerModel() != null
-											&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null) {
-										if (manufacturer != null && manufacturerModelName != null && deviceSerialNumber != null) {
-											String manufacturerSC = acquisitionEquipment.getManufacturerModel().getManufacturer().getName();
-											String manufacturerModelNameSC = acquisitionEquipment.getManufacturerModel().getName();
-											if (manufacturerSC.compareToIgnoreCase(manufacturer) == 0
-													&& manufacturerModelNameSC.compareToIgnoreCase(manufacturerModelName) == 0
-													&& acquisitionEquipment.getSerialNumber() != null
-													&& acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0) {
+									// check if values from server are complete, no sense for comparison if no serial number on server
+									if (acquisitionEquipment != null
+										&& acquisitionEquipment.getManufacturerModel() != null
+										&& acquisitionEquipment.getManufacturerModel().getManufacturer() != null
+										&& acquisitionEquipment.getSerialNumber() != null) {
+										// check if values are present in DICOM
+										if (deviceSerialNumber != null && !"".equals(deviceSerialNumber)) {
+											if (acquisitionEquipment.getSerialNumber().compareToIgnoreCase(deviceSerialNumber) == 0
+												|| deviceSerialNumber.contains(acquisitionEquipment.getSerialNumber())) {
 												studyCard.setCompatible(true);
 												compatibleStudyCard = true;
 											} else {
 												studyCard.setCompatible(false);
 											}
+										// no match with server
 										} else {
-											studyCard.setCompatible(false);
+											studyCard.setCompatible(false); // no match, as no value from DICOM or from server exists
 										}
+									// set in-compatible in case of missing server values
 									} else {
 										studyCard.setCompatible(false);
 									}								
-									break;
+									break; // correct equipment found, break for-loop acqEquip
 								}
 							}
 						}
@@ -210,7 +214,7 @@ public class ImportDialogOpener {
 			}
 			if (!firstCompatibleStudyFound) {
 				// this selectItem adds study cards to the stuyCardCB in case of no
-				// compatible study found, see ImportStudyAndStudyCardCBItemListenerNG
+				// compatible study found, see ImportStudyAndStudyCardCBItemListener
 				Study firstStudy = studiesWithStudyCards.get(0);
 				importDialog.studyCB.setSelectedItem(firstStudy);
 				if (firstStudy.getStudyCards() != null && !firstStudy.getStudyCards().isEmpty()) {

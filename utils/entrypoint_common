@@ -78,6 +78,7 @@ require()
             SHANOIR_CERTIFICATE_PEM_KEY) ;;
             VIP_URL_SCHEME)         match "$name" '^(http|https)$'                      ;;
             VIP_URL_HOST)           match "$name" '^([a-z0-9.-]+)$'                     ;;
+            VIP_CLIENT_SECRET)      ;;
             *)
                 error "unknown var: $name"
                 ;;

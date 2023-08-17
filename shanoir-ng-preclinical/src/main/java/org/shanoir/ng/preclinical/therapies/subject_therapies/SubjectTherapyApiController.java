@@ -35,7 +35,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class SubjectTherapyApiController implements SubjectTherapyApi {
@@ -59,8 +59,8 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 
 	@Override
 	public ResponseEntity<SubjectTherapy> addSubjectTherapy(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "therapy to add to subject", required = true) @RequestBody SubjectTherapy subtherapy,
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "therapy to add to subject", required = true) @RequestBody SubjectTherapy subtherapy,
 			BindingResult result) throws RestServiceException {
 
 		// First check if given user exists
@@ -102,8 +102,8 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 
 	@Override
 	public ResponseEntity<Void> deleteSubjectTherapy(
-			@ApiParam(value = "Subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "subject therapy id to delete", required = true) @PathVariable("tid") Long tid)
+			@Parameter(name = "Subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "subject therapy id to delete", required = true) @PathVariable("tid") Long tid)
 			throws RestServiceException {
 
 		// First check if given user exists
@@ -128,7 +128,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 
 	@Override
 	public ResponseEntity<Void> deleteSubjectTherapies(
-			@ApiParam(value = "animal subject id", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
 		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
@@ -146,8 +146,8 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 
 	@Override
 	public ResponseEntity<SubjectTherapy> getSubjectTherapyById(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of subject therapy that needs to be fetched", required = true) @PathVariable("tid") Long tid)
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of subject therapy that needs to be fetched", required = true) @PathVariable("tid") Long tid)
 			throws RestServiceException {
 		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
@@ -164,7 +164,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 
 	@Override
 	public ResponseEntity<List<SubjectTherapy>> getSubjectTherapies(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException {
+		@Parameter(name = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException {
 		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(
@@ -177,7 +177,7 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 
 	@Override
 	public ResponseEntity<List<SubjectTherapy>> getSubjectTherapiesByTherapy(
-			@ApiParam(value = "therapy id", required = true) @PathVariable("tid") Long tid)
+			@Parameter(name = "therapy id", required = true) @PathVariable("tid") Long tid)
 			throws RestServiceException {
 		Therapy therapy = therapyService.findById(tid);
 		if (therapy == null) {
@@ -193,9 +193,9 @@ public class SubjectTherapyApiController implements SubjectTherapyApi {
 
 	@Override
 	public ResponseEntity<Void> updateSubjectTherapy(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of subject therapy that needs to be updated", required = true) @PathVariable("tid") Long tid,
-			@ApiParam(value = "Subject therapy object that needs to be updated", required = true) @RequestBody SubjectTherapy subtherapy,
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of subject therapy that needs to be updated", required = true) @PathVariable("tid") Long tid,
+			@Parameter(name = "Subject therapy object that needs to be updated", required = true) @RequestBody SubjectTherapy subtherapy,
 			final BindingResult result) throws RestServiceException {
 
 		subtherapy.setId(tid);

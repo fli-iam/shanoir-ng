@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.studycard.model.assignment;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;

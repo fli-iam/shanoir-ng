@@ -14,8 +14,13 @@
 
 package org.shanoir.ng.manufacturermodel.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
-import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
+import org.shanoir.ng.manufacturermodel.repository.ManufacturerRepository;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,12 +30,39 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class ManufacturerServiceImpl extends BasicEntityServiceImpl<Manufacturer> implements ManufacturerService {
+public class ManufacturerServiceImpl implements ManufacturerService {
 
-	@Override
+	private ManufacturerRepository repository;
+
 	protected Manufacturer updateValues(Manufacturer from, Manufacturer to) {
 		return to;
 	}
 
+	public Optional<Manufacturer> findById(final Long id) {
+		return repository.findById(id);
+	}
+	
+	public List<Manufacturer> findAll() {
+		return Utils.toList(repository.findAll());
+	}
+	
+	public Manufacturer create(final Manufacturer entity) {
+		Manufacturer savedEntity = repository.save(entity);
+		return savedEntity;
+	}
+	
+	public Manufacturer update(final Manufacturer entity) throws EntityNotFoundException {
+		final Optional<Manufacturer> entityDbOpt = repository.findById(entity.getId());
+		final Manufacturer entityDb = entityDbOpt.orElseThrow(
+				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+		updateValues(entity, entityDb);
+		return repository.save(entityDb);
+	}
+
+	public void deleteById(final Long id) throws EntityNotFoundException  {
+		final Optional<Manufacturer> entity = repository.findById(id);
+		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+		repository.deleteById(id);
+	}
 
 }

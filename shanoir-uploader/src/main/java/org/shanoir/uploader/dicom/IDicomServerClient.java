@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
-import org.shanoir.uploader.dicom.query.Media;
+import org.shanoir.ng.importer.model.Patient;
 
 public interface IDicomServerClient {
 
@@ -22,7 +22,7 @@ public interface IDicomServerClient {
 	 * @param seriesDescription
 	 * @return Media object representing a tree model structure or null
 	 */
-	public Media queryDicomServer(String patientName,
+	public List<Patient> queryDicomServer(String patientName,
 			String patientID, String studyDescription, String seriesDescription, String birthDate, String studyDate)
 			throws Exception;
 
@@ -32,7 +32,7 @@ public interface IDicomServerClient {
 	 * begin to send all files to a local server implemented in DcmRcvHelper.
 	 * @param selectedSeries
 	 */
-	public List<String> retrieveDicomFiles(Collection<Serie> selectedSeries, final File tempFolderForUpload);
+	public List<String> retrieveDicomFiles(Collection<SerieTreeNode> selectedSeries, final File tempFolderForUpload);
 	
 	/**
 	 * This method returns the work folder.

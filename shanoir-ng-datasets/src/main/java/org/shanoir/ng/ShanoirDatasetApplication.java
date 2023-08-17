@@ -26,7 +26,7 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 
 /**
  * Shanoir-NG microservice datasets application.
@@ -34,7 +34,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @SpringBootApplication
 @EnableSpringDataWebSupport
 @EnableScheduling
-@EnableSwagger2
+@OpenAPIDefinition
 public class ShanoirDatasetApplication {
 
 	public static void main(String[] args) {

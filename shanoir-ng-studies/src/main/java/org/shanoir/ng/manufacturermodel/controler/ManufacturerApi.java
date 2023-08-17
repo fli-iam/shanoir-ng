@@ -17,7 +17,6 @@ package org.shanoir.ng.manufacturermodel.controler;
 import java.util.List;
 
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
-import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,75 +28,76 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
-@Api(value = "manufacturer")
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "manufacturer")
 @RequestMapping("/manufacturers")
 public interface ManufacturerApi {
 
-	@ApiOperation(value = "", notes = "If exists, returns the manufacturer corresponding to the given id", response = Manufacturer.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found manufacturer", response = Manufacturer.class),
-			@ApiResponse(code = 204, message = "no manufacturer found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "If exists, returns the manufacturer corresponding to the given id")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found manufacturer"),
+			@ApiResponse(responseCode = "204", description = "no manufacturer found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{manufacturerId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Manufacturer> findManufacturerById(
-			@ApiParam(value = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId);
+			@Parameter(name = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId);
 
-	@ApiOperation(value = "", notes = "Returns all the manufacturers", response = Manufacturer.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found manufacturers", response = Manufacturer.class),
-			@ApiResponse(code = 204, message = "no manufacturer found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Returns all the manufacturers")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found manufacturers"),
+			@ApiResponse(responseCode = "204", description = "no manufacturer found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<Manufacturer>> findManufacturers();
 
-	@ApiOperation(value = "", notes = "Saves a new manufacturer", response = Manufacturer.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created manufacturer", response = Manufacturer.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Saves a new manufacturer")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created manufacturer"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Manufacturer> saveNewManufacturer(
-			@ApiParam(value = "manufacturer to create", required = true) @RequestBody Manufacturer manufacturer,
+			@Parameter(name = "manufacturer to create", required = true) @RequestBody Manufacturer manufacturer,
 			final BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Updates a manufacturer", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "manufacturer updated", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "manufacturer not found", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Updates a manufacturer")
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "manufacturer updated"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "manufacturer not found"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{manufacturerId}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @controlerSecurityService.idMatches(#manufacturerId, #manufacturer)")
 	ResponseEntity<Void> updateManufacturer(
-			@ApiParam(value = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId,
-			@ApiParam(value = "manufacturer to update", required = true) @RequestBody Manufacturer manufacturer,
+			@Parameter(name = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId,
+			@Parameter(name = "manufacturer to update", required = true) @RequestBody Manufacturer manufacturer,
 			BindingResult result) throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "Deletes a manufacturer", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "manufacturer deleted", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no center found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Deletes a manufacturer")
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "manufacturer deleted"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no center found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@DeleteMapping(value = "/{manufacturerId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteManufacturer(
-			@ApiParam(value = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId)
+			@Parameter(name = "id of the manufacturer", required = true) @PathVariable("manufacturerId") Long manufacturerId)
 			throws RestServiceException;
 
 }

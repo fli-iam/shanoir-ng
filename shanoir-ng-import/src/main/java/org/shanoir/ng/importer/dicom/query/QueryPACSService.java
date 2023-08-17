@@ -19,8 +19,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -36,10 +34,8 @@ import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.ng.shared.exception.ShanoirImportException;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.weasis.dicom.op.CFind;
@@ -50,6 +46,8 @@ import org.weasis.dicom.param.DicomParam;
 import org.weasis.dicom.param.DicomProgress;
 import org.weasis.dicom.param.DicomState;
 import org.weasis.dicom.param.ProgressListener;
+
+import jakarta.annotation.PostConstruct;
 
 @Service
 public class QueryPACSService {
@@ -84,8 +82,7 @@ public class QueryPACSService {
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
 	
-	@Autowired
-	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
+	public QueryPACSService() {} // for ShUp usage
 	
 	@PostConstruct
 	private void initDicomNodes() {
@@ -94,10 +91,14 @@ public class QueryPACSService {
 		this.called = new DicomNode(calledName, calledHost, calledPort);
 	}
 	
+	public void setDicomNodes(DicomNode calling, DicomNode called) {
+		this.calling = calling;
+		this.called = called;
+		this.maxPatientsFromPACS = 10;
+	}
+	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws ShanoirImportException {
 		ImportJob importJob = new ImportJob();
-		importJob.setUserId(KeycloakUtil.getTokenUserId());
-		importJob.setFromPacs(true);
 		/**
 		 * In case of any patient specific search field is filled, work on patient level. Highest priority.
 		 */
@@ -126,8 +127,12 @@ public class QueryPACSService {
 		}
 		return importJob;
 	}
-	
+
 	public void queryCMOVE(Serie serie) {
+		queryCMOVE(serie.getSeriesInstanceUID());
+	}
+
+	public DicomState queryCMOVE(String seriesInstanceUID) {
 		DicomProgress progress = new DicomProgress();
 		progress.addProgressListener(new ProgressListener() {
 			@Override
@@ -136,10 +141,10 @@ public class QueryPACSService {
 			}
 		});
 		DicomParam[] params = { new DicomParam(Tag.QueryRetrieveLevel, "SERIES"),
-				new DicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID()) };
+				new DicomParam(Tag.SeriesInstanceUID, seriesInstanceUID) };
 		AdvancedParams options = new AdvancedParams();
 		options.getQueryOptions().add(QueryOption.RELATIONAL); // Required for QueryRetrieveLevel other than study
-		CMove.process(options, calling, called, calledNameSCP, progress, params);
+		return CMove.process(options, calling, called, calledNameSCP, progress, params);
 	}
 
 	/**
@@ -294,11 +299,11 @@ public class QueryPACSService {
 			for (int i = 0; i < attributesList.size(); i++) {
 				Attributes attributes = attributesList.get(i);
 				Serie serie = new Serie(attributes);
-				if (!dicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(attributes)) {
+				if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(attributes)) {
 					queryInstances(calling, called, serie, study);
 					if (!serie.getInstances().isEmpty()) {
-						dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
-						dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
+						DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
+						DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 					} else {
 						LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
 						serie.setIgnored(true);
@@ -335,7 +340,7 @@ public class QueryPACSService {
 			List<Instance> instances = new ArrayList<>();
 			for (int i = 0; i < attributes.size(); i++) {
 				Instance instance = new Instance(attributes.get(i));
-				if (!dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes.get(i))) {
+				if (!DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes.get(i))) {
 					instances.add(instance);
 				}
 			}

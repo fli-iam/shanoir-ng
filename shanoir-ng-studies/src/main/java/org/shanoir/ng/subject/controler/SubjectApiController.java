@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class SubjectApiController implements SubjectApi {
@@ -71,7 +71,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<Void> deleteSubject(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		try {
 			// Delete all associated bids folders
 			subjectService.deleteById(subjectId);
@@ -84,7 +84,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<SubjectDTO> findSubjectById(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		final Subject subject = subjectService.findById(subjectId);
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -143,8 +143,8 @@ public class SubjectApiController implements SubjectApi {
 	// Attention: this method is used by ShanoirUploader!!!
 	@Override
 	public ResponseEntity<Void> updateSubject(
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
-			@ApiParam(value = "subject to update", required = true) @RequestBody Subject subject,
+			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId,
+			@Parameter(name = "subject to update", required = true) @RequestBody Subject subject,
 			final BindingResult result) throws RestServiceException, MicroServiceCommunicationException {
 		validate(subject, result);
 		try {
@@ -161,8 +161,8 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<List<SimpleSubjectDTO>> findSubjectsByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name="preclinical", required = false) @RequestParam(value="preclinical", required = false) String preclinical) {
 		final List<SimpleSubjectDTO> simpleSubjectDTOList;
 		if ("null".equals(preclinical)) {
 			simpleSubjectDTOList = subjectService.findAllSubjectsOfStudy(studyId);
@@ -185,7 +185,7 @@ public class SubjectApiController implements SubjectApi {
 
 	@Override
 	public ResponseEntity<SubjectDTO> findSubjectByIdentifier(
-			@ApiParam(value = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
+			@Parameter(name = "identifier of the subject", required = true) @PathVariable("subjectIdentifier") String subjectIdentifier) {
 		final Subject subject = subjectService.findByIdentifier(subjectIdentifier);
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);

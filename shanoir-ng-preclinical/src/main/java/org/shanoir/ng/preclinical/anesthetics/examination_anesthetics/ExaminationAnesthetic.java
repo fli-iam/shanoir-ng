@@ -17,15 +17,6 @@ package org.shanoir.ng.preclinical.anesthetics.examination_anesthetics;
 import java.util.Date;
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.shared.hateoas.HalEntity;
@@ -34,7 +25,12 @@ import org.shanoir.ng.shared.hateoas.Links;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 /**
  * Examination Anesthetic
  */
@@ -82,20 +78,13 @@ public class ExaminationAnesthetic extends HalEntity  {
   public void initLinks() {
 	  this.addLink(Links.REL_SELF, "examination/"+ examinationId +"/anesthetic/" + getId());
   }
-			
-  @Override
-  @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-  @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-  public Long getId() {
-	  return super.getId();
-  }
   
   public ExaminationAnesthetic examinationId(Long id) {
     this.examinationId = id;
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Long getExaminationId() {
     return examinationId;
   }
@@ -109,7 +98,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Anesthetic getAnesthetic() {
     return anesthetic;
   }
@@ -123,7 +112,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Double getDose() {
     return dose;
   }
@@ -137,7 +126,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Reference getDoseUnit() {
     return doseUnit;
   }
@@ -151,7 +140,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getInjectionInterval() {
     return injectionInterval;
   }
@@ -165,7 +154,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getInjectionSite() {
     return injectionSite;
   }
@@ -179,7 +168,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getInjectionType() {
     return injectionType;
   }
@@ -193,7 +182,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Date getStartDate() {
     return startDate;
   }
@@ -207,7 +196,7 @@ public class ExaminationAnesthetic extends HalEntity  {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Date getEndDate() {
     return endDate;
   }

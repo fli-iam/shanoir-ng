@@ -18,9 +18,8 @@ import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
 import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
@@ -29,9 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class ExaminationToStudyDTOMapperTest {
@@ -51,7 +49,7 @@ public class ExaminationToStudyDTOMapperTest {
 	public void examinationToStudyDTO() throws ParseException {
 		Examination examination = createExamination();
 		final StudyDTO studyDTO = examinationToStudyDTOMapper.examinationToStudyDTO(examination);
-		Assert.assertNotNull(studyDTO);
+		Assertions.assertNotNull(studyDTO);
 	}
 
 	private Examination createExamination() {

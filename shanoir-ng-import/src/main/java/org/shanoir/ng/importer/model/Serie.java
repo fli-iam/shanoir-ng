@@ -131,7 +131,9 @@ public class Serie {
 		final EquipmentDicom equipmentDicom = new EquipmentDicom(
 				attributes.getString(Tag.Manufacturer),
 				attributes.getString(Tag.ManufacturerModelName),
-				attributes.getString(Tag.DeviceSerialNumber));
+				attributes.getString(Tag.DeviceSerialNumber),
+				attributes.getString(Tag.StationName),
+				attributes.getString(Tag.MagneticFieldStrength));
 		setEquipment(equipmentDicom);
 	}
 

@@ -43,7 +43,6 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -75,13 +74,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private static final String YES = "YES";
 
 	@Autowired
-	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
-
-	@Autowired
 	private ShanoirEventService eventService;
-
-	@Value("${shanoir.import.upload.folder}")
-	private String uploadFolder;
 
 	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event)
 			throws FileNotFoundException {
@@ -178,7 +171,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param images
 	 * @throws FileNotFoundException
 	 */
-	private File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
+	public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
 			throws FileNotFoundException {
 		StringBuilder instanceFilePath = new StringBuilder();
 		if (isImportFromPACS) {
@@ -228,7 +221,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
 			Attributes attributes = dIS.readDataset();
 			// Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
-			if (dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
+			if (DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
 				// do nothing here as instances list will be emptied after split between images and non-images
 			} else {
 				// divide here between non-images and images, non-images at first
@@ -331,7 +324,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			String manufacturer = attributes.getString(Tag.Manufacturer);
 			String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
 			String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
-			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber));
+			String stationName = attributes.getString(Tag.StationName);
+			String magneticFieldStrength = attributes.getString(Tag.MagneticFieldStrength);
+			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
 		}
 	}
 
@@ -374,8 +369,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSeriesDescription(seriesDescriptionDicomFile);
 			}
 		}
-		dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
-		dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie, attributes);
+		DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
+		DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie, attributes);
 		if (serie.getSeriesDate() == null) {
 			serie.setSeriesDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate)));
 		}
@@ -387,7 +382,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			serie.setProtocolName(attributes.getString(Tag.ProtocolName));
 		}
 		// keep this check at this place: enhanced Dicom needs to be checked first
-		dicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
+		DicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
 	}
 
 	/**

@@ -16,77 +16,78 @@ package org.shanoir.ng.preclinical.subjects.controller;
 
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
-import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-@Api(value = "subject")
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+
+@Tag(name = "subject")
 @RequestMapping("/subject")
 public interface AnimalSubjectApi {
 
-	@ApiOperation(value = "Add a new animalsubject", notes = "", response = PreclinicalSubjectDto.class, tags = {
-			"AnimalSubject", })
+	@Operation(summary = "Add a new animalsubject", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "success returns AnimalSubject", response = PreclinicalSubjectDto.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = PreclinicalSubjectDto.class),
-			@ApiResponse(code = 409, message = "Already exists - conflict", response = PreclinicalSubjectDto.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = PreclinicalSubjectDto.class) })
+			@ApiResponse(responseCode = "200", description = "success returns AnimalSubject"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<PreclinicalSubjectDto> createAnimalSubject(
-			@ApiParam(value = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto animalSubject,
+			@Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto animalSubject,
 			final BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "Deletes an animalSubject", notes = "", response = Void.class, tags = { "AnimalSubject", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid subject value", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Deletes an animalSubject", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid subject value"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@DeleteMapping(value = "/{id}", produces = { "application/json" })
 	ResponseEntity<Void> deleteAnimalSubject(
-			@ApiParam(value = "AnimalSubject id to delete", required = true) @PathVariable("id") Long id);
+			@Parameter(name = "AnimalSubject id to delete", required = true) @PathVariable("id") Long id);
 
-	@ApiOperation(value = "Find animalSubject by subject Id", notes = "Returns a subject", response = AnimalSubject.class, tags = {
-			"AnimalSubject", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = AnimalSubjectDto.class),
-			@ApiResponse(code = 400, message = "Invalid ID supplied", response = AnimalSubjectDto.class),
-			@ApiResponse(code = 404, message = "Subject not found", response = AnimalSubjectDto.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = AnimalSubjectDto.class) })
+	@Operation(summary  = "Find animalSubject by subject Id", description = "Returns a subject")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+		@ApiResponse(responseCode = "400", description = "Invalid ID supplied"),
+		@ApiResponse(responseCode = "404", description = "Subject not found"),
+		@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@GetMapping(value = "/{id}", produces = { "application/json" })
 	ResponseEntity<AnimalSubjectDto> getAnimalSubjectBySubjectId(
-			@ApiParam(value = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
+			@Parameter(name = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
-	@ApiOperation(value = "List all animalSubjects", notes = "", response = AnimalSubject.class, responseContainer = "List", tags = {
-			"AnimalSubject", })
+	@Operation(summary = "List all animalSubjects", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of Preclinical AnimalSubject", response = AnimalSubjectDto.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AnimalSubjectDto.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AnimalSubjectDto.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = AnimalSubjectDto.class) })
+		@ApiResponse(responseCode = "200", description = "An array of Preclinical AnimalSubject"),
+		@ApiResponse(responseCode = "401", description = "unauthorized"),
+		@ApiResponse(responseCode = "403", description = "forbidden"),
+		@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/all", produces = { "application/json" })
 	ResponseEntity<List<AnimalSubjectDto>> getAllAnimalSubjects();
 
-	@ApiOperation(value = "Update an existing animalSubject", notes = "", response = Void.class, tags = {
-			"AnimalSubject", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-			@ApiResponse(code = 404, message = "Subject not found", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Update an existing animalSubject", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "404", description = "Subject not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PutMapping(value = "/{id}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<Void> updateAnimalSubject(
-			@ApiParam(value = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "AnimalSubject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto dto,
+			@Parameter(name = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "AnimalSubject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto dto,
 			final BindingResult result) throws RestServiceException;
 
 }
