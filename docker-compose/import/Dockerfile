@@ -41,11 +41,10 @@ RUN apt-get update -qq \
     libsm6 \
     libxext6 \
     lib32stdc++6 \
-    libtiff5 \
+    libtiff6 \
     libglib2.0-0:i386 \
     locales \
-    locales-all \
-    python
+    locales-all
 
 # Compile DCM2NIIX from source
 ENV DCMCOMMIT_VERSION=v1.0.20210317
