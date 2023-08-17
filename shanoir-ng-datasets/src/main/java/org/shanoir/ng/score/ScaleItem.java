@@ -1,16 +1,18 @@
 package org.shanoir.ng.score;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
+import java.sql.Types;
 
+import org.hibernate.annotations.JdbcTypeCode;
 import org.shanoir.ng.examination.model.CodedVariable;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 /**
  * The Class ScaleItem.
@@ -38,7 +40,7 @@ public class ScaleItem extends AbstractEntity {
 	 * The qualitative score code. Might exceed 255 characters so the mapping
 	 * uses a blob.
 	 */
-	@Lob
+	@JdbcTypeCode(Types.LONGVARCHAR)
 	private String qualitativeScaleItem;
 
 	/** The quantitative score code. */
