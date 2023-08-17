@@ -1,1 +1,1 @@
-ALTER TABLE reference CHANGE value refvalue; 
+ALTER TABLE reference CHANGE value refvalue varchar(255); 
