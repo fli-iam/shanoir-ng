@@ -183,7 +183,9 @@ public class ImportUtils {
 		importJob.setStudyCardId(studyCard.getId());
 		importJob.setAcquisitionEquipmentId(studyCard.getAcquisitionEquipmentId());
 		importJob.setConverterId(studyCard.getNiftiConverterId());
+		importJob.setExaminationId(examinationId);
 
+		List<Patient> patients = new ArrayList<>();
 		// handle patient and subject
 		Patient patient = new Patient();
 		patient.setPatientID(uploadJob.getSubjectIdentifier());
@@ -192,22 +194,35 @@ public class ImportUtils {
 		subject.setName(subjectName);
 		importJob.setSubjectName(subjectName);
 		patient.setSubject(subject);
-		List<Patient> patients = new ArrayList<>();
 		patients.add(patient);
-		importJob.setPatients(patients);
 		// handle study dicom == examination in Shanoir
 		List<org.shanoir.ng.importer.model.Study> studiesImportJob = new ArrayList<org.shanoir.ng.importer.model.Study>();
 		org.shanoir.ng.importer.model.Study studyImportJob = new org.shanoir.ng.importer.model.Study();
-		studiesImportJob.add(studyImportJob);
-		patient.setStudies(studiesImportJob);
-		importJob.setExaminationId(examinationId);
 		// handle series for study
-		final Collection<SerieTreeNode> serieTreeNodes = uploadJob.getSeries();
 		final List<Serie> series = new ArrayList<Serie>();
-		for (SerieTreeNode serieTreeNode : serieTreeNodes){
-			series.add(serieTreeNode.getSerie());
+		final Collection<SerieTreeNode> serieTreeNodes = uploadJob.getSeries();
+		for (SerieTreeNode serieTreeNode : serieTreeNodes) {
+			Serie serie = new Serie();
+			serie.setSelected(serieTreeNode.isSelected());
+			serie.setSeriesInstanceUID(serieTreeNode.getId());
+			serie.setSeriesNumber(serieTreeNode.getSeriesNumber());
+			serie.setModality(serieTreeNode.getModality());
+			serie.setProtocolName(serieTreeNode.getProtocol());
+			List<Instance> instances = new ArrayList<Instance>();
+			for (String filename : serieTreeNode.getFileNames()){
+				Instance instance = new Instance();
+				String[] myStringArray = {filename};
+				instance.setReferencedFileID(myStringArray);
+				instances.add(instance);
+			}
+			serie.setInstances(instances);
+			serie.setImagesNumber(serieTreeNode.getFileNames().size());
+			series.add(serie);
 		}
 		studyImportJob.setSeries(series);
+		studiesImportJob.add(studyImportJob);
+		patient.setStudies(studiesImportJob);
+		importJob.setPatients(patients);
 		return importJob;
 	}
 

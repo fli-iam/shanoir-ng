@@ -42,6 +42,8 @@ public class SerieTreeNode implements DicomTreeNode {
 
 	private Serie serie;
 	
+	private List<String> fileNames;
+	
 	// constructor for JAXB
 	public SerieTreeNode() {
 		this.serie = new Serie();
@@ -275,25 +277,11 @@ public class SerieTreeNode implements DicomTreeNode {
 	@XmlElementWrapper(name="fileNames")
 	@XmlElement(name="fileName")
 	public List<String> getFileNames() {
-		List<String> fileNames = new ArrayList<String>();
-		List<Instance> instances = serie.getInstances();
-		for(Instance instance : instances) {
-			// we can use here [0] as the arrays are flatten before
-			// for pacs: by DicomServerClient, for CD/DVD: by copy method
-			fileNames.add(instance.getReferencedFileID()[0]);
-		}
 		return fileNames;
 	}
-
+	
 	public void setFileNames(List<String> fileNames) {
-		List<Instance> instances = new ArrayList<Instance>();
-		for (String fileName : fileNames){
-			Instance instance = new Instance();
-			String[] myStringArray = {fileName};
-			instance.setReferencedFileID(myStringArray);
-			instances.add(instance);
-		}
-		this.serie.setInstances(instances);
+		this.fileNames = fileNames;
 	}
 
 }
