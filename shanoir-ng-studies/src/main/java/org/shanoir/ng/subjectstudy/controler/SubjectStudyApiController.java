@@ -35,7 +35,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class SubjectStudyApiController implements SubjectStudyApi {
@@ -53,8 +53,8 @@ public class SubjectStudyApiController implements SubjectStudyApi {
 
 	@Override
 	public ResponseEntity<Void> updateSubjectStudy(
-			@ApiParam(value = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
-			@ApiParam(value = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
+			@Parameter(name = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
+			@Parameter(name = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
 			final BindingResult result) throws RestServiceException {
 
 		final FieldErrorMap errors = new FieldErrorMap(result);

@@ -16,7 +16,7 @@ package org.shanoir.ng.processing.controler;
 
 import java.util.List;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
@@ -33,109 +33,109 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-@Api(value = "datasetProcessing")
+@Tag(name = "datasetProcessing")
 @RequestMapping("/datasetProcessing")
 public interface DatasetProcessingApi {
 
-	@ApiOperation(value = "", notes = "Deletes a dataset processing", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "dataset processing deleted", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no dataset processing found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Deletes a dataset processing")
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dataset processing deleted"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no dataset processing found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@DeleteMapping(value = "/{datasetProcessingId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> deleteDatasetProcessing(
-			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
+			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "If exists, returns the dataset processing corresponding to the given id", response = DatasetProcessingDTO.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found dataset processing", response = DatasetProcessingDTO.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no dataset processing found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "If exists, returns the dataset processing corresponding to the given id")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset processing"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no dataset processing found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{datasetProcessingId}", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
-			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
+			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
 
-	@ApiOperation(value = "", notes = "Returns all the dataset processings", response = DatasetProcessingDTO.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all the dataset processings")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found dataset processings", response = DatasetProcessingDTO.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no dataset processing found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found dataset processings"),
+			@ApiResponse(responseCode = "204", description = "no dataset processing found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/study/{studyId}/subject/{subjectId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessingsByStudyIdAndSubjectId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 
-	@ApiOperation(value = "", notes = "Returns the dataset processings with given study and subject", response = DatasetProcessingDTO.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns the dataset processings with given study and subject")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found dataset processings", response = DatasetProcessingDTO.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no dataset processing found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found dataset processings"),
+			@ApiResponse(responseCode = "204", description = "no dataset processing found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessings();
 
-	@ApiOperation(value = "", notes = "Returns the input datasets of a processing", response = DatasetDTO.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns the input datasets of a processing")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found dataset processings", response = DatasetDTO.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no dataset processing found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found dataset processings"),
+			@ApiResponse(responseCode = "204", description = "no dataset processing found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{datasetProcessingId}/inputDatasets/", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<DatasetDTO>> getInputDatasets(@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
+	ResponseEntity<List<DatasetDTO>> getInputDatasets(@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
 
-	@ApiOperation(value = "", notes = "Returns the output datasets of a processing", response = DatasetDTO.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns the output datasets of a processing")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found dataset processings", response = DatasetDTO.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no dataset processing found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found dataset processings"),
+			@ApiResponse(responseCode = "204", description = "no dataset processing found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{datasetProcessingId}/outputDatasets/", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<DatasetDTO>> getOutputDatasets(@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
+	ResponseEntity<List<DatasetDTO>> getOutputDatasets(@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
 
-	@ApiOperation(value = "", notes = "Saves a new dataset processing", response = DatasetProcessingDTO.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created dataset processing", response = DatasetProcessingDTO.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Saves a new dataset processing")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created dataset processing"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(@ApiParam(value = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
+	ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(@Parameter(name = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Updates a dataset processing", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "dataset processing updated", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Updates a dataset processing")
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dataset processing updated"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{datasetProcessingId}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER') and @controlerSecurityService.idMatches(#datasetProcessingId, #datasetProcessing)")
 	ResponseEntity<Void> updateDatasetProcessing(
-			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
-			@ApiParam(value = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing, BindingResult result)
+			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
+			@Parameter(name = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing, BindingResult result)
 			throws RestServiceException;
 
 }

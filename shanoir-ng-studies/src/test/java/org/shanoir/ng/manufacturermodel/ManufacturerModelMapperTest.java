@@ -14,9 +14,8 @@
 
 package org.shanoir.ng.manufacturermodel;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.manufacturermodel.dto.ManufacturerModelDTO;
 import org.shanoir.ng.manufacturermodel.dto.mapper.ManufacturerModelMapper;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
@@ -24,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Manufacturer model mapper test.
@@ -32,7 +30,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author msimon
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class ManufacturerModelMapperTest {
@@ -45,8 +43,8 @@ public class ManufacturerModelMapperTest {
 	@Test
 	public void centersToCenterDTOsTest() {
 		final ManufacturerModelDTO manufacturerModelDTO = manufacturerModelMapper.manufacturerModelToManufacturerModelDTO(createManufacturerModel());
-		Assert.assertNotNull(manufacturerModelDTO);
-		Assert.assertTrue(manufacturerModelDTO.getName().equals(MANUFACTURER_MODEL_NAME));
+		Assertions.assertNotNull(manufacturerModelDTO);
+		Assertions.assertTrue(manufacturerModelDTO.getName().equals(MANUFACTURER_MODEL_NAME));
 	}
 
 	private ManufacturerModel createManufacturerModel() {

@@ -14,8 +14,9 @@
 
 package org.shanoir.ng.study;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
@@ -25,10 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
@@ -40,10 +40,8 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * User security service test.
@@ -51,7 +49,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author jlouis
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class StudyServiceSecurityTest {
@@ -69,7 +67,7 @@ public class StudyServiceSecurityTest {
 	@MockBean
 	private StudyRepository repository;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockNew = ModelsUtil.createStudy();
 		mockExisting = ModelsUtil.createStudy();
@@ -172,10 +170,10 @@ public class StudyServiceSecurityTest {
 		given(repository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
 		List<Study> all = service.findAll();
 		List<Study> repoAll = repository.findAll();
-		Assert.assertNotNull(all);
-		Assert.assertEquals(repoAll.size(), all.size());
-		Assert.assertTrue(all.size() > 0);
-		Assert.assertNotNull(all.get(0).getStudyCenterList());
+		Assertions.assertNotNull(all);
+		Assertions.assertEquals(repoAll.size(), all.size());
+		Assertions.assertTrue(all.size() > 0);
+		Assertions.assertNotNull(all.get(0).getStudyCenterList());
 	}
 	
 	@Test
@@ -189,11 +187,11 @@ public class StudyServiceSecurityTest {
 			.willReturn(Arrays.asList(studyMock));
 		List<Study> repoAll = repository.findByStudyUserList_UserIdAndStudyUserList_StudyUserRightsAndStudyUserList_Confirmed_OrderByNameAsc(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId(), true);
 		List<Study> all = service.findAll();
-		Assert.assertNotNull(all);
-		Assert.assertEquals(repoAll.size(), all.size());
-		Assert.assertTrue(repoAll.size() > 0);
-		Assert.assertTrue(all.size() > 0);
-		Assert.assertNotNull(all.get(0).getStudyCenterList());
+		Assertions.assertNotNull(all);
+		Assertions.assertEquals(repoAll.size(), all.size());
+		Assertions.assertTrue(repoAll.size() > 0);
+		Assertions.assertTrue(all.size() > 0);
+		Assertions.assertNotNull(all.get(0).getStudyCenterList());
 	}
 	
 	private Study buildStudyMock(Long id, StudyUserRight... rights) {

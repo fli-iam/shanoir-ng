@@ -177,6 +177,7 @@ services:
       - SHANOIR_MIGRATION
       - VIP_URL_SCHEME
       - VIP_URL_HOST
+      - VIP_CLIENT_SECRET
     volumes:
       - "logs:/var/log/shanoir-ng-logs"
       - certificate-share-data:/etc/ssl/certs/java:ro

@@ -16,19 +16,16 @@ package org.shanoir.ng.preclinical.subjects.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.validation.Valid;
-
-import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
-import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
-import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectUniqueValidator;
+import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
+import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDtoService;
 import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
-import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectUniqueValidator;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -51,7 +48,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 @Controller
 public class AnimalSubjectApiController implements AnimalSubjectApi {
@@ -85,7 +83,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<PreclinicalSubjectDto> createAnimalSubject(
-			@ApiParam(value = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto dto,
+			@Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto dto,
 			final BindingResult result) throws RestServiceException {
 
 		try {
@@ -160,7 +158,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<AnimalSubjectDto> getAnimalSubjectBySubjectId(
-			@ApiParam(value = "subject id of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "subject id of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final AnimalSubjectDto subject = dtoService.getPreclinicalDtoFromAnimalSubject(subjectService.getBySubjectId(id)).getAnimalSubject();
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -179,8 +177,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<Void> updateAnimalSubject(
-			@ApiParam(value = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long subjectId,
-			@ApiParam(value = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto dto,
+			@Parameter(name = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long subjectId,
+			@Parameter(name = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto dto,
 			final BindingResult result) throws RestServiceException {
 
 		// IMPORTANT : avoid any confusion that could lead to security breach
@@ -226,7 +224,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<Void> deleteAnimalSubject(
-			@ApiParam(value = "subject id of AnimalSubject to delete", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "subject id of AnimalSubject to delete", required = true) @PathVariable("id") Long id) {
 		try {
 			AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 			if (animalSubject == null) {
@@ -246,4 +244,5 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	private FieldErrorMap getUniqueConstraintErrors(final AnimalSubject subject) {
 		return uniqueValidator.validate(subject);
 	}
+
 }

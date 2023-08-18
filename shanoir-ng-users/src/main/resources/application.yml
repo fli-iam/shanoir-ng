@@ -28,13 +28,14 @@ spring:
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
-      use-new-id-generator-mappings: false
+      id:
+        db_structure_naming_strategy: legacy
     properties:
       hibernate:
         connection:
@@ -66,40 +67,29 @@ spring:
     port: 25
     properties:
       mail.smtp.from: do-not-reply@inria.fr
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
 
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: false
 
 front:
   server:
     address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
     url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
-##### Keycloak #####
-keycloak:
-  # attention: this config for the token issuer needs to match the domain of the frontend
-  # used for token creation AND the server url needs to be known from inside the docker network:
-  auth-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth
-  cors: true
-  realm: shanoir-ng
-  resource: shanoir-ng-users
-  ssl-required: external
-  credentials.secret: a0be59b0-5a8d-4a11-82fd-5d8e5358444e
-  securityConstraints:
-    - authRoles: 
-      - ROLE_ADMIN
-      - ROLE_EXPERT
-      - ROLE_USER
-    - securityCollections:
-      - name: user secured api
-      - patterns:
-        - /user/*
-    - securityCollections:
-      - name: role secured api
-      - patterns:
-        - /role/*
 ##### Keycloak admin client, that ms users can directly communicate with keycloak #####
 kc.admin.client:
   server.url: http://${SHANOIR_PREFIX}keycloak:8080/auth
   realm: master
   client.id: admin-cli
+  realm.users: shanoir-ng
 # logging configuration
 logging:
   file:
@@ -161,7 +151,7 @@ spring:
     allow-bean-definition-overriding: true
     allow-circular-references: true
   datasource:
-    url: jdbc:h2:mem:shanoirNgUsers;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
+    url: jdbc:h2:mem:shanoirNgUsers;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
     username: sa
     password: 
     driver-class-name: org.h2.Driver
@@ -184,3 +174,6 @@ spring:
 front:
   server:
     url: https://shanoir-ng-nginx
+logging:
+  file:
+    name: /tmp/shanoir-ng-logs/shanoir-ng-users.log

@@ -20,10 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -34,7 +33,8 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.shanoir.ng.utils.ExtraDataModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Examination anesthetics service test.
@@ -42,7 +42,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author sloury
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class ExtraDataServiceTest {
 
 	public static final Long EXAMINATION_ID = 1L;
@@ -64,7 +65,7 @@ public class ExtraDataServiceTest {
 	@InjectMocks
 	private ExaminationExtraDataServiceImpl extraDataService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(extraDataRepository.findAllByExaminationId(1L))
 				.willReturn(Arrays.asList(ExtraDataModelUtil.createExaminationExtraData()));
@@ -83,9 +84,9 @@ public class ExtraDataServiceTest {
 	@Test
 	public void findByIdTest() {
 		final ExaminationExtraData extradata = extraDataService.findById(EXTRADATA_ID);
-		Assert.assertNotNull(extradata);
-		Assert.assertTrue(EXTRADATA_FILENAME.equals(extradata.getFilename()));
-		Assert.assertTrue(AnestheticModelUtil.EXAM_ID.equals(extradata.getExaminationId()));
+		Assertions.assertNotNull(extradata);
+		Assertions.assertTrue(EXTRADATA_FILENAME.equals(extradata.getFilename()));
+		Assertions.assertTrue(AnestheticModelUtil.EXAM_ID.equals(extradata.getExaminationId()));
 
 		Mockito.verify(extraDataRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -93,8 +94,8 @@ public class ExtraDataServiceTest {
 	@Test
 	public void findByExaminationIdTest() {
 		final List<ExaminationExtraData> extradata = extraDataService.findAllByExaminationId(EXAMINATION_ID);
-		Assert.assertNotNull(extradata);
-		Assert.assertTrue(extradata.size() == 1);
+		Assertions.assertNotNull(extradata);
+		Assertions.assertTrue(extradata.size() == 1);
 
 		Mockito.verify(extraDataRepository, Mockito.times(1)).findAllByExaminationId(EXAMINATION_ID);
 	}
@@ -109,8 +110,8 @@ public class ExtraDataServiceTest {
 	@Test
 	public void updateTest() throws ShanoirException {
 		final ExaminationExtraData updatedExtraData = extraDataService.update(createExtraData());
-		Assert.assertNotNull(updatedExtraData);
-		Assert.assertTrue(EXTRADATA_FILENAME.equals(updatedExtraData.getFilename()));
+		Assertions.assertNotNull(updatedExtraData);
+		Assertions.assertTrue(EXTRADATA_FILENAME.equals(updatedExtraData.getFilename()));
 
 		Mockito.verify(extraDataRepository, Mockito.times(1)).save(Mockito.any(ExaminationExtraData.class));
 	}

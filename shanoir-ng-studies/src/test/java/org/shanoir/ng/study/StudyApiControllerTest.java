@@ -14,9 +14,9 @@
 
 package org.shanoir.ng.study;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,18 +27,17 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.study.controler.StudyApiController;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
@@ -59,13 +58,9 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for study controller.
@@ -73,7 +68,6 @@ import com.google.gson.GsonBuilder;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = StudyApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -84,8 +78,6 @@ public class StudyApiControllerTest {
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 	private static final String REQUEST_PATH_FOR_MEMBERS = REQUEST_PATH_WITH_ID + "/members";
 	private static final String REQUEST_PATH_FOR_MEMBER_WITH_ID = REQUEST_PATH_FOR_MEMBERS + "/1";
-
-	private Gson gson;
 
 	@Autowired
 	private MockMvc mvc;
@@ -114,25 +106,22 @@ public class StudyApiControllerTest {
 	@MockBean
 	private ShanoirEventService eventService;
 
-	@ClassRule
-	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	@TempDir
+	public static File tempFolder;
 	
 	public static String tempFolderPath;
 	
-	@BeforeClass
-	public static void beforeClass() {
-		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+	@BeforeAll
+	public static void beforeAll() {
+		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
 	    System.setProperty("studies-data", tempFolderPath);
 	}
 	
-	@Before
+	@BeforeEach
 	public void setup() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
 		given(studyMapperMock.studiesToStudyDTOs(Mockito.anyList()))
 		.willReturn(Arrays.asList(new StudyDTO()));
 		given(studyMapperMock.studyToStudyDTO(Mockito.any(Study.class))).willReturn(new StudyDTO());
-
 		doNothing().when(studyServiceMock).deleteById(1L);
 		given(studyServiceMock.findAll()).willReturn(Arrays.asList(new Study()));
 		given(studyServiceMock.create(Mockito.mock(Study.class))).willReturn(new Study());
@@ -145,7 +134,7 @@ public class StudyApiControllerTest {
 	// @Test
 	public void addMember() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_FOR_MEMBERS).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createStudyUser())))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createStudyUser())))
 		.andExpect(status().isNoContent());
 	}
 
@@ -192,7 +181,7 @@ public class StudyApiControllerTest {
 
 			// WHEN The file is added to the examination
 
-			mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH + "/protocol-file-upload/1").file(file))
+			mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH + "/protocol-file-upload/1").file(file))
 			.andExpect(status().isOk());
 
 			// THEN the file is saved

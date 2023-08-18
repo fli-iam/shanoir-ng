@@ -2,18 +2,17 @@ package org.shanoir.ng.datasetacquisition.repository;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import org.apache.commons.math3.util.Pair;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 @Component
 public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepositoryCustom {
@@ -23,7 +22,6 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public Page<DatasetAcquisition> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
 			Iterable<Long> studyIds, Pageable pageable) {
 		

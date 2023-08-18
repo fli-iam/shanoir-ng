@@ -14,16 +14,17 @@
 
 package org.shanoir.ng.preclinical.subjects.model;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import io.swagger.annotations.ApiModelProperty;
+import java.util.Objects;
+
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.Index;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 /**
  * Animal Subject
@@ -74,7 +75,7 @@ public class AnimalSubject extends HalEntity {
 	 * 
 	 * @return specie
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getSpecie() {
 		return specie;
 	}
@@ -93,7 +94,7 @@ public class AnimalSubject extends HalEntity {
 	 * 
 	 * @return strain
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getStrain() {
 		return strain;
 	}
@@ -112,7 +113,7 @@ public class AnimalSubject extends HalEntity {
 	 * 
 	 * @return biotype
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getBiotype() {
 		return biotype;
 	}
@@ -131,7 +132,7 @@ public class AnimalSubject extends HalEntity {
 	 * 
 	 * @return provider
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getProvider() {
 		return provider;
 	}
@@ -150,7 +151,7 @@ public class AnimalSubject extends HalEntity {
 	 * 
 	 * @return stabulation
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getStabulation() {
 		return stabulation;
 	}
