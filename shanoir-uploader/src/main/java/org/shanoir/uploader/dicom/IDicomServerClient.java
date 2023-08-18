@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
 
 public interface IDicomServerClient {
 

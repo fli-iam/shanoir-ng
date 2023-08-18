@@ -15,6 +15,7 @@ import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.dicom.query.ConfigBean;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.weasis.dicom.param.DicomNode;
 import org.weasis.dicom.param.DicomState;
@@ -114,14 +115,10 @@ public class DicomServerClient implements IDicomServerClient {
 					};
 					File[] newFileNames = uploadFolder.listFiles(oldFileNamesFilter);
 					logger.debug("newFileNames: " + newFileNames.length);
-					List<Instance> instances = new ArrayList<Instance>();
 					for (int i = 0; i < newFileNames.length; i++) {
 						fileNamesForSerie.add(newFileNames[i].getName());
-						Instance instance = new Instance();
-						instance.setReferencedFileID(new String[]{newFileNames[i].getName()});
-						instances.add(instance);
 					}
-					serieTreeNode.getSerie().setInstances(instances);
+					serieTreeNode.setFileNames(fileNamesForSerie);
 					retrievedDicomFiles.addAll(fileNamesForSerie);
 					oldFileNames.addAll(fileNamesForSerie);
 					logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()

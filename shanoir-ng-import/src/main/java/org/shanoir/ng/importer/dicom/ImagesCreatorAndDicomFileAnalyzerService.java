@@ -128,7 +128,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @throws FileNotFoundException
 	 */
-	private void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Serie serie, Patient patient, boolean isImportFromPACS)
+	public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Serie serie, Patient patient, boolean isImportFromPACS)
 			throws FileNotFoundException {
 		List<Instance> instances = serie.getInstances();
 		if (!instances.isEmpty()) {
@@ -394,21 +394,23 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param attributes
 	 */
 	private void checkPatientData(Patient patient, Attributes attributes) {
-		if (patient.getPatientBirthDate() == null) {
-			// has not been found in dicomdir, so we get it from .dcm file:
-			patient.setPatientBirthDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate)));
-		}
-		if (StringUtils.isEmpty(patient.getPatientSex())) {
-			// has not been found in dicomdir, so we get it from .dcm file:
-			patient.setPatientSex(attributes.getString(Tag.PatientSex));
-		}
-		// we can not display this information for the pacs in select series: as info not available
-		String patientIdentityRemoved = attributes.getString(Tag.PatientIdentityRemoved);
-		if (StringUtils.isNotBlank(patientIdentityRemoved)) {
-			if (YES.equals(patientIdentityRemoved)) {
-				patient.setPatientIdentityRemoved(true);
-				String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
-				patient.setDeIdentificationMethod(deIdentificationMethod);
+		if (patient != null) {
+			if (patient.getPatientBirthDate() == null) {
+				// has not been found in dicomdir, so we get it from .dcm file:
+				patient.setPatientBirthDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate)));
+			}
+			if (StringUtils.isEmpty(patient.getPatientSex())) {
+				// has not been found in dicomdir, so we get it from .dcm file:
+				patient.setPatientSex(attributes.getString(Tag.PatientSex));
+			}
+			// we can not display this information for the pacs in select series: as info not available
+			String patientIdentityRemoved = attributes.getString(Tag.PatientIdentityRemoved);
+			if (StringUtils.isNotBlank(patientIdentityRemoved)) {
+				if (YES.equals(patientIdentityRemoved)) {
+					patient.setPatientIdentityRemoved(true);
+					String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
+					patient.setDeIdentificationMethod(deIdentificationMethod);
+				}
 			}
 		}
 	}

@@ -16,8 +16,8 @@ import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.exception.PseudonymusException;
 import org.shanoir.uploader.gui.MainWindow;
 

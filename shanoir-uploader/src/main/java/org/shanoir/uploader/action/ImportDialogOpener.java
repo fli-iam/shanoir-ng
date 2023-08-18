@@ -12,7 +12,7 @@ import java.util.ResourceBundle;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.dicom.SerieTreeNode;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.gui.ImportDialog;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;

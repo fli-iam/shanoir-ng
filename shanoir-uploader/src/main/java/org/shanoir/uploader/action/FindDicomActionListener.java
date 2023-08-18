@@ -25,9 +25,9 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.DicomTree;
 import org.shanoir.uploader.gui.MainWindow;
@@ -86,7 +86,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		Media media = new Media();
 		// when the open file from CD/DVD menu is clicked
 		if (event.getSource().getClass() == JMenuItem.class) {
-			logger.info("Opening Dicom files from CD/DVD...");
+			logger.info("Opening DICOM files from CD/DVD...");
 			this.mainWindow.isFromPACS = false;
 
 			int returnVal = fileChooser.showOpenDialog(FindDicomActionListener.this);
@@ -104,9 +104,9 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 						}
 						final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
 						List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
-						dicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, selectedRootDir.getAbsolutePath(), false, null);
 						fillMediaWithPatients(media, patients);
 						filePathDicomDir = selectedRootDir.toString();
+						dicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, selectedRootDir.getAbsolutePath(), false, null);
 						// clean up in case of dicomdir generated
 						if (dicomDirGenerated) {
 							dicomDirFile.delete();
@@ -296,8 +296,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 			while (patientsIterator.hasNext()) {
 				Map.Entry pair = (Map.Entry) patientsIterator.next();
 				String patientKey = pair.getKey().toString();
-				patientNames[counter] = patientKey.substring(patientKey
-						.indexOf(" ") + 1);
+				patientNames[counter] = patientKey.substring(patientKey.indexOf(" ") + 1);
 				DicomTreeNode patient = (DicomTreeNode) pair.getValue();
 				patientNodes[counter] = patient;
 				logger.debug("Queried Subject Name " + counter + " : " + patientNames[counter].toString() );

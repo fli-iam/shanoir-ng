@@ -10,13 +10,14 @@ import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.SerieTreeNode;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
+import org.shanoir.uploader.utils.Util;
 
 /**
  * This class downloads the files from the PACS or copies
@@ -38,12 +39,12 @@ public class DownloadOrCopyRunnable implements Runnable {
 	
 	private String filePathDicomDir;
 
-	private Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries;
+	private Set<SerieTreeNode> selectedSeries;
 
 	private DicomDataTransferObject dicomData;
 	
 	public DownloadOrCopyRunnable(boolean isFromPACS, final IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, final String filePathDicomDir,
-		final Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries, final DicomDataTransferObject dicomData) {
+		final Set<SerieTreeNode> selectedSeries, final DicomDataTransferObject dicomData) {
 		this.isFromPACS = isFromPACS;
 		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.dicomServerClient = dicomServerClient; // used with PACS import
@@ -56,26 +57,28 @@ public class DownloadOrCopyRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		/**
-		 * 1. Download from PACS or copy from CD/DVD
-		 */
 		File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
 		List<String> allFileNames = null;
 		try {
+			/**
+			 * 1. Download from PACS or copy from CD/DVD/local file system
+			 */
 			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(this.isFromPACS, selectedSeries, uploadFolder, dicomFileAnalyzer, dicomServerClient, filePathDicomDir);
+		
+			/**
+			 * 2. Fill MRI information into serie from first DICOM file of each serie
+			 * This has already been done for CD/DVD import, but not yet here for PACS
+			 */
+			if (this.isFromPACS) {
+				for (Iterator iterator = selectedSeries.iterator(); iterator.hasNext();) {
+					SerieTreeNode serieTreeNode = (SerieTreeNode) iterator.next();
+					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(filePathDicomDir, serieTreeNode.getSerie(), null, isFromPACS);
+				}
+			}
 		} catch (FileNotFoundException e) {
 			logger.error(e.getMessage(), e);
 		}
 		
-		/**
-		 * 2. Fill MRI information into serie from first DICOM file of each serie
-		 * This has already been done for CD/DVD import, but not yet here for PACS.
-		 */
-		for (Iterator iterator = selectedSeries.iterator(); iterator.hasNext();) {
-			SerieTreeNode serie = (SerieTreeNode) iterator.next();
-// @todo			Util.processSerieMriInfo(uploadFolder, serie);
-		}
-			
 		/**
 		 * 3. Write the UploadJob and schedule upload
 		 */

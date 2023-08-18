@@ -9,9 +9,9 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.Media;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 
 /**
