@@ -287,9 +287,9 @@ public class SerieTreeNode implements DicomTreeNode {
 
 	public void setFileNames(List<String> fileNames) {
 		List<Instance> instances = new ArrayList<Instance>();
-		for (String filename : fileNames){
+		for (String fileName : fileNames){
 			Instance instance = new Instance();
-			String[] myStringArray = {filename};
+			String[] myStringArray = {fileName};
 			instance.setReferencedFileID(myStringArray);
 			instances.add(instance);
 		}
