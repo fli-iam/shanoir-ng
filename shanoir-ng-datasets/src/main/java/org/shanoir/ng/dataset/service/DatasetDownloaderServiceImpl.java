@@ -204,7 +204,7 @@ public class DatasetDownloaderServiceImpl {
 		}
 	}
 
-	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withInputFile) throws EntityNotFoundException, RestServiceException, IOException {
+	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withManifest) throws EntityNotFoundException, RestServiceException, IOException {
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 
@@ -274,7 +274,7 @@ public class DatasetDownloaderServiceImpl {
 						List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, datasetFilePath);
 						datasetFiles.addAll(files);
 
-						if(withInputFile){
+						if(withManifest){
 							filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
 							filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(datasetFiles);
 						}

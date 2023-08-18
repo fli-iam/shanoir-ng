@@ -23,6 +23,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTO;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -127,6 +128,17 @@ public interface DatasetApi {
 	@GetMapping(value = "/acquisition/{acquisitionId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@ApiParam(value = "id of the acquisition", required = true) @PathVariable("acquisitionId") Long acquisitionId);
+
+	@ApiOperation(value = "", notes = "Returns a dataset list", response = List.class, tags = {})
+	@ApiResponses(value = { @ApiResponse(code = 200, message = "found datasets", response = Page.class),
+			@ApiResponse(code = 204, message = "no user found", response = ErrorModel.class),
+			@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
+			@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
+			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@GetMapping(value = "/examination/{examinationId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
+	ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
+
 
 	@ApiOperation(value = "", notes = "Returns a dataset list", response = List.class, tags = {})
 	@ApiResponses(value = { @ApiResponse(code = 200, message = "found datasets", response = Page.class),
@@ -295,7 +307,7 @@ public interface DatasetApi {
 			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
 	@PostMapping(value = "/allById", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
-	ResponseEntity<List<DatasetDTO>> findDatasetsByIds(
+	ResponseEntity<List<DatasetAndProcessingsDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
 
 	@ApiOperation(value = "", notes = "If exists, returns the size of the study datasets corresponding to the given id", response = Long.class, tags = {})

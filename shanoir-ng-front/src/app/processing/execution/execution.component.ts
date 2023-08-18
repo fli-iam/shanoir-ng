@@ -20,14 +20,14 @@ import {Dataset} from 'src/app/datasets/shared/dataset.model';
 import {DatasetService} from 'src/app/datasets/shared/dataset.service';
 import {DatasetProcessingType} from 'src/app/enum/dataset-processing-type.enum';
 import {ColumnDefinition} from 'src/app/shared/components/table/column.definition.type';
-import {Page} from 'src/app/shared/components/table/pageable.model';
 import {KeycloakService} from 'src/app/shared/keycloak/keycloak.service';
 import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
 import {ProcessingService} from '../processing.service';
 import {Option} from '../../shared/select/select.component';
 import { formatDate } from '@angular/common';
-import {Mode} from "../../shared/components/entity/entity.component.abstract";
 import {DatasetAcquisition} from "../../dataset-acquisitions/shared/dataset-acquisition.model";
+import {FileEntity} from "./file-entity";
+import {Examination} from "../../examinations/shared/examination.model";
 
 @Component({
     selector: 'app-execution',
@@ -39,23 +39,22 @@ export class ExecutionComponent implements OnInit {
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
     selectedDatasets: Set<Dataset>;
-    datasetOptions: Option<Dataset>[];
-    acquisitionOptions: Option<DatasetAcquisition>[];
+
+    fileEntitiesOptions: Option<FileEntity>[];
     token: String;
     refreshToken: String;
     parametersApplied: boolean = false;
     nbExecutions = 0;
     execution: Execution;
     columnDefs: { [key: string]: ColumnDefinition[] } = {};
-    datasets: { [key: string]: Dataset[] } = {};
-    acquisitions: { [key: string]: DatasetAcquisition[] } = {};
-
+    fileEntities: { [key: string]: FileEntity[] } = {};
     tables = [];
     fileInputs = [];
-    inputDatasets: Dataset[] = [];
+    inputDatasets: Set<Dataset>;
     execDefaultName= "";
     exportFormat="nii";
     groupBy = "dataset";
+    selectedGroupBy = "dataset";
 
     constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
         this.breadcrumbsService.nameStep('2. Executions');
@@ -76,10 +75,6 @@ export class ExecutionComponent implements OnInit {
                         this.datasetService.getByIds(datasets).then(
                             result => {
                                 this.selectedDatasets = new Set(result);
-                                this.datasetOptions = [];
-                                this.selectedDatasets.forEach(dataset => {
-                                    this.datasetOptions.push(new Option<Dataset>(dataset, dataset.name + '(' + dataset.id + ')'));
-                                });
                                 this.createColumnDefs();
                             });
                     });
@@ -98,26 +93,19 @@ export class ExecutionComponent implements OnInit {
         this.execDefaultName = this.getDefaultExecutionName();
     }
 
-    addDataset(event, paramName) {
-        this.datasets[paramName].push(event);
+    addFileEntity(event, paramName) {
+        this.fileEntities[paramName].push(event);
     }
 
-    addAcquisition(event, paramName) {
-        this.acquisitions[paramName].push(event);
-    }
-
-    removeDataset(dataset, paramName) {
-        this.datasets[paramName].splice(this.datasets[paramName].indexOf(dataset), 1);
-    }
-
-    removeAcquisition(acquisition, paramName) {
-        this.acquisitions[paramName].splice(this.acquisitions[paramName].indexOf(acquisition), 1);
+    removeFileEntity(event, paramName) {
+        this.fileEntities[paramName].splice(this.fileEntities[paramName].indexOf(event), 1);
     }
 
     initExecutionForm() {
         this.executionForm = new UntypedFormGroup({
             "execution_name": new UntypedFormControl('', Validators.required),
-            "export_format": new UntypedFormControl('', Validators.required)
+            "export_format": new UntypedFormControl('', Validators.required),
+            "group_by": new UntypedFormControl('', Validators.required)
         });
 
         this.pipeline.parameters.forEach(
@@ -151,11 +139,16 @@ export class ExecutionComponent implements OnInit {
     onApplyParameters() {
         this.parametersApplied = false;
 
-        let availableDatasets: Dataset[] = Array.from(this.selectedDatasets);
+        let availableFileEntities: FileEntity[] = this.getFileEntitiesFromDatasets(Array.from(this.selectedDatasets));
+
+        this.fileEntitiesOptions = [];
+        availableFileEntities.forEach(fileEntity => {
+            this.fileEntitiesOptions.push(new Option<FileEntity>(fileEntity, fileEntity.name + '(' + fileEntity.entity.id + ')'));
+        });
 
         // By default, we order by alphabtical order
         // TODO: Propose another possible order (by ID?)
-        availableDatasets.sort((a: Dataset, b: Dataset) => {
+        availableFileEntities.sort((a: FileEntity, b: FileEntity) => {
             return a.name.localeCompare(b.name);
         })
 
@@ -166,6 +159,7 @@ export class ExecutionComponent implements OnInit {
         execution.timeout = 20;
         execution.inputValues = {};
 
+        this.selectedGroupBy = this.groupBy;
 
         this.pipeline.parameters.forEach(
             parameter => {
@@ -173,37 +167,21 @@ export class ExecutionComponent implements OnInit {
                     // If we have a file, we try to set up the adapted dataset
                     // We try to find all adapted datasets
                     let value = this.executionForm.get(parameter.name).value ? this.executionForm.get(parameter.name).value  : "";
-                    let datasetFilter: RegExp = new RegExp(value);
+                    let nameFilter: RegExp = new RegExp(value);
 
-                    let datasetsToSet: Dataset[] = [];
+                    let fileEntitiesToSet: FileEntity[] = [];
 
-                    availableDatasets.forEach(dataset => {
-                        if (datasetFilter.test(dataset.name)) {
-                            datasetsToSet.push(dataset);
+                    availableFileEntities.forEach(fileEntity => {
+                        if (nameFilter.test(fileEntity.name)) {
+                            fileEntitiesToSet.push(fileEntity);
                         }
                     });
 
-                    datasetsToSet.forEach(dataset => {
-                        availableDatasets.splice(availableDatasets.indexOf(dataset), 1);
+                    fileEntitiesToSet.forEach(fileEntity => {
+                        availableFileEntities.splice(availableFileEntities.indexOf(fileEntity), 1);
                     });
 
-                    this.datasets[parameter.name] = datasetsToSet;
-
-                    let acquisitionToSet: DatasetAcquisition[] = [];
-                    datasetsToSet.forEach(dataset => {
-                        if(!acquisitionToSet.includes(dataset.datasetAcquisition)){
-                            acquisitionToSet.includes(dataset.datasetAcquisition);
-                        }
-                    });
-
-                    this.acquisitions[parameter.name] = acquisitionToSet;
-
-                    // File ad md5 values should be selected automatically depending on the pipeline.
-                    if(this.groupBy == 'dataset'){
-                        execution.inputValues[parameter.name] = this.getDatasetsUris(datasetsToSet);
-                    }else if(this.groupBy == 'acquisition'){
-                        execution.inputValues[parameter.name] = this.getAcquisitionsUris(datasetsToSet);
-                    }
+                    this.fileEntities[parameter.name] = fileEntitiesToSet;
 
                 } else if (parameter.type == ParameterType.Boolean) {
                     execution.inputValues[parameter.name] = this.executionForm.get(parameter.name).value ? true : false;
@@ -215,50 +193,46 @@ export class ExecutionComponent implements OnInit {
         this.parametersApplied = true;
     }
 
-    getDatasetUri(dataset) {
+    getFileEntitiesFromDatasets(datasets: Dataset[]): FileEntity[]{
+        let fileEntities = new Map();
+        datasets.forEach(ds => {
+            if(this.groupBy == 'dataset'){
+                fileEntities.set(ds.id, new FileEntity(ds.name, ds.subject.name, ds, this.getFileEntityUri(ds.id, ds.name)));
+            }else if (this.groupBy == 'acquisition' && ds.datasetAcquisition) {
+                let name = ds.datasetAcquisition.type + " dataset acquisition " + ds.datasetAcquisition.id;
+                fileEntities.set(ds.datasetAcquisition.id, new FileEntity(name, ds.subject.name, ds.datasetAcquisition, this.getFileEntityUri(ds.datasetAcquisition.id, name)));
+            }else if (this.groupBy == 'examination' && ds.datasetAcquisition && ds.datasetAcquisition.examination) {
+                let exam = ds.datasetAcquisition.examination
+                fileEntities.set(exam.id, new FileEntity(exam.comment, ds.subject.name, exam, this.getFileEntityUri(exam.id, exam.comment)));
+            }
+        })
+        return Array.from(fileEntities.values());
+
+    }
+
+    getFileEntityUri(id, name) {
         let extension = ".nii.gz"
         if(this.exportFormat == "dcm") {
             extension = ".zip"
         }
-        let dataset_name = `dataset_id+${dataset.id}+${dataset.name.replace(/ /g, "_")}${extension}`
-        return `shanoir:/${dataset_name}?format=${this.exportFormat}&datasetId=${dataset.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+        let entity_name = this.groupBy + `_id+${id}+${name.replace(/ /g, "_")}${extension}`
+        return `shanoir:/${entity_name}?format=${this.exportFormat}&${this.groupBy}Id=${id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
     }
 
-    getDatasetsUris(datasets) {
-        return datasets.forEach(dataset => {
-            return this.getDatasetUri(dataset);
-        })
-    }
+    // getPage(parameterName: string, pageable: any): Promise<Page<Dataset>> {
+    //     let page: Page<Dataset> = new Page();
+    //     page.content = Array.from(this.fil[parameterName]);
+    //     page.number = 1;
+    //     page.size = this.datasets[parameterName].length;
+    //     page.numberOfElements = this.datasets[parameterName].length;
+    //     page.totalElements = this.datasets[parameterName].length;
+    //     page.totalPages = Math.ceil(page.numberOfElements / page.size);
+    //     return new Promise((resolve, reject) => {
+    //         resolve(page);
+    //     });
+    // }
 
-    getAcquisitionUri(acquisition) {
-        let extension = ".nii.gz"
-        if(this.exportFormat == "dcm") {
-            extension = ".zip"
-        }
-        let acquisition_name = `acquisition_id+${acquisition.id}+${acquisition.type}_acquisition${extension}`
-        return `shanoir:/${acquisition_name}?format=${this.exportFormat}&acquisitionId=${acquisition.id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
-    }
-
-    getAcquisitionsUris(acquisitions) {
-        return acquisitions.forEach(acquisition => {
-            return this.getAcquisitionUri(acquisition);
-        })
-    }
-
-    getPage(parameterName: string, pageable: any): Promise<Page<Dataset>> {
-        let page: Page<Dataset> = new Page();
-        page.content = Array.from(this.datasets[parameterName]);
-        page.number = 1;
-        page.size = this.datasets[parameterName].length;
-        page.numberOfElements = this.datasets[parameterName].length;
-        page.totalElements = this.datasets[parameterName].length;
-        page.totalPages = Math.ceil(page.numberOfElements / page.size);
-        return new Promise((resolve, reject) => {
-            resolve(page);
-        });
-    }
-
-    onSubmitExecutionForm() {
+    async onSubmitExecutionForm() {
         let execution: Execution = new Execution();
 
         execution.name = this.cleanExecutionName(this.executionForm.get("execution_name").value);
@@ -266,33 +240,9 @@ export class ExecutionComponent implements OnInit {
         execution.timeout = 20;
         execution.inputValues = {};
 
-        this.pipeline.parameters.forEach(
-            parameter => {
-                if (parameter.type == ParameterType.File) {
-                    execution.inputValues[parameter.name] = [];
+        this.inputDatasets = new Set();
 
-                    let datasetsOf = this.datasets[parameter.name];
-                    datasetsOf.forEach(dataset => {
-                        // File ad md5 values should be selected automatically depending on the pipeline.
-                        if(this.groupBy == 'dataset') {
-                            execution.inputValues[parameter.name].push(this.getDatasetUri(dataset));
-                        }
-                        this.inputDatasets.push(dataset);
-                    })
-
-                    if(this.groupBy == 'acquisition'){
-                        let acquisitionsOf = this.acquisitions[parameter.name];
-                        acquisitionsOf.forEach(acquisition => {
-                            // File ad md5 values should be selected automatically depending on the pipeline.
-                            execution.inputValues[parameter.name].push(this.getAcquisitionUri(acquisition));
-                        })
-                    }
-
-                } else {
-                    execution.inputValues[parameter.name] = this.executionForm.get(parameter.name).value;
-                }
-            }
-        )
+        this.setExecutionParams(execution);
 
         /**
          * Init result location
@@ -335,6 +285,44 @@ export class ExecutionComponent implements OnInit {
                 console.error(error);
             }
         )
+    }
+
+    private setExecutionParams(execution: Execution) {
+        this.pipeline.parameters.forEach(
+            parameter => {
+                if (parameter.type == ParameterType.File) {
+                    execution.inputValues[parameter.name] = [];
+
+                    let fileEntitiesOf = this.fileEntities[parameter.name];
+                    fileEntitiesOf.forEach(fileEntity => {
+                        // File ad md5 values should be selected automatically depending on the pipeline.
+                        execution.inputValues[parameter.name].push(fileEntity.uri);
+                        this.getInputDatasets(fileEntity).then(datasets => {
+                            datasets.forEach(ds => this.inputDatasets.add(ds))
+                        });
+                    })
+                } else {
+                    execution.inputValues[parameter.name] = this.executionForm.get(parameter.name).value;
+                }
+            }
+        )
+    }
+
+    async getInputDatasets(fileEntity: FileEntity): Promise<Dataset[]>{
+
+        if(fileEntity.entity instanceof Dataset){
+            return [fileEntity.entity];
+        }else if(fileEntity.entity instanceof DatasetAcquisition){
+            return await this.datasetService.getByAcquisitionId(fileEntity.entity.id).then(acqDs => {
+                return acqDs;
+            });
+        }else if(fileEntity.entity instanceof Examination){
+            return await this.datasetService.getByExaminationId(fileEntity.entity.id).then(examDs => {
+                return examDs;
+            });
+        }
+        return [];
+
     }
 
     getParameterType(parameterType: ParameterType): String {

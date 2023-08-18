@@ -27,10 +27,11 @@
 	   </div>
     </div>
     <div>
-        <label>Group by <tool-tip>Datasets may be added to selection to complete acquisition or examination if selected</tool-tip></label>
+        <label>Group by <tool-tip>Datasets may be added to selection to complete acquisition(s) / examination(s) if selected</tool-tip></label>
         <span class="right-col">
             <input id="dataset" type="radio" formControlName="group_by" name="group_by" [(ngModel)]="groupBy" value="dataset" />Dataset(s)
             <input id="acquisition" type="radio" formControlName="group_by" name="group_by" [(ngModel)]="groupBy" value="acquisition" />Acquisition(s)
+            <input id="examination" type="radio" formControlName="group_by" name="group_by" [(ngModel)]="groupBy" value="examination" />Examination(s)
         </span>
     </div>
     <div>
@@ -43,57 +44,27 @@
 </form>
 <button type='button' (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
 
-<div *ngIf="parametersApplied && groupBy == 'dataset'" class="block-div">
-<legend> List of datasets selected for the given parameters: </legend>
+<div *ngIf="parametersApplied" class="block-div">
+<legend> List of {{selectedGroupBy}} selected for the given parameters: </legend>
     <div *ngFor="let parameter of fileInputs" class="parent-div">
         <div *ngIf="parameter.type == 'File'" class="file-parameter-div">
-            <input type="hidden" [(ngModel)]="datasets[parameter.name]"/>
+            <input type="hidden" [(ngModel)]="fileEntities[parameter.name]"/>
             <b>{{parameter.name}} :</b>
-               <select-box placeholder="Available datasets" (onAddClick)="addDataset($event, parameter.name)" [options]="datasetOptions">
+               <select-box placeholder="Available {{selectedGroupBy}}s" (onAddClick)="addFileEntity($event, parameter.name)" [options]="fileEntitiesOptions">
                </select-box>
             <table>
                 <tr>
                   <th>
-                  Dataset name (id)
+                  {{selectedGroupBy}} name (id)
                   </th>
                   <th>
                      Subject
                      </th>
                 </tr>
-                <tr *ngFor="let dataset of datasets[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
-                    <td>{{dataset.name}} ({{dataset.id}})</td>
-                    <td>{{dataset.subject.name}}</td>
-                    <td *ngIf="datasets[parameter.name].length > 1" class="icon icon-clickable" (click)="removeDataset(dataset, parameter.name)">
-                        <i class="fas fa-times"></i>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <br/>
-    </div>
-</div>
-
-<div *ngIf="parametersApplied && groupBy == 'acquisition'" class="block-div">
-    <legend> List of acquisitions selected for the given parameters: </legend>
-    <div *ngFor="let parameter of fileInputs" class="parent-div">
-        <div *ngIf="parameter.type == 'File'" class="file-parameter-div">
-            <input type="hidden" [(ngModel)]="acquisitions[parameter.name]"/>
-            <b>{{parameter.name}} :</b>
-            <select-box placeholder="Available acquisition" (onAddClick)="addAcquisition($event, parameter.name)" [options]="acquisitionOptions">
-            </select-box>
-            <table>
-                <tr>
-                    <th>
-                        Acquisition id
-                    </th>
-                    <th>
-                        Subject
-                    </th>
-                </tr>
-                <tr *ngFor="let acquisition of acquisitions[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
-                    <td>{{acquisition.id}}</td>
-                    <td>{{acquisition?.examination?.subject?.name}}</td>
-                    <td *ngIf="acquisition[parameter.name].length > 1" class="icon icon-clickable" (click)="removeAcquisition(acquisition, parameter.name)">
+                <tr *ngFor="let fileEntity of fileEntities[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
+                    <td>{{fileEntity.name}} ({{fileEntity.entity.id}})</td>
+                    <td>{{fileEntity.subjectName}}</td>
+                    <td *ngIf="fileEntities[parameter.name].length > 1" class="icon icon-clickable" (click)="removeFileEntity(fileEntity, parameter.name)">
                         <i class="fas fa-times"></i>
                     </td>
                 </tr>

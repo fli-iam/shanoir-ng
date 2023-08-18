@@ -162,6 +162,13 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 			return datasets.stream().map(AbstractEntity::getId).collect(Collectors.toCollection(HashSet::new));
 		}
 
+		// "examination_id+[acquisition id]+whatever.nii"
+		matcher = Pattern.compile("examination_id\\+(\\d+)\\+.*").matcher(name);
+		if (matcher.matches()) {
+			List<Dataset> datasets = datasetService.findByExaminationId(Long.valueOf(matcher.group(1)));
+			return datasets.stream().map(AbstractEntity::getId).collect(Collectors.toCollection(HashSet::new));
+		}
+
 		return ids;
 	}
 

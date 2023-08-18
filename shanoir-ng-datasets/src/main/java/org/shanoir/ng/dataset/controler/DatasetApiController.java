@@ -40,6 +40,7 @@ import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTO;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
@@ -216,13 +217,25 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetsByIds(
+	public ResponseEntity<List<DatasetAndProcessingsDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+
+		List<DatasetAndProcessingsDTOInterface> dtos = new ArrayList<>();
+		for(Dataset dataset : datasets){
+			if (dataset instanceof MrDataset) {
+				dtos.add(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset));
+			} else if (dataset instanceof EegDataset) {
+				dtos.add(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset));
+			} else {
+				dtos.add(datasetMapper.datasetToDatasetAndProcessingsDTO(dataset));
+			}
+		}
+
+		return new ResponseEntity<>(dtos, HttpStatus.OK);
 	}
 
     @Override
@@ -248,7 +261,17 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 		}
 	}
-	
+
+	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId) {
+		List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
+		if (datasets.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+		}
+	}
+
 	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByStudycardId(@ApiParam(value = "id of the studycard", required = true) @PathVariable("studycardId") Long studycardId) {
 		List<Dataset> datasets = datasetService.findByStudycard(studycardId);

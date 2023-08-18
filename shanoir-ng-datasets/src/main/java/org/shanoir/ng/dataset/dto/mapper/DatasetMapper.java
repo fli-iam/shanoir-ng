@@ -68,7 +68,7 @@ public interface DatasetMapper {
 	DatasetAndProcessingsDTO datasetToDatasetAndProcessingsDTO(Dataset dataset);
 	
 	/**
-	 * Map a @Dataset to a @DatasetDTO.
+	 * Map a @Dataset list to a @DatasetDTO list.
 	 * 
 	 * @param datasets
 	 *            dataset.
@@ -76,6 +76,7 @@ public interface DatasetMapper {
 	 */
 	@IterableMapping(qualifiedByName = "standard")
 	List<DatasetDTO> datasetToDatasetDTO(List<Dataset> datasets);
+
 
 	/**
 	 * Map a @Dataset to a @DatasetDTO.
