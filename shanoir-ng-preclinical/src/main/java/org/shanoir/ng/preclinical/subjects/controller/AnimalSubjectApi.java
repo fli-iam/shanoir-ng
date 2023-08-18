@@ -69,15 +69,15 @@ public interface AnimalSubjectApi {
 	ResponseEntity<AnimalSubjectDto> getAnimalSubjectBySubjectId(
 			@Parameter(name = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
-	@Operation(value = "", notes = "List animalSubjects linked to the given subject ids", response = Long.class, tags = {})
+	@Operation(summary = "", description = "List animalSubjects linked to the given subject ids")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of Preclinical AnimalSubject"),
-			@ApiResponse(code = 401, message = "unauthorized"),
-			@ApiResponse(code = 403, message = "forbidden"s),
-			@ApiResponse(code = 500, message = "Unexpected error") })
+			@ApiResponse(responseCode = "200", description = "An array of Preclinical AnimalSubject"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@PostMapping(value = "/find", produces = { "application/json" })
 	ResponseEntity<List<AnimalSubjectDto>> findBySubjectIds(
-			@Parameter("studyIds") @RequestParam List<Long> subjectIds
+			@Parameter(name = "study ids") List<Long> subjectIds
 	);
 
 	@Operation(summary = "Update an existing animalSubject", description = "")
