@@ -20,7 +20,7 @@ import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DicomDataTransferObject;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.SerieTreeNode;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -93,7 +93,7 @@ public class ImportUtils {
 	 * @param dicomData
 	 * @param uploadJob
 	 */
-	public static void initUploadJob(final Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries,
+	public static void initUploadJob(final Set<org.shanoir.uploader.dicom.query.SerieTreeNode> selectedSeries,
 			final DicomDataTransferObject dicomData, UploadJob uploadJob) {
 		uploadJob.setUploadState(UploadState.READY);
 		uploadJob.setUploadDate(Util.formatTimePattern(new Date()));
@@ -160,6 +160,17 @@ public class ImportUtils {
 		return null;
 	}
 
+	/**
+	 * subjectId and examinationId are created in the window of ImportDialog and are not known before.
+	 * 
+	 * @param uploadJob
+	 * @param subjectName
+	 * @param subjectId
+	 * @param examinationId
+	 * @param study
+	 * @param studyCard
+	 * @return
+	 */
 	public static ImportJob prepareImportJob(UploadJob uploadJob, String subjectName, Long subjectId, Long examinationId, Study study, StudyCard studyCard) {
 		ImportJob importJob = new ImportJob();
 		importJob.setFromShanoirUploader(true);
@@ -191,12 +202,12 @@ public class ImportUtils {
 		patient.setStudies(studiesImportJob);
 		importJob.setExaminationId(examinationId);
 		// handle series for study
-		final Collection<SerieTreeNode> seriesShUp = uploadJob.getSeries();
-		final List<Serie> seriesImportJob = new ArrayList<Serie>();
-		for (SerieTreeNode serieShUp : seriesShUp){
-			seriesImportJob.add(serieShUp.getSerie());
+		final Collection<SerieTreeNode> serieTreeNodes = uploadJob.getSeries();
+		final List<Serie> series = new ArrayList<Serie>();
+		for (SerieTreeNode serieTreeNode : serieTreeNodes){
+			series.add(serieTreeNode.getSerie());
 		}
-		studyImportJob.setSeries(seriesImportJob);
+		studyImportJob.setSeries(series);
 		return importJob;
 	}
 
@@ -204,7 +215,7 @@ public class ImportUtils {
 	 * Initializes UploadStatusServiceJob object
 	 * 
 	 */
-	public static void initDataUploadJob(final Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries,
+	public static void initDataUploadJob(final Set<org.shanoir.uploader.dicom.query.SerieTreeNode> selectedSeries,
 			final DicomDataTransferObject dicomData, NominativeDataUploadJob dataUploadJob) {
 		dataUploadJob.setPatientName(dicomData.getFirstName() + " " + dicomData.getLastName());
 		dataUploadJob.setPatientPseudonymusHash(dicomData.getSubjectIdentifier());
@@ -257,7 +268,7 @@ public class ImportUtils {
 		return allFileNames;
 	}
 
-	public static List<String> copyFilesToUploadFolder(ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, Set<org.shanoir.uploader.dicom.SerieTreeNode> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
+	public static List<String> copyFilesToUploadFolder(ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, Set<org.shanoir.uploader.dicom.query.SerieTreeNode> selectedSeries, final File uploadFolder, String filePathDicomDir) throws FileNotFoundException {
 		List<String> allFileNames = new ArrayList<String>();
 		for (SerieTreeNode serieTreeNode : selectedSeries) {
 			Serie serie = serieTreeNode.getSerie();

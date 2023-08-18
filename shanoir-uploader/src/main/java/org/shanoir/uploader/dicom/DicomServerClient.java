@@ -15,6 +15,7 @@ import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.dicom.query.ConfigBean;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.weasis.dicom.param.DicomNode;
 import org.weasis.dicom.param.DicomState;

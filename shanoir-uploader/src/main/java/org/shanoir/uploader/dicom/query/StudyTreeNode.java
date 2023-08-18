@@ -13,7 +13,6 @@ import javax.swing.tree.TreeNode;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.SerieTreeNode;
 
 /**
  * Study representation from DICOMDIR.

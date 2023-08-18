@@ -3,13 +3,12 @@ package org.shanoir.uploader.upload;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
+
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-
-import org.shanoir.uploader.dicom.PreImportData;
-import org.shanoir.uploader.dicom.SerieTreeNode;
 
 /**
  * This class contains all informations concerning an upload.
@@ -60,16 +59,6 @@ public class UploadJob {
 	private String firstNameHash3;
 
 	private String birthDateHash;
-	
-	private PreImportData preImportdata;
-
-	public PreImportData getPreImportdata() {
-		return preImportdata;
- 	}
-
-	public void setPreImportdata(PreImportData preImportdata) {
-		this.preImportdata = preImportdata;
-	}
 
 	public UploadState getUploadState() {
 		return uploadState;
