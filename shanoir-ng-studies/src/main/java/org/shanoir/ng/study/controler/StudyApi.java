@@ -43,6 +43,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
+
 @Tag(name = "studies", description = "the studies API")
 @RequestMapping("/studies")
 public interface StudyApi {
@@ -112,8 +113,8 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudyDTO(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<StudyDTO> findStudyById(
-			@Parameter(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@Parameter(value = "Fetch detailed storage volume of study", allowableValues = "true, false", defaultValue = "false")
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "Fetch detailed storage volume of study")
 			@Valid
 			@RequestParam(value = "withStorageVolume", required = false, defaultValue="false") boolean withStorageVolume);
 
@@ -132,26 +133,26 @@ public interface StudyApi {
 
   @Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Sizes of the study files in bytes by format", response = Long.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no study found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "Sizes of the study files in bytes by format"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no study found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error")})
 	@GetMapping(value = "/detailedStorageVolume/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") Long studyId) throws RestServiceException;
 
 	@Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "Sizes of the study files in bytes by format"),
-			@ApiResponse(code = 401, message = "unauthorized"),
-			@ApiResponse(code = 403, message = "forbidden"),
-			@ApiResponse(code = 404, message = "no study found"),
-			@ApiResponse(code = 500, message = "unexpected error") })
+			@ApiResponse(responseCode = "200", description = "Sizes of the study files in bytes by format"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no study found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "/detailedStorageVolume", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.filterVolumesHasRightOnStudies(#studyIds, 'CAN_SEE_ALL'))")
 	ResponseEntity<Map<Long, StudyStorageVolumeDTO>> getDetailedStorageVolumeByStudy(
-			@Parameter("studyIds") @RequestParam List<Long> studyIds
+			@Parameter(name = "study ids") @RequestParam List<Long> studyIds
 	) throws RestServiceException;
 
 
