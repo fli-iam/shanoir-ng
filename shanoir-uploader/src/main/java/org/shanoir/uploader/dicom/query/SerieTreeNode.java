@@ -35,7 +35,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * @author mkain
  * 
  */
-@XmlType(propOrder={"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "mriInformation"})
+@XmlType(propOrder={"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames", "mriInformation"})
 public class SerieTreeNode implements DicomTreeNode {
 
 	private StudyTreeNode parent;
