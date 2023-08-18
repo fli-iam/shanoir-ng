@@ -278,7 +278,8 @@ public class ImportUtils {
 				String dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_");
 				File destFile = new File(uploadFolder.getAbsolutePath() + File.separator + dicomFileName);
 				FileUtil.copyFile(sourceFile, destFile);
-				newFileNamesOfSerie.add(dicomFileName);				
+				newFileNamesOfSerie.add(dicomFileName);	
+				serieTreeNode.setFileNames(newFileNamesOfSerie);
 			}
 			allFileNames.addAll(newFileNamesOfSerie);
 		}

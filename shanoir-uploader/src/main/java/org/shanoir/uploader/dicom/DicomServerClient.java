@@ -115,14 +115,10 @@ public class DicomServerClient implements IDicomServerClient {
 					};
 					File[] newFileNames = uploadFolder.listFiles(oldFileNamesFilter);
 					logger.debug("newFileNames: " + newFileNames.length);
-					List<Instance> instances = new ArrayList<Instance>();
 					for (int i = 0; i < newFileNames.length; i++) {
 						fileNamesForSerie.add(newFileNames[i].getName());
-						Instance instance = new Instance();
-						instance.setReferencedFileID(new String[]{newFileNames[i].getName()});
-						instances.add(instance);
 					}
-					serieTreeNode.getSerie().setInstances(instances);
+					serieTreeNode.setFileNames(fileNamesForSerie);
 					retrievedDicomFiles.addAll(fileNamesForSerie);
 					oldFileNames.addAll(fileNamesForSerie);
 					logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()

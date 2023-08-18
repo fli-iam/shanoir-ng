@@ -278,7 +278,9 @@ public class SerieTreeNode implements DicomTreeNode {
 		List<String> fileNames = new ArrayList<String>();
 		List<Instance> instances = serie.getInstances();
 		for(Instance instance : instances) {
-			fileNames.add(instance.getReferencedFileID().toString());
+			// we can use here [0] as the arrays are flatten before
+			// for pacs: by DicomServerClient, for CD/DVD: by copy method
+			fileNames.add(instance.getReferencedFileID()[0]);
 		}
 		return fileNames;
 	}
