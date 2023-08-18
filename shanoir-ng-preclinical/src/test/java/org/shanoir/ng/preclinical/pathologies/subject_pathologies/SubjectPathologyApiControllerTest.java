@@ -20,9 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
@@ -30,8 +29,8 @@ import org.shanoir.ng.preclinical.pathologies.PathologyService;
 import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModelService;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.references.RefsService;
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
-import org.shanoir.ng.preclinical.subjects.AnimalSubjectService;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.PathologyModelUtil;
@@ -43,7 +42,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -56,7 +54,7 @@ import com.google.gson.GsonBuilder;
  * @author sloury
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = SubjectPathologyApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
@@ -95,13 +93,13 @@ public class SubjectPathologyApiControllerTest {
 	private SubjectPathologyEditableByManager editableOnlyValidator;
 
 
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(subPathosServiceMock).deleteById(1L);
 		given(subPathosServiceMock.findAll()).willReturn(Arrays.asList(new SubjectPathology()));
-		given(subjectsServiceMock.findById(1L)).willReturn(new AnimalSubject());
+		given(subjectsServiceMock.getBySubjectId(1L)).willReturn(new AnimalSubject());
 		given(pathologiesServiceMock.findById(1L)).willReturn(new Pathology());
 		given(refsServiceMock.findById(1L)).willReturn(new Reference());
 		given(subPathosServiceMock.findByAnimalSubject(new AnimalSubject()))

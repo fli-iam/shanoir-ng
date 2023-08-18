@@ -15,8 +15,10 @@
 package org.shanoir.ng.examination.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -42,7 +44,7 @@ public interface ExaminationService {
 	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnExamination(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
 
 	/**
 	 * Delete an examination from a rabbit MQ call, not identified
@@ -50,7 +52,7 @@ public interface ExaminationService {
 	 * @param exam the examination to delete
 	 * @throws EntityNotFoundException
 	 */
-	void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException;
+	void deleteFromRabbit(Examination exam) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
 
 	/**
 	 * Get all examinations for a specific user to support DICOMweb.

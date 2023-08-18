@@ -1,17 +1,18 @@
 package org.shanoir.ng.datasetacquisition.repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import java.util.List;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import org.apache.commons.math3.util.Pair;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 @Component
 public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepositoryCustom {
@@ -21,7 +22,6 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 
 
 	@SuppressWarnings("unchecked")
-	@Override
 	public Page<DatasetAcquisition> findPageByStudyCenterOrStudyIdIn(Iterable<Pair<Long, Long>> studyCenterIds,
 			Iterable<Long> studyIds, Pageable pageable) {
 		
@@ -72,4 +72,35 @@ public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepos
 		return new PageImpl<DatasetAcquisition>(query.getResultList(), pageable, total);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<DatasetAcquisition> findByStudyCardIdAndStudyCenterOrStudyIdIn(Long studyCardId,
+			Iterable<Pair<Long, Long>> studyCenterIds, Iterable<Long> studyIds) {
+		
+		String queryEndStr = "from DatasetAcquisition as da "
+				+ "join da.examination as ex "
+				+ "where (ex.study.id in ?1 ";
+		int i = 2;
+		for (Pair<Long, Long> studyCenter : studyCenterIds) {
+			queryEndStr += "or (ex.study.id = ?" + i + " and ex.centerId = ?" + (i + 1) + ") ";
+			i += 2;
+		}
+		queryEndStr += ") and da.studyCard.id = ?" + i;
+		i++;
+		
+		String queryStr = "select da " + queryEndStr;
+		
+		Query query = entityManager.createQuery(queryStr);
+		
+		query.setParameter(1, studyIds);
+		i = 2;
+		for (Pair<Long, Long> studyCenter : studyCenterIds) {
+			query.setParameter(i, studyCenter.getFirst());
+			query.setParameter(i + 1, studyCenter.getSecond());
+			i += 2;
+		}
+		query.setParameter(i, studyCardId);
+
+		return query.getResultList();
+	}
 }

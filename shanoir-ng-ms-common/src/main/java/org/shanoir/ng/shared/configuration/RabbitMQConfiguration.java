@@ -86,6 +86,9 @@ public class RabbitMQConfiguration {
 	/** Delete subject => Delete associated examination / datasets. */
 	public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
 
+	/** Delete animal subject => Delete associated subject. */
+	public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
+
 	/** Delete user queue. */
 	public static final String DELETE_USER_QUEUE = "delete-user-queue";
 	

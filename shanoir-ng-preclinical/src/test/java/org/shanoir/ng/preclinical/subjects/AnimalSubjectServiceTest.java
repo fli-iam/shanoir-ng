@@ -20,20 +20,22 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.references.RefsRepository;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectServiceImpl;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnimalSubjectModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Subjects service test.
@@ -41,10 +43,12 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author sloury
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class AnimalSubjectServiceTest {
 
-	private static final Long SUBJECT_ID = 1L;
+	private static final Long ID = 1L;
+	private static final Long SUBJECT_ID = 2L;
 	private static final String UPDATED_SUBJECT_DATA = "subject73";
 	private static final Long REF_ID = 1L;
 
@@ -60,46 +64,46 @@ public class AnimalSubjectServiceTest {
 	@Mock
 	private RefsRepository refsRepository;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(subjectsRepository.findAll()).willReturn(Arrays.asList(AnimalSubjectModelUtil.createAnimalSubject()));
 		given(subjectsRepository.findByReference(ReferenceModelUtil.createReferenceSpecie()))
 				.willReturn(Arrays.asList(AnimalSubjectModelUtil.createAnimalSubject()));
-		given(subjectsRepository.findById(SUBJECT_ID)).willReturn(Optional.of(AnimalSubjectModelUtil.createAnimalSubject()));
+		given(subjectsRepository.findById(ID)).willReturn(Optional.of(AnimalSubjectModelUtil.createAnimalSubject()));
+		given(subjectsRepository.getBySubjectId(SUBJECT_ID)).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
 		given(subjectsRepository.save(Mockito.any(AnimalSubject.class)))
 				.willReturn(AnimalSubjectModelUtil.createAnimalSubject());
 	}
 
 	@Test
-	public void deleteByIdTest() throws ShanoirException {
-		subjectsService.deleteById(SUBJECT_ID);
+	public void deleteBySubjectIdTest() throws ShanoirException {
+		subjectsService.deleteBySubjectId(SUBJECT_ID);
 
-		Mockito.verify(subjectsRepository, Mockito.times(1)).deleteById(Mockito.anyLong());
+		Mockito.verify(subjectsRepository, Mockito.times(1)).deleteBySubjectId(Mockito.anyLong());
 	}
 
 	@Test
 	public void findAllTest() {
 		final List<AnimalSubject> subjects = subjectsService.findAll();
-		Assert.assertNotNull(subjects);
-		Assert.assertTrue(subjects.size() == 1);
+		Assertions.assertNotNull(subjects);
+		Assertions.assertTrue(subjects.size() == 1);
 
 		Mockito.verify(subjectsRepository, Mockito.times(1)).findAll();
 	}
 
 	@Test
-	public void findByIdTest() {
-		final AnimalSubject subject = subjectsService.findById(SUBJECT_ID);
-		Assert.assertNotNull(subject);
-		Assert.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(subject.getId()));
-
-		Mockito.verify(subjectsRepository, Mockito.times(1)).findById(Mockito.anyLong());
+	public void getBySubjectIdTest() {
+		final AnimalSubject subject = subjectsService.getBySubjectId(SUBJECT_ID);
+		Assertions.assertNotNull(subject);
+		Assertions.assertTrue(AnimalSubjectModelUtil.SUBJECT_ID.equals(subject.getSubjectId()));
+		Mockito.verify(subjectsRepository, Mockito.times(1)).getBySubjectId(Mockito.anyLong());
 	}
 
 	@Test
 	public void findByReferenceTest() {
 		final List<AnimalSubject> subjects = subjectsService.findByReference(AnimalSubjectModelUtil.createSpecie());
-		Assert.assertNotNull(subjects);
-		Assert.assertTrue(subjects.size() == 1);
+		Assertions.assertNotNull(subjects);
+		Assertions.assertTrue(subjects.size() == 1);
 
 		Mockito.verify(subjectsRepository, Mockito.times(1)).findByReference(AnimalSubjectModelUtil.createSpecie());
 	}
@@ -114,9 +118,8 @@ public class AnimalSubjectServiceTest {
 	@Test
 	public void updateTest() throws ShanoirException {
 		final AnimalSubject updatedSubject = subjectsService.update(createAnimalSubject());
-		Assert.assertNotNull(updatedSubject);
-		Assert.assertTrue(SUBJECT_ID.equals(updatedSubject.getId()));
-
+		Assertions.assertNotNull(updatedSubject);
+		Assertions.assertTrue(ID.equals(updatedSubject.getId()));
 		Mockito.verify(subjectsRepository, Mockito.times(1)).save(Mockito.any(AnimalSubject.class));
 	}
 
@@ -132,7 +135,8 @@ public class AnimalSubjectServiceTest {
 	 */
 	private AnimalSubject createAnimalSubject() {
 		final AnimalSubject animalSubject = new AnimalSubject();
-		animalSubject.setId(SUBJECT_ID);
+		animalSubject.setId(ID);
+		animalSubject.setSubjectId(SUBJECT_ID);
 		return animalSubject;
 	}
 

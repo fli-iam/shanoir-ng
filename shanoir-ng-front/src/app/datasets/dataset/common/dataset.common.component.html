@@ -54,7 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<label i18n="Dataset detail|Dataset subject@@datasetDetailSubject">Subject</label>
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">
-				<a [routerLink]="['/subject/details/', dataset.subject?.id]">
+				<a [routerLink]="[getSubjectLink()]">
 					{{dataset.subject?.name}}
 				</a>
 				</ng-template>
@@ -90,10 +90,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<li>
 			<label i18n="Dataset detail|Dataset type@@datasetDetailType">Modality type</label>
 			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'"> 
+				<ng-template [ngSwitchCase]="'view'">
 					{{dataset.type}}
 				</ng-template>
-				<ng-template ngSwitchDefault> 
+				<ng-template ngSwitchDefault>
 					<select-box [ngModelOptions]="{standalone: true}" [(ngModel)]="dataset.type" [options]="datasetTypes">
 					</select-box>
 				</ng-template>
@@ -122,7 +122,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<ng-template *ngIf="mode=='view'">{{dataset.referencedDatasetForSuperimposition}}</ng-template>
 			</span>
 		</li> -->
-		
+
 		<!-- <li>
 			<label i18n="Dataset detail|Dataset group fo subject@@datasetDetailGroupOfSubject">Group of subjects</label>
 			<span class="right-col" [ngSwitch]="mode">
@@ -145,7 +145,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.name}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<input type="text" 
+					<input type="text"
 						[ngModel]="dataset.updatedMetadata.name ? dataset.updatedMetadata.name : dataset.originMetadata.name"
 						(ngModelChange)="dataset.updatedMetadata.name = $event"
 						(change)="updateForm()"
@@ -158,7 +158,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.comment ? dataset.updatedMetadata.comment : dataset.originMetadata.comment}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<input type="text" 
+					<input type="text"
 						[ngModel]="dataset.updatedMetadata.comment ? dataset.updatedMetadata.comment : dataset.originMetadata.comment"
 						(ngModelChange)="dataset.updatedMetadata.comment = $event"
 						(change)="updateForm()"
@@ -171,11 +171,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.exploredEntity? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<select-box 
-							[ngModel]="dataset.updatedMetadata.exploredEntity ? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity" 
-							(ngModelChange)="dataset.updatedMetadata.exploredEntity = $event" 
+					<select-box
+							[ngModel]="dataset.updatedMetadata.exploredEntity ? dataset.updatedMetadata.exploredEntity : dataset.originMetadata.exploredEntity"
+							(ngModelChange)="dataset.updatedMetadata.exploredEntity = $event"
 							(userChange)="updateForm()"
-							[ngModelOptions]="{standalone: true}" 
+							[ngModelOptions]="{standalone: true}"
 							[options]="exploredEntityOptions">
 					</select-box>
 				</ng-template>
@@ -206,11 +206,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.processedDatasetType? dataset.updatedMetadata.processedDatasetType : dataset.originMetadata.processedDatasetType}}</ng-template>
 				<ng-template ngSwitchDefault>
-					<select-box 
+					<select-box
 							[ngModel]="dataset.updatedMetadata.processedDatasetType ? dataset.updatedMetadata.processedDatasetType : dataset.originMetadata.processedDatasetType"
-							(ngModelChange)="dataset.updatedMetadata.processedDatasetType = $event" 
+							(ngModelChange)="dataset.updatedMetadata.processedDatasetType = $event"
 							(userChange)="updateForm()"
-							[ngModelOptions]="{standalone: true}" 
+							[ngModelOptions]="{standalone: true}"
 							[options]="processedDatasetTypeOptions">
 					</select-box>
 				</ng-template>

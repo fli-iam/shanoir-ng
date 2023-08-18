@@ -23,6 +23,7 @@ import org.dcm4che3.data.Tag;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -83,6 +84,7 @@ public class Study {
 		return series;
 	}
 
+	@JsonIgnore
 	public List<Serie> getSelectedSeries() {
 		return series.stream().filter(Serie::getSelected).collect(Collectors.toList());
 	}

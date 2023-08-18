@@ -1,6 +1,6 @@
 package org.shanoir.ng.datasetacquisition.model;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 

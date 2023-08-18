@@ -16,29 +16,24 @@ package org.shanoir.ng.preclinical.references;
 
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PostLoad;
+
 /**
  * Reference
  */
 @Entity
-@Table(name = "reference")
 @JsonPropertyOrder({ "_links", "category" ,"reftype", "value" })
 public class Reference extends HalEntity   {
 	
-
   @JsonProperty("category")
   private String category = "common";
 	
@@ -46,8 +41,8 @@ public class Reference extends HalEntity   {
   private String reftype = null;
 
   @JsonProperty("value")
+  @Column(name = "refvalue")
   private String value = null;
-
   
   /**
 	 * Init HATEOAS links
@@ -56,20 +51,13 @@ public class Reference extends HalEntity   {
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "reference/" + getId());
   }
-
-  @Override
-  @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-  @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-  public Long getId() {
-	return super.getId();
-  }
   
   public Reference category(String category) {
     this.category = category;
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getCategory() {
     return category;
   }
@@ -87,7 +75,7 @@ public class Reference extends HalEntity   {
    * none
    * @return type
   **/
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getReftype() {
     return reftype;
   }
@@ -105,7 +93,7 @@ public class Reference extends HalEntity   {
    * none
    * @return value
   **/
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getValue() {
     return value;
   }
@@ -155,5 +143,5 @@ public class Reference extends HalEntity   {
     }
     return o.toString().replace("\n", "\n    ");
   }
-}
 
+}

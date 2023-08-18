@@ -15,6 +15,7 @@
 package org.shanoir.ng.dataset.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,12 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -55,6 +53,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 
 /**
  * Dataset service implementation.
@@ -87,7 +89,7 @@ public class DatasetServiceImpl implements DatasetService {
 	private boolean dicomWeb;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirException {
+	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException {
 		final Dataset datasetDb = repository.findById(id).orElse(null);
 		if (datasetDb == null) {
 			throw new EntityNotFoundException(Dataset.class, id);
@@ -129,7 +131,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	@Transactional
-	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException {
+	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException, SolrServerException, IOException {
 		List<Dataset> dss = this.findByIdIn(ids);
 		Map<Long, Long> datasetStudyMap = new HashMap<>();
 		for (Dataset ds : dss) {
@@ -153,12 +155,8 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Dataset create(final Dataset dataset) {
+	public Dataset create(final Dataset dataset) throws SolrServerException, IOException {
 		Dataset ds = repository.save(dataset);
-		// Do not index processed dataset for the moment
-		if (ds.getDatasetProcessing() == null) {
-			solrService.indexDataset(ds.getId());
-		}
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		return ds;
 	}

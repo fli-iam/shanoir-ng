@@ -52,6 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     <logger name="org.shanoir.ng.importer.ImporterManagerService" level="INFO" additivity="false">
         <appender-ref ref="IMPORTS_FILE_LOG" />
     </logger>
+
     <logger name="org.dcm4che3" level="WARN" additivity="false">
         <appender-ref ref="FILE" />
     </logger>
@@ -60,4 +61,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <appender-ref ref="FILE" />
         <appender-ref ref="CONSOLE" />
     </root>
+
 </configuration>

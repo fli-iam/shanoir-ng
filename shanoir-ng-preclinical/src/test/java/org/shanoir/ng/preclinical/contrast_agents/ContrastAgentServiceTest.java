@@ -20,10 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -35,7 +34,8 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ContrastAgentModelUtil;
 import org.shanoir.ng.utils.ReferenceModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 
 /**
@@ -44,7 +44,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author sloury
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class ContrastAgentServiceTest {
 
 	private static final Long AGENT_ID = 1L;
@@ -63,7 +64,7 @@ public class ContrastAgentServiceTest {
 	
 		
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(agentsRepository.findAll()).willReturn(Arrays.asList(ContrastAgentModelUtil.createContrastAgentGado()));
 		given(agentsRepository.findById(AGENT_ID)).willReturn(Optional.of(ContrastAgentModelUtil.createContrastAgentGado()));
@@ -80,8 +81,8 @@ public class ContrastAgentServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<ContrastAgent> agents = agentsService.findAll();
-		Assert.assertNotNull(agents);
-		Assert.assertTrue(agents.size() == 1);
+		Assertions.assertNotNull(agents);
+		Assertions.assertTrue(agents.size() == 1);
 
 		Mockito.verify(agentsRepository, Mockito.times(1)).findAll();
 	}
@@ -89,8 +90,8 @@ public class ContrastAgentServiceTest {
 	@Test
 	public void findByIdTest() {
 		final ContrastAgent agent = agentsService.findById(AGENT_ID);
-		Assert.assertNotNull(agent);
-		Assert.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
+		Assertions.assertNotNull(agent);
+		Assertions.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
 
 		Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -98,8 +99,8 @@ public class ContrastAgentServiceTest {
 	@Test
 	public void findByNameTest() {
 		final ContrastAgent agent = agentsService.findById(AGENT_ID);
-		Assert.assertNotNull(agent);
-		Assert.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
+		Assertions.assertNotNull(agent);
+		Assertions.assertTrue(ContrastAgentModelUtil.AGENT_GADO_REFERENCE_NAME.equals(agent.getName().getValue()));
 
 		Mockito.verify(agentsRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -116,8 +117,8 @@ public class ContrastAgentServiceTest {
 	@Test
 	public void updateTest() throws ShanoirException {
 		final ContrastAgent updatedAgent = agentsService.update(createContrastAgent());
-		Assert.assertNotNull(updatedAgent);
-		Assert.assertTrue(UPDATED_AGENT_DATA.equals(updatedAgent.getManufacturedName()));
+		Assertions.assertNotNull(updatedAgent);
+		Assertions.assertTrue(UPDATED_AGENT_DATA.equals(updatedAgent.getManufacturedName()));
 
 		Mockito.verify(agentsRepository, Mockito.times(1)).save(Mockito.any(ContrastAgent.class));
 	}
