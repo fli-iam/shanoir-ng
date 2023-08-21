@@ -48,7 +48,7 @@ public class DicomServerClient implements IDicomServerClient {
 		DicomNode calling = new DicomNode(config.getLocalDicomServerAETCalling(), config.getLocalDicomServerHost(), config.getLocalDicomServerPort());
 		DicomNode called = new DicomNode(config.getDicomServerAETCalled(), config.getDicomServerHost(), config.getDicomServerPort());
 		queryPACSService = new QueryPACSService();
-		queryPACSService.setDicomNodes(calling, called, config.getLocalDicomServerAETCalling());
+		queryPACSService.setDicomNodes(calling, called, config.getDicomServerAETCalled());
 		dcmRcvManager.configure(config);
 	}
 	
@@ -147,9 +147,9 @@ public class DicomServerClient implements IDicomServerClient {
 	private boolean getFilesFromServer(final String seriesInstanceUID, final String seriesDescription) throws Exception {
 		final DicomState state;
 		try {
-			logger.info("\n\n C_MOVE, serie (" + seriesDescription + ") command: launching c-move with args: " + seriesDescription + ", " + seriesInstanceUID + "\n\n");
+			logger.info("\n C_MOVE, serie (" + seriesDescription + ") command: launching c-move with args: " + seriesDescription + ", " + seriesInstanceUID + "\n");
 			state = queryPACSService.queryCMOVE(seriesInstanceUID);
-			logger.debug("\n\n Dicom Query list:\n " + state.toString() + "\n");
+			logger.debug("\n Dicom Query list:\n " + state.toString() + "\n");
 		} catch (final Exception e) {
 			logger.error(e.getMessage(), e);
 			return false;
