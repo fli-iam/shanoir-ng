@@ -16,13 +16,13 @@ package org.shanoir.ng.user.security;
 
 import java.util.Map;
 
-import org.keycloak.KeycloakPrincipal;
-import org.keycloak.representations.AccessToken;
 import org.shanoir.ng.shared.exception.TokenNotFoundException;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,47 +33,36 @@ public class IsMeSecurityService {
     	else if (isAnonymousConnected()) return false;
     	else return id.equals(getConnectedUserId());
     }
-    
-    @SuppressWarnings("rawtypes")
-	public boolean isMe(String username) {
-    	final Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if (principal instanceof KeycloakPrincipal) {
-			return username.equals(((KeycloakPrincipal) principal).getName());
-		}
-		return false;
+
+    public boolean isMe(String username) {
+    	final JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+		return username.equals(authentication.getToken().getClaimAsString("preferred_username"));
     }
     
     public boolean isMe(User user) {
     	if (user == null) throw new IllegalArgumentException("user cannot be null");
     	else return isMe(user.getId());
     }
-    
-    
-    
+
     private boolean isAnonymousConnected() {
     	return SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken;
     }
     
     private Long getConnectedUserId() {
-    	if (!(SecurityContextHolder.getContext().getAuthentication().getPrincipal() instanceof KeycloakPrincipal)) {
-    		throw new IllegalArgumentException("Cannot get the connected user id because principal is not an instance of KeycloakPrincipal. "
-    				+ "If this error occures in a unit test context, maybe user @WithMockKeycloakUser instead of @WithMockUser.");
-    	}
-		@SuppressWarnings("rawtypes")
-		final KeycloakPrincipal principal = (KeycloakPrincipal) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		final AccessToken accessToken = principal.getKeycloakSecurityContext().getToken();
-		if (accessToken == null) {
+    	final JwtAuthenticationToken authentication = (JwtAuthenticationToken) SecurityContextHolder.getContext().getAuthentication();
+
+    	final Jwt jwt = authentication.getToken();
+		if (jwt == null) {
 			throw new TokenNotFoundException("Cannot find token while checking access to method");
 		}
 
 		Long tokenUserId = null;
-		final Map<String, Object> otherClaims = accessToken.getOtherClaims();
+		final Map<String, Object> otherClaims = jwt.getClaims();
 		if (otherClaims.containsKey(KeycloakUtil.USER_ID_TOKEN_ATT)) {
 			tokenUserId = Long.valueOf(otherClaims.get(KeycloakUtil.USER_ID_TOKEN_ATT).toString());
 		}
 
 		return tokenUserId;
     }
- 
-    
+     
 }

@@ -88,7 +88,7 @@ public class ReadyState implements State {
 	 */
 	private void initNominativeDataFilesBeforeLaunchingJobs() {
 		final List<File> folders = Util.listFolders(ShUpOnloadConfig.getWorkFolder());
-		logger.info("Update Nominative DataFiles Before Closing " + folders.size() + " folders in work folder.");
+		logger.debug("Update Nominative DataFiles Before Closing " + folders.size() + " folders in work folder.");
 		for (Iterator foldersIt = folders.iterator(); foldersIt.hasNext();) {
 			NominativeDataUploadJobManager dataJobManager = null;
 			final File folder = (File) foldersIt.next();
@@ -98,7 +98,7 @@ public class ReadyState implements State {
 				final File file = (File) filesIt.next();
 				if (file.getName().equals(
 						NominativeDataUploadJobManager.NOMINATIVE_DATA_JOB_XML)) {
-					logger.info(" Initializing data job manager before launching Jobs");
+					logger.debug(" Initializing data job manager before launching Jobs");
 					dataJobManager = new NominativeDataUploadJobManager(file);
 				}
 			}

@@ -26,11 +26,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.math3.util.Pair;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.springframework.data.util.Pair;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.internal.util.collections.Sets;
 import org.shanoir.ng.datasetacquisition.controler.DatasetAcquisitionApi;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -60,11 +60,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
-
-import com.google.common.collect.Sets;
 
 /**
  * User security service test.
@@ -72,7 +69,7 @@ import com.google.common.collect.Sets;
  * @author jlouis
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class DatasetAcquisitionApiSecurityTest {
@@ -101,7 +98,7 @@ public class DatasetAcquisitionApiSecurityTest {
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
 	
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockBindingResult = new BeanPropertyBindingResult(mockDsAcq(1L), "datasetAcquisition");
 		given(rightsService.hasRightOnStudy(Mockito.anyLong(), Mockito.anyString())).willReturn(false);
@@ -406,9 +403,11 @@ public class DatasetAcquisitionApiSecurityTest {
 		
 		given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(Mockito.<Pair<Long, Long>>anyList(), Mockito.<Long>anySet(), Mockito.any(Pageable.class))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{}), PageRequest.of(0, 10), 0));
 		List<Pair<Long, Long>> studyCenterIds = new ArrayList<>();
-		studyCenterIds.add(new Pair<Long, Long>(1L, 1L));
-		given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newHashSet(new Long[]{}), PageRequest.of(0, 10))).willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
-		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId())).willReturn(Arrays.asList(new Long[]{1L, 2L}));
+		studyCenterIds.add(Pair.of(1L, 1L));
+		given(datasetAcquisitionRepository.findPageByStudyCenterOrStudyIdIn(studyCenterIds, Sets.<Long>newSet(new Long[]{}), PageRequest.of(0, 10)))
+			.willReturn(new PageImpl<>(Arrays.asList(new DatasetAcquisition[]{dsAcq1}), PageRequest.of(0, 10), 1));
+		given(rightsRepository.findDistinctStudyIdByUserId(LOGGED_USER_ID, StudyUserRight.CAN_SEE_ALL.getId()))
+			.willReturn(Arrays.asList(new Long[]{1L, 2L}));
 		StudyUser su1 = new StudyUser();
 		su1.setStudyId(1L);
 		su1.setCenterIds(Arrays.asList(new Long[]{1L}));

@@ -20,17 +20,17 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.role.model.Role;
 import org.shanoir.ng.role.repository.RoleRepository;
 import org.shanoir.ng.role.service.RoleServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * User detail service test.
@@ -47,7 +47,7 @@ public class RoleServiceTest {
     @InjectMocks
     private RoleServiceImpl roleService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(roleRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUserRole()));
 	}

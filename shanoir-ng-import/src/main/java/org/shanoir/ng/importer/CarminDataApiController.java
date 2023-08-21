@@ -19,11 +19,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.importer.model.carmin.Path;
 import org.shanoir.ng.importer.model.carmin.UploadData;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -39,7 +40,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.util.UriUtils;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 /**
  * Carmin data upload results from VIP to tmp folder endpoint
@@ -51,7 +52,7 @@ public class CarminDataApiController implements CarminDataApi {
 
     private static final String VIP_UPLOAD_FOLDER = "vip_uploads";
     private static final String ERROR_WHILE_SAVING_UPLOADED_FILE = "Error while saving uploaded file.";
-    private static final String PATH_PREFIX = "/carmin-data/path/";
+    private static final String PATH_PREFIX = "/carmin-data/";
 
     private static final Logger LOG = LoggerFactory.getLogger(CarminDataApiController.class);
 
@@ -68,62 +69,49 @@ public class CarminDataApiController implements CarminDataApi {
 
     @Override
     public ResponseEntity<Path> uploadPath(
-            @ApiParam(value = "") @Valid @RequestBody UploadData body)
+            @Parameter(name = "") @Valid @RequestBody UploadData body)
             throws RestServiceException {
 
-        String completePath = extractPathFromRequest(httpServletRequest);
-        LOG.info(completePath);
+        String importPath = getImportPathFromRequest(httpServletRequest);
 
         Path path = new Path();
 
         try {
 
-            // creates file from the base64 string
-            String[] pathItems = completePath.split("/");
-            String uploadFileName = pathItems[pathItems.length - 1];
+            File resultFile = new File(importPath);
+            File resultDir = resultFile.getParentFile();
 
-            // create unique user directory from the completePath
-            final String userImportDirFilePath = importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator
-                    + pathItems[1] + File.separator
-                    + pathItems[2];
-
-            final File userImportDir = new File(userImportDirFilePath);
-            if (!userImportDir.exists()) {
-                userImportDir.mkdirs();
+            if (!resultDir.exists()) {
+                resultDir.mkdirs();
             }
 
-            // upload the result in the folder
-            File destinationUploadFile = new File(userImportDir.getAbsolutePath(), uploadFileName);
             byte[] bytes = Base64.decodeBase64(body.getBase64Content());
-            FileUtils.writeByteArrayToFile(destinationUploadFile, bytes);
+            FileUtils.writeByteArrayToFile(resultFile, bytes);
 
-            path.setPlatformPath(userImportDir.getAbsolutePath());
+            path.setPlatformPath(resultDir.getAbsolutePath());
             path.setIsDirectory(true);
             // sum of the size of all files within the directory
-            long size = Files.walk(userImportDir.toPath()).mapToLong(p -> p.toFile().length()).sum();
+            long size = Files.walk(resultDir.toPath()).mapToLong(p -> p.toFile().length()).sum();
             path.setSize(size);
             path.setLastModificationDate(new Date().getTime());
 
         } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("I/O error while uploading [{}]", importPath, e);
             throw new RestServiceException(
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), ERROR_WHILE_SAVING_UPLOADED_FILE, null));
         }
 
-        return new ResponseEntity<Path>(path, HttpStatus.CREATED);
+        return new ResponseEntity<>(path, HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<Void> deletePath() {
-        String completePath = extractPathFromRequest(httpServletRequest);
-        LOG.info(completePath);
-
-        final String userImportDirFilePath = importDir + File.separator + VIP_UPLOAD_FOLDER + completePath;
+        String userImportDirFilePath = getImportPathFromRequest(httpServletRequest);
 
         final File fileToDelete = new File(userImportDirFilePath);
         Utils.deleteFolder(fileToDelete);
 
-        return new ResponseEntity<Void>(HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -132,11 +120,9 @@ public class CarminDataApiController implements CarminDataApi {
      * @param request
      * @return
      */
-    private String extractPathFromRequest(HttpServletRequest request) {
+    private String getImportPathFromRequest(HttpServletRequest request) {
         String decodedUri = UriUtils.decode(request.getRequestURI(), "UTF-8");
-        int index = decodedUri.indexOf(PATH_PREFIX);
-
-        return decodedUri.substring(index + PATH_PREFIX.length() - 1);
+        return importDir + File.separator + VIP_UPLOAD_FOLDER + File.separator + decodedUri.replace(PATH_PREFIX, "");
     }
 
 }

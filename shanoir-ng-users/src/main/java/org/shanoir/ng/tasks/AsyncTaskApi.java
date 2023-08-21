@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 /**
  * API to manage asynchronous tasks:
@@ -22,26 +22,26 @@ import io.swagger.annotations.ApiResponses;
  * @author fli
  *
  */
-@Api(value = "tasks")
+@Tag(name = "tasks")
 @RequestMapping("/tasks")
 @CrossOrigin(exposedHeaders = "Access-Control-Allow-Origin")
 public interface AsyncTaskApi {
-	@ApiOperation(value = "", notes = "If exists, returns the tasks that the user is allowed to see", response = ShanoirEvent.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found tasks", response = ShanoirEvent.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no task found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@Operation(summary = "", description = "If exists, returns the tasks that the user is allowed to see")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found tasks"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no task found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<List<ShanoirEvent>> findTasks();
 
-	@ApiOperation(value = "", notes = "Pushes a new event emitter to front", response = SseEmitter.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found tasks", response = SseEmitter.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no task found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@Operation(summary = "", description = "Pushes a new event emitter to front")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found tasks"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no task found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/updateTasks")
 	ResponseEntity<SseEmitter> updateTasks() throws IOException;
 }

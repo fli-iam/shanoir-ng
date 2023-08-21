@@ -27,4 +27,5 @@ export class ProcessedDatasetImportJob {
     processedDatasetName: string;
     processedDatasetComment: string;
     datasetProcessing: DatasetProcessing;
+    timestamp: number;
 }

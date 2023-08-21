@@ -18,17 +18,17 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.modality.BidsDataset;
@@ -130,7 +130,7 @@ public abstract class Dataset extends AbstractEntity {
 	 * Parent dataset with the same sampling grid, ie that can be superimposed
 	 * with this dataset.
 	 */
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "referenced_dataset_for_superimposition_id")
 	private Dataset referencedDatasetForSuperimposition;
 
@@ -149,6 +149,9 @@ public abstract class Dataset extends AbstractEntity {
 
 	/** Subject. */
 	private Long subjectId;
+
+	/** Can we download the subject ? */
+	private boolean downloadable = true;
 
 	/** Metadata updated by study card. */
 	@OneToOne(cascade = CascadeType.ALL)
@@ -406,6 +409,14 @@ public abstract class Dataset extends AbstractEntity {
 	@Deprecated
 	public void setImportedStudyId(Long importedStudyId) {
 		this.importedStudyId = importedStudyId;
+	}
+
+	public boolean isDownloadable() {
+		return downloadable;
+	}
+
+	public void setDownloadable(boolean downloadable) {
+		this.downloadable = downloadable;
 	}
 
 }

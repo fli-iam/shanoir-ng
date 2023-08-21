@@ -35,7 +35,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class AnestheticApiController implements AnestheticApi {
@@ -58,7 +58,7 @@ public class AnestheticApiController implements AnestheticApi {
 
 	@Override
 	public ResponseEntity<Anesthetic> createAnesthetic(
-			@ApiParam(value = "Anesthetic to create", required = true) @RequestBody Anesthetic anesthetic,
+			@Parameter(name = "Anesthetic to create", required = true) @RequestBody Anesthetic anesthetic,
 			BindingResult result) throws RestServiceException {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(anesthetic);
@@ -88,7 +88,7 @@ public class AnestheticApiController implements AnestheticApi {
 
 	@Override
 	public ResponseEntity<Void> deleteAnesthetic(
-			@ApiParam(value = "Anesthetic id to delete", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "Anesthetic id to delete", required = true) @PathVariable("id") Long id) {
 		if (anestheticsService.findById(id) == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -103,7 +103,7 @@ public class AnestheticApiController implements AnestheticApi {
 
 	@Override
 	public ResponseEntity<Anesthetic> getAnestheticById(
-			@ApiParam(value = "ID of anesthetic that needs to be fetched", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "ID of anesthetic that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final Anesthetic anesthetic = anestheticsService.findById(id);
 		if (anesthetic == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -122,7 +122,7 @@ public class AnestheticApiController implements AnestheticApi {
 
 	@Override
 	public ResponseEntity<List<Anesthetic>> getAnestheticsByType(
-			@ApiParam(value = "Anesthetic type ", required = true) @PathVariable("type") String type) {
+			@Parameter(name = "Anesthetic type ", required = true) @PathVariable("type") String type) {
 		try {
 			final List<Anesthetic> anesthetics = anestheticsService
 					.findAllByAnestheticType(AnestheticType.valueOf(type.toUpperCase()));
@@ -138,8 +138,8 @@ public class AnestheticApiController implements AnestheticApi {
 
 	@Override
 	public ResponseEntity<Void> updateAnesthetic(
-			@ApiParam(value = "ID of anesthetic that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Anesthetic object that needs to be updated", required = true) @RequestBody Anesthetic anesthetic,
+			@Parameter(name = "ID of anesthetic that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Anesthetic object that needs to be updated", required = true) @RequestBody Anesthetic anesthetic,
 			final BindingResult result) throws RestServiceException {
 
 		anesthetic.setId(id);

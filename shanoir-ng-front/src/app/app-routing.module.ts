@@ -88,7 +88,6 @@ import { PipelinesComponent } from './processing/pipelines/pipelines.component';
 import { ExecutionComponent } from './processing/execution/execution.component';
 import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
-import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
 import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
@@ -97,6 +96,7 @@ import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 import { QualityCardListComponent } from './study-cards/quality-card-list/quality-card-list.component';
 import { QualityCardComponent } from './study-cards/quality-card/quality-card.component';
+import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 
 let routes: Routes = [
     {
@@ -203,6 +203,9 @@ let routes: Routes = [
             }
         ]
     }, {
+        path: 'task/status/:ts',
+        component: TaskStatusComponent
+    }, {    
         path: 'task',
         component: AsyncTasksComponent
     }, {
@@ -559,7 +562,7 @@ let routes: Routes = [
 	},
     {
 		path: 'study-card/apply/:id',
-		component: StudyCardApplyComponent,
+		component: ApplyStudyCardOnComponent,
         canActivate: [AuthAdminOrExpertGuard],
 	},{
 		path: 'study-card/apply-on-datasets',

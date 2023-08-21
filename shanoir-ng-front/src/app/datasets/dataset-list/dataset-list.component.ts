@@ -29,8 +29,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 
 @Component({
     selector: 'dataset-list',
-    templateUrl: 'dataset-list.component.html',
-    styleUrls: ['dataset-list.component.css']
+    templateUrl: 'dataset-list.component.html'
 })
 
 export class DatasetListComponent extends EntityListComponent<Dataset>{

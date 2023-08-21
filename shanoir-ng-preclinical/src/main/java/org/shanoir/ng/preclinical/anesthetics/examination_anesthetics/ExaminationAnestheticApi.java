@@ -25,88 +25,82 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-@Api(value = "examination_anesthetic")
+@Tag(name = "examination_anesthetic")
 public interface ExaminationAnestheticApi {
 
-	@ApiOperation(value = "Add a new anesthetic to examination", notes = "", response = Void.class, tags = {
-			"ExaminationAnesthetic", })
+	@Operation(summary = "Add a new anesthetic to examination", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "success returns anesthetic examination", response = ExaminationAnesthetic.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = ExaminationAnesthetic.class),
-			@ApiResponse(code = 409, message = "Already exists - conflict", response = ExaminationAnesthetic.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = ExaminationAnesthetic.class) })
+			@ApiResponse(responseCode = "200", description = "success returns anesthetic examination"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PostMapping(value = "/examination/{id}/anesthetic", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<ExaminationAnesthetic> addExaminationAnesthetic(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "anesthetic to add to examination", required = true) @RequestBody ExaminationAnesthetic anesthetic,
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "anesthetic to add to examination", required = true) @RequestBody ExaminationAnesthetic anesthetic,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "Deletes an anesthetic from examination", notes = "", response = Void.class, tags = {
-			"ExaminationAnesthetic", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid examination anesthetic id", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Deletes an anesthetic from examination", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid examination anesthetic id"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@DeleteMapping(value = "/examination/{id}/anesthetic/{eaid}", produces = {
 			"application/json" })
 	ResponseEntity<Void> deleteExaminationAnesthetic(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "examination anesthetic id", required = true) @PathVariable("eaid") Long eaid)
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "examination anesthetic id", required = true) @PathVariable("eaid") Long eaid)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Get examination anesthetic by id", notes = "", response = ExaminationAnesthetic.class, responseContainer = "List", tags = {
-			"ExaminationAnesthetic", })
+	@Operation(summary = "Get examination anesthetic by id", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An examination anesthetic", response = ExaminationAnesthetic.class),
-			@ApiResponse(code = 404, message = "Examination anesthetic not found", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = ExaminationAnesthetic.class) })
+			@ApiResponse(responseCode = "200", description = "An examination anesthetic"),
+			@ApiResponse(responseCode = "404", description = "Examination anesthetic not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/examination/{id}/anesthetic/{eaid}", produces = {
 			"application/json" })
 	ResponseEntity<ExaminationAnesthetic> getExaminationAnestheticById(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Examination anesthetic id", required = true) @PathVariable("eaid") Long eaid)
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Examination anesthetic id", required = true) @PathVariable("eaid") Long eaid)
 			throws RestServiceException;
 
-	@ApiOperation(value = "List all anesthetics for examination", notes = "", response = ExaminationAnesthetic.class, responseContainer = "List", tags = {
-			"ExaminationAnesthetic", })
+	@Operation(summary = "List all anesthetics for examination", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of examination anesthetics", response = ExaminationAnesthetic.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = ExaminationAnesthetic.class) })
+			@ApiResponse(responseCode = "200", description = "An array of examination anesthetics"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/examination/{id}/anesthetic/all", produces = {
 			"application/json" })
 	ResponseEntity<List<ExaminationAnesthetic>> getExaminationAnesthetics(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Update an existing examination anesthetic", notes = "", response = Void.class, tags = {
-			"ExaminationAnesthetic", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-			@ApiResponse(code = 404, message = "Examination anesthetic not found", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Update an existing examination anesthetic", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "404", description = "Examination anesthetic not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PutMapping(value = "/examination/{id}/anesthetic/{eaid}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<Void> updateExaminationAnesthetic(
-			@ApiParam(value = "ID of examination", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of examination anesthetic that needs to be updated", required = true) @PathVariable("eaid") Long eaid,
-			@ApiParam(value = "Examination Anesthetic that will be be updated", required = true) @RequestBody ExaminationAnesthetic anesthetic,
+			@Parameter(name = "ID of examination", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of examination anesthetic that needs to be updated", required = true) @PathVariable("eaid") Long eaid,
+			@Parameter(name = "Examination Anesthetic that will be be updated", required = true) @RequestBody ExaminationAnesthetic anesthetic,
 			final BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "List all examinationsAnesthetics for a given anesthetic", notes = "", response = ExaminationAnesthetic.class, responseContainer = "List", tags = {
-			"ExaminationAnesthetic", })
+	@Operation(summary = "List all examinationsAnesthetics for a given anesthetic", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of examination anesthetics", response = ExaminationAnesthetic.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = ExaminationAnesthetic.class) })
+			@ApiResponse(responseCode = "200", description = "An array of examination anesthetics"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/examination/all/anesthetic/{id}", produces = {
 			"application/json" })
 	ResponseEntity<List<ExaminationAnesthetic>> getExaminationAnestheticsByAnesthetic(
-			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException;
 
 }
