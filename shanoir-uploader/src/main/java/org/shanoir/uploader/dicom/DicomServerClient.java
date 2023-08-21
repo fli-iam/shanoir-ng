@@ -48,7 +48,9 @@ public class DicomServerClient implements IDicomServerClient {
 		DicomNode calling = new DicomNode(config.getLocalDicomServerAETCalling(), config.getLocalDicomServerHost(), config.getLocalDicomServerPort());
 		DicomNode called = new DicomNode(config.getDicomServerAETCalled(), config.getDicomServerHost(), config.getDicomServerPort());
 		queryPACSService = new QueryPACSService();
-		queryPACSService.setDicomNodes(calling, called, config.getDicomServerAETCalled());
+		// attention: we use calling here (== ShUp) to inform the DICOM server to send to ShUp,
+		// who becomes the "called" afterwards from the point of view of the DICOM server (switch)
+		queryPACSService.setDicomNodes(calling, called, config.getLocalDicomServerAETCalling());
 		dcmRcvManager.configure(config);
 	}
 	
@@ -88,7 +90,7 @@ public class DicomServerClient implements IDicomServerClient {
 	 */
 	@Override
 	public synchronized List<String> retrieveDicomFiles(final Collection<SerieTreeNode> selectedSeries, final File uploadFolder) {
-		dcmRcvManager.setDestination(uploadFolder.getAbsolutePath());
+		dcmRcvManager.startSCPServer(uploadFolder.getAbsolutePath());
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		final List<String> oldFileNames = new ArrayList<String>();
 		// Iterate over all series and send command for sending DICOM files.

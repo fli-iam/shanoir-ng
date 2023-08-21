@@ -87,8 +87,8 @@ public class QueryPACSService {
 	@PostConstruct
 	private void initDicomNodes() {
 		// Initialize connection configuration parameters here: to be used for all queries
-		this.calling = new DicomNode(callingName, callingHost, callingPort);
-		this.called = new DicomNode(calledName, calledHost, calledPort);
+		this.calling = new DicomNode(callingName, callingHost, callingPort); // ShUp
+		this.called = new DicomNode(calledName, calledHost, calledPort); // PACS
 	}
 	
 	public void setDicomNodes(DicomNode calling, DicomNode called, String calledNameSCP) {

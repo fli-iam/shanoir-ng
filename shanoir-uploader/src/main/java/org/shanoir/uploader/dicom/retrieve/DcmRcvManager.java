@@ -53,7 +53,7 @@ public class DcmRcvManager {
 		this.lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, null, null);
 	}
 	
-	public void setDestination(final String folderPath) {
+	public void startSCPServer(final String folderPath) {
 		try {
 			if(this.listener != null)
 				listener.stop();
