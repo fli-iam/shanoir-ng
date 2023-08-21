@@ -19,11 +19,10 @@
  */
 package org.shanoir.ng.solr.controler;
 
+import java.io.IOException;
 import java.util.List;
 
-import javax.validation.Valid;
-
-import org.shanoir.ng.shared.exception.ErrorModel;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
@@ -36,47 +35,49 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 /**
  * @author yyao
  *
  */
-@Api(value = "solr", description = "the Solr API")
+@Tag(name = "solr", description = "the Solr API")
 @RequestMapping("/solr")
 public interface SolrApi {
-	@ApiOperation(value = "", notes = "Index all data to Solr", response = Void.class, tags={})
+	
+	@Operation(summary = "", description = "Index all data to Solr")
     @ApiResponses(value = {
-        @ApiResponse(code = 204, message = "indexed data", response = Void.class),
-        @ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-        @ApiResponse(code = 403, message = "forbidden", response = Void.class),
-        @ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
-        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+        @ApiResponse(responseCode = "204", description = "indexed data"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "422", description = "bad parameters"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
     @RequestMapping(value = "/index", produces = { "application/json" }, method = RequestMethod.POST)
     @PreAuthorize("hasRole('ADMIN')")
-    ResponseEntity<Void> indexAll() throws RestServiceException;
+    ResponseEntity<Void> indexAll() throws RestServiceException, SolrServerException, IOException;
 
-	@ApiOperation(value = "", notes = "Search with facets and returns solr documents and facets page", response = SolrResultPage.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found documents and facets", response = Page.class),
-		@ApiResponse(code = 204, message = "nothing found", response = ErrorModel.class),
-		@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
-		@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
-		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Search with facets and returns solr documents and facets page")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found documents and facets"),
+		@ApiResponse(responseCode = "204", description = "nothing found"),
+		@ApiResponse(responseCode = "401", description = "unauthorized"),
+		@ApiResponse(responseCode = "403", description = "forbidden"),
+		@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
-	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@ApiParam(value = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
+	ResponseEntity<SolrResultPage<ShanoirSolrDocument>> facetSearch(@Parameter(name = "facets", required = true) @Valid @RequestBody ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Returns solr documents matching the given dataset ids", response = SolrResultPage.class, responseContainer = "List", tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "found documents", response = Page.class),
-		@ApiResponse(code = 204, message = "nothing found", response = ErrorModel.class),
-		@ApiResponse(code = 401, message = "unauthorized", response = ErrorModel.class),
-		@ApiResponse(code = 403, message = "forbidden", response = ErrorModel.class),
-		@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Returns solr documents matching the given dataset ids")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found documents"),
+		@ApiResponse(responseCode = "204", description = "nothing found"),
+		@ApiResponse(responseCode = "401", description = "unauthorized"),
+		@ApiResponse(responseCode = "403", description = "forbidden"),
+		@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/byIds", consumes = {"application/json" }, produces = { "application/json" }, method = RequestMethod.POST)
-	ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@ApiParam(value = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException;
+	ResponseEntity<Page<ShanoirSolrDocument>> findByIdIn(@Parameter(name = "dataset ids", required = true) @Valid @RequestBody List<Long> datasetIds, Pageable pageable) throws RestServiceException;
 	
 }

@@ -42,7 +42,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class AcquisitionEquipmentApiController implements AcquisitionEquipmentApi {
@@ -58,7 +58,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Override
 	public ResponseEntity<Void> deleteAcquisitionEquipment(
-			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
+			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		try {
 			if (acquisitionEquipmentId.equals(0L)) {
 				throw new EntityNotFoundException("Cannot update unknown equipment");
@@ -73,7 +73,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Override
 	public ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
-			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
+			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId) {
 		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(acquisitionEquipmentId).orElse(null);
 		if (equipment == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -93,7 +93,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
 	
-	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByCenter(@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId) {
 		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByCenterId(centerId);
 		if (equipments.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -102,7 +102,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
 	}
 	
-	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllByStudyId(studyId);
 		// Remove "unknown" equipment
 		equipments = equipments.stream().filter(equipment -> equipment.getId() != 0).collect(Collectors.toList());
@@ -115,7 +115,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Override
 	public ResponseEntity<AcquisitionEquipmentDTO> saveNewAcquisitionEquipment(
-			@ApiParam(value = "acquisition equipment to create", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
+			@Parameter(name = "acquisition equipment to create", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);
@@ -135,8 +135,8 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Override
 	public ResponseEntity<Void> updateAcquisitionEquipment(
-			@ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId,
-			@ApiParam(value = "acquisition equipment to update", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
+			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") final Long acquisitionEquipmentId,
+			@Parameter(name = "acquisition equipment to update", required = true) @RequestBody final AcquisitionEquipment acquisitionEquipment,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);

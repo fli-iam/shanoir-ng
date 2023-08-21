@@ -1,18 +1,18 @@
 package org.shanoir.ng.subject.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -26,7 +26,8 @@ import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
 import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +37,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author fli
  *
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class RabbitMQSubjectServiceTest {
 
 	@Mock
@@ -69,7 +71,7 @@ public class RabbitMQSubjectServiceTest {
 
 	private String studyName = "studyname";
 	
-	@Before
+	@BeforeEach
 	public void init() {
 		subject.setId(subjectId);
 		subject.setSubjectStudyList(new ArrayList<>());
@@ -90,10 +92,12 @@ public class RabbitMQSubjectServiceTest {
 		assertTrue(result.contains(ident));
 	}
 
-	@Test(expected = AmqpRejectAndDontRequeueException.class)
+	@Test
 	public void testGetSubjetsForStudyFail() throws JsonProcessingException {
+		assertThrows(AmqpRejectAndDontRequeueException.class, () -> {
 		// GIVEN a study ID, retrieve all associated subjects
 		rabbitMQSubjectService.getSubjectsForStudy("non parsable long");
+		});
 	}
 
 	@Test

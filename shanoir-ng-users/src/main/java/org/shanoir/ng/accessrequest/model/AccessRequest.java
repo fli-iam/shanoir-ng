@@ -1,8 +1,8 @@
 package org.shanoir.ng.accessrequest.model;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.user.model.User;

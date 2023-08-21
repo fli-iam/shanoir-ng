@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.acquisitionequipment;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
@@ -21,23 +22,24 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentServiceImpl;
-import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Acquisition equipment service test.
@@ -45,7 +47,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author msimon
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AcquisitionEquipmentServiceTest {
 
 	private static final Long ACQ_EQPT_ID = 1L;
@@ -65,16 +68,18 @@ public class AcquisitionEquipmentServiceTest {
 	@InjectMocks
 	private AcquisitionEquipmentServiceImpl acquisitionEquipmentService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(repository.findAll()).willReturn(Arrays.asList(ModelsUtil.createAcquisitionEquipment()));
 		given(repository.findById(ACQ_EQPT_ID)).willReturn(Optional.of(ModelsUtil.createAcquisitionEquipment()));
 		given(repository.save(Mockito.any(AcquisitionEquipment.class))).willReturn(createAcquisitionEquipment());
 	}
 
-	@Test(expected = EntityNotFoundException.class)
+	@Test
 	public void deleteByBadIdTest() throws EntityNotFoundException  {
-		acquisitionEquipmentService.deleteById(2L);
+		assertThrows(EntityNotFoundException.class, () -> {
+			acquisitionEquipmentService.deleteById(2L);
+		});
 	}
 
 	@Test
@@ -87,18 +92,17 @@ public class AcquisitionEquipmentServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAll();
-		Assert.assertNotNull(equipments);
-		Assert.assertTrue(equipments.size() == 1);
 
+		Assertions.assertNotNull(equipments);
+		Assertions.assertTrue(equipments.size() == 1);
 		Mockito.verify(repository, Mockito.times(1)).findAll();
 	}
 
 	@Test
 	public void findByIdTest() {
 		final AcquisitionEquipment equipment = acquisitionEquipmentService.findById(ACQ_EQPT_ID).orElse(null);
-		Assert.assertNotNull(equipment);
-		Assert.assertTrue(ModelsUtil.ACQ_EQPT_SERIAL_NUMBER.equals(equipment.getSerialNumber()));
-
+		Assertions.assertNotNull(equipment);
+		Assertions.assertTrue(ModelsUtil.ACQ_EQPT_SERIAL_NUMBER.equals(equipment.getSerialNumber()));
 		Mockito.verify(repository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
 
@@ -112,9 +116,8 @@ public class AcquisitionEquipmentServiceTest {
 	@Test
 	public void updateTest() throws EntityNotFoundException {
 		final AcquisitionEquipment updatedEquipment = acquisitionEquipmentService.update(createAcquisitionEquipment());
-		Assert.assertNotNull(updatedEquipment);
-		Assert.assertTrue(UPDATED_ACQ_EQPT_SERIAL_NUMBER.equals(updatedEquipment.getSerialNumber()));
-
+		Assertions.assertNotNull(updatedEquipment);
+		Assertions.assertTrue(UPDATED_ACQ_EQPT_SERIAL_NUMBER.equals(updatedEquipment.getSerialNumber()));
 		Mockito.verify(repository, Mockito.times(1)).save(Mockito.any(AcquisitionEquipment.class));
 	}
 

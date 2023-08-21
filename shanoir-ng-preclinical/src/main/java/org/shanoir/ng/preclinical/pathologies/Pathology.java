@@ -16,13 +16,6 @@ package org.shanoir.ng.preclinical.pathologies;
 
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
@@ -30,11 +23,13 @@ import org.shanoir.ng.shared.validation.Unique;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
 /**
  * Reference
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-23T14:51:04.625Z")
 @Entity
 @Table(name = "pathology")
 @JsonPropertyOrder({ "_links", "name" })
@@ -52,20 +47,12 @@ public class Pathology extends HalEntity   {
 	this.addLink(Links.REL_SELF, "pathology/" + getId());
   }
   
-  @Override
-  @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-  @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-  public Long getId() {
-	return super.getId();
-  }
-  
-  
   public Pathology name(String name) {
     this.name = name;
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getName() {
     return name;
   }

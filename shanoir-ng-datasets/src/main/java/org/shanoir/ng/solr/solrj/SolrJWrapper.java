@@ -17,26 +17,26 @@
  * https://github.com/swagger-api/swagger-codegen
  * Do not edit the class manually.
  */
-package org.shanoir.ng.solr.repository;
+package org.shanoir.ng.solr.solrj;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
+import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.solr.core.query.result.FacetFieldEntry;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
-import org.springframework.data.solr.repository.Facet;
-import org.springframework.data.solr.repository.Query;
-import org.springframework.data.solr.repository.SolrCrudRepository;
 
 /**
  * @author yyao
  *
  */
-public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository<ShanoirSolrDocument, Long> {
+public interface SolrJWrapper {
 	
 	@Query(value = "*:*")
 	@Facet(fields = {"studyName", "subjectName", "datasetName", "centerName", "examinationComment", "acquisitionEquipmentName",
@@ -47,11 +47,22 @@ public interface SolrRepository extends SolrRepositoryCustom, SolrCrudRepository
 			"datasetType", "datasetNature", "subjectType", "tags"}, limit = 200)
 	public SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
 	
-	public void deleteByDatasetId(Long datasetId);
+	void addToIndex(ShanoirSolrDocument document) throws SolrServerException, IOException;
+	
+	void addAllToIndex(List<ShanoirSolrDocument> documents) throws SolrServerException, IOException;
+	
+	void deleteFromIndex(Long datasetId) throws SolrServerException, IOException;
 
-	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable);
+	void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException;
+	
+	void deleteAll() throws SolrServerException, IOException;
 
-	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn( List<Long> studyIds, Collection<Long> datasetIds, Pageable pageable);
+	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
-	public void deleteByDatasetIdIn(List<Long> datasetIds);
+	public Page<ShanoirSolrDocument> findByStudyIdInAndDatasetIdIn(Map<Long, List<String>> studiesCenter, Collection<Long> datasetIds, Pageable pageable) throws RestServiceException;
+	
+	public SolrResultPage<ShanoirSolrDocument> findByFacetCriteriaForAdmin(ShanoirSolrQuery facet, Pageable pageable) throws RestServiceException;
+	
+	public SolrResultPage<ShanoirSolrDocument> findByStudyIdInAndFacetCriteria(Map<Long, List<String>> studiesCenter, ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
+
 }

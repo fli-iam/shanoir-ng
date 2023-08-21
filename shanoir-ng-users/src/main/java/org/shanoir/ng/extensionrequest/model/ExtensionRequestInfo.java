@@ -17,9 +17,9 @@ package org.shanoir.ng.extensionrequest.model;
 import java.io.Serializable;
 import java.time.LocalDate;
 
-import javax.persistence.Embeddable;
-import javax.persistence.Transient;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 

@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.dto.mapper.DatasetProcessingMapper;
@@ -41,7 +39,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 @Controller
 public class DatasetProcessingApiController implements DatasetProcessingApi {
@@ -57,7 +56,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<Void> deleteDatasetProcessing(
-			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
+			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId)
 			throws RestServiceException {
 
 		try {
@@ -71,7 +70,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<DatasetProcessingDTO> findDatasetProcessingById(
-			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
+			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		
 		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
 		if (!datasetProcessing.isPresent()) {
@@ -91,8 +90,8 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<List<DatasetProcessingDTO>> findDatasetProcessingsByStudyIdAndSubjectId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
 		List<DatasetProcessing> datasetProcessings = datasetProcessingService.findAll();
 		if (datasetProcessings.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -110,7 +109,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<List<DatasetDTO>> getInputDatasets(
-			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
+			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
 		List<Dataset> inputDatasets = datasetProcessing.get().getInputDatasets();
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(inputDatasets), HttpStatus.OK);
@@ -118,7 +117,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<List<DatasetDTO>> getOutputDatasets(
-			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
+			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId) {
 		final Optional<DatasetProcessing> datasetProcessing = datasetProcessingService.findById(datasetProcessingId);
 		List<Dataset> outputDatasets = datasetProcessing.get().getOutputDatasets();
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(outputDatasets), HttpStatus.OK);
@@ -126,7 +125,7 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<DatasetProcessingDTO> saveNewDatasetProcessing(
-			@ApiParam(value = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
+			@Parameter(name = "dataset processing to create", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			final BindingResult result) throws RestServiceException {
 		
 		/* Validation */
@@ -139,8 +138,8 @@ public class DatasetProcessingApiController implements DatasetProcessingApi {
 
 	@Override
 	public ResponseEntity<Void> updateDatasetProcessing(
-			@ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
-			@ApiParam(value = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
+			@Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
+			@Parameter(name = "dataset processing to update", required = true) @Valid @RequestBody DatasetProcessing datasetProcessing,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);

@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.profile.controler;
 
+import java.util.List;
+
 import org.shanoir.ng.profile.model.Profile;
 import org.shanoir.ng.profile.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,17 +23,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import java.util.List;
-
 @Controller
 public class ProfileApiController implements ProfileApi {
+
 	@Autowired
 	private ProfileService profileService;
 
 	@Override
 	public ResponseEntity<List<Profile>> findProfiles() {
 		List<Profile> profiles = profileService.findAll();
-
 		if (profiles.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.preclinical.extra_data.bloodgas_data;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import org.shanoir.ng.preclinical.extra_data.examination_extra_data.ExaminationExtraData;
 

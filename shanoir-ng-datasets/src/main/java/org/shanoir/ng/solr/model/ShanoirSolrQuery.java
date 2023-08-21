@@ -24,8 +24,6 @@ import org.shanoir.ng.shared.paging.FacetPageable;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.utils.Range;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * @author yyao
  *
@@ -319,4 +317,5 @@ public class ShanoirSolrQuery {
 	public void setCenterId(Collection<Long> centerId) {
 		this.centerId = centerId;
 	}
+
 }

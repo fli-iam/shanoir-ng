@@ -15,6 +15,7 @@
 package org.shanoir.ng.acquisitionequipment.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +25,8 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.service.CenterServiceImpl;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +42,10 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<AcquisitionEquipment> implements AcquisitionEquipmentService {
+public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentService {
 
 	@Autowired
-	AcquisitionEquipmentRepository repository;
+	private AcquisitionEquipmentRepository repository;
 
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
@@ -53,6 +55,10 @@ public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<Acqu
 
 	private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentServiceImpl.class);
 	@Override
+	public Optional<AcquisitionEquipment> findById(final Long id) {
+		return repository.findById(id);
+	}
+
 	protected AcquisitionEquipment updateValues(AcquisitionEquipment from, AcquisitionEquipment to) {
 		to.setCenter(from.getCenter());
 		to.setManufacturerModel(from.getManufacturerModel());
@@ -60,19 +66,20 @@ public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<Acqu
 		return to;
 	}
 
-	@Override
+	public List<AcquisitionEquipment> findAll() {
+		return Utils.toList(repository.findAll());
+	}
+
 	public List<AcquisitionEquipment> findAllByCenterId(Long centerId) {
 		return this.repository.findByCenterId(centerId);
 	}
-	
-	@Override
+
 	public List<AcquisitionEquipment> findAllByStudyId(Long studyId) {
 		return this.repository.findByCenterStudyCenterListStudyId(studyId);
 	}
 
-	@Override
 	public AcquisitionEquipment create(AcquisitionEquipment entity) {
-		AcquisitionEquipment newDbAcEq = super.create(entity);
+		AcquisitionEquipment newDbAcEq = repository.save(entity);
 		String datasetAcEqName = newDbAcEq.getManufacturerModel().getManufacturer().getName().trim() + " " + newDbAcEq.getManufacturerModel().getName().trim();
 		try {
 			updateName(new IdName(newDbAcEq.getId(), datasetAcEqName));
@@ -91,4 +98,19 @@ public class AcquisitionEquipmentServiceImpl extends BasicEntityServiceImpl<Acqu
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center name.");
 		}
 	}
+
+	public AcquisitionEquipment update(final AcquisitionEquipment entity) throws EntityNotFoundException {
+		final Optional<AcquisitionEquipment> entityDbOpt = repository.findById(entity.getId());
+		final AcquisitionEquipment entityDb = entityDbOpt.orElseThrow(
+				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+		updateValues(entity, entityDb);
+		return repository.save(entityDb);
+	}
+
+	public void deleteById(final Long id) throws EntityNotFoundException  {
+		final Optional<AcquisitionEquipment> entity = repository.findById(id);
+		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+		repository.deleteById(id);
+	}
+
 }

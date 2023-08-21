@@ -3,7 +3,7 @@ package org.shanoir.ng.dicom.web;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.solr.common.StringUtils;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;

@@ -15,6 +15,7 @@
 package org.shanoir.ng.manufacturermodel.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,7 +25,8 @@ import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -38,7 +40,7 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<ManufacturerModel> implements ManufacturerModelService {
+public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 	
 	@Autowired
 	private ManufacturerModelRepository manufacturerModelRepository;
@@ -51,6 +53,36 @@ public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<Manufac
 
 	@Autowired
 	private ObjectMapper objectMapper;
+	public Optional<ManufacturerModel> findById(final Long id) {
+		return manufacturerModelRepository.findById(id);
+	}
+
+	@Override
+	public List<ManufacturerModel> findAll() {
+		return Utils.toList(manufacturerModelRepository.findAll());
+	}
+
+	@Override
+	public ManufacturerModel create(final ManufacturerModel entity) {
+		ManufacturerModel savedEntity = manufacturerModelRepository.save(entity);
+		return savedEntity;
+	}
+
+	@Override
+	public ManufacturerModel update(final ManufacturerModel entity) throws EntityNotFoundException {
+		final Optional<ManufacturerModel> entityDbOpt = manufacturerModelRepository.findById(entity.getId());
+		final ManufacturerModel entityDb = entityDbOpt.orElseThrow(
+				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+		updateValues(entity, entityDb);
+		return manufacturerModelRepository.save(entityDb);
+	}
+
+	@Override
+	public void deleteById(final Long id) throws EntityNotFoundException  {
+		final Optional<ManufacturerModel> entity = manufacturerModelRepository.findById(id);
+		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+		manufacturerModelRepository.deleteById(id);
+	}
 
 	@Override
 	public List<IdName> findIdsAndNames() {
@@ -62,7 +94,6 @@ public class ManufacturerModelServiceImpl extends BasicEntityServiceImpl<Manufac
 		return manufacturerModelRepository.findIdsAndNames();
 	}
 
-	@Override
 	protected ManufacturerModel updateValues(ManufacturerModel from, ManufacturerModel to) {
 		to.setDatasetModalityType(from.getDatasetModalityType());
 		to.setMagneticField(from.getMagneticField());

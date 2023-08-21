@@ -25,106 +25,81 @@ import java.util.List;
 import org.apache.solr.client.solrj.beans.Field;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.solr.core.mapping.Indexed;
-import org.springframework.data.solr.core.mapping.SolrDocument;
 
 /**
  * @author yyao
  *
  */
-@SolrDocument(solrCoreName = "shanoir")
 public class ShanoirSolrDocument {
 	
 	/** An id of type string and distinct from datasetId is preferable for Solr **/
 	@Id
 	@Field
-	@Indexed
 	private String id;
 	
 	@Field
-	@Indexed
 	private	Long datasetId;
 	
 	@Field
-	@Indexed
 	private	String datasetName;
 	
 	// DatasetModalityType: MR, CT, PET etc..
 	@Field
-	@Indexed
 	private	String datasetType;
 	
 	// T1, T2, Diff, etc..
 	@Field
-	@Indexed
 	private String datasetNature;
 	
 	@Field
-	@Indexed
 	private Date datasetCreationDate;
 
 	@Field
-	@Indexed
 	private Long examinationId;
 
 	@Field
-	@Indexed
 	private String examinationComment;
-	
 
-	@Indexed
+	@Field
 	private Date examinationDate;
 
 	@Field
-	@Indexed
 	private String acquisitionEquipmentName;
 
 	@Field
-	@Indexed
 	private String subjectName;
 
 	@Field
-	@Indexed
 	private String subjectType;
 
 	@Field
-	@Indexed
 	private Long subjectId;
 
 	@Field
-	@Indexed
 	private String studyName;
 	
 	@Field
-	@Indexed
 	private Long studyId;
 	
 	@Field
-	@Indexed
 	private String centerName;
 
 	@Field
-	@Indexed
 	private Long centerId;
 
 	@Field
-	@Indexed
 	private Double sliceThickness;
 	
 	@Field
-	@Indexed
 	private Double pixelBandwidth;
 	
 	@Field
-	@Indexed
 	private Double magneticFieldStrength;
 	
 	@Field
-	@Indexed(name="tags", type="string")
 	private List<String> tags;
 
-	public ShanoirSolrDocument () {
-		
+	public ShanoirSolrDocument () {		
 	}
 	
 	public ShanoirSolrDocument (String id, Long datasetId, String datasetName, String datasetType, String datasetNature,
@@ -310,9 +285,7 @@ public class ShanoirSolrDocument {
 	public void setStudyName(String studyName) {
 		this.studyName = studyName;
 	}
-
-
-
+	
 	/**
 	 * @return the studyId
 	 */

@@ -17,7 +17,6 @@ package  org.shanoir.ng.subject.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
