@@ -250,44 +250,47 @@ export class ExecutionComponent implements OnInit {
          */
         let resultPath = this.generateResultPath();
         execution.resultsLocation = `shanoir:/${resultPath}?token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
-        this.carminClientService.createExecution(execution).then(
-            (execution: Execution) => {
-                this.msgService.log('info', 'the execution successfully started.')
+        this.setExecutionParams(execution).then( () => {
+            this.carminClientService.createExecution(execution).then(
+                (execution: Execution) => {
+                    this.msgService.log('info', 'the execution successfully started.')
 
-                let carminDatasetProcessing: CarminDatasetProcessing = new CarminDatasetProcessing(execution.identifier, execution.name, execution.pipelineIdentifier, resultPath, execution.status, execution.timeout, execution.startDate, execution.endDate);
+                    let carminDatasetProcessing: CarminDatasetProcessing = new CarminDatasetProcessing(execution.identifier, execution.name, execution.pipelineIdentifier, resultPath, execution.status, execution.timeout, execution.startDate, execution.endDate);
 
-                carminDatasetProcessing.comment = execution.name;
-                carminDatasetProcessing.studyId = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
-                carminDatasetProcessing.datasetProcessingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
-                carminDatasetProcessing.outputProcessing = this.pipeline.outputProcessing;
+                    carminDatasetProcessing.comment = execution.name;
+                    carminDatasetProcessing.studyId = [...this.selectedDatasets][0].study.id;  // TODO : this should be selected automatically if all datasets have the same study, if not show a select input to choose what context.
+                    carminDatasetProcessing.datasetProcessingType = DatasetProcessingType.SEGMENTATION; // TODO : this should be selected by the user.
+                    carminDatasetProcessing.outputProcessing = this.pipeline.outputProcessing;
 
-                // HOTFIX for circular dataset object issue
-                this.inputDatasets.forEach(dataset => {
-                    dataset.study.subjectStudyList = [];
-                    dataset.study.studyCenterList = [];
-                    dataset.subject.subjectStudyList = [];
-                })
+                    // HOTFIX for circular dataset object issue
+                    this.inputDatasets.forEach(dataset => {
+                        dataset.study.subjectStudyList = [];
+                        dataset.study.studyCenterList = [];
+                        dataset.subject.subjectStudyList = [];
+                    })
 
-                carminDatasetProcessing.inputDatasets = Array.from(this.inputDatasets);
+                    carminDatasetProcessing.inputDatasets = Array.from(this.inputDatasets);
 
-                this.carminDatasetProcessing.create(carminDatasetProcessing).then(
-                    (response: CarminDatasetProcessing) => {
-                        this.router.navigate([`/dataset-processing/details/${response.id}`]);
-                    },
-                    (error) => {
-                        this.msgService.log('error', 'Sorry, an error occurred while creating dataset processing.');
-                        console.error(error);
-                    }
-                )
-            },
-            (error) => {
-                this.msgService.log('error', 'Sorry, an error occurred while starting the execution.');
-                console.error(error);
-            }
-        )
+                    this.carminDatasetProcessing.create(carminDatasetProcessing).then(
+                        (response: CarminDatasetProcessing) => {
+                            this.router.navigate([`/dataset-processing/details/${response.id}`]);
+                        },
+                        (error) => {
+                            this.msgService.log('error', 'Sorry, an error occurred while creating dataset processing.');
+                            console.error(error);
+                        }
+                    )
+                },
+                (error) => {
+                    this.msgService.log('error', 'Sorry, an error occurred while starting the execution.');
+                    console.error(error);
+                }
+            )
+        });
     }
 
-    private setExecutionParams(execution: Execution) {
+    private setExecutionParams(execution: Execution): Promise<Awaited<void>[]> {
+        let promises: Promise<void>[] = [];
         this.pipeline.parameters.forEach(
             parameter => {
                 if (parameter.type == ParameterType.File) {
@@ -297,15 +300,16 @@ export class ExecutionComponent implements OnInit {
                     fileEntitiesOf.forEach(fileEntity => {
                         // File ad md5 values should be selected automatically depending on the pipeline.
                         execution.inputValues[parameter.name].push(fileEntity.uri);
-                        this.getInputDatasets(fileEntity).then(datasets => {
+                        promises.push(this.getInputDatasets(fileEntity).then(datasets => {
                             datasets.forEach(ds => this.inputDatasets.add(ds))
-                        });
+                        }));
                     })
                 } else {
                     execution.inputValues[parameter.name] = this.executionForm.get(parameter.name).value;
                 }
             }
         )
+        return Promise.all(promises);
     }
 
     async getInputDatasets(fileEntity: FileEntity): Promise<Dataset[]>{
@@ -313,13 +317,9 @@ export class ExecutionComponent implements OnInit {
         if(fileEntity.entity instanceof Dataset){
             return [fileEntity.entity];
         }else if(fileEntity.entity instanceof DatasetAcquisition){
-            return await this.datasetService.getByAcquisitionId(fileEntity.entity.id).then(acqDs => {
-                return acqDs;
-            });
+            return await this.datasetService.getByAcquisitionId(fileEntity.entity.id);
         }else if(fileEntity.entity instanceof Examination){
-            return await this.datasetService.getByExaminationId(fileEntity.entity.id).then(examDs => {
-                return examDs;
-            });
+            return await this.datasetService.getByExaminationId(fileEntity.entity.id);
         }
         return [];
 
