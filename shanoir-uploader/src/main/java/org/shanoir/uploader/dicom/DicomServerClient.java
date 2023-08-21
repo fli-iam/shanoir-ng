@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.dcm4che3.net.Status;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
-import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.dicom.query.ConfigBean;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
@@ -49,7 +48,7 @@ public class DicomServerClient implements IDicomServerClient {
 		DicomNode calling = new DicomNode(config.getLocalDicomServerAETCalling(), config.getLocalDicomServerHost(), config.getLocalDicomServerPort());
 		DicomNode called = new DicomNode(config.getDicomServerAETCalled(), config.getDicomServerHost(), config.getDicomServerPort());
 		queryPACSService = new QueryPACSService();
-		queryPACSService.setDicomNodes(calling, called);
+		queryPACSService.setDicomNodes(calling, called, config.getLocalDicomServerAETCalling());
 		dcmRcvManager.configure(config);
 	}
 	
@@ -148,7 +147,7 @@ public class DicomServerClient implements IDicomServerClient {
 	private boolean getFilesFromServer(final String seriesInstanceUID, final String seriesDescription) throws Exception {
 		final DicomState state;
 		try {
-			logger.info("\n\n C_MOVE, serie (" + seriesDescription + ") command: launching dcmqr with args:\n\n");
+			logger.info("\n\n C_MOVE, serie (" + seriesDescription + ") command: launching c-move with args: " + seriesDescription + ", " + seriesInstanceUID + "\n\n");
 			state = queryPACSService.queryCMOVE(seriesInstanceUID);
 			logger.debug("\n\n Dicom Query list:\n " + state.toString() + "\n");
 		} catch (final Exception e) {

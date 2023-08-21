@@ -91,9 +91,10 @@ public class QueryPACSService {
 		this.called = new DicomNode(calledName, calledHost, calledPort);
 	}
 	
-	public void setDicomNodes(DicomNode calling, DicomNode called) {
+	public void setDicomNodes(DicomNode calling, DicomNode called, String calledNameSCP) {
 		this.calling = calling;
 		this.called = called;
+		this.calledNameSCP = calledNameSCP;
 		this.maxPatientsFromPACS = 10;
 	}
 	
