@@ -22,6 +22,7 @@ import { ServiceLocator } from 'src/app/utils/locator.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { DownloadSetupComponent } from './download-setup/download-setup.component';
 import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
+import { Queue } from './queue.model';
 
 declare var JSZip: any;
 
@@ -42,6 +43,8 @@ export type Report = {
 
 @Injectable()
 export class MassDownloadService {
+
+    private downloadQueue: Queue = new Queue();
 
     constructor(
         private datasetService: DatasetService,
@@ -84,33 +87,46 @@ export class MassDownloadService {
         if (datasetIds.length == 0) return;
         return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
             let task: Task = this.createTask(datasetIds.length);
-            const start: number = Date.now();
-            let ids = [...datasetIds]; // copy array
-            let report: Report = this.initReport(datasetIds);
-            let promises: Promise<void>[] = [];
-            for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
-                promises.push(
-                    this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task)
-                );
-            }
-            return Promise.all(promises).then(() => {
-                task.lastUpdate = new Date();
-                report.duration = Date.now() - start;
-                if (report.nbError > 0) {
-                    task.status = -1;
-                    const tab: string = '- ';
-                    task.message = 'download failed in ' + report.duration + 'ms.\n'
-                        + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
-                        + tab + report.nbError + ' datasets were downloaded but are (at least partially) in error and files could be missing.\n'
-                        + 'errors details :\n'
-                        + JSON.stringify(report, null, 4);
-                    JSON.stringify(report);
-                } else {
-                    task.status = task.status == -1 ? -1 : 1;
-                    task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' files saved in the selected directory';
+            this.downloadQueue.waitForTurn().then(releaseQueue => {
+                try {
+                    task.status = 2;
+                    const start: number = Date.now();
+                    let ids = [...datasetIds]; // copy array
+                    let report: Report = this.initReport(datasetIds);
+                    let promises: Promise<void>[] = [];
+                    for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
+                        promises.push(
+                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task)
+                        );
+                    }
+                    return Promise.all(promises).then(() => {
+                        task.lastUpdate = new Date();
+                        report.duration = Date.now() - start;
+                        if (report.nbError > 0) {
+                            task.status = -1;
+                            const tab: string = '- ';
+                            task.message = 'download failed in ' + report.duration + 'ms.\n'
+                                + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
+                                + tab + report.nbError + ' datasets were downloaded but are (at least partially) in error and files could be missing.\n'
+                                + 'errors details :\n'
+                                + JSON.stringify(report, null, 4);
+                            JSON.stringify(report);
+                        } else {
+                            task.status = task.status == -1 ? -1 : 1;
+                            task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' files saved in the selected directory';
+                        }
+        
+                        this.notificationService.pushLocalTask(task);
+                    }).catch(reason => {
+                        task.message = 'download error : ' + reason;
+                        this.notificationService.pushLocalTask(task);
+                    }).finally(() => {
+                        releaseQueue();
+                    });
+                } catch (error) {
+                    releaseQueue();
+                    throw error;
                 }
-
-                this.notificationService.pushLocalTask(task);
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
@@ -119,25 +135,35 @@ export class MassDownloadService {
         if (datasets.length == 0) return;
         return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
             let task: Task = this.createTask(datasets.length);
-            const start: number = Date.now();
-            let ids = [...datasets.map(ds => ds.id)];
-            let report: Report = this.initReport(datasets.map(ds => ds.id));
-            let promises: Promise<void>[] = [];
-            let j = 0;
-            for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
-                promises.push(
-                    this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, datasets)
-                );
-            }
-            return Promise.all(promises).then(() => {
-                task.lastUpdate = new Date();
-                task.status = task.status == -1 ? -1 : 1;
-                task.message = 'download completed in ' + (Date.now() - start) + 'ms, files saved in the selected directory';
-                this.notificationService.pushLocalTask(task);
-                report.duration = Date.now() - start;
-            }).catch(reason => {
-                task.message = 'download error : ' + reason;
-                this.notificationService.pushLocalTask(task);
+            this.downloadQueue.waitForTurn().then(releaseQueue => {
+                try {
+                    task.status = 2;
+                    const start: number = Date.now();
+                    let ids = [...datasets.map(ds => ds.id)];
+                    let report: Report = this.initReport(datasets.map(ds => ds.id));
+                    let promises: Promise<void>[] = [];
+                    let j = 0;
+                    for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
+                        promises.push(
+                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, datasets)
+                        );
+                    }
+                    return Promise.all(promises).then(() => {
+                        task.lastUpdate = new Date();
+                        task.status = task.status == -1 ? -1 : 1;
+                        task.message = 'download completed in ' + (Date.now() - start) + 'ms, files saved in the selected directory';
+                        this.notificationService.pushLocalTask(task);
+                        report.duration = Date.now() - start;
+                    }).catch(reason => {
+                        task.message = 'download error : ' + reason;
+                        this.notificationService.pushLocalTask(task);
+                    }).finally(() => {
+                        releaseQueue();
+                    });
+                } catch (error) {
+                    releaseQueue();
+                    throw error;
+                }
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }

@@ -27,6 +27,7 @@ export class NotificationsService {
     public nbNewError: number = 0;
     private tasks: Task[] = [];
     public tasksInProgress: Task[] = [];
+    public tasksInWait: Task[] = [];
     public freshCompletedTasks: Task[] = [];
     private source;
     private tasksSubject: BehaviorSubject<Task[]> = new BehaviorSubject<Task[]>([]) ;
@@ -77,6 +78,7 @@ export class NotificationsService {
                 throw e;
             }
         }, 1000);
+        setTimeout(() => {clearInterval(this.readLocalStorageConnection);}, 10000)
     }
 
     private refresh() {
@@ -91,22 +93,28 @@ export class NotificationsService {
 
     updateStatusVars() {
         let tmpTasksInProgress = [];
+        let tmpTasksInWait = [];
         for (let task of this.allTasks.concat(this.newLocalTasksQueue)) {
             if (task.status == -1) {
-                let freshError: Task = this.tasksInProgress.concat(this.newLocalTasksQueue).find(tip => tip.status == 2 && task.id == tip.id);
+                let newLocalTasks: Task[] = this.newLocalTasksQueue.filter(nlt => !this.tasksInProgress.find(tip => tip.id == nlt.id));
+                let freshError: Task = this.tasksInProgress.concat(newLocalTasks).find(tip => (tip.status == 2 || task.status == 4) && task.id == tip.id);
                 if (freshError) {
                     this.pushToFreshError(task);
                 }
             } else if (task.status == 1) {
-                let freshDone: Task = this.tasksInProgress.concat(this.newLocalTasksQueue).find(tip => tip.status == 2 && task.id == tip.id);
+                let newLocalTasks: Task[] = this.newLocalTasksQueue.filter(nlt => !this.tasksInProgress.find(tip => tip.id == nlt.id));
+                let freshDone: Task = this.tasksInProgress.concat(newLocalTasks).find(tip => (tip.status == 2 || task.status == 4) && task.id == tip.id);
                 if (freshDone) {
                     this.pushToFreshCompleted(task);
                 }
             } else if (task.status == 2) {
                 tmpTasksInProgress.push(task);
+            } else if (task.status == 4) {
+                tmpTasksInWait.push(task);
             }
         }
         this.tasksInProgress = tmpTasksInProgress;
+        this.tasksInWait = tmpTasksInWait;
     }
 
     pushToFreshCompleted(task: Task) {

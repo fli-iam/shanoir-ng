@@ -16,12 +16,18 @@ import { Entity } from '../shared/components/entity/entity.abstract';
 import { Report } from '../shared/mass-download/mass-download.service';
 import { camelToSpaces } from '../utils/app.utils';
 
+export type TaskStatus = 
+    -1 // error
+    | 1 // done
+    | 2 // in progress
+    | 4; // queued
+
 export class Task extends Entity {
 
     id: number;
     creationDate: Date;
     lastUpdate: Date;
-    private _status: -1 | 1 | 2;
+    private _status: TaskStatus;
     private _message: string;
     private _progress: number;
     private _eventType: string;
@@ -39,12 +45,12 @@ export class Task extends Entity {
         return this._eventType;
     }
 
-    set status(status: -1 | 1 | 2) {
+    set status(status: TaskStatus) {
         this._status = status;
         if (status == -1) this._progress = -1;
     }
 
-    get status(): -1 | 1 | 2 {
+    get status(): TaskStatus {
         return this._status;
     }
 
