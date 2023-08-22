@@ -221,8 +221,7 @@ public class BIDSServiceImpl implements BIDSService {
 	@Override
 	public File exportAsBids(final Long studyId, String studyName) throws IOException {
 		// Get folder
-		studyName = studyName.replaceAll(" ", "");
-		studyName = studyName.replaceAll("_", "");
+		studyName = studyName.replaceAll("[ _] ", ""); 
 		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
 		File workFolder = new File(tmpFilePath);
 		if (workFolder.exists()) {
@@ -327,7 +326,7 @@ public class BIDSServiceImpl implements BIDSService {
 				exportAsBids(exam, examDir, studyName, subject.getName());
 			}
 		} catch (Exception e) {
-			LOG.error("Error to display " + sessionFile, e);
+			LOG.error("Fail to process sessionFile [{}] for study [{}]", sessionFile, studyName, e);
 		}
 	}
 
@@ -381,7 +380,7 @@ public class BIDSServiceImpl implements BIDSService {
 					getScansFile(examDir, subjectName);
 					createDatasetBidsFiles(ds, examDir, studyName, subjectName);
 				} catch (IOException e) {
-					LOG.error("Euh, là ?" + e.getMessage(), e);
+					LOG.error("Error while creating BIDS dataset file for dataset [{}]", ds.getName(), e);
 				}
 			}
 		}
@@ -429,11 +428,60 @@ public class BIDSServiceImpl implements BIDSService {
 	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, String subjectName) throws IOException {
 		File dataFolder = null;
 
-		String nature = null;
-		subjectName = subjectName.replaceAll(" ", "");
-		subjectName = subjectName.replaceAll("_", "");
+		subjectName = subjectName.replaceAll("[ _] ", ""); 
 		String datasetFilePrefix = workDir.getName();
+		
+		dataFolder = createSpecificDataFolder(dataset, workDir, dataFolder, subjectName, studyName);
 
+		// Copy dataset files in the directory AS hard link to avoid duplicating files
+		List<URL> pathURLs = new ArrayList<>();
+		getDatasetFilePathURLs(dataset, pathURLs, null);
+
+		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
+			URL url =  iterator.next();
+			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
+			String fileName = datasetFilePrefix + "_";
+			
+			String nature = null;
+
+			if (dataset instanceof MrDataset) {
+				MrDataset mrDataset = (MrDataset) dataset;
+				if (mrDataset.getUpdatedMrMetadata() != null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
+					nature = mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();
+				} else if (mrDataset.getOriginMrMetadata() != null && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
+					nature = mrDataset.getOriginMrMetadata().getMrDatasetNature().name();
+				}
+				fileName += natureMap.get(nature);
+				fileName += "_";
+			}
+
+			fileName += srcFile.getName();
+
+			try {
+			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + fileName);
+				// Use link to avoid file duplication
+				deleteIfExists(pathToGo.toAbsolutePath().toString());
+				Files.createLink(pathToGo, srcFile.toPath());
+
+				// Add the file to the scans.tsv reference
+				File scansTsvFile = getScansFile(workDir, subjectName);
+				StringBuilder buffer = new StringBuilder();
+				buffer.append(pathToGo.getParent().getFileName() + File.separator + pathToGo.getFileName()).append(TABULATION)
+				.append(format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate().atStartOfDay())).append(TABULATION)
+				.append(dataset.getDatasetAcquisition().getExamination().getId())
+				.append(NEW_LINE);
+
+				Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
+
+			} catch (IOException exception) {
+				LOG.error("File could not be created: {}", srcFile.getAbsolutePath(), exception);
+			}
+		}
+	}
+
+	private File createSpecificDataFolder(Dataset dataset, File workDir, File dataFolder, String subjectName, String studyName) {
 		// Create specific files (EEG, MS, MEG, etc..)
 		if (dataset instanceof EegDataset) {
 			dataFolder = createDataFolder("eeg", workDir);
@@ -444,11 +492,6 @@ public class BIDSServiceImpl implements BIDSService {
 			dataFolder = createDataFolder("pet", workDir);
 		} else if (dataset instanceof MrDataset) {
 			MrDataset mrDataset = (MrDataset) dataset;
-			if (mrDataset.getUpdatedMrMetadata() != null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
-				nature = mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();
-			} else if (mrDataset.getOriginMrMetadata() != null && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
-				nature = mrDataset.getOriginMrMetadata().getMrDatasetNature().name();
-			}
 			// Here we want to know whether we have anat/func/dwi/fmap
 			// We base ourselves on SeriesDescription here
 			MrProtocol protocol = ((MrDatasetAcquisition) dataset.getDatasetAcquisition()).getMrProtocol();
@@ -491,44 +534,7 @@ public class BIDSServiceImpl implements BIDSService {
 		} else {
 			dataFolder = createDataFolder("undefined", workDir);
 		}
-
-		// Copy dataset files in the directory AS hard link to avoid duplicating files
-		List<URL> pathURLs = new ArrayList<>();
-		getDatasetFilePathURLs(dataset, pathURLs, null);
-
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-
-		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
-			URL url =  iterator.next();
-			File srcFile = new File(UriUtils.decode(url.getPath(), "UTF-8"));
-			String fileName = datasetFilePrefix + "_";
-			if (nature != null) {
-				fileName += natureMap.get(nature);
-				fileName += "_";
-			}
-
-			fileName += srcFile.getName();
-
-			try {
-			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + fileName);
-				// Use link to avoid file duplication
-				deleteIfExists(pathToGo.toAbsolutePath().toString());
-				Files.createLink(pathToGo, srcFile.toPath());
-
-				// Add the file to the scans.tsv reference
-				File scansTsvFile = getScansFile(workDir, subjectName);
-				StringBuilder buffer = new StringBuilder();
-				buffer.append(pathToGo.getParent().getFileName() + File.separator + pathToGo.getFileName()).append(TABULATION)
-				.append(format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate().atStartOfDay())).append(TABULATION)
-				.append(dataset.getDatasetAcquisition().getExamination().getId())
-				.append(NEW_LINE);
-
-				Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.toString().getBytes(), StandardOpenOption.APPEND);
-
-			} catch (IOException exception) {
-				LOG.error("File could not be created: {}", srcFile.getAbsolutePath(), exception);
-			}
-		}
+		return dataFolder;
 	}
 
 	private void deleteIfExists(String filePath) {

@@ -41,7 +41,7 @@ public interface BidsApi {
         @ApiResponse(code = 200, message = "OK", response = Resource.class),
         @ApiResponse(code = 401, message = "unauthorized"),
         @ApiResponse(code = 403, message = "forbidden"),
-        @ApiResponse(code = 404, message = "no dataset found"),
+        @ApiResponse(code = 404, message = "no study found"),
         @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
     @GetMapping(value = "refreshBids/studyId/{studyId}/studyName/{studyName}")
     ResponseEntity<BidsElement>  refreshBIDSByStudyId(
