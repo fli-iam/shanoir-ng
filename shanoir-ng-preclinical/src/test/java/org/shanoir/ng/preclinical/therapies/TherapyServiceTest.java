@@ -20,17 +20,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.TherapyModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Therapies service test.
@@ -38,7 +38,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author sloury
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class TherapyServiceTest {
 
 	private static final Long THERAPY_ID = 1L;
@@ -55,7 +56,7 @@ public class TherapyServiceTest {
 	private TherapyServiceImpl therapiesService;
 	
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(therapiesRepository.findAll()).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
 		given(therapiesRepository.findByTherapyType(TherapyType.SURGERY)).willReturn(Arrays.asList(TherapyModelUtil.createTherapyBrain()));
@@ -74,8 +75,8 @@ public class TherapyServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<Therapy> therapies = therapiesService.findAll();
-		Assert.assertNotNull(therapies);
-		Assert.assertTrue(therapies.size() == 1);
+		Assertions.assertNotNull(therapies);
+		Assertions.assertTrue(therapies.size() == 1);
 
 		Mockito.verify(therapiesRepository, Mockito.times(1)).findAll();
 	}
@@ -83,8 +84,8 @@ public class TherapyServiceTest {
 	@Test
 	public void findByIdTest() {
 		final Therapy therapy = therapiesService.findById(THERAPY_ID);
-		Assert.assertNotNull(therapy);
-		Assert.assertTrue(TherapyModelUtil.THERAPY_NAME_BRAIN.equals(therapy.getName()));
+		Assertions.assertNotNull(therapy);
+		Assertions.assertTrue(TherapyModelUtil.THERAPY_NAME_BRAIN.equals(therapy.getName()));
 
 		Mockito.verify(therapiesRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -92,8 +93,8 @@ public class TherapyServiceTest {
 	@Test
 	public void findByNameTest() {
 		final Therapy therapy = therapiesService.findByName(TherapyModelUtil.THERAPY_NAME_BRAIN);
-		Assert.assertNotNull(therapy);
-		Assert.assertTrue(THERAPY_ID.equals(therapy.getId()));
+		Assertions.assertNotNull(therapy);
+		Assertions.assertTrue(THERAPY_ID.equals(therapy.getId()));
 
 		Mockito.verify(therapiesRepository, Mockito.times(1)).findByName(TherapyModelUtil.THERAPY_NAME_BRAIN);
 	}
@@ -101,8 +102,8 @@ public class TherapyServiceTest {
 	@Test
 	public void findByTherapyTypeTest() {
 		final List<Therapy> therapies = therapiesService.findByTherapyType(TherapyType.SURGERY);
-		Assert.assertNotNull(therapies);
-		Assert.assertTrue(therapies.size() == 1);
+		Assertions.assertNotNull(therapies);
+		Assertions.assertTrue(therapies.size() == 1);
 
 		Mockito.verify(therapiesRepository, Mockito.times(1)).findByTherapyType(TherapyType.SURGERY);
 	}
@@ -117,9 +118,9 @@ public class TherapyServiceTest {
 	@Test
 	public void updateTest() throws ShanoirException {
 		final Therapy updatedTherapy = therapiesService.update(createTherapy());
-		Assert.assertNotNull(updatedTherapy);
-		Assert.assertTrue(UPDATED_THERAPY_DATA.equals(updatedTherapy.getName()));
-		Assert.assertTrue(UPDATED_THERAPY_TYPE_DATA.equals(updatedTherapy.getTherapyType().getValue()));
+		Assertions.assertNotNull(updatedTherapy);
+		Assertions.assertTrue(UPDATED_THERAPY_DATA.equals(updatedTherapy.getName()));
+		Assertions.assertTrue(UPDATED_THERAPY_TYPE_DATA.equals(updatedTherapy.getTherapyType().getValue()));
 
 		Mockito.verify(therapiesRepository, Mockito.times(1)).save(Mockito.any(Therapy.class));
 	}

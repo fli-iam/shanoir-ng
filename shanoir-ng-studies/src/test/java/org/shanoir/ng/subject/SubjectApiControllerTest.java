@@ -23,14 +23,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.service.MicroserviceRequestsService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.subject.controler.SubjectApiController;
@@ -49,13 +49,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for subject controller.
@@ -63,7 +59,7 @@ import com.google.gson.GsonBuilder;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = SubjectApiController.class)
 @ContextConfiguration(classes = {SubjectApiController.class, RestTemplate.class, MicroserviceRequestsService.class})
 @AutoConfigureMockMvc(addFilters = false)
@@ -71,8 +67,6 @@ public class SubjectApiControllerTest {
 
 	private static final String REQUEST_PATH = "/subjects";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-
-	private Gson gson;
 
 	@Autowired
 	private MockMvc mvc;
@@ -92,17 +86,13 @@ public class SubjectApiControllerTest {
 	@MockBean
 	private ShanoirEventService eventService;
 
-	@Before
+	@BeforeEach
 	public void setup() throws EntityNotFoundException, MicroServiceCommunicationException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-
 		given(subjectMapperMock.subjectsToSubjectDTOs(Mockito.anyList()))
 		.willReturn(Arrays.asList(new SubjectDTO()));
-		
 		doNothing().when(subjectServiceMock).deleteById(1L);
 		given(subjectServiceMock.findAll()).willReturn(Arrays.asList(new Subject()));
 		given(subjectServiceMock.findById(1L)).willReturn(new Subject());
-
 		Subject subject = new Subject();
 		subject.setId(Long.valueOf(123));
 		given(subjectServiceMock.create(Mockito.any(Subject.class))).willReturn(subject );
@@ -132,7 +122,7 @@ public class SubjectApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewSubjectTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createSubject())))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createSubject())))
 				.andExpect(status().isOk());
 	}
 
@@ -142,7 +132,7 @@ public class SubjectApiControllerTest {
 		Subject subject = ModelsUtil.createSubject();
 		subject.setId(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(subject)))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
 				.andExpect(status().isNoContent());
 	}
 
@@ -167,9 +157,9 @@ public class SubjectApiControllerTest {
 
 		
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(subject)))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
 				.andExpect(status().isOk())
-				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}}]"));
+				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"subjectPreclinical\":false,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"subjectPreclinical\":false,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}}]"));
 	}
 
 	@Test
@@ -194,9 +184,9 @@ public class SubjectApiControllerTest {
 
 		
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH + "/1/allSubjects").param("preclinical", "null").accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(subject)))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(subject)))
 				.andExpect(status().isOk())
-				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}}]"));
+				.andExpect(content().string("[{\"id\":2,\"name\":\"AA\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"subjectPreclinical\":false,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}},{\"id\":1,\"name\":\"BB\",\"identifier\":null,\"subjectStudy\":{\"id\":null,\"subject\":null,\"subjectPreclinical\":false,\"study\":null,\"subjectStudyIdentifier\":null,\"subjectType\":null,\"physicallyInvolved\":false,\"tags\":null,\"qualityTag\":null}}]"));
 	}
 
 }

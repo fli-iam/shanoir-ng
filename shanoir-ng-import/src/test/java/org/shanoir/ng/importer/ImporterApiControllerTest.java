@@ -14,11 +14,8 @@
 
 package org.shanoir.ng.importer;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -30,20 +27,17 @@ import java.util.Collections;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
-import org.shanoir.ng.importer.dicom.ImportJobConstructorService;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.ng.importer.model.EegDataset;
 import org.shanoir.ng.importer.model.EegImportJob;
 import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.utils.ImportUtils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -56,13 +50,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for importer controller.
@@ -70,19 +61,14 @@ import com.google.gson.GsonBuilder;
  * @author atouboul
  *
  */
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = ImporterApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
 public class ImporterApiControllerTest {
 
-	private static final String UPLOAD_EEG_PATH = "/importer/upload_eeg/";
-
 	private static final String START_EEG_JOB_PATH = "/importer/start_import_eeg_job/";
 
 	private static final String GET_DICOM = "/importer/get_dicom/";
-
-	private Gson gson;
 	
 	@Autowired
 	private MockMvc mvc;
@@ -92,9 +78,6 @@ public class ImporterApiControllerTest {
 
 	@MockBean
 	private DicomDirToModelService dicomDirToModel;
-
-	@MockBean
-	private ImportJobConstructorService importJobConstructorService;
 
 	@MockBean
 	private ImagesCreatorAndDicomFileAnalyzerService imagesCreatorAndDicomFileAnalyzer;
@@ -113,11 +96,6 @@ public class ImporterApiControllerTest {
 	
 	@MockBean
 	private ShanoirEventService shanoirEventService;
-
-	@Before
-	public void setup() throws ShanoirException, IOException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
-	}
 
 	public MockMultipartFile createFile(boolean withParticipants, boolean studyDescription,
 			boolean sourceData, boolean importJson) throws IOException {
@@ -165,7 +143,7 @@ public class ImporterApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.post(START_EEG_JOB_PATH)
 				.accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(gson.toJson(importJob)));
+				.content(JacksonUtils.serialize(importJob)));
 		
 		// Just check that the name is well transmitted and that the call is made
 		verify(restTemplate).exchange(Mockito.any(String.class), Mockito.eq(HttpMethod.POST), captor.capture(), Mockito.eq(String.class));

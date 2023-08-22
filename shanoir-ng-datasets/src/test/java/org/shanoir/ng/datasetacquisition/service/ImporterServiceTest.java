@@ -1,9 +1,9 @@
 package org.shanoir.ng.datasetacquisition.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -17,9 +17,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.dcm4che3.data.Attributes;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -52,9 +51,8 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class ImporterServiceTest {
@@ -95,7 +93,7 @@ public class ImporterServiceTest {
 
 	private Examination exam;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws IOException {
 		exam = new Examination();
 		exam.setExaminationDate(LocalDate.now());
@@ -170,7 +168,7 @@ public class ImporterServiceTest {
 		
 		// THEN datasets are created
 		// Check what we save at the end
-		verify(datasetAcquisitionRepository).saveAll(any());
+		verify(datasetAcquisitionService).createAll(any());
 		//verify(datasetAcquisitionService).create(datasetAcq);
 		verify(dicomPersisterService).persistAllForSerie(any());
 

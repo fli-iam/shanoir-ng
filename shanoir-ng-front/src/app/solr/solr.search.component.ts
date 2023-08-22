@@ -458,7 +458,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         customActionDefs.push(
             {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
             {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
-            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
+            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
             {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
             {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
@@ -478,7 +478,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 this.selectionTable.refresh();
             }, disabledIfNoResult: true},
             {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
-            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
+            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
             {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
             {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
@@ -516,8 +516,21 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     initExecutionMode() {
-        this.processingService.setDatasets(this.selectedDatasetIds);
-        this.router.navigate(['/processing']);
+        let noAdminStudies: Set<string> = new Set();
+        this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
+            acquisitions.forEach(acq => {
+                if (!this.hasAdminRight(acq.examination?.study?.id)) {
+                    noAdminStudies.add(acq.examination?.study?.name);
+                }
+            });
+            if(noAdminStudies.size > 0){
+                this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to run pipelines on studies you don\'t administrate. '
+                    + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...noAdminStudies].join(', '));
+            }else{
+                this.processingService.setDatasets(this.selectedDatasetIds);
+                this.router.navigate(['/processing']);
+            }
+        });
     }
 
     copyIds() {

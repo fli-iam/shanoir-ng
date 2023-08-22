@@ -17,7 +17,6 @@ package  org.shanoir.ng.subject.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.dateTime.LocalDateSerializer;
 import org.shanoir.ng.subject.model.HemisphericDominance;
 import org.shanoir.ng.subject.model.ImagedObjectCategory;
@@ -52,8 +51,7 @@ public class SubjectDTO {
     private Sex sex;
     
     private List<SubjectStudyDTO> subjectStudyList;
-    
-    private boolean preclinical;
+	private boolean preclinical;
 
 	/**
 	 * @return the id
@@ -180,7 +178,7 @@ public class SubjectDTO {
 	public void setSubjectStudyList(List<SubjectStudyDTO> subjectStudyList) {
 		this.subjectStudyList = subjectStudyList;
 	}
-	
+
 	public boolean isPreclinical() {
 		return preclinical;
 	}
@@ -188,19 +186,4 @@ public class SubjectDTO {
 	public void setPreclinical(boolean preclinical) {
 		this.preclinical = preclinical;
 	}
-    
-//  private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<UserPersonalCommentSubject>(0);
-
-//    private PseudonymusHashValues pseudonymusHashValues;
-
-//    private List<Dataset> datasetList = new ArrayList<Dataset>(0);
-//
-//    private List<Examination> examinationList = new ArrayList<Examination>(0);
-//
-//    private List<RelSubjectGroupOfSubjects> relSubjectGroupOfSubjectsList = new ArrayList<RelSubjectGroupOfSubjects>(0);
-//
-//    private List<UserPersonalCommentSubject> userPersonalCommentList = new ArrayList<UserPersonalCommentSubject>(0);
-
-    
-    
 }

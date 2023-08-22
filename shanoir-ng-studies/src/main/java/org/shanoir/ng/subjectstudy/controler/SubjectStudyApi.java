@@ -26,27 +26,28 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 /**
  * @author yyao
  *
  */
 
-@Api(value = "subjectStudy")
+@Tag(name = "subjectStudy")
 @RequestMapping("/subjectStudy")
 public interface SubjectStudyApi {
 	
-	@ApiOperation(value = "", notes = "Updates subject study", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "subject study updated", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@Operation(summary = "", description = "Updates subject study")
+	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "subject study updated"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/{subjectStudyId}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("( hasRole('ADMIN') or ( hasAnyRole('EXPERT', 'USER')"
@@ -54,7 +55,7 @@ public interface SubjectStudyApi {
 			+ " or @studySecurityService.hasRightOnStudy(#subjectStudy.getStudy(), 'CAN_ADMINISTRATE') )"
 			+ "  )) and @controlerSecurityService.idMatches(#subjectStudyId, #subjectStudy)")
 	ResponseEntity<Void> updateSubjectStudy(
-			@ApiParam(value = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
-			@ApiParam(value = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
+			@Parameter(name = "id of the subject study", required = true) @PathVariable("subjectStudyId") Long subjectStudyId,
+			@Parameter(name = "subject study to update", required = true) @RequestBody SubjectStudy subjectStudy,
 			final BindingResult result) throws RestServiceException;
 }

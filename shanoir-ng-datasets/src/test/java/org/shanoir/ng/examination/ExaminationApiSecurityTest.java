@@ -27,9 +27,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.examination.controler.ExaminationApi;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
@@ -57,7 +56,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
@@ -67,7 +65,7 @@ import org.springframework.validation.BindingResult;
  * @author jlouis
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class ExaminationApiSecurityTest {
@@ -91,7 +89,7 @@ public class ExaminationApiSecurityTest {
 	@MockBean
 	StudyUserRightsRepository studyUserRightsRepository;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockBindingResult = new BeanPropertyBindingResult(mockExam(1L), "examination");
 	}

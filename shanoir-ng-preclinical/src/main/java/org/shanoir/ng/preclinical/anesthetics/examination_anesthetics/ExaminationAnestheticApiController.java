@@ -33,7 +33,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class ExaminationAnestheticApiController implements ExaminationAnestheticApi {
@@ -56,8 +56,8 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 
 	@Override
 	public ResponseEntity<ExaminationAnesthetic> addExaminationAnesthetic(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "anesthetic to add to examination", required = true) @RequestBody ExaminationAnesthetic examAnesthetic,
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "anesthetic to add to examination", required = true) @RequestBody ExaminationAnesthetic examAnesthetic,
 			BindingResult result) throws RestServiceException {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(examAnesthetic);
@@ -87,8 +87,8 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 
 	@Override
 	public ResponseEntity<Void> deleteExaminationAnesthetic(
-			@ApiParam(value = "Examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Examination anesthetic id to delete", required = true) @PathVariable("eaid") Long eaid)
+			@Parameter(name = "Examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Examination anesthetic id to delete", required = true) @PathVariable("eaid") Long eaid)
 			throws RestServiceException {
 
 		if (examAnestheticsService.findById(eaid) == null) {
@@ -105,8 +105,8 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 
 	@Override
 	public ResponseEntity<ExaminationAnesthetic> getExaminationAnestheticById(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of examination id that needs to be fetched", required = true) @PathVariable("eaid") Long eaid)
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of examination id that needs to be fetched", required = true) @PathVariable("eaid") Long eaid)
 			throws RestServiceException {
 		final ExaminationAnesthetic examAnesthetic = examAnestheticsService.findById(eaid);
 		if (examAnesthetic == null) {
@@ -117,7 +117,7 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 
 	@Override
 	public ResponseEntity<List<ExaminationAnesthetic>> getExaminationAnesthetics(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
 		final List<ExaminationAnesthetic> examAnesthetics = examAnestheticsService.findByExaminationId(id);
 		return new ResponseEntity<>(examAnesthetics, HttpStatus.OK);
@@ -125,9 +125,9 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 
 	@Override
 	public ResponseEntity<Void> updateExaminationAnesthetic(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of examination anesthetic that needs to be updated", required = true) @PathVariable("eaid") Long eaid,
-			@ApiParam(value = "Examination anesthetic object that needs to be updated", required = true) @RequestBody ExaminationAnesthetic examAnesthetic,
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of examination anesthetic that needs to be updated", required = true) @PathVariable("eaid") Long eaid,
+			@Parameter(name = "Examination anesthetic object that needs to be updated", required = true) @RequestBody ExaminationAnesthetic examAnesthetic,
 			final BindingResult result) throws RestServiceException {
 
 		examAnesthetic.setId(eaid);
@@ -153,7 +153,7 @@ public class ExaminationAnestheticApiController implements ExaminationAnesthetic
 
 	@Override
 	public ResponseEntity<List<ExaminationAnesthetic>> getExaminationAnestheticsByAnesthetic(
-			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
 		Anesthetic anesthetic = anestheticsService.findById(id);
 		if (anesthetic == null) {

@@ -14,8 +14,9 @@
 
 package org.shanoir.ng.subject.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 
 import java.time.Instant;
@@ -25,10 +26,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -54,7 +54,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -65,7 +64,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class SubjectServiceTest {
@@ -93,7 +91,7 @@ public class SubjectServiceTest {
 	@Mock
 	private StudyExaminationRepository studyExaminationRepository;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(subjectRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createSubject()));
 		given(subjectRepository.findById(SUBJECT_ID)).willReturn(Optional.of(ModelsUtil.createSubject()));
@@ -113,8 +111,8 @@ public class SubjectServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<Subject> subjects = subjectService.findAll();
-		Assert.assertNotNull(subjects);
-		Assert.assertTrue(subjects.size() == 1);
+		Assertions.assertNotNull(subjects);
+		Assertions.assertTrue(subjects.size() == 1);
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).findAll();
 	}
@@ -122,8 +120,8 @@ public class SubjectServiceTest {
 	@Test
 	public void findByIdTest() {
 		final Subject subject = subjectService.findById(SUBJECT_ID);
-		Assert.assertNotNull(subject);
-		Assert.assertTrue(ModelsUtil.SUBJECT_NAME.equals(subject.getName()));
+		Assertions.assertNotNull(subject);
+		Assertions.assertTrue(ModelsUtil.SUBJECT_NAME.equals(subject.getName()));
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -137,8 +135,8 @@ public class SubjectServiceTest {
 	@Test
 	public void updateTest() throws RestServiceException, ShanoirException {
 		final Subject updatedSubject = subjectService.update(createSubjectToUpdate());
-		Assert.assertNotNull(updatedSubject);
-		Assert.assertTrue(Sex.F.equals(updatedSubject.getSex()));
+		Assertions.assertNotNull(updatedSubject);
+		Assertions.assertTrue(Sex.F.equals(updatedSubject.getSex()));
 
 		Mockito.verify(subjectRepository, Mockito.times(1)).save(Mockito.any(Subject.class));
 	}
