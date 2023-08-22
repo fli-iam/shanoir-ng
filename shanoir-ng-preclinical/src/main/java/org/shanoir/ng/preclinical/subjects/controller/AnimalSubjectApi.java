@@ -77,7 +77,7 @@ public interface AnimalSubjectApi {
 			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@PostMapping(value = "/find", produces = { "application/json" })
 	ResponseEntity<List<AnimalSubjectDto>> findBySubjectIds(
-			@Parameter(name = "subject ids") @RequestBody List<Long> subjectIds
+			@Parameter(name = "List of subject ids", required = true) @RequestBody @Valid List<Long> subjectIds
 	);
 
 	@Operation(summary = "Update an existing animalSubject", description = "")
