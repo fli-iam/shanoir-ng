@@ -20,17 +20,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Examination anesthetics service test.
@@ -38,13 +38,13 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
  * @author sloury
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class ExaminationAnestheticServiceTest {
 
 	private static final Long EXAM_ANESTHETIC_ID = 1L;
 	private static final Long EXAMINATION_ID = 1L;
 	private static final Long UPDATED_EXAM_ANESTHETIC_ANESTHETIC_ID = 3L;
-	
 
 	@Mock
 	private ExaminationAnestheticRepository examAnestheticRepository;
@@ -55,9 +55,7 @@ public class ExaminationAnestheticServiceTest {
 	@InjectMocks
 	private ExaminationAnestheticServiceImpl examAnestheticsService;
 	
-			
-	
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(examAnestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
 		given(examAnestheticRepository.findByExaminationId(1L)).willReturn(Arrays.asList(AnestheticModelUtil.createExaminationAnesthetic()));
@@ -75,8 +73,8 @@ public class ExaminationAnestheticServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<ExaminationAnesthetic> examAnesthetics = examAnestheticsService.findAll();
-		Assert.assertNotNull(examAnesthetics);
-		Assert.assertTrue(examAnesthetics.size() == 1);
+		Assertions.assertNotNull(examAnesthetics);
+		Assertions.assertTrue(examAnesthetics.size() == 1);
 
 		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findAll();
 	}
@@ -84,8 +82,8 @@ public class ExaminationAnestheticServiceTest {
 	@Test
 	public void findByIdTest() {
 		final ExaminationAnesthetic examAnesthetic = examAnestheticsService.findById(EXAM_ANESTHETIC_ID);
-		Assert.assertNotNull(examAnesthetic);
-		Assert.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(examAnesthetic.getAnesthetic().getName()));
+		Assertions.assertNotNull(examAnesthetic);
+		Assertions.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(examAnesthetic.getAnesthetic().getName()));
 		
 		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -93,13 +91,11 @@ public class ExaminationAnestheticServiceTest {
 	@Test
 	public void findByExaminationIdTest() {
 		final List<ExaminationAnesthetic> examAnesthetics = examAnestheticsService.findByExaminationId(1L);
-		Assert.assertNotNull(examAnesthetics);
-		Assert.assertTrue(examAnesthetics.size() == 1);
+		Assertions.assertNotNull(examAnesthetics);
+		Assertions.assertTrue(examAnesthetics.size() == 1);
 
 		Mockito.verify(examAnestheticRepository, Mockito.times(1)).findByExaminationId(1L);
 	}
-	
-	
 
 	@Test
 	public void saveTest() throws ShanoirException {
@@ -111,8 +107,8 @@ public class ExaminationAnestheticServiceTest {
 	@Test
 	public void updateTest() throws ShanoirException {
 		final ExaminationAnesthetic updatedExamAnesthetic = examAnestheticsService.update(createExaminationAnesthetic());
-		Assert.assertNotNull(updatedExamAnesthetic);
-		Assert.assertTrue(UPDATED_EXAM_ANESTHETIC_ANESTHETIC_ID.equals(updatedExamAnesthetic.getAnesthetic().getId()));
+		Assertions.assertNotNull(updatedExamAnesthetic);
+		Assertions.assertTrue(UPDATED_EXAM_ANESTHETIC_ANESTHETIC_ID.equals(updatedExamAnesthetic.getAnesthetic().getId()));
 
 		Mockito.verify(examAnestheticRepository, Mockito.times(1)).save(Mockito.any(ExaminationAnesthetic.class));
 	}

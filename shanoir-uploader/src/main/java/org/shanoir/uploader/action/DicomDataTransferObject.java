@@ -5,8 +5,10 @@ import java.util.Date;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.shanoir.uploader.dicom.query.Patient;
-import org.shanoir.uploader.dicom.query.Study;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Study;
+import org.shanoir.uploader.dicom.query.PatientTreeNode;
+import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.MainWindow;
 import org.shanoir.uploader.utils.Util;
 
@@ -83,31 +85,33 @@ public class DicomDataTransferObject {
 	 * to the server as we anonymize the data already on the client.
 	 * 
 	 * @param mainWindow
-	 * @param patient
+	 * @param patientTreeNode
 	 * @throws Exception
 	 */
-	public DicomDataTransferObject(final MainWindow mainWindow, final Patient patient, final Study study) throws Exception {
+	public DicomDataTransferObject(final MainWindow mainWindow, final PatientTreeNode patientTreeNode, final StudyTreeNode studyTreeNode) throws Exception {
 		/**
 		 * Extract from Patient object.
 		 */
+		Patient patient = patientTreeNode.getPatient();
 		// extract birth date of the patient of the first selected series
 		// attention: the birth date is only taken from one patient, even
 		// when the tree could display and select multiple patients
-		final String dicomBirthDate = patient.getDescriptionMap().get(BIRTH_DATE);
+		final String dicomBirthDate = patient.getPatientBirthDate().toString();
 		if (dicomBirthDate != null && !"".equals(dicomBirthDate)) {
 			birthDate = Util.convertStringDicomDateToDate(dicomBirthDate);
 		}
-		final String name = patient.getDescriptionMap().get(NAME);
+		final String name = patient.getPatientName();
 		firstName = Util.computeFirstName(name);
 		lastName = Util.computeLastName(name);
-		sex = patient.getDescriptionMap().get(SEX);
-		IPP = patient.getDescriptionMap().get(ID);
+		sex = patient.getPatientSex();
+		IPP = patient.getPatientID();
 
 		/**
 		 * Extract from Study object.
 		 */
-		studyInstanceUID = study.getDescriptionMap().get(ID);
-		String dicomStudyDate = study.getDescriptionMap().get(DATE);
+		Study study = studyTreeNode.getStudy();
+		studyInstanceUID = study.getStudyInstanceUID();
+		String dicomStudyDate = study.getStudyDate().toString();
 		if (dicomStudyDate != null && !"".equals(dicomStudyDate)) {
 			studyDate = Util.convertStringDicomDateToDate(dicomStudyDate);
 		} else if (mainWindow != null) {
@@ -118,7 +122,7 @@ public class DicomDataTransferObject {
 				    JOptionPane.ERROR_MESSAGE);
 			throw new Exception();
 		}
-		studyDescription = study.getStudyDescriptionOverwrite();
+		studyDescription = study.getStudyDescription();
 	}
 
 	public String getIPP() {

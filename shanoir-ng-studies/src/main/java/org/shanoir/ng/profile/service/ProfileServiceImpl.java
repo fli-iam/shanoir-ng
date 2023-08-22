@@ -14,8 +14,14 @@
 
 package org.shanoir.ng.profile.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.shanoir.ng.profile.model.Profile;
-import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
+import org.shanoir.ng.profile.repository.ProfileRepository;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.utils.Utils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -25,11 +31,41 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class ProfileServiceImpl extends BasicEntityServiceImpl<Profile> implements ProfileService {
+public class ProfileServiceImpl implements ProfileService {
 
-	@Override
+	@Autowired
+	private ProfileRepository repository;
+
+	public Optional<Profile> findById(final Long id) {
+		return repository.findById(id);
+	}
+	
+	public List<Profile> findAll() {
+		return Utils.toList(repository.findAll());
+	}
+	
+	public Profile create(final Profile entity) {
+		Profile savedEntity = repository.save(entity);
+		return savedEntity;
+	}
+	
+	public Profile update(final Profile entity) throws EntityNotFoundException {
+		final Optional<Profile> entityDbOpt = repository.findById(entity.getId());
+		final Profile entityDb = entityDbOpt.orElseThrow(
+				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+		updateValues(entity, entityDb);
+		return repository.save(entityDb);
+	}
+
+	public void deleteById(final Long id) throws EntityNotFoundException  {
+		final Optional<Profile> entity = repository.findById(id);
+		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+		repository.deleteById(id);
+	}
+	
 	protected Profile updateValues(Profile from, Profile to) {
 		to.setProfileName(from.getProfileName());
 		return to;
 	}
+
 }

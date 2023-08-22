@@ -14,13 +14,12 @@
 
 //package org.shanoir.ng.dataset;
 //
-//import static org.junit.Assert.assertEquals;
+//import static org.junit.jupiter.api.Assertions.assertEquals;
 //
 //import java.io.IOException;
 //
 //import org.apache.http.client.ClientProtocolException;
-//import org.junit.Test;
-//import org.junit.runner.RunWith;
+//import org.junit.jupiter.api.Test;
 //import org.shanoir.ng.dataset.model.Dataset;
 //import org.shanoir.ng.utils.KeycloakControllerTestIT;
 //import org.shanoir.ng.utils.ModelsUtil;
@@ -33,7 +32,6 @@
 //import org.springframework.http.HttpStatus;
 //import org.springframework.http.ResponseEntity;
 //import org.springframework.test.context.ActiveProfiles;
-//import org.springframework.test.context.junit4.SpringRunner;
 //
 ///**
 // * Integration tests for dataset controller.
@@ -41,7 +39,7 @@
 // * @author msimon
 // *
 // */
-//@RunWith(SpringRunner.class)
+//
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("test")
 //public class DatasetApiControllerTestIT extends KeycloakControllerTestIT {

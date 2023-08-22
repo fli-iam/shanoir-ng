@@ -14,20 +14,13 @@
 
 package org.shanoir.ng.study.dto;
 
-import org.shanoir.ng.profile.model.Profile;
-import org.shanoir.ng.shared.core.model.IdName;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.study.model.StudyStatus;
 import org.shanoir.ng.study.model.StudyType;
-import org.shanoir.ng.study.model.StudyUser;
-import org.shanoir.ng.studycenter.StudyCenterDTO;
-import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.tag.model.StudyTagDTO;
-import org.shanoir.ng.tag.model.TagDTO;
-import org.shanoir.ng.timepoint.TimepointDTO;
-
-import java.time.LocalDate;
-import java.util.List;
 
 /**
  * DTO for study.

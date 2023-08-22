@@ -14,10 +14,10 @@
 
 package org.shanoir.ng.datasetacquisition.model.pet;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import jakarta.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 

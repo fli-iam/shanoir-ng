@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class PathologyModelApiController implements PathologyModelApi {
@@ -78,7 +78,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	@Override
 	public ResponseEntity<PathologyModel> createPathologyModel(
-			@ApiParam(value = "pathology model to create", required = true) @RequestBody PathologyModel model,
+			@Parameter(name = "pathology model to create", required = true) @RequestBody PathologyModel model,
 			BindingResult result) throws RestServiceException {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(model);
@@ -108,7 +108,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	@Override
 	public ResponseEntity<Void> deletePathologyModel(
-			@ApiParam(value = "Pathology model id to delete", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "Pathology model id to delete", required = true) @PathVariable("id") Long id) {
 		PathologyModel toDelete = modelsService.findById(id);
 		if (toDelete == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -133,7 +133,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	@Override
 	public ResponseEntity<PathologyModel> getPathologyModelById(
-			@ApiParam(value = "ID of pathology model that needs to be fetched", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "ID of pathology model that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final PathologyModel model = modelsService.findById(id);
 		if (model == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -152,7 +152,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	@Override
 	public ResponseEntity<List<PathologyModel>> getPathologyModelsByPathology(
-			@ApiParam(value = "ID of pathology", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "ID of pathology", required = true) @PathVariable("id") Long id) {
 		Pathology pathology = pathologiesService.findById(id);
 		if (pathology == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -167,8 +167,8 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	@Override
 	public ResponseEntity<Void> updatePathologyModel(
-			@ApiParam(value = "ID of pathology model that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Pathology model object that needs to be updated", required = true) @RequestBody PathologyModel model,
+			@Parameter(name = "ID of pathology model that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Pathology model object that needs to be updated", required = true) @RequestBody PathologyModel model,
 			final BindingResult result) throws RestServiceException {
 
 		model.setId(id);
@@ -197,7 +197,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	@Override
 	public ResponseEntity<PathologyModel> uploadModelSpecifications(
-			@ApiParam(value = "ID of pathology model upload data to", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of pathology model upload data to", required = true) @PathVariable("id") Long id,
 			@RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException {
 
 		if (uploadfiles == null || uploadfiles.length == 0) {
@@ -230,7 +230,7 @@ public class PathologyModelApiController implements PathologyModelApi {
 
 	@Override
 	public ResponseEntity<Resource> downloadModelSpecifications(
-			@ApiParam(value = "ID of model specifications file to download", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "ID of model specifications file to download", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
 
 		final PathologyModel model = modelsService.findById(id);

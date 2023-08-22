@@ -27,6 +27,5 @@ import org.springframework.data.repository.CrudRepository;
  *
  */
 public interface ShanoirMetadataRepository extends CrudRepository<ShanoirMetadata, Long>, ShanoirMetadataRepositoryCustom {
-	
 
 }
