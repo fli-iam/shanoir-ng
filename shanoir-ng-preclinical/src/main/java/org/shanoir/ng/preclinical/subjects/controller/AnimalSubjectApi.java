@@ -21,13 +21,7 @@ import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -77,7 +71,7 @@ public interface AnimalSubjectApi {
 			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@PostMapping(value = "/find", produces = { "application/json" })
 	ResponseEntity<List<AnimalSubjectDto>> findBySubjectIds(
-			@Parameter(name = "List of subject ids", required = true) @RequestBody @Valid List<Long> subjectIds
+			@Parameter(name = "List of subject ids", required = true) @RequestParam(value = "subjectIds") List<Long> subjectIds
 	);
 
 	@Operation(summary = "Update an existing animalSubject", description = "")

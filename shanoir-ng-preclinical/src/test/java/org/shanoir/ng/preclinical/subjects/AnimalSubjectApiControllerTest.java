@@ -141,8 +141,7 @@ public class AnimalSubjectApiControllerTest {
 
 	@Test
 	public void findSubjectsTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH_FIND).param("subjectIds", "1,2,3")
-						.contentType(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH_FIND).param("subjectIds", "1,2,3"))
 				.andExpect(status().isOk());
 	}
 
