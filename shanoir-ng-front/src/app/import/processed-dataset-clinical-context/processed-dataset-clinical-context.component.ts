@@ -96,10 +96,6 @@ export class ProcessedDatasetClinicalContextComponent extends AbstractClinicalCo
         });
     }
 
-    public showDatasetProcessingDetails() {
-        this.router.navigate(['dataset-processing/details/' + this.datasetProcessing.id]);
-    }
-
     protected reloadSavedData(): Promise<void> {
         if (this.importDataService.contextBackup(this.stepTs)) {
             this.reloading = true;

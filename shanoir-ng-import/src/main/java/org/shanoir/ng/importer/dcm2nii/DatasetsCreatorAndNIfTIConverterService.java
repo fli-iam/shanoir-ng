@@ -36,7 +36,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -111,29 +111,11 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	@Value("${shanoir.import.series.seriesProperties}")
 	private String seriesProperties;
 
-	@Value("${shanoir.import.series.donotseparatedatasetsinserie}")
-	private String doNotSeparateDatasetsInSerie;
-
 	@Value("${shanoir.conversion.converters.convertwithclidcm}")
 	private String convertWithClidcm;
 	
 	@Value("${shanoir.conversion.converters.path}")
 	private String convertersPath;
-	
-	@Value("${shanoir.conversion.dcm2nii.converters.convertas4d}")
-	private String convertAs4D;
-
-	@Value("${shanoir.conversion.dcm2nii.converters.path.linux}")
-	private String convertersPathLinux;
-
-	@Value("${shanoir.conversion.dcm2nii.converters.path.windows}")
-	private String convertersPathWindows;
-
-	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.linux}")
-	private String clidcmPathLinux;
-
-	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.windows}")
-	private String clidcmPathWindows;
 
 	/** Logs of the conversion. */
 	private String conversionLogs;
@@ -188,7 +170,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					serie.setDatasets(new ArrayList<Dataset>());
 					constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
 					// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
-					if (!serie.getIsSpectroscopy()) {
+					if (serie.getIsSpectroscopy() != null && !serie.getIsSpectroscopy()) {
 						constructNifti(serieIDFolderFile, serie, converterId);
 					}
 				} catch (NoSuchFieldException | SecurityException e) {

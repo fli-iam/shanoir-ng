@@ -2,11 +2,6 @@ package org.shanoir.ng.examination.repository;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-
-import org.apache.commons.math3.util.Pair;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.slf4j.Logger;
@@ -14,7 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 
 @Component
 public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
@@ -67,7 +67,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 		if (preclinical != null) {
 			nbPreParams++;
 			preclinicalIndex = nbPreParams;
-			queryEndStr +=  "where ex.preclinical is ?" + preclinicalIndex + " ";
+			queryEndStr +=  "where ex.preclinical = ?" + preclinicalIndex + " ";
 		}
 		if (subjectName != null) {
 			nbPreParams++;
@@ -140,7 +140,7 @@ public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {
 		
 		LOG.debug("examination paging query : " + query);
 
-		return new Pair<>(query.getResultList(), total);
+		return Pair.of(query.getResultList(), total);
 	}
 	
 }

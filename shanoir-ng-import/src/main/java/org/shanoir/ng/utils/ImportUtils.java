@@ -20,6 +20,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
@@ -48,8 +49,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.google.common.io.Files;
 
 /**
  * Utility class
@@ -448,7 +447,7 @@ public class ImportUtils {
 			result.clear();
 			if (move) { // move file
 				try {
-					Files.move(in, out);
+					Files.move(in.toPath(), out.toPath());
 					result.put(Boolean.TRUE, out);
 				} catch (IOException e) {
 					result.put(Boolean.FALSE, out);

@@ -43,9 +43,6 @@ public class ShanoirExec {
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirExec.class);
-	
-	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.lib}")
-    private String clidcmPathLib;
 
 	@Value("${ms.url.dicom2nifti}")
 	private String dicomifierMsUrl;
@@ -94,7 +91,7 @@ public class ShanoirExec {
 		
 		if (!systemEnv.containsKey("VISTAL_FMT")) {
 			envp[i] = "VISTAL_FMT=NII";
-			envp[i + 1] = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + clidcmPathLib;
+			envp[i + 1] = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:";
 		}
 
 		final String result = exec(cmd, envp);

@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.center;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
@@ -22,9 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -40,7 +40,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * User security service test.
@@ -48,7 +47,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author jlouis
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class CenterSecurityTest {
@@ -66,7 +65,7 @@ public class CenterSecurityTest {
 	@MockBean
 	private CenterRepository repository;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockNew = ModelsUtil.createCenter();
 		mockExisting = ModelsUtil.createCenter();
@@ -127,30 +126,34 @@ public class CenterSecurityTest {
 		assertAccessAuthorized(service::deleteByIdCheckDependencies, ENTITY_ID);
 	}
 	
-	@Test(expected = UndeletableDependenciesException.class)
+	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testDependenciesCheckAcq() throws EntityNotFoundException, UndeletableDependenciesException {
-		final long ID = 666L;
-		Center center = ModelsUtil.createCenter();
-		center.setId(ID);
-		List<AcquisitionEquipment> acqs = new ArrayList<>();
-		acqs.add(new AcquisitionEquipment());
-		center.setAcquisitionEquipments(acqs);
-		given(repository.findById(ID)).willReturn(Optional.of(center));
-		service.deleteByIdCheckDependencies(ID);
+		assertThrows(UndeletableDependenciesException.class, () -> {
+			final long ID = 666L;
+			Center center = ModelsUtil.createCenter();
+			center.setId(ID);
+			List<AcquisitionEquipment> acqs = new ArrayList<>();
+			acqs.add(new AcquisitionEquipment());
+			center.setAcquisitionEquipments(acqs);
+			given(repository.findById(ID)).willReturn(Optional.of(center));
+			service.deleteByIdCheckDependencies(ID);
+		});
 	}
 	
-	@Test(expected = UndeletableDependenciesException.class)
+	@Test
 	@WithMockKeycloakUser(id = LOGGED_USER_ID, username = LOGGED_USER_USERNAME, authorities = { "ROLE_ADMIN" })
 	public void testDependenciesCheckStuCenter() throws EntityNotFoundException, UndeletableDependenciesException {
-		final long ID = 69L;
-		Center center = ModelsUtil.createCenter();
-		center.setId(ID);
-		List<StudyCenter> studyCenterList = new ArrayList<>();
-		studyCenterList.add(new StudyCenter());
-		center.setStudyCenterList(studyCenterList);
-		given(repository.findById(ID)).willReturn(Optional.of(center));
-		service.deleteByIdCheckDependencies(ID);
+		assertThrows(UndeletableDependenciesException.class, () -> {
+			final long ID = 69L;
+			Center center = ModelsUtil.createCenter();
+			center.setId(ID);
+			List<StudyCenter> studyCenterList = new ArrayList<>();
+			studyCenterList.add(new StudyCenter());
+			center.setStudyCenterList(studyCenterList);
+			given(repository.findById(ID)).willReturn(Optional.of(center));
+			service.deleteByIdCheckDependencies(ID);
+		});
 	}
 
 }

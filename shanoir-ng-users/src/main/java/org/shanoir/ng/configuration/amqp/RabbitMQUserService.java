@@ -81,7 +81,7 @@ public class RabbitMQUserService {
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_MAIL_QUEUE)
 	@RabbitHandler
 	public void receiveImportEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 			EmailDatasetsImported mail = mapper.readValue(generatedMailAsString, EmailDatasetsImported.class);
 			this.emailService.notifyStudyManagerDataImported(mail);
@@ -99,7 +99,7 @@ public class RabbitMQUserService {
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE)
 	@RabbitHandler
 	public void receiveImportFailedEvent(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 			EmailDatasetImportFailed mail = mapper.readValue(generatedMailAsString, EmailDatasetImportFailed.class);
 			this.emailService.notifyStudyManagerImportFailure(mail);
@@ -117,7 +117,7 @@ public class RabbitMQUserService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_USER_MAIL_QUEUE)
 	@RabbitHandler
 	public void receiveStudyUserReport(String generatedMailAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 			EmailStudyUsersAdded mail = mapper.readValue(generatedMailAsString, EmailStudyUsersAdded.class);
 			this.emailService.notifyStudyManagerStudyUsersAdded(mail);

@@ -1,18 +1,17 @@
 package org.shanoir.ng.importer.model.carmin;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Objects;
+
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.NotNull;
-import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.validation.constraints.NotNull;
 
 /**
  * UploadData
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-10-28T14:56:55.987Z[GMT]")
-
-
 public class UploadData {
     @JsonProperty("base64Content")
     private String base64Content = null;

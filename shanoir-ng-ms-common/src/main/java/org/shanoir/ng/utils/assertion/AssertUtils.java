@@ -14,13 +14,12 @@
 
 package org.shanoir.ng.utils.assertion;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.security.access.AccessDeniedException;
 
 public abstract class AssertUtils {
-	
 	
 	public static void assertAccessDenied(AccessCheckedFunction0Arg function) throws ShanoirException {
 		try {

@@ -5,8 +5,7 @@ import static org.mockito.BDDMockito.given;
 import java.time.LocalDate;
 import java.util.Collections;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.user.model.User;
@@ -16,14 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Test class for ShcheduledTasks class
  * @author fli
  *
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 public class ScheduledTasksTest {

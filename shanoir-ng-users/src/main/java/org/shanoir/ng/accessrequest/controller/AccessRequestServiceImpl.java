@@ -21,12 +21,10 @@ public class AccessRequestServiceImpl implements AccessRequestService {
 		return this.accessRequestRepository.findById(id);
 	}
 
-	@Override
 	public List<AccessRequest> findAll() {
 		return Utils.toList(this.accessRequestRepository.findAll());
 	}
 
-	@Override
 	public AccessRequest create(AccessRequest entity) {
 		return this.accessRequestRepository.save(entity);
 	}
@@ -60,4 +58,5 @@ public class AccessRequestServiceImpl implements AccessRequestService {
 	public List<AccessRequest> findByUserId(Long userId) {
 		return this.accessRequestRepository.findByUserId(userId);
 	}
+
 }

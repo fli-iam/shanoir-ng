@@ -25,7 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 /**
  * @author yyao
@@ -39,7 +39,7 @@ public class NIfTIConverterApiController implements NIfTIConverterApi{
 	
 	@Override
 	public ResponseEntity<NIfTIConverter> findNiftiConverterById(
-			@ApiParam(value = "id of the study card", required = true) @PathVariable("niftiConverterId") Long niftiConverterId) {
+			@Parameter(name = "id of the study card", required = true) @PathVariable("niftiConverterId") Long niftiConverterId) {
 		final NIfTIConverter niftiConverter = niftiConverterService.findById(niftiConverterId);
 		if (niftiConverterId == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);

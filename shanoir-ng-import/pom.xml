@@ -16,7 +16,7 @@
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
 		<artifactId>shanoir-ng-back</artifactId>
-		<version>2.6.6</version>
+		<version>3.1.2</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
@@ -27,7 +27,6 @@
 	<description>Shanoir-NG Import Microservice</description>
 
 	<properties>
-		<dcm4che.version>5.14.1</dcm4che.version>
 		<weasis.version>5.14.1</weasis.version>
 	</properties>
 
@@ -36,31 +35,27 @@
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>2.6.6</version>
+			<version>3.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-study-rights</artifactId>
-			<version>2.6.6</version>
+			<version>3.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir.anonymization</groupId>
 			<artifactId>anonymization</artifactId>
-			<version>2.6.6</version>
+			<version>3.1.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-exchange</artifactId>
-			<version>2.6.6</version>
+			<version>3.1.2</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.fasterxml.jackson.module</groupId>
 			<artifactId>jackson-module-kotlin</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
 		</dependency>
 
 		<!-- DICOM Weasis Tools, based on dcm4che3 -->
@@ -109,14 +104,11 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-		</dependency>
 		<!-- mvnrepository.com/artifact/org.apache.httpcomponents/httpmime -->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpmime</artifactId>
+			<version>4.5.14</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi -->
@@ -150,10 +142,14 @@
 					</classpathDependencyExcludes>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
+			<!-- Used here for ShanoirUploader: creae an additional single jar to be used by ShUp -->
+	        <plugin>
+	            <groupId>org.springframework.boot</groupId>
+	            <artifactId>spring-boot-maven-plugin</artifactId>
+	            <configuration>
+	                <classifier>exec</classifier>
+	            </configuration>
+	        </plugin>
 			<!-- Copy shanoir-ng-import.jar for docker-compose up running -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -163,7 +159,7 @@
 						<phase>package</phase>
 						<configuration>
 							<target>
-								<copy file="target/${project.build.finalName}.jar"
+								<copy file="target/${project.build.finalName}-exec.jar"
 									tofile="${basedir}/../docker-compose/import/${project.artifactId}.jar" />
 								<copy file="../utils/entrypoint_common"
 									tofile="${basedir}/../docker-compose/import/entrypoint_common" />

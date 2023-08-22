@@ -22,9 +22,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.acquisitionequipment.controler.AcquisitionEquipmentApiController;
 import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
@@ -33,6 +32,7 @@ import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
@@ -43,12 +43,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for acquisition equipment controller.
@@ -56,7 +52,6 @@ import com.google.gson.GsonBuilder;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
 @WebMvcTest(AcquisitionEquipmentApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -64,8 +59,6 @@ public class AcquisitionEquipmentApiControllerTest {
 
 	private static final String REQUEST_PATH = "/acquisitionequipments";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-
-	private Gson gson;
 
 	@Autowired
 	private MockMvc mvc;
@@ -82,9 +75,8 @@ public class AcquisitionEquipmentApiControllerTest {
 	@MockBean(name = "controlerSecurityService")
 	private ControlerSecurityService controlerSecurityService;
 
-	@Before
+	@BeforeEach
 	public void setup() throws EntityNotFoundException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException  {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 		given(acquisitionEquipmentMapper
 				.acquisitionEquipmentsToAcquisitionEquipmentDTOs(Mockito.anyList()))
 						.willReturn(Arrays.asList(new AcquisitionEquipmentDTO()));
@@ -134,7 +126,7 @@ public class AcquisitionEquipmentApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void saveNewAcquisitionEquipmentTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createAcquisitionEquipment())))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createAcquisitionEquipment())))
 				.andExpect(status().isOk());
 	}
 
@@ -142,7 +134,7 @@ public class AcquisitionEquipmentApiControllerTest {
 	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
 	public void updateAcquisitionEquipmentTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createAcquisitionEquipment())))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createAcquisitionEquipment())))
 				.andExpect(status().isNoContent());
 	}
 

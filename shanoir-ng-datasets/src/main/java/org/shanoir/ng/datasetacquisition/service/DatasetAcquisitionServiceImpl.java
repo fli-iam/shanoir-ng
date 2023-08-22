@@ -14,14 +14,18 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
-import org.apache.commons.math3.util.Pair;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -31,19 +35,16 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.shared.service.SecurityService;
 import org.shanoir.ng.solr.service.SolrService;
-import org.shanoir.ng.study.rights.StudyUser;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService {
@@ -66,7 +67,14 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     public List<DatasetAcquisition> findByStudyCard(Long studyCardId) {
-        return repository.findByStudyCardId(studyCardId);
+        if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+            return repository.findByStudyCardId(studyCardId);
+        } else {
+            List<Pair<Long, Long>> studyCenters = new ArrayList<>();
+            Set<Long> unrestrictedStudies = new HashSet<Long>();
+            securityService.getStudyCentersAndUnrestrictedStudies(studyCenters, unrestrictedStudies);
+            return repository.findByStudyCardIdAndStudyCenterOrStudyIdIn(studyCardId, studyCenters, unrestrictedStudies);
+        }
     }
 
     @Override
@@ -111,12 +119,20 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
             return repository.findPageByStudyCenterOrStudyIdIn(studyCenters, unrestrictedStudies, pageable);
         }
     }
+    
+    @Override
+    public Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions) {
+    	Iterable<DatasetAcquisition> result = this.repository.saveAll(acquisitions);
+    	for (DatasetAcquisition acquisition: result) {
+            shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, acquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+    	}
+    	return StreamSupport.stream(result.spliterator(), false).collect(Collectors.toList());
+    }
 
     @Override
     public DatasetAcquisition create(DatasetAcquisition entity) {
         DatasetAcquisition savedEntity = repository.save(entity);
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, entity.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-
         return savedEntity;
     }
 
@@ -164,7 +180,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
 
     @Override
     @Transactional
-    public void deleteById(Long id) throws EntityNotFoundException, ShanoirException {
+    public void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException {
         final DatasetAcquisition entity = repository.findById(id).orElse(null);
         if (entity == null) {
             throw new EntityNotFoundException("Cannot find entity with id = " + id);
@@ -179,7 +195,7 @@ public class DatasetAcquisitionServiceImpl implements DatasetAcquisitionService 
         repository.deleteById(id);
         shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_ACQUISITION_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
     }
-
+    
     @Override
     public boolean existsByStudyCardId(Long studyCardId) {
         return repository.existsByStudyCard_Id(studyCardId);

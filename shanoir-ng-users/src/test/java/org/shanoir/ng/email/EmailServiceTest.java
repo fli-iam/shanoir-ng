@@ -24,15 +24,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.shanoir.ng.accountrequest.model.AccountRequestInfo;
 import org.shanoir.ng.shared.email.EmailDatasetsImported;
 import org.shanoir.ng.user.model.User;
 import org.shanoir.ng.user.repository.UserRepository;
@@ -41,10 +36,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 /**
  * User detail service test.
@@ -52,7 +49,6 @@ import com.icegreen.greenmail.util.ServerSetup;
  * @author msimon
  * 
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 public class EmailServiceTest {
@@ -67,19 +63,19 @@ public class EmailServiceTest {
 	@MockBean
 	private UserRepository userRepositoryMock;
 	
-	@Before
-	public void initGreenMail() {
+	@BeforeEach
+	void setup() {
 		ServerSetup setup = new ServerSetup(3025, "localhost", "smtp");
 		greenMail = new GreenMail(setup);
 		greenMail.start();
 		given(userRepositoryMock.findAdminEmails()).willReturn(Arrays.asList(new String[]{"admin@test.shanoir.fr"}));
 	}
-	
-	@After
-    public void stopMailServer() {
+
+	@AfterEach
+    void stopMailServer() {
         greenMail.stop();
     }
-
+	
 	@Test
 	public void notifyAccountWillExpireTest() throws Exception {
 		emailService.notifyAccountWillExpire(ModelsUtil.createUser());

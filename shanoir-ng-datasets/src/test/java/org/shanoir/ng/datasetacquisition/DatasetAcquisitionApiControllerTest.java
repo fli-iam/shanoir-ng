@@ -1,15 +1,9 @@
 package org.shanoir.ng.datasetacquisition;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.shanoir.ng.dataset.modality.EegDatasetDTO;
 import org.shanoir.ng.datasetacquisition.controler.DatasetAcquisitionApiController;
@@ -27,16 +21,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = DatasetAcquisitionApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -68,7 +59,7 @@ public class DatasetAcquisitionApiControllerTest {
 
 	private Gson gson;
 	
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 	}
