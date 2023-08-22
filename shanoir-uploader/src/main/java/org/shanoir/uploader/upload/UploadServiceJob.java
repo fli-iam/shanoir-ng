@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
@@ -18,6 +17,7 @@ import org.quartz.JobExecutionException;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.ImportFinishRunnable;
+import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
@@ -107,7 +107,8 @@ public class UploadServiceJob implements Job {
 					|| file.getName().equals(ImportFinishRunnable.IMPORT_JOB_JSON)) {
 				// do not add to list
 		    } else {
-				filesToTransfer.add(file);
+		    	if (file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX))
+		    		filesToTransfer.add(file);
 			}
 		}
 		if (uploadJobManager != null && nominativeDataUploadJobManager != null) {

@@ -143,4 +143,10 @@ public class Patient {
 		this.deIdentificationMethod = deIdentificationMethod;
 	}
 
+	@Override
+	public String toString() {
+		return "Patient [patientID=" + patientID + ", patientName=" + patientName + ", patientBirthName="
+				+ patientBirthName + ", patientBirthDate=" + patientBirthDate + "]";
+	}
+
 }

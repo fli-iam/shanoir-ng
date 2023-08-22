@@ -26,9 +26,9 @@ public class DcmRcvManager {
 	 * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
 	 * We store in a folder with the SeriesInstanceUID and the file name of the SOPInstanceUID.
 	 */
-	private static final String STORAGE_PATTERN = "/{0020000E}/{00080018}";
+	private static final String STORAGE_PATTERN = "{00080018}";
 	
-	private static final String DICOM_FILE_SUFFIX = ".dcm";
+	public static final String DICOM_FILE_SUFFIX = ".dcm";
 	
 	private DicomNode scpNode;
 	
@@ -53,7 +53,7 @@ public class DcmRcvManager {
 		this.lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, null, null);
 	}
 	
-	public void setDestination(final String folderPath) {
+	public void startSCPServer(final String folderPath) {
 		try {
 			if(this.listener != null)
 				listener.stop();
@@ -66,7 +66,6 @@ public class DcmRcvManager {
 	        logger.info("DICOM SCP server successfully initialized: " + this.scpNode.toString() + ", " + folderPath);
 		} catch (Exception e) {
 			logger.error("Error during startup of DICOM server: " + e.getMessage() + "\n DICOM server is not started.");
-			System.exit(0);
 		}		
 	}
 	
