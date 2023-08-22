@@ -323,7 +323,7 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Boolean> hasDUAByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws ShanoirException {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws ShanoirException {
 
 		DataUserAgreement dua = this.dataUserAgreementService.findDUAByUserIdAndStudyId(KeycloakUtil.getTokenUserId(), studyId);
 
