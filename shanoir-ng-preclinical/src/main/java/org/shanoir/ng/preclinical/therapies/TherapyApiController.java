@@ -35,7 +35,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class TherapyApiController implements TherapyApi {
@@ -59,7 +59,7 @@ public class TherapyApiController implements TherapyApi {
 	
 	@Override
 	public ResponseEntity<Therapy> createTherapy(
-			@ApiParam(value = "therapy to create", required = true) @RequestBody Therapy therapy, BindingResult result)
+			@Parameter(name = "therapy to create", required = true) @RequestBody Therapy therapy, BindingResult result)
 			throws RestServiceException {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(therapy);
@@ -89,7 +89,7 @@ public class TherapyApiController implements TherapyApi {
 
 	@Override
 	public ResponseEntity<Void> deleteTherapy(
-			@ApiParam(value = "Therapy id to delete", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "Therapy id to delete", required = true) @PathVariable("id") Long id) {
 		if (therapiesService.findById(id) == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
@@ -104,7 +104,7 @@ public class TherapyApiController implements TherapyApi {
 
 	@Override
 	public ResponseEntity<Therapy> getTherapyById(
-			@ApiParam(value = "ID of therapy that needs to be fetched", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "ID of therapy that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final Therapy therapy = therapiesService.findById(id);
 		if (therapy == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -114,7 +114,7 @@ public class TherapyApiController implements TherapyApi {
 
 	@Override
 	public ResponseEntity<List<Therapy>> getTherapyByType(
-			@ApiParam(value = "Type of therapies that needs to be fetched", required = true) @PathVariable("type") String type)
+			@Parameter(name = "Type of therapies that needs to be fetched", required = true) @PathVariable("type") String type)
 			throws RestServiceException {
 		try {
 			final List<Therapy> therapies = therapiesService.findByTherapyType(TherapyType.valueOf(type.toUpperCase()));
@@ -138,8 +138,8 @@ public class TherapyApiController implements TherapyApi {
 
 	@Override
 	public ResponseEntity<Void> updateTherapy(
-			@ApiParam(value = "ID of therapy that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Therapy object that needs to be updated", required = true) @RequestBody Therapy therapy,
+			@Parameter(name = "ID of therapy that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Therapy object that needs to be updated", required = true) @RequestBody Therapy therapy,
 			final BindingResult result) throws RestServiceException {
 
 		therapy.setId(id);

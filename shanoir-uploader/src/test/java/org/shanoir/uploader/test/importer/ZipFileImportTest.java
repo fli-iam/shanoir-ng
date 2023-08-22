@@ -7,9 +7,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.junit.jupiter.api.Test;
+import org.shanoir.ng.importer.model.ImportJob;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
@@ -18,10 +21,6 @@ import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.model.rest.importer.ImportJob;
-import org.shanoir.uploader.model.rest.importer.Patient;
-import org.shanoir.uploader.model.rest.importer.Serie;
-import org.shanoir.uploader.model.rest.importer.Study;
 import org.shanoir.uploader.test.AbstractTest;
 import org.shanoir.uploader.utils.Util;
 
@@ -31,13 +30,14 @@ public class ZipFileImportTest extends AbstractTest {
 
 	private static Logger logger = Logger.getLogger(ZipFileImportTest.class);
 	
+	@Test
 	public void importDicomZipTest() throws Exception {
 		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
-		study.setId(Long.valueOf(1));
+		study.setId(Long.valueOf(3));
 		study.setName("DemoStudy");
 		for (int i = 0; i < 1; i++) {
 			ImportJob importJob = step1UploadDicom("acr_phantom_t1.zip");
-			if (CollectionUtils.isNotEmpty(importJob.getPatients())) {
+			if (!importJob.getPatients().isEmpty()) {
 				selectAllSeriesForImport(importJob);
 				Subject subject = step2CreateSubject(importJob, study);
 				Examination examination = step3CreateExamination(subject);
@@ -61,20 +61,20 @@ public class ZipFileImportTest extends AbstractTest {
 			throws JsonProcessingException, Exception {
 		importJob.setStudyId(study.getId());
 		importJob.setStudyName(study.getName());
-		importJob.setStudyCardId(Long.valueOf(1));
+		importJob.setStudyCardId(Long.valueOf(3)); // @todo better create one on your own
 		importJob.setStudyCardName("StudyCard1");
 		importJob.setAcquisitionEquipmentId(Long.valueOf(1));
 		importJob.setSubjectName(subject.getName());
 		importJob.setExaminationId(examination.getId());
 		importJob.setConverterId(Long.valueOf(6));
-		importJob.setAnonymisationProfileToUse("Neurinfo"); // yes we are in ShUp, but use the standard import API
+		importJob.setAnonymisationProfileToUse("Profile Neurinfo"); // yes we are in ShUp, but use the standard import API
 		String importJobJson = Util.objectWriter.writeValueAsString(importJob);
 		shUpClient.startImportJob(importJobJson);
 	}
 
 	private Examination step3CreateExamination(Subject subject) {
 		Examination examination = new Examination();
-		examination.setStudyId(Long.valueOf(1));
+		examination.setStudyId(subject.getSubjectStudyList().get(0).getStudy().getId());
 		examination.setSubjectId(subject.getId());
 		examination.setCenterId(Long.valueOf(1));
 		examination.setExaminationDate(new Date());
@@ -102,7 +102,11 @@ public class ZipFileImportTest extends AbstractTest {
 		subject.setSubjectStudyList(new ArrayList<SubjectStudy>());
 		subject = shUpClient.createSubject(subject, true, Long.valueOf(1));
 		createSubjectStudy(study, subject);
-		patient.setSubject(subject);
+		subject.setImagedObjectCategory(null); // to fix server issue with incompatible mapping value
+		org.shanoir.ng.importer.model.Subject subjectImportJob = new org.shanoir.ng.importer.model.Subject();
+		subjectImportJob.setId(subject.getId());
+		subjectImportJob.setName(subject.getName());
+		patient.setSubject(subjectImportJob);
 		return subject;
 	}
 

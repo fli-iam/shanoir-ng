@@ -20,9 +20,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -37,7 +36,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -50,8 +48,6 @@ import com.google.gson.GsonBuilder;
  * @author sloury
  *
  */
-
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = RefsApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
@@ -59,7 +55,6 @@ import com.google.gson.GsonBuilder;
 public class ReferencesApiControllerTest {
 
 	private static final String REQUEST_PATH = "/refs";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/";
 	private static final String REQUEST_PATH_CATEGORIES = REQUEST_PATH + "/categories";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
 	private static final String REQUEST_PATH_WITH_CAT_TYPE_VALUE = REQUEST_PATH + "/category/subject/specie/rat";
@@ -83,8 +78,7 @@ public class ReferencesApiControllerTest {
 	@MockBean
 	private RefsEditableByManager editableOnlyValidator;
 
-
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
@@ -94,7 +88,7 @@ public class ReferencesApiControllerTest {
 		given(refsServiceMock.findByCategoryTypeAndValue("subject", "specie", "rat")).willReturn(new Reference());
 		Reference ref = new Reference();
 		ref.setId(Long.valueOf(123));
-		given(refsServiceMock.save(Mockito.any(Reference.class))).willReturn(ref );
+		given(refsServiceMock.save(Mockito.any(Reference.class))).willReturn(ref);
 		given(uniqueValidator.validate(Mockito.any(Reference.class))).willReturn(new FieldErrorMap());
 		given(editableOnlyValidator.validate(Mockito.any(Reference.class))).willReturn(new FieldErrorMap());
 	}
@@ -138,7 +132,7 @@ public class ReferencesApiControllerTest {
 
 	@Test
 	public void findReferencesTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
 	}
 

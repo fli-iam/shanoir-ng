@@ -33,7 +33,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class AnestheticIngredientApiController implements AnestheticIngredientApi {
@@ -55,8 +55,8 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 
 	@Override
 	public ResponseEntity<AnestheticIngredient> createAnestheticIngredient(
-			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Anesthetic Ingredient to create", required = true) @RequestBody AnestheticIngredient ingredient,
+			@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Anesthetic Ingredient to create", required = true) @RequestBody AnestheticIngredient ingredient,
 			BindingResult result) throws RestServiceException {
 
 		// First check if given anesthetic exists
@@ -95,8 +95,8 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 
 	@Override
 	public ResponseEntity<Void> deleteAnestheticIngredient(
-			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Anesthetic Ingredient id to delete", required = true) @PathVariable("aiid") Long aiid) {
+			@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Anesthetic Ingredient id to delete", required = true) @PathVariable("aiid") Long aiid) {
 		AnestheticIngredient toDelete = ingredientsService.findById(aiid);
 		if (toDelete == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -111,8 +111,8 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 
 	@Override
 	public ResponseEntity<AnestheticIngredient> getAnestheticIngredientById(
-			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of ingredient that needs to be fetched", required = true) @PathVariable("aiid") Long aiid) {
+			@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of ingredient that needs to be fetched", required = true) @PathVariable("aiid") Long aiid) {
 		final AnestheticIngredient ingredient = ingredientsService.findById(aiid);
 		if (ingredient == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -122,7 +122,7 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 
 	@Override
 	public ResponseEntity<List<AnestheticIngredient>> getAnestheticIngredients(
-			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
 		// First check if given anesthetic exists
 		Anesthetic anesthetic = anestheticsService.findById(id);
@@ -137,9 +137,9 @@ public class AnestheticIngredientApiController implements AnestheticIngredientAp
 
 	@Override
 	public ResponseEntity<Void> updateAnestheticIngredient(
-			@ApiParam(value = "anesthetic id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of anesthetic ingredient that needs to be updated", required = true) @PathVariable("aiid") Long aiid,
-			@ApiParam(value = "Anesthetic Ingredient object that needs to be updated", required = true) @RequestBody AnestheticIngredient ingredient,
+			@Parameter(name = "anesthetic id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of anesthetic ingredient that needs to be updated", required = true) @PathVariable("aiid") Long aiid,
+			@Parameter(name = "Anesthetic Ingredient object that needs to be updated", required = true) @RequestBody AnestheticIngredient ingredient,
 			final BindingResult result) throws RestServiceException {
 
 		ingredient.setId(aiid);

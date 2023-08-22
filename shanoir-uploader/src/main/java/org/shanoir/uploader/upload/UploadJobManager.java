@@ -2,10 +2,10 @@ package org.shanoir.uploader.upload;
 
 import java.io.File;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 
 import org.apache.log4j.Logger;
 
@@ -38,7 +38,7 @@ public class UploadJobManager {
 			uploadFolderPath
 			+ File.separatorChar
 			+ UPLOAD_JOB_XML);
-		logger.info("UploadJobManager initialized with file: "
+		logger.debug("UploadJobManager initialized with file: "
 			+ this.uploadJobFile.getAbsolutePath());
 	}
 	
@@ -48,7 +48,7 @@ public class UploadJobManager {
 	 */
 	public UploadJobManager(final File uploadJobFile) {
 		this.uploadJobFile = uploadJobFile;
-		logger.info("UploadJobManager initialized with file: "
+		logger.debug("UploadJobManager initialized with file: "
 			+ this.uploadJobFile.getAbsolutePath());
 	}
 	

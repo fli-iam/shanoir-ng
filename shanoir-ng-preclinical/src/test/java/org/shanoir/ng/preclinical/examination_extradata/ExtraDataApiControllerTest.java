@@ -18,14 +18,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.extra_data.ExtraDataApiController;
@@ -49,7 +48,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -62,7 +60,7 @@ import com.google.gson.GsonBuilder;
  * @author sloury
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = ExtraDataApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
@@ -113,19 +111,17 @@ public class ExtraDataApiControllerTest {
 	@MockBean
 	private ExtraDataEditableByManager editableOnlyValidator;
 
-	@ClassRule
-	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	@TempDir
+	public File tempFolder;
 	
-	public static String tempFolderPath;
-	@BeforeClass
-	public static void beforeClass() {
-		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
-	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
-	}
+	public String tempFolderPath;
 
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
+	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
+
+	    gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(extraDataServiceMock).deleteById(1L);
 		given(extraDataServiceMock.findAllByExaminationId(1L)).willReturn(Arrays.asList(new ExaminationExtraData()));
@@ -172,7 +168,7 @@ public class ExtraDataApiControllerTest {
 	public void uploadExtraDataTest() throws Exception {
 		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain",
 				"some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH_UPLOAD).file(firstFile)).andExpect(status().isOk());
+		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD).file(firstFile)).andExpect(status().isOk());
 	}
 
 	@Test

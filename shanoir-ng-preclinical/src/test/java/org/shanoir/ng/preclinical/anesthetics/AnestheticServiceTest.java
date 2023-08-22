@@ -20,10 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -34,7 +33,8 @@ import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticType;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.AnestheticModelUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Anesthetics service test.
@@ -42,12 +42,12 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author sloury
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class AnestheticServiceTest {
 
 	private static final Long ANESTHETIC_ID = 1L;
 	private static final String UPDATED_ANESTHETIC_DATA = "Injection 2%";
-	
 
 	@Mock
 	private AnestheticRepository anestheticRepository;
@@ -58,9 +58,7 @@ public class AnestheticServiceTest {
 	@InjectMocks
 	private AnestheticServiceImpl anestheticsService;
 	
-			
-	
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(anestheticRepository.findAll()).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticGas()));
 		given(anestheticRepository.findAllByAnestheticType(AnestheticType.GAS)).willReturn(Arrays.asList(AnestheticModelUtil.createAnestheticGas()));
@@ -78,8 +76,8 @@ public class AnestheticServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<Anesthetic> anesthetics = anestheticsService.findAll();
-		Assert.assertNotNull(anesthetics);
-		Assert.assertTrue(anesthetics.size() == 1);
+		Assertions.assertNotNull(anesthetics);
+		Assertions.assertTrue(anesthetics.size() == 1);
 
 		Mockito.verify(anestheticRepository, Mockito.times(1)).findAll();
 	}
@@ -87,8 +85,8 @@ public class AnestheticServiceTest {
 	@Test
 	public void findByIdTest() {
 		final Anesthetic anesthetic = anestheticsService.findById(ANESTHETIC_ID);
-		Assert.assertNotNull(anesthetic);
-		Assert.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(anesthetic.getName()));
+		Assertions.assertNotNull(anesthetic);
+		Assertions.assertTrue(AnestheticModelUtil.ANESTHETIC_NAME.equals(anesthetic.getName()));
 
 		Mockito.verify(anestheticRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -96,14 +94,12 @@ public class AnestheticServiceTest {
 	@Test
 	public void findByAnestheticTypeTest() {
 		final List<Anesthetic> anesthetics = anestheticsService.findAllByAnestheticType(AnestheticType.GAS);
-		Assert.assertNotNull(anesthetics);
-		Assert.assertTrue(anesthetics.size() == 1);
+		Assertions.assertNotNull(anesthetics);
+		Assertions.assertTrue(anesthetics.size() == 1);
 
 		Mockito.verify(anestheticRepository, Mockito.times(1)).findAllByAnestheticType(AnestheticType.GAS);
 	}
 	
-	
-
 	@Test
 	public void saveTest() throws ShanoirException {
 		anestheticsService.save(createAnesthetic());
@@ -114,9 +110,9 @@ public class AnestheticServiceTest {
 	@Test
 	public void updateTest() throws ShanoirException {
 		final Anesthetic updatedAnesthetic = anestheticsService.update(createAnesthetic());
-		Assert.assertNotNull(updatedAnesthetic);
-		Assert.assertTrue(UPDATED_ANESTHETIC_DATA.equals(updatedAnesthetic.getName()));
-		Assert.assertTrue(AnestheticType.INJECTION.equals(updatedAnesthetic.getAnestheticType()));
+		Assertions.assertNotNull(updatedAnesthetic);
+		Assertions.assertTrue(UPDATED_ANESTHETIC_DATA.equals(updatedAnesthetic.getName()));
+		Assertions.assertTrue(AnestheticType.INJECTION.equals(updatedAnesthetic.getAnestheticType()));
 
 		Mockito.verify(anestheticRepository, Mockito.times(1)).save(Mockito.any(Anesthetic.class));
 	}

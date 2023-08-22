@@ -3,12 +3,10 @@ package org.shanoir.uploader.dicom.query;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
-import org.dcm4che2.data.DicomObject;
-import org.dcm4che2.data.Tag;
+import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 
 /**
@@ -18,17 +16,13 @@ import org.shanoir.uploader.dicom.DicomTreeNode;
  */
 public class Media implements DicomTreeNode {
 
-	private static final String NO_ID = "No ID";
-
 	/** The related patients. */
-	// private HashMap<String, DicomTreeNode> relatedPatients;
 	private LinkedHashMap<String, DicomTreeNode> relatedPatients;
 
 	/**
 	 * Creates a new Media object.
 	 */
 	public Media() {
-		// this.relatedPatients = new HashMap<String, DicomTreeNode>();
 		this.relatedPatients = new LinkedHashMap<String, DicomTreeNode>();
 	}
 
@@ -42,7 +36,7 @@ public class Media implements DicomTreeNode {
 	 */
 	public void addTreeNode(final String id, final DicomTreeNode patient) {
 		this.relatedPatients.put(id, patient);
-		((Patient) patient).setParent(this);
+		((PatientTreeNode) patient).setParent(this);
 	}
 
 	/**
@@ -122,16 +116,6 @@ public class Media implements DicomTreeNode {
 	}
 
 	/**
-	 * Sets the data.
-	 *
-	 * @param arg0
-	 *            arg0
-	 */
-	public void setData(final Object arg0) {
-		// TODO Auto-generated method stub
-	}
-
-	/**
 	 * Sets the parent.
 	 *
 	 * @param arg0
@@ -158,29 +142,11 @@ public class Media implements DicomTreeNode {
 	}
 
 	/**
-	 * No description for a media object.
-	 *
-	 * @return the description map
-	 */
-	public HashMap<String, String> getDescriptionMap() {
-		return new HashMap<String, String>();
-	}
-
-	/**
 	 * No id.
 	 *
 	 * @return the id
 	 */
 	public String getId() {
-		return null;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 *
-	 * @see org.shanoir.dicom.model.DicomTreeNode#getDescriptionKeys()
-	 */
-	public List<String> getDescriptionKeys() {
 		return null;
 	}
 
@@ -223,23 +189,13 @@ public class Media implements DicomTreeNode {
 	 * @param dicomObject
 	 * @return
 	 */
-	public DicomTreeNode initChildTreeNode(final DicomObject dicomObject) {
-		final String patientIdName = dicomObject.dataset().getString(Tag.PatientID) + " "
-				+ dicomObject.dataset().getString(Tag.PatientName);
-		final Patient patient = new Patient(patientIdName, 
-				dicomObject.dataset().getString(Tag.PatientBirthDate),
-				dicomObject.dataset().getString(Tag.PatientSex),
-				dicomObject.dataset().getString(Tag.PatientName),
-				dicomObject.dataset().getString(Tag.PatientBirthName));
-
-		// if no id is defined for the patient
-		if (patientIdName == null || "".equals(patientIdName)) {
-			patient.setId(NO_ID);
-		}
-		return patient;
+	public PatientTreeNode initChildTreeNode(final Patient patient) {
+		final PatientTreeNode patientTreeNode = new PatientTreeNode(patient);
+		return patientTreeNode;
 	}
 
-	public void setImagesCount(int count) {
+	@Override
+	public void setParent(DicomTreeNode parent) {
 	}
 
 }

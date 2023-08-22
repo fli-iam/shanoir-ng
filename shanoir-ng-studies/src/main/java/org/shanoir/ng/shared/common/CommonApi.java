@@ -18,24 +18,25 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RequestMapping("/common")
 public interface CommonApi {
 
-	@ApiOperation(value = "", notes = "If exists, returns the study name, subject name, center name corresponding to the given ids", response = CommonIdNamesDTO.class, tags = {})
+	@Operation(summary = "", description = "If exists, returns the study name, subject name, center name corresponding to the given ids")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found elements", response = CommonIdNamesDTO.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = CommonIdNamesDTO.class),
-			@ApiResponse(code = 403, message = "forbidden", response = CommonIdNamesDTO.class),
-			@ApiResponse(code = 404, message = "no element found", response = CommonIdNamesDTO.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = CommonIdNamesDTO.class) })
+			@ApiResponse(responseCode = "200", description = "found elements"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no element found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<CommonIdNamesDTO> findStudySubjectCenterNamesByIds(
-			@ApiParam(value = "study to update", required = true) @RequestBody CommonIdsDTO commonIdDTO);
+			@Parameter(name = "study to update", required = true) @RequestBody CommonIdsDTO commonIdDTO);
 
 }

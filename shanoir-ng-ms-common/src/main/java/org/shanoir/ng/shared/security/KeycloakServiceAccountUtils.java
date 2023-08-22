@@ -29,11 +29,11 @@ public class KeycloakServiceAccountUtils {
     private static final Logger LOG = LoggerFactory.getLogger(KeycloakServiceAccountUtils.class);
     private final String GRANT_TYPE="client_credentials";
 
-    @Value("${service-account.token.uri}")
+    @Value("${service-account.token.uri:'https://shanoir-ng-nginx/auth'}")
     private String serverUrl;
-    @Value("${service-account.client.id}")
+    @Value("${service-account.client.id:'service-account'}")
     private String clientId;
-    @Value("${service-account.client.credential-secret}")
+    @Value("${service-account.client.credential-secret:'SECRET'}")
     private String clientSecret;
 
     @Autowired

@@ -1,6 +1,6 @@
 package org.shanoir.ng.dataset.modality;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import org.shanoir.ng.dataset.model.Dataset;
 
