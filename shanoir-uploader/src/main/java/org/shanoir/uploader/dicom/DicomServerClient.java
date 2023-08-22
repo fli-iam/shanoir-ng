@@ -90,6 +90,7 @@ public class DicomServerClient implements IDicomServerClient {
 	 */
 	@Override
 	public synchronized List<String> retrieveDicomFiles(final Collection<SerieTreeNode> selectedSeries, final File uploadFolder) {
+		// for each exam/patient download: create a new mini-pacs that uses the specific download folder within the workFolder
 		dcmRcvManager.startSCPServer(uploadFolder.getAbsolutePath());
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		final List<String> oldFileNames = new ArrayList<String>();
@@ -101,20 +102,26 @@ public class DicomServerClient implements IDicomServerClient {
 				// move files from server directly into uploadFolder
 				boolean noError = getFilesFromServer(seriesInstanceUID, serieTreeNode.getDescription());
 				if(noError) {
-					// create file name filter for old files
-					final FilenameFilter oldFileNamesFilter = new FilenameFilter() {
+					// create file name filter for old files and only use .dcm files (ignore /tmp folder)
+					final FilenameFilter oldFileNamesAndDICOMFilter = new FilenameFilter() {
 						@Override
 						public boolean accept(File dir, String name) {
+							// ignore files from other series before
 							for (Iterator iterator = oldFileNames.iterator(); iterator.hasNext();) {
 								String oldFileName = (String) iterator.next();
 								if (name.equals(oldFileName)) {
 									return false;
 								}
 							}
-							return true;
+							// only take .dcm files into consideration, ignore others
+							if (name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
+								return true;
+							} else {
+								return false;
+							}
 						}
 					};
-					File[] newFileNames = uploadFolder.listFiles(oldFileNamesFilter);
+					File[] newFileNames = uploadFolder.listFiles(oldFileNamesAndDICOMFilter);
 					logger.debug("newFileNames: " + newFileNames.length);
 					for (int i = 0; i < newFileNames.length; i++) {
 						fileNamesForSerie.add(newFileNames[i].getName());
