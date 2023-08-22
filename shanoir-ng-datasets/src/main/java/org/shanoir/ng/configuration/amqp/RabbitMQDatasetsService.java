@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -221,7 +222,7 @@ public class RabbitMQDatasetsService {
 	 * Updates all the solr references for this subject.
 	 * @param subjectId the subject ID updated
 	 */
-	private void updateSolr(final List<Long> subjectIds) {
+	private void updateSolr(final List<Long> subjectIds) throws SolrServerException, IOException {
 		Set<Long> datasetsToUpdate = new HashSet<>();
 		for (Examination exam : examinationRepository.findBySubjectIdIn(subjectIds)) {
 			for (DatasetAcquisition acq : exam.getDatasetAcquisitions()) {
@@ -282,7 +283,7 @@ public class RabbitMQDatasetsService {
 			)
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public void createDatasetAcquisition(final String studyStr) {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
 			DatasetAcquisition acq = datasetAcquisitionService.findById(Long.valueOf(event.getObjectId()));
@@ -311,7 +312,7 @@ public class RabbitMQDatasetsService {
 			)
 	@Transactional
 	public void deleteSubject(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 
 			ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);
@@ -349,7 +350,7 @@ public class RabbitMQDatasetsService {
 			)
 	@Transactional
 	public void deleteStudy(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
 		try {
 			ShanoirEvent event = objectMapper.readValue(eventAsString, ShanoirEvent.class);

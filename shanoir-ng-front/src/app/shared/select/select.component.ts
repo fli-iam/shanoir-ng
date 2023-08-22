@@ -88,6 +88,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() newHidden: boolean;
     @Input() addDisabled: boolean;
     @Input() addHidden: boolean;
+    @Input() viewRoute: string;
+    @Input() newRoute: string;
     @Output() onViewClick = new EventEmitter();
     @Output() onNewClick = new EventEmitter();
     @Output() onAddClick = new EventEmitter();

@@ -1,0 +1,1 @@
+ALTER TABLE coil MODIFY coil_type TINYINT;

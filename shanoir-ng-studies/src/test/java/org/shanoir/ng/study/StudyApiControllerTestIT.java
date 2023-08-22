@@ -14,14 +14,13 @@
 
 //package org.shanoir.ng.study;
 //
-//import static org.junit.Assert.assertEquals;
+//import static org.junit.Assertions.assertEquals;
 //
 //import java.io.IOException;
 //import java.util.Arrays;
 //
 //import org.apache.http.client.ClientProtocolException;
-//import org.junit.Test;
-//import org.junit.runner.RunWith;
+//import org.junit.jupiter.api.Test;
 //import org.shanoir.ng.center.model.Center;
 //import org.shanoir.ng.study.model.Study;
 //import org.shanoir.ng.study.model.StudyStatus;
@@ -39,7 +38,6 @@
 //import org.springframework.http.HttpStatus;
 //import org.springframework.http.ResponseEntity;
 //import org.springframework.test.context.ActiveProfiles;
-//import org.springframework.test.context.junit4.SpringRunner;
 //
 ///**
 // * Integration tests for study controller.
@@ -47,7 +45,7 @@
 // * @author msimon
 // *
 // */
-//@RunWith(SpringRunner.class)
+//
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("dev")
 //public class StudyApiControllerTestIT extends KeycloakControllerTestIT {

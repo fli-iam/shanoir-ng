@@ -1,7 +1,7 @@
 package org.shanoir.ng.exporter.service;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.io.File;
@@ -11,10 +11,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -36,7 +35,6 @@ import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author JCome
  *
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class BidsServiceTest {
@@ -74,7 +72,7 @@ public class BidsServiceTest {
 	
 	public static String tempFolderPath;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws IOException {
         String property = "java.io.tmpdir";
         tempFolderPath = System.getProperty(property) + "/tmpTest/";
@@ -146,7 +144,7 @@ public class BidsServiceTest {
 		assertFalse(examFile.exists());
 	}
 
-	@After
+	@AfterEach
 	public void tearDown() {
 		// delete files
         File tempFile = new File(tempFolderPath);

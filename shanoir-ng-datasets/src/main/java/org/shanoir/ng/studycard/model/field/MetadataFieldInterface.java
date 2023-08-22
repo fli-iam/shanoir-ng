@@ -14,6 +14,8 @@
 
 package org.shanoir.ng.studycard.model.field;
 
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
+
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonDeserialize(using = MetadataFieldDeserializer.class)
@@ -24,16 +26,18 @@ public interface MetadataFieldInterface<T> {
      * 
      * @param object
      * @param updatedValue
+	 * @throws CheckedIllegalClassException if object class is incompatible with this field
      */
-	void update(T object, String updatedValue);
+	void update(T object, String updatedValue) throws CheckedIllegalClassException;
 
 	/**
 	 * Get the object's metadata field value 
 	 * 
 	 * @param object
 	 * @return field value
+	 * @throws CheckedIllegalClassException if object class is incompatible with this field
 	 */
-	String get(T object);
+	String get(T object) throws CheckedIllegalClassException;
 	
 	/**
 	 * Get the enum object id

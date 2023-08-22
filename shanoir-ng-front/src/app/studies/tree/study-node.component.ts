@@ -23,8 +23,8 @@ import {
     RightNode,
     StudyCardNode,
     StudyNode,
-    SubjectNode,
-    UNLOADED
+    ClinicalSubjectNode,
+    UNLOADED, SubjectNode, PreclinicalSubjectNode
 } from '../../tree/tree.model';
 import { StudyUserRight } from '../shared/study-user-right.enum';
 import { Study } from '../shared/study.model';
@@ -71,7 +71,10 @@ export class StudyNodeComponent implements OnChanges {
                 this.node = this.input;
             } else {
                 let subjects: SubjectNode[] = this.input.subjectStudyList.map(subjectStudy => {
-                    return new SubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
+                    if(subjectStudy.subject.preclinical){
+                        return new PreclinicalSubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
+                    }
+                    return new ClinicalSubjectNode(subjectStudy.subject.id, this.subjectStudyPipe.transform(subjectStudy), subjectStudy.tags, UNLOADED, subjectStudy.qualityTag, this.canAdmin);
                 });
                 let centers: CenterNode[] = this.input.studyCenterList.map(studyCenter => {
                     return new CenterNode(studyCenter.center.id, studyCenter.center.name, UNLOADED);
