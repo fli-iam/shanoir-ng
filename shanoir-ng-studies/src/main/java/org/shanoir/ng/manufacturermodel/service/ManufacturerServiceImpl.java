@@ -46,6 +46,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ManufacturerServiceImpl implements ManufacturerService {
 
+	@Autowired
 	private ManufacturerRepository repository;
 
 	@Autowired
@@ -62,7 +63,6 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 	@Autowired
 	private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
 
-	@Override
 	protected Manufacturer updateValues(Manufacturer manu, Manufacturer manuDb) {
 		manuDb.setName(manu.getName());
 

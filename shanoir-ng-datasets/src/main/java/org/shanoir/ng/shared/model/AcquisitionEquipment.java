@@ -15,9 +15,9 @@ package org.shanoir.ng.shared.model;
 
 import org.shanoir.ng.shared.core.model.IdName;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 /**
  * @author yyao

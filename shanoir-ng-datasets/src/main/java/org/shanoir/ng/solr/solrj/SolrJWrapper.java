@@ -31,21 +31,14 @@ import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.solr.repository.Facet;
 
 /**
  * @author yyao
  *
  */
 public interface SolrJWrapper {
-	
-	@Query(value = "*:*")
-	@Facet(fields = {"studyName", "subjectName", "datasetName", "centerName", "examinationComment", "acquisitionEquipmentName",
-			"datasetType", "datasetNature", "subjectType", "tags"}, limit = 200)
-	public SolrResultPage<ShanoirSolrDocument> findAllDocsAndFacets(Pageable pageable);
-	
-	@Facet(fields = {"studyName", "subjectName", "datasetName", "centerName", "examinationComment", "acquisitionEquipmentName",
-			"datasetType", "datasetNature", "subjectType", "tags"}, limit = 200)
-	public SolrResultPage<ShanoirSolrDocument> findByStudyIdIn(Collection<Long> studyIds, Pageable pageable);
 	
 	void addToIndex(ShanoirSolrDocument document) throws SolrServerException, IOException;
 	

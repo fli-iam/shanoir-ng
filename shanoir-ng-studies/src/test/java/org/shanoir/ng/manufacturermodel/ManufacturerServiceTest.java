@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -34,6 +35,9 @@ import org.shanoir.ng.manufacturermodel.service.ManufacturerServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Manufacturer service test.
@@ -41,8 +45,8 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
  * @author msimon
  * 
  */
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
+@SpringBootTest
+@ActiveProfiles("test")
 public class ManufacturerServiceTest {
 
 	private static final Long MANUFACTURER_ID = 1L;
