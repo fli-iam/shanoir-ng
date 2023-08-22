@@ -24,10 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -67,7 +63,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 
 @Controller
 public class StudyApiController implements StudyApi {
@@ -251,8 +250,8 @@ public class StudyApiController implements StudyApi {
 	
 	@Override
 	public void downloadProtocolFile(
-		@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-		@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName,
+		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+		@Parameter(name = "file to download", required = true) @PathVariable("fileName") String fileName,
 		HttpServletResponse response) throws RestServiceException, IOException {
 		String filePath = studyService.getStudyFilePath(studyId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
@@ -272,8 +271,8 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Void> uploadProtocolFile(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException {
 		try {
 			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
@@ -320,7 +319,7 @@ public class StudyApiController implements StudyApi {
 	
 	@Override
 	public ResponseEntity<Void> acceptDataUserAgreement(
-		@ApiParam(value = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
+		@Parameter(name = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
 		throws RestServiceException, MicroServiceCommunicationException {
 		try {
 			this.dataUserAgreementService.acceptDataUserAgreement(duaId);
@@ -333,8 +332,8 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Void> uploadDataUserAgreement(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "dua to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "dua to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
 		try {
 			if (!file.getOriginalFilename().endsWith(".pdf")  || file.getSize() > 50000000) {
 				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
@@ -359,8 +358,8 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public void downloadDataUserAgreement(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException {
 		String filePath = studyService.getStudyFilePath(studyId, fileName);
 		LOG.info("Retrieving file : {}", filePath);
 		File fileToDownLoad = new File(filePath);
@@ -378,7 +377,7 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Void> deleteDataUserAgreement (
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
 		Study study = studyService.findById(studyId);
 
 		if (study.getDataUserAgreementPaths() == null || study.getDataUserAgreementPaths().isEmpty()) {
@@ -395,8 +394,8 @@ public class StudyApiController implements StudyApi {
 
 	@Override
 	public ResponseEntity<Void> deleteStudyUser (
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-			@ApiParam(value = "id of the userId", required = true) @PathVariable("userId") Long userId) throws IOException {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "id of the userId", required = true) @PathVariable("userId") Long userId) throws IOException {
 		studyService.removeStudyUserFromStudy(studyId, userId);
 		List<StudyUserRight> surList = studyUserService.getRightsForStudy(studyId);
 

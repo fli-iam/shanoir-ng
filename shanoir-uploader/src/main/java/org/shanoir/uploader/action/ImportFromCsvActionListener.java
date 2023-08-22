@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.gui.ImportFromCSVWindow;
 import org.shanoir.uploader.model.CsvImport;
@@ -22,15 +23,17 @@ public class ImportFromCsvActionListener implements ActionListener {
 
 	ImportFromCSVWindow importFromCSVWindow;
 	IDicomServerClient dicomServerClient;
+	ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	File shanoirUploaderFolder;
 
 	List<CsvImport> csvImports;
 	ShanoirUploaderServiceClient shanoirUploaderServiceClientNG;
 	private ResourceBundle resourceBundle;
 
-	public ImportFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, File shanoirUploaderFolder, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
+	public ImportFromCsvActionListener(ImportFromCSVWindow importFromCSVWindow, ResourceBundle resourceBundle, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, File shanoirUploaderFolder, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.importFromCSVWindow = importFromCSVWindow;
 		this.dicomServerClient = dicomServerClient;
+		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.shanoirUploaderServiceClientNG = shanoirUploaderServiceClientNG;
 		this.resourceBundle = resourceBundle;
@@ -38,7 +41,7 @@ public class ImportFromCsvActionListener implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		ImportFromCsvRunner importer = new ImportFromCsvRunner(csvImports, resourceBundle, importFromCSVWindow, dicomServerClient, shanoirUploaderServiceClientNG);
+		ImportFromCsvRunner importer = new ImportFromCsvRunner(csvImports, resourceBundle, importFromCSVWindow, dicomServerClient, dicomFileAnalyzer, shanoirUploaderServiceClientNG);
 		importer.execute();
 	}
 

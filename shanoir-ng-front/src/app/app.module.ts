@@ -234,7 +234,6 @@ import { SolrPagingCriterionComponent } from './solr/criteria/solr.paging-criter
 import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
-import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { SolrTextSearchModeComponent } from './solr/text-search/solr.text-search-mode.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
@@ -269,7 +268,8 @@ import { WelcomeComponent } from './welcome/welcome.component';
 import { LoginGuard } from "./shared/roles/login-guard";
 import { AccessRequestService } from './users/access-request/access-request.service';
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
-
+import { ClipboardModule } from '@angular/cdk/clipboard';
+import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 
 @NgModule({
     imports: [
@@ -282,7 +282,8 @@ import { AccessRequestListComponent } from './users/access-request/access-reques
         NgxJsonViewerModule,
         AppRoutingModule,
         PreclinicalRoutingModule,
-        RouterModule
+        RouterModule,
+        ClipboardModule
     ],
     declarations: [
         AccountRequestComponent,
@@ -432,7 +433,6 @@ import { AccessRequestListComponent } from './users/access-request/access-reques
         SolrPagingCriterionComponent,
         SolrTextSearchComponent,
         MetadataComponent,
-        StudyCardApplyComponent,
         ApplyStudyCardOnComponent,
         SolrTextSearchModeComponent,
         ChallengeBlockComponent,
@@ -456,7 +456,8 @@ import { AccessRequestListComponent } from './users/access-request/access-reques
         QualityControlComponent,
         QualityCardListComponent,
         QualityCardComponent,
-        QualityCardRuleComponent
+        QualityCardRuleComponent,
+        TaskStatusComponent
     ],
     // Not required anymore with Angular > 9.0
     // entryComponents: [

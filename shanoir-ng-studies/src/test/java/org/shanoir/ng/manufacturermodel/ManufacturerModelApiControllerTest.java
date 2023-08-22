@@ -21,14 +21,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.manufacturermodel.controler.ManufacturerModelApiController;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerModelService;
+import org.shanoir.ng.shared.jackson.JacksonUtils;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +37,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 /**
  * Unit tests for manufacturer model controller.
@@ -51,7 +46,7 @@ import com.google.gson.GsonBuilder;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(ManufacturerModelApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
@@ -59,8 +54,6 @@ public class ManufacturerModelApiControllerTest {
 
 	private static final String REQUEST_PATH = "/manufacturermodels";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/1";
-
-	private Gson gson;
 
 	@Autowired
 	private MockMvc mvc;
@@ -71,13 +64,10 @@ public class ManufacturerModelApiControllerTest {
 	@MockBean(name = "controlerSecurityService")
 	private ControlerSecurityService controlerSecurityService;
 
-	@Before
+	@BeforeEach
 	public void setup() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		gson = new GsonBuilder().create();
-		
 		ManufacturerModel model = new ManufacturerModel();
 		model.setId(1L);
-
 		given(manufacturerModelServiceMock.findAll()).willReturn(Arrays.asList(model));
 		given(manufacturerModelServiceMock.findById(1L)).willReturn(Optional.of(model));
 		given(manufacturerModelServiceMock.create(Mockito.mock(ManufacturerModel.class)))
@@ -103,7 +93,7 @@ public class ManufacturerModelApiControllerTest {
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void saveNewManufacturerModelTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createManufacturerModel())))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturerModel())))
 				.andExpect(status().isOk());
 	}
 
@@ -111,7 +101,7 @@ public class ManufacturerModelApiControllerTest {
 	@WithMockUser(authorities = { "ROLE_ADMIN" })
 	public void updateManufacturerModelTTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
-				.contentType(MediaType.APPLICATION_JSON).content(gson.toJson(ModelsUtil.createManufacturerModel())))
+				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(ModelsUtil.createManufacturerModel())))
 				.andExpect(status().isNoContent());
 	}
 

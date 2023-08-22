@@ -234,6 +234,7 @@ export class StudyComponent extends EntityComponent<Study> {
             'withExamination': [this.study.withExamination],
             'clinical': [this.study.clinical],
             'description': [this.study.description],
+            'license': [this.study.license],
             'visibleByDefault': [this.study.visibleByDefault],
             'downloadableByDefault': [this.study.downloadableByDefault],
             'monoCenter': [{value: this.study.monoCenter, disabled: this.study.studyCenterList && this.study.studyCenterList.length > 1}, [Validators.required]],
@@ -252,8 +253,8 @@ export class StudyComponent extends EntityComponent<Study> {
     private getTotalSize(id: number): Promise<number> {
         let waitUploads: Promise<void> = this.studyService.fileUploadings.has(id)
             ? this.studyService.fileUploadings.get(id)
-            : Promise.resolve(); 
-        
+            : Promise.resolve();
+
         this.uploading = true;
         return waitUploads.then(() => {
             return Promise.all([

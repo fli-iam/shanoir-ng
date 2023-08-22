@@ -124,13 +124,5 @@ export class BidsUploadComponent {
     get valid(): boolean {
         return this.archiveStatus == 'uploaded';
     }
-    
-    public showStudyDetails() {
-        window.open('study/details/' + this.study.id, '_blank');
-    }
-
-    public showCenterDetails() {
-        window.open('center/details/' + this.center.id, '_blank');
-    }
 }
     

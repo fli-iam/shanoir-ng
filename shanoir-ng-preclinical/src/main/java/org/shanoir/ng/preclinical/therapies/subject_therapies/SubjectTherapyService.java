@@ -16,7 +16,7 @@ package org.shanoir.ng.preclinical.therapies.subject_therapies;
 
 import java.util.List;
 
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.preclinical.therapies.Therapy;
 import org.shanoir.ng.shared.exception.ShanoirException;
 

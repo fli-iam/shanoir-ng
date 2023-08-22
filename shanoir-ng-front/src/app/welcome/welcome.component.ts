@@ -70,6 +70,9 @@ export class WelcomeComponent implements OnInit {
                         "@context": "https://schema.org",
                         "@type": "Dataset",
                         "dct:conformsTo": "https://bioschemas.org/profiles/Dataset/0.3-RELEASE-2019_06_14",
+                        "url": "` + shanoirUrl + `/shanoir-ng/study/details/` + study.id + `",
+                        "identifier": "` + shanoirUrl + `/shanoir-ng/study/details/` + study.id + `",
+                        "license": "` + study.license + `",
                         "name": "` + study.name + `",
                         "description": "` + study.description + `",
                         "keywords": [
@@ -105,6 +108,9 @@ export class WelcomeComponent implements OnInit {
                     "@type": "Organization",
                     "dct:conformsTo": "https://bioschemas.org/profiles/Organization/0.2-DRAFT-2019_07_19",
                     "description": "France Life Imaging (FLI) is a harmonized imaging network for biomedical research giving access to innovative or even unique imaging equipment systems and to a methodological expertise in all imaging fields to researchers, from public research organisations and industries.",
+                    "legalName": "FRANCE LIFE IMAGING",
+                    "sameAs": "https://www.francelifeimaging.fr",
+                    "topic": "Réseau français pour l'imagerie médicale",
                     "name": "France Life Imaging",
                     "url": "https://www.francelifeimaging.fr"
                 },
@@ -113,6 +119,9 @@ export class WelcomeComponent implements OnInit {
                     "@type": "Organization",
                     "dct:conformsTo": "https://bioschemas.org/profiles/Organization/0.2-DRAFT-2019_07_19",
                     "description": "Inria - National Institute for Research in Digital Science and Technology",
+                    "legalName": "INSTITUT NATIONAL DE RECHERCHE EN INFORMATIQUE ET EN AUTOMATIQUE (INRIA)",
+                    "sameAs": "https://www.wikidata.org/wiki/Q1146208",
+                    "topic": "Recherche en informatique",
                     "name": "Inria",
                     "url": "https://inria.fr"
                 }

@@ -36,6 +36,7 @@ shanoir-ng-users/shanoir-events-log.log
 shanoir-ng-preclinical/nullbruker/
 shanoir-ng-front/node/
 shanoir-ng-front/package-lock.json
+shanoir-ng-front/.angular
 *.class
 *.jar
 *.project

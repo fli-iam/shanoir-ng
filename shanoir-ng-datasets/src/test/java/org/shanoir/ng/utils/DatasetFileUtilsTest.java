@@ -1,9 +1,8 @@
 package org.shanoir.ng.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,22 +17,20 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.test.context.ActiveProfiles;
 
 @ActiveProfiles("test")
 public class DatasetFileUtilsTest {
 
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
+    @TempDir
+    public File testFolder;
 
     @Test
     public void writeInputFileForExport() throws IOException {
       
         File sample = new File("src/test/resources/input.json");
-        assertTrue("Sample file " + sample.getAbsolutePath() + " does not exists !", sample.exists());
 
         Map<Long, List<String>> files2AcquisitionId = new HashMap<>();
 
@@ -50,16 +47,16 @@ public class DatasetFileUtilsTest {
         ByteArrayOutputStream bytesOutputStream = new ByteArrayOutputStream();
         ZipOutputStream out = new ZipOutputStream(bytesOutputStream, StandardCharsets.UTF_8);
 
-        DatasetFileUtils.writeInputFileForExport(out, files2AcquisitionId);
+        DatasetFileUtils.writeManifestForExport(out, files2AcquisitionId);
 
         out.close();
 
         ByteArrayInputStream bytesInputStream = new ByteArrayInputStream(bytesOutputStream.toByteArray());
         ZipInputStream in = new ZipInputStream(bytesInputStream, StandardCharsets.UTF_8);
         ZipEntry readEntry = in.getNextEntry();
-        assertNull("ZipInputStream must not retrieve comments", readEntry.getComment());
         assertNotNull(readEntry);
-        assertEquals("input stream does not exists !", "input.json", readEntry.getName());
+        assertNull(readEntry.getComment());
+        assertEquals("input.json", readEntry.getName());
         in.close();
     }
 

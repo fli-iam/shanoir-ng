@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
                     #refTd
                     >
-                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.table-edit]="editMode" *ngIf="col.type != 'button'" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi" [class.wrap]="!col.nowrap">
+                <div class="cell-container" (click)="col.type == 'button' ? null : onRowClick(item)" [class.table-edit]="editMode" *ngIf="col.type != 'button'" [class.select]="!!col.possibleValues" [class.multiselect]="!!col.possibleValues && col.multi" [class.wrap]="col.wrap">
 
                     <!-- default display -->
                     <a class="cell-new-tab" [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi && col.type != 'button'">
@@ -58,7 +58,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </a>
                     </a>
 
-                    <!--  -->
+                    <!-- multi -->
                     <a [routerLink]="vars.rowRoute" *ngIf="!editMode && col.multi"  class="cell-new-tab">
                         <span *ngFor="let oneVal of getFieldRawValue(item, col['field'])" class="block" [style.color]="oneVal.backgroundColor" [style.background-color]="oneVal.color" [class.dark]="getFontColor(oneVal.color)">
                             <span class="label">

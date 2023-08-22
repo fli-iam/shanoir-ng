@@ -25,93 +25,87 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-@Api(value = "subject_therapy")
+@Tag(name = "subject_therapy")
 public interface SubjectTherapyApi {
 
-	@ApiOperation(value = "Add a new subject therapy", notes = "", response = Void.class, tags = { "SubjectTherapy", })
+	@Operation(summary = "Add a new subject therapy", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "success returns subject therapy", response = SubjectTherapy.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = SubjectTherapy.class),
-			@ApiResponse(code = 409, message = "Already exists - conflict", response = SubjectTherapy.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = SubjectTherapy.class) })
+			@ApiResponse(responseCode = "200", description = "success returns subject therapy"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PostMapping(value = "/subject/{id}/therapy", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<SubjectTherapy> addSubjectTherapy(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "therapy to add to subject", required = true) @RequestBody SubjectTherapy therapy,
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "therapy to add to subject", required = true) @RequestBody SubjectTherapy therapy,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "Deletes a therapy from subject", notes = "", response = Void.class, tags = {
-			"SubjectTherapy", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid subject therapy id", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Deletes a therapy from subject", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid subject therapy id"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@DeleteMapping(value = "/subject/{id}/therapy/{tid}", produces = {
 			"application/json" })
 	ResponseEntity<Void> deleteSubjectTherapy(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "subject therapy id", required = true) @PathVariable("tid") Long tid)
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "subject therapy id", required = true) @PathVariable("tid") Long tid)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Deletes all therapies linked to a given subject", notes = "", response = Void.class, tags = {
-			"SubjectTherapy", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid subject id", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Deletes all therapies linked to a given subject", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid subject id"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@DeleteMapping(value = "/subject/{id}/therapy/all", produces = {
 			"application/json" })
 	ResponseEntity<Void> deleteSubjectTherapies(
-			@ApiParam(value = "animal subject id", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException;
 
-	@ApiOperation(value = "Get subject therapy by id", notes = "", response = SubjectTherapy.class, responseContainer = "List", tags = {
-			"SubjectTherapy", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "A subject therapy", response = SubjectTherapy.class),
-			@ApiResponse(code = 404, message = "Subjet therapy not found", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = SubjectTherapy.class) })
+	@Operation(summary = "Get subject therapy by id", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "A subject therapy"),
+			@ApiResponse(responseCode = "404", description = "Subjet therapy not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/subject/{id}/therapy/{tid}", produces = {
 			"application/json" })
 	ResponseEntity<SubjectTherapy> getSubjectTherapyById(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "Subject therapy id", required = true) @PathVariable("tid") Long tid)
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "Subject therapy id", required = true) @PathVariable("tid") Long tid)
 			throws RestServiceException;
 
-	@ApiOperation(value = "List all subject therapies for subject", notes = "", response = SubjectTherapy.class, responseContainer = "List", tags = {
-			"SubjectTherapy", })
+	@Operation(summary = "List all subject therapies for subject", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of subject therapies", response = SubjectTherapy.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = SubjectTherapy.class) })
+			@ApiResponse(responseCode = "200", description = "An array of subject therapies"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/subject/{id}/therapy/all", produces = { "application/json" })
 	ResponseEntity<List<SubjectTherapy>> getSubjectTherapies(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException;
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id) throws RestServiceException;
 
-	@ApiOperation(value = "List all subject therapies for given therapy", notes = "", response = SubjectTherapy.class, responseContainer = "List", tags = {
-			"SubjectTherapy", })
+	@Operation(summary = "List all subject therapies for given therapy", description = "")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "An array of subject therapies", response = SubjectTherapy.class),
-			@ApiResponse(code = 500, message = "Unexpected error", response = SubjectTherapy.class) })
+			@ApiResponse(responseCode = "200", description = "An array of subject therapies"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
 	@GetMapping(value = "/subject/all/therapy/{tid}", produces = { "application/json" })
 	ResponseEntity<List<SubjectTherapy>> getSubjectTherapiesByTherapy(
-			@ApiParam(value = "therapy id", required = true) @PathVariable("tid") Long tid) throws RestServiceException;
+			@Parameter(name = "therapy id", required = true) @PathVariable("tid") Long tid) throws RestServiceException;
 
-	@ApiOperation(value = "Update an existing subject therapy", notes = "", response = Void.class, tags = {
-			"SubjectTherapy", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "Successful operation", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-			@ApiResponse(code = 404, message = "Subject Therapy not found", response = Void.class),
-			@ApiResponse(code = 500, message = "Unexpected Error", response = Void.class) })
+	@Operation(summary = "Update an existing subject therapy", description = "")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "404", description = "Subject Therapy not found"),
+			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
 	@PutMapping(value = "/subject/{id}/therapy/{tid}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<Void> updateSubjectTherapy(
-			@ApiParam(value = "ID of subject", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of subject therapy that needs to be updated", required = true) @PathVariable("tid") Long tid,
-			@ApiParam(value = "Subject Therapy that will be be updated", required = true) @RequestBody SubjectTherapy therapy,
+			@Parameter(name = "ID of subject", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of subject therapy that needs to be updated", required = true) @PathVariable("tid") Long tid,
+			@Parameter(name = "Subject Therapy that will be be updated", required = true) @RequestBody SubjectTherapy therapy,
 			final BindingResult result) throws RestServiceException;
 
 }

@@ -48,7 +48,7 @@ export class StudyNode implements ShanoirNode {
 }
 
 
-export class SubjectNode implements ShanoirNode {
+export abstract class SubjectNode implements ShanoirNode {
 
     constructor(
         public id: number,
@@ -73,12 +73,23 @@ export class SubjectNode implements ShanoirNode {
                 tag.name = 'Error';
                 tag.color = 'red';
             }
-            tags.unshift(tag);            
+            tags.unshift(tag);
         }
     }
-    
+
     public open: boolean = false;
-    public title: string = "subject";
+    public title: string;
+    public awesome: string;
+}
+
+export class ClinicalSubjectNode extends SubjectNode {
+    public title = "subject";
+    public awesome = "fas fa-user-injured";
+}
+
+export class PreclinicalSubjectNode extends SubjectNode {
+    public title = "preclinical-subject";
+    public awesome = "fas fa-hippo";
 }
 
 

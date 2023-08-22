@@ -14,13 +14,12 @@
 
 //package org.shanoir.ng.acquisitionequipment;
 //
-//import static org.junit.Assert.assertEquals;
+//import static org.junit.Assertions.assertEquals;
 //
 //import java.io.IOException;
 //
 //import org.apache.http.client.ClientProtocolException;
-//import org.junit.Test;
-//import org.junit.runner.RunWith;
+//import org.junit.jupiter.api.Test;
 //import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 //import org.shanoir.ng.center.model.Center;
 //import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
@@ -35,7 +34,6 @@
 //import org.springframework.http.HttpStatus;
 //import org.springframework.http.ResponseEntity;
 //import org.springframework.test.context.ActiveProfiles;
-//import org.springframework.test.context.junit4.SpringRunner;
 //
 ///**
 // * Integration tests for acquisition equipment controller.
@@ -43,7 +41,7 @@
 // * @author msimon
 // *
 // */
-//@RunWith(SpringRunner.class)
+//
 //@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 //@ActiveProfiles("dev")
 //public class AcquisitionEquipmentApiControllerTestIT extends KeycloakControllerTestIT {

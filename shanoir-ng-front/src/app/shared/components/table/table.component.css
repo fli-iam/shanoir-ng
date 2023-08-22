@@ -82,7 +82,7 @@ checkbox { vertical-align: middle; }
 td checkbox { transform: scale(0.8); border-color: var(--color-b-light2); }
 
 .triangle { position: absolute;  left: 0; right: 0; z-index: 1; }
-.triangle.up { top: -12px; }
+.triangle.up { top: -11px; }
 .triangle.down { bottom: -8px; }
 	.triangle svg { width: 15px; height: 5px;  }
 	.triangle svg polygon { fill: var(--color-b); }
