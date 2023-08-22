@@ -17,7 +17,6 @@ import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
-import org.shanoir.uploader.utils.Util;
 
 /**
  * This class downloads the files from the PACS or copies
