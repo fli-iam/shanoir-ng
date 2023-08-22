@@ -29,6 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     class="cell cell-{{$any(col).field != undefined ? $any(col).field : 'nofield'}} {{getCellTypeStr(col)}}"
                     [class.bool]="vars.boolean"
                     [class.progress]="col.type == 'progress'"
+                    [class.multi]="editMode && col.multi"
                     [attr.title]="col.tip != undefined ? col.tip : (vars.render.text ? vars.render.text : '')"
                     [style.color]="vars.render?.color"
                     [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
@@ -38,7 +39,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                     <!-- default display -->
                     <a class="cell-new-tab" [routerLink]="vars.rowRoute" *ngIf="!(editMode && vars.editable) && !vars.route && !vars.boolean && col.type != 'progress' && !col.multi && col.type != 'button'">
-                        <span
+                        <span class="default-data-parent"
                             [style.color]="vars.cellGraphics?.color"
                             [style.border-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.color : null"
                             [style.background-color]="vars.cellGraphics?.tag ? vars.cellGraphics?.backgroundColor : null"
@@ -77,22 +78,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                 <!-- editable boolean -->
                 <ng-container *ngIf="vars.boolean && editMode && vars.editable">
-                  <checkbox [ngModel]="vars.cellValue" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox>
+                    <checkbox [ngModel]="vars.cellValue" (ngModelChange)="onFieldEdit(item, col, $event)"></checkbox>
                 </ng-container>
 
                 <!-- editable text / number -->
                 <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && !vars.possibleValues">
-                  <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
+                    <input type="text" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" />
                 </ng-container>
 
                 <!-- editable with dropdown -->
                 <ng-container *ngIf="editMode && vars.editable && (isColumnText(col) || isColumnNumber(col)) && vars.possibleValues">
-                  <select *ngIf="!col.multi" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
-                    <option *ngFor="let possibleValue of vars.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
-                  </select>
-                  <ng-container *ngIf="col.multi">
-                    <multi-select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" [options]="vars.possibleValues"></multi-select>
-                  </ng-container>
+                    <!-- single -->
+                    <select *ngIf="!col.multi" [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)">
+                        <option *ngFor="let possibleValue of vars.possibleValues" [value]="possibleValue.value">{{possibleValue.label}}</option>
+                    </select>
+                    <!-- multi -->
+                    <ng-container *ngIf="col.multi">
+                        <multi-select [ngModel]="getFieldRawValue(item, col['field'])" (ngModelChange)="onFieldEdit(item, col, $event)" [options]="vars.possibleValues"></multi-select>
+                    </ng-container>
                 </ng-container>
 
                 <!-- display a button -->

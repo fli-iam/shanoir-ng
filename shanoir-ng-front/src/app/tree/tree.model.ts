@@ -59,6 +59,7 @@ export abstract class SubjectNode implements ShanoirNode {
         public canDeleteChildren: boolean
     ) {
         if (!tags) tags = [];
+        else tags = tags.map(t => t.clone());
         if (qualityTag) {
             let tag: Tag = new Tag();
             tag.id = -1;
