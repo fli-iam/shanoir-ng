@@ -380,7 +380,7 @@ public class RabbitMQDatasetsService {
 	@Transactional
 	public String getDetailedStudyStorageVolume(Long studyId) {
 
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
 		StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(datasetService.getVolumeByFormat(studyId),
 				examinationService.getExtraDataSizeByStudyId(studyId));
@@ -397,7 +397,7 @@ public class RabbitMQDatasetsService {
 	@RabbitHandler
 	@Transactional
 	public String getDetailedStorageVolumeByStudy(List<Long> studyIds) {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 
 		Map<Long, StudyStorageVolumeDTO> studyStorageVolumes = new HashMap<>();
 
