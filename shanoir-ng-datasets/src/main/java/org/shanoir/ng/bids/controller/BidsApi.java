@@ -36,19 +36,19 @@ public interface BidsApi {
     		@Parameter(name = "id of the study", required=true) @PathVariable("studyId") Long studyId,
     		@Parameter(name = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
 
-    @Operation(value = "", nickname = "refreshBids", notes = "Refresh the BIDS structure for a given study ID and study name", response = Resource.class, tags={})
+    @Operation(summary = "refreshBids", description = "Refresh the BIDS structure for a given study ID and study name")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "OK", response = Resource.class),
-        @ApiResponse(code = 401, message = "unauthorized"),
-        @ApiResponse(code = 403, message = "forbidden"),
-        @ApiResponse(code = 404, message = "no study found"),
-        @ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+        @ApiResponse(responseCode = "200", description = "OK"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "404", description = "no study found"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "refreshBids/studyId/{studyId}/studyName/{studyName}")
     ResponseEntity<BidsElement>  refreshBIDSByStudyId(
-    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
+    		@Parameter(name = "id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@Parameter(name = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
 
-    @Operation(value = "", nickname = "exportBIDSBySubjectId", notes = "If exists, returns a zip file of the BIDS structure corresponding to the given study id and path", response = Resource.class, tags={})
+    @Operation(summary = "exportBIDSBySubjectId", description = "If exists, returns a zip file of the BIDS structure corresponding to the given study id and path")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "zip file"),
         @ApiResponse(responseCode = "401", description = "unauthorized"),

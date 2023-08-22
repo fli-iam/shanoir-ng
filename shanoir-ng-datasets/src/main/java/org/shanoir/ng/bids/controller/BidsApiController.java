@@ -71,8 +71,8 @@ public class BidsApiController implements BidsApi {
 	}
 
     public ResponseEntity<BidsElement> refreshBIDSByStudyId(
-    		@ApiParam(value = "id of the study", required=true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
+    		@Parameter(name = "id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@Parameter(name = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException {
     	this.bidsService.deleteBidsFolder(studyId, studyName);
     	return this.getBIDSStructureByStudyId(studyId);
     }
