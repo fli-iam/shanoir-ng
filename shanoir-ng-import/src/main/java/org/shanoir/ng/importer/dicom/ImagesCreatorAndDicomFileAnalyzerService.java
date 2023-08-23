@@ -107,8 +107,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 						} catch (Exception e) {
 							handleError(event, nbSeries, cpt, serie, e);						
 						}
-					} else {
-						serie.setSelected(false);
 					}
 					cpt++;
 				}
@@ -135,7 +133,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Serie serie, Patient patient, boolean isImportFromPACS)
 			throws FileNotFoundException {
 		List<Instance> instances = serie.getInstances();
-		if (!instances.isEmpty()) {
+		if (instances != null && !instances.isEmpty()) {
 			Instance firstInstance = instances.get(0);
 			File firstInstanceFile = getFileFromInstance(firstInstance, serie, folderFileAbsolutePath, isImportFromPACS);
 			processDicomFileForFirstInstance(firstInstanceFile, serie, patient);
