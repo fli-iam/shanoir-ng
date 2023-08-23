@@ -258,7 +258,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 	}
 
 	@Override
-	public Long getExtraDataSizeByStudyid(Long studyId){
+	public Long getExtraDataSizeByStudyId(Long studyId){
 
 		List<Examination> exams = this.findByStudyId(studyId);
 

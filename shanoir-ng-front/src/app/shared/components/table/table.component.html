@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     [class.bool]="vars.boolean"
                     [class.progress]="col.type == 'progress'"
                     [class.multi]="editMode && col.multi"
-                    [attr.title]="col.tip != undefined ? col.tip : (vars.render.text ? vars.render.text : '')"
+                    [attr.title]="col.tip != undefined ? col.tip(item) : (vars.render.text ? vars.render.text : '')"
                     [style.color]="vars.render?.color"
                     [style.background-color]="vars.cellGraphics?.tag ? null : vars.cellGraphics?.backgroundColor"
                     #refTd
@@ -120,7 +120,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             class="{{getColTypeStr(col)}}"
             [class.sortable]="!col.disableSorting && col.type!='button'"
             [class.active]="lastSortedCol==col"
-            [attr.title]="col.tip != undefined ? col.tip : col.headerName"
+            [attr.title]="col.headerName"
             [style.width]="col.width"
             [class.sub-header]="sub"
             #refTh>
