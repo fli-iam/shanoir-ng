@@ -12,6 +12,12 @@ import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
  */
 public abstract class OutputProcessing {
 
+	/**
+	 * Return true if the implementation can process the result of the given processing
+	 *
+	 * @param processing CarminDatasetProcessing
+	 * @return
+	 */
 	public abstract boolean canProcess(CarminDatasetProcessing processing);
 
 	/**

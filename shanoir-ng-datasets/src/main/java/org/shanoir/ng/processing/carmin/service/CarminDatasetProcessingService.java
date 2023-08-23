@@ -28,4 +28,5 @@ public interface CarminDatasetProcessingService extends BasicEntityService<Carmi
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     CarminDatasetProcessing updateCarminDatasetProcessing(CarminDatasetProcessing carminDatasetProcessing) throws EntityNotFoundException;
 
+    List<CarminDatasetProcessing> findAllRunning();
 }

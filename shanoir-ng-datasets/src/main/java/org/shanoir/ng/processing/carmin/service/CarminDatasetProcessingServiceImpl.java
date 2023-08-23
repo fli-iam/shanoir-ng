@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
 import org.shanoir.ng.processing.carmin.repository.CarminDatasetProcessingRepository;
 import org.shanoir.ng.processing.carmin.security.CarminDatasetProcessingSecurityService;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
@@ -77,5 +78,10 @@ public class CarminDatasetProcessingServiceImpl extends BasicEntityServiceImpl<C
                 return (CarminDatasetProcessing) carminDatasetProcessingRepository.save(entityDb);
 
         }
+
+    @Override
+    public List<CarminDatasetProcessing> findAllRunning() {
+        return carminDatasetProcessingRepository.findByStatus(ExecutionStatus.RUNNING);
+    }
 
 }

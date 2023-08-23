@@ -1,14 +1,7 @@
 package org.shanoir.ng.processing.carmin.schedule;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
@@ -42,6 +35,9 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import javax.annotation.PostConstruct;
+
 /**
  * CRON job to request VIP api and create processedDataset
  * 
@@ -85,10 +81,35 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	@Autowired
 	private OutputProcessingService outputProcessingService;
 
+	/**
+	 * At datasets MS start (when this spring service is instantiated), restart job that are still 'RUNNING' in database
+	 *
+	 * @throws SecurityException
+	 * @throws EntityNotFoundException
+	 */
+	@PostConstruct
+	public void restartRunningJobs() throws SecurityException, EntityNotFoundException {
+
+		List<CarminDatasetProcessing> processings =  this.carminDatasetProcessingService.findAllRunning();
+
+		for(CarminDatasetProcessing processing : processings){
+			this.startMonitoringJob(processing.getIdentifier());
+			LOG.info("VIP monitoring job [{}] has been restarted.", processing.getIdentifier());
+		}
+
+	}
+
+	/**
+	 * Async job that monitor the state of the VIP execution and process its outcome
+	 *
+	 * @param identifier unique id of the VIP execution
+	 * @throws EntityNotFoundException
+	 * @throws SecurityException
+	 */
 	@Async
 	@Override
 	@Transactional
-	public void startJob(String identifier) throws EntityNotFoundException, SecurityException {
+	public void startMonitoringJob(String identifier) throws EntityNotFoundException, SecurityException {
 		int attempts = 1;
 		this.identifier = identifier;
 

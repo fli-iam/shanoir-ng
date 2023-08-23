@@ -37,6 +37,13 @@ public class OutputProcessingService {
     @Autowired
     private List<OutputProcessing> outputProcessings;
 
+    /**
+     *
+     * Process the result of the given processing
+     *
+     * @param processing
+     * @throws OutputProcessingException
+     */
     public void process(CarminDatasetProcessing processing) throws OutputProcessingException {
 
         final File userImportDir = new File(
