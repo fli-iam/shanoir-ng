@@ -266,7 +266,7 @@ public class ImporterApiController implements ImporterApi {
 		final File importJobDir = new File(userImportDir, tempDirId);
 		if (importJobDir.exists()) {
 			importJob.setWorkFolder(importJobDir.getAbsolutePath());
-			removeUnselectedSeries(importJob);
+			cleanSeries(importJob);
 			LOG.info("Starting import job for user {} (userId: {}) with import job folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
 			importerManagerService.manageImportJob(importJob);
 			return new ResponseEntity<>(HttpStatus.OK);
@@ -277,7 +277,7 @@ public class ImporterApiController implements ImporterApi {
 		}
 	}
 
-	private void removeUnselectedSeries(final ImportJob importJob) {
+	private void cleanSeries(final ImportJob importJob) {
 		for (Iterator<Patient> patientIt = importJob.getPatients().iterator(); patientIt.hasNext();) {
 			Patient patient = patientIt.next();
 			List<Study> studies = patient.getStudies();
