@@ -37,6 +37,12 @@ export class Tag extends Entity {
         }
     }
 
+    clone(): any {
+        let t: Tag = new Tag();
+        t.id = this.id;
+        t.color = this.color;
+        t.name = this.name;
+    }
 }
 
 
