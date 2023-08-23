@@ -21,6 +21,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.model.ExploredEntity;
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -99,7 +100,7 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
 	},
 	MR_DATASET_NATURE(14) {
 		@Override
-		public String get(Dataset dataset) {
+		public String get(Dataset dataset) throws CheckedIllegalClassException {
 			if (dataset instanceof MrDataset) {
 				MrDataset mrDataset = (MrDataset) dataset;
 				if (mrDataset.getUpdatedMrMetadata() != null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
@@ -109,19 +110,19 @@ public enum DatasetMetadataField implements MetadataFieldInterface<Dataset> {
                 }		
 				return null;
 			} else {
-				throw new IllegalArgumentException("dataset should be of type MrDataset");
+				throw new CheckedIllegalClassException(MrDataset.class, dataset);
 			}
 		}
 		
 		@Override
-		public void update(Dataset dataset, String updatedValue) {
+		public void update(Dataset dataset, String updatedValue) throws CheckedIllegalClassException {
 			MrDatasetNature nature = MrDatasetNature.valueOf(updatedValue);
 			if (dataset instanceof MrDataset) {
 				MrDataset mrDataset = (MrDataset) dataset;
 				if (mrDataset.getUpdatedMrMetadata() == null) mrDataset.setUpdatedMrMetadata(new MrDatasetMetadata());
 				mrDataset.getUpdatedMrMetadata().setMrDatasetNature(nature);			
 			} else {
-				throw new IllegalArgumentException("dataset should be of type MrDataset");
+				throw new CheckedIllegalClassException(MrDataset.class, dataset);
 			}
 		}
 	};

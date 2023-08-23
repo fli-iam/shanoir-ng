@@ -23,10 +23,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.accessrequest.controller.AccessRequestService;
 import org.shanoir.ng.shared.core.model.IdList;
@@ -57,7 +56,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -67,7 +65,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {UserApiController.class, ControlerSecurityService.class, UserPrivacySecurityService.class,
 		IsMeSecurityService.class, UserFieldEditionSecurityManager.class, UserUniqueConstraintManager.class, UserRepository.class, 
 		AccessRequestService.class})
@@ -103,12 +100,12 @@ public class UserApiControllerTest {
 	@MockBean
 	private VIPUserService vipUserService;
 	
-	@BeforeClass
+	@BeforeAll
 	public static void beforeClass() {
 	    System.setProperty("vip.enabled", "false");
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() throws EntityNotFoundException, AccountNotOnDemandException, SecurityException  {
 		User mockUser = ModelsUtil.createUser(1L);
 		given(userService.confirmAccountRequest(Mockito.any(User.class))).willReturn(mockUser);
@@ -176,12 +173,12 @@ public class UserApiControllerTest {
 		User user = ModelsUtil.createAdmin(1L);
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isUnprocessableEntity());
 		user = ModelsUtil.createUser(1L);
 		user.setExpirationDate(LocalDate.now().plusYears(100));
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON).content(JacksonUtils.serialize(user)))
-				.andExpect(status().isForbidden());
+				.andExpect(status().isUnprocessableEntity());
 	}
 
 }

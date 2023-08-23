@@ -14,9 +14,8 @@
 
 package org.shanoir.ng.importer;
 
-import java.io.IOException;
-
 import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
@@ -35,167 +34,164 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Api(value = "importer", description = "Importer API")
+@Tag(name = "importer", description = "Importer API")
 @RequestMapping("/importer")
 public interface ImporterApi {
 
-    @ApiOperation(value = "Create a temp directory (random long), as sub-dir of a user specific dir, for one import and return the name == tempDirId",
-    		notes = "Create a temp directory (random long), as sub-dir of a user specific dir, for one import and return the name == tempDirId", response = String.class)
+    // used by ShanoirUploader!!! 1. step: create a tempDir for the import
+    @Operation(summary = "Create a temp directory (random long), as sub-dir of a user specific dir, for one import and return the name == tempDirId",
+    		description = "Create a temp directory (random long), as sub-dir of a user specific dir, for one import and return the name == tempDirId")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "temp dir created", response = String.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = String.class),
-			@ApiResponse(code = 403, message = "forbidden", response = String.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+			@ApiResponse(responseCode = "200", description = "temp dir created"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "", produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<String> createTempDir() throws RestServiceException;
     
-    @ApiOperation(value = "Upload a file into a specific temp dir", notes = "Upload a file into a specific temp dir", response = Void.class)
+    // used by ShanoirUploader!!! 2. step: called for each DICOM file
+    @Operation(summary = "Upload a file into a specific temp dir", description = "Upload a file into a specific temp dir")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "file uploaded", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+			@ApiResponse(responseCode = "200", description = "file uploaded"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = "{tempDirId}", consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<Void> uploadFile(
-    		@ApiParam(value = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
-    		@ApiParam(value = "file") @RequestParam("file") MultipartFile file) throws RestServiceException, IOException;
+    		@Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
+    		@Parameter(name = "file") @RequestParam("file") MultipartFile file) throws RestServiceException, IOException;
     
-    @ApiOperation(value = "Start exchange", notes = "Start exchange", response = Void.class)
+    @Operation(summary = "Start exchange", description = "Start exchange")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "exchange started", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+        @ApiResponse(responseCode = "200", description = "exchange started"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = "/start_import/", consumes = { "application/json" })
-
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<Void> startImport(@ApiParam(value = "Exchange", required=true) @RequestBody Exchange exchange) throws RestServiceException, FileNotFoundException, IOException;
+    ResponseEntity<Void> startImport(@Parameter(name = "Exchange", required=true) @RequestBody Exchange exchange) throws RestServiceException, FileNotFoundException, IOException;
     
-    @ApiOperation(value = "Upload one DICOM .zip file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file", })
+    @Operation(summary = "Upload one DICOM .zip file", description = "Upload DICOM .zip file")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
-        @ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
+        @ApiResponse(responseCode = "200", description = "success returns file path"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+        @ApiResponse(responseCode = "200", description = "Unexpected Error") })
     @PostMapping(value = "/upload_dicom/",
         produces = { "application/json" },
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<ImportJob> uploadDicomZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException;
+    ResponseEntity<ImportJob> uploadDicomZipFile(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile) throws RestServiceException;
     
-    @ApiOperation(value = "Upload multiple examinations DICOM .zip file", notes = "Upload DICOM .zip file", response = Void.class, tags={ "Upload one DICOM .zip file", })
+    @Operation(summary = "Upload multiple examinations DICOM .zip file", description = "Upload DICOM .zip file")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
-        @ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
+        @ApiResponse(responseCode = "200", description = "success returns file path"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+        @ApiResponse(responseCode = "200", description = "Unexpected Error") })
     @PostMapping(value = "/upload_multiple_dicom/study/{studyId}/studyName/{studyName}/studyCard/{studyCardId}/center/{centerId}/converter/{converterId}/",
         produces = { "application/json" },
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<ImportJob> uploadMultipleDicom(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
-    		@ApiParam(value = "studyId", required = true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "studyName", required = true) @PathVariable("studyName") String studyName,
-    		@ApiParam(value = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
-    		@ApiParam(value = "centerId", required = true) @PathVariable("centerId") Long centerId,
-    		@ApiParam(value = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException;
+    ResponseEntity<ImportJob> uploadMultipleDicom(@Parameter(name = "file detail") @RequestPart("file") MultipartFile dicomZipFile,
+    		@Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
+    		@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
+    		@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
+    		@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
+    		@Parameter(name = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException;
 
-    @ApiOperation(value = "Upload one EEG file", notes = "Upload channel and metadata from EEG file", response = Void.class, tags = {"Import one EEG file", })
+    @Operation(summary = "Upload one EEG file", description = "Upload channel and metadata from EEG file")
     @ApiResponses(value = {
-    	@ApiResponse(code = 200, message = "success returns file path", response = Void.class),
-		@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-		@ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
-		@ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
+    	@ApiResponse(responseCode = "200", description = "success returns file path"),
+		@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+		@ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+		@ApiResponse(responseCode = "200", description = "Unexpected Error") })
     @PostMapping(value = "/upload_eeg/",
 	    consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<EegImportJob> uploadEEGZipFile(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile eegZipFile) throws RestServiceException;
+    ResponseEntity<EegImportJob> uploadEEGZipFile(@Parameter(name = "file detail") @RequestPart("file") MultipartFile eegZipFile) throws RestServiceException;
 
-    @ApiOperation(value = "Upload a NIfTI file or an Analyze data item", notes = "Upload .nii, .nii.gz or .hdr/.img files", response = Void.class, tags={ "Upload .nii, .nii.gz or .hdr/.img files", })
+    @Operation(summary = "Upload a NIfTI file or an Analyze data item", description = "Upload .nii, .nii.gz or .hdr/.img files")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
-        @ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
+        @ApiResponse(responseCode = "200", description = "success returns file path"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+        @ApiResponse(responseCode = "200", description = "Unexpected Error") })
     @PostMapping(value = "/upload_processed_dataset/",
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<String> uploadProcessedDataset(
-        @ApiParam(value = "image detail") @RequestPart("image") MultipartFile imageFile, 
-        @ApiParam(value = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
+        @Parameter(name = "image detail") @RequestPart("image") MultipartFile imageFile, 
+        @Parameter(name = "header detail", required = false) @RequestPart(value = "header", required = false) MultipartFile headerFile) 
         throws RestServiceException;
     
-    @ApiOperation(value = "Import one DICOM .zip file", notes = "Import DICOM .zip file already uploaded", response = Void.class, tags = {
+    @Operation(summary = "Import one DICOM .zip file", description = "Import DICOM .zip file already uploaded", tags = {
 			"Import one DICOM .zip file", })
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "success returns file path", response = Void.class),
-			@ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-			@ApiResponse(code = 409, message = "Already exists - conflict", response = Void.class),
-			@ApiResponse(code = 200, message = "Unexpected Error", response = Error.class) })
-	@PostMapping(value = "/import_dicom/", produces = { "application/json" }, consumes = {
-			"application/json" })
-	ResponseEntity<ImportJob> importDicomZipFile(@ApiParam(value = "file path") @RequestBody String dicomZipFilename)
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "success returns file path"),
+			@ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+			@ApiResponse(responseCode = "409", description = "Already exists - conflict"),
+			@ApiResponse(responseCode = "200", description = "Unexpected Error") })
+	@PostMapping(value = "/import_dicom/", produces = { "application/json" }, consumes = { "application/json" })
+	ResponseEntity<ImportJob> importDicomZipFile(@Parameter(name = "file path") @RequestBody String dicomZipFilename)
 			throws RestServiceException;
     
-    @ApiOperation(value = "Start import job", notes = "Start import job", response = Void.class, tags={ "Start import job", })
+    // used by ShanoirUploader!!! 3. step
+    @Operation(summary = "Start import job", description = "Start import job")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "import job started", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
-    @PostMapping(value = "/start_import_job/",
-        produces = { "application/json" },
-        consumes = { "application/json" })
+        @ApiResponse(responseCode = "200", description = "import job started"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @PostMapping(value = "/start_import_job/", consumes = { "application/json" }, produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> startImportJob(@ApiParam(value = "ImportJob", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
+    ResponseEntity<Void> startImportJob(@Parameter(name = "ImportJob", required=true) @RequestBody ImportJob importJob) throws RestServiceException;
 
-    @ApiOperation(value = "Start analysis of EEG job", notes = "Start analysis eeg job", response = Void.class, tags={ "Start analysis eeg job", })
+    @Operation(summary = "Start analysis of EEG job", description = "Start analysis eeg job")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "import eeg job analysed", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+        @ApiResponse(responseCode = "200", description = "import eeg job analysed"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = "/start_analysis_eeg_job/",
         produces = { "application/json" },
         consumes = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<EegImportJob> analyzeEegZipFile(@ApiParam(value = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException;
+    ResponseEntity<EegImportJob> analyzeEegZipFile(@Parameter(name = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException;
 
-    @ApiOperation(value = "Start import EEG job", notes = "Start import eeg job", response = Void.class, tags={ "Start import eeg job", })
+    @Operation(summary = "Start import EEG job", description = "Start import eeg job")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "import eeg job started", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+        @ApiResponse(responseCode = "200", description = "import eeg job started"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = "/start_import_eeg_job/",
         produces = { "application/json" },
         consumes = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnStudy(#importJob.getStudyId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> startImportEEGJob(@ApiParam(value = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException;
+    ResponseEntity<Void> startImportEEGJob(@Parameter(name = "EegImportJob", required=true) @RequestBody EegImportJob importJob) throws RestServiceException;
 
-    @ApiOperation(value = "ImportFromPACS: Query PACS", notes = "ImportFromPACS: Query PACS", response = Void.class, tags={ "ImportFromPACS: Query PACS", })
+    @Operation(summary = "ImportFromPACS: Query PACS", description = "ImportFromPACS: Query PACS")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "query the PACS started", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+        @ApiResponse(responseCode = "200", description = "query the PACS started"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = "/query_pacs/",
         produces = { "application/json" },
         consumes = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT') and @importSecurityService.canImportFromPACS())")
-    ResponseEntity<ImportJob> queryPACS(@ApiParam(value = "DicomQuery", required=true) @RequestBody DicomQuery dicomQuery) throws RestServiceException;
-
+    ResponseEntity<ImportJob> queryPACS(@Parameter(name = "DicomQuery", required=true) @RequestBody DicomQuery dicomQuery) throws RestServiceException;
     
-    @ApiOperation(value = "Get dicom image", notes = "Get dicom image", response = Void.class, tags={ "", })
+    @Operation(summary = "Get dicom image", description = "Get dicom image")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "get dicom image", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+        @ApiResponse(responseCode = "200", description = "get dicom image"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "/get_dicom/", produces = { "application/dicom" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<ByteArrayResource> getDicomImage(@ApiParam(value = "path", required=true) @RequestParam(value = "path", required = true) String path) throws RestServiceException, IOException;
-
+    ResponseEntity<ByteArrayResource> getDicomImage(@Parameter(name = "path", required=true) @RequestParam(value = "path", required = true) String path) throws RestServiceException, IOException;
 
 }

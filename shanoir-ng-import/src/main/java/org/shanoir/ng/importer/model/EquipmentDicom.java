@@ -37,13 +37,21 @@ public class EquipmentDicom {
 	@JsonProperty("deviceSerialNumber")
 	private String deviceSerialNumber;
 	
+	@JsonProperty("stationName")
+	private String stationName;
+	
+	@JsonProperty("magneticFieldStrength")
+	private String magneticFieldStrength;	
+	
 	// Keep this empty constructor to avoid Jackson deserialization exceptions
 	public EquipmentDicom() {}
 
-	public EquipmentDicom(String manufacturer, String manufacturerModelName, String deviceSerialNumber) {
+	public EquipmentDicom(String manufacturer, String manufacturerModelName, String deviceSerialNumber, String stationName, String magneticFieldStrength) {
 		this.manufacturer = manufacturer;
 		this.manufacturerModelName = manufacturerModelName;
 		this.deviceSerialNumber = deviceSerialNumber;
+		this.stationName = stationName;
+		this.magneticFieldStrength = magneticFieldStrength;
 	}
 
 	public String getManufacturer() {
@@ -70,6 +78,22 @@ public class EquipmentDicom {
 		this.deviceSerialNumber = deviceSerialNumber;
 	}
 	
+	public String getStationName() {
+		return stationName;
+	}
+
+	public void setStationName(String stationName) {
+		this.stationName = stationName;
+	}
+
+	public String getMagneticFieldStrength() {
+		return magneticFieldStrength;
+	}
+
+	public void setMagneticFieldStrength(String magneticFieldStrength) {
+		this.magneticFieldStrength = magneticFieldStrength;
+	}
+
 	@JsonIgnore
 	public boolean isComplete() {
 		return StringUtils.isNotEmpty(this.manufacturer)

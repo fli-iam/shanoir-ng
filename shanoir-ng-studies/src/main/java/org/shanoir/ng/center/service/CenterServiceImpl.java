@@ -23,7 +23,6 @@ import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
-import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -53,7 +52,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 @Service
-public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements CenterService {
+public class CenterServiceImpl implements CenterService {
 
 	@Autowired
 	private CenterRepository centerRepository;
@@ -107,6 +106,14 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 		return centerRepository.findIdsAndNames();
 	}
 	
+	public Optional<Center> findById(final Long id) {
+		return centerRepository.findById(id);
+	}
+	
+	public List<Center> findAll() {
+		return Utils.toList(centerRepository.findAll());
+	}
+	
 	@Override
 	public List<IdName> findIdsAndNames(Long studyId) {
 		List<IdName> centers =  centerRepository.findIdsAndNames(studyId);
@@ -133,7 +140,6 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 		return centers;
 	}
 
-	@Override
 	protected Center updateValues(final Center from, final Center to) {
 		to.setCity(from.getCity());
 		to.setCountry(from.getCountry());
@@ -164,10 +170,9 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 		}
 		return updatedCenter;
 	}
-	
-	@Override
+
 	public Center create(Center center) {
-		Center newDbCenter = super.create(center);
+		Center newDbCenter = centerRepository.save(center);
 		try {
 			updateName(new IdName(newDbCenter.getId(), newDbCenter.getName()));
 		} catch (MicroServiceCommunicationException e) {
@@ -190,4 +195,11 @@ public class CenterServiceImpl extends BasicEntityServiceImpl<Center> implements
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center name.");
 		}
 	}
+	
+	public void deleteById(final Long id) throws EntityNotFoundException  {
+		final Optional<Center> entity = centerRepository.findById(id);
+		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+		centerRepository.deleteById(id);
+	}
+
 }

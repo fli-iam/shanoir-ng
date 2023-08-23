@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.common.util.Hash;
 import org.joda.time.DateTime;
@@ -62,6 +60,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class DatasetDownloaderServiceImpl {
@@ -103,7 +102,7 @@ public class DatasetDownloaderServiceImpl {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	public void downloadDatasetById(Long datasetId, Long converterId, String format, HttpServletResponse response)
+	public void downloadDatasetById(Long datasetId, Long converterId, String format, HttpServletResponse response, boolean withManifest)
 			throws RestServiceException, IOException {
 
 		final Dataset dataset = datasetService.findById(datasetId);
@@ -116,6 +115,8 @@ public class DatasetDownloaderServiceImpl {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNAUTHORIZED.value(), "Dataset cannot be downloaded for security reasons.", null));
 		}
+
+		Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
 		String subjectName = "unknownSubject";
 		Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
@@ -150,8 +151,11 @@ public class DatasetDownloaderServiceImpl {
 			switch (format) {
 				case DCM:
 					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, serieErrors);
-					downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, null,
-							serieErrors);
+					List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, null, serieErrors);
+					if(withManifest){
+						filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
+						filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(files);
+					}
 					break;
 				case NII:
 					// Check if we want a specific converter -> nifti reconversion
@@ -204,8 +208,20 @@ public class DatasetDownloaderServiceImpl {
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 			}
-			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(),
-					KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.SUCCESS);
+
+			// Check folder emptiness
+			if (pathURLs.isEmpty()) {
+				// Folder is empty => return an error
+				LOG.error("No files could be found for the dataset(s).");
+				throw new RestServiceException(
+						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for this dataset(s)."));
+			}
+
+			if(!filesByAcquisitionId.isEmpty()){
+				DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
+			}
+
+			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.SUCCESS);
 			eventService.publishEvent(event);
 			if (!serieErrors.isEmpty()) {
 				DatasetError error = new DatasetError(datasetId, null);
@@ -243,7 +259,7 @@ public class DatasetDownloaderServiceImpl {
 		// Get the data
 		List<Dataset> failingDatasets = new ArrayList<Dataset>();
 
-		Map<Long, List<String>> files2AcquisitionId = new HashMap<>();
+		Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
 		response.setContentType("application/zip");
 		// Add timestamp to get a difference
@@ -309,9 +325,9 @@ public class DatasetDownloaderServiceImpl {
 								subjectName, dataset, datasetFilePath, null);
 						datasetFiles.addAll(files);
 
-						if (withInputFile) {
-							files2AcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
-							files2AcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(datasetFiles);
+						if(withInputFile){
+							filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
+							filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(datasetFiles);
 						}
 
 					} else if (NII.equals(format)) {
@@ -373,8 +389,8 @@ public class DatasetDownloaderServiceImpl {
 				zipOutputStream.closeEntry();
 			}
 
-			if (!files2AcquisitionId.isEmpty()) {
-				DatasetFileUtils.writeInputFileForExport(zipOutputStream, files2AcquisitionId);
+			if(!filesByAcquisitionId.isEmpty()){
+				DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
 			}
 
 			String ids = String.join(",",

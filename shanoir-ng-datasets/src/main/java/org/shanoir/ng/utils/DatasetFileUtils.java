@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.mail.MessagingException;
-
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.dataset.dto.InputDTO;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -29,6 +27,8 @@ import org.springframework.web.util.UriUtils;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.mail.MessagingException;
 
 public class DatasetFileUtils {
 
@@ -128,9 +128,9 @@ public class DatasetFileUtils {
 		return files;
 	}
 
-	public static void writeInputFileForExport(final ZipOutputStream zipOutputStream, Map<Long, List<String>> files2AcquisitionId) throws IOException {
+	public static void writeManifestForExport(final ZipOutputStream zipOutputStream, Map<Long, List<String>> filesByAcquisitionId) throws IOException {
 		InputDTO input = new InputDTO();
-		for (Map.Entry<Long, List<String>> entry : files2AcquisitionId.entrySet()) {
+		for (Map.Entry<Long, List<String>> entry : filesByAcquisitionId.entrySet()) {
 			InputDTO.InputSerieDTO serie = new InputDTO.InputSerieDTO();
 			serie.setId(entry.getKey());
 			for(String file : entry.getValue()){

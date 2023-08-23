@@ -17,19 +17,10 @@ package org.shanoir.ng.preclinical.pathologies.subject_pathologies;
 import java.util.Date;
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
 import org.shanoir.ng.preclinical.references.Reference;
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.RefValueExists;
@@ -39,7 +30,12 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Subject Pathology
@@ -87,20 +83,13 @@ public class SubjectPathology extends HalEntity {
 		this.addLink(Links.REL_SELF, "subject/" + getAnimalSubject().getId() + "/pathology/" + getId());
 	}
 
-	@Override
-	@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-	@GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-	public Long getId() {
-		return super.getId();
-	}
-
 	public SubjectPathology subject(AnimalSubject animalSubject) {
 		this.animalSubject = animalSubject;
 		return this;
 	}
 
 	@JsonIgnore
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public AnimalSubject getAnimalSubject() {
 		return animalSubject;
 	}
@@ -119,7 +108,7 @@ public class SubjectPathology extends HalEntity {
 	 * 
 	 * @return subjectId
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Pathology getPathology() {
 		return pathology;
 	}
@@ -138,7 +127,7 @@ public class SubjectPathology extends HalEntity {
 	 * 
 	 * @return subjectId
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public PathologyModel getPathologyModel() {
 		return pathologyModel;
 	}
@@ -157,7 +146,7 @@ public class SubjectPathology extends HalEntity {
 	 * 
 	 * @return location
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Reference getLocation() {
 		return location;
 	}
@@ -176,7 +165,7 @@ public class SubjectPathology extends HalEntity {
 	 * 
 	 * @return startDate
 	 **/
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Date getStartDate() {
 		return startDate;
 	}
@@ -190,7 +179,7 @@ public class SubjectPathology extends HalEntity {
 		return this;
 	}
 
-	@ApiModelProperty(value = "none")
+	@Schema(name = "none")
 	public Date getEndDate() {
 		return endDate;
 	}

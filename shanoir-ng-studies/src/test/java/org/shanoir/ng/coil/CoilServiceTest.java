@@ -14,27 +14,29 @@
 
 package org.shanoir.ng.coil;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.shanoir.ng.coil.dto.mapper.CoilMapper;
 import org.shanoir.ng.coil.model.Coil;
 import org.shanoir.ng.coil.repository.CoilRepository;
 import org.shanoir.ng.coil.service.CoilServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Coil service test.
@@ -42,7 +44,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author msimon
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class CoilServiceTest {
 
 	private static final Long COIL_ID = 1L;
@@ -54,22 +57,21 @@ public class CoilServiceTest {
 	@Mock
 	private CoilRepository coilRepository;
 
-	@Mock
-	private RabbitTemplate rabbitTemplate;
-
 	@InjectMocks
 	private CoilServiceImpl coilService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(coilRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCoil()));
 		given(coilRepository.findById(COIL_ID)).willReturn(Optional.of(ModelsUtil.createCoil()));
 		given(coilRepository.save(Mockito.any(Coil.class))).willReturn(ModelsUtil.createCoil());
 	}
 
-	@Test(expected=EntityNotFoundException.class)
+	@Test
 	public void deleteByBadIdTest() throws EntityNotFoundException {
-		coilService.deleteById(2L);
+		assertThrows(EntityNotFoundException.class, () -> {
+			coilService.deleteById(2L);
+		});
 	}
 	
 	@Test
@@ -81,8 +83,8 @@ public class CoilServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<Coil> coils = coilService.findAll();
-		Assert.assertNotNull(coils);
-		Assert.assertTrue(coils.size() == 1);
+		Assertions.assertNotNull(coils);
+		Assertions.assertTrue(coils.size() == 1);
 
 		Mockito.verify(coilRepository, Mockito.times(1)).findAll();
 	}
@@ -90,8 +92,8 @@ public class CoilServiceTest {
 	@Test
 	public void findByIdTest() {
 		final Coil coil = coilService.findById(COIL_ID).orElseThrow();
-		Assert.assertNotNull(coil);
-		Assert.assertTrue(ModelsUtil.COIL_NAME.equals(coil.getName()));
+		Assertions.assertNotNull(coil);
+		Assertions.assertTrue(ModelsUtil.COIL_NAME.equals(coil.getName()));
 
 		Mockito.verify(coilRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -99,7 +101,6 @@ public class CoilServiceTest {
 	@Test
 	public void saveTest() {
 		coilService.create(createCoil());
-
 		Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
 	}
 
@@ -107,9 +108,8 @@ public class CoilServiceTest {
 	public void updateTest() throws EntityNotFoundException {
 		final Coil coil = createCoil();
 		final Coil updatedCoil = coilService.update(coil);
-		Assert.assertNotNull(updatedCoil);
-		Assert.assertTrue(UPDATED_COIL_NAME.equals(coil.getName()));
-
+		Assertions.assertNotNull(updatedCoil);
+		Assertions.assertTrue(UPDATED_COIL_NAME.equals(coil.getName()));
 		Mockito.verify(coilRepository, Mockito.times(1)).save(Mockito.any(Coil.class));
 	}
 

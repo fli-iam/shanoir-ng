@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2022 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -52,14 +52,14 @@ export class CarminClientService {
    * @param body Execution
    */
   public createExecution(execution: Execution ): Promise<Execution> {
-    
+
     if (execution === null || execution === undefined) {
       throw new Error('Required parameter execution was null or undefined when calling createExecution.');
     }
     return this.httpClient.post<Execution>(`${this.basePath}/executions`,execution).toPromise();
   }
 
-  
+
   /**
    * Delete an execution
    * This will kill the underlying processes (if possible) and free all resources associated with this execution (if deleteFiles parameter is present and true)
@@ -157,7 +157,7 @@ export class CarminClientService {
     if (executionIdentifier === null || executionIdentifier === undefined) {
       throw new Error('Required parameter executionIdentifier was null or undefined when calling getStderr.');
     }
-    return this.httpClient.get<string>(`${this.basePath}/executions/${executionIdentifier}/stderr`);
+    return this.httpClient.get(`${this.basePath}/executions/${executionIdentifier}/stderr`, {responseType: 'text'});
   }
 
   /**
@@ -171,7 +171,7 @@ export class CarminClientService {
     if (executionIdentifier === null || executionIdentifier === undefined) {
       throw new Error('Required parameter executionIdentifier was null or undefined when calling getStdout.');
     }
-    return this.httpClient.get<string>(`${this.basePath}/executions/${executionIdentifier}/stdout`);
+    return this.httpClient.get(`${this.basePath}/executions/${executionIdentifier}/stdout`, {responseType: 'text'});
   }
 
   /**

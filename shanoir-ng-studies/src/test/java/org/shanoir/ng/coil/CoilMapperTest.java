@@ -17,9 +17,8 @@ package org.shanoir.ng.coil;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.coil.dto.CoilDTO;
 import org.shanoir.ng.coil.dto.mapper.CoilMapper;
 import org.shanoir.ng.coil.model.Coil;
@@ -27,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Coil mapper test.
@@ -35,7 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author msimon
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class CoilMapperTest {
@@ -49,16 +47,16 @@ public class CoilMapperTest {
 	@Test
 	public void coilsToCoilDTOsTest() {
 		final List<CoilDTO> coilDTOs = coilMapper.coilsToCoilDTOs(Arrays.asList(createCoil()));
-		Assert.assertNotNull(coilDTOs);
-		Assert.assertTrue(coilDTOs.size() == 1);
-		Assert.assertTrue(coilDTOs.get(0).getId().equals(COIL_ID));
+		Assertions.assertNotNull(coilDTOs);
+		Assertions.assertTrue(coilDTOs.size() == 1);
+		Assertions.assertTrue(coilDTOs.get(0).getId().equals(COIL_ID));
 	}
 
 	@Test
 	public void coilToCoilDTOTest() {
 		final CoilDTO coilDTO = coilMapper.coilToCoilDTO(createCoil());
-		Assert.assertNotNull(coilDTO);
-		Assert.assertTrue(coilDTO.getId().equals(COIL_ID));
+		Assertions.assertNotNull(coilDTO);
+		Assertions.assertTrue(coilDTO.getId().equals(COIL_ID));
 	}
 
 	private Coil createCoil() {

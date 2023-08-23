@@ -31,7 +31,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
           <menu-item *ngIf="!related" label="Details..." awesome="fa-regular fa-eye"></menu-item>
         </a>
         <menu-item *ngIf="node.type != 'Eeg' && node.type != 'BIDS' && !node.processed" [disabled]="loading" label="Download as DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
-        <menu-item *ngIf="node.type != 'Eeg' && node.type != 'BIDS'" [disabled]="loading" label="Download as Nifti" awesome="fas fa-download" (click)="download('nii')"></menu-item>
+        <menu-item *ngIf="node.type != 'Eeg' && node.type != 'BIDS' && !node.processed" [disabled]="loading" label="Download as NIfTI" awesome="fas fa-download" (click)="download('nii')"></menu-item>
+        <menu-item *ngIf="node.processed" [disabled]="loading" label="Download processed data" awesome="fas fa-download" (click)="download('nii')"></menu-item>
         <menu-item *ngIf="node.type == 'Eeg'" [disabled]="loading" label="Download as EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
         <menu-item *ngIf="node.type == 'BIDS'" [disabled]="loading" label="Download BIDS" awesome="fas fa-download" (click)="download('BIDS')"></menu-item>
         <menu-item *ngIf="this.node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>

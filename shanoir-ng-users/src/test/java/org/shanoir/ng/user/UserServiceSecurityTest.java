@@ -21,10 +21,11 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 import java.util.Arrays;
+import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.shanoir.ng.accountrequest.repository.AccountRequestInfoRepository;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
@@ -42,7 +43,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * User security service test.
@@ -50,7 +50,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author jlouis
  * 
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserServiceSecurityTest {
@@ -58,7 +57,6 @@ public class UserServiceSecurityTest {
 	private static final long USER_ID = 1L;
 	private static final long LOGGED_USER_ID = 2L;
 	private static final String LOGGED_USER_USERNAME = "logged";
-	private static final String UPDATED_USER_FIRSTNAME = "test";
 	private static final String USER_USERNAME = "name";
 	private static final String USER_EMAIL = "test@shanoir.fr";
 
@@ -88,19 +86,19 @@ public class UserServiceSecurityTest {
 	private User mockAccountReqUser;
 	private User mockMe;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockUser = ModelsUtil.createUser(USER_ID);
 		mockNewUser = ModelsUtil.createUser(null);
 		mockAccountReqUser = ModelsUtil.createUser(null);
-			mockAccountReqUser.setAccountRequestDemand(true);
-			mockAccountReqUser.setRole(null);
+		mockAccountReqUser.setAccountRequestDemand(true);
+		mockAccountReqUser.setRole(null);
 		mockMe = ModelsUtil.createAdmin(LOGGED_USER_ID);
 		
-//		given(userRepository.findOne(USER_ID)).willReturn(mockUser);
-//		given(userRepository.findOne(LOGGED_USER_ID)).willReturn(mockMe);
+		given(userRepository.findById(USER_ID)).willReturn(Optional.of(mockUser));
+		given(userRepository.findById(LOGGED_USER_ID)).willReturn(Optional.of(mockMe));
 		given(userRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createUser()));
-//		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
+		given(userRepository.findByUsername(Mockito.anyString())).willReturn(Optional.of(ModelsUtil.createUser()));
 //		given(userRepository.findByIdIn(Mockito.anyListOf(Long.class)))
 //				.willReturn(Arrays.asList(createUser()));
 //		given(userRepository

@@ -255,8 +255,8 @@ export class StudyComponent extends EntityComponent<Study> {
     private getTotalSize(id: number): Promise<number> {
         let waitUploads: Promise<void> = this.studyService.fileUploadings.has(id)
             ? this.studyService.fileUploadings.get(id)
-            : Promise.resolve(); 
-        
+            : Promise.resolve();
+
         this.uploading = true;
         return waitUploads.then(() => {
             return Promise.all([

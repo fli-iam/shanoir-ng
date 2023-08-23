@@ -16,15 +16,6 @@ package org.shanoir.ng.preclinical.anesthetics.ingredients;
 
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.shared.hateoas.HalEntity;
@@ -36,7 +27,12 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 /**
  * Anesthetic Ingredient
  */
@@ -71,20 +67,13 @@ public class AnestheticIngredient extends HalEntity   {
   public void initLinks() {
 	this.addLink(Links.REL_SELF, "anesthetic/"+ anesthetic.getId() +"/ingredient/" + getId());
   }
-			
-  @Override
-  @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-  @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-  public Long getId() {
-  	return super.getId();
-  }
   
   public AnestheticIngredient anesthetic(Anesthetic anesthetic) {
     this.anesthetic = anesthetic;
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Anesthetic getAnesthetic() {
     return anesthetic;
   }
@@ -98,7 +87,7 @@ public class AnestheticIngredient extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Reference getName() {
     return name;
   }
@@ -113,7 +102,7 @@ public class AnestheticIngredient extends HalEntity   {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Double getConcentration() {
     return concentration;
   }
@@ -127,7 +116,7 @@ public class AnestheticIngredient extends HalEntity   {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Reference getConcentrationUnit() {
     return concentrationUnit;
   }

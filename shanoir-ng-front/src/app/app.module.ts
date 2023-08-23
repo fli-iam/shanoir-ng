@@ -228,7 +228,6 @@ import { SolrPagingCriterionComponent } from './solr/criteria/solr.paging-criter
 import { SolrRangeCriterionComponent } from './solr/criteria/solr.range-criterion.component';
 import { SolrTextSearchComponent } from './solr/text-search/solr.text-search.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
-import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { SolrTextSearchModeComponent } from './solr/text-search/solr.text-search-mode.component';
 import { PhysiologicalDataFormComponent } from './preclinical/extraData/physiologicalData/add/physiologicalData-form.component';
@@ -428,7 +427,6 @@ import { DownloadSetupComponent } from './shared/mass-download/download-setup/do
         SolrPagingCriterionComponent,
         SolrTextSearchComponent,
         MetadataComponent,
-        StudyCardApplyComponent,
         ApplyStudyCardOnComponent,
         SolrTextSearchModeComponent,
         ChallengeBlockComponent,

@@ -17,9 +17,8 @@ package org.shanoir.ng.acquisitionequipment;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -29,7 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * User security service test.
@@ -37,7 +35,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author jlouis
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class AcquisitionEquipmentSecurityTest {
@@ -52,7 +50,7 @@ public class AcquisitionEquipmentSecurityTest {
 	@Autowired
 	private AcquisitionEquipmentService service;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockNew = ModelsUtil.createAcquisitionEquipment();
 		mockExisting = ModelsUtil.createAcquisitionEquipment();

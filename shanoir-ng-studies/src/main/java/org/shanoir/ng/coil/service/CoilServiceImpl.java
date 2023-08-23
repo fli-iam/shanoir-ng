@@ -14,11 +14,13 @@
 
 package org.shanoir.ng.coil.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.coil.model.Coil;
 import org.shanoir.ng.coil.repository.CoilRepository;
-import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,12 +31,11 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class CoilServiceImpl extends BasicEntityServiceImpl<Coil> implements CoilService {
+public class CoilServiceImpl implements CoilService {
 
 	@Autowired
-	private CoilRepository coilRepository;
+	private CoilRepository repository;
 
-	@Override
 	protected Coil updateValues(final Coil from, final Coil to) {
 		to.setCoilType(from.getCoilType());
 		to.setName(from.getName());
@@ -45,8 +46,35 @@ public class CoilServiceImpl extends BasicEntityServiceImpl<Coil> implements Coi
 		return to;
 	}
 
-	@Override
 	public Optional<Coil> findByName(String name) {
-		return coilRepository.findByName(name);
+		return repository.findByName(name);
 	}
+	
+	public Optional<Coil> findById(final Long id) {
+		return repository.findById(id);
+	}
+	
+	public List<Coil> findAll() {
+		return Utils.toList(repository.findAll());
+	}
+	
+	public Coil create(final Coil entity) {
+		Coil savedEntity = repository.save(entity);
+		return savedEntity;
+	}
+	
+	public Coil update(final Coil entity) throws EntityNotFoundException {
+		final Optional<Coil> entityDbOpt = repository.findById(entity.getId());
+		final Coil entityDb = entityDbOpt.orElseThrow(
+				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+		updateValues(entity, entityDb);
+		return repository.save(entityDb);
+	}
+
+	public void deleteById(final Long id) throws EntityNotFoundException  {
+		final Optional<Coil> entity = repository.findById(id);
+		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
+		repository.deleteById(id);
+	}
+
 }

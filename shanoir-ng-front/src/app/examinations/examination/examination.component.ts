@@ -179,6 +179,14 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             .then(subjects => this.subjects = subjects);
     }
 
+    getSubjectLink(){
+        if(this.examination.preclinical){
+            return '/preclinical-subject/details/'+ this.examination.subject?.id;
+        } else {
+            return '/subject/details/'+ this.examination.subject?.id;
+        }
+    }
+
     onStudyChange() {
         this.getSubjects();
     }
