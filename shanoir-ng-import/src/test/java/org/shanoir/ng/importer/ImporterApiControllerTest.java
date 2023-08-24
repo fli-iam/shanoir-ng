@@ -147,7 +147,7 @@ public class ImporterApiControllerTest {
 				.content(JacksonUtils.serialize(importJob)));
 		
 		// Just check that the name is well transmitted and that the call is made
-		verify(rabbitTemplate).exchange(Mockito.any(String.class), captor.capture());
+		verify(rabbitTemplate).convertSendAndReceive(Mockito.any(String.class), captor.capture());
 
 		//verify(restTemplate).exchange(Mockito.any(String.class), Mockito.eq(HttpMethod.POST), captor.capture(), Mockito.eq(String.class));
 		assertTrue(((String)captor.getValue()).contains(dataset.getName()));
