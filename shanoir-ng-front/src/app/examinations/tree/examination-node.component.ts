@@ -196,7 +196,6 @@ export class ExaminationNodeComponent implements OnChanges {
         })
     }
 
-
     onAcquisitionDelete(index: number) {
         (this.node.datasetAcquisitions as DatasetAcquisitionNode[]).splice(index, 1) ;
     }

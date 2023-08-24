@@ -26,6 +26,7 @@ import { Study } from '../shared/study.model';
 import {KeycloakService} from "../../shared/keycloak/keycloak.service";
 import {StudyRightsService} from "../shared/study-rights.service";
 import {StudyUserRight} from "../shared/study-user-right.enum";
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 @Component({
     selector: 'reverse-study-node',
@@ -52,7 +53,8 @@ export class ReverseStudyNodeComponent implements OnChanges {
             private examinationService: ExaminationService,
             private examPipe: ExaminationPipe,
             private keycloakService: KeycloakService,
-            private studyRightsService: StudyRightsService) {
+            private studyRightsService: StudyRightsService,
+            private downloadService: MassDownloadService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -138,9 +140,16 @@ export class ReverseStudyNodeComponent implements OnChanges {
             this.canAdmin
         );
     }
+
     hasDependency(dependencyArr: any[] | UNLOADED): boolean | 'unknown' {
         if (!dependencyArr) return false;
         else if (dependencyArr == UNLOADED) return 'unknown';
         else return dependencyArr.length > 0;
+    }
+
+    download() {
+        this.loading = true;
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.node.id, this.subjectId)
+            .finally(() => this.loading = false);
     }
 }

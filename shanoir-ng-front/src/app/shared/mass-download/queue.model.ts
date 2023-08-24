@@ -28,7 +28,6 @@ export class Queue {
         const ticket: number = this._nextTicket++;
         return new Promise((resolve, reject) => {
             const sub: Subscription = this._queue.takeUntil(stop).subscribe(calledTicket => {
-                console.log('ticket ? ', ticket, calledTicket)
                 if (calledTicket == ticket) {
                     stop.next();
                     stop.complete();

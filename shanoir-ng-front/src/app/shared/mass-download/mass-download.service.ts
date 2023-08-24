@@ -14,7 +14,7 @@
 
 import { HttpResponse } from '@angular/common/http';
 import { ComponentRef, Injectable } from '@angular/core';
-import { Observable } from 'rxjs-compat';
+import { Observable, Subject } from 'rxjs-compat';
 import { Task } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
@@ -23,6 +23,8 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { DownloadSetupComponent } from './download-setup/download-setup.component';
 import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
 import { Queue } from './queue.model';
+import { take } from 'rxjs/operators';
+import { SuperPromise } from 'src/app/utils/super-promise';
 
 declare var JSZip: any;
 
@@ -52,42 +54,50 @@ export class MassDownloadService {
         private dialogService: ConfirmDialogService) {
     }
 
-    downloadByIds(datasetIds: number[]) {
-        if (window.showDirectoryPicker) { // test compatibility
-            let modalRef: ComponentRef<DownloadSetupComponent> = this.openModal();
-            modalRef.instance.go.subscribe(options => {
-                return this._downloadByIds(datasetIds, options.format, options.nbQueues);
-            });
-        } else {
-            this.dialogService.error('Browser incompatibility', 'Sorry, your browser does not allow this advanced download functionality.'
-                    + ' See the list of compatible browsers : https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility');
-        }
+    downloadByIds(datasetIds: number[]): Promise<void> {
+        return this.openModal().then(ret => {
+            if (ret != 'cancel') {
+                return this._downloadByIds(datasetIds, ret.format, ret.nbQueues)
+            } else return Promise.resolve();
+        });
     }
 
-
-    downloadDatasets(datasets: Dataset[]) {
-        if (window.showDirectoryPicker) { // test compatibility
-            let modalRef: ComponentRef<DownloadSetupComponent> = this.openModal();
-            modalRef.instance.go.subscribe(options => {
-                this._downloadDatasets(datasets, options.format, options.nbQueues);
-            });
-        } else {
-            this.dialogService.error('Browser incompatibility', 'Sorry, your browser does not allow this advanced download functionality.'
-                    + ' See the list of compatible browsers : https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility');
-        }
+    downloadDatasets(datasets: Dataset[]): Promise<void> {
+        return this.openModal().then(ret => {
+            if (ret != 'cancel') {
+                return this._downloadDatasets(datasets, ret.format, ret.nbQueues);
+            } else return Promise.resolve();
+        });
     }
 
-    downloadAllByStudyId(studyId): Promise<void> {
-        return this.datasetService.getByStudyId(studyId).then(datasets => {
-            return this.downloadDatasets(datasets);
-        })
+    downloadAllByStudyId(studyId: number): Promise<void> {
+        return this.openModal().then(ret => {
+            if (ret != 'cancel') {
+                return this.datasetService.getByStudyId(studyId).then(datasets => {
+                    this._downloadDatasets(datasets, ret.format, ret.nbQueues);
+                })
+            } else return Promise.resolve();
+        });
+    }
+
+    downloadAllByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<void> {
+        return this.openModal().then(ret => {
+            if (ret != 'cancel') {
+                return this.datasetService.getByStudyIdAndSubjectId(studyId, subjectId).then(datasets => {
+                    return this._downloadDatasets(datasets, ret.format, ret.nbQueues).then(r => {
+                        console.log(123, r);
+                        return r;
+                    });
+                })
+            } else return Promise.resolve();
+        });
     }
 
     private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4): Promise<void> {
         if (datasetIds.length == 0) return;
         return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
             let task: Task = this.createTask(datasetIds.length);
-            this.downloadQueue.waitForTurn().then(releaseQueue => {
+            return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
                     task.status = 2;
                     const start: number = Date.now();
@@ -135,7 +145,7 @@ export class MassDownloadService {
         if (datasets.length == 0) return;
         return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
             let task: Task = this.createTask(datasets.length);
-            this.downloadQueue.waitForTurn().then(releaseQueue => {
+            return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
                     task.status = 2;
                     const start: number = Date.now();
@@ -158,6 +168,7 @@ export class MassDownloadService {
                         task.message = 'download error : ' + reason;
                         this.notificationService.pushLocalTask(task);
                     }).finally(() => {
+                        console.log(report)
                         releaseQueue();
                     });
                 } catch (error) {
@@ -253,6 +264,7 @@ export class MassDownloadService {
         const options = {
             mode: 'readwrite'
         };
+        // @ts-ignore
         const handle: FileSystemDirectoryHandle = await window.showDirectoryPicker(options);
         return handle;
     }
@@ -307,18 +319,32 @@ export class MassDownloadService {
         return task;
     }
 
-    private openModal(): ComponentRef<DownloadSetupComponent> {
-        let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
-        this.waitForEnd(modalRef);
-        return modalRef;
+    private openModal(): Promise<{format: Format, nbQueues: number} | 'cancel'> {
+        // @ts-ignore
+        if (window.showDirectoryPicker) { // test compatibility
+            let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
+            return this.waitForEnd(modalRef);
+        } else {
+            this.dialogService.error('Browser incompatibility', 'Sorry, your browser does not allow this advanced download functionality.'
+                    + ' See the list of compatible browsers : https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility');
+            return Promise.reject('browser not compatible');
+        }
     }
 
-    private waitForEnd(modalRef: ComponentRef<any>): Promise<void> {
-        let result: Observable<any> = Observable.race([modalRef.instance.go, modalRef.instance.close]);
-        result.subscribe(() => {
+    private waitForEnd(modalRef: ComponentRef<any>): Promise<{format: Format, nbQueues: number} | 'cancel'> {
+        let resPromise: SuperPromise<{format: Format, nbQueues: number} | 'cancel'> = new SuperPromise();
+        let result: Observable<any> = Observable.race([
+            modalRef.instance.go, 
+            modalRef.instance.close.map(() => 'cancel')
+        ]);
+        result.pipe(take(1)).subscribe(ret => {
             modalRef.destroy();
+            resPromise.resolve(ret);
+        }, error => {
+            modalRef.destroy();
+            resPromise.reject(error);
         });
-        return result.toPromise().then();
+        return resPromise;
     }
 }
 
