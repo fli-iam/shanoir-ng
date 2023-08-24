@@ -37,7 +37,7 @@ public class DicomServerClient implements IDicomServerClient {
 		
 	private DcmRcvManager dcmRcvManager = new DcmRcvManager();
 	
-	private QueryPACSService queryPACSService;
+	private QueryPACSService queryPACSService = new QueryPACSService();
 	
 	private File workFolder;
 	
@@ -47,7 +47,6 @@ public class DicomServerClient implements IDicomServerClient {
 		// Initialize connection configuration parameters here: to be used for all queries
 		DicomNode calling = new DicomNode(config.getLocalDicomServerAETCalling(), config.getLocalDicomServerHost(), config.getLocalDicomServerPort());
 		DicomNode called = new DicomNode(config.getDicomServerAETCalled(), config.getDicomServerHost(), config.getDicomServerPort());
-		queryPACSService = new QueryPACSService();
 		// attention: we use calling here (== ShUp) to inform the DICOM server to send to ShUp,
 		// who becomes the "called" afterwards from the point of view of the DICOM server (switch)
 		queryPACSService.setDicomNodes(calling, called, config.getLocalDicomServerAETCalling());
@@ -59,8 +58,14 @@ public class DicomServerClient implements IDicomServerClient {
 	 */
 	@Override
 	public boolean echoDicomServer() {
-		// @todo add echo here
-		logger.info("Echoing of the DICOM server was successful? -> ");
+		int port = Integer.valueOf(config.getDicomServerPort());
+		boolean result = queryPACSService.queryECHO(config.getDicomServerAETCalled(), config.getDicomServerHost(), port, config.getLocalDicomServerAETCalling());
+		if (result) {
+			logger.info("Echoing of the DICOM server was successful? -> " + result);
+		} else {
+			logger.info("Echoing of the DICOM server was successful? -> " + result);
+			return false;
+		}
 		return true;
 	}
 	

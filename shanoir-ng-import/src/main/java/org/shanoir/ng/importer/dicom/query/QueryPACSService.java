@@ -14,15 +14,29 @@
 
 package org.shanoir.ng.importer.dicom.query;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.UID;
+import org.dcm4che3.net.ApplicationEntity;
+import org.dcm4che3.net.Association;
+import org.dcm4che3.net.Connection;
+import org.dcm4che3.net.Device;
+import org.dcm4che3.net.DimseRSP;
+import org.dcm4che3.net.IncompatibleConnectionException;
 import org.dcm4che3.net.QueryOption;
+import org.dcm4che3.net.pdu.AAssociateRQ;
+import org.dcm4che3.net.pdu.PresentationContext;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
@@ -146,6 +160,49 @@ public class QueryPACSService {
 		AdvancedParams options = new AdvancedParams();
 		options.getQueryOptions().add(QueryOption.RELATIONAL); // Required for QueryRetrieveLevel other than study
 		return CMove.process(options, calling, called, calledNameSCP, progress, params);
+	}
+	
+	public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
+		LOG.info("DICOM ECHO: Starting with configuration {}, {}, {} <- {}", calledAET, hostName, port, callingAET);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+        try {
+        	// set up calling configuration
+        	Device device = new Device("c-echo-scu");
+            ApplicationEntity callingAE = new ApplicationEntity(callingAET);
+            Connection callingConn = new Connection();
+            device.addApplicationEntity(callingAE);
+            device.addConnection(callingConn);
+            device.setExecutor(executor);
+            device.setScheduledExecutor(scheduledExecutor);
+            callingAE.addConnection(callingConn);
+            
+            Connection calledConn = new Connection(null, hostName, port);
+            AAssociateRQ aarq = new AAssociateRQ();
+            aarq.setCallingAET(callingAET);
+            aarq.setCalledAET(calledAET);
+            aarq.addPresentationContext(new PresentationContext(1,
+                    UID.Verification, UID.ImplicitVRLittleEndian));
+            Association as = callingAE.connect(calledConn, aarq);
+            as.cecho();
+            as.release();
+        } catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+			return false;
+		} catch (InterruptedException e) {
+			LOG.error(e.getMessage(), e);
+			return false;
+		} catch (IncompatibleConnectionException e) {
+			LOG.error(e.getMessage(), e);
+			return false;
+		} catch (GeneralSecurityException e) {
+			LOG.error(e.getMessage(), e);
+			return false;
+		} finally {
+            executor.shutdown();
+            scheduledExecutor.shutdown();
+        }
+        return true;
 	}
 
 	/**
@@ -306,12 +363,12 @@ public class QueryPACSService {
 						DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
 						DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
 					} else {
-						LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
+						LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
 						serie.setIgnored(true);
 						serie.setSelected(false);
 					}
 				} else {
-					LOG.warn("Serie found with non imaging modality and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
+					LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
 					serie.setIgnored(true);
 					serie.setSelected(false);
 				}
