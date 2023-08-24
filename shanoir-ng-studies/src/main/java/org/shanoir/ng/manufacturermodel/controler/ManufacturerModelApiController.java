@@ -44,9 +44,6 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 	@Autowired
 	private ManufacturerModelService manufacturerModelService;
 
-	@Autowired
-	ShanoirEventService eventService;
-
 	@Override
 	public ResponseEntity<ManufacturerModel> findManufacturerModelById(
 			@PathVariable("manufacturerModelId") final Long manufacturerModelId) {
@@ -130,20 +127,4 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 			throw new RestServiceException(error);
 		} 
 	}
-
-//	@Override
-//	public ResponseEntity<Void> deleteManufacturerModel(Long manufacturerModelId) {
-//		try {
-//			if (manufacturerModelId.equals(0L)) {
-//				throw new EntityNotFoundException("Cannot update unknown manufacturer model");
-//			}
-//			manufacturerModelService.deleteById(manufacturerModelId);
-//			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EQUIPEMENT_EVENT, manufacturerModelId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-//			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//
-//		} catch (EntityNotFoundException e) {
-//			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//		}
-//	}
-
 }
