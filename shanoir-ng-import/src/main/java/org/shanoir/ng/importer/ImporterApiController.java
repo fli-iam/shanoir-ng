@@ -77,6 +77,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -653,15 +654,13 @@ public class ImporterApiController implements ImporterApi {
 	public ResponseEntity<Void> startImportEEGJob(
 			@Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
 		// Comment: Anonymisation is not necessary for pure brainvision EEGs data
-		// For .EDF, anonymisation could be done here.
-		// Comment: BIDS translation will be done during export and not during import.
-
-		// HttpEntity represents the request
-		final HttpEntity<EegImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
-		// Post to dataset MS to finish import and create associated datasets
-		ResponseEntity<String> response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody,
-				String.class);
-		return new ResponseEntity<>(response.getStatusCode());
+		try {
+			Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE,  objectMapper.writeValueAsString(importJob));
+			return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));			
+		} catch (Exception e) {
+			LOG.error("Error during EEG import", e);
+			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@Override

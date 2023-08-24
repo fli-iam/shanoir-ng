@@ -157,6 +157,9 @@ public class RabbitMQConfiguration {
 
 	/** Queue used to get the name of a study from ID */
 	public static final String STUDY_NAME_QUEUE = "study-name-queue";
+	
+	/** Queue used to import eeg data */
+	public static final String IMPORT_EEG_QUEUE = "import-eeg-queue";
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
@@ -400,5 +403,10 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue studyNameQueue() {
 		return new Queue(STUDY_NAME_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue importEEGQueue() {
+		return new Queue(IMPORT_EEG_QUEUE, true);
 	}
 }
