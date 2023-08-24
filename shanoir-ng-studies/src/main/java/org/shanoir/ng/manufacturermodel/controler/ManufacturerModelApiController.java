@@ -22,10 +22,14 @@ import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerModelService;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +43,9 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 
 	@Autowired
 	private ManufacturerModelService manufacturerModelService;
+
+	@Autowired
+	ShanoirEventService eventService;
 
 	@Override
 	public ResponseEntity<ManufacturerModel> findManufacturerModelById(
@@ -123,5 +130,20 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 			throw new RestServiceException(error);
 		} 
 	}
+
+//	@Override
+//	public ResponseEntity<Void> deleteManufacturerModel(Long manufacturerModelId) {
+//		try {
+//			if (manufacturerModelId.equals(0L)) {
+//				throw new EntityNotFoundException("Cannot update unknown manufacturer model");
+//			}
+//			manufacturerModelService.deleteById(manufacturerModelId);
+//			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_EQUIPEMENT_EVENT, manufacturerModelId.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
+//			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//
+//		} catch (EntityNotFoundException e) {
+//			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//		}
+//	}
 
 }

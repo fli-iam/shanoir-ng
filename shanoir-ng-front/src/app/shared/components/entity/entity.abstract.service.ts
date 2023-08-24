@@ -95,7 +95,8 @@ export abstract class EntityService<T extends Entity> {
                             this.consoleService.log('warn', warn);
                             return false;
                         }
-                        throw Error(reason);
+
+                        this.consoleService.log('warn', 'Cannot be deleted. This ' + name + ' is already used in an Acquisition Equipment.');
                     });
                 }
                 return false;
