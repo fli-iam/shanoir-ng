@@ -18,11 +18,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.UID;
+import org.dcm4che3.net.ApplicationEntity;
+import org.dcm4che3.net.Association;
+import org.dcm4che3.net.Connection;
+import org.dcm4che3.net.Device;
 import org.dcm4che3.net.QueryOption;
+import org.dcm4che3.net.pdu.AAssociateRQ;
+import org.dcm4che3.net.pdu.PresentationContext;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
 import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
@@ -146,6 +156,50 @@ public class QueryPACSService {
 		AdvancedParams options = new AdvancedParams();
 		options.getQueryOptions().add(QueryOption.RELATIONAL); // Required for QueryRetrieveLevel other than study
 		return CMove.process(options, calling, called, calledNameSCP, progress, params);
+	}
+	
+	public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
+		LOG.info("DICOM ECHO: Starting with configuration {}, {}, {}", calledAET, hostName, port);
+        // called: remote
+        Connection called = new Connection(calledAET, hostName, port);
+        // calling: local
+        ApplicationEntity callingAE = new ApplicationEntity(callingAET);
+        Connection calling = new Connection();
+        callingAE.addConnection(calling);
+
+        Device device = new Device("echo-test-on-store-scu");
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+        device.setExecutor(executorService);
+        device.setScheduledExecutor(scheduledExecutorService);
+        device.addApplicationEntity(callingAE);
+        device.addConnection(calling);
+        
+        Association as = null;
+        try {
+            AAssociateRQ rq = new AAssociateRQ();
+            rq.addPresentationContext(new PresentationContext(1, UID.Verification, UID.ImplicitVRLittleEndian));
+        	as = callingAE.connect(called, rq);
+        	as.cecho().next();
+    		LOG.info("DICOM ECHO: Success...");
+        	return true;
+		} catch (Exception e) {
+			LOG.error("DICOM ECHO failed:" + e.getMessage());
+			return false;
+		} finally {
+			try {
+				if (as != null) {
+		            if (as.isReadyForDataTransfer())
+		                as.release();
+		            as.waitForSocketClose();
+		        }
+		        executorService.shutdown();
+		        scheduledExecutorService.shutdown();
+			} catch (Exception e) {
+				LOG.error("DICOM ECHO (close connection) failed:" + e.getMessage());
+				return false;
+			}
+	    }
 	}
 
 	/**
