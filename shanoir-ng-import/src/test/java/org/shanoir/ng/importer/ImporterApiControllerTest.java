@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.importer;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -133,7 +134,7 @@ public class ImporterApiControllerTest {
 	@Test
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testStartImportEEGJob() throws Exception {
-		ArgumentCaptor<HttpEntity> captor = ArgumentCaptor.forClass(HttpEntity.class);
+		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 
 		EegImportJob importJob = new EegImportJob();
 		EegDataset dataset = new EegDataset();
@@ -146,8 +147,10 @@ public class ImporterApiControllerTest {
 				.content(JacksonUtils.serialize(importJob)));
 		
 		// Just check that the name is well transmitted and that the call is made
-		verify(restTemplate).exchange(Mockito.any(String.class), Mockito.eq(HttpMethod.POST), captor.capture(), Mockito.eq(String.class));
-		assertEquals(dataset.getName(), ((EegImportJob)captor.getValue().getBody()).getDatasets().get(0).getName());
+		verify(rabbitTemplate).exchange(Mockito.any(String.class), captor.capture());
+
+		//verify(restTemplate).exchange(Mockito.any(String.class), Mockito.eq(HttpMethod.POST), captor.capture(), Mockito.eq(String.class));
+		assertTrue(((String)captor.getValue()).contains(dataset.getName()));
 	}
 
 	@Test
