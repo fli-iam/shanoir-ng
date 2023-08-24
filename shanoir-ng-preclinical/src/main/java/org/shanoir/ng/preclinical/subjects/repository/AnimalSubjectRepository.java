@@ -18,6 +18,8 @@ import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface AnimalSubjectRepository extends CrudRepository<AnimalSubject, Long>, AnimalSubjectRepositoryCustom {
 
     AnimalSubject getBySubjectId(Long id);
@@ -29,4 +31,5 @@ public interface AnimalSubjectRepository extends CrudRepository<AnimalSubject, L
     boolean existsAnimalSubjectBySubjectId(Long subjectId);
 
 
+    List<AnimalSubject> findBySubjectIdIn(List<Long> subjectIds);
 }

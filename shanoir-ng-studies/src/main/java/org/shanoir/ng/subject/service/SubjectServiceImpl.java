@@ -331,4 +331,9 @@ public class SubjectServiceImpl implements SubjectService {
 	public List<Subject> findByPreclinical(boolean preclinical) {
 		return subjectRepository.findByPreclinical(preclinical);
 	}
+
+    @Override
+    public boolean existsSubjectWithName(String name) {
+        return this.subjectRepository.existsByName(name);
+    }
 }

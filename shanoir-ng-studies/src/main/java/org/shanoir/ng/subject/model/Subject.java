@@ -45,9 +45,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.SqlResultSetMapping;
-
+import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 
 @Entity
+@Table(indexes = @Index(name = "subject_name_idx", columnList = "name", unique = true))
 @JsonPropertyOrder({ "_links", "id", "name", "identifier", "sex", "birthDate", "imagedObjectCategory",
 	"preclinical", "pseudonymusHashValues", "subjectStudyList", "languageHemisphericDominance", "manualHemisphericDominance",
 "userPersonalCommentList" })

@@ -58,6 +58,9 @@ public class RabbitMQConfiguration {
 	/** BIDS purpose => Get a list of subjects to create bids participants file. */
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
 
+	/** Preclinical subject creation => Check if a subject with this name already exists **/
+	public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
+
 	/** Study name updated => notify dataset MS to change database. */
 	public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
 
@@ -231,6 +234,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue subjectsQueue() {
 		return new Queue(SUBJECTS_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue subjectsNameQueue() {
+		return new Queue(SUBJECTS_NAME_QUEUE, true);
 	}
 
 	@Bean

@@ -21,13 +21,7 @@ import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -69,14 +63,16 @@ public interface AnimalSubjectApi {
 	ResponseEntity<AnimalSubjectDto> getAnimalSubjectBySubjectId(
 			@Parameter(name = "ID of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id);
 
-	@Operation(summary = "List all animalSubjects", description = "")
+	@Operation(summary = "", description = "List animalSubjects linked to the given subject ids")
 	@ApiResponses(value = {
-		@ApiResponse(responseCode = "200", description = "An array of Preclinical AnimalSubject"),
-		@ApiResponse(responseCode = "401", description = "unauthorized"),
-		@ApiResponse(responseCode = "403", description = "forbidden"),
-		@ApiResponse(responseCode = "500", description = "Unexpected error") })
-	@GetMapping(value = "/all", produces = { "application/json" })
-	ResponseEntity<List<AnimalSubjectDto>> getAllAnimalSubjects();
+			@ApiResponse(responseCode = "200", description = "An array of Preclinical AnimalSubject"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "Unexpected error") })
+	@PostMapping(value = "/find", produces = { "application/json" })
+	ResponseEntity<List<AnimalSubjectDto>> findBySubjectIds(
+			@Parameter(name = "List of subject ids", required = true) @RequestParam(value = "subjectIds") List<Long> subjectIds
+	);
 
 	@Operation(summary = "Update an existing animalSubject", description = "")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
