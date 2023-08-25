@@ -21,9 +21,9 @@ import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.service.ProcessingResourceService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
@@ -59,6 +59,9 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 
 	@Autowired
 	private DatasetService datasetService;
+
+	@Autowired
+	private ProcessingResourceService processingResourceService;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ProcessedDatasetProcessing.class);
 
@@ -127,13 +130,13 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 				String key = keys.next();
 				Object value = json.get(key);
 				if (value instanceof JSONArray) {
-					// case "["object_id+XXX+filename.nii", "YYY+filename.nii", ...]"
+					// case "["resource_id+XXX+filename.nii", "resource_id+YYY+filename.nii", ...]"
 					JSONArray array = (JSONArray) value;
 					for (int i = 0; i < array.length(); i++) {
 						candidates.add(array.getString(i));
 					}
 				} else {
-					// Case "object_id+XXX+filename.nii"
+					// Case "resource_id+XXX+filename.nii"
 					candidates.add((String) value);
 				}
 			}
@@ -148,25 +151,10 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 
 	public HashSet<Long> getDatasetIdsFromFilename(String name){
 		HashSet<Long> ids = new HashSet<>();
-		// "dataset_id+[dataset id]+whatever.nii"
-		Matcher matcher = Pattern.compile("dataset_id\\+(\\d+)\\+.*").matcher(name);
+		// "resource_id+[processing resource id]+whatever.nii"
+		Matcher matcher = Pattern.compile("resource_id\\+(.+)\\+.*").matcher(name);
 		if (matcher.matches()) {
-			ids.add(Long.valueOf(matcher.group(1)));
-			return ids;
-		}
-
-		// "acquisition_id+[acquisition id]+whatever.nii"
-		matcher = Pattern.compile("acquisition_id\\+(\\d+)\\+.*").matcher(name);
-		if (matcher.matches()) {
-			List<Dataset> datasets = datasetService.findByAcquisition(Long.valueOf(matcher.group(1)));
-			return datasets.stream().map(AbstractEntity::getId).collect(Collectors.toCollection(HashSet::new));
-		}
-
-		// "examination_id+[acquisition id]+whatever.nii"
-		matcher = Pattern.compile("examination_id\\+(\\d+)\\+.*").matcher(name);
-		if (matcher.matches()) {
-			List<Dataset> datasets = datasetService.findByExaminationId(Long.valueOf(matcher.group(1)));
-			return datasets.stream().map(AbstractEntity::getId).collect(Collectors.toCollection(HashSet::new));
+			ids.addAll(this.processingResourceService.findDatasetIdsByResourceId(matcher.group(1)));
 		}
 
 		return ids;

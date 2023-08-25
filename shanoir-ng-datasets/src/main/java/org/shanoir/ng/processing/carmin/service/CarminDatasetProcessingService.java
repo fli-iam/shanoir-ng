@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
 import org.shanoir.ng.shared.core.service.BasicEntityService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,4 +30,6 @@ public interface CarminDatasetProcessingService extends BasicEntityService<Carmi
     CarminDatasetProcessing updateCarminDatasetProcessing(CarminDatasetProcessing carminDatasetProcessing) throws EntityNotFoundException;
 
     List<CarminDatasetProcessing> findAllRunning();
+
+    List<ParameterResourcesDTO> createProcessingResources(CarminDatasetProcessing createdProcessing, List<ParameterResourcesDTO> parameterDatasets);
 }

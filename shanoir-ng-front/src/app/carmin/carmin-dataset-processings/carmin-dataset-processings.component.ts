@@ -6,7 +6,7 @@ import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.mo
 import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
 import { TableComponent } from 'src/app/shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
-import { CarminDatasetProcessing } from '../models/CarminDatasetProcessing';
+import { CarminDatasetProcessing } from '../models/carmin-dataset-processing.model';
 import { CarminDatasetProcessingService } from '../shared/carmin-dataset-processing.service';
 
 @Component({

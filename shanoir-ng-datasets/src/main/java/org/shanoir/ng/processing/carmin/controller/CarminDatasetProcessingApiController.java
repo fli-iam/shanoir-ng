@@ -10,6 +10,9 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.schedule.ExecutionStatusMonitorService;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
+import org.shanoir.ng.processing.dto.CarminDatasetProcessingDTO;
+import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
+import org.shanoir.ng.processing.dto.mapper.CarminDatasetProcessingMapper;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorDetails;
@@ -41,62 +44,58 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
     @Autowired
     private ExecutionStatusMonitorService executionStatusMonitorService;
 
+    @Autowired
+    private CarminDatasetProcessingMapper mapper;
+
     @Override
-    public ResponseEntity<CarminDatasetProcessing> saveNewCarminDatasetProcessing(
-            @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing, BindingResult result)
+    public ResponseEntity<CarminDatasetProcessingDTO> saveNewCarminDatasetProcessing(
+            @Valid @RequestBody CarminDatasetProcessingDTO dto, boolean start, BindingResult result)
             throws RestServiceException, EntityNotFoundException, SecurityException {
 
         /* Validation */
         validate(result);
-        
-        /**
-         * run monitoring job
-         */
 
         /* Save dataset processing in db. */
-        final CarminDatasetProcessing createdDatasetProcessing = carminDatasetProcessingService
-                .createCarminDatasetProcessing(carminDatasetProcessing);
+        final CarminDatasetProcessing createdProcessing = carminDatasetProcessingService
+                .createCarminDatasetProcessing(mapper.carminDatasetProcessingDTOToCarminDatasetProcessing(dto));
 
-        executionStatusMonitorService.startMonitoringJob(carminDatasetProcessing.getIdentifier());
+        List<ParameterResourcesDTO> parametersDatasets = carminDatasetProcessingService.createProcessingResources(createdProcessing, dto.getParametersResources());
 
-        return new ResponseEntity<>(createdDatasetProcessing, HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<CarminDatasetProcessing> findCarminDatasetProcessingById(Long datasetProcessingId) {
-        final Optional<CarminDatasetProcessing> carminDatasetProcessing = carminDatasetProcessingService.findById(datasetProcessingId);
-		if (!carminDatasetProcessing.isPresent()) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		// Avoid infinite loop error -> We should be using datasetDTO here in a general matter.
-		for (Dataset dataset : carminDatasetProcessing.get().getInputDatasets()) {
-			dataset.setDatasetAcquisition(null);
-		}
-		return new ResponseEntity<>(carminDatasetProcessing.get(), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<CarminDatasetProcessing> findCarminDatasetProcessingByIdentifier(
-            @ApiParam(value = "id of the dataset processing", required = true) @RequestParam("identifier") String identifier) {
-
-        final Optional<CarminDatasetProcessing> carminDatasetProcessing = carminDatasetProcessingService.findByIdentifier(identifier);
-        if (!carminDatasetProcessing.isPresent()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(start){
+            if (createdProcessing.getIdentifier() == null || createdProcessing.getIdentifier().isEmpty()) {
+                throw new RestServiceException(
+                        new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Monitoring job has been set to start but processing identifier is null or empty.", null));
+            }
+            executionStatusMonitorService.startMonitoringJob(createdProcessing.getIdentifier());
         }
 
-        return new ResponseEntity<>(carminDatasetProcessing.get(), HttpStatus.OK);
+        CarminDatasetProcessingDTO createdDTO = mapper.carminDatasetProcessingToCarminDatasetProcessingDTO(createdProcessing);
+        createdDTO.setParametersResources(parametersDatasets);
+
+        return new ResponseEntity<>(createdDTO, HttpStatus.OK);
     }
+
 
     @Override
     public ResponseEntity<Void> updateCarminDatasetProcessing(
             @ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
-            @ApiParam(value = "dataset processing to update", required = true) @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing,
-            final BindingResult result) throws RestServiceException {
+            @ApiParam(value = "dataset processing to update", required = true) @Valid @RequestBody CarminDatasetProcessingDTO dto,
+            boolean start,
+            final BindingResult result) throws RestServiceException, SecurityException {
 
         validate(result);
         try {
-            carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            CarminDatasetProcessing updatedProcessing = carminDatasetProcessingService.updateCarminDatasetProcessing(mapper.carminDatasetProcessingDTOToCarminDatasetProcessing(dto));
+
+            if(start){
+                if (updatedProcessing.getIdentifier() == null || updatedProcessing.getIdentifier().isEmpty()) {
+                    throw new RestServiceException(
+                            new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Monitoring job has been set to start but processing identifier is null or empty.", null));
+                }
+                executionStatusMonitorService.startMonitoringJob(updatedProcessing.getIdentifier());
+            }
+
+            return new ResponseEntity<>(HttpStatus.OK);
 
         } catch (EntityNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -104,31 +103,60 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
     }
 
     @Override
-    public ResponseEntity<List<CarminDatasetProcessing>> findCarminDatasetProcessings() {
-        final List<CarminDatasetProcessing> carminDatasetProcessings = carminDatasetProcessingService.findAllAllowed();
-		if (carminDatasetProcessings.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingById(Long datasetProcessingId) {
+        final Optional<CarminDatasetProcessing> processing = carminDatasetProcessingService.findById(datasetProcessingId);
+		if (processing.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
-		return new ResponseEntity<>(carminDatasetProcessings, HttpStatus.OK);
+		// Avoid infinite loop error -> We should be using datasetDTO here in a general matter.
+		for (Dataset dataset : processing.get().getInputDatasets()) {
+			dataset.setDatasetAcquisition(null);
+		}
+		return new ResponseEntity<>(mapper.carminDatasetProcessingToCarminDatasetProcessingDTO(processing.get()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<List<CarminDatasetProcessing>> findCarminDatasetProcessingsByStudyIdAndSubjectId(
+    public ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingByIdentifier(
+            @ApiParam(value = "id of the dataset processing", required = true) @RequestParam("identifier") String identifier) {
+
+        final Optional<CarminDatasetProcessing> processing = carminDatasetProcessingService.findByIdentifier(identifier);
+
+        if (processing.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(mapper.carminDatasetProcessingToCarminDatasetProcessingDTO(processing.get()), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessings() {
+        final List<CarminDatasetProcessing> processings = carminDatasetProcessingService.findAllAllowed();
+		if (processings.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(mapper.carminDatasetProcessingsToCarminDatasetProcessingDTOs(processings), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessingsByStudyIdAndSubjectId(
             @ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
             @ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
-        List<CarminDatasetProcessing> carminDatasetProcessings = carminDatasetProcessingService.findAll();
-        if (carminDatasetProcessings.isEmpty()) {
+        List<CarminDatasetProcessing> processings = carminDatasetProcessingService.findAll();
+        if (processings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        carminDatasetProcessings = carminDatasetProcessings.stream().filter(processing -> {
-            return !CollectionUtils.isEmpty(processing.getInputDatasets())
-                    && processing.getInputDatasets().get(0).getStudyId().equals(studyId)
-                    && processing.getInputDatasets().get(0).getSubjectId().equals(subjectId);
-        }).collect(Collectors.toList());
-        if (carminDatasetProcessings.isEmpty()) {
+        processings = processings.stream()
+                .filter(processing ->
+                        !CollectionUtils.isEmpty(processing.getInputDatasets())
+                && processing.getInputDatasets().get(0).getStudyId().equals(studyId)
+                && processing.getInputDatasets().get(0).getSubjectId().equals(subjectId))
+                .collect(Collectors.toList());
+
+        if (processings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(carminDatasetProcessings, HttpStatus.OK);
+
+        return new ResponseEntity<>(mapper.carminDatasetProcessingsToCarminDatasetProcessingDTOs(processings), HttpStatus.OK);
     }
 
     private void validate(BindingResult result) throws RestServiceException {

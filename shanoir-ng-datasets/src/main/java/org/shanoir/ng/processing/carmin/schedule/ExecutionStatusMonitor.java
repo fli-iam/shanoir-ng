@@ -18,6 +18,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,24 +81,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 	@Autowired
 	private OutputProcessingService outputProcessingService;
-
-	/**
-	 * At datasets MS start (when this spring service is instantiated), restart job that are still 'RUNNING' in database
-	 *
-	 * @throws SecurityException
-	 * @throws EntityNotFoundException
-	 */
-	@PostConstruct
-	public void restartRunningJobs() throws SecurityException, EntityNotFoundException {
-
-		List<CarminDatasetProcessing> processings =  this.carminDatasetProcessingService.findAllRunning();
-
-		for(CarminDatasetProcessing processing : processings){
-			this.startMonitoringJob(processing.getIdentifier());
-			LOG.info("VIP monitoring job [{}] has been restarted.", processing.getIdentifier());
-		}
-
-	}
 
 	/**
 	 * Async job that monitor the state of the VIP execution and process its outcome

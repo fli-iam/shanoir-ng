@@ -15,12 +15,12 @@
     <div *ngFor="let parameter of pipeline.parameters">
         <div *ngIf="parameter.name != 'executable'">
              <label>{{parameter.name}}{{!parameter.isOptional && parameter.type != 'Boolean' ? '*' : ''}} <tool-tip> {{parameter.description}} </tool-tip></label>
-             <input *ngIf="!isAFile(parameter.type) && parameter.type != 'Boolean'" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+             <input *ngIf="!isAFile(parameter) && parameter.type != 'Boolean'" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
              <span *ngIf="parameter.type == 'Boolean'">
                  <checkbox formControlName="{{parameter.name}}" id="{{parameter.name}}"></checkbox>
              </span>
-             <span *ngIf="isAFile(parameter.type)">
-                 <input *ngIf="isAFile(parameter.type)"
+             <span *ngIf="isAFile(parameter)">
+                 <input *ngIf="isAFile(parameter)"
                     formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
                  <ng-template #loading>Loading datasets...</ng-template>
              </span>
@@ -45,31 +45,29 @@
 <button type='button' (click)="onApplyParameters()" [disabled]="!executionForm.valid">Apply</button>
 
 <div *ngIf="parametersApplied" class="block-div">
-<legend> List of {{selectedGroupBy}} selected for the given parameters: </legend>
+<legend> List of datasets selected for the given parameters: </legend>
     <div *ngFor="let parameter of fileInputs" class="parent-div">
-        <div *ngIf="parameter.type == 'File'" class="file-parameter-div">
-            <input type="hidden" [(ngModel)]="fileEntities[parameter.name]"/>
-            <b>{{parameter.name}} :</b>
-               <select-box placeholder="Available {{selectedGroupBy}}s" (onAddClick)="addFileEntity($event, parameter.name)" [options]="fileEntitiesOptions">
-               </select-box>
-            <table>
-                <tr>
-                  <th>
-                  {{selectedGroupBy}} name (id)
-                  </th>
-                  <th>
-                     Subject
-                     </th>
-                </tr>
-                <tr *ngFor="let fileEntity of fileEntities[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
-                    <td>{{fileEntity.name}} ({{fileEntity.entity.id}})</td>
-                    <td>{{fileEntity.subjectName}}</td>
-                    <td *ngIf="fileEntities[parameter.name].length > 1" class="icon icon-clickable" (click)="removeFileEntity(fileEntity, parameter.name)">
-                        <i class="fas fa-times"></i>
-                    </td>
-                </tr>
-            </table>
-        </div>
+        <input type="hidden" [(ngModel)]="datasetsByParam[parameter.name]"/>
+        <b>{{parameter.name}} :</b>
+           <select-box placeholder="Available datasets" (onAddClick)="addDatasetFromParam($event, parameter.name)" [options]="datasetsOptions">
+           </select-box>
+        <table>
+            <tr>
+              <th>
+              Dataset name (id)
+              </th>
+              <th>
+                 Subject
+                 </th>
+            </tr>
+            <tr *ngFor="let dataset of datasetsByParam[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
+                <td>{{dataset.name}} ({{dataset.id}})</td>
+                <td>{{dataset.subject?.name}}</td>
+                <td *ngIf="datasetsByParam[parameter.name].length > 1" class="icon icon-clickable" (click)="removeDatasetFromParam(dataset, parameter.name)">
+                    <i class="fas fa-times"></i>
+                </td>
+            </tr>
+        </table>
         <br/>
     </div>
 </div>

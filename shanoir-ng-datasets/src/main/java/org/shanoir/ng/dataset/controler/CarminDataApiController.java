@@ -25,9 +25,15 @@ import javax.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
+import org.shanoir.ng.dicom.DIMSEService;
+import org.shanoir.ng.processing.carmin.model.ProcessingResource;
+import org.shanoir.ng.processing.carmin.service.ProcessingResourceService;
+import org.shanoir.ng.processing.dto.mapper.CarminDatasetProcessingMapper;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,13 +46,15 @@ import io.swagger.annotations.ApiParam;
 @Controller
 public class CarminDataApiController implements CarminDataApi{
 
+    private static final Logger LOG = LoggerFactory.getLogger(CarminDataApiController.class);
+
     private static final String DCM = "dcm";
     
     @Autowired
     private DatasetDownloaderServiceImpl datasetDownloaderService;
 
     @Autowired
-    private DatasetService datasetService;
+    private ProcessingResourceService processingResourceService;
 
     @Override
     public ResponseEntity<?> getPath(
@@ -66,26 +74,20 @@ public class CarminDataApiController implements CarminDataApi{
             case "properties":
                 return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
             case "content":
-                Long id = Long.parseLong(completePath);
 
-                if(completePath.contains("dataset_id")){
-                    datasetDownloaderService.downloadDatasetById(id,null, format, response, true);
-                    return new ResponseEntity<Void>(HttpStatus.OK);
+                List<Dataset> datasets = this.processingResourceService.findDatasetsByResourceId(completePath);
+
+                if(datasets.isEmpty()){
+                    LOG.error("No dataset found for resource id [{}]", completePath);
+                    return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
                 }
 
-                if(completePath.contains("acquisition_id")){
-                    List<Dataset> datasets = datasetService.findByAcquisition(id);
-                    datasetDownloaderService.massiveDownload(format, datasets, response, true);
-                    return new ResponseEntity<Void>(HttpStatus.OK);
-                }
-
-                if(completePath.contains("examination_id")){
-                   List<Dataset> datasets = datasetService.findByExaminationId(id);
-                    datasetDownloaderService.massiveDownload(format, datasets, response, true);
-                    return new ResponseEntity<Void>(HttpStatus.OK);
-                }
+                datasetDownloaderService.massiveDownload(format, datasets, response, true);
+                return new ResponseEntity<Void>(HttpStatus.OK);
         }
+
         return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+
     }
 
 }
