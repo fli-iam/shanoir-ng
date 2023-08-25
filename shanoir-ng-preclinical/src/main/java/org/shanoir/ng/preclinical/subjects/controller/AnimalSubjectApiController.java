@@ -16,7 +16,6 @@ package org.shanoir.ng.preclinical.subjects.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
 import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
@@ -113,6 +112,15 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	private SubjectDto createSubject(SubjectDto dto) throws ShanoirException, RestServiceException {
 
+		if(subjectService.isSubjectNameAlreadyUsed(dto.getName())){
+			FieldErrorMap errorMap = new FieldErrorMap();
+			List<FieldError> errors = new ArrayList();
+			errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", dto.getName()));
+			errorMap.put("name", errors);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errorMap)));
+		}
+
 		dto.setPreclinical(true);
 
 		Long subjectId;
@@ -123,16 +131,6 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 			LOG.error(msg, ex);
 			throw new ShanoirException(msg, ex);
 		}
-
-		if(subjectService.isSubjectIdAlreadyUsed(subjectId)){
-			FieldErrorMap errorMap = new FieldErrorMap();
-			List<FieldError> errors = new ArrayList();
-			errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", dto.getName()));
-			errorMap.put("name", errors);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errorMap)));
-		}
-
 		dto.setId(subjectId);
 
 		return dto;
@@ -169,8 +167,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<List<AnimalSubjectDto>> getAllAnimalSubjects() {
-		final List<AnimalSubjectDto> subjects = dtoService.getAnimalSubjectDtoListFromAnimalSubjectList(subjectService.findAll());
+	public ResponseEntity<List<AnimalSubjectDto>> findBySubjectIds(List<Long> subjectIds) {
+		final List<AnimalSubjectDto> subjects = dtoService.getAnimalSubjectDtoListFromAnimalSubjectList(subjectService.findBySubjectIds(subjectIds));
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

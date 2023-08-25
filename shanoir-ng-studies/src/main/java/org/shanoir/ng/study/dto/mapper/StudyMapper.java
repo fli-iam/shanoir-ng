@@ -57,7 +57,8 @@ public interface StudyMapper {
 			@Mapping(target = "studyCards", ignore = true),
 			@Mapping(target = "studyCenterList", ignore = true),
 			@Mapping(target = "subjectStudyList", ignore = true),
-			@Mapping(target = "tags", ignore = true) }
+			@Mapping(target = "tags", ignore = true),
+			@Mapping(target = "storageVolume", ignore = true) }
 	)
 	StudyDTO studyToStudyDTO (Study study);
 	

@@ -110,10 +110,12 @@ public class DicomDirToModelService {
 				instances.sort(new InstanceNumberSorter());
 				serie.setInstances(instances);
 			} else {
-				LOG.warn("Serie found with empty instances and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
+				LOG.warn("Serie found with empty instances and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
+				serie.setIgnored(true);
+				serie.setSelected(false);
 			}
 		} else {
-			LOG.warn("Serie found with non imaging modality and therefore ignored (SerieInstanceUID: {}).", serie.getSeriesInstanceUID());
+			LOG.warn("Serie found with no-imaging modality and therefore ignored (SeriesDescription: {}, SerieInstanceUID: {}).", serie.getSeriesDescription(), serie.getSeriesInstanceUID());
 			serie.setIgnored(true);
 			serie.setSelected(false);
 		}

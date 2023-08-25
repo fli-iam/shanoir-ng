@@ -102,8 +102,9 @@ export abstract class EntityService<T extends Entity> {
             })
     }
 
-    get(id: number): Promise<T> {
-        return this.http.get<any>(this.API_URL + '/' + id)
+    get(id: number, withStorageVolume = false): Promise<T> {
+        return this.http.get<any>(this.API_URL + '/' + id
+            + (withStorageVolume ? '?withStorageVolume=true' : ''))
             .toPromise()
             .then(this.mapEntity);
     }

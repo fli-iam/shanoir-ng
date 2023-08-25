@@ -16,7 +16,9 @@ package org.shanoir.ng.dataset.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
+import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -116,7 +118,10 @@ public interface DatasetService {
 	List<Dataset> findByStudyId(Long studyId);
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	Long getExpressionSizeByStudyId(Long studyId);
+	List<VolumeByFormatDTO> getVolumeByFormat(Long studyId);
+
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudies(#studyIds, 'CAN_SEE_ALL'))")
+	Map<Long, List<VolumeByFormatDTO>> getVolumeByFormatByStudyId(List<Long> studyIds);
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")
