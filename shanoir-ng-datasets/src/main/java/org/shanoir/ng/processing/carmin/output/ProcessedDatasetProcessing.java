@@ -135,7 +135,7 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 					for (int i = 0; i < array.length(); i++) {
 						candidates.add(array.getString(i));
 					}
-				} else {
+				} else if (value instanceof String){
 					// Case "resource_id+XXX+filename.nii"
 					candidates.add((String) value);
 				}
