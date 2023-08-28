@@ -30,7 +30,7 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 @WithSecurityContext(factory = MockKeycloakUserContextFactory.class)
 public @interface WithMockKeycloakUser {
 	
-	long id();
+	long id() default -1;
 	
 	String value() default "user";
 

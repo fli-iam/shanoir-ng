@@ -73,21 +73,24 @@ export class CoilComponent extends EntityComponent<Coil> {
             if (this.acqEquip) {
                 coil.center = this.acqEquip.center;
                 coil.manufacturerModel = this.acqEquip.manufacturerModel;
+            } else {
+                this.coil.center = this.centers.filter(center => center.id == this.coil.center.id)[0];
+                this.updateManufList(this.coil.center?.id);
+                this.coil.manufacturerModel = this.manufModels.filter(manuf => manuf.id == this.entity.manufacturerModel.id)[0];
             }
-            this.coil.center = this.centers.filter(center => center.id == this.coil.center.id)[0];
-            this.updateManufList(this.coil.center);
-            this.coil.manufacturerModel = this.manufModels.filter(manuf => manuf.id == this.entity.manufacturerModel.id)[0];
         });
     }
 
     initCreate(): Promise<void> {
         this.entity = new Coil();
         this.prefilledCenter = this.breadcrumbsService.currentStep.getPrefilledValue('center');
+        let centerPromise: Promise<void>;
         if (this.prefilledCenter) {
             this.coil.center = this.prefilledCenter;
             this.centers = [this.prefilledCenter];
+            centerPromise = Promise.resolve();
         } else {
-            this.centerService.getAll().then(centers => {
+            centerPromise = this.centerService.getAll().then(centers => {
                 this.centers = centers;
             });
         }
@@ -96,7 +99,7 @@ export class CoilComponent extends EntityComponent<Coil> {
             this.coil.manufacturerModel = this.prefilledManuf;
             this.manufModels = [this.prefilledManuf];
         }
-        return Promise.resolve();
+        return centerPromise;
     }
 
     buildForm(): UntypedFormGroup {
@@ -119,16 +122,15 @@ export class CoilComponent extends EntityComponent<Coil> {
         return form;
     }
 
-    updateManufList(center: Center): void {
-        this.coil.center = center;
-        this.coil.manufacturerModel = null;
-        if (this.form) this.form.get('acquiEquipModel').markAsUntouched();
-        this.manufModels = [];
-        if (center && center.acquisitionEquipments) {
-            for (let acqEqu of center.acquisitionEquipments) {
-                this.manufModels.push(acqEqu.manufacturerModel);
+    updateManufList(centerId: number): void {
+        if (!this.prefilledManuf) {
+            const center: Center = this.centers?.find(c => c.id == centerId);
+            this.coil.center = center;
+            if (this.form) this.form.get('acquiEquipModel').markAsUntouched();
+            this.manufModels = center?.acquisitionEquipments?.map(acqEq => acqEq.manufacturerModel);
+            if (!this.coil.manufacturerModel || !this.manufModels?.find(model => model.id == this.coil.manufacturerModel.id)) {
+                this.coil.manufacturerModel = this.manufModels?.[0];
             }
-            if (this.manufModels[0]) this.coil.manufacturerModel = this.manufModels[0];
         }
     }
 
@@ -154,10 +156,8 @@ export class CoilComponent extends EntityComponent<Coil> {
             this.subscribtions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     let currentCoil: Coil = currentStep.entity as Coil;
+                    currentCoil.center = this.centers.find(c => c.id == (entity as AcquisitionEquipment).center?.id);
                     currentCoil.manufacturerModel = (entity as AcquisitionEquipment).manufacturerModel;
-                    if (currentCoil.center.id == (entity as AcquisitionEquipment).center.id) {
-                        currentCoil.center.acquisitionEquipments.unshift(entity);
-                    }
                 })
             );
         });

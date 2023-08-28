@@ -14,33 +14,19 @@ public class RSDocumentListener implements DocumentListener {
 	}
 
 	public void insertUpdate(DocumentEvent e) {
-		if (mainWindow.noAnonR.isSelected()) {
-			if (mainWindow.lastNameTF.getText().length() != 0 & mainWindow.firstNameTF.getText().length() != 0
-					& mainWindow.birthNameTF.getText().length() != 0 & mainWindow.birthDateTF.getText().length() != 0
-					& (mainWindow.mSexR.isSelected() || mainWindow.fSexR.isSelected())
-					& mainWindow.isDicomObjectSelected == true)
-				mainWindow.downloadOrCopyButton.setEnabled(true);
-		} else {
-			if (mainWindow.newPatientIDTF.getText().length() != 0 & mainWindow.birthDateTF.getText().length() != 0
-					& (mainWindow.mSexR.isSelected() || mainWindow.fSexR.isSelected())
-					& mainWindow.isDicomObjectSelected == true)
-				mainWindow.downloadOrCopyButton.setEnabled(true);
-		}
+		if (mainWindow.lastNameTF.getText().length() != 0 & mainWindow.firstNameTF.getText().length() != 0
+				& mainWindow.birthNameTF.getText().length() != 0 & mainWindow.birthDateTF.getText().length() != 0
+				& (mainWindow.mSexR.isSelected() || mainWindow.fSexR.isSelected())
+				& mainWindow.isDicomObjectSelected == true)
+			mainWindow.downloadOrCopyButton.setEnabled(true);
 	}
 
 	public void removeUpdate(DocumentEvent e) {
-		if (mainWindow.noAnonR.isSelected()) {
-			if (mainWindow.lastNameTF.getText().length() == 0 || mainWindow.firstNameTF.getText().length() == 0
-				|| mainWindow.birthNameTF.getText().length() == 0 || mainWindow.birthDateTF.getText().length() == 0
-				|| !(mainWindow.mSexR.isSelected() || mainWindow.fSexR.isSelected())
-				|| mainWindow.isDicomObjectSelected == false)
-			mainWindow.downloadOrCopyButton.setEnabled(false);
-		} else {
-			if (mainWindow.newPatientIDTF.getText().length() == 0 || mainWindow.birthDateTF.getText().length() == 0
-					|| !(mainWindow.mSexR.isSelected() || mainWindow.fSexR.isSelected())
-					|| mainWindow.isDicomObjectSelected == false)
-				mainWindow.downloadOrCopyButton.setEnabled(false);			
-		}
+		if (mainWindow.lastNameTF.getText().length() == 0 || mainWindow.firstNameTF.getText().length() == 0
+			|| mainWindow.birthNameTF.getText().length() == 0 || mainWindow.birthDateTF.getText().length() == 0
+			|| !(mainWindow.mSexR.isSelected() || mainWindow.fSexR.isSelected())
+			|| mainWindow.isDicomObjectSelected == false)
+		mainWindow.downloadOrCopyButton.setEnabled(false);
 	}
 
 	public void changedUpdate(DocumentEvent e) {

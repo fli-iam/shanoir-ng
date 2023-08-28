@@ -4,12 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.PathMatcher;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.keycloak.representations.AccessTokenResponse;
@@ -19,6 +18,9 @@ import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
 import org.shanoir.ng.processing.carmin.output.DefaultOutputProcessing;
 import org.shanoir.ng.processing.carmin.output.OutputProcessing;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
@@ -40,6 +42,8 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.annotation.PostConstruct;
 /**
  * CRON job to request VIP api and create processedDataset
  * 
@@ -76,6 +80,9 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 	@Autowired
 	private DefaultOutputProcessing defaultOutputProcessing;
+
+	@Autowired
+	private ShanoirEventService eventService;
 	
 	// Map of output methods to execute.
     private static Map<String, OutputProcessing> outputProcessingMap;
@@ -99,19 +106,28 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 		String uri = VIP_URI + identifier + "/summary";
 		RestTemplate restTemplate = new RestTemplate();
-		
-		String token = null;
 
-		// check if the token is initialized
-		if (StringUtils.isEmpty(token)) {
-			// refresh the token
-			token = this.refreshServiceAccountAccessToken();
-		}
+		// refresh the token
+		String token = this.refreshServiceAccountAccessToken();
 
-		CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
+		CarminDatasetProcessing processing = this.carminDatasetProcessingService
 				.findByIdentifier(this.identifier)
 				.orElseThrow(() -> new EntityNotFoundException(
-						"entity not found with identifier :" + this.identifier));
+						"Processing [" + this.identifier + "] not found"));
+
+		String execLabel = "VIP Execution [" + processing.getName() + "]";
+
+
+		ShanoirEvent event = new ShanoirEvent(
+				ShanoirEventType.IMPORT_DATASET_EVENT,
+				processing.getId().toString(),
+				KeycloakUtil.getTokenUserId(),
+				execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel(),
+				ShanoirEvent.IN_PROGRESS,
+				0.5f);
+		eventService.publishEvent(event);
+
+		processing.setProcessingDate(LocalDate.now());
 
 		while (!stop.get()) {
 
@@ -122,9 +138,11 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 			// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
 			if(attempts >= 3){
-				LOG.error("failed to get execution details in {} attempts.", attempts);
+				String msg = "Failed to get execution details from VIP in " + attempts + " attempts";
+				LOG.error(msg);
 				LOG.error("Stopping the thread...");
 				stop.set(true);
+				this.setJobInError(event, execLabel + " : " + msg);
 				break;
 			}
 
@@ -135,50 +153,78 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				attempts = 1;
 				switch (execution.getStatus()) {
 				case FINISHED:
-					/**
-					 * updates the status and finish the job
-					 */
 
-					carminDatasetProcessing.setStatus(ExecutionStatus.FINISHED);
+					processing.setStatus(ExecutionStatus.FINISHED);
 
-					this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
+					this.carminDatasetProcessingService.updateCarminDatasetProcessing(processing);
+
+					LOG.info("{} status is [{}]", execLabel, ExecutionStatus.FINISHED.getRestLabel());
+					event.setMessage(execLabel + " : Finished. Processing imported results...");
+					eventService.publishEvent(event);
 
 					// untar the .tgz files
 					final File userImportDir = new File(
 							this.importDir + File.separator +
-							carminDatasetProcessing.getResultsLocation());
+							processing.getResultsLocation());
+
+					LOG.info("Processing result in import directory [{}]...", userImportDir.getAbsolutePath());
 
 					final PathMatcher matcher = userImportDir.toPath().getFileSystem()
 							.getPathMatcher("glob:**/*.{tgz,tar.gz}");
-					final Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath());
+					String outputProcessingKey = StringUtils.isEmpty(processing.getOutputProcessing()) ? DEFAULT_OUTPUT : processing.getOutputProcessing();
 
-					String outputProcessingKey = StringUtils.isEmpty(carminDatasetProcessing.getOutputProcessing()) ? DEFAULT_OUTPUT : carminDatasetProcessing.getOutputProcessing();
-					
-					stream.filter(matcher::matches)
-					.forEach(zipFile -> {
-						outputProcessingMap.get(outputProcessingKey).manageTarGzResult(zipFile.toFile(), userImportDir.getAbsoluteFile(), carminDatasetProcessing);
-					});
 
-					LOG.info("execution status updated, stopping job...");
+					processing.setProcessingDate(LocalDate.now());
+
+					try (Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath())) {
+
+						stream.filter(matcher::matches)
+								.forEach(zipFile -> {
+									outputProcessingMap.get(outputProcessingKey).manageTarGzResult(zipFile.toFile(), userImportDir.getAbsoluteFile(), processing);
+								});
+
+					} catch (IOException e) {
+
+						String msg = "I/O error while listing files in import directory";
+						LOG.error(msg, e);
+						this.setJobInError(event, execLabel + " : " + msg);
+
+						stop.set(true);
+						break;
+					}
+
+					LOG.info("Execution status updated, stopping job...");
 
 					stop.set(true);
+
+					event.setMessage(execLabel + " : Finished");
+					event.setStatus(ShanoirEvent.SUCCESS);
+					event.setProgress(1f);
+					eventService.publishEvent(event);
+
 					break;
 
 				case UNKOWN:
 				case EXECUTION_FAILED:
 				case KILLED:
 
-					carminDatasetProcessing.setStatus(execution.getStatus());
-					this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
-					LOG.info("execution status updated, stopping job...");
+					LOG.warn("{} status is [{}]", execLabel, execution.getStatus().getRestLabel());
+
+					processing.setStatus(execution.getStatus());
+					this.carminDatasetProcessingService.updateCarminDatasetProcessing(processing);
+
+					LOG.info("Execution status updated, stopping job...");
 
 					stop.set(true);
+
+					this.setJobInError(event, execLabel + " : "  + execution.getStatus().getRestLabel()
+							+ (execution.getErrorCode() != null ? " (Error code : " + execution.getErrorCode() + ")" : ""));
+
 					break;
 
 				case RUNNING:
 					Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
 					break;
-
 				default:
 					stop.set(true);
 					break;
@@ -186,24 +232,31 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 			} catch (HttpStatusCodeException e) {
 				// in case of an error with response payload
 				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-					LOG.warn("Unauthorized");
-					LOG.info("Getting new token...");
+					LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
 					token = this.refreshServiceAccountAccessToken();
 					// inc attempts.
 					attempts++;
 				} else {
-					LOG.error("error while getting execution info with status : {} ,and message :", e.getStatusCode(), e.getMessage());
+
+					String msg = "Failed to get execution details from VIP in " + attempts + " attempts";
+					LOG.error(msg , e);
+					this.setJobInError(event, execLabel + " : " + msg);
+
 					stop.set(true);
 				}
 			} catch (RestClientException e) {
 				// in case of an error with no response payload
-				LOG.error("there is no response payload while getting execution info", e);
+				String msg = "No response payload in execution infos from VIP";
+				LOG.error(msg, e);
+				this.setJobInError(event, execLabel + " : " + msg);
+
 				stop.set(true);
 			} catch (InterruptedException e) {
-				LOG.error("sleep thread exception :", e);
-				stop.set(true);
-			} catch (IOException e) {
-				LOG.error("file exception :", e);
+
+				String msg = "Thread exception";
+				LOG.error(msg, e);
+				this.setJobInError(event, execLabel + " : " + msg);
+
 				stop.set(true);
 			}
 		}
@@ -216,5 +269,12 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	private String refreshServiceAccountAccessToken() throws SecurityException {
 		AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
 		return accessTokenResponse.getToken();
+	}
+
+	private void setJobInError(ShanoirEvent event, String msg){
+		event.setMessage(msg);
+		event.setStatus(ShanoirEvent.ERROR);
+		event.setProgress(1f);
+		eventService.publishEvent(event);
 	}
 }

@@ -146,7 +146,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         return '/imports/eeg';
     }
 
-    public importData(): Promise<any> {
+    public importData(timestamp: number): Promise<any> {
         let importJob = new EegImportJob();
         importJob.datasets = [];
         let context = this.importDataService.contextData as EegContextData;
@@ -170,6 +170,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         importJob.examinationId = context.examination.id;
         importJob.studyId = context.study.id;
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
+        importJob.timestamp = timestamp;
         return this.importService.startEegImportJob(importJob);
     }
 

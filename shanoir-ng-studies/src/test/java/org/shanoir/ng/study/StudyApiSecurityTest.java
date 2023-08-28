@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.study;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
@@ -25,9 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
@@ -45,7 +44,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
@@ -55,7 +53,7 @@ import org.springframework.validation.BindingResult;
  * @author jlouis
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class StudyApiSecurityTest {
@@ -80,7 +78,7 @@ public class StudyApiSecurityTest {
 	@MockBean
 	private SubjectStudyRepository subjectStudyRepository;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockNew = ModelsUtil.createStudy();
 		mockExisting = ModelsUtil.createStudy();
@@ -94,7 +92,7 @@ public class StudyApiSecurityTest {
 		assertAccessDenied(api::deleteStudy, ENTITY_ID);
 		assertAccessDenied(api::findStudies);
 		assertAccessDenied(api::findStudiesNames);
-		assertAccessDenied(api::findStudyById, ENTITY_ID);
+		assertAccessDenied(api::findStudyById, ENTITY_ID, false);
 		assertAccessDenied(api::saveNewStudy, mockNew, mockBindingResult);
 		assertAccessDenied(api::updateStudy, ENTITY_ID, mockExisting, mockBindingResult);
 	}
@@ -142,7 +140,7 @@ public class StudyApiSecurityTest {
 		assertAccessAuthorized(api::findStudies);
 		assertAccessAuthorized(api::findStudiesNames);
 		given(repository.findById(ENTITY_ID)).willReturn(Optional.of(buildStudyMock(ENTITY_ID)));
-		assertAccessAuthorized(api::findStudyById, ENTITY_ID);
+		assertAccessAuthorized(api::findStudyById, ENTITY_ID, false);
 		assertAccessAuthorized(api::saveNewStudy, mockNew, mockBindingResult);
 		assertAccessAuthorized(api::updateStudy, ENTITY_ID, mockExisting, mockBindingResult);
 	}
@@ -157,7 +155,7 @@ public class StudyApiSecurityTest {
 		assertEquals(null, api.findStudies().getBody());
 		assertAccessAuthorized(api::findStudiesNames);
 		assertEquals(null, api.findStudiesNames().getBody());
-		assertAccessDenied(api::findStudyById, 1L);
+		assertAccessDenied(api::findStudyById, 1L, false);
 		
 		// Wrong Rights
 		Study studyMockWrongRights = buildStudyMock(2L, StudyUserRight.CAN_ADMINISTRATE, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT);
@@ -168,7 +166,7 @@ public class StudyApiSecurityTest {
 		assertEquals(null, api.findStudies().getBody());
 		assertAccessAuthorized(api::findStudiesNames);
 		assertEquals(null, api.findStudiesNames().getBody());
-		assertAccessDenied(api::findStudyById, 2L);
+		assertAccessDenied(api::findStudyById, 2L, false);
 		
 		// Right rights
 		Study studyMockRightRights = buildStudyMock(3L, StudyUserRight.CAN_SEE_ALL);
@@ -182,7 +180,7 @@ public class StudyApiSecurityTest {
 		assertAccessAuthorized(api::findStudiesNames);
 		assertNotNull(api.findStudiesNames().getBody());
 		assertEquals(1, api.findStudiesNames().getBody().size());
-		assertAccessAuthorized(api::findStudyById, 3L);
+		assertAccessAuthorized(api::findStudyById, 3L, false);
 	}
 
 	private Study buildStudyMock(Long id, StudyUserRight... rights) {

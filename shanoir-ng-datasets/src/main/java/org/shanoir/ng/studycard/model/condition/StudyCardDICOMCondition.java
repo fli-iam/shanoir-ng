@@ -19,8 +19,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
@@ -55,8 +55,13 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
     }
         
     public boolean fulfilled(Attributes dicomAttributes, StringBuffer errorMsg) {
-        LOG.info("conditionFulfilled: " + this.getId() + " processing one condition with all its values: ");
-        this.getValues().stream().forEach(s -> LOG.info(s));
+        LOG.debug("conditionFulfilled: " + this.getId() + " processing one condition with all its values: ");
+        this.getValues().stream().forEach(s -> LOG.debug(s));
+        if (dicomAttributes == null) {
+            if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                + "] was ignored because no dicom data was provided");
+            return true;
+        }
         if (!dicomAttributes.contains(getDicomTag())) {
             if (errorMsg != null) errorMsg.append("condition [" + toString() 
                 + "] failed because no value was found in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));

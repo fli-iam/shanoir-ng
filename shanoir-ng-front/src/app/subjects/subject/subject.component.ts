@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -22,7 +22,7 @@ import { DatepickerComponent } from '../../shared/date-picker/date-picker.compon
 import { IdName } from '../../shared/models/id-name.model';
 import { Option } from '../../shared/select/select.component';
 import { StudyService } from '../../studies/shared/study.service';
-import { ReverseSubjectNode, SubjectNode } from '../../tree/tree.model';
+import { ReverseSubjectNode, ClinicalSubjectNode } from '../../tree/tree.model';
 import { ImagedObjectCategory } from '../shared/imaged-object-category.enum';
 import { Subject } from '../shared/subject.model';
 import { SubjectService } from '../shared/subject.service';
@@ -49,7 +49,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     private nameValidators = [Validators.required, Validators.minLength(2), Validators.maxLength(64), Validators.pattern(this.pattern)];
     forceStudy: Study = null;
     dicomPatientName: string;
-    subjectNode: Subject | SubjectNode;
+    subjectNode: Subject | ClinicalSubjectNode;
 
     catOptions: Option<ImagedObjectCategory>[] = [
         new Option<ImagedObjectCategory>(ImagedObjectCategory.PHANTOM, 'Phantom'),
@@ -72,7 +72,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
     }
 
     public get subject(): Subject { return this.entity; }
-    public set subject(subject: Subject) { 
+    public set subject(subject: Subject) {
         this.entity = subject;
         this.subjectNode = this.breadcrumbsService.currentStep.data.subjectNode ? this.breadcrumbsService.currentStep.data.subjectNode : subject;
     }
@@ -146,7 +146,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         }
         return subjectForm;
     }
-    
+
     private forbiddenNameValidator(forbiddenValues: string[]): ValidatorFn {
       return (c: AbstractControl): { [key: string]: boolean } | null => {
         if (forbiddenValues.indexOf(c.value) !== -1) {
@@ -231,7 +231,7 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
         if (this.isAlreadyAnonymized && this.subjectNamePrefix) {
             this.subject.name = this.subjectNamePrefix + this.dicomPatientName;
         } else if (!this.isAlreadyAnonymized && this.subjectNamePrefix && this.dicomPatientName) {
-            this.subject.name = this.subjectNamePrefix; 
+            this.subject.name = this.subjectNamePrefix;
         }
     }
 }

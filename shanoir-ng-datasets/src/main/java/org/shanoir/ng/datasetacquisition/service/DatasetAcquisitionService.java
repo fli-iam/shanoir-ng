@@ -14,8 +14,11 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -36,7 +39,7 @@ public interface DatasetAcquisitionService {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
-	List<DatasetAcquisition> findByStudyCard(Long id);
+	public List<DatasetAcquisition> findByStudyCard(Long studyCardId);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetAcquisitionList(returnObject, 'CAN_SEE_ALL')")
@@ -60,7 +63,9 @@ public interface DatasetAcquisitionService {
 	Iterable<DatasetAcquisition> update(List<DatasetAcquisition> entities);
 	
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#id, 'CAN_ADMINISTRATE')")
-	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
 
     boolean existsByStudyCardId(Long studyCardId);
+
+	Collection<DatasetAcquisition> createAll(Collection<DatasetAcquisition> acquisitions);
 }

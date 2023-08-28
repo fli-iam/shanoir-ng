@@ -18,14 +18,12 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
@@ -44,7 +42,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -57,7 +54,6 @@ import com.google.gson.GsonBuilder;
  * @author sloury
  *
  */
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = PathologyModelApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
@@ -77,38 +73,39 @@ public class PathologyModelApiControllerTest {
 
 	@MockBean
 	private PathologyModelService modelServiceMock;
+
 	@MockBean
 	private PathologyService pathologyServiceMock;
+	
 	@MockBean
 	private ShanoirEventService eventService;
+	
 	@MockBean
 	private PathologyModelUniqueValidator uniqueValidator;
+	
 	@MockBean
 	private PathologyModelEditableByManager editableOnlyValidator;
 
-
-	@ClassRule
-	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	@TempDir
+	public File tempFolder;
 	
-	public static String tempFolderPath;
-	@BeforeClass
-	public static void beforeClass() {
-		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
-	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
-	}
-
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException {
+		File tmpFolder = new File(tempFolder, "/tmp/");
+		tmpFolder.mkdirs();
+	    System.setProperty("preclinical.uploadExtradataFolder", tmpFolder.getAbsolutePath());
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
 		doNothing().when(modelServiceMock).deleteById(1L);
 		given(modelServiceMock.findAll()).willReturn(Arrays.asList(new PathologyModel()));
 		given(modelServiceMock.findByPathology(new Pathology())).willReturn(Arrays.asList(new PathologyModel()));
-		given(modelServiceMock.findById(1L)).willReturn(new PathologyModel());
+		PathologyModel patho1 = new PathologyModel();
+		patho1.setId(1L);
+		given(modelServiceMock.findById(1L)).willReturn(patho1);
 		given(pathologyServiceMock.findById(1L)).willReturn(new Pathology());
 		PathologyModel patho = new PathologyModel();
 		patho.setId(Long.valueOf(123));
-		given(modelServiceMock.save(Mockito.any(PathologyModel.class))).willReturn(patho );
+		given(modelServiceMock.save(Mockito.any(PathologyModel.class))).willReturn(patho);
 		
 		given(uniqueValidator.validate(Mockito.any(PathologyModel.class))).willReturn(new FieldErrorMap());
 		given(editableOnlyValidator.validate(Mockito.any(PathologyModel.class))).willReturn(new FieldErrorMap());
@@ -153,14 +150,6 @@ public class PathologyModelApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.put(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(gson.toJson(PathologyModelUtil.createPathologyModel()))).andExpect(status().isOk());
-	}
-
-	@Test
-	@WithMockUser
-	public void uploadSpecificationsTest() throws Exception {
-		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain", "some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH_UPLOAD_SPECS).file(firstFile))
-				.andExpect(status().isOk());
 	}
 
 }

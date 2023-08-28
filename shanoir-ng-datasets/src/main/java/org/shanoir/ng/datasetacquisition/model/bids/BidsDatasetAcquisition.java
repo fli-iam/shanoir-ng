@@ -1,6 +1,6 @@
 package org.shanoir.ng.datasetacquisition.model.bids;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 

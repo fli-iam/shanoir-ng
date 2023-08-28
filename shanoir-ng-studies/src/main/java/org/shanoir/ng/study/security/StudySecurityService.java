@@ -14,10 +14,7 @@
 
 package org.shanoir.ng.study.security;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -33,7 +30,9 @@ import org.shanoir.ng.subject.dto.SimpleSubjectDTO;
 import org.shanoir.ng.subject.dto.SubjectDTO;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subject.repository.SubjectRepository;
+import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
 import org.shanoir.ng.subjectstudy.model.SubjectStudy;
+import org.shanoir.ng.subjectstudy.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -50,6 +49,9 @@ public class StudySecurityService {
 
 	@Autowired
 	StudyUserRepository studyUserRepository;
+
+	@Autowired
+	SubjectStudyRepository subjectStudyRepository;
 
 	@Autowired
 	DataUserAgreementRepository dataUserAgreementRepository;
@@ -71,6 +73,19 @@ public class StudySecurityService {
 			throw new EntityNotFoundException("Cannot find study with id " + studyId);
 		}
 		return hasPrivilege(study, right);
+	}
+
+	public boolean filterVolumesHasRightOnStudies(List<Long> studyIds, String rightStr) throws EntityNotFoundException {
+
+		List<Long> invalidStudyIds = new ArrayList<>();
+
+		for(Long id : studyIds){
+			 if(!this.hasRightOnStudy(id, rightStr)){
+				 invalidStudyIds.add(id);
+			 }
+		}
+		studyIds.removeAll(invalidStudyIds);
+		return true;
 	}
 
 	/**
@@ -215,6 +230,45 @@ public class StudySecurityService {
 					return true;
 				}
 			}
+		}
+		return false;
+	}
+
+	/**
+	 * Check that the connected user has the given right in all studies to
+	 * which the subject participates. ! ATTENTION ! This method is meant to be used
+	 * with a trusted Subject, meaning it should not be used with a Subject object
+	 * that comes from the user API but most likely from a Subject coming from the
+	 * database.
+	 *
+	 * @param subjectDto
+	 *            the subject id
+	 * @param rightStr
+	 * @return true or false
+	 */
+	public boolean hasRightOnSubjectForEveryStudies(SubjectDTO subjectDto, String rightStr) {
+		boolean res = false;
+		Subject subject = subjectRepository.findById(subjectDto.getId()).orElse(null);
+		StudyUserRight right = StudyUserRight.valueOf(rightStr);
+		List<Long> toRemove = new ArrayList<>();
+		if (subjectDto != null && subjectDto.getSubjectStudyList() != null) {
+			for (SubjectStudy subjectStudy : subject.getSubjectStudyList()) {
+				if (hasPrivilege(subjectStudy.getStudy(), right)) {
+					res = true;
+				}
+				else {
+					toRemove.add(subjectStudy.getId());
+				}
+			}
+
+			ListIterator<SubjectStudyDTO> iter = subjectDto.getSubjectStudyList().listIterator();
+			while(iter.hasNext()){
+				if(toRemove.contains(iter.next().getId())) {
+					iter.remove();
+				}
+			}
+
+			return res;
 		}
 		return false;
 	}

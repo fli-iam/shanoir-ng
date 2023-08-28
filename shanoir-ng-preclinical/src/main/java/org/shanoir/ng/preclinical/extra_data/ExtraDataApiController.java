@@ -23,8 +23,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloodGasData;
 import org.shanoir.ng.preclinical.extra_data.bloodgas_data.BloogGasUniqueConstraintManager;
@@ -49,7 +49,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class ExtraDataApiController implements ExtraDataApi {
@@ -91,7 +91,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Override
 	public ResponseEntity<ExaminationExtraData> uploadExtraData(
-			@ApiParam(value = "extra data id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "extra data id", required = true) @PathVariable("id") Long id,
 			@RequestParam("files") MultipartFile[] uploadfiles) throws RestServiceException {
 
 		if (uploadfiles.length == 0) {
@@ -106,8 +106,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 		ExaminationExtraData extradata = extraDataService.findById(id);
 
 		try {
-			extradata = saveUploadedFile(extradata, uploadfiles[0]);
-			extraDataService.save(extradata);
+			ExaminationExtraData uploadedData = saveUploadedFile(extradata, uploadfiles[0]);
+			extraDataService.save(uploadedData);
 			return new ResponseEntity<>(extradata, HttpStatus.OK);
 		} catch (IOException e) {
 			throw new RestServiceException(e,
@@ -120,8 +120,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Override
 	public ResponseEntity<ExaminationExtraData> createExtraData(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ExaminationExtraData to create", required = true) @RequestBody ExaminationExtraData extradata,
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ExaminationExtraData to create", required = true) @RequestBody ExaminationExtraData extradata,
 			BindingResult result) throws RestServiceException {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
@@ -148,8 +148,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Override
 	public ResponseEntity<PhysiologicalData> createPhysiologicalExtraData(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "PhysiologicalData to create", required = true) @RequestBody PhysiologicalData extradata,
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "PhysiologicalData to create", required = true) @RequestBody PhysiologicalData extradata,
 			BindingResult result) throws RestServiceException {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
@@ -178,8 +178,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Override
 	public ResponseEntity<BloodGasData> createBloodGasExtraData(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "BloodGasData to create", required = true) @RequestBody BloodGasData extradata,
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "BloodGasData to create", required = true) @RequestBody BloodGasData extradata,
 			BindingResult result) throws RestServiceException {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(extradata);
@@ -206,8 +206,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Override
 	public ResponseEntity<Void> deleteExtraData(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ExaminationExtraData id to delete", required = true) @PathVariable("eid") Long eid)
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ExaminationExtraData id to delete", required = true) @PathVariable("eid") Long eid)
 			throws RestServiceException {
 		ExaminationExtraData toDelete = extraDataService.findById(eid);
 		if (toDelete == null) {
@@ -235,8 +235,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Override
 	public ResponseEntity<ExaminationExtraData> getExtraDataById(
-			@ApiParam(value = "examination id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of exam extra data that needs to be fetched", required = true) @PathVariable("eid") Long eid) {
+			@Parameter(name = "examination id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of exam extra data that needs to be fetched", required = true) @PathVariable("eid") Long eid) {
 		final ExaminationExtraData extradata = extraDataService.findById(eid);
 		if (extradata == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -246,14 +246,14 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Override
 	public ResponseEntity<List<ExaminationExtraData>> getExaminationExtraData(
-			@ApiParam(value = "ID of examination from which we get extradata", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "ID of examination from which we get extradata", required = true) @PathVariable("id") Long id) {
 		final List<ExaminationExtraData> extradatas = extraDataService.findAllByExaminationId(id);
 		return new ResponseEntity<>(extradatas, HttpStatus.OK);
 	}
 
 	@Override
 	public void downloadExtraData(
-			@ApiParam(value = "ID of exam extra data file to download", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of exam extra data file to download", required = true) @PathVariable("id") Long id,
 			HttpServletResponse response)
 			throws RestServiceException {
 
@@ -280,9 +280,9 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Override
 	public ResponseEntity<Void> updatePhysiologicalData(
-			@ApiParam(value = "ID of examination that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of physiologicalData that needs to be updated", required = true) @PathVariable("eid") Long eid,
-			@ApiParam(value = "PhysiologicalData object that needs to be updated", required = true) @RequestBody PhysiologicalData physioData,
+			@Parameter(name = "ID of examination that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of physiologicalData that needs to be updated", required = true) @PathVariable("eid") Long eid,
+			@Parameter(name = "PhysiologicalData object that needs to be updated", required = true) @RequestBody PhysiologicalData physioData,
 			final BindingResult result) throws RestServiceException {
 		// IMPORTANT : avoid any confusion that could lead to security breach
 		physioData.setId(eid);
@@ -314,9 +314,9 @@ public class ExtraDataApiController implements ExtraDataApi {
 
 	@Override
 	public ResponseEntity<Void> updateBloodGasData(
-			@ApiParam(value = "ID of examination that needs to be updated", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of bloodGasData that needs to be updated", required = true) @PathVariable("eid") Long eid,
-			@ApiParam(value = "BloodGasData object that needs to be updated", required = true) @RequestBody BloodGasData bloodGasData,
+			@Parameter(name = "ID of examination that needs to be updated", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of bloodGasData that needs to be updated", required = true) @PathVariable("eid") Long eid,
+			@Parameter(name = "BloodGasData object that needs to be updated", required = true) @RequestBody BloodGasData bloodGasData,
 			final BindingResult result) throws RestServiceException {
 		// IMPORTANT : avoid any confusion that could lead to security breach
 		bloodGasData.setId(eid);
@@ -361,6 +361,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		createdFolder.mkdirs();
 		// Path to file
 		File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
+		fileToGet.createNewFile();
 		file.transferTo(fileToGet);
 
 		extradata.setFilename(file.getOriginalFilename());

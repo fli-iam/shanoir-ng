@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<li [class.active]="activeTab == 'members'" [routerLink]="'.'" [fragment]="'members'" replaceUrl="true">Members</li>
 				<li [class.active]="activeTab == 'tags'" [routerLink]="'.'" [fragment]="'tags'" replaceUrl="true">Tags</li>
 				<ng-container *ngIf="mode == 'view'">
-					<li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>				
+					<li *ngIf="isStudyAdmin" [class.active]="activeTab == 'quality'" [routerLink]="'.'" [fragment]="'quality'" replaceUrl="true">Quality</li>
 					<li [class.active]="activeTab == 'tree'" [routerLink]="'.'" [fragment]="'tree'" replaceUrl="true">Tree</li>
 					<li [class.active]="activeTab == 'bids'" [routerLink]="'.'" [fragment]="'bids'" replaceUrl="true">BIDS</li>
 				</ng-container>
@@ -62,9 +62,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</ng-template>
 						</span>
 					</li>
-					<li>
-						<label i18n="Study detail|Name label@@studyDetailPublicDescription">Public description</label>
-						<span class="right-col" [ngSwitch]="mode">
+                    <li>
+                        <label i18n="Study detail|Description label@@studyDetailPublicDescription">Public description</label>
+                        <span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							{{study.description}}
 						</ng-template>
@@ -72,7 +72,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<textarea type="text" formControlName="description" [(ngModel)]="study.description"></textarea>
 						</ng-template>
 						</span>
-					</li>
+                    </li>
+                    <li>
+                        <label i18n="Study detail|License label@@studyDetailLicense">License</label>
+                        <span class="right-col" [ngSwitch]="mode">
+						<ng-template [ngSwitchCase]="'view'">
+							{{study.license}}
+						</ng-template>
+						<ng-template ngSwitchDefault>
+							<input type="text" formControlName="license" [(ngModel)]="study.license">
+						</ng-template>
+						</span>
+                    </li>
 					<li>
 						<label i18n="Study detail|Start date label@@studyDetailStartDate">Start date</label>
 						<span class="right-col">
@@ -127,7 +138,29 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li>
 						<label i18n="Study detail|Status label@@studyDetailStatus">Storage volume</label>
 						<span class="right-col" *ngIf="!uploading">
-							{{ studySizeStr(study.size) }}
+                            <table class="no-spacing">
+                                <tr *ngFor="let item of study.detailedSizes | keyvalue: valueDescOrder">
+                                    <td class="volume-storage-left">
+                                        {{ item.key }}
+                                    </td>
+                                    <td>
+                                        {{ storageVolumePrettyPrint(item.value) }}
+                                    </td>
+                                </tr>
+                                <tr *ngIf="study.totalSize > 0">
+                                     <td class="volume-storage-left volume-storage-total">
+                                        Total
+                                    </td>
+                                    <td class="volume-storage-total" >
+                                        {{ storageVolumePrettyPrint(study.totalSize) }}
+                                    </td>
+                                </tr>
+                                <tr *ngIf="!study.totalSize || study.totalSize == 0" >
+                                    <td>
+                                        0 Bytes
+                                    </td>
+                                </tr>
+                            </table>
 						</span>
 						<span class="right-col" *ngIf="uploading">
 							<i class="fas fa-spinner fa-pulse"></i>

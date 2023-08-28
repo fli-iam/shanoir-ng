@@ -90,6 +90,10 @@ public class StudyDTO {
 
 	private String description;
 
+	private String license;
+
+	private StudyStorageVolumeDTO storageVolume;
+
 	/**
 	 * Default constructor.
 	 */
@@ -461,5 +465,22 @@ public class StudyDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public String getLicense() {
+		return license;
+	}
+
+	public void setLicense(String license) {
+		this.license = license;
+	}
+
+
+	public StudyStorageVolumeDTO getStorageVolume() {
+		return storageVolume;
+	}
+
+	public void setStorageVolume(StudyStorageVolumeDTO storageVolume) {
+		this.storageVolume = storageVolume;
 	}
 }

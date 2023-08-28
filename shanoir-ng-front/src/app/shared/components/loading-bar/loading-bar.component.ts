@@ -30,35 +30,39 @@ export class LoadingBarComponent {
 
     @HostBinding('style.width') get pixelWidth() {
         return this.width + 'px';
-     }
+    }
+
+    @HostBinding('class.error') get isError() {
+        return this.progress == -1;
+    }
+
+    @HostBinding('class.done') get isDone() {
+        return this.progress == 1;
+    }
 
     getProgressText(): string {
-        if (this.progress === -1 && this.text) {
-            return this.text;
+        if (this.progress == -1) {
+            return this.text ? this.text : 'ERROR';
         }
-        if (this.unknownDownload) {
-            return this.studySizeStr(this.progress);
+        else if (this.unknownDownload) {
+            return this.getSizeStr(this.progress);
         }
-        return Math.floor(this.progress * 100) + "%";
+        else return Math.floor(this.progress * 100) + "%";
     }
 
-    studySizeStr(size: number) {
+    getSizeStr(size: number): string {
 
-      const base: number = 1024;
-      const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        const base: number = 1024;
+        const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-      if(size == null || size == 0){
-        return "0 " + units[0];
-      }
+        if(size == null || size == 0){
+            return "0 " + units[0];
+        }
 
-      const exponent: number = Math.floor(Math.log(size) / Math.log(base));
-      let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
-      let unit: string = units[exponent];
+        const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+        let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
+        let unit: string = units[exponent];
 
-      return value + " " + unit;
+        return value + " " + unit;
     }
-
-    onResized(event) {
-    }
-
 } 

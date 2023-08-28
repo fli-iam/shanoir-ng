@@ -34,12 +34,12 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     </study-card-rules>
                 </span>
             </td>
-            <!-- <td>
+            <td>
                 <span>
                     Check at import
                     <checkbox [(ngModel)]="qualityCard.toCheckAtImport" (onChange)="updateQualityCard(qualityCard)"></checkbox>
                 </span>
-            </td> -->
+            </td>
             <td>
                 <button type="button" *ngIf="!pagings.get(qualityCard.id)" class="alt right-icon apply" (click)="apply(qualityCard)" [disabled]="loading.get(qualityCard.id)">
                     Apply now
@@ -63,7 +63,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </td>
         </tr>
         <tr *ngIf="pagings.get(qualityCard.id)?.items?.length > 0">
-            <td colspan="3" class="report-cell"> <!-- TODO : SET TO 4 ! !!!!!!!!!!!!!!!!!!!!!! -->
+            <td colspan="4" class="report-cell">
                 <shanoir-table class="report"
                     [getPage]="getPage.get(qualityCard.id).bind(this)"
                     [columnDefs]="columnDefs"

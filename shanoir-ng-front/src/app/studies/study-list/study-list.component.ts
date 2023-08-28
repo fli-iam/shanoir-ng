@@ -22,6 +22,10 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { UserService } from '../../users/shared/user.service';
+import {StudyCardComponent} from "../../study-cards/study-card/study-card.component";
+import {PublicStudyData} from "../shared/study.dto";
+import {User} from "../../users/shared/user.model";
+import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
 
 
 @Component({
@@ -31,6 +35,8 @@ import { UserService } from '../../users/shared/user.service';
 })
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
+
+    private isStudyVolumesFetching = true;
 
     @ViewChild('table', { static: false }) table: TableComponent;
 
@@ -45,7 +51,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         return this.studyService;
     }
 
+
     getEntities(): Promise<Study[]> {
+        this.isStudyVolumesFetching = true;
         let earlyResult: Promise<Study[]> = Promise.all([
             this.studyService.getAll(),
             this.studyService.getPublicStudiesData()
@@ -75,7 +83,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         })
         Promise.all([
             earlyResult,
-            this.userService.getAccessRequests()
+            this.userService.getAccessRequests(),
         ]).then(([studies, accessRequests]) => {
             if (accessRequests?.length > 0) {
                 for (let accessRequest of accessRequests) {
@@ -84,6 +92,31 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
+            let ids = new Set<number>();
+            studies.forEach(study => {
+               ids.add(study.id);
+            });
+            this.studyService.getStudiesStorageVolume(ids).then(volumes => {
+                studies.forEach( study => {
+                    (study as Study).totalSize = volumes.get(study.id)?.total;
+                    let sizesByLabel = new Map<String, number>()
+
+                    if(volumes.get(study.id)?.volumeByFormat){
+                        for(let sizeByFormat of volumes.get(study.id)?.volumeByFormat){
+                            if(sizeByFormat.size > 0){
+                                sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+                            }
+                        }
+                    }
+
+                    if(volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0){
+                        sizesByLabel.set("Other files (DUA, protocol...)", volumes.get(study.id)?.extraDataSize);
+                    }
+
+                    (study as Study).detailedSizes = sizesByLabel;
+                    this.isStudyVolumesFetching = false;
+                });
+            })
         });
         return earlyResult;
     }
@@ -116,6 +149,30 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             },
             {
                 headerName: "Examinations", field: "nbExaminations", type: "number", width: '30px'
+            },
+            {
+                headerName: "Members", field: "nbMembers", type: "number", width: '30px'
+            },
+            {
+                headerName: "Storage volume", field: "totalSize", disableSearch: true, type: "number", orderBy: ["totalSize"],
+                cellRenderer: (params: any) => {
+                    if (this.isStudyVolumesFetching) {
+                        return "Fetching..."
+                    }
+                    return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
+                },
+                tip: (data: any) => {
+                    let tip = ""
+                    if(this.isStudyVolumesFetching){
+                        return "Calculating the detailed study storage volume, this may take up to a minute"
+                    }
+                    if(data.detailedSizes){
+                        data.detailedSizes.forEach((size: number, label: string) => {
+                            tip += label + " : " + this.studyService.storageVolumePrettyPrint(size) + "\n";
+                        });
+                    }
+                    return tip;
+                }
             }
         ];
         return colDef;
@@ -141,19 +198,21 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         );
     }
 
-    goToViewFromEntity(study: Study): void {
-        if (study.visibleByDefault && study.locked && !this.keycloakService.isUserAdmin()) {
-            if (study.accessRequestedByCurrentUser) {
-                this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.');
+    goToViewFromEntity(study: any): void {
+        if (study instanceof Study) {
+            if (study.visibleByDefault && study.locked && !this.keycloakService.isUserAdmin()) {
+                if (study.accessRequestedByCurrentUser) {
+                    this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.');
+                } else {
+                    this.confirmDialogService.confirm('Authorization needed',
+                        'Before accessing this study you have to request an access to its administrator, do you want to proceed ?'
+                    ).then(result => {
+                        if (result) this.router.navigate(['/access-request/study/' + study.id]);
+                    });
+                }
             } else {
-                this.confirmDialogService.confirm('Authorization needed',
-                    'Before accessing this study you have to request an access to its administrator, do you want to proceed ?'
-                ).then(result => {
-                    if (result) this.router.navigate(['/access-request/study/' + study.id]);
-                });
+                super.goToViewFromEntity(study);
             }
-        } else {
-            super.goToViewFromEntity(study);
         }
     }
 }

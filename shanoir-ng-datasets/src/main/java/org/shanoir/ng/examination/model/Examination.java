@@ -14,23 +14,13 @@
 
 package org.shanoir.ng.examination.model;
 
+import java.sql.Types;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.hateoas.HalEntity;
@@ -40,6 +30,18 @@ import org.shanoir.ng.shared.model.Subject;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PostLoad;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Examination.
@@ -51,272 +53,277 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({ "_links", "id", "examinationDate", "centerId", "subjectId", "studyId", "preclinical" })
 public class Examination extends HalEntity {
 
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -5513725630019270395L;
+    /**
+     * UID
+     */
+    private static final long serialVersionUID = -5513725630019270395L;
 
-	/** Acquisition Center. */
-	@NotNull
-	private Long centerId;
+    /** Acquisition Center. */
+    @NotNull
+    private Long centerId;
 
-	/**
-	 * A comment on the dataset. In case of importing from dicom files, it could
-	 * be the series description for instance.
-	 */
-	private String comment;
+    /**
+     * A comment on the dataset. In case of importing from dicom files, it could
+     * be the series description for instance.
+     */
+    private String comment;
 
-	/** Dataset acquisitions. */
-	@JsonIgnore
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = CascadeType.ALL)
-	private List<DatasetAcquisition> datasetAcquisitions;
+    /** Dataset acquisitions. */
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = CascadeType.ALL)
+    private List<DatasetAcquisition> datasetAcquisitions;
 
-	/** Examination date. */
-	@NotNull
-	@LocalDateAnnotations
-	private LocalDate examinationDate;
+    /** Examination date. */
+    @NotNull
+    @LocalDateAnnotations
+    private LocalDate examinationDate;
 
-	/**
-	 * Experimental group of subjects. Can be null only if subject is not null.
-	 */
-	private Long experimentalGroupOfSubjectsId;
+    /**
+     * Experimental group of subjects. Can be null only if subject is not null.
+     */
+    private Long experimentalGroupOfSubjectsId;
 
-	/** List of extra files directly attached to the examinations. */
-	@ElementCollection
-	@CollectionTable(name = "extra_data_file_path")
-	@Column(name = "path")
-	private List<String> extraDataFilePathList;
+    /** List of extra files directly attached to the examinations. */
+    @ElementCollection
+    @CollectionTable(name = "extra_data_file_path")
+    @Column(name = "path")
+    private List<String> extraDataFilePathList;
 
-	/** List of the instrumentBasedAssessment related to this examination. */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = { CascadeType.ALL })
-	private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
+    /** List of the instrumentBasedAssessment related to this examination. */
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "examination", cascade = { CascadeType.ALL })
+    private List<InstrumentBasedAssessment> instrumentBasedAssessmentList;
 
-	/** Center of the investigator if he is external. */
-	private Long investigatorCenterId;
+    /** Center of the investigator if he is external. */
+    private Long investigatorCenterId;
 
-	/**
-	 * True if the investigator come from an other center than the acquisition
-	 * center.
-	 */
-	@NotNull
-	private boolean investigatorExternal;
+    /**
+     * True if the investigator come from an other center than the acquisition
+     * center.
+     */
+    @NotNull
+    private boolean investigatorExternal;
 
-	/** Investigator. */
-	// @NotNull
-	private Long investigatorId;
+    /** Investigator. */
+    // @NotNull
+    private Long investigatorId;
 
-	/** Notes about this examination. */
-	@Lob
-	private String note;
+    /** Notes about this examination. */
+	@JdbcTypeCode(Types.LONGVARCHAR)
+    private String note;
 
-	/** Study. */
+    /** Study. */
     @ManyToOne
     @JoinColumn(name = "study_id")
     @NotNull
     private Study study;
 
-	/** Subject. Can be null only if experimentalGroupOfSubjects is not null. */
-	@ManyToOne
-	@JoinColumn(name = "subject_id")
-	private Subject subject;
+    /** Subject. Can be null only if experimentalGroupOfSubjects is not null. */
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
 
-	/**
-	 * Subject weight at the time of the examination
-	 */
-	private Double subjectWeight;
+    /**
+     * Subject weight at the time of the examination
+     */
+    private Double subjectWeight;
 
-	/** Study Timepoint */
-	private Long timepointId;
+    /** Study Timepoint */
+    private Long timepointId;
 
-	/** The unit of weight, can be in kg or g */
-	private Integer weightUnitOfMeasure;
+    /** The unit of weight, can be in kg or g */
+    private Integer weightUnitOfMeasure;
 
-	/** Flag to set the examination as pre-clinical  */ 
-	@Column(nullable=false)
-	@ColumnDefault("false")
-	private boolean preclinical;
-		
-	/**
-	 * Init HATEOAS links
-	 */
-	@PostLoad
-	public void initLinks() {
-		this.addLink(Links.REL_SELF, "examination/" + getId());
-	}
+    /** Flag to set the examination as pre-clinical  */ 
+    @Column(nullable=false)
+    @ColumnDefault("false")
+    private boolean preclinical;
+        
+    /**
+     * Init HATEOAS links
+     */
+    @PostLoad
+    public void initLinks() {
+        this.addLink(Links.REL_SELF, "examination/" + getId());
+    }
 
-	/**
-	 * @return the centerId
-	 */
-	public Long getCenterId() {
-		return centerId;
-	}
+    /**
+     * @return the centerId
+     */
+    public Long getCenterId() {
+        return centerId;
+    }
 
-	/**
-	 * @param centerId
-	 *            the centerId to set
-	 */
-	public void setCenterId(Long centerId) {
-		this.centerId = centerId;
-	}
+    /**
+     * @param centerId
+     *            the centerId to set
+     */
+    public void setCenterId(Long centerId) {
+        this.centerId = centerId;
+    }
 
-	/**
-	 * @return the comment
-	 */
-	public String getComment() {
-		return comment;
-	}
+    /**
+     * @return the comment
+     */
+    public String getComment() {
+        return comment;
+    }
 
-	/**
-	 * @param comment
-	 *            the comment to set
-	 */
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
+    /**
+     * @param comment
+     *            the comment to set
+     */
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
 
-	/**
-	 * @return the datasetAcquisitions
-	 */
-	public List<DatasetAcquisition> getDatasetAcquisitions() {
-		return datasetAcquisitions;
-	}
+    /**
+     * @return the datasetAcquisitions
+     */
+    public List<DatasetAcquisition> getDatasetAcquisitions() {
+        return datasetAcquisitions;
+    }
 
-	/**
-	 * @param datasetAcquisitionList
-	 *            the datasetAcquisitionList to set
-	 */
-	public void setDatasetAcquisitions(List<DatasetAcquisition> datasetAcquisitions) {
-		this.datasetAcquisitions = datasetAcquisitions;
-	}
+    /**
+     * @param datasetAcquisitionList
+     *            the datasetAcquisitionList to set
+     */
+    public void setDatasetAcquisitions(List<DatasetAcquisition> datasetAcquisitions) {
+        this.datasetAcquisitions = datasetAcquisitions;
+    }
 
-	/**
-	 * @return the examinationDate
-	 */
-	public LocalDate getExaminationDate() {
-		return examinationDate;
-	}
+    public void addDatasetAcquisitions(DatasetAcquisition acquisition) {
+        if (getDatasetAcquisitions() == null) setDatasetAcquisitions(new ArrayList<>());
+        getDatasetAcquisitions().add(acquisition);
+    }
 
-	/**
-	 * @param examinationDate
-	 *            the examinationDate to set
-	 */
-	public void setExaminationDate(LocalDate examinationDate) {
-		this.examinationDate = examinationDate;
-	}
+    /**
+     * @return the examinationDate
+     */
+    public LocalDate getExaminationDate() {
+        return examinationDate;
+    }
 
-	/**
-	 * @return the experimentalGroupOfSubjectsId
-	 */
-	public Long getExperimentalGroupOfSubjectsId() {
-		return experimentalGroupOfSubjectsId;
-	}
+    /**
+     * @param examinationDate
+     *            the examinationDate to set
+     */
+    public void setExaminationDate(LocalDate examinationDate) {
+        this.examinationDate = examinationDate;
+    }
 
-	/**
-	 * @param experimentalGroupOfSubjectsId
-	 *            the experimentalGroupOfSubjectsId to set
-	 */
-	public void setExperimentalGroupOfSubjectsId(Long experimentalGroupOfSubjectsId) {
-		this.experimentalGroupOfSubjectsId = experimentalGroupOfSubjectsId;
-	}
+    /**
+     * @return the experimentalGroupOfSubjectsId
+     */
+    public Long getExperimentalGroupOfSubjectsId() {
+        return experimentalGroupOfSubjectsId;
+    }
 
-	/**
-	 * @return the extraDataFilePathList
-	 */
-	public List<String> getExtraDataFilePathList() {
-		return extraDataFilePathList;
-	}
+    /**
+     * @param experimentalGroupOfSubjectsId
+     *            the experimentalGroupOfSubjectsId to set
+     */
+    public void setExperimentalGroupOfSubjectsId(Long experimentalGroupOfSubjectsId) {
+        this.experimentalGroupOfSubjectsId = experimentalGroupOfSubjectsId;
+    }
 
-	/**
-	 * @param extraDataFilePathList
-	 *            the extraDataFilePathList to set
-	 */
-	public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
-		this.extraDataFilePathList = extraDataFilePathList;
-	}
+    /**
+     * @return the extraDataFilePathList
+     */
+    public List<String> getExtraDataFilePathList() {
+        return extraDataFilePathList;
+    }
 
-	/**
-	 * @return the instrumentBasedAssessmentList
-	 */
-	public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
-		return instrumentBasedAssessmentList;
-	}
+    /**
+     * @param extraDataFilePathList
+     *            the extraDataFilePathList to set
+     */
+    public void setExtraDataFilePathList(List<String> extraDataFilePathList) {
+        this.extraDataFilePathList = extraDataFilePathList;
+    }
 
-	/**
-	 * @param instrumentBasedAssessmentList
-	 *            the instrumentBasedAssessmentList to set
-	 */
-	public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
-		this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
-	}
+    /**
+     * @return the instrumentBasedAssessmentList
+     */
+    public List<InstrumentBasedAssessment> getInstrumentBasedAssessmentList() {
+        return instrumentBasedAssessmentList;
+    }
 
-	/**
-	 * @return the investigatorCenterId
-	 */
-	public Long getInvestigatorCenterId() {
-		return investigatorCenterId;
-	}
+    /**
+     * @param instrumentBasedAssessmentList
+     *            the instrumentBasedAssessmentList to set
+     */
+    public void setInstrumentBasedAssessmentList(List<InstrumentBasedAssessment> instrumentBasedAssessmentList) {
+        this.instrumentBasedAssessmentList = instrumentBasedAssessmentList;
+    }
 
-	/**
-	 * @param investigatorCenterId
-	 *            the investigatorCenterId to set
-	 */
-	public void setInvestigatorCenterId(Long investigatorCenterId) {
-		this.investigatorCenterId = investigatorCenterId;
-	}
+    /**
+     * @return the investigatorCenterId
+     */
+    public Long getInvestigatorCenterId() {
+        return investigatorCenterId;
+    }
 
-	/**
-	 * @return the investigatorExternal
-	 */
-	public boolean isInvestigatorExternal() {
-		return investigatorExternal;
-	}
+    /**
+     * @param investigatorCenterId
+     *            the investigatorCenterId to set
+     */
+    public void setInvestigatorCenterId(Long investigatorCenterId) {
+        this.investigatorCenterId = investigatorCenterId;
+    }
 
-	/**
-	 * @param investigatorExternal
-	 *            the investigatorExternal to set
-	 */
-	public void setInvestigatorExternal(boolean investigatorExternal) {
-		this.investigatorExternal = investigatorExternal;
-	}
+    /**
+     * @return the investigatorExternal
+     */
+    public boolean isInvestigatorExternal() {
+        return investigatorExternal;
+    }
 
-	/**
-	 * @return the investigatorId
-	 */
-	public Long getInvestigatorId() {
-		return investigatorId;
-	}
+    /**
+     * @param investigatorExternal
+     *            the investigatorExternal to set
+     */
+    public void setInvestigatorExternal(boolean investigatorExternal) {
+        this.investigatorExternal = investigatorExternal;
+    }
 
-	/**
-	 * @param investigatorId
-	 *            the investigatorId to set
-	 */
-	public void setInvestigatorId(Long investigatorId) {
-		this.investigatorId = investigatorId;
-	}
+    /**
+     * @return the investigatorId
+     */
+    public Long getInvestigatorId() {
+        return investigatorId;
+    }
 
-	/**
-	 * @return the note
-	 */
-	public String getNote() {
-		return note;
-	}
+    /**
+     * @param investigatorId
+     *            the investigatorId to set
+     */
+    public void setInvestigatorId(Long investigatorId) {
+        this.investigatorId = investigatorId;
+    }
 
-	/**
-	 * @param note
-	 *            the note to set
-	 */
-	public void setNote(String note) {
-		this.note = note;
-	}
+    /**
+     * @return the note
+     */
+    public String getNote() {
+        return note;
+    }
 
-	/**
+    /**
+     * @param note
+     *            the note to set
+     */
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    /**
      * @return the studyId
      */
     public Long getStudyId() {
         return getStudy() != null ? getStudy().getId() : null;
     }
-	
-	public Study getStudy() {
+    
+    public Study getStudy() {
         return study;
     }
 
@@ -325,68 +332,68 @@ public class Examination extends HalEntity {
     }
 
     public Subject getSubject() {
-		return subject;
-	}
+        return subject;
+    }
 
-	public void setSubject(Subject subject) {
-		this.subject = subject;
-	}
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
 
-	/**
-	 * @return the subjectWeight
-	 */
-	public Double getSubjectWeight() {
-		return subjectWeight;
-	}
+    /**
+     * @return the subjectWeight
+     */
+    public Double getSubjectWeight() {
+        return subjectWeight;
+    }
 
-	/**
-	 * @param subjectWeight
-	 *            the subjectWeight to set
-	 */
-	public void setSubjectWeight(Double subjectWeight) {
-		this.subjectWeight = subjectWeight;
-	}
+    /**
+     * @param subjectWeight
+     *            the subjectWeight to set
+     */
+    public void setSubjectWeight(Double subjectWeight) {
+        this.subjectWeight = subjectWeight;
+    }
 
-	/**
-	 * @return the timepointId
-	 */
-	public Long getTimepointId() {
-		return timepointId;
-	}
+    /**
+     * @return the timepointId
+     */
+    public Long getTimepointId() {
+        return timepointId;
+    }
 
-	/**
-	 * @param timepointId
-	 *            the timepointId to set
-	 */
-	public void setTimepointId(Long timepointId) {
-		this.timepointId = timepointId;
-	}
+    /**
+     * @param timepointId
+     *            the timepointId to set
+     */
+    public void setTimepointId(Long timepointId) {
+        this.timepointId = timepointId;
+    }
 
-	/**
-	 * @return the weightUnitOfMeasure
-	 */
-	public UnitOfMeasure getWeightUnitOfMeasure() {
-		return UnitOfMeasure.getUnit(weightUnitOfMeasure);
-	}
+    /**
+     * @return the weightUnitOfMeasure
+     */
+    public UnitOfMeasure getWeightUnitOfMeasure() {
+        return UnitOfMeasure.getUnit(weightUnitOfMeasure);
+    }
 
-	/**
-	 * @param weightUnitOfMeasure
-	 *            the weightUnitOfMeasure to set
-	 */
-	public void setWeightUnitOfMeasure(UnitOfMeasure weightUnitOfMeasure) {
-		if (weightUnitOfMeasure == null) {
-			this.weightUnitOfMeasure = null;
-		} else {
-			this.weightUnitOfMeasure = weightUnitOfMeasure.getId();
-		}
-	}
-	
-	public boolean isPreclinical() {
-		return preclinical;
-	}
+    /**
+     * @param weightUnitOfMeasure
+     *            the weightUnitOfMeasure to set
+     */
+    public void setWeightUnitOfMeasure(UnitOfMeasure weightUnitOfMeasure) {
+        if (weightUnitOfMeasure == null) {
+            this.weightUnitOfMeasure = null;
+        } else {
+            this.weightUnitOfMeasure = weightUnitOfMeasure.getId();
+        }
+    }
+    
+    public boolean isPreclinical() {
+        return preclinical;
+    }
 
-	public void setPreclinical(boolean preclinical) {
-		this.preclinical = preclinical;
-	}
+    public void setPreclinical(boolean preclinical) {
+        this.preclinical = preclinical;
+    }
 
 }

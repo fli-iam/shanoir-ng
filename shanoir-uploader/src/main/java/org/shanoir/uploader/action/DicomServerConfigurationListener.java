@@ -15,9 +15,8 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.dcm4che2.tool.dcmecho.DcmEcho;
+import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.uploader.ShUpConfig;
-//import org.shanoir.uploader.crypto.BlowfishAlgorithm;
 import org.shanoir.uploader.gui.DicomServerConfigurationWindow;
 
 /**
@@ -29,10 +28,12 @@ import org.shanoir.uploader.gui.DicomServerConfigurationWindow;
  */
 
 public class DicomServerConfigurationListener implements ActionListener {
-	private static final String DCMECHO = "DCMECHO";
+
 	private static Logger logger = Logger.getLogger(DicomServerConfigurationListener.class);
 
 	DicomServerConfigurationWindow dicomWindow;
+	
+	private QueryPACSService queryPACSService = new QueryPACSService();
 
 	public DicomServerConfigurationListener(DicomServerConfigurationWindow dicomWindow) {
 		this.dicomWindow = dicomWindow;
@@ -54,7 +55,7 @@ public class DicomServerConfigurationListener implements ActionListener {
 			boolean configurationParametersOK = checkFormEchoParameters(remoteHost, remotePortString, calledAET,
 					resourceBundle);
 			if (configurationParametersOK) {
-				boolean connexionEstablished = echo(remoteHost, remotePortString, calledAET);
+				boolean connexionEstablished = echo(remoteHost, remotePortString, calledAET, localAET);
 				if (connexionEstablished) {
 					String message = "<html><b>"
 							+ resourceBundle.getString(
@@ -90,7 +91,7 @@ public class DicomServerConfigurationListener implements ActionListener {
 				boolean configurationParametersOK = checkFormConfigureParameters(remoteHost, remotePortString,
 						calledAET, localHost, localPortString, localAET, resourceBundle);
 				if (configurationParametersOK) {
-					if (echo(remoteHost, remotePortString, calledAET)) {
+					if (echo(remoteHost, remotePortString, calledAET, localAET)) {
 
 						try {
 							Properties props = ShUpConfig.dicomServerProperties;
@@ -135,55 +136,9 @@ public class DicomServerConfigurationListener implements ActionListener {
 		}
 	}
 
-	// this method verifies the connexion to the PACS
-	public boolean echo(String remoteHost, String remotePortString, String calledAET) {
-		logger.info("echo: Starting...");
-		final DcmEcho dcmecho = new DcmEcho(DCMECHO);
-
-		dcmecho.setRemoteHost(remoteHost);
-		dcmecho.setRemotePort((int) (Integer.parseInt(remotePortString)));
-		dcmecho.setCalledAET(calledAET, false);
-		if (dicomWindow.isDicomServerEnableTLS3DES) {
-			dcmecho.setTlsNeedClientAuth(false);
-			dcmecho.setTls3DES_EDE_CBC();
-			dcmecho.setKeyStoreURL(dicomWindow.keyStoreURLTF.getText());
-			// get keystore password
-			char[] input1 = dicomWindow.keyStorePasswordTF.getPassword();
-			String keyStorePassword = "";
-			for (int i = 0; i < input1.length; i++)
-				keyStorePassword += input1[i];
-
-			dcmecho.setKeyStorePassword(keyStorePassword);
-			dcmecho.setTrustStoreURL(dicomWindow.trustStoreURLTF.getText());
-			// get truststore password
-			char[] input2 = dicomWindow.keyStorePasswordTF.getPassword();
-			String trustStorePassword = "";
-			for (int i = 0; i < input2.length; i++)
-				trustStorePassword += input2[i];
-			dcmecho.setTrustStorePassword(trustStorePassword);
-
-		}
-		try {
-			dcmecho.open();
-		} catch (Exception e) {
-			logger.error("echo: Failed to open connection:" + e.getMessage());
-			return false;
-		}
-		try {
-			dcmecho.echo();
-			logger.info("echo: Success.");
-			return true;
-		} catch (Exception e) {
-			logger.error("echo: Failed to echo:" + e.getMessage());
-			return false;
-		} finally {
-			try {
-				dcmecho.close();
-			} catch (Exception e) {
-				logger.error("echo: Failed to close connection:" + e.getMessage());
-				return false;
-			}
-		}
+	// this method verifies the connection to the PACS
+	public boolean echo(String remoteHost, String remotePortString, String calledAET, String localAET) {
+		return queryPACSService.queryECHO(calledAET, remoteHost, Integer.valueOf(remotePortString), localAET);
 	}
 
 	// check only remoteHost, remotePortString and calledAET parameters (remote PACS
@@ -202,7 +157,7 @@ public class DicomServerConfigurationListener implements ActionListener {
 			configurationParametersOK = false;
 		} else {
 			try {
-				int remotePortInt = Integer.parseInt(remotePortString);
+				Integer.parseInt(remotePortString);
 			} catch (NumberFormatException e) {
 				String message = resourceBundle.getString(
 						"shanoir.uploader.configurationMenu.dicomServer.configure.checkFormConfigureParameters.portNumber.message");
@@ -235,8 +190,8 @@ public class DicomServerConfigurationListener implements ActionListener {
 			configurationParametersOK = false;
 		} else {
 			try {
-				int remotePortInt = Integer.parseInt(remotePortString);
-				int localPortInt = Integer.parseInt(localPortString);
+				Integer.parseInt(remotePortString);
+				Integer.parseInt(localPortString);
 			} catch (NumberFormatException e) {
 				String message = resourceBundle.getString(
 						"shanoir.uploader.configurationMenu.dicomServer.configure.checkFormConfigureParameters.portNumber.message");

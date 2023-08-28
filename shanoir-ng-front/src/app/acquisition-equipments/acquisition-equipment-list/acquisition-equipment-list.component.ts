@@ -68,13 +68,6 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
 
     // Grid columns definition
     getColumnDefs(): ColumnDefinition[] {
-        function dateRenderer(date: number) {
-            if (date) {
-                return new Date(date).toLocaleDateString();
-            }
-            return null;
-        };
-
         let columnDefs: ColumnDefinition[] = [
             {
                 headerName: "Acquisition equipment", field: "name", cellRenderer: function (params: any) {
@@ -105,7 +98,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
                 headerName: "",
                 type: "button",
                 awesome: "fa-solid fa-magnet",
-                tip: "Add coil",
+                tip: () => { return "Add coil"},
                 action: (acqEquip) => this.openCreateCoil(acqEquip)
             });
         }

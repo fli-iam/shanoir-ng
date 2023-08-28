@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -33,14 +33,14 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 export class CenterListComponent extends BrowserPaginEntityListComponent<Center> {
 
     @ViewChild('table', { static: false }) table: TableComponent;
-    
+
     constructor(
             private centerService: CenterService) {
 
         super('center');
         this.manageDelete();
     }
-    
+
     getService(): EntityService<Center> {
         return this.centerService;
     }
@@ -48,14 +48,14 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
     getOptions() {
         return {
             new: true,
-            view: true, 
-            edit: this.keycloakService.isUserAdminOrExpert(), 
+            view: true,
+            edit: this.keycloakService.isUserAdminOrExpert(),
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
 
     getEntities(): Promise<Center[]> {
-        return this.centerService.getAll(); 
+        return this.centerService.getAll();
     }
 
     getColumnDefs(): ColumnDefinition[] {
@@ -66,7 +66,7 @@ export class CenterListComponent extends BrowserPaginEntityListComponent<Center>
             { headerName: "Country", field: "country" }
         ];
         if (this.keycloakService.isUserAdminOrExpert()) {
-            columnDefs.push({ headerName: "", type: "button", awesome: "fa-solid fa-microscope", tip: "Add acq. equip.", action: item => this.openCreateAcqEquip(item) });
+            columnDefs.push({ headerName: "", type: "button", awesome: "fa-solid fa-microscope", tip: () => { return "Add acq. equip." }, action: item => this.openCreateAcqEquip(item) });
         }
         return columnDefs;
     }

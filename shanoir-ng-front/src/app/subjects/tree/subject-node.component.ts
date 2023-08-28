@@ -26,8 +26,8 @@ import {
     DatasetNode,
     ExaminationNode,
     ProcessingNode,
-    SubjectNode,
-    UNLOADED,
+    ClinicalSubjectNode,
+    UNLOADED, SubjectNode, PreclinicalSubjectNode,
 } from '../../tree/tree.model';
 import {Subject} from '../shared/subject.model';
 import {SubjectService} from "../shared/subject.service";
@@ -49,7 +49,7 @@ export class SubjectNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     showDetails: boolean;
     @Input() hasBox: boolean = false;
-    detailsPath: string = "/subject/details/";
+    detailsPath: string = "";
 
     constructor(
         private examinationService: ExaminationService,
@@ -62,8 +62,16 @@ export class SubjectNodeComponent implements OnChanges {
         if (changes['input']) {
             if (this.input instanceof SubjectNode) {
                 this.node = this.input;
+            } else if (this.input.preclinical){
+                this.node = new PreclinicalSubjectNode(
+                    this.input.id,
+                    this.input.name,
+                    [],
+                    UNLOADED,
+                    null,
+                    false);
             } else {
-                this.node = new SubjectNode(
+                this.node = new ClinicalSubjectNode(
                     this.input.id,
                     this.input.name,
                     [],
@@ -72,7 +80,8 @@ export class SubjectNodeComponent implements OnChanges {
                     false);
             }
             this.nodeInit.emit(this.node);
-            this.showDetails = this.router.url != this.detailsPath + this.node.id;
+            this.detailsPath = '/' + this.node.title + '/details/' + this.node.id;
+            this.showDetails = this.router.url != this.detailsPath;
         }
     }
 
@@ -141,6 +150,10 @@ export class SubjectNodeComponent implements OnChanges {
         if (!this.node.examinations) return false;
         else if (this.node.examinations == (UNLOADED as any)) return 'unknown';
         else return this.node.examinations.length > 0;
+    }
+
+    showSubjectDetails() {
+        this.router.navigate(['/' + this.node.title + '/details/' + this.node.id]);
     }
 
     collapseAll() {

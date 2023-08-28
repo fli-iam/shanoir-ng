@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerService;
 import org.shanoir.ng.manufacturermodel.service.ManufacturerUniqueConstraintManager;
@@ -35,6 +33,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import jakarta.validation.Valid;
 
 @Controller
 public class ManufacturerApiController implements ManufacturerApi {
