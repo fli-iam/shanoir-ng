@@ -70,7 +70,8 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
             { 
                headerName: 'Message', field: 'message', width: '100%', type:'link', route: (task: Task) => task.route
             }, { 
-               headerName: 'Progress', field: 'progress', width: '110px', type: 'progress' 
+               headerName: 'Progress', field: 'progress', width: '110px', type: 'progress', 
+               cellRenderer: params => { return {progress: params.data?.progress, status: params.data?.status}; }
             }, { 
                headerName: "Creation", field: "creationDate", width: '130px', type: 'date'
             },{

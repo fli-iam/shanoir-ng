@@ -20,7 +20,8 @@ export type TaskStatus =
     -1 // error
     | 1 // done
     | 2 // in progress
-    | 4; // queued
+    | 4 // queued
+    | 5; // in progress but warning
 
 export class Task extends Entity {
 
@@ -103,12 +104,6 @@ export class Task extends Entity {
         }
         return true;
     }
-}
-
-
-export class DownloadTask extends Task {
-    
-    report: Report;
 }
 
 

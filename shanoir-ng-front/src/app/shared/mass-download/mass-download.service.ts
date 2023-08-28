@@ -85,7 +85,6 @@ export class MassDownloadService {
             if (ret != 'cancel') {
                 return this.datasetService.getByStudyIdAndSubjectId(studyId, subjectId).then(datasets => {
                     return this._downloadDatasets(datasets, ret.format, ret.nbQueues).then(r => {
-                        console.log(123, r);
                         return r;
                     });
                 })
@@ -110,23 +109,7 @@ export class MassDownloadService {
                         );
                     }
                     return Promise.all(promises).then(() => {
-                        task.lastUpdate = new Date();
-                        report.duration = Date.now() - start;
-                        if (report.nbError > 0) {
-                            task.status = -1;
-                            const tab: string = '- ';
-                            task.message = 'download failed in ' + report.duration + 'ms.\n'
-                                + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
-                                + tab + report.nbError + ' datasets were downloaded but are (at least partially) in error and files could be missing.\n'
-                                + 'errors details :\n'
-                                + JSON.stringify(report, null, 4);
-                            JSON.stringify(report);
-                        } else {
-                            task.status = task.status == -1 ? -1 : 1;
-                            task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' files saved in the selected directory';
-                        }
-        
-                        this.notificationService.pushLocalTask(task);
+                        this.handleEnd(task, report, start);
                     }).catch(reason => {
                         task.message = 'download error : ' + reason;
                         this.notificationService.pushLocalTask(task);
@@ -159,16 +142,11 @@ export class MassDownloadService {
                         );
                     }
                     return Promise.all(promises).then(() => {
-                        task.lastUpdate = new Date();
-                        task.status = task.status == -1 ? -1 : 1;
-                        task.message = 'download completed in ' + (Date.now() - start) + 'ms, files saved in the selected directory';
-                        this.notificationService.pushLocalTask(task);
-                        report.duration = Date.now() - start;
+                        this.handleEnd(task, report, start);
                     }).catch(reason => {
                         task.message = 'download error : ' + reason;
                         this.notificationService.pushLocalTask(task);
                     }).finally(() => {
-                        console.log(report)
                         releaseQueue();
                     });
                 } catch (error) {
@@ -177,6 +155,26 @@ export class MassDownloadService {
                 }
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
+    }
+
+    private handleEnd(task: Task, report: Report, start: number) {
+        task.lastUpdate = new Date();
+        report.duration = Date.now() - start;
+        if (report.nbError > 0) {
+            task.status = -1;
+            const tab: string = '- ';
+            task.message = 'download failed in ' + report.duration + 'ms.\n'
+                + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
+                + tab + report.nbError + ' datasets were downloaded but are (at least partially) in error and files could be missing.\n'
+                + 'errors details :\n'
+                + JSON.stringify(report, null, 4);
+            JSON.stringify(report);
+        } else {
+            task.status = task.status == -1 ? -1 : 1;
+            task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' files saved in the selected directory';
+        }
+
+        this.notificationService.pushLocalTask(task);
     }
 
     private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, datasets?: Dataset[]): Promise<void> {
@@ -209,7 +207,7 @@ export class MassDownloadService {
                         report.list[id].error = errorsJson;
                         report.list[id].errorTime = Date.now();
                         task.message = 'saving dataset n°' + id + ' failed';
-                        task.status = -1;
+                        task.status = 5;
                     });
                 } else {
                     report.list[id].status = 'SUCCESS';
@@ -224,7 +222,7 @@ export class MassDownloadService {
             report.list[id].error = reason;
             report.list[id].errorTime = Date.now();
             task.message = 'saving dataset n°' + id + ' failed';
-            task.status = -1;
+            task.status = 5;
         }).finally(() => {
             if (report.list[id].status == 'SUCCESS') {
                 report.nbSuccess++;

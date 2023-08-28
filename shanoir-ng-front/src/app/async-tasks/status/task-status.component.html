@@ -27,7 +27,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>
                 <label>Status</label>
                 <span class="right-col">
-                    <progress-bar [progress]="task?.progress"></progress-bar>
+                    <progress-bar [progress]="task?.progress" [warning]="task.status == 5"></progress-bar>
                     <!-- <button *ngIf="task.eventType == 'downloadDataset.event' && task?.progress == -1" class="alt left-icon normal">
                         <i class="fas fa-download"></i>
                         Retry

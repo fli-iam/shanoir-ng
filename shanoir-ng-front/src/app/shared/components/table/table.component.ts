@@ -251,7 +251,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         } else if (result.text) {
             return result;
         } else {
-            return "" + result;
+            return result;
         }
     }
 

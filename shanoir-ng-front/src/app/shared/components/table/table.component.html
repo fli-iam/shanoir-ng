@@ -103,7 +103,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
                 <!-- display a progress bar -->
                 <ng-container *ngIf="col.type == 'progress'">
-                    <progress-bar [progress]="vars.render" width="100"></progress-bar>
+                    <progress-bar [progress]="vars.render?.progress || vars.render" width="100" [warning]="vars.render?.status == 5"></progress-bar>
                 </ng-container>
                 <div *ngIf="colIndex < columnDefs.length - 1" class="resizer" (mousedown)="startDrag(colIndex, refTd, $event, columnDefs)" (mouseup)="stopDrag()"></div>
             </td>

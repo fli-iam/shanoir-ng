@@ -38,6 +38,8 @@ export class NotificationsService {
     private readLocalStorageConnection;
     private lastLocalStorageRead: number = 0;
     readonly writeInterval: number = 500;
+    readonly readInterval: number = 1000;
+    readonly persistenceTime: number = 1800000;
 
 
     constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
@@ -67,7 +69,7 @@ export class NotificationsService {
         if (this.readLocalStorageConnection) clearInterval(this.readLocalStorageConnection);
         this.readLocalStorageConnection = setInterval(() => {
             try {
-                if ((Date.now() - this.lastLocalStorageRead) >= 900) {
+                if ((Date.now() - this.lastLocalStorageRead) >= (this.readInterval - 100)) {
                     this.readLocalTasks()
                     this.updateStatusVars();
                     this.emitTasks();
@@ -77,8 +79,7 @@ export class NotificationsService {
                 this.lastLocalStorageRead = null;
                 throw e;
             }
-        }, 1000);
-        setTimeout(() => {clearInterval(this.readLocalStorageConnection);}, 10000)
+        }, this.readInterval);
     }
 
     private refresh() {
@@ -94,20 +95,18 @@ export class NotificationsService {
     updateStatusVars() {
         let tmpTasksInProgress = [];
         let tmpTasksInWait = [];
-        for (let task of this.allTasks.concat(this.newLocalTasksQueue)) {
-            if (task.status == -1) {
-                let newLocalTasks: Task[] = this.newLocalTasksQueue.filter(nlt => !this.tasksInProgress.find(tip => tip.id == nlt.id));
-                let freshError: Task = this.tasksInProgress.concat(newLocalTasks).find(tip => (tip.status == 2 || task.status == 4) && task.id == tip.id);
+        for (let task of this.allTasks) {
+            if (task.status == -1 && task.lastUpdate) {
+                let freshError: boolean = !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval + 1000);
                 if (freshError) {
                     this.pushToFreshError(task);
                 }
             } else if (task.status == 1) {
-                let newLocalTasks: Task[] = this.newLocalTasksQueue.filter(nlt => !this.tasksInProgress.find(tip => tip.id == nlt.id));
-                let freshDone: Task = this.tasksInProgress.concat(newLocalTasks).find(tip => (tip.status == 2 || task.status == 4) && task.id == tip.id);
+                let freshDone: boolean = !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval + 1000);
                 if (freshDone) {
                     this.pushToFreshCompleted(task);
                 }
-            } else if (task.status == 2) {
+            } else if (task.status == 2 || task.status == 5) {
                 tmpTasksInProgress.push(task);
             } else if (task.status == 4) {
                 tmpTasksInWait.push(task);
@@ -118,21 +117,25 @@ export class NotificationsService {
     }
 
     pushToFreshCompleted(task: Task) {
-        this.freshCompletedTasks.push(task);
+        if (!this.freshCompletedTasks.find(tip => tip.id == task.id)) {
+            this.freshCompletedTasks.push(task);
+        }
         this.nbNew++;
-        // remove after 30s
+        // remove after 30min
         setTimeout(() => {
             this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
-        }, 30000);
+        }, this.persistenceTime);
     }
 
     pushToFreshError(task: Task) {
+        if (!this.freshCompletedTasks.find(tip => tip.id == task.id)) {
+            this.freshCompletedTasks.push(task);
+        }
         this.nbNewError++;
-        this.freshCompletedTasks.push(task);
-        // remove after 30s
+        // remove after 30min
         setTimeout(() => {
             this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
-        }, 30000);
+        }, this.persistenceTime);
     }
 
     private connectToServer() {

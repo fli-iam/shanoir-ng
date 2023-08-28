@@ -67,13 +67,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </li>
     <!-- *ngIf="state.jobsOpened" -->
     <div class="sub-menu jobs" [@slideDown]="state.jobsOpened">
-        <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait)" [ngSwitch]="task.eventType" [@disapearUp] [@.disabled]="task.status == 2">
+        <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait)" [ngSwitch]="task.eventType" [@disapearUp] [@.disabled]="task.status == 2 || task.status == 5">
             <a routerLink="/task"  routerLinkActive="active">
-                <progress-bar [progress]="task.progress" [width]="50"></progress-bar>
+                <progress-bar [progress]="task.progress" [width]="50" [warning]="task.status == 5"></progress-bar>
                 <i *ngIf="task.status == 4" class="fa-solid fa-hourglass-half status-icon"></i>
                 <i *ngIf="task.status == 2" class="fa-solid fa-play status-icon"></i>
                 <i *ngIf="task.status == 1" class="fa-solid fa-check status-icon"></i>
-                <i *ngIf="task.status == -1" class="fa-solid fa-triangle-exclamation status-icon"></i>
+                <i *ngIf="task.status == -1 || task.status == 5" class="fa-solid fa-triangle-exclamation status-icon"></i>
                 {{task.creationDate | date: 'HH:mm:ss'}} 
                 <ng-template [ngSwitchCase]="'downloadDataset.event'">
                     <i class="fa-solid fa-download"></i>
