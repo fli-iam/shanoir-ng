@@ -40,7 +40,7 @@ export class CarminDatasetProcessingService extends EntityService<CarminDatasetP
     }
 
     public updateAndStart(processing: CarminDatasetProcessing){
-        return this.http.put<any>(this.API_URL + '/' + processing.id, this.stringify(processing) + '?start=true')
+        return this.http.put<any>(this.API_URL + '/' + processing.id + '?start=true', this.stringify(processing))
             .toPromise();
     }
 

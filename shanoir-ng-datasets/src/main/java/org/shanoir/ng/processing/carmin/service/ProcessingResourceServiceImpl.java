@@ -1,6 +1,7 @@
 package org.shanoir.ng.processing.carmin.service;
 
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.model.ProcessingResource;
 import org.shanoir.ng.processing.carmin.repository.ProcessingResourceRepository;
@@ -16,10 +17,13 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
 
     @Autowired
     public ProcessingResourceRepository repository;
+    @Autowired
+    public DatasetService datasetService;
 
     @Override
     public List<Dataset> findDatasetsByResourceId(String resourceId) {
-        return repository.findDatasetByResourceId(resourceId);
+        List<Long> ids = repository.findDatasetIdByResourceId(resourceId);
+        return datasetService.findByIdIn(ids);
     }
 
     @Override

@@ -9,7 +9,6 @@ import java.util.List;
 
 @Repository
 public interface ProcessingResourceRepository  extends CrudRepository<ProcessingResource, Long> {
-    List<Dataset> findDatasetByResourceId(String resourceId);
 
     List<Long> findDatasetIdByResourceId(String resourceId);
 }
