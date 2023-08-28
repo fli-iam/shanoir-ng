@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
@@ -29,6 +30,7 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
@@ -668,12 +670,65 @@ public class StudyServiceImpl implements StudyService {
 	}
 
 	@Override
-	public Long getStudyFilesSize(Long studyId){
-		Optional<Study> studyOpt = this.studyRepository.findById(studyId);
-		if (studyOpt.isEmpty()) {
-			return 0L;
+	public StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId){
+
+		StudyStorageVolumeDTO dto;
+		try {
+			String dtoAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME, studyId);
+			if(dtoAsString != null && !dtoAsString.isEmpty()){
+				dto = objectMapper.readValue(dtoAsString, StudyStorageVolumeDTO.class);
+			}else{
+				dto = new StudyStorageVolumeDTO();
+			}
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Error while fetching study [{}] datasets volume storage details.", studyId, e);
+			return null;
 		}
-		Study study = studyOpt.get();
+
+		long filesSize = this.getStudyFilesSize(studyId);
+
+		dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
+		dto.setTotal(filesSize + dto.getTotal());
+
+		return dto;
+
+	}
+
+	@Override
+	public Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyIds) {
+		Map<Long, StudyStorageVolumeDTO> detailedStorageVolumes;
+		try {
+			String resultAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyIds);
+			if(resultAsString != null && !resultAsString.isEmpty()){
+				detailedStorageVolumes = objectMapper.readValue(resultAsString,  new TypeReference<HashMap<Long, StudyStorageVolumeDTO>>() {});
+			}else{
+				detailedStorageVolumes = new HashMap<>();
+			}
+		} catch (AmqpException | JsonProcessingException e) {
+			LOG.error("Error while fetching studies [{}] datasets volume storage details.", studyIds, e);
+			return null;
+		}
+
+
+		this.studyRepository.findAllById(studyIds).forEach( study -> {
+				Long filesSize = this.getStudyFilesSize(study);
+				StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
+				dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
+				dto.setTotal(filesSize + dto.getTotal());
+			}
+		);
+
+		return detailedStorageVolumes;
+	}
+
+	private long getStudyFilesSize(Long studyId){
+		Optional<Study> study = this.studyRepository.findById(studyId);
+		return study.map(this::getStudyFilesSize).orElse(0L);
+
+	}
+
+	private long getStudyFilesSize(Study study){
+
 		List<String> paths = Stream.of(study.getDataUserAgreementPaths(), study.getProtocolFilePaths())
 				.flatMap(Collection::stream)
 				.collect(Collectors.toList());
@@ -681,13 +736,12 @@ public class StudyServiceImpl implements StudyService {
 		long size = 0L;
 
 		for (String path : paths) {
-			File f = new File(this.getStudyFilePath(studyId, path));
+			File f = new File(this.getStudyFilePath(study.getId(), path));
 			if(f.exists()){
 				size += f.length();
 			}
 		}
 
 		return size;
-
 	}
 }

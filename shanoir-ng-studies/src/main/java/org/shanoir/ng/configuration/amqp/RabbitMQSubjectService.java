@@ -137,6 +137,13 @@ public class RabbitMQSubjectService {
 		}
 	}
 
+	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_NAME_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public boolean existsSubjectName(String name){
+		return this.subjectService.existsSubjectWithName(name);
+	}
+
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE)
 	@RabbitHandler
 	@Transactional
@@ -205,12 +212,11 @@ public class RabbitMQSubjectService {
 
 			Optional<Subject> subject = subjectRepository.findById(id);
 
-			if(subject.isEmpty()){
+			if(subject.isEmpty() || !subject.get().isPreclinical()){
 				return;
 			}
 
 			subjectService.deleteById(subject.get().getId());
-
 			LOG.info("Subject [{}] has been deleted following deletion of preclinical subject [{}]", subject.get().getId(), id);
 
 

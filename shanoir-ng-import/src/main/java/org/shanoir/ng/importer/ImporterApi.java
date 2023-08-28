@@ -69,15 +69,6 @@ public interface ImporterApi {
     		@Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
     		@Parameter(name = "file") @RequestParam("file") MultipartFile file) throws RestServiceException, IOException;
     
-    @Operation(summary = "Start exchange", description = "Start exchange")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "exchange started"),
-        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
-        @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @PostMapping(value = "/start_import/", consumes = { "application/json" })
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
-    ResponseEntity<Void> startImport(@Parameter(name = "Exchange", required=true) @RequestBody Exchange exchange) throws RestServiceException, FileNotFoundException, IOException;
-    
     @Operation(summary = "Upload one DICOM .zip file", description = "Upload DICOM .zip file")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "success returns file path"),

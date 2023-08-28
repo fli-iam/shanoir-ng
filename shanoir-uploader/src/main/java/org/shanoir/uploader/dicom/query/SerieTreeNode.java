@@ -161,7 +161,33 @@ public class SerieTreeNode implements DicomTreeNode {
 	 */
 	@XmlTransient
 	public String getDisplayString() {
-		return this.serie.toString();
+		String result = "";
+		final String modality = this.serie.getModality();
+		if (modality != null && !"".equals(modality)) {
+			result += "[" + modality + "] ";
+		}
+		final String description = this.serie.getSeriesDescription();
+		final String id = this.serie.getSeriesInstanceUID();
+		if (description != null && !"".equals(description)) {
+			result += description;
+		} else if (id != null && !id.equals("")) {
+			result += id;
+		}
+		EquipmentDicom equipment = this.serie.getEquipment();
+		if (equipment != null) {
+			String stationName = equipment.getStationName();
+			if (stationName != null && !"".equals(stationName)) {
+				result += " [ " + stationName + " , ";
+			}			
+		}
+		InstitutionDicom institution = this.serie.getInstitution();
+		if (institution != null) {
+			String institutionName = institution.getInstitutionName();
+			if (institutionName != null && !"".equals(institutionName)) {
+				result += institutionName + " ] ";
+			}			
+		}
+		return result;
 	}
 
 	/**

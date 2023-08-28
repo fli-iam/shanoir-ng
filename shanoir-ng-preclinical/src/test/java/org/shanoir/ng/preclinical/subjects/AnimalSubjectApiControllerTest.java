@@ -69,7 +69,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public class AnimalSubjectApiControllerTest {
 
 	private static final String REQUEST_PATH = "/subject";
-	private static final String REQUEST_PATH_ALL = REQUEST_PATH + "/all";
+	private static final String REQUEST_PATH_FIND = REQUEST_PATH + "/find";
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH + "/2";
 
 	@Autowired
@@ -106,10 +106,10 @@ public class AnimalSubjectApiControllerTest {
 	public void setup() throws ShanoirException, JsonProcessingException {
 		doNothing().when(subjectsServiceMock).deleteBySubjectId(1L);
 		given(subjectsServiceMock.findAll()).willReturn(Arrays.asList(new AnimalSubject()));
-		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(new AnimalSubject());
-		given(subjectsServiceMock.createSubject(Mockito.any(SubjectDto.class))).willReturn(1L);
-		given(subjectsServiceMock.isSubjectIdAlreadyUsed(2L)).willReturn(false);
-		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(new AnimalSubject());
+		given(subjectsServiceMock.getBySubjectId(AnimalSubjectModelUtil.SUBJECT_ID)).willReturn(new AnimalSubject());
+		given(subjectsServiceMock.createSubject(Mockito.any(SubjectDto.class))).willReturn(AnimalSubjectModelUtil.ID);
+		given(subjectsServiceMock.isSubjectNameAlreadyUsed(AnimalSubjectModelUtil.SUBJECT_NAME)).willReturn(false);
+		given(subjectsServiceMock.getBySubjectId(AnimalSubjectModelUtil.SUBJECT_ID)).willReturn(new AnimalSubject());
 		PreclinicalSubjectDto dto = new PreclinicalSubjectDto();
 		dto.setAnimalSubject(new AnimalSubjectDto());
 		given(dtoServiceMock.getPreclinicalDtoFromAnimalSubject(Mockito.any(AnimalSubject.class))).willReturn(dto);
@@ -118,7 +118,7 @@ public class AnimalSubjectApiControllerTest {
 		given(dtoServiceMock.getAnimalSubjectFromAnimalSubjectDto(Mockito.any(AnimalSubjectDto.class))).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
 		given(dtoServiceMock.getAnimalSubjectFromPreclinicalDto(Mockito.any(PreclinicalSubjectDto.class))).willReturn(AnimalSubjectModelUtil.createAnimalSubject());
 		AnimalSubject subject = new AnimalSubject();
-		given(subjectsServiceMock.getBySubjectId(2L)).willReturn(subject);
+		given(subjectsServiceMock.getBySubjectId(AnimalSubjectModelUtil.SUBJECT_ID)).willReturn(subject);
 		AnimalSubject anSubj = new AnimalSubject();
 		anSubj.setId(1L);
 		given(subjectsServiceMock.save(Mockito.any(AnimalSubject.class))).willReturn(anSubj );
@@ -141,7 +141,7 @@ public class AnimalSubjectApiControllerTest {
 
 	@Test
 	public void findSubjectsTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_ALL).accept(MediaType.APPLICATION_JSON))
+		mvc.perform(MockMvcRequestBuilders.post(REQUEST_PATH_FIND).param("subjectIds", "1,2,3"))
 				.andExpect(status().isOk());
 	}
 

@@ -40,6 +40,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
@@ -138,9 +139,9 @@ public class StudyApiController implements StudyApi {
 		List<Study> studies = studyService.findAll();
 		if (studies.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} else {
-			return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
 		}
+
+		return new ResponseEntity<>(studyMapper.studiesToStudyDTOs(studies), HttpStatus.OK);
 	}
 
 	@Override
@@ -170,13 +171,21 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId) {
+	public ResponseEntity<StudyDTO> findStudyById(@PathVariable("studyId") final Long studyId, boolean withStorageVolume) {
 		Study study = studyService.findById(studyId);
+
 		if (study == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} else {
-			return new ResponseEntity<>(studyMapper.studyToStudyDTO(study), HttpStatus.OK);
 		}
+
+		StudyDTO dto = studyMapper.studyToStudyDTO(study);
+
+		if(withStorageVolume){
+			dto.setStorageVolume(studyService.getDetailedStorageVolume(dto.getId()));
+		}
+
+		return new ResponseEntity<>(dto, HttpStatus.OK);
+
 	}
 
 	@Override
@@ -198,13 +207,26 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<Long> getStudyFilesSize(@PathVariable("studyId") final Long studyId) {
-		return new ResponseEntity<>(studyService.getStudyFilesSize(studyId), HttpStatus.OK);
+	public ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") final Long studyId) throws RestServiceException {
+		StudyStorageVolumeDTO dto = studyService.getDetailedStorageVolume(studyId);
+		if(dto == null){
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(),
+							"Error while fetching study datasets storage volume details.", null)
+			);
+		}
+
+		return new ResponseEntity<>(dto, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<Map<Long, StudyStorageVolumeDTO>> getDetailedStorageVolumeByStudy(List<Long> studyIds) {
+		return new ResponseEntity<>(studyService.getDetailedStorageVolumeByStudy(studyIds), HttpStatus.OK);
 	}
 
 	@Override
 	public ResponseEntity<Void> updateStudy(@PathVariable("studyId") final Long studyId, @RequestBody final Study study,
-			final BindingResult result) throws RestServiceException {
+											final BindingResult result) throws RestServiceException {
 
 		validate(study, result);
 

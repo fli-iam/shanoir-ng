@@ -10,23 +10,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
-import org.dcm4che3.data.UID;
-import org.dcm4che3.net.ApplicationEntity;
-import org.dcm4che3.net.Association;
-import org.dcm4che3.net.Connection;
-import org.dcm4che3.net.Device;
-import org.dcm4che3.net.pdu.AAssociateRQ;
-import org.dcm4che3.net.pdu.PresentationContext;
+import org.shanoir.ng.importer.dicom.query.QueryPACSService;
 import org.shanoir.uploader.ShUpConfig;
-//import org.shanoir.uploader.crypto.BlowfishAlgorithm;
 import org.shanoir.uploader.gui.DicomServerConfigurationWindow;
 
 /**
@@ -42,6 +32,8 @@ public class DicomServerConfigurationListener implements ActionListener {
 	private static Logger logger = Logger.getLogger(DicomServerConfigurationListener.class);
 
 	DicomServerConfigurationWindow dicomWindow;
+	
+	private QueryPACSService queryPACSService = new QueryPACSService();
 
 	public DicomServerConfigurationListener(DicomServerConfigurationWindow dicomWindow) {
 		this.dicomWindow = dicomWindow;
@@ -146,47 +138,7 @@ public class DicomServerConfigurationListener implements ActionListener {
 
 	// this method verifies the connection to the PACS
 	public boolean echo(String remoteHost, String remotePortString, String calledAET, String localAET) {
-		logger.info("DICOM echo: Starting...");
-		
-        // remote
-        AAssociateRQ rq = new AAssociateRQ();
-        rq.addPresentationContext(new PresentationContext(1, UID.Verification, UID.ImplicitVRLittleEndian));
-        Connection called = new Connection(calledAET, remoteHost, Integer.valueOf(remotePortString));
-        // local
-        Device device = new Device("storescu");
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        ScheduledExecutorService scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
-        device.setExecutor(executorService);
-        device.setScheduledExecutor(scheduledExecutorService);
-        Connection conn = new Connection();
-        device.addConnection(conn);
-        ApplicationEntity ae = new ApplicationEntity(localAET);
-        device.addApplicationEntity(ae);
-        ae.addConnection(conn);
-        
-        Association as = null;
-        try {
-        	as = ae.connect(called, rq);
-        	as.cecho().next();
-    		logger.info("DICOM echo: Success...");
-        	return true;
-		} catch (Exception e) {
-			logger.error("DICOM echo failed:" + e.getMessage());
-			return false;
-		} finally {
-			try {
-				if (as != null) {
-		            if (as.isReadyForDataTransfer())
-		                as.release();
-		            as.waitForSocketClose();
-		        }
-		        executorService.shutdown();
-		        scheduledExecutorService.shutdown();
-			} catch (Exception e) {
-				logger.error("DICOM echo (close connection) failed:" + e.getMessage());
-				return false;
-			}
-	    }
+		return queryPACSService.queryECHO(calledAET, remoteHost, Integer.valueOf(remotePortString), localAET);
 	}
 
 	// check only remoteHost, remotePortString and calledAET parameters (remote PACS

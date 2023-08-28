@@ -86,7 +86,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		Media media = new Media();
 		// when the open file from CD/DVD menu is clicked
 		if (event.getSource().getClass() == JMenuItem.class) {
-			logger.info("Opening DICOM files from CD/DVD...");
+			logger.info("Opening DICOM files from CD/DVD/local file system...");
 			this.mainWindow.isFromPACS = false;
 
 			int returnVal = fileChooser.showOpenDialog(FindDicomActionListener.this);
@@ -258,9 +258,11 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 				List<Serie> series = study.getSeries();
 				for (Iterator iterator3 = series.iterator(); iterator3.hasNext();) {
 					Serie serie = (Serie) iterator3.next();
-					final SerieTreeNode serieTreeNode = studyTreeNode.initChildTreeNode(serie);
-					// add series
-					studyTreeNode.addTreeNode(serieTreeNode.getId(), serieTreeNode);					
+					if (!serie.isErroneous() && !serie.isIgnored()) {
+						final SerieTreeNode serieTreeNode = studyTreeNode.initChildTreeNode(serie);
+						// add series
+						studyTreeNode.addTreeNode(serieTreeNode.getId(), serieTreeNode);
+					}
 				}
 				
 			}
