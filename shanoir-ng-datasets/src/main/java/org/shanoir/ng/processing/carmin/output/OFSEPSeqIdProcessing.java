@@ -96,6 +96,11 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
         for(File file : resultFiles){
             if (file.getAbsolutePath().endsWith(PIPELINE_OUTPUT)) {
 
+                if (file.length() == 0) {
+                    LOG.warn("Result file [{}] is present but empty.", file.getAbsolutePath());
+                    return;
+                }
+
                 try (InputStream is = new FileInputStream(file)) {
                     JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
                     this.processSeries(json.getJSONArray("series"), processing);

@@ -117,6 +117,8 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 
 		if (resultJson == null) {
 			LOG.info("No result JSON found in archive.");
+		} else if (resultJson.length() == 0) {
+			LOG.warn("Result JSON [{}] is present but empty.", resultJson.getAbsolutePath());
 		} else {
 			LOG.info("Processing result JSON [{}]...", resultJson.getName());
 
@@ -185,7 +187,7 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 			processedDataset.setStudyId(carminDatasetProcessing.getStudyId());
 			processedDataset.setStudyName(study.getName());
-			processedDataset.setProcessedDatasetName(getNameWithoutExtension(file.getName()));
+			processedDataset.setProcessedDatasetName(carminDatasetProcessing.getName());
 
 			if(inputDatasets.size() != 0) {
 
