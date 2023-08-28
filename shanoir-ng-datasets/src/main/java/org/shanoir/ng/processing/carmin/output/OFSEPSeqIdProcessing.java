@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OFSEPSeqIdProcessing extends OutputProcessing {
@@ -120,23 +121,32 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong("id");
-            List<Dataset> datasets = datasetService.findByAcquisition(serieId);
 
-            if(datasets == null || datasets.isEmpty()){
+            List<Dataset> datasets = processing.getInputDatasets().stream()
+                    .filter(ds -> ds.getDatasetAcquisition() != null
+                            && ds.getDatasetAcquisition().getId().equals(serieId))
+                    .collect(Collectors.toList());
+
+            if(datasets.isEmpty()){
                 LOG.error("No dataset found for serie/acquisition [" + serieId + "]");
                 continue;
             }
 
             for(Dataset ds : datasets){
 
-                long dsId = ds.getId();
-
                 JSONObject vol;
                 vol = this.getMatchingVolume(ds, serie);
 
                 if(vol == null){
-                    LOG.error("No volume from serie [{}] could be match with dataset [{}].", serieId, dsId);
+                    LOG.error("No volume from serie [{}] could be match with dataset [{}].", serieId, ds.getId());
                     continue;
+                }
+
+                try {
+                    this.updateDataset(serie, ds, vol);
+                } catch (EntityNotFoundException e) {
+                    LOG.error("Error while updating dataset [{}]", ds.getId(), e);
+                    throw e;
                 }
 
                 List<DatasetProperty> properties = this.getDatasetPropertiesFromVolume(ds, vol, processing);
@@ -161,7 +171,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
         if(acq instanceof MrDatasetAcquisition){
             ((MrDatasetAcquisition) acq).getMrProtocol()
-                    .getOriginMetadata()
+                    .getUpdatedMetadata()
                     .setMrSequenceName(serie.getString("type"));
         }
 
