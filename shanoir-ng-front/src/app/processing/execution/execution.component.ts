@@ -244,7 +244,8 @@ export class ExecutionComponent implements OnInit {
 
             dto.resourceIds.forEach(id => {
                 let entity_name = `resource_id+${id}+${this.selectedGroupBy}${extension}`
-                let inputValue = `shanoir:/${entity_name}?format=${this.exportFormat}&resourceId=${id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
+                // datasetId URI param = resourceId (to be changed once VIP has been updated)
+                let inputValue = `shanoir:/${entity_name}?format=${this.exportFormat}&datasetId=${id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
                 execution.inputValues[dto.parameter].push(inputValue);
             })
         });
