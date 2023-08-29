@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.springframework.transaction.annotation.Isolation;
 
 import javax.transaction.Transactional;
 
@@ -29,7 +30,9 @@ public abstract class OutputProcessing {
 	 * @param parentFolder the temporary arent folder in which we are currently working
 	 * @param processing   the corresponding dataset processing.
 	 */
-	@Transactional
+
+
+	@Transactional(Transactional.TxType.REQUIRES_NEW)
 	public abstract void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException;
 
 }

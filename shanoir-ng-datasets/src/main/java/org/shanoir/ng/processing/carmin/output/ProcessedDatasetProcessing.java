@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.transaction.Transactional;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.io.IOUtils;
@@ -34,12 +35,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProcessedDatasetProcessing extends OutputProcessing {
 
-	public static final String JSON_INFILE = "infile";
 	@Value("${vip.result-file-name}")
 	private String resultFileName;
 
@@ -73,7 +72,7 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(Transactional.TxType.REQUIRES_NEW)
 	public void manageTarGzResult(List<File> resultFiles, File parent, CarminDatasetProcessing processing) throws OutputProcessingException {
 
 		try {

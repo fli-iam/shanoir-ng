@@ -3,28 +3,30 @@ package org.shanoir.ng.processing.carmin.output;
 import org.apache.commons.io.IOUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.property.model.DatasetProperty;
 import org.shanoir.ng.property.service.DatasetPropertyService;
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
+import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -94,7 +96,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     }
 
     @Override
-    @Transactional
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException {
 
         for(File file : resultFiles){
@@ -127,7 +129,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @throws PacsException
      * @throws EntityNotFoundException
      */
-    private void processSeries(JSONArray series, CarminDatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException {
+    private void processSeries(JSONArray series, CarminDatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException {
 
         for (int i = 0; i < series.length(); i++) {
 
@@ -156,7 +158,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
                 try {
                     this.updateDataset(serie, ds, vol);
-                } catch (EntityNotFoundException e) {
+                } catch (CheckedIllegalClassException | EntityNotFoundException e) {
                     LOG.error("Error while updating dataset [{}]", ds.getId(), e);
                     throw e;
                 }
@@ -177,24 +179,15 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @throws JSONException
      * @throws EntityNotFoundException
      */
-    private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException {
+    private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException {
 
         if(ds.getDatasetAcquisition() instanceof MrDatasetAcquisition){
-            MrDatasetAcquisition acq = (MrDatasetAcquisition) ds.getDatasetAcquisition();
-
-            MrProtocolSCMetadata metadata = acq.getMrProtocol().getUpdatedMetadata() != null
-                    ? acq.getMrProtocol().getUpdatedMetadata()
-                    : new MrProtocolSCMetadata();
-
-            metadata.setMrSequenceName(serie.getString("type"));
-            acq.getMrProtocol().setUpdatedMetadata(metadata);
+            DatasetAcquisition acq = ds.getDatasetAcquisition();
+            DatasetAcquisitionMetadataField.MR_SEQUENCE_NAME.update(acq, serie.getString("type"));
             datasetAcquisitionService.update(acq);
         }
 
-        if(ds.getUpdatedMetadata() == null){
-            ds.setUpdatedMetadata(ds.getOriginMetadata() != null ? ds.getOriginMetadata() : new DatasetMetadata());
-        }
-        ds.getUpdatedMetadata().setName(vol.getString("type"));
+        DatasetMetadataField.NAME.update(ds, vol.getString("type"));
         datasetService.update(ds);
     }
 
