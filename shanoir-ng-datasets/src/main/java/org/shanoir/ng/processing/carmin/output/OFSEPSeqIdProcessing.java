@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -128,7 +128,8 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @throws PacsException
      * @throws EntityNotFoundException
      */
-    private void processSeries(JSONArray series, CarminDatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException {
+    @Transactional
+    public void processSeries(JSONArray series, CarminDatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException {
 
         for (int i = 0; i < series.length(); i++) {
 
@@ -178,7 +179,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @throws JSONException
      * @throws EntityNotFoundException
      */
-    private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException {
+    public void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException {
 
         DatasetMetadataField.NAME.update(ds, vol.getString("type"));
 
