@@ -266,6 +266,7 @@ import { MassDownloadService } from './shared/mass-download/mass-download.servic
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
 import { DownloadSetupComponent } from './shared/mass-download/download-setup/download-setup.component';
+import { DownloadSetupAltComponent } from './shared/mass-download/download-setup-alt/download-setup-alt.component';
 
 @NgModule({
     imports: [
@@ -452,7 +453,8 @@ import { DownloadSetupComponent } from './shared/mass-download/download-setup/do
         QualityCardComponent,
         QualityCardRuleComponent,
         TaskStatusComponent,
-        DownloadSetupComponent
+        DownloadSetupComponent,
+        DownloadSetupAltComponent
     ],
     providers: [
         AcquisitionEquipmentService,

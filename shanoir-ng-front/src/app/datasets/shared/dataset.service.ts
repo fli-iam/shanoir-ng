@@ -25,6 +25,7 @@ import { ServiceLocator } from '../../utils/locator.service';
 import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
+import { TaskStatus } from 'src/app/async-tasks/task.model';
 
 export type Format = 'eeg' | 'nii' | 'BIDS' | 'dcm';
 
@@ -32,7 +33,7 @@ export type Format = 'eeg' | 'nii' | 'BIDS' | 'dcm';
 export class DatasetService extends EntityService<Dataset> implements OnDestroy {
 
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
-    subscribtions: Subscription[] = [];
+    subscriptions: Subscription[] = [];
 
     httpOptions = {
         headers: new HttpHeaders({ 'Content-Type': 'application/json' })
@@ -106,21 +107,24 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
             .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
     }
 
-    progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
+    progressBarFunc(event: HttpEvent<any>, state?: {status?: TaskStatus, progress?: number}): void {
        switch (event.type) {
             case HttpEventType.Sent:
-              progressBar.progress = -1;
-              break;
+                state.status = 4;
+                state.progress = -1;
+                break;
             case HttpEventType.DownloadProgress:
-              progressBar.progress = event.loaded;
-              break;
+                state.status = 2;
+                state.progress = event.loaded;
+                break;
             case HttpEventType.Response:
-                progressBar.progress = 0;
+                state.status = 1;
+                state.progress = 1;
                 saveAs(event.body, this.getFilename(event));
         }
     }
 
-    public downloadDatasets(ids: number[], format: string, progressBar: LoadingBarComponent) {
+    public downloadDatasets(ids: number[], format: string, state?: {status?: TaskStatus, progress?: number}): Promise<void> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
@@ -131,20 +135,21 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 observe: 'events',
                 responseType: 'blob'
         });
-        this.subscribtions.push(
+        this.subscriptions.push(
             postResponse.subscribe(
-                (event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
+                (event: HttpEvent<any>) => this.progressBarFunc(event, state),
                 error =>  {
-                    this.errorService. handleError(error);
-                    progressBar.progress = 0;
+                    this.errorService.handleError(error);
+                    state.status = -1;
                 }
             )
         );
+        return postResponse.toPromise().then();
     }
 
     public downloadDatasetsByStudy(studyId: number, format: string, progressBar: LoadingBarComponent) {
         let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
-        this.subscribtions.push(
+        this.subscriptions.push(
            this.http.get(
            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',{
                 reportProgress: true,
@@ -152,16 +157,17 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 responseType: 'blob',
                 params: params
             }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
-             error =>  {
-                this.errorService. handleError(error);
-                progressBar.progress = 0;
-            })
+                error =>  {
+                    this.errorService.handleError(error);
+                    progressBar.progress = 0;
+                }
+            )
          );
     }
 
   public downloadDatasetsByExamination(examinationId: number, format: string, progressBar: LoadingBarComponent) {
     let params = new HttpParams().set("examinationId", '' + examinationId).set("format", format);
-    this.subscribtions.push(
+    this.subscriptions.push(
         this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination',{
                 reportProgress: true,
@@ -273,7 +279,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscribtions) {
+        for(let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

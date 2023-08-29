@@ -25,6 +25,7 @@ import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialo
 import { Queue } from './queue.model';
 import { take } from 'rxjs/operators';
 import { SuperPromise } from 'src/app/utils/super-promise';
+import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 
 declare var JSZip: any;
 
@@ -47,6 +48,7 @@ export type Report = {
 export class MassDownloadService {
 
     private downloadQueue: Queue = new Queue();
+    readonly BROWSER_COMPAT_ERROR_MSG: string = 'browser not compatible';
 
     constructor(
         private datasetService: DatasetService,
@@ -59,6 +61,14 @@ export class MassDownloadService {
             if (ret != 'cancel') {
                 return this._downloadByIds(datasetIds, ret.format, ret.nbQueues)
             } else return Promise.resolve();
+        }).catch(error => {
+            if (error == this.BROWSER_COMPAT_ERROR_MSG) {
+                return this.openAltModal().then(ret => {
+                    if (ret != 'cancel') {
+                        return this._downloadByIdsAlt(datasetIds, ret);
+                    } else return Promise.resolve();
+                });
+            } else throw error;
         });
     }
 
@@ -122,6 +132,29 @@ export class MassDownloadService {
                 }
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
+    }
+
+    private _downloadByIdsAlt(datasetIds: number[], format: Format): Promise<void> {
+        if (datasetIds.length == 0) return;
+        let task: Task = this.createTask(datasetIds.length);
+        return this.downloadQueue.waitForTurn().then(releaseQueue => {
+            try {
+                task.status = 2;
+                const start: number = Date.now();
+                return this.datasetService.downloadDatasets(datasetIds, format, task).then(() => {
+                    let duration: number = Date.now() - start;
+                    task.message = 'download completed in ' + duration + 'ms, ' + datasetIds.length + ' datasets zipped';
+                }).catch(reason => {
+                    task.message = 'download error : ' + reason;
+                    this.notificationService.pushLocalTask(task);
+                }).finally(() => {
+                    releaseQueue();
+                });
+            } catch (error) {
+                releaseQueue();
+                throw error;
+            }
+        });
     }
 
     private _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4): Promise<void> {
@@ -323,14 +356,17 @@ export class MassDownloadService {
             let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
             return this.waitForEnd(modalRef);
         } else {
-            this.dialogService.error('Browser incompatibility', 'Sorry, your browser does not allow this advanced download functionality.'
-                    + ' See the list of compatible browsers : https://developer.mozilla.org/en-US/docs/Web/API/Window/showDirectoryPicker#browser_compatibility');
-            return Promise.reject('browser not compatible');
+            return Promise.reject(this.BROWSER_COMPAT_ERROR_MSG);
         }
     }
 
-    private waitForEnd(modalRef: ComponentRef<any>): Promise<{format: Format, nbQueues: number} | 'cancel'> {
-        let resPromise: SuperPromise<{format: Format, nbQueues: number} | 'cancel'> = new SuperPromise();
+    private openAltModal(): Promise<Format | 'cancel'> {
+        let modalRef: ComponentRef<DownloadSetupAltComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupAltComponent);
+        return this.waitForEnd(modalRef);
+    }
+
+    private waitForEnd(modalRef: ComponentRef<any>): Promise<any | 'cancel'> {
+        let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
         let result: Observable<any> = Observable.race([
             modalRef.instance.go, 
             modalRef.instance.close.map(() => 'cancel')

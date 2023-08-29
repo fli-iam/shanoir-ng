@@ -1,0 +1,12 @@
+:host { display: table; background-color: var(--color-overlay); position: fixed; top: 0; bottom: 0; left: 0; right: 0; height: 100%; width: 100%; z-index: 10000; 
+    vertical-align: middle; text-align: center; }
+.cell { display: table-cell; vertical-align: middle; text-align: center; }
+.window { display: inline-block; background-color: var(--very-light-grey); border-radius: 2px; vertical-align: middle; padding: 15px 20px; }
+
+.body { width: 100%; text-align: left; margin-top: 20px; }
+.footer { margin-top: 20px; }
+input[type="number"] { width: 52px; }
+
+.msg { max-width: 600px; color: var(--color-error); line-height: 20px; text-align: left; background-color: var(--light-error); padding: 10px 20px; border-radius: 2px; }
+.msg i { font-size: 20px; color: orangered; }
+.msg a { cursor: pointer; }

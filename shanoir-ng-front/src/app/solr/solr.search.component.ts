@@ -458,15 +458,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         let customActionDefs:any = [];
         customActionDefs.push(
             {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
-            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
-            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
-            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
-            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true },
             {title: "Download", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true},
-            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoSelected: true },
             {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
         );
         return customActionDefs;
@@ -480,26 +475,14 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 this.table.clearSelection();
                 this.selectionTable.refresh();
             }, disabledIfNoResult: true},
-            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
-            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
-            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
-            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true },
             {title: "Download", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true},
-            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoResult: true },
             {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
         );
         return customActionDefs;
     }
-
-    massiveDownload(type: Format) {
-        if (this.selectedDatasetIds) {
-            this.datasetService.downloadDatasets([...this.selectedDatasetIds], type, this.progressBar);
-        }
-    }
-
     downloadSelected() {
         if (this.selectedDatasetIds) {
             this.downloadService.downloadByIds([...this.selectedDatasetIds]);
