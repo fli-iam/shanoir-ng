@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
@@ -78,9 +79,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     };
 
     @Autowired
-    private DatasetService datasetService;
-    @Autowired
-    private DatasetAcquisitionService datasetAcquisitionService;
+    private DatasetRepository datasetRepository;
 
     @Autowired
     private WADODownloaderService wadoDownloaderService;
@@ -128,7 +127,6 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @throws PacsException
      * @throws EntityNotFoundException
      */
-    @Transactional
     public void processSeries(JSONArray series, CarminDatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException {
 
         for (int i = 0; i < series.length(); i++) {
@@ -189,7 +187,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
             ds.setDatasetAcquisition(acq);
         }
 
-        datasetService.update(ds);
+        datasetRepository.save(ds);
     }
 
 

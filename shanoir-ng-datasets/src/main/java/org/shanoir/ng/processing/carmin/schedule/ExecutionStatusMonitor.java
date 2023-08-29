@@ -91,6 +91,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	 */
 	@Async
 	@Override
+	@Transactional
 	public void startMonitoringJob(String identifier) throws EntityNotFoundException, SecurityException {
 		int attempts = 1;
 		this.identifier = identifier;
@@ -173,7 +174,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		return "VIP Execution [" + processing.getName() + "]";
 	}
 
-	@Transactional
 	public void processKilledJob(CarminDatasetProcessing processing, ShanoirEvent event, Execution execution) throws EntityNotFoundException {
 
 		String execLabel = this.getExecLabel(processing);
@@ -191,7 +191,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				+ (execution.getErrorCode() != null ? " (Error code : " + execution.getErrorCode() + ")" : ""));
 	}
 
-	@Transactional
 	public void processFinishedJob(CarminDatasetProcessing processing, ShanoirEvent event) throws EntityNotFoundException, OutputProcessingException {
 
 		String execLabel = this.getExecLabel(processing);
