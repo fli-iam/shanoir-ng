@@ -94,6 +94,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     }
 
     @Override
+    @Transactional
     public void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException {
 
         for(File file : resultFiles){
@@ -117,6 +118,15 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
     }
 
+    /**
+     * Process all series / acquisitions found in output JSON
+     *
+     * @param series JSONArray
+     * @param processing CarminDatasetProcessing
+     * @throws JSONException
+     * @throws PacsException
+     * @throws EntityNotFoundException
+     */
     private void processSeries(JSONArray series, CarminDatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException {
 
         for (int i = 0; i < series.length(); i++) {
@@ -159,16 +169,15 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     }
 
     /**
-     * Update dataset from pipeline output
+     * Update dataset from pipeline output serie & volume
      *
-     * @param serie
-     * @param ds
-     * @param vol
+     * @param serie JSONObject
+     * @param ds Dataset
+     * @param vol JSONObject
      * @throws JSONException
      * @throws EntityNotFoundException
      */
-    @Transactional
-    public void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException {
+    private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException {
 
         if(ds.getDatasetAcquisition() instanceof MrDatasetAcquisition){
             MrDatasetAcquisition acq = (MrDatasetAcquisition) ds.getDatasetAcquisition();
@@ -191,10 +200,10 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
 
     /**
-     * Create dataset properties from pipeline output
+     * Create dataset properties from pipeline output volume
      *
-     * @param ds
-     * @param volume
+     * @param ds Dataset
+     * @param volume JSONObject
      * @return
      */
     private List<DatasetProperty> getDatasetPropertiesFromVolume(Dataset ds, JSONObject volume, CarminDatasetProcessing processing) throws JSONException {
@@ -234,11 +243,13 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
 
     /**
-     * Get JSON volume matching Shanoir dataset
+     * Return JSON volume matching Shanoir dataset
      * Match is made by orientation DICOM property
      *
-     * @param dataset
-     * @return
+     * @param dataset Dataset
+     * @param serie JSONObject
+     *
+     * @return JSONObject
      * @throws JSONException
      */
     public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie) throws JSONException, PacsException {
@@ -264,6 +275,14 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
     }
 
+    /**
+     * Check if the two arrays are equals
+     *
+     * @param dsOrientation double[]
+     * @param volOrientation JSONArray
+     * @return boolean
+     * @throws JSONException
+     */
     public boolean areOrientationsEquals(double[] dsOrientation, JSONArray volOrientation) throws JSONException {
 
         if(dsOrientation.length != volOrientation.length()){

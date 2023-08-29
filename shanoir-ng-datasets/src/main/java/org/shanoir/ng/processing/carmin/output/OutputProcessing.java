@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 
+import javax.transaction.Transactional;
+
 /**
  * This class defines the default class to be implemented for output processing.
  * @author jcome
@@ -27,6 +29,7 @@ public abstract class OutputProcessing {
 	 * @param parentFolder the temporary arent folder in which we are currently working
 	 * @param processing   the corresponding dataset processing.
 	 */
+	@Transactional
 	public abstract void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException;
 
 }

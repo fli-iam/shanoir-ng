@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProcessedDatasetProcessing extends OutputProcessing {
@@ -72,6 +73,7 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 	}
 
 	@Override
+	@Transactional
 	public void manageTarGzResult(List<File> resultFiles, File parent, CarminDatasetProcessing processing) throws OutputProcessingException {
 
 		try {
