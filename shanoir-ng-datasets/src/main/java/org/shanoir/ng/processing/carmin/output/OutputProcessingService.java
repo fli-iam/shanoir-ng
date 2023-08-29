@@ -45,7 +45,6 @@ public class OutputProcessingService {
      * @param processing
      * @throws OutputProcessingException
      */
-    @Transactional
     public void process(CarminDatasetProcessing processing) throws OutputProcessingException {
 
         final File userImportDir = new File(

@@ -31,7 +31,6 @@ public abstract class OutputProcessing {
 	 * @param processing   the corresponding dataset processing.
 	 */
 
-	@Transactional(isolation = Isolation.READ_COMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public abstract void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException;
 
 }
