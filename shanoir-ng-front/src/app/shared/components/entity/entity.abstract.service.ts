@@ -23,6 +23,8 @@ import {UntypedFormBuilder} from "@angular/forms";
 import {KeycloakService} from "../../keycloak/keycloak.service";
 import {ServiceLocator} from "../../../utils/locator.service";
 import {ShanoirError} from "../../models/error.model";
+import {ManufacturerModel} from "../../../acquisition-equipments/shared/manufacturer-model.model";
+import {Manufacturer} from "../../../acquisition-equipments/shared/manufacturer.model";
 
 
 export abstract class EntityService<T extends Entity> {
@@ -84,7 +86,7 @@ export abstract class EntityService<T extends Entity> {
                         }
                         let warn = 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
                         if((reason.error && reason.error.code == 422)
-                            || reason.status == 422){
+                            || reason.status == 422 || entity instanceof Manufacturer || entity instanceof ManufacturerModel){
                             this.consoleService.log('warn', warn);
                             return false;
                         }
@@ -96,7 +98,7 @@ export abstract class EntityService<T extends Entity> {
                             return false;
                         }
 
-                        this.consoleService.log('warn', 'Cannot be deleted. This ' + name + ' is already used in an Acquisition Equipment.');
+                        throw Error(reason);
                     });
                 }
                 return false;

@@ -108,16 +108,4 @@ public interface ManufacturerModelApi {
 			@Parameter(name = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId,
 			@Parameter(name = "manufacturer model to update", required = true) @RequestBody ManufacturerModel manufacturerModel,
 			final BindingResult result) throws RestServiceException;
-
-//	@Operation(summary = "", description = "Deletes a manufacturer model")
-//	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "manufacturer model deleted"),
-//			@ApiResponse(responseCode = "401", description = "unauthorized"),
-//			@ApiResponse(responseCode = "403", description = "forbidden"),
-//			@ApiResponse(responseCode = "404", description = "no center found"),
-//			@ApiResponse(responseCode = "500", description = "unexpected error") })
-//	@DeleteMapping(value = "/{manufacturerModelId}", produces = { "application/json" })
-//	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-//	ResponseEntity<Void> deleteManufacturerModel(
-//			@Parameter(name = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId);
-
 }

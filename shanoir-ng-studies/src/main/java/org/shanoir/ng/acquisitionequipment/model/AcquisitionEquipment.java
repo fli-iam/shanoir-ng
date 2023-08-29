@@ -20,7 +20,6 @@ import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;

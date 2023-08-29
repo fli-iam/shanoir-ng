@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
+import org.shanoir.ng.center.service.CenterServiceImpl;
 import org.shanoir.ng.manufacturermodel.model.ManufacturerModel;
 import org.shanoir.ng.manufacturermodel.repository.ManufacturerModelRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -28,6 +29,8 @@ import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +56,8 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 
 	@Autowired
 	private ObjectMapper objectMapper;
+
+	private static final Logger LOG = LoggerFactory.getLogger(ManufacturerModelServiceImpl.class);
 	public Optional<ManufacturerModel> findById(final Long id) {
 		return manufacturerModelRepository.findById(id);
 	}
@@ -73,6 +78,7 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 		final Optional<ManufacturerModel> entityDbOpt = manufacturerModelRepository.findById(entity.getId());
 		final ManufacturerModel entityDb = entityDbOpt.orElseThrow(
 				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
+
 		updateValues(entity, entityDb);
 		return manufacturerModelRepository.save(entityDb);
 	}
@@ -103,7 +109,7 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 		try {
 			updateManufacturerModelName(from);
 		} catch (MicroServiceCommunicationException e) {
-			throw new RuntimeException(e);
+			LOG.error("Could not send the manufacturer model values change to the other microservices !", e);
 		}
 
 		return to;
@@ -120,8 +126,7 @@ public class ManufacturerModelServiceImpl implements ManufacturerModelService {
 				IdName acEq = new IdName();
 				acEq.setId(acEqItem.getId());
 				acEq.setName(acEqItem.getManufacturerModel().getManufacturer().getName() + " " + manuModelName);
-					rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
-						objectMapper.writeValueAsString(acEq));
+				rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, objectMapper.writeValueAsString(acEq));
 			}
 
 			return true;

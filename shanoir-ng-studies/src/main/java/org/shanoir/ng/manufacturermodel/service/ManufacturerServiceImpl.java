@@ -28,6 +28,8 @@ import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,13 +65,15 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 	@Autowired
 	private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
 
+	private static final Logger LOG = LoggerFactory.getLogger(ManufacturerServiceImpl.class);
+
 	protected Manufacturer updateValues(Manufacturer manu, Manufacturer manuDb) {
 		manuDb.setName(manu.getName());
 
 		try {
 			updateManufacturer(manu);
 		} catch (MicroServiceCommunicationException e) {
-			throw new RuntimeException(e);
+			LOG.error("Could not send the manufacturer values change to the other microservices !", e);
 		}
 		return manuDb;
 	}
@@ -81,7 +85,7 @@ public class ManufacturerServiceImpl implements ManufacturerService {
 				return true;
 			}
 			List<ManufacturerModel> listManuModel = manufacturerModelRepository.findByManufacturerId(manufacturer.getId()).orElse(null);
-			if (listManuModel == null) {
+			if (listManuModel == null || listManuModel.isEmpty()) {
 				return true;
 			}
 			for (ManufacturerModel manuModel : listManuModel) {

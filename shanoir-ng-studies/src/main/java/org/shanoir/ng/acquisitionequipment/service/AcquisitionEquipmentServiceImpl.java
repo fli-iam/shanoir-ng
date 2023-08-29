@@ -95,7 +95,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 					objectMapper.writeValueAsString(idName));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
-			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update center name.");
+			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update acquisition equipment name.");
 		}
 	}
 

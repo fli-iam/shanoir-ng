@@ -53,7 +53,6 @@ public class ManufacturerModel extends HalEntity {
 
 	@ManyToOne
 	@NotNull
-	//@JoinColumn(name = "manufacturer_id")
 	private Manufacturer manufacturer;
 
 	@NotNull
