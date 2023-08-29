@@ -7,9 +7,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
@@ -167,19 +169,23 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      */
     @Transactional
     public void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException {
-        DatasetAcquisition acq = ds.getDatasetAcquisition();
 
-        if(acq instanceof MrDatasetAcquisition){
-            ((MrDatasetAcquisition) acq).getMrProtocol()
-                    .getUpdatedMetadata()
-                    .setMrSequenceName(serie.getString("type"));
+        if(ds.getDatasetAcquisition() instanceof MrDatasetAcquisition){
+            MrDatasetAcquisition acq = (MrDatasetAcquisition) ds.getDatasetAcquisition();
+
+            MrProtocolSCMetadata metadata = acq.getMrProtocol().getUpdatedMetadata() != null
+                    ? acq.getMrProtocol().getUpdatedMetadata()
+                    : new MrProtocolSCMetadata();
+
+            metadata.setMrSequenceName(serie.getString("type"));
+            acq.getMrProtocol().setUpdatedMetadata(metadata);
+            datasetAcquisitionService.update(acq);
         }
 
-        datasetAcquisitionService.update(acq);
-
-        ds.setUpdatedMetadata(ds.getOriginMetadata());
+        if(ds.getUpdatedMetadata() == null){
+            ds.setUpdatedMetadata(ds.getOriginMetadata() != null ? ds.getOriginMetadata() : new DatasetMetadata());
+        }
         ds.getUpdatedMetadata().setName(vol.getString("type"));
-
         datasetService.update(ds);
     }
 
