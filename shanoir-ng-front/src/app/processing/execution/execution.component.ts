@@ -57,7 +57,6 @@ export class ExecutionComponent implements OnInit {
     execDefaultName= "";
     exportFormat="nii";
     groupBy = "dataset";
-    selectedGroupBy = "dataset";
 
     constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
         this.breadcrumbsService.nameStep('2. Executions');
@@ -155,8 +154,6 @@ export class ExecutionComponent implements OnInit {
             return a.name.localeCompare(b.name);
         })
 
-        this.selectedGroupBy = this.groupBy;
-
         this.pipeline.parameters.forEach(
             parameter => {
                 if (this.isAFile(parameter)) {
@@ -243,7 +240,7 @@ export class ExecutionComponent implements OnInit {
             }
 
             dto.resourceIds.forEach(id => {
-                let entity_name = `resource_id+${id}+${this.selectedGroupBy}${extension}`
+                let entity_name = `resource_id+${id}+${this.groupBy}${extension}`
                 // datasetId URI param = resourceId (to be changed once VIP has been updated)
                 let inputValue = `shanoir:/${entity_name}?format=${this.exportFormat}&datasetId=${id}&token=${this.token}&refreshToken=${this.refreshToken}&md5=none&type=File`;
                 execution.inputValues[dto.parameter].push(inputValue);
@@ -292,7 +289,7 @@ export class ExecutionComponent implements OnInit {
                 if (this.isAFile(parameter)) {
                     let dto = new ParameterResourcesDTO();
                     dto.parameter = parameter.name;
-                    dto.groupBy = this.getGroupByEnumByLabel(this.selectedGroupBy);
+                    dto.groupBy = this.getGroupByEnumByLabel(this.groupBy);
                     dto.datasetIds = this.datasetsByParam[parameter.name].map(dataset => { return dataset.id});
                     processingInit.parametersResources.push(dto);
                 }

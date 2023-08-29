@@ -180,14 +180,14 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      */
     private void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException {
 
-        if(ds.getDatasetAcquisition() instanceof MrDatasetAcquisition){
-            DatasetAcquisition acq = ds.getDatasetAcquisition();
+        DatasetMetadataField.NAME.update(ds, vol.getString("type"));
+        Dataset updatedDs = datasetService.update(ds);
+
+        if(updatedDs.getDatasetAcquisition() instanceof MrDatasetAcquisition){
+            DatasetAcquisition acq = updatedDs.getDatasetAcquisition();
             DatasetAcquisitionMetadataField.MR_SEQUENCE_NAME.update(acq, serie.getString("type"));
             datasetAcquisitionService.update(acq);
         }
-
-        DatasetMetadataField.NAME.update(ds, vol.getString("type"));
-        datasetService.update(ds);
     }
 
 
