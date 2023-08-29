@@ -3,7 +3,6 @@ package org.shanoir.ng.processing.carmin.output;
 import org.apache.commons.io.IOUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
-import org.hibernate.Session;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -26,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -80,6 +78,9 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
     @Autowired
     private DatasetRepository datasetRepository;
+
+    @Autowired
+    private DatasetAcquisitionService acquisitionService;
 
     @Autowired
     private WADODownloaderService wadoDownloaderService;
@@ -180,14 +181,14 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     public void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException {
 
         DatasetMetadataField.NAME.update(ds, vol.getString("type"));
+        datasetRepository.save(ds);
 
         if(ds.getDatasetAcquisition() instanceof MrDatasetAcquisition){
             DatasetAcquisition acq = ds.getDatasetAcquisition();
             DatasetAcquisitionMetadataField.MR_SEQUENCE_NAME.update(acq, serie.getString("type"));
-            ds.setDatasetAcquisition(acq);
+            acquisitionService.update(acq);
         }
 
-        datasetRepository.save(ds);
     }
 
 

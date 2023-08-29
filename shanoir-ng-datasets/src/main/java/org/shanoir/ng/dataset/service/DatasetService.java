@@ -89,7 +89,7 @@ public interface DatasetService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
 	Dataset update(Dataset dataset) throws EntityNotFoundException;
-	
+
 	/**
 	 * Find every dataset
 	 * 

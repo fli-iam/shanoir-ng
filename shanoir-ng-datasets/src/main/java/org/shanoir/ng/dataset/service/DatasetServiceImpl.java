@@ -167,7 +167,7 @@ public class DatasetServiceImpl implements DatasetService {
 		if (datasetDb == null) {
 			throw new EntityNotFoundException(Dataset.class, dataset.getId());
 		}
-		updateDatasetValues(datasetDb, dataset);
+		this.updateDatasetValues(datasetDb, dataset);
 		Dataset ds = repository.save(datasetDb);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.UPDATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 		return ds;
@@ -184,11 +184,7 @@ public class DatasetServiceImpl implements DatasetService {
 	private Dataset updateDatasetValues(final Dataset datasetDb, final Dataset dataset) {
 		datasetDb.setCreationDate(dataset.getCreationDate());
 		datasetDb.setId(dataset.getId());
-		//datasetDb.setOriginMetadata(dataset.getOriginMetadata());
 		datasetDb.setProcessings(dataset.getProcessings());
-		//datasetDb.setReferencedDatasetForSuperimposition(dataset.getReferencedDatasetForSuperimposition());
-		//datasetDb.setReferencedDatasetForSuperimpositionChildrenList(dataset.getReferencedDatasetForSuperimpositionChildrenList());
-		//datasetDb.setStudyId(dataset.getStudyId());
 		datasetDb.setSubjectId(dataset.getSubjectId());
 		if (dataset.getOriginMetadata().getId().equals(dataset.getUpdatedMetadata().getId())) {
 			// Force creation of a new dataset metadata
