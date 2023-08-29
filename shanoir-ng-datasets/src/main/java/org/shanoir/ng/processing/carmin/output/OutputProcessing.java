@@ -1,12 +1,12 @@
 package org.shanoir.ng.processing.carmin.output;
 
-import java.io.File;
-import java.util.List;
-
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
+import java.io.File;
+import java.util.List;
 
 /**
  * This class defines the default class to be implemented for output processing.
@@ -31,8 +31,7 @@ public abstract class OutputProcessing {
 	 * @param processing   the corresponding dataset processing.
 	 */
 
-
-	@Transactional(Transactional.TxType.REQUIRES_NEW)
+	@Transactional(isolation = Isolation.READ_COMMITTED,  propagation = Propagation.REQUIRES_NEW)
 	public abstract void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException;
 
 }

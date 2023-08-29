@@ -96,7 +96,6 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     }
 
     @Override
-    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException {
 
         for(File file : resultFiles){
