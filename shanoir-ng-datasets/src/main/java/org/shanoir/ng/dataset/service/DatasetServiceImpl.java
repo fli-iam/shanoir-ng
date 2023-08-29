@@ -15,18 +15,18 @@
 package org.shanoir.ng.dataset.service;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-
 import org.apache.commons.io.FileUtils;
+import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
@@ -59,6 +59,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+
 /**
  * Dataset service implementation.
  * 
@@ -90,7 +94,7 @@ public class DatasetServiceImpl implements DatasetService {
 	private boolean dicomWeb;
 
 	@Override
-	public void deleteById(final Long id) throws ShanoirException {
+	public void deleteById(final Long id) throws ShanoirException, SolrServerException, IOException {
 		final Dataset datasetDb = repository.findById(id).orElse(null);
 		if (datasetDb == null) {
 			throw new EntityNotFoundException(Dataset.class, id);
@@ -132,7 +136,7 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	@Transactional
-	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException {
+	public void deleteByIdIn(List<Long> ids) throws EntityNotFoundException, SolrServerException, IOException {
 		List<Dataset> dss = this.findByIdIn(ids);
 		Map<Long, Long> datasetStudyMap = new HashMap<>();
 		for (Dataset ds : dss) {
@@ -156,7 +160,7 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Dataset create(final Dataset dataset) {
+	public Dataset create(final Dataset dataset)  throws SolrServerException, IOException  {
 		if (dataset instanceof MrDataset) {
 			MrDataset mrDataset = (MrDataset) dataset;
 			if (!CollectionUtils.isEmpty(mrDataset.getFlipAngle())) {
@@ -191,10 +195,6 @@ public class DatasetServiceImpl implements DatasetService {
 			}
 		}
 		Dataset ds = repository.save(dataset);
-		// Do not index processed dataset for the moment
-		if (ds.getDatasetProcessing() == null) {
-			solrService.indexDataset(ds.getId());
-		}
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_EVENT, ds.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, ds.getStudyId()));
 		return ds;
 	}
@@ -249,44 +249,46 @@ public class DatasetServiceImpl implements DatasetService {
 
 	@Override
 	public Page<Dataset> findPage(final Pageable pageable) {
+
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return repository.findAll(pageable);
-		} else {
-			Long userId = KeycloakUtil.getTokenUserId();
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+		}
 
-			// Check if user has restrictions.
-			boolean hasRestrictions = false;
-			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(userId));
-			Map<Long, List<Long>> studyUserCenters = new HashMap<>();
-			for (StudyUser studyUser : studyUsers) {
-				if (! CollectionUtils.isEmpty(studyUser.getCenterIds())) {
-					hasRestrictions = true;
-					studyUserCenters.put(studyUser.getStudyId(), studyUser.getCenterIds());
-				}
-			}
-			// If yes, get all examinations and filter by centers
-			if (hasRestrictions) {
-				List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudy_IdIn(studyIds, pageable.getSort()));
-				
-				if (CollectionUtils.isEmpty(datasets)) {
-					return new PageImpl<>(datasets);
-				}
-				
-				datasets = datasets.stream().filter(ds -> 
-						studyUserCenters.get(ds.getStudyId()) != null &&
-						studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
-						.collect(Collectors.toList());
-				int size = datasets.size();
+		Long userId = KeycloakUtil.getTokenUserId();
+		List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 
-				datasets = datasets.subList(pageable.getPageSize() * pageable.getPageNumber(), Math.min(datasets.size(), pageable.getPageSize() * (pageable.getPageNumber() + 1)));
-				
-				Page<Dataset> page = new PageImpl<>(datasets, pageable, size);
-				return page;
-			} else {
-				return repository.findByDatasetAcquisitionExaminationStudy_IdIn(studyIds, pageable);
+		// Check if user has restrictions.
+		boolean hasRestrictions = false;
+		List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(userId));
+		Map<Long, List<Long>> studyUserCenters = new HashMap<>();
+		for (StudyUser studyUser : studyUsers) {
+			if (! CollectionUtils.isEmpty(studyUser.getCenterIds())) {
+				hasRestrictions = true;
+				studyUserCenters.put(studyUser.getStudyId(), studyUser.getCenterIds());
 			}
 		}
+
+		if (!hasRestrictions) {
+			return repository.findByDatasetAcquisitionExaminationStudy_IdIn(studyIds, pageable);
+		}
+
+		// If yes, get all examinations and filter by centers
+		List<Dataset> datasets = Utils.toList(repository.findByDatasetAcquisitionExaminationStudy_IdIn(studyIds, pageable.getSort()));
+
+		if (CollectionUtils.isEmpty(datasets)) {
+			return new PageImpl<>(datasets);
+		}
+
+		datasets = datasets.stream().filter(ds ->
+				studyUserCenters.get(ds.getStudyId()) != null &&
+				studyUserCenters.get(ds.getStudyId()).contains(ds.getDatasetAcquisition().getExamination().getCenterId()))
+				.collect(Collectors.toList());
+		int size = datasets.size();
+
+		datasets = datasets.subList(pageable.getPageSize() * pageable.getPageNumber(), Math.min(datasets.size(), pageable.getPageSize() * (pageable.getPageNumber() + 1)));
+
+		Page<Dataset> page = new PageImpl<>(datasets, pageable, size);
+		return page;
 	}
 
 	@Override
@@ -295,8 +297,34 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public Long getExpressionSizeByStudyId(Long studyId) {
-		return repository.getExpressionSizeByStudyId(studyId);
+	public List<VolumeByFormatDTO> getVolumeByFormat(Long studyId) {
+		List<Object[]> results = repository.findExpressionSizesByStudyIdGroupByFormat(studyId);
+		List<VolumeByFormatDTO> sizesByFormat = new ArrayList<>();
+
+		for(Object[] result : results){
+			sizesByFormat.add(new VolumeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[0]), (Long) result[1]));
+		}
+
+		return sizesByFormat;
+
+	}
+
+	@Override
+	public Map<Long, List<VolumeByFormatDTO>> getVolumeByFormatByStudyId(List<Long> studyIds) {
+		List<Object[]> results = repository.findExpressionSizesTotalByStudyIdGroupByFormat(studyIds);
+		Map<Long, List<VolumeByFormatDTO>> sizesByFormatAndStudy = new HashMap<>();
+
+		for(Long id : studyIds){
+			sizesByFormatAndStudy.putIfAbsent(id, new ArrayList<>());
+		}
+
+		for(Object[] result : results){
+			Long studyId = (Long) result[0];
+			sizesByFormatAndStudy.get(studyId).add(new VolumeByFormatDTO(DatasetExpressionFormat.getFormat((int) result[1]), (Long) result[2]));
+		}
+
+		return sizesByFormatAndStudy;
+
 	}
 
 	@Override

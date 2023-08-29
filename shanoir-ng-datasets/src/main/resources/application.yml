@@ -26,13 +26,14 @@ spring:
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
-      use-new-id-generator-mappings: false
+      id:
+        db_structure_naming_strategy: legacy
     properties:
       hibernate:
         connection:
@@ -68,30 +69,25 @@ spring:
       enabled: true
       max-file-size: 5000MB
       max-request-size: 5000MB
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
-##### Keycloak #####
-keycloak:
-  # attention: this config for the token issuer needs to match the domain of the frontend
-  # used for token creation AND the server url needs to be known from inside the docker network:
-  auth-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth
-  cors: true
-  realm: shanoir-ng
-  resource: shanoir-ng-datasets
-  ssl-required: external
-  securityConstraints:
-    - authRoles: 
-      - ROLE_ADMIN
-      - ROLE_EXPERT
-      - ROLE_GUEST
-      - ROLE_USER
-    - securityCollections:
-      - name: datasets secured api
-      - patterns:
-        - /*
+
 # Solr
-spring.data.solr.host: http://${SHANOIR_PREFIX}solr:8983/solr/
+solr.host: http://${SHANOIR_PREFIX}solr:8983/solr/shanoir
 # microservices url
 ms.url:
   shanoir-ng-studies: http://${SHANOIR_PREFIX}studies:9902/
@@ -208,7 +204,7 @@ spring:
     allow-bean-definition-overriding: true
     allow-circular-references: true
   datasource:
-    url: jdbc:h2:mem:SHANOIR_NG_DATASET;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
+    url: jdbc:h2:mem:SHANOIR_NG_DATASET;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false;NON_KEYWORDS=VALUE
     username: sa
     password: 
     driver-class-name: org.h2.Driver
@@ -219,7 +215,6 @@ spring:
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: create-drop
-      use-new-id-generator-mappings: false
   autoconfigure.exclude: org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   mvc:
     pathmatch:

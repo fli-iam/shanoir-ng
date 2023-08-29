@@ -67,7 +67,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								</a>
 							</ng-template>
 							<ng-template ngSwitchDefault> 
-								<select-box formControlName="center" [(ngModel)]="acqEquip.center" (onViewClick)="viewCenter($event)" [viewDisabled]="!acqEquip.center" [optionArr]="centers">
+								<select-box formControlName="center" [(ngModel)]="acqEquip.center" [viewRoute]="'/center/details/' + acqEquip?.center?.id" [viewDisabled]="!acqEquip.center" [optionArr]="centers">
 								</select-box>
 								<label *ngIf="hasError('center', ['required'])" class="form-validation-alert" i18n="AcqEquip detail|Center required error@@acqEqptDetailCenterRequiredError">Center is required!</label>
 							</ng-template>

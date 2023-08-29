@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.ws.rs.core.Response;
-
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RoleResource;
 import org.keycloak.admin.client.resource.UserResource;
@@ -39,6 +37,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+
+import jakarta.ws.rs.core.Response;
 
 /**
  * This class does the user(s) management for Shanoir-NG in relation with
@@ -102,7 +102,7 @@ public class ShanoirUsersManagement implements ApplicationRunner {
 	@Value("${SHANOIR_KEYCLOAK_PASSWORD}")
 	private String kcAdminClientPassword;
 
-	@Value("${keycloak.realm}")
+	@Value("${kc.admin.client.realm.users}")
 	private String keycloakRealm;
 	
 	private Keycloak keycloak;

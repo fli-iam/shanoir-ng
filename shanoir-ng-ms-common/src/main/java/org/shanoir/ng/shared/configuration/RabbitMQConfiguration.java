@@ -59,6 +59,9 @@ public class RabbitMQConfiguration {
 	/** BIDS purpose => Get a list of subjects to create bids participants file. */
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
 
+	/** Preclinical subject creation => Check if a subject with this name already exists **/
+	public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
+
 	/** Study name updated => notify dataset MS to change database. */
 	public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
 
@@ -71,6 +74,10 @@ public class RabbitMQConfiguration {
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
 
+	public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
+
+	public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
+
 	/** Get the type of dataset from a given study. */
 	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
 	
@@ -82,6 +89,9 @@ public class RabbitMQConfiguration {
 
 	/** Delete subject => Delete associated examination / datasets. */
 	public static final String DELETE_SUBJECT_QUEUE = "delete-subject-queue";
+
+	/** Delete animal subject => Delete associated subject. */
+	public static final String DELETE_ANIMAL_SUBJECT_QUEUE = "delete-animal-subject-queue";
 
 	/** Delete user queue. */
 	public static final String DELETE_USER_QUEUE = "delete-user-queue";
@@ -157,6 +167,9 @@ public class RabbitMQConfiguration {
 
 	/** Queue used to get the name of a study from ID */
 	public static final String STUDY_NAME_QUEUE = "study-name-queue";
+	
+	/** Queue used to import eeg data */
+	public static final String IMPORT_EEG_QUEUE = "import-eeg-queue";
 
 	/** Queue used to publish logging file. */
 	public static final String STUDY_MIGRATION_LOGGING_QUEUE = "study-migration-logging-queue";
@@ -234,8 +247,23 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
+	public static Queue subjectsNameQueue() {
+		return new Queue(SUBJECTS_NAME_QUEUE, true);
+	}
+
+	@Bean
 	public static Queue datasetSubjectQueue() {
 		return new Queue(DATASET_SUBJECT_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue studyDatasetsDetailedStorageVolumeQueue() {
+		return new Queue(STUDY_DATASETS_DETAILED_STORAGE_VOLUME, true);
+	}
+
+	@Bean
+	public static Queue studyDatasetsTotalStorageVolumeQueue() {
+		return new Queue(STUDY_DATASETS_TOTAL_STORAGE_VOLUME, true);
 	}
 
 	@Bean
@@ -408,5 +436,10 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue studyMigrationLoggingQueue() {
 		return new Queue(STUDY_MIGRATION_LOGGING_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue importEEGQueue() {
+		return new Queue(IMPORT_EEG_QUEUE, true);
 	}
 }

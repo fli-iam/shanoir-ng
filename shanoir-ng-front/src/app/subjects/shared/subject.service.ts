@@ -41,6 +41,11 @@ export class SubjectService extends EntityService<Subject> {
         .toPromise();
     }
 
+    getClinicalSubjects(): Promise<Subject[]> {
+        return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL + '?preclinical=false')
+            .toPromise();
+    }
+
     getPreclinicalSubjects(): Promise<Subject[]> {
         return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL + '?clinical=false')
             .toPromise();

@@ -17,12 +17,12 @@ package org.shanoir.ng.preclinical.bruker;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import java.io.File;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
@@ -38,7 +38,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.client.RestTemplate;
@@ -49,7 +48,7 @@ import org.springframework.web.client.RestTemplate;
  * @author mbodin
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = BrukerApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
@@ -65,18 +64,15 @@ public class BrukerApiControllerTest {
 	@MockBean
 	private RestTemplate restTemplate;
 
-	@ClassRule
-	public static TemporaryFolder tempFolder = new TemporaryFolder();
+	@TempDir
+	public File tempFolder;
 	
 	public static String tempFolderPath;
-	@BeforeClass
-	public static void beforeClass() {
-		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
+	
+	@BeforeEach
+	public void beforeClass() {
+		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
 	    System.setProperty("preclinical.uploadBrukerFolder", tempFolderPath);
-	}
-
-	@Before
-	public void setup() throws ShanoirException {
 	}
 
 	@Test
@@ -97,4 +93,5 @@ public class BrukerApiControllerTest {
 		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD_BRUKER).file(firstFile))
 				.andExpect(status().isNotAcceptable());
 	}
+
 }

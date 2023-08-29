@@ -16,9 +16,10 @@ package org.shanoir.ng.shared.core.model;
 
 import java.io.Serializable;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
 
 /**
  * Generic class used to manage entities common data.
@@ -35,7 +36,7 @@ public abstract class AbstractEntity implements Serializable {
 	private static final long serialVersionUID = -3276989363792089822L;
 
 	@Id
-	@GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**

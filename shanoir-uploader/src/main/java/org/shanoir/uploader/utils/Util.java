@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -41,14 +40,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.log4j.Logger;
-import org.dcm4che2.data.DicomObject;
-import org.dcm4che2.data.Tag;
-import org.dcm4che2.io.DicomInputStream;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShanoirUploader;
-import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.MRI;
-import org.shanoir.uploader.dicom.Serie;
 import org.shanoir.uploader.dicom.anonymize.Pseudonymizer;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -58,7 +51,6 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
@@ -477,49 +469,6 @@ public final class Util {
 
 		}
 		return result;
-	}
-
-	/**
-	 * Add MRI info to Serie (MR series only) using the first DICOM file.
-	 * 
-	 * @param rootDir
-	 * @param serie
-	 */
-	public static void processSerieMriInfo(File rootDir, DicomTreeNode serie) {
-		final String modality = serie.getDescriptionMap().get("modality");
-		if (modality != null) {
-			List<String> imageFileNames = ((Serie) serie).getFileNames();
-			for (final Iterator<String> iteImages = imageFileNames.iterator(); iteImages.hasNext();) {
-				String imageFileName = iteImages.next();
-				if (!"PR".equals(modality) && !"SR".equals(modality)) {
-					String imageFilePath = rootDir.toString() + File.separator + imageFileName;
-					// create the MRI Object containing MRI information
-					DicomObject dcmObj;
-					DicomInputStream din = null;
-					MRI mriInformation = new MRI();
-					try {
-						din = new DicomInputStream(new File(imageFilePath));
-						dcmObj = din.readDicomObject();
-						mriInformation.setInstitutionName(dcmObj.getString(Tag.InstitutionName));
-						mriInformation.setInstitutionAddress(dcmObj.getString(Tag.InstitutionAddress));
-						mriInformation.setStationName(dcmObj.getString(Tag.StationName));
-						mriInformation.setManufacturer(dcmObj.getString(Tag.Manufacturer));
-						mriInformation.setManufacturersModelName(dcmObj.getString(Tag.ManufacturerModelName));
-						mriInformation.setDeviceSerialNumber(dcmObj.getString(Tag.DeviceSerialNumber));
-					} catch (IOException e) {
-						logger.error(e.getMessage(), e);
-						return;
-					} finally {
-						try {
-							din.close();
-						} catch (IOException ignore) {
-						}
-					}
-					((Serie) serie).setMriInformation(mriInformation);
-					return;
-				}
-			}
-		}
 	}
 
 	/**

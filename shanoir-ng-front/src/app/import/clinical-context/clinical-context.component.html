@@ -29,7 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                         [(ngModel)]="study"
                         (userChange)="onSelectStudy()"
-                        (onViewClick)="showStudyDetails()"
+                        [viewRoute]="'/study/details/' + this.study?.id"
                         [viewDisabled]="!study"
                         [options]="studyOptions"
                         [disabled]="loading">
@@ -52,7 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <select-box
                         [(ngModel)]="studycard"
                         (userChange)="onSelectStudyCard()"
-                        (onViewClick)="showStudyCardDetails()"
+                        [viewRoute]="'/study-card/details/' + this.studycard?.id"
                         (onUserClear)="onClearStudyCard()"
                         [viewDisabled]="!studycard"
                         [options]="studycardOptions"
@@ -90,7 +90,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [readOnly]="useStudyCard"
                         [(ngModel)]="center"
                         (userChange)="onSelectCenter()"
-                        (onViewClick)="showCenterDetails()" [viewDisabled]="!center"
+                        [viewRoute]="'/center/details/' + this.center?.id" [viewDisabled]="!center"
                         (onNewClick)="openCreateCenter()" [newHidden]="hasCompatibleCenters"
                         [options]="centerOptions">
                 </select-box>
@@ -115,7 +115,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [readOnly]="useStudyCard"
                         [(ngModel)]="acquisitionEquipment"
                         (userChange)="onContextChange();"
-                        (onViewClick)="showAcquistionEquipmentDetails()" [viewDisabled]="!acquisitionEquipment"
+                        [viewRoute]="'/acquisition-equipment/details/' + this.acquisitionEquipment?.id" [viewDisabled]="!acquisitionEquipment"
                         (onNewClick)="openCreateAcqEqt()" [newHidden]="hasCompatibleEquipments"
                         [options]="acquisitionEquipmentOptions" [pipe]="acqEqPipe">
                 </select-box>
@@ -145,7 +145,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         [disabled]="loading || !study || !acquisitionEquipment"
                         [(ngModel)]="subject"
                         (userChange)="onSelectSubject();"
-                        (onViewClick)="showSubjectDetails()" [viewDisabled]="!subject"
+                        [viewRoute]="'/subject/details/' + this.subject?.id" [viewDisabled]="!subject"
                         (onNewClick)="openCreateSubject()" [newDisabled]="!study || !acquisitionEquipment"
                         [optionArr]="subjects">
                 </select-box>
@@ -192,7 +192,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                     <checkbox [(ngModel)]="subject.subjectStudy.physicallyInvolved" [ngModelOptions]="{standalone: true}"></checkbox>
                 </span>
             </li>
-            <li>
+            <li *ngIf="this.study?.tags">
                 <label>Tags</label>
                 <tag-list [(ngModel)]="subject.subjectStudy.tags" [availableTags]="this.study?.tags"></tag-list>
             </li>
@@ -208,7 +208,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <label class="required-label">Select an examination</label>
             <span class="right-col">
                 <select-box [disabled]="!study || !subject || loading" [(ngModel)]="examination" (userChange)="onSelectExam()"
-                        (onViewClick)="showExaminationDetails()" [viewDisabled]="!examination"
+                        [viewRoute]="'/examination/details/' + this.examination?.id" [viewDisabled]="!examination"
                         (onNewClick)="openCreateExam()" [newDisabled]="!study || !subject" [optionArr]="examinations" [pipe]="subjectExaminationLabelPipe">
                 </select-box>
             </span>

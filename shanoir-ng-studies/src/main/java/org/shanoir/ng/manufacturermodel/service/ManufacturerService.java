@@ -14,8 +14,13 @@
 
 package org.shanoir.ng.manufacturermodel.service;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.shanoir.ng.manufacturermodel.model.Manufacturer;
-import org.shanoir.ng.shared.core.service.BasicEntityService;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Manufacturer model service.
@@ -23,6 +28,52 @@ import org.shanoir.ng.shared.core.service.BasicEntityService;
  * @author jlouis
  *
  */
-public interface ManufacturerService extends BasicEntityService<Manufacturer> {
+public interface ManufacturerService {
 
+	/**
+	 * Find entity by its id. 
+	 *
+	 * @param id id
+	 * @return an entity or null.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	Optional<Manufacturer> findById(Long id);
+	
+	/**
+	 * Get all entities.
+	 * 
+	 * @return a list of manufacturers.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	List<Manufacturer> findAll();
+
+	/**
+	 * Save an entity.
+	 *
+	 * @param entity the entity to create.
+	 * @return created entity.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
+	Manufacturer create(Manufacturer entity);
+
+	/**
+	 * Update an entity.
+	 *
+	 * @param entity the entity to update.
+	 * @return updated entity.
+	 * @throws EntityNotFoundException
+	 * @throws MicroServiceCommunicationException 
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	Manufacturer update(Manufacturer entity) throws EntityNotFoundException;
+	
+	/**
+	 * Delete an entity.
+	 * 
+	 * @param id the entity id to be deleted.
+	 * @throws EntityNotFoundException if the entity cannot be found.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	void deleteById(Long id) throws EntityNotFoundException;
+	
 }

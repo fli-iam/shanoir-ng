@@ -15,10 +15,12 @@
 package org.shanoir.ng.acquisitionequipment.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
-import org.shanoir.ng.shared.core.service.BasicEntityService;
-import org.springframework.stereotype.Service;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * Acquisition equipment service.
@@ -26,9 +28,54 @@ import org.springframework.stereotype.Service;
  * @author msimon
  *
  */
-@Service
-public interface AcquisitionEquipmentService extends BasicEntityService<AcquisitionEquipment> {
+public interface AcquisitionEquipmentService {
 
+	/**
+	 * Find entity by its id. 
+	 *
+	 * @param id id
+	 * @return an entity or null.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	Optional<AcquisitionEquipment> findById(Long id);
+	
+	/**
+	 * Get all entities.
+	 * 
+	 * @return a list of manufacturers.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	List<AcquisitionEquipment> findAll();
+
+	/**
+	 * Save an entity.
+	 *
+	 * @param entity the entity to create.
+	 * @return created entity.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
+	AcquisitionEquipment create(AcquisitionEquipment entity);
+
+	/**
+	 * Update an entity.
+	 *
+	 * @param entity the entity to update.
+	 * @return updated entity.
+	 * @throws EntityNotFoundException
+	 * @throws MicroServiceCommunicationException 
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	AcquisitionEquipment update(AcquisitionEquipment entity) throws EntityNotFoundException;
+	
+	/**
+	 * Delete an entity.
+	 * 
+	 * @param id the entity id to be deleted.
+	 * @throws EntityNotFoundException if the entity cannot be found.
+	 */
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	void deleteById(Long id) throws EntityNotFoundException;
+	
 	List<AcquisitionEquipment> findAllByCenterId(Long centerId);
 	
 	List<AcquisitionEquipment> findAllByStudyId(Long studyId);

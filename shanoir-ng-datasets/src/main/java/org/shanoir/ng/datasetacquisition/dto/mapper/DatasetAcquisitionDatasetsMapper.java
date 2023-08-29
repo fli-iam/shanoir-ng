@@ -19,6 +19,7 @@ import java.util.List;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.MapperConfig;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingInheritanceStrategy;
 import org.mapstruct.ObjectFactory;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
@@ -31,6 +32,8 @@ import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
+import org.shanoir.ng.shared.paging.PageImpl;
+import org.springframework.data.domain.Page;
 
 @Mapper(componentModel = "spring", uses = { ExaminationMapper.class, DatasetMapper.class })
 @DecoratedWith(DatasetAcquisitionDatasetsDecorator.class)
@@ -38,8 +41,10 @@ import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
 public interface DatasetAcquisitionDatasetsMapper {
 	
 	List<DatasetAcquisitionDatasetsDTO> datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(
-			List<DatasetAcquisition> datasetAcquisitions); 
-	
+			List<DatasetAcquisition> datasetAcquisitions);
+
+	PageImpl<DatasetAcquisitionDatasetsDTO> datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(Page<DatasetAcquisition> daPage);
+			
 	DatasetAcquisitionDatasetsDTO datasetAcquisitionToDatasetAcquisitionDatasetsDTO(
 			DatasetAcquisition datasetAcquisition);
 
@@ -59,5 +64,4 @@ public interface DatasetAcquisitionDatasetsMapper {
 		if (ds != null) return ds;
         else throw new IllegalStateException("Cannot map from a dataset dto that don't provide a valid type. Given type = " + dto.getType());
     }
-
 }

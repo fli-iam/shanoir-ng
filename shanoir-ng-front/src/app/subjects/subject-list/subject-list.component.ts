@@ -51,7 +51,7 @@ export class SubjectListComponent extends EntityListComponent<Subject> {
     }
 
     getEntities(): Promise<Subject[]> {
-        return this.subjectService.getAll().then(result => result.filter(subj => !subj.preclinical));
+        return this.subjectService.getClinicalSubjects()
     }
 
     // Grid columns definition

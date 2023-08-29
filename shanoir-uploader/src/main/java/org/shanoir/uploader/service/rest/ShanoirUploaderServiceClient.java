@@ -24,21 +24,20 @@ import org.apache.hc.core5.net.URIBuilder;
 import org.apache.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.model.dto.StudyCardOnStudyResultDTO;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
+import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
-import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.utils.Util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
  * 
@@ -58,6 +57,8 @@ public class ShanoirUploaderServiceClient {
 	private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
 
 	private static final String SERVICE_STUDYCARDS_APPLY_ON_STUDY = "service.studycards.apply.on.study";
+	
+	private static final String SERVICE_CENTERS_CREATE = "service.centers.create";
 
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS = "service.acquisition.equipments";
 	
@@ -91,6 +92,8 @@ public class ShanoirUploaderServiceClient {
 
 	private String serviceURLStudyCardsApplyOnStudy;
 	
+	private String serviceURLCentersCreate;
+
 	private String serviceURLAcquisitionEquipments;
 	
 	private String serviceURLSubjectsFindByIdentifier;
@@ -136,6 +139,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
 		this.serviceURLStudyCardsApplyOnStudy = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_APPLY_ON_STUDY);
+		this.serviceURLCentersCreate = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_CENTERS_CREATE);
 		this.serviceURLAcquisitionEquipments = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
@@ -247,11 +252,11 @@ public class ShanoirUploaderServiceClient {
 						if (newAccessToken != null) {
 							ShUpOnloadConfig.setTokenString(newAccessToken);
 						} else {
-							logger.info("ERROR: with access token refresh.");
+							logger.error("ERROR: with access token refresh.");
 						}
-						logger.info("Access token has been refreshed.");
+						logger.debug("Access token has been refreshed.");
 					} else {
-						logger.info("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
+						logger.error("ERROR: Access token could NOT be refreshed: HttpStatus-" + statusCode);
 					}
 				}
 			} catch (Exception e) {
@@ -512,6 +517,27 @@ public class ShanoirUploaderServiceClient {
 					logger.error("Could not get dataset of study " + studyId + " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			}
+		}
+		return null;
+	}
+	
+	public Center createCenter(final Center center) {
+		try {
+			String json = Util.objectWriter.writeValueAsString(center);
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLCentersCreate, json, false)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					Center centerCreated = Util.getMappedObject(response, Center.class);
+					return centerCreated;
+				} else {
+					logger.error("Error in createCenter: with center " + center.getName()
+						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		} catch (IOException ioE) {
+			logger.error(ioE.getMessage(), ioE);			
 		}
 		return null;
 	}

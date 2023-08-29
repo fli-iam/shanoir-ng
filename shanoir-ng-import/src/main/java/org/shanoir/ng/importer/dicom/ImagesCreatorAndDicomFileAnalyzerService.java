@@ -43,7 +43,6 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -75,13 +74,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private static final String YES = "YES";
 
 	@Autowired
-	private DicomSerieAndInstanceAnalyzer dicomSerieAndInstanceAnalyzer;
-
-	@Autowired
 	private ShanoirEventService eventService;
-
-	@Value("${shanoir.import.upload.folder}")
-	private String uploadFolder;
 
 	public void createImagesAndAnalyzeDicomFiles(List<Patient> patients, String folderFileAbsolutePath, boolean isImportFromPACS, ShanoirEvent event)
 			throws FileNotFoundException {
@@ -98,15 +91,37 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				int cpt = 1;
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
-					if(event != null){
-						event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] " + cpt + "/" + nbSeries + ")");
-						eventService.publishEvent(event);
+					if (!serie.isIgnored()) {
+						if(event != null) {
+							event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
+							eventService.publishEvent(event);
+						}
+						try {
+							filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
+						} catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
+							handleError(event, nbSeries, cpt, serie, e);
+						}
+						// use a second try here, in case error is on serie, to get at least the serie name for error tracing
+						try {
+							getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
+						} catch (Exception e) {
+							handleError(event, nbSeries, cpt, serie, e);						
+						}
 					}
-					filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
-					getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
 					cpt++;
 				}
 			}
+		}
+	}
+
+	private void handleError(ShanoirEvent event, int nbSeries, int cpt, Serie serie, Exception e) {
+		LOG.error("Error while processing serie: {} {} {}", serie.toString(), e.getMessage(), e.getStackTrace());
+		serie.setErroneous(true);
+		serie.setErrorMessage(e.getMessage() + ", " + e.toString());
+		serie.setSelected(false);
+		if(event != null){
+			event.setMessage("Error with serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
+			eventService.publishEvent(event);
 		}
 	}
 
@@ -115,10 +130,10 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @throws FileNotFoundException
 	 */
-	private void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Serie serie, Patient patient, boolean isImportFromPACS)
+	public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Serie serie, Patient patient, boolean isImportFromPACS)
 			throws FileNotFoundException {
 		List<Instance> instances = serie.getInstances();
-		if (!instances.isEmpty()) {
+		if (instances != null && !instances.isEmpty()) {
 			Instance firstInstance = instances.get(0);
 			File firstInstanceFile = getFileFromInstance(firstInstance, serie, folderFileAbsolutePath, isImportFromPACS);
 			processDicomFileForFirstInstance(firstInstanceFile, serie, patient);
@@ -134,19 +149,21 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @throws FileNotFoundException
 	 */
-	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS) throws FileNotFoundException {
+	private void filterAndCreateImages(String folderFileAbsolutePath, Serie serie, boolean isImportFromPACS) throws Exception {
 		List<Image> images = new ArrayList<Image>();
 		List<Object> nonImages = new ArrayList<Object>();
 		List<Instance> instances = serie.getInstances();
-		for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
-			Instance instance = instancesIt.next();
-			File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
-			processDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
+		if (instances != null) {
+			for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
+				Instance instance = instancesIt.next();
+				File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
+				processOneDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
+			}
+			serie.setNonImages(nonImages);
+			serie.setNonImagesNumber(nonImages.size());
+			serie.setImages(images);
+			serie.setImagesNumber(images.size());
 		}
-		serie.setNonImages(nonImages);
-		serie.setNonImagesNumber(nonImages.size());
-		serie.setImages(images);
-		serie.setImagesNumber(images.size());
 	}
 
 	/**
@@ -158,7 +175,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param images
 	 * @throws FileNotFoundException
 	 */
-	private File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
+	public File getFileFromInstance(Instance instance, Serie serie, String folderFileAbsolutePath, boolean isImportFromPACS)
 			throws FileNotFoundException {
 		StringBuilder instanceFilePath = new StringBuilder();
 		if (isImportFromPACS) {
@@ -204,11 +221,11 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processDicomFileForAllInstances(File dicomFile, List<Image> images, String folderFileAbsolutePath) {
-		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
-			Attributes attributes = dIS.readDataset(-1, -1);
+	private void processOneDicomFileForAllInstances(File dicomFile, List<Image> images, String folderFileAbsolutePath) throws Exception {
+		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
+			Attributes attributes = dIS.readDataset();
 			// Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
-			if (dicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
+			if (DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
 				// do nothing here as instances list will be emptied after split between images and non-images
 			} else {
 				// divide here between non-images and images, non-images at first
@@ -222,8 +239,11 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				addImageSeparateDatasetsInfo(image, attributes);
 				images.add(image);
 			}
-		} catch (IOException e) {
-			LOG.error("Error during DICOM file process.", e);
+		} catch (IOException iOE) {
+			throw iOE;
+		} catch (Exception e) {
+			LOG.error("Error while processing DICOM file: " + dicomFile.getAbsolutePath());
+			throw e;
 		}
 	}
 	
@@ -237,13 +257,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	private void processDicomFileForFirstInstance(File dicomFile, Serie serie, Patient patient) {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) {
 			LOG.debug("Process first DICOM file of serie {} path {}", serie.getSeriesInstanceUID() + " " + serie.getSeriesDescription(), dicomFile.getAbsolutePath());
-			Attributes attributes = dIS.readDataset(-1, -1);
+			Attributes attributes = dIS.readDatasetUntilPixelData();
 			checkPatientData(patient, attributes);
 			checkSerieData(serie, attributes);
 			addSeriesEquipment(serie, attributes);
 			addSeriesCenter(serie, attributes);
 		} catch (IOException e) {
-			LOG.error("Error during processing of DICOM file:", e);
+			LOG.error("Error during processing of DICOM file " + dicomFile.getAbsolutePath() + ":", e);
 		}
 	}
 
@@ -254,8 +274,12 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param image
 	 * @param datasetAttributes
 	 */
-	private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) {
-		if (UID.EnhancedMRImageStorage.equals(attributes.getString(Tag.SOPClassUID))) {
+	private void addImageSeparateDatasetsInfo(Image image, Attributes attributes) throws Exception {
+		final String sopClassUID = attributes.getString(Tag.SOPClassUID);
+		if (UID.EnhancedMRImageStorage.equals(sopClassUID)
+			|| UID.EnhancedMRColorImageStorage.equals(sopClassUID)
+			|| UID.EnhancedCTImageStorage.equals(sopClassUID)
+			|| UID.EnhancedPETImageStorage.equals(sopClassUID)) {
 			MultiframeExtractor emf = new MultiframeExtractor();
 			attributes = emf.extract(attributes, 0);
 		}
@@ -304,7 +328,9 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			String manufacturer = attributes.getString(Tag.Manufacturer);
 			String manufacturerModelName = attributes.getString(Tag.ManufacturerModelName);
 			String deviceSerialNumber = attributes.getString(Tag.DeviceSerialNumber);
-			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber));
+			String stationName = attributes.getString(Tag.StationName);
+			String magneticFieldStrength = attributes.getString(Tag.MagneticFieldStrength);
+			serie.setEquipment(new EquipmentDicom(manufacturer, manufacturerModelName, deviceSerialNumber, stationName, magneticFieldStrength));
 		}
 	}
 
@@ -347,8 +373,8 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				serie.setSeriesDescription(seriesDescriptionDicomFile);
 			}
 		}
-		dicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
-		dicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie, attributes);
+		DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
+		DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie, attributes);
 		if (serie.getSeriesDate() == null) {
 			serie.setSeriesDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.SeriesDate)));
 		}
@@ -360,7 +386,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			serie.setProtocolName(attributes.getString(Tag.ProtocolName));
 		}
 		// keep this check at this place: enhanced Dicom needs to be checked first
-		dicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
+		DicomSerieAndInstanceAnalyzer.checkSerieIsMultiFrame(serie, attributes);
 	}
 
 	/**
@@ -372,21 +398,23 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param attributes
 	 */
 	private void checkPatientData(Patient patient, Attributes attributes) {
-		if (patient.getPatientBirthDate() == null) {
-			// has not been found in dicomdir, so we get it from .dcm file:
-			patient.setPatientBirthDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate)));
-		}
-		if (StringUtils.isEmpty(patient.getPatientSex())) {
-			// has not been found in dicomdir, so we get it from .dcm file:
-			patient.setPatientSex(attributes.getString(Tag.PatientSex));
-		}
-		// we can not display this information for the pacs in select series: as info not available
-		String patientIdentityRemoved = attributes.getString(Tag.PatientIdentityRemoved);
-		if (StringUtils.isNotBlank(patientIdentityRemoved)) {
-			if (YES.equals(patientIdentityRemoved)) {
-				patient.setPatientIdentityRemoved(true);
-				String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
-				patient.setDeIdentificationMethod(deIdentificationMethod);
+		if (patient != null) {
+			if (patient.getPatientBirthDate() == null) {
+				// has not been found in dicomdir, so we get it from .dcm file:
+				patient.setPatientBirthDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate)));
+			}
+			if (StringUtils.isEmpty(patient.getPatientSex())) {
+				// has not been found in dicomdir, so we get it from .dcm file:
+				patient.setPatientSex(attributes.getString(Tag.PatientSex));
+			}
+			// we can not display this information for the pacs in select series: as info not available
+			String patientIdentityRemoved = attributes.getString(Tag.PatientIdentityRemoved);
+			if (StringUtils.isNotBlank(patientIdentityRemoved)) {
+				if (YES.equals(patientIdentityRemoved)) {
+					patient.setPatientIdentityRemoved(true);
+					String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
+					patient.setDeIdentificationMethod(deIdentificationMethod);
+				}
 			}
 		}
 	}

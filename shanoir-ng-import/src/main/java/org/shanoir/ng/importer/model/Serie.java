@@ -25,16 +25,25 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * This class represents a serie based on Dicom as used in Shanoir.
+ * This class represents a serie based on DICOM as used in Shanoir.
  * 
  * @author atouboul
  * @author mkain
  */
 public class Serie {
-
+	
 	@JsonProperty("selected")
 	private boolean selected;
 
+	@JsonProperty("ignored")
+	private boolean ignored;
+
+	@JsonProperty("erroneous")
+	private boolean erroneous;
+
+	@JsonProperty("errorMessage")
+	private String errorMessage;
+	
 	@JsonProperty("seriesInstanceUID")
 	private String seriesInstanceUID;
 
@@ -115,10 +124,16 @@ public class Serie {
 		this.numberOfSeriesRelatedInstances = attributes.getInt(Tag.NumberOfSeriesRelatedInstances, 0);
 		this.modality = attributes.getString(Tag.Modality);
 		this.protocolName = attributes.getString(Tag.ProtocolName);
+		this.isEnhanced = Boolean.FALSE;
+		this.isMultiFrame = Boolean.FALSE;
+		this.isSpectroscopy = Boolean.FALSE;
+		this.isCompressed = Boolean.FALSE;
 		final EquipmentDicom equipmentDicom = new EquipmentDicom(
 				attributes.getString(Tag.Manufacturer),
 				attributes.getString(Tag.ManufacturerModelName),
-				attributes.getString(Tag.DeviceSerialNumber));
+				attributes.getString(Tag.DeviceSerialNumber),
+				attributes.getString(Tag.StationName),
+				attributes.getString(Tag.MagneticFieldStrength));
 		setEquipment(equipmentDicom);
 	}
 
@@ -128,6 +143,30 @@ public class Serie {
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
+	}
+
+	public boolean isIgnored() {
+		return ignored;
+	}
+
+	public void setIgnored(boolean ignored) {
+		this.ignored = ignored;
+	}
+
+	public boolean isErroneous() {
+		return erroneous;
+	}
+
+	public void setErroneous(boolean erroneous) {
+		this.erroneous = erroneous;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
 	}
 
 	public String getSeriesInstanceUID() {
@@ -304,6 +343,20 @@ public class Serie {
 
 	public void setSequenceName(String sequenceName) {
 		this.sequenceName = sequenceName;
+	}
+	
+	public String toString() {
+		StringBuffer sB = new StringBuffer();
+		sB.append(this.seriesDescription);
+		sB.append(", ");
+		sB.append(this.sequenceName);
+		sB.append(", ");
+		sB.append(this.protocolName);
+		sB.append(", ");
+		sB.append(this.seriesNumber);
+		sB.append(", ");
+		sB.append(this.seriesInstanceUID);
+		return sB.toString();
 	}
 
 }

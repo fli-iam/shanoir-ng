@@ -8,15 +8,16 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
-import org.shanoir.uploader.model.rest.importer.ImportJob;
+import org.shanoir.uploader.action.ImportFinishRunnable;
+import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.nominativeData.CurrentNominativeDataController;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
@@ -103,10 +104,11 @@ public class UploadServiceJob implements Job {
 			// that this file is for sure transferred as the last file to avoid sync problems
 			// on the server, when auto-import starts with still missing files
 			} else if (file.getName().equals(UploadJobManager.UPLOAD_JOB_XML)
-					|| file.getName().equals(ImportJob.IMPORT_JOB_JSON)) {
+					|| file.getName().equals(ImportFinishRunnable.IMPORT_JOB_JSON)) {
 				// do not add to list
 		    } else {
-				filesToTransfer.add(file);
+		    	if (file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX))
+		    		filesToTransfer.add(file);
 			}
 		}
 		if (uploadJobManager != null && nominativeDataUploadJobManager != null) {
@@ -159,13 +161,13 @@ public class UploadServiceJob implements Job {
 			 * Explicitly upload the upload-job.xml as the last file to avoid sync problems on server in case of
 			 * many files have to be uploaded.
 			 */
-			File importJobJsonFile = new File(folder.getAbsolutePath() + File.separator + ImportJob.IMPORT_JOB_JSON);
+			File importJobJsonFile = new File(folder.getAbsolutePath() + File.separator + ImportFinishRunnable.IMPORT_JOB_JSON);
 			ImportJob importJob;
 			if (importJobJsonFile.exists()) {
 				importJob = objectMapper.readValue(importJobJsonFile, ImportJob.class);
 				setTempDirIdAndStartImport(tempDirId, importJob);	
 			} else {
-				throw new Exception(ImportJob.IMPORT_JOB_JSON + " missing in folder.");
+				throw new Exception(ImportFinishRunnable.IMPORT_JOB_JSON + " missing in folder.");
 			}
 			currentNominativeDataController.updateNominativeDataPercentage(folder,
 					UploadState.FINISHED_UPLOAD.toString());
@@ -174,12 +176,13 @@ public class UploadServiceJob implements Job {
 			uploadJobManager.writeUploadJob(uploadJob);
 			
 			// If we are coming from CSV import, delete the data from the work folder (but not the upload files in itself)
-			if (importJob.isFromCsv()) {
-				for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
-					File file = (File) iterator.next();
-					FileUtils.deleteQuietly(file);
-				}
-			}
+			// @todo clean up fromCSV
+//			if (importJob.isFromCsv()) {
+//				for (Iterator<File> iterator = allFiles.iterator(); iterator.hasNext();) {
+//					File file = (File) iterator.next();
+//					FileUtils.deleteQuietly(file);
+//				}
+//			}
 
 		} catch (Exception e) {
 			currentNominativeDataController.updateNominativeDataPercentage(folder, UploadState.ERROR.toString());

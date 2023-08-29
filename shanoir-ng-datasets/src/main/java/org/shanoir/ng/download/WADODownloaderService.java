@@ -35,13 +35,8 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.annotation.PostConstruct;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.json.JSONReader;
@@ -65,6 +60,12 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.mail.BodyPart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 
 /**
  * This class is used to download files on using WADO URLs:
@@ -406,7 +407,7 @@ public class WADODownloaderService {
 			String json = downloadMetadataFromPACS(urlStr);
 			// transform from flat to tree
 			try {
-				return DicomJsonUtils.inflfateDCM4CheeJSON(json);
+				return DicomJsonUtils.inflateDCM4CheeJSON(json);
 				//tree.put
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block

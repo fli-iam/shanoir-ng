@@ -18,9 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.mapper.ExaminationDatasetAcquisitionMapper;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -32,7 +31,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Dataset acquisition mapper test.
@@ -40,7 +38,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author msimon
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class DatasetAcquisitionMapperTest {
@@ -56,10 +54,10 @@ public class DatasetAcquisitionMapperTest {
 	public void datasetAcquisitionsToExaminationDatasetAcquisitionDTOsTest() {
 		final List<ExaminationDatasetAcquisitionDTO> datasetAcquisitionDTOs = datasetAcquisitionMapper
 				.datasetAcquisitionsToExaminationDatasetAcquisitionDTOs(Arrays.asList(createDatasetAcquisition()));
-		Assert.assertNotNull(datasetAcquisitionDTOs);
-		Assert.assertTrue(datasetAcquisitionDTOs.size() == 1);
-		Assert.assertTrue(DATASET_ACQUISITION_ID.equals(datasetAcquisitionDTOs.get(0).getId()));
-		Assert.assertTrue(DATASET_ACQUISITION_WIHTOUT_DATASET_NAME.equals(datasetAcquisitionDTOs.get(0).getName()));
+		Assertions.assertNotNull(datasetAcquisitionDTOs);
+		Assertions.assertTrue(datasetAcquisitionDTOs.size() == 1);
+		Assertions.assertTrue(DATASET_ACQUISITION_ID.equals(datasetAcquisitionDTOs.get(0).getId()));
+		Assertions.assertTrue(DATASET_ACQUISITION_WIHTOUT_DATASET_NAME.equals(datasetAcquisitionDTOs.get(0).getName()));
 	}
 
 	@Test
@@ -69,9 +67,9 @@ public class DatasetAcquisitionMapperTest {
 
 		final ExaminationDatasetAcquisitionDTO datasetAcquisitionDTO = datasetAcquisitionMapper
 				.datasetAcquisitionToExaminationDatasetAcquisitionDTO(datasetAcquisition);
-		Assert.assertNotNull(datasetAcquisitionDTO);
-		Assert.assertTrue(DATASET_ACQUISITION_ID.equals(datasetAcquisitionDTO.getId()));
-		Assert.assertTrue(DATASET_ACQUISITION_WIHT_DATASET_NAME.equals(datasetAcquisitionDTO.getName()));
+		Assertions.assertNotNull(datasetAcquisitionDTO);
+		Assertions.assertTrue(DATASET_ACQUISITION_ID.equals(datasetAcquisitionDTO.getId()));
+		Assertions.assertTrue(DATASET_ACQUISITION_WIHT_DATASET_NAME.equals(datasetAcquisitionDTO.getName()));
 	}
 
 	private DatasetAcquisition createDatasetAcquisition() {

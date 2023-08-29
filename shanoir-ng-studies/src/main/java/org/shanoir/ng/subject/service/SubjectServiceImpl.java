@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -321,13 +322,18 @@ public class SubjectServiceImpl implements SubjectService {
 	}
 
 	@Override
-	public Page<Subject> getFilteredPageByStudies(Pageable page, String name, List<Study> studies) {
-		Iterable<Long> studyIds = studies.stream().map(study -> study.getId()).collect(Collectors.toList());
-		return subjectRepository.findDistinctByNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
+	public Page<Subject> getClinicalFilteredPageByStudies(Pageable page, String name, List<Study> studies) {
+		Iterable<Long> studyIds = studies.stream().map(AbstractEntity::getId).collect(Collectors.toList());
+		return subjectRepository.findDistinctByPreclinicalIsFalseAndNameContainingAndSubjectStudyListStudyIdIn(name, page, studyIds);
 	}
 
 	@Override
 	public List<Subject> findByPreclinical(boolean preclinical) {
 		return subjectRepository.findByPreclinical(preclinical);
 	}
+
+    @Override
+    public boolean existsSubjectWithName(String name) {
+        return this.subjectRepository.existsByName(name);
+    }
 }

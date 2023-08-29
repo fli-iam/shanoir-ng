@@ -1,6 +1,6 @@
 package org.shanoir.uploader.upload;
 
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * This class contains all states of the UploadService's

@@ -21,7 +21,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
 		<artifactId>shanoir-ng-back</artifactId>
-		<version>2.6.6</version>
+		<version>3.1.2</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
@@ -30,18 +30,5 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 	<name>shanoir-ng-ms-common</name>
 	<description>Shanoir-NG Microservices Common Project</description>
-	
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20190722</version>
-        </dependency>
-	</dependencies>
 
 </project>

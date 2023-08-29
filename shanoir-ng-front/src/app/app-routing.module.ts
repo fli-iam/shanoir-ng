@@ -89,7 +89,6 @@ import { PipelinesComponent } from './processing/pipelines/pipelines.component';
 import { ExecutionComponent } from './processing/execution/execution.component';
 import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
-import { StudyCardApplyComponent } from './study-cards/study-card-apply/study-card-apply.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
 import { PacsClinicalContextComponent } from './import/pacs-clinical-context/pacs-clinical-context.component';
@@ -570,7 +569,7 @@ let routes: Routes = [
 	},
     {
 		path: 'study-card/apply/:id',
-		component: StudyCardApplyComponent,
+		component: ApplyStudyCardOnComponent,
         canActivate: [AuthAdminOrExpertGuard],
 	},{
 		path: 'study-card/apply-on-datasets',

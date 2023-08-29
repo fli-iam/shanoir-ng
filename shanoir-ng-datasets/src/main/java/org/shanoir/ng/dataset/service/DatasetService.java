@@ -14,8 +14,12 @@
 
 package org.shanoir.ng.dataset.service;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
+import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -40,7 +44,7 @@ public interface DatasetService {
 	 * @throws ShanoirException 
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#id, 'CAN_ADMINISTRATE'))")
-	void deleteById(Long id) throws EntityNotFoundException, ShanoirException;
+	void deleteById(Long id) throws EntityNotFoundException, ShanoirException, SolrServerException, IOException;
 	
 	/**
 	 * Delete several datasets.
@@ -49,7 +53,7 @@ public interface DatasetService {
 	 * @throws EntityNotFoundException
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnEveryDataset(#ids, 'CAN_ADMINISTRATE'))")
-	void deleteByIdIn(List<Long> ids) throws EntityNotFoundException;
+	void deleteByIdIn(List<Long> ids) throws EntityNotFoundException, SolrServerException, IOException;
 
 	/**
 	 * Find dataset by its id.
@@ -78,7 +82,7 @@ public interface DatasetService {
 	 * @return created dataset.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnNewDataset(#dataset, 'CAN_IMPORT'))")
-	Dataset create(Dataset dataset);
+	Dataset create(Dataset dataset) throws SolrServerException, IOException;
 
 	/**
 	 * Update a dataset.
@@ -114,7 +118,10 @@ public interface DatasetService {
 	List<Dataset> findByStudyId(Long studyId);
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	Long getExpressionSizeByStudyId(Long studyId);
+	List<VolumeByFormatDTO> getVolumeByFormat(Long studyId);
+
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudies(#studyIds, 'CAN_SEE_ALL'))")
+	Map<Long, List<VolumeByFormatDTO>> getVolumeByFormatByStudyId(List<Long> studyIds);
 
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterDatasetList(returnObject, 'CAN_SEE_ALL')")

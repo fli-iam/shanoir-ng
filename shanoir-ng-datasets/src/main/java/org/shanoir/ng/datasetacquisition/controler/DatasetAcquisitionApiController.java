@@ -18,8 +18,9 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.validation.Valid;
+import org.shanoir.ng.utils.SecurityContextUtil;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
@@ -62,7 +63,8 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 @Controller
 public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
@@ -92,7 +94,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Override
 	public ResponseEntity<Void> createNewDatasetAcquisition(
-			@ApiParam(value = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
+			@Parameter(name = "DatasetAcquisition to create", required = true) @Valid @RequestBody ImportJob importJob) throws RestServiceException {
 		try {
 			importerService.createAllDatasetAcquisition(importJob, KeycloakUtil.getTokenUserId());
 		} catch (ShanoirException e) {
@@ -103,11 +105,17 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
-	@Override
-	public ResponseEntity<Void> createNewEegDatasetAcquisition(@ApiParam(value = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) throws IOException {
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+
+		EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
+		
 		eegImporterService.createEegDataset(importJob);
 		importerService.cleanTempFiles(importJob.getWorkFolder());
-		return new ResponseEntity<>(HttpStatus.OK);
+		return HttpStatus.OK.value();
 	}
 
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)
@@ -138,21 +146,19 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetAcquisitionDTO>> findByStudyCard(
-			@ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
-
+	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findByStudyCard(
+			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByStudyCard(studyCardId);
-		if (daList.isEmpty()) {
+		if (daList == null || daList.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} else {
-			return new ResponseEntity<>(dsAcqMapper.datasetAcquisitionsToDatasetAcquisitionDTOs(daList), HttpStatus.OK);
+			return new ResponseEntity<>(dsAcqDsMapper.datasetAcquisitionsToDatasetAcquisitionDatasetsDTOs(daList), HttpStatus.OK);
 		}
 	}
 
 	@Override
 	public ResponseEntity<List<ExaminationDatasetAcquisitionDTO>> findDatasetAcquisitionByExaminationId(
-			@ApiParam(value = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
-
+			@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId) {
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByExamination(examinationId);
 		daList.sort(new Comparator<DatasetAcquisition>() {
 
@@ -171,7 +177,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Override
 	public ResponseEntity<List<DatasetAcquisitionDatasetsDTO>> findDatasetAcquisitionByDatasetIds(
-			@ApiParam(value = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
+			@Parameter(name = "ids of the datasets", required = true) @RequestBody Long[] datasetIds) {
 		
 		List<DatasetAcquisition> daList = datasetAcquisitionService.findByDatasetId(datasetIds);
 		
@@ -192,15 +198,14 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 	
 	@Override
 	public ResponseEntity<Void> deleteDatasetAcquisition(
-			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
-					throws RestServiceException {
-
+			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId)
+			throws RestServiceException {
 		try {
 			datasetAcquisitionService.deleteById(datasetAcquisitionId);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (EntityNotFoundException e) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		} catch (ShanoirException e) {
+		} catch (IOException | SolrServerException | ShanoirException e) {
 			LOG.error("Error while deleting dataset acquisition: ", e);
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -208,8 +213,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Override
 	public ResponseEntity<DatasetAcquisitionDTO> findDatasetAcquisitionById(
-			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId) {
-
+			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId) {
 		final DatasetAcquisition datasetAcquisition = datasetAcquisitionService.findById(datasetAcquisitionId);
 		if (datasetAcquisition == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -230,8 +234,8 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 
 	@Override
 	public ResponseEntity<Void> updateDatasetAcquisition(
-			@ApiParam(value = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
-			@ApiParam(value = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition,
+			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
+			@Parameter(name = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition,
 			final BindingResult result) throws RestServiceException {
 
 		validate(result);

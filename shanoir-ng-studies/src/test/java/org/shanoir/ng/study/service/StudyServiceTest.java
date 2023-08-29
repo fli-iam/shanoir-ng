@@ -14,11 +14,12 @@ $ * Shanoir NG - Import, manage and share neuroimaging data
 
 package org.shanoir.ng.study.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.BDDMockito.given;
 
 import java.io.File;
@@ -29,13 +30,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -54,8 +52,8 @@ import org.shanoir.ng.studycenter.StudyCenterRepository;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -68,7 +66,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author msimon
  * 
  */
-@RunWith(SpringRunner.class)
+@SpringBootTest
 @ActiveProfiles("test")
 public class StudyServiceTest {
 
@@ -103,19 +101,12 @@ public class StudyServiceTest {
 	@Mock
 	private ObjectMapper objectMapper;
 
-	@ClassRule
-	public static TemporaryFolder tempFolder = new TemporaryFolder();
-	
-	public static String tempFolderPath;
+	@TempDir
+	public File tempFolder;
 
-	@BeforeClass
-	public static void beforeClass() {
-		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
-	}
-
-	@Before
+	@BeforeEach
 	public void setup() {
-	    ReflectionTestUtils.setField(studyService, "dataDir", this.tempFolderPath);
+	    ReflectionTestUtils.setField(studyService, "dataDir", tempFolder.getAbsolutePath() + "/tmp/");
 
 		given(studyRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudy()));
 		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(ModelsUtil.createStudy()));
@@ -139,8 +130,8 @@ public class StudyServiceTest {
 	@Test
 	public void findByIdTest() throws AccessDeniedException {
 		final Study study = studyService.findById(STUDY_ID);
-		Assert.assertNotNull(study);
-		Assert.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
+		Assertions.assertNotNull(study);
+		Assertions.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
 
 		Mockito.verify(studyRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -155,8 +146,8 @@ public class StudyServiceTest {
 		given(studyRepository.findById(STUDY_ID)).willReturn(Optional.of(newStudy));
 
 		final Study study = studyService.findById(STUDY_ID);
-		Assert.assertNotNull(study);
-		Assert.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
+		Assertions.assertNotNull(study);
+		Assertions.assertTrue(ModelsUtil.STUDY_NAME.equals(study.getName()));
 
 		Mockito.verify(studyRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -171,7 +162,7 @@ public class StudyServiceTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_EXPERT" })
 	public void updateTest() throws AccessDeniedException, EntityNotFoundException, MicroServiceCommunicationException, IOException {
 		// Also test protocol file path
-		File protocol = new File(tempFolderPath + "study-1/old.txt");
+		File protocol = new File(tempFolder.getAbsolutePath() + "/tmp/study-1/old.txt");
 
 		protocol.getParentFile().mkdirs();
 		protocol.createNewFile();
@@ -188,8 +179,8 @@ public class StudyServiceTest {
 		given(studyRepository.save(Mockito.any(Study.class))).willReturn(updatedStudy);
 		
 		final Study returnedStudy = studyService.update(updatedStudy);
-		Assert.assertNotNull(returnedStudy);
-		Assert.assertTrue(UPDATED_STUDY_NAME.equals(returnedStudy.getName()));
+		Assertions.assertNotNull(returnedStudy);
+		Assertions.assertTrue(UPDATED_STUDY_NAME.equals(returnedStudy.getName()));
 		assertNotNull(returnedStudy.getProtocolFilePaths());
 		assertEquals(1, returnedStudy.getProtocolFilePaths().size());
 		assertEquals("new.txt", returnedStudy.getProtocolFilePaths().iterator().next());

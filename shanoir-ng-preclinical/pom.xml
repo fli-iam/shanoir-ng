@@ -20,7 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<parent>
 		<groupId>org.shanoir-ng</groupId>
 		<artifactId>shanoir-ng-back</artifactId>
-		<version>2.6.6</version>
+		<version>3.1.2</version>
 		<relativePath>../shanoir-ng-back</relativePath>
 	</parent>
 
@@ -34,24 +34,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<dependency>
 			<groupId>org.shanoir-ng</groupId>
 			<artifactId>shanoir-ng-ms-common</artifactId>
-			<version>2.6.6</version>
-		</dependency>
-
-		<!-- Resteasy -->
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxrs</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client</artifactId>
-			<version>${resteasy.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jackson2-provider</artifactId>
-			<version>${resteasy.version}</version>
+			<version>3.1.2</version>
 		</dependency>
 
 		<!-- SpringFox Swagger UI -->
@@ -59,31 +42,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-joda</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>${springfox.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger-ui</artifactId>
-			<version>${springfox.version}</version>
-			<exclusions>
-				<exclusion>
-					<artifactId>org.mapstruct</artifactId>
-					<groupId>mapstruct</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
 
 		<!-- AMQP -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-amqp</artifactId>
 		</dependency>
 
 		<dependency>
@@ -99,7 +62,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<version>3.2.2</version>
 		</dependency>
 	</dependencies>
-
 
 	<build>
 		<plugins>

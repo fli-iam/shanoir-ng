@@ -32,12 +32,15 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 	private List<Examination> examinationsOfSubject;
 	
 	private Date studyDate;
+	
+	private ImportStudyCardFilterDocumentListener importStudyCardDocumentListener;
 
-	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs, Date studyDate) {
+	public ImportStudyAndStudyCardCBItemListener(MainWindow mainWindow, Subject subject, List<Examination> examinationDTOs, Date studyDate, ImportStudyCardFilterDocumentListener importStudyCardDocumentListener) {
 		this.mainWindow = mainWindow;
 		this.subject = subject;
 		this.examinationsOfSubject = examinationDTOs;
 		this.studyDate = studyDate;
+		this.importStudyCardDocumentListener = importStudyCardDocumentListener;
 	}
 
 	public void itemStateChanged(ItemEvent e) {
@@ -108,11 +111,14 @@ public class ImportStudyAndStudyCardCBItemListener implements ItemListener {
 
 	private void updateStudyCards(Study study) {
 		mainWindow.importDialog.studyCardCB.removeAllItems();
+		this.importStudyCardDocumentListener.cleanDefaultStudyCards();
 		if (study.getStudyCards() != null) {
 			for (StudyCard studyCard : study.getStudyCards()) {
 				mainWindow.importDialog.studyCardCB.addItem(studyCard);
+				this.importStudyCardDocumentListener.addDefaultStudyCard(studyCard);
 			}
 		}
+		
 	}
 
 	private void updateSubjectStudy(Study study) {

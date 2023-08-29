@@ -48,7 +48,7 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.examination.model.Examination;
@@ -64,7 +64,6 @@ import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.QualityException;
@@ -107,16 +106,10 @@ public class ImporterService {
     private DatasetService datasetService;
 
     @Autowired
-    private DatasetAcquisitionRepository datasetAcquisitionRepository;
-
-    @Autowired
     private DicomPersisterService dicomPersisterService;
 
     @Autowired
     private ShanoirEventService eventService;
-
-    @Autowired
-    private SolrService solrService;
 
     @Autowired
     private ImporterMailService mailService;
@@ -126,6 +119,9 @@ public class ImporterService {
 
     @Autowired
     private QualityCardService qualityCardService;
+   
+    @Autowired
+    private DatasetAcquisitionService datasetAcquisitionService;
 
     @Autowired
     private DicomProcessing dicomProcessing;
@@ -150,7 +146,7 @@ public class ImporterService {
         ShanoirEvent event = importJob.getShanoirEvent();
         event.setMessage("Creating datasets...");
         eventService.publishEvent(event);
-        SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
         Set<DatasetAcquisition> generatedAcquisitions = null;
         try {
             Examination examination = examinationRepository.findById(importJob.getExaminationId()).orElse(null);
@@ -164,17 +160,17 @@ public class ImporterService {
                 if (qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
                 } else { // Then do the import
-                    datasetAcquisitionRepository.saveAll(generatedAcquisitions);
+                	generatedAcquisitions = new HashSet<DatasetAcquisition>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
                         persistPatientInPacs(importJob.getPatients(), event);
                     } catch (Exception e) { // if error in pacs
                         // revert dataset acquisitions
                         for (DatasetAcquisition acquisition : generatedAcquisitions) {
-                            datasetAcquisitionRepository.deleteById(acquisition.getId());
+                            datasetAcquisitionService.deleteById(acquisition.getId());
                         }
                         throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved");
                     }
-                }	
+                }
             } else {
                 throw new ShanoirException("Examination not found: " + importJob.getExaminationId());
             }
@@ -406,7 +402,7 @@ public class ImporterService {
      * Create a processed dataset dataset associated with a dataset processing.
      * @param importJob the import job from importer MS.
      */
-    public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws IOException {
+    public Dataset createProcessedDataset(final ProcessedDatasetImportJob importJob) throws IOException, Exception {
 
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getProcessedDatasetFilePath(), KeycloakUtil.getTokenUserId(), "Starting import...", ShanoirEvent.IN_PROGRESS, 0f);
         eventService.publishEvent(event);
@@ -500,12 +496,13 @@ public class ImporterService {
             File destFile = new File(outDir.getAbsolutePath() + File.separator + originalNiftiName);
 
             // Save file
-            Path location = null;
+            Path location;
             try {
                 destFile.getParentFile().mkdirs();
                 location = Files.copy(srcFile.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
                 LOG.error("IOException generating Processed Dataset Expression", e);
+                throw e;
             }
             DatasetFile datasetFile = new DatasetFile();
             datasetFile.setPacs(false);
@@ -532,8 +529,6 @@ public class ImporterService {
 
             dataset = datasetService.create(dataset);
             
-            solrService.indexDataset(dataset.getId());
-
             event.setStatus(ShanoirEvent.SUCCESS);
             event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
                     +": Successfully created processed dataset for subject " + importJob.getSubjectName() + " in dataset "
@@ -551,6 +546,11 @@ public class ImporterService {
             eventService.publishEvent(event);
             throw e;
         }
+    }
+
+    public void createFailedJob(String datasetFilePath){
+        ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, datasetFilePath, KeycloakUtil.getTokenUserId(), "Import of dataset failed.", ShanoirEvent.ERROR, -1f);
+        eventService.publishEvent(event);
     }
     
 }

@@ -20,6 +20,7 @@ import * as AppUtils from '../../../utils/app.utils';
 import * as PreclinicalUtils from '../../utils/preclinical.utils';
 import { AnimalSubject } from './animalSubject.model';
 import { PreclinicalSubject, PreclinicalSubjectDTO } from './preclinicalSubject.model';
+import {PRECLINICAL_API_SUBJECT_FIND_URL} from "../../utils/preclinical.utils";
 
 
 @Injectable()
@@ -33,23 +34,16 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
 
     getEntityInstance() { return new PreclinicalSubject(); }
 
-
-    getAnimalSubjects(): Promise<AnimalSubject[]>{
-        return this.http.get<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_ALL_URL)
+    getAnimalSubjects(ids: IterableIterator<any>): Promise<AnimalSubject[]>{
+        const formData: FormData = new FormData();
+        formData.set('subjectIds', Array.from(ids).join(","));
+        return this.http.post<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECT_FIND_URL, formData)
             .toPromise();
     }
 
     getAnimalSubject(id: number): Promise<AnimalSubject>{
         return this.http.get<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL+"/"+id)
             .toPromise();
-    }
-
-    getAnimalSubjectsBySubjectIds(ids: number[]) {
-        const formData: FormData = new FormData();
-        formData.set('subjectIds', ids.join(","));
-        return this.http
-            .post<AnimalSubject[]>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL + "/allBySubjectId", formData)
-            .toPromise()
     }
 
     updateAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
@@ -59,14 +53,8 @@ export class AnimalSubjectService extends EntityService<PreclinicalSubject>{
         .toPromise();
     }
 
-    createAnimalSubject(animalSubject: AnimalSubject): Promise<AnimalSubject> {
-        return this.http.post<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, JSON.stringify(animalSubject))
-            .toPromise();
-    }
-
-
-    findAnimalSubjectBySubjectId(subjectId: number){
-        return this.http.get<AnimalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECT_FIND_URL+"/"+subjectId)
+    createPreclinicalSubject(preclinicalSubject: PreclinicalSubject): Promise<PreclinicalSubject> {
+        return this.http.post<PreclinicalSubject>(PreclinicalUtils.PRECLINICAL_API_SUBJECTS_URL, this.stringify(preclinicalSubject))
             .toPromise();
     }
 

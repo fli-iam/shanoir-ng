@@ -22,6 +22,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.log4j.Logger;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.uploader.action.ImportFromCsvActionListener;
 import org.shanoir.uploader.action.UploadFromCsvActionListener;
 import org.shanoir.uploader.dicom.IDicomServerClient;
@@ -45,18 +46,19 @@ public class ImportFromCSVWindow extends JFrame {
 	final JPanel masterPanel;
 
 	JTable table;
-	
 
 	UploadFromCsvActionListener uploadListener;
 	ImportFromCsvActionListener importListener;
 	IDicomServerClient dicomServerClient;
+	ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 	ShanoirUploaderServiceClient shanoirUploaderServiceClient;
 	public JScrollPane scrollPaneUpload;
 
-	public ImportFromCSVWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
+	public ImportFromCSVWindow(File shanoirUploaderFolder, ResourceBundle resourceBundle, JScrollPane scrollPaneUpload, IDicomServerClient dicomServerClient, ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer, ShanoirUploaderServiceClient shanoirUploaderServiceClientNG) {
 		this.shanoirUploaderFolder = shanoirUploaderFolder;
 		this.resourceBundle = resourceBundle;
 		this.dicomServerClient = dicomServerClient;
+		this.dicomFileAnalyzer = dicomFileAnalyzer;
 		this.shanoirUploaderServiceClient = shanoirUploaderServiceClientNG;
 		this.scrollPaneUpload = scrollPaneUpload;
 
@@ -169,7 +171,7 @@ public class ImportFromCSVWindow extends JFrame {
 		progressBar.setVisible(false);
 		masterPanel.add(progressBar, gBCProgressBar);
 	
-		importListener = new ImportFromCsvActionListener(this, resourceBundle, dicomServerClient, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
+		importListener = new ImportFromCsvActionListener(this, resourceBundle, dicomServerClient, dicomFileAnalyzer, shanoirUploaderFolder, shanoirUploaderServiceClientNG);
 
 		uploadButton.addActionListener(importListener);
 
