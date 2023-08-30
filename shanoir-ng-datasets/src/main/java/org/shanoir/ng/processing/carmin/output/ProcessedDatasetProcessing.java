@@ -130,16 +130,21 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 			Iterator<String> keys = json.keys();
 			while (keys.hasNext()) {
 				String key = keys.next();
-				Object value = json.get(key);
-				if (value instanceof JSONArray) {
+				JSONArray array = json.optJSONArray(key);
+				if (array != null) {
 					// case "["resource_id+XXX+filename.nii", "resource_id+YYY+filename.nii", ...]"
-					JSONArray array = (JSONArray) value;
 					for (int i = 0; i < array.length(); i++) {
-						candidates.add(array.getString(i));
+						String value = array.optString(i);
+						if(value != null){
+							candidates.add(array.getString(i));
+						}
 					}
-				} else if (value instanceof String){
-					// Case "resource_id+XXX+filename.nii"
-					candidates.add((String) value);
+				} else {
+					String value = json.optString(key);
+					if(value != null){
+						// Case "resource_id+XXX+filename.nii"
+						candidates.add(value);
+					}
 				}
 			}
 		}

@@ -127,9 +127,8 @@ public class OutputProcessingService {
 
     private void deleteCache(File cacheFolder) {
 
-        try {
-            Files.walk(cacheFolder.toPath())
-                    .sorted(Comparator.reverseOrder())
+        try (Stream<Path> stream = Files.walk(cacheFolder.toPath()) ) {
+            stream.sorted(Comparator.reverseOrder())
                     .map(Path::toFile)
                     .forEach(File::delete);
         } catch (IOException e) {
