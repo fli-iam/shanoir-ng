@@ -115,6 +115,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<artifactId>spring-security-test</artifactId>
 			<!-- do not put scope test here: compile errors -->
 		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.httpcomponents.client5</groupId>
+		    <artifactId>httpclient5</artifactId>
+		</dependency>
 
 		<!-- duplicate definition, but only here to avoid warning in maven compile -->
 		<dependency>

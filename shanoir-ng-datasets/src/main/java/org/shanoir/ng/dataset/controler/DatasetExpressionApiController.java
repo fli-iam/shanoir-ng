@@ -9,8 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
-
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class DatasetExpressionApiController implements DatasetExpressionApi {
@@ -20,7 +19,7 @@ public class DatasetExpressionApiController implements DatasetExpressionApi {
 	
 	@Override
 	public ResponseEntity<DatasetExpression> saveNewDatasetExpression(
-			@ApiParam(value = "datasetExpression to create", required = true) @RequestBody DatasetExpression expression, BindingResult result)
+			@Parameter(name = "datasetExpression to create", required = true) @RequestBody DatasetExpression expression, BindingResult result)
 			throws RestServiceException {
 		return new ResponseEntity<>(datasetExpressionService.create(expression), HttpStatus.OK);
 	}

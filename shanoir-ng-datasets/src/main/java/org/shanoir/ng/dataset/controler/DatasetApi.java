@@ -41,11 +41,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -60,7 +55,7 @@ import jakarta.validation.Valid;
 @RequestMapping("/datasets")
 public interface DatasetApi {
 	
-	@ApiOperation(value = "", notes = "Creates new dataset", response = Void.class, tags={  })
+	@Operation(summary = "", description = "Creates new dataset", tags={  })
     @ApiResponses(value = {
 			@ApiResponse(responseCode = "204", description = "dataset deleted"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
@@ -72,7 +67,7 @@ public interface DatasetApi {
         consumes = { "application/json" })
 	//TODO: @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<Dataset> saveNewDataset(
-    		@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
+    		@Parameter(name = "Dataset to create", required=true) @RequestBody Dataset dataset,
     		final BindingResult result) throws RestServiceException;
 
 	@Operation(summary = "", description = "Deletes a dataset")

@@ -19,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class MigrationApiController implements MigrationApi {
@@ -41,11 +41,11 @@ public class MigrationApiController implements MigrationApi {
 
 	@Override
 	public synchronized ResponseEntity<String> migrateStudy (
-			@ApiParam(value = "Url of distant shanoir") @RequestParam("shanoirUrl") Integer shanoirUrl,
-			@ApiParam(value = "Username of user") @RequestParam("username") String username,
-			@ApiParam(value = "Password of user") @RequestParam("userPassword") String userPassword,
-			@ApiParam(value = "study ID", required = true) @RequestParam("studyId") Long studyId,
-			@ApiParam(value = "Distant user ID", required = true) @RequestParam("userId") Long userId)
+			@Parameter(name = "Url of distant shanoir") @RequestParam("shanoirUrl") Integer shanoirUrl,
+			@Parameter(name = "Username of user") @RequestParam("username") String username,
+			@Parameter(name = "Password of user") @RequestParam("userPassword") String userPassword,
+			@Parameter(name = "study ID", required = true) @RequestParam("studyId") Long studyId,
+			@Parameter(name = "Distant user ID", required = true) @RequestParam("userId") Long userId)
 					throws RestServiceException {
 		try {
 			// Connect to keycloak and keep connection alive

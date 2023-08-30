@@ -17,6 +17,7 @@ package org.shanoir.ng.datasetacquisition.controler;
 import java.io.IOException;
 import java.util.List;
 
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
 import org.shanoir.ng.datasetacquisition.dto.ExaminationDatasetAcquisitionDTO;
@@ -58,10 +59,10 @@ public interface DatasetAcquisitionApi {
         consumes = { "application/json" })
 	//TODO: @PreAuthorize("hasRole('ADMIN')")
     ResponseEntity<DatasetAcquisition> saveNewDatasetAcquisition(
-    		@ApiParam(value = "DatasetAcquisition to create", required=true) @RequestBody DatasetAcquisition acquisition,
+    		@Parameter(name = "DatasetAcquisition to create", required=true) @RequestBody DatasetAcquisition acquisition,
     		final BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Creates new dataset acquisition", response = Void.class, tags={  })
+	@Operation(summary = "", description = "Creates new dataset acquisition", tags={  })
     @ApiResponses(value = {
         @ApiResponse(responseCode = "204", description = "created Dataset Acquitistion"),
         @ApiResponse(responseCode = "401", description = "unauthorized"),

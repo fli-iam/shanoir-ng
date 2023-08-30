@@ -551,7 +551,7 @@ public class DatasetApiController implements DatasetApi {
 
 	@Override
 	public ResponseEntity<Dataset> saveNewDataset(
-			@ApiParam(value = "Dataset to create", required=true) @RequestBody Dataset dataset,
+			@Parameter(name = "Dataset to create", required=true) @RequestBody Dataset dataset,
 			final BindingResult result) throws RestServiceException {
 		Dataset created = datasetService.create(dataset);
 		return new ResponseEntity<>(created, HttpStatus.OK);

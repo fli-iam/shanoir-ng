@@ -82,7 +82,7 @@ public interface DatasetService {
 	 * @return created dataset.
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnNewDataset(#dataset, 'CAN_IMPORT'))")
-	Dataset create(Dataset dataset) throws SolrServerException, IOException;
+	Dataset create(Dataset dataset);
 
 	/**
 	 * Update a dataset.

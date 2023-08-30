@@ -1,9 +1,8 @@
 package org.shanoir.ng.datasetfile.service;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,56 +14,59 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Api(value = "datasetfile", description = "the datasetfile API")
+@Tag(name = "datasetfile")
 @RequestMapping("/datasetfiles")
 public interface DatasetFileApi {
 
-	@ApiOperation(value = "", notes = "Saves a new dataset file", response = DatasetFile.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created file", response = DatasetFile.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Saves a new dataset file", tags = {})
+	@ApiResponses(value = { 
+			@ApiResponse(responseCode = "200", description = "created file"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "",
 		produces = { "application/json" },
 		consumes ={ "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<DatasetFile> saveNewDatasetFile(
-			@ApiParam(value = "datasetfile to create", required = true) @RequestBody DatasetFile datasetFile,
+			@Parameter(name = "datasetfile to create", required = true) @RequestBody DatasetFile datasetFile,
 			BindingResult result)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Add file on datasetFile", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created file", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Add file on datasetFile", tags = {})
+	@ApiResponses(value = { 
+			@ApiResponse(responseCode = "200", description = "created file"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "file-upload/{datasetFileId}",
 		produces = { "application/json" },
 		consumes ={ "multipart/form-data" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> addFile(
-			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId,
-			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
+			@Parameter(name = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId,
+			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Add all files to the PACS", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created file", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Add all files to the PACS", tags = {})
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "created file"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "file-upload-to-pacs/{datasetFileId}",
 		produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<Void> addFilesToPacs(
-			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId)
+			@Parameter(name = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId)
 			throws RestServiceException;
 }

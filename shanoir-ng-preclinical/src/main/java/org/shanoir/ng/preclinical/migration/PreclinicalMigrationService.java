@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.Anesthetic;
 import org.shanoir.ng.preclinical.anesthetics.anesthetic.AnestheticRepository;
@@ -18,8 +18,8 @@ import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPatholo
 import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyRepository;
 import org.shanoir.ng.preclinical.references.Reference;
 import org.shanoir.ng.preclinical.references.RefsRepository;
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
-import org.shanoir.ng.preclinical.subjects.AnimalSubjectRepository;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.repository.AnimalSubjectRepository;
 import org.shanoir.ng.preclinical.therapies.Therapy;
 import org.shanoir.ng.preclinical.therapies.TherapyRepository;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapy;
@@ -173,10 +173,9 @@ public class PreclinicalMigrationService {
 
 		// Animal_subject
 		for (Entry<Long, IdName> entry : job.getSubjectsMap().entrySet()) {
-			for (AnimalSubject animalSubject : animalSubjectRepository.findBySubjectId(entry.getKey())) {
-				LOG.error("moving Animal subject " + animalSubject.getId() + animalSubject.getSubjectId());
-				migrateSubject(animalSubject, job);
-			}
+			AnimalSubject animalSubject = animalSubjectRepository.getBySubjectId(entry.getKey());
+			LOG.error("moving Animal subject " + animalSubject.getId() + animalSubject.getSubjectId());
+			migrateSubject(animalSubject, job);
 		}
 
 		job.getLogging().add("Animal subject migration - success");

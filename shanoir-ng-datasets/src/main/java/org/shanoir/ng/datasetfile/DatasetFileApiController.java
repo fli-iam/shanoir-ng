@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 import org.apache.commons.io.FileUtils;
 import org.shanoir.ng.datasetfile.service.DatasetFileApi;
@@ -30,8 +30,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
+import io.swagger.v3.oas.annotations.Parameter;
 
-import io.swagger.annotations.ApiParam;
 
 @Controller
 public class DatasetFileApiController implements DatasetFileApi {
@@ -73,7 +73,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 
 	@Override
 	public 	ResponseEntity<DatasetFile> saveNewDatasetFile(
-			@ApiParam(value = "datasetfile to create", required = true) @RequestBody DatasetFile datasetFile,
+			@Parameter(name = "datasetfile to create", required = true) @RequestBody DatasetFile datasetFile,
 			BindingResult result) throws RestServiceException  {
 		try {
 			// Save file
@@ -111,7 +111,7 @@ public class DatasetFileApiController implements DatasetFileApi {
 	}
 
 	public ResponseEntity<Void> addFilesToPacs(
-			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId)
+			@Parameter(name = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId)
 					throws RestServiceException {
 		// Transfer to pacs
 		DatasetFile datasetFile = datasetFileService.findById(datasetFileId).orElse(null);
@@ -134,8 +134,8 @@ public class DatasetFileApiController implements DatasetFileApi {
                                                                                                                                                                               
 	@Override
 	public ResponseEntity<Void> addFile(
-			@ApiParam(value = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId,
-			@ApiParam(value = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
+			@Parameter(name = "id of the dataset file", required = true) @PathVariable("datasetFileId") Long datasetFileId,
+			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 					throws RestServiceException {
 		DatasetFile datasetFile = datasetFileService.findById(datasetFileId).orElse(null);
 		File destination = null;

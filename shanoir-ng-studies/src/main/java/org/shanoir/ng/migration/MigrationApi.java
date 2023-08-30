@@ -16,6 +16,7 @@ package org.shanoir.ng.migration;
 
 import java.io.IOException;
 import java.util.List;
+
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
@@ -24,38 +25,40 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Api(value = "migration")
+@Tag(name = "migration")
 @RequestMapping("/migration")
 public interface MigrationApi {
 
-	@ApiOperation(value = "", notes = "Connects to a distant shanoir", response = Void.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "connected", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@Operation(summary = "", description = "Connects to a distant shanoir", tags = {})
+	@ApiResponses(value = { 
+			@ApiResponse(responseCode = "204", description = "connected"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/migrate", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<String> migrateStudy (
-			@ApiParam(value = "Url of distant shanoir", required = true) @RequestParam("shanoirUrl") Integer shanoirUrl,
-			@ApiParam(value = "Username of user", required = true) @RequestParam("username") String username,
-			@ApiParam(value = "Password of user", required = true) @RequestParam("userPassword") String userPassword,
-			@ApiParam(value = "study ID", required = true) @RequestParam("studyId") Long studyId,
-			@ApiParam(value = "Distant user ID", required = true) @RequestParam("userId") Long userId)
+			@Parameter(name = "Url of distant shanoir", required = true) @RequestParam("shanoirUrl") Integer shanoirUrl,
+			@Parameter(name = "Username of user", required = true) @RequestParam("username") String username,
+			@Parameter(name = "Password of user", required = true) @RequestParam("userPassword") String userPassword,
+			@Parameter(name = "study ID", required = true) @RequestParam("studyId") Long studyId,
+			@Parameter(name = "Distant user ID", required = true) @RequestParam("userId") Long userId)
 			throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Get migration configuration", response = String.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 204, message = "no value", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 404, message = "no config found", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+	@Operation(summary = "", description = "Get migration configuration", tags = {})
+	@ApiResponses(value = { 
+			@ApiResponse(responseCode = "204", description = "no value"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no config found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "urls", produces = {
 			"application/json" })
 	@PreAuthorize("hasRole('ADMIN')")

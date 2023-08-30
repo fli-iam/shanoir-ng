@@ -9,26 +9,28 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
-@Api(value = "datasetexpression", description = "the datasetexpression API")
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
+@Tag(name = "datasetexpression")
 @RequestMapping("/datasetexpressions")
 public interface DatasetExpressionApi {
 
-	@ApiOperation(value = "", notes = "Saves a new dataset expression", response = DatasetExpression.class, tags = {})
-	@ApiResponses(value = { @ApiResponse(code = 200, message = "created expression", response = DatasetExpression.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+	@Operation(summary = "", description = "Saves a new dataset expression", tags = {})
+	@ApiResponses(value = { 
+			@ApiResponse(responseCode = "200", description = "created expression"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<DatasetExpression> saveNewDatasetExpression(
-			@ApiParam(value = "datasetExpression to create", required = true) @RequestBody DatasetExpression expression, BindingResult result)
+			@Parameter(name = "datasetExpression to create", required = true) @RequestBody DatasetExpression expression, BindingResult result)
 			throws RestServiceException;
 }
