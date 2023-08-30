@@ -46,7 +46,7 @@ export class LoadingBarComponent {
         if (this.progress == -1) {
             return this.text ? this.text : 'ERROR';
         }
-        else if (this.unknownDownload) {
+        else if (this.unknownDownload || this.progress > 1) {
             return this.getSizeStr(this.progress);
         }
         else return Math.ceil(this.progress * 100) + "%";
@@ -62,7 +62,7 @@ export class LoadingBarComponent {
         }
 
         const exponent: number = Math.floor(Math.log(size) / Math.log(base));
-        let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
+        let value: number = Math.round(parseFloat((size / Math.pow(base, exponent)).toFixed(2)));
         let unit: string = units[exponent];
 
         return value + " " + unit;

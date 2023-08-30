@@ -16,9 +16,11 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { TaskStatus } from 'src/app/async-tasks/task.model';
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
-import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
@@ -28,12 +30,9 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { environment } from '../../../environments/environment';
 
 @Component({
     selector: 'examination',
@@ -43,7 +42,6 @@ import { environment } from '../../../environments/environment';
 export class ExaminationComponent extends EntityComponent<Examination> {
 
     @ViewChild('input') private fileInput: ElementRef;
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
     public centers: IdName[];
     public studies: IdName[];
@@ -58,6 +56,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
     examNode: Examination | ExaminationNode;
+    downloadState: {status?: TaskStatus, progress?: number} = {};
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
@@ -149,7 +148,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     download(format: string) {
-          this.datasetService.downloadDatasetsByExamination(this.id, format, this.progressBar);
+        this.datasetService.downloadDatasetsByExamination(this.id, format, this.downloadState);
     }
 
     openViewer() {

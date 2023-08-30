@@ -14,8 +14,8 @@
 
 import { HttpResponse } from '@angular/common/http';
 import { ComponentRef, Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs-compat';
-import { Task } from 'src/app/async-tasks/task.model';
+import { Observable, Subject, Subscription } from 'rxjs-compat';
+import { Task, TaskStatus } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
@@ -141,13 +141,39 @@ export class MassDownloadService {
             try {
                 task.status = 2;
                 const start: number = Date.now();
-                return this.datasetService.downloadDatasets(datasetIds, format, task).then(() => {
+                const downloadObs: Observable<{status?: TaskStatus, progress?: number}> = this.datasetService.downloadDatasets(datasetIds, format);
+                let endPromise: SuperPromise<void> = new SuperPromise();
+
+                let errorFunction = error => {
+                    task.lastUpdate = new Date();
+                    task.status = -1;
+                    task.message = 'error while downloading : ' + (error?.message || error?.toString() || 'see logs');
+                    this.notificationService.pushLocalTask(task);
+                    releaseQueue();
+                    endPromise.reject(error);
+                }
+
+                const flowSubscription: Subscription = downloadObs.subscribe(state => {
+                    task.lastUpdate = new Date();
+                    task.progress = state?.progress;
+                    task.status = state?.status;
+                    this.notificationService.pushLocalTask(task);
+                }, errorFunction);
+
+                const endSubscription: Subscription = downloadObs.last().subscribe(state => {
+                    flowSubscription.unsubscribe();
                     let duration: number = Date.now() - start;
                     task.message = 'download completed in ' + duration + 'ms, ' + datasetIds.length + ' datasets zipped';
-                }).catch(reason => {
-                    task.message = 'download error : ' + reason;
+                    task.lastUpdate = new Date();
+                    task.status = 1;
+                    task.progress = 1;
                     this.notificationService.pushLocalTask(task);
-                }).finally(() => {
+                    endPromise.resolve();
+                }, errorFunction);
+
+                return endPromise.finally(() => {
+                    flowSubscription.unsubscribe();
+                    endSubscription.unsubscribe();
                     releaseQueue();
                 });
             } catch (error) {

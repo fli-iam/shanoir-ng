@@ -152,7 +152,7 @@ export class ExaminationNodeComponent implements OnChanges {
             datasetIdsReady = Promise.resolve();
         }
         datasetIdsReady.then(() => {
-            this.datasetService.downloadDatasets(this.datasetIds, format, this.progressBar);
+            //this.datasetService.downloadDatasets(this.datasetIds, format, this.progressBar);
             this.downloading = false;
         });
     }

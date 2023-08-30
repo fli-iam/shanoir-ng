@@ -82,7 +82,7 @@ export class DatasetDownloadComponent {
     public download() {
         // Call service method to download datasets
         if (this.mode == 'selected') {
-            this.datasetService.downloadDatasets(this.datasetIds, this.type, this.progressBar);
+            //this.datasetService.downloadDatasets(this.datasetIds, this.type, this.progressBar);
         } else if (this.mode == 'all') {
             if (this.useBids) {
                 this.studyService.exportBIDSByStudyId(this.studyId, this.progressBar);
