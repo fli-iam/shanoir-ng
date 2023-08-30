@@ -107,7 +107,6 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     extractProgression(event: HttpEvent<any>): {status?: TaskStatus, progress?: number} {
-        console.log(event.type)
         switch (event.type) {
             case HttpEventType.Sent:
             case HttpEventType.ResponseHeader:
