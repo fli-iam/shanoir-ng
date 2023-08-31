@@ -222,10 +222,6 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 
 		datasetProcessingService.update(processing);
 
-		// Remove datasets from current Carmin processing
-		carminDatasetProcessing.setInputDatasets(Collections.emptyList());
-		datasetProcessingService.update(carminDatasetProcessing);
-
 	}
 
 	private DatasetProcessing createProcessing(CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) {

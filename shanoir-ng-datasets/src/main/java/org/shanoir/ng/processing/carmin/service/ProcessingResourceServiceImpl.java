@@ -22,13 +22,13 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
 
     @Override
     public List<Dataset> findDatasetsByResourceId(String resourceId) {
-        List<Long> ids = repository.findDatasetIdByResourceId(resourceId);
+        List<Long> ids = repository.findDatasetIdsByResourceId(resourceId);
         return datasetService.findByIdIn(ids);
     }
 
     @Override
     public List<Long> findDatasetIdsByResourceId(String resourceId) {
-        return repository.findDatasetIdByResourceId(resourceId);
+        return repository.findDatasetIdsByResourceId(resourceId);
     }
 
     @Override

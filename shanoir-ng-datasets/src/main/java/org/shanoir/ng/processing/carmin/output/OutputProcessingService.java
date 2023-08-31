@@ -7,6 +7,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.service.DatasetProcessingService;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +40,9 @@ public class OutputProcessingService {
 
     @Autowired
     private List<OutputProcessing> outputProcessings;
+    @Autowired
+    private DatasetProcessingService datasetProcessingService;
+
 
     /**
      *
@@ -45,7 +51,7 @@ public class OutputProcessingService {
      * @param processing
      * @throws OutputProcessingException
      */
-    public void process(CarminDatasetProcessing processing) throws OutputProcessingException {
+    public void process(CarminDatasetProcessing processing) throws OutputProcessingException, EntityNotFoundException {
 
         final File userImportDir = new File(
                 this.importDir + File.separator +
@@ -65,8 +71,10 @@ public class OutputProcessingService {
             }
 
             this.deleteCache(cacheFolder);
-
         }
+        // Remove processed datasets from current Carmin processing
+        processing.setInputDatasets(Collections.emptyList());
+        datasetProcessingService.update(processing);
     }
 
     private List<File> getArchivesToProcess(File userImportDir) throws OutputProcessingException {

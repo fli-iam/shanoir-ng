@@ -14,6 +14,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.service.ProcessingResourceService;
 import org.shanoir.ng.property.model.DatasetProperty;
 import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
@@ -88,6 +89,9 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     @Autowired
     private DatasetPropertyService datasetPropertyService;
 
+    @Autowired
+    private ProcessingResourceService processingResourceService;
+
 
 
     @Override
@@ -134,6 +138,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
             JSONObject serie = series.getJSONObject(i);
             Long serieId = serie.getLong("id");
+
 
             List<Dataset> datasets = processing.getInputDatasets().stream()
                     .filter(ds -> ds.getDatasetAcquisition() != null

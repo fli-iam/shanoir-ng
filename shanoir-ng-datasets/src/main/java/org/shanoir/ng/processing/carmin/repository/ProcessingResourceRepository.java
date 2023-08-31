@@ -1,6 +1,5 @@
 package org.shanoir.ng.processing.carmin.repository;
 
-import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.carmin.model.ProcessingResource;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -12,5 +11,5 @@ import java.util.List;
 public interface ProcessingResourceRepository  extends CrudRepository<ProcessingResource, Long> {
 
     @Query(value = "SELECT dataset.id FROM ProcessingResource WHERE resourceId = :resourceId")
-    List<Long> findDatasetIdByResourceId(String resourceId);
+    List<Long> findDatasetIdsByResourceId(String resourceId);
 }
