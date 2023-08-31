@@ -65,13 +65,14 @@ export class Task extends Entity {
     }
 
     private buildRoute(): string {
+        console.log(this.message);
         if (this.eventType === 'importDataset.event' && this.status != -1) {
             if (this.message.lastIndexOf('examination [') != -1) {
-                let substring = this.message.match("/examination \[\d+\]/g")
-                return '/examination/details/' + substring.slice(substring.lastIndexOf("["), substring.lastIndexOf("]"));
+                let substring = this.message.match(/examination \[\d+\]/g)[0];
+                return '/examination/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
             } else if (this.message.indexOf('dataset [') != -1) {
-                let substring = this.message.match("/dataset \[\d+\]/g")
-                return '/dataset/details/' + substring.slice(substring.lastIndexOf("["), substring.lastIndexOf("]"));
+                let substring = this.message.match(/dataset \[\d+\]/g)[0];
+                return '/dataset/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
             } else if (this.message.indexOf('VIP Execution') != -1) {
                return '/dataset-processing/details/' + this.objectId
             }
