@@ -186,9 +186,9 @@ public class ImporterService {
             event.setProgress(1f);
             event.setStatus(ShanoirEvent.SUCCESS);
 
-            event.setMessage(importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")"
-                    +" : Successfully created datasets for subject " + importJob.getSubjectName()
-                    + " in examination " + examination.getId());
+            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
+                    +" Successfully created datasets for subject [" + importJob.getSubjectName()
+                    + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 
             // Manage archive
@@ -540,9 +540,10 @@ public class ImporterService {
             solrService.indexDataset(dataset.getId());
 
             event.setStatus(ShanoirEvent.SUCCESS);
-            event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
-                    +": Successfully created processed dataset for subject " + importJob.getSubjectName() + " in dataset "
-                    + dataset.getId());
+
+            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] " +
+                    "Successfully created processed dataset [" + dataset.getId() + "] " +
+                    "for subject [" + importJob.getSubjectName() + "]");
             event.setProgress(1f);
             eventService.publishEvent(event);
             

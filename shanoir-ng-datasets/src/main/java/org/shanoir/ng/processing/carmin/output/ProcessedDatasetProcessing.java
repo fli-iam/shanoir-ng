@@ -156,15 +156,14 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 		return datasetService.findByIdIn(new ArrayList<>(datasetIds));
 	}
 
-	public HashSet<Long> getDatasetIdsFromFilename(String name){
-		HashSet<Long> ids = new HashSet<>();
+	public List<Long> getDatasetIdsFromFilename(String name){
 		// "resource_id+[processing resource id]+whatever.nii"
 		Matcher matcher = Pattern.compile("resource_id\\+(.+)\\+.*").matcher(name);
 		if (matcher.matches()) {
-			ids.addAll(this.processingResourceService.findDatasetIdsByResourceId(matcher.group(1)));
+			return this.processingResourceService.findDatasetIdsByResourceId(matcher.group(1));
 		}
 
-		return ids;
+		return new ArrayList<>();
 	}
 
 	/**
