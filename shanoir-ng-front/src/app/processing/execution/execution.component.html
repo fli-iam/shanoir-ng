@@ -56,6 +56,12 @@
               <th>
               Dataset name (id)
               </th>
+                <th>
+                    Acquisition id
+                </th>
+                <th>
+                    Examination name (id)
+                </th>
               <th>
                  Subject
                  </th>
@@ -63,6 +69,8 @@
             <tr *ngFor="let dataset of datasetsByParam[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
                 <td>{{dataset.name}} ({{dataset.id}})</td>
                 <td>{{dataset.subject?.name}}</td>
+                <td>{{dataset.datasetAcquisition?.id}}</td>
+                <td>{{dataset.datasetAcquisition?.examination?.id}}</td>
                 <td *ngIf="datasetsByParam[parameter.name].length > 1" class="icon icon-clickable" (click)="removeDatasetFromParam(dataset, parameter.name)">
                     <i class="fas fa-times"></i>
                 </td>
