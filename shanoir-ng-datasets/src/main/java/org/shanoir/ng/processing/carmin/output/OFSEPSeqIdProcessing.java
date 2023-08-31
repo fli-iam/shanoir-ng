@@ -112,7 +112,15 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
                 try (InputStream is = new FileInputStream(file)) {
                     JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
-                    this.processSeries(json.getJSONArray("series"), processing);
+                    JSONArray series = json.getJSONArray("series");
+
+                    if(series.length() < 1){
+                        LOG.warn("Series list is empty in result file [{}].", file.getAbsolutePath());
+                        return;
+                    }
+
+                    this.processSeries(series, processing);
+
                 }catch (Exception e) {
                     throw new OutputProcessingException("An error occured while extracting result from result archive.", e);
                 }
