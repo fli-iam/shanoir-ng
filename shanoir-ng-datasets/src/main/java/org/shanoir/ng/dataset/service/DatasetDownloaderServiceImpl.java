@@ -95,11 +95,7 @@ public class DatasetDownloaderServiceImpl {
 
 		Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
-		String subjectName = "unknownSubject";
-		Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
-		if (subjectOpt.isPresent()) {
-			subjectName = subjectOpt.get().getName();
-		}
+		String subjectName = getSubjectName(dataset);
 
 		String datasetName = subjectName + "_" + dataset.getId() + "_" + dataset.getName();
 		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
@@ -237,7 +233,7 @@ public class DatasetDownloaderServiceImpl {
 						continue;
 					}
 					// Create a new folder organized by subject / examination
-					String subjectName = subjectRepository.findById(dataset.getSubjectId()).orElse(null).getName();
+					String subjectName = getSubjectName(dataset);
 					if (subjectName.contains(File.separator)) {
 						subjectName = subjectName.replaceAll(File.separator, "_");
 					}
@@ -344,6 +340,17 @@ public class DatasetDownloaderServiceImpl {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Unexpected error while downloading dataset files"));
 		}
+	}
+
+	private String getSubjectName(Dataset dataset) {
+		String subjectName = "unknownSubject";
+		if(dataset.getSubjectId() != null){
+			Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
+			if (subjectOpt.isPresent()) {
+				subjectName = subjectOpt.get().getName();
+			}
+		}
+		return subjectName;
 	}
 
 }

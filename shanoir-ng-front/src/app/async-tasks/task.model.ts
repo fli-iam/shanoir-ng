@@ -65,7 +65,6 @@ export class Task extends Entity {
     }
 
     private buildRoute(): string {
-        console.log(this.message);
         if (this.eventType === 'importDataset.event' && this.status != -1) {
             if (this.message.lastIndexOf('examination [') != -1) {
                 let substring = this.message.match(/examination \[\d+\]/g)[0];
