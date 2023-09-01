@@ -543,4 +543,11 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
         this.breadcrumbsService.currentStep.data.subjectNode = node;
     }
 
+    deleteBySubject(subject: Subject) {
+        this.subjectService.deleteWithConfirmDialog("preclinical-subject", subject).then(deleted => {
+            if(deleted){
+                this.goToList();
+            }
+        });
+    }
 }
