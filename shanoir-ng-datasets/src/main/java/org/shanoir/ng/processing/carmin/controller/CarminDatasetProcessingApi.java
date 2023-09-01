@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.dto.CarminDatasetProcessingDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
@@ -31,9 +31,9 @@ public interface CarminDatasetProcessingApi {
         @PostMapping(value = "", produces = { "application/json" }, consumes = {
                         "application/json" })
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-        ResponseEntity<CarminDatasetProcessing> saveNewCarminDatasetProcessing(
-                        @Parameter(name = "carmin dataset processing to create", required = true) @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing,
-                        @Parameter(value = "start monitoring job once created") @RequestParam(value = "start", required = false, defaultValue="false") boolean start,
+        ResponseEntity<CarminDatasetProcessingDTO> saveNewCarminDatasetProcessing(
+                        @Parameter(name = "carmin dataset processing to create", required = true) @Valid @RequestBody CarminDatasetProcessingDTO carminDatasetProcessing,
+                        @Parameter(name = "start monitoring job once created") @RequestParam(value = "start", required = false, defaultValue="false") boolean start,
                         BindingResult result) throws RestServiceException, EntityNotFoundException, SecurityException;
 
         @Operation(summary = "", description = "Updates a dataset processing")
@@ -46,9 +46,8 @@ public interface CarminDatasetProcessingApi {
                 "application/json" })
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
         ResponseEntity<Void> updateCarminDatasetProcessing(
-                @Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
-                @Parameter(name = "carmin dataset processing to update", required = true) @Valid @RequestBody CarminDatasetProcessing carminDatasetProcessing,
-                @Parameter(value = "start monitoring job once updated") @RequestParam(value = "start", required = false, defaultValue="false") boolean start,
+                @Parameter(name = "carmin dataset processing to update", required = true) @Valid @RequestBody CarminDatasetProcessingDTO carminDatasetProcessing,
+                @Parameter(name = "start monitoring job once updated") @RequestParam(value = "start", required = false, defaultValue="false") boolean start,
                 BindingResult result)
                 throws RestServiceException, SecurityException;
 
@@ -61,7 +60,7 @@ public interface CarminDatasetProcessingApi {
                         @ApiResponse(responseCode = "500", description = "unexpected error") })
         @GetMapping(value = "/{datasetProcessingId}", produces = { "application/json" })
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-        ResponseEntity<CarminDatasetProcessing> findCarminDatasetProcessingById(
+        ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingById(
                         @Parameter(name = "id of the carmin dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
 
         @Operation(summary = "", description = "If exists, returns the carmin dataset processing corresponding to the given execution identifier with carmin new fields")
@@ -73,7 +72,7 @@ public interface CarminDatasetProcessingApi {
                         @ApiResponse(responseCode = "500", description = "unexpected error") })
         @GetMapping(value = "", produces = { "application/json" })
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-        ResponseEntity<CarminDatasetProcessing> findCarminDatasetProcessingByIdentifier(
+        ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingByIdentifier(
                         @Parameter(name = "identifier of the execution", required = true) @RequestParam("identifier") String identifier);
 
         @Operation(summary = "", description = "If exists, returns the dataset processing corresponding to the given id with carmin new fields")
@@ -85,7 +84,7 @@ public interface CarminDatasetProcessingApi {
                         @ApiResponse(responseCode = "500", description = "unexpected error") })
         @GetMapping(value = "carminDatasetProcessings", produces = { "application/json" })
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-        ResponseEntity<List<CarminDatasetProcessing>> findCarminDatasetProcessings();
+        ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessings();
 
         @Operation(summary = "", description = "Returns all the carmin dataset processings with given study and subject")
         @ApiResponses(value = {
@@ -96,7 +95,7 @@ public interface CarminDatasetProcessingApi {
                 @ApiResponse(responseCode = "500", description = "unexpected error") })
         @GetMapping(value = "/study/{studyId}/subject/{subjectId}", produces = { "application/json" })
         @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-        ResponseEntity<List<CarminDatasetProcessing>> findCarminDatasetProcessingsByStudyIdAndSubjectId(
+        ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessingsByStudyIdAndSubjectId(
         		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
         		@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
 

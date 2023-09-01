@@ -73,7 +73,6 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
     @Override
     public ResponseEntity<Void> updateCarminDatasetProcessing(
-            @Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
             @Parameter(name = "dataset processing to update", required = true) @Valid @RequestBody CarminDatasetProcessingDTO dto,
             boolean start,
             final BindingResult result) throws RestServiceException, SecurityException {

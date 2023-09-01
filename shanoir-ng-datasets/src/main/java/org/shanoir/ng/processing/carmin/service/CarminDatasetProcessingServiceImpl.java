@@ -7,8 +7,8 @@ import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
 import org.shanoir.ng.processing.carmin.repository.CarminDatasetProcessingRepository;
 import org.shanoir.ng.processing.carmin.security.CarminDatasetProcessingSecurityService;
 import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
-import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +18,10 @@ import java.util.*;
  * @author KhalilKes
  */
 @Service
-public class CarminDatasetProcessingServiceImpl extends BasicEntityServiceImpl<CarminDatasetProcessing>
-        implements CarminDatasetProcessingService {
+public class CarminDatasetProcessingServiceImpl implements CarminDatasetProcessingService {
 
     @Autowired
-    private CarminDatasetProcessingRepository carminDatasetProcessingRepository;
+    private CarminDatasetProcessingRepository repository;
 
     @Autowired
     private ProcessingResourceService processingResourceService;
@@ -35,8 +34,7 @@ public class CarminDatasetProcessingServiceImpl extends BasicEntityServiceImpl<C
 
     private final String RIGHT_STR = "CAN_SEE_ALL";
 
-    @Override
-    protected CarminDatasetProcessing updateValues(CarminDatasetProcessing from, CarminDatasetProcessing to) {
+    private CarminDatasetProcessing updateValues(CarminDatasetProcessing from, CarminDatasetProcessing to) {
         to.setIdentifier(from.getIdentifier());
         to.setStatus(from.getStatus());
         to.setName(from.getName());
@@ -57,15 +55,42 @@ public class CarminDatasetProcessingServiceImpl extends BasicEntityServiceImpl<C
     }
 
     @Override
+    public Optional<CarminDatasetProcessing> findById(Long id) {
+        return repository.findById(id);
+    }
+
+    @Override
+    public List<CarminDatasetProcessing> findAll() {
+        return Utils.toList(repository.findAll());
+    }
+
+    @Override
+    public CarminDatasetProcessing create(CarminDatasetProcessing entity) {
+        return repository.save(entity);
+    }
+
+    @Override
+    public CarminDatasetProcessing update(CarminDatasetProcessing entity) throws EntityNotFoundException {
+        final CarminDatasetProcessing processing = repository.findById(entity.getId()).orElse(null);
+        if (processing == null) throw new EntityNotFoundException(CarminDatasetProcessing.class, entity.getId());
+        return repository.save(processing);
+    }
+
+    @Override
+    public void deleteById(Long id) throws EntityNotFoundException {
+        repository.deleteById(id);
+    }
+
+    @Override
     public CarminDatasetProcessing createCarminDatasetProcessing(
             final CarminDatasetProcessing carminDatasetProcessing) {
-        CarminDatasetProcessing savedEntity = carminDatasetProcessingRepository.save(carminDatasetProcessing);
+        CarminDatasetProcessing savedEntity = repository.save(carminDatasetProcessing);
         return savedEntity;
     }
 
     @Override
     public Optional<CarminDatasetProcessing> findByIdentifier(String identifier) {
-        return carminDatasetProcessingRepository.findByIdentifier(identifier);
+        return repository.findByIdentifier(identifier);
     }
 
     @Override
@@ -76,20 +101,20 @@ public class CarminDatasetProcessingServiceImpl extends BasicEntityServiceImpl<C
     @Override
     public CarminDatasetProcessing updateCarminDatasetProcessing(final CarminDatasetProcessing carminDatasetProcessing)
             throws EntityNotFoundException {
-        final Optional<CarminDatasetProcessing> entityDbOpt = carminDatasetProcessingRepository
+        final Optional<CarminDatasetProcessing> entityDbOpt = repository
                 .findById(carminDatasetProcessing.getId());
         final CarminDatasetProcessing entityDb = entityDbOpt.orElseThrow(
                 () -> new EntityNotFoundException(carminDatasetProcessing.getClass(),
                         carminDatasetProcessing.getId()));
 
-        updateValues(carminDatasetProcessing, entityDb);
-        return carminDatasetProcessingRepository.save(entityDb);
+        this.updateValues(carminDatasetProcessing, entityDb);
+        return repository.save(entityDb);
 
     }
 
     @Override
     public List<CarminDatasetProcessing> findAllRunning() {
-        return carminDatasetProcessingRepository.findByStatus(ExecutionStatus.RUNNING);
+        return repository.findByStatus(ExecutionStatus.RUNNING);
     }
 
     @Override
