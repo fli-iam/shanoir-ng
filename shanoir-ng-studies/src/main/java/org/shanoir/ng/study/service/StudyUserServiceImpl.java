@@ -93,6 +93,11 @@ public class StudyUserServiceImpl implements StudyUserService {
 		return false;
 	}
 
+	@Override
+	public List<StudyUser> findStudyUsersByStudyId(Long studyId) {
+		return studyUserRepository.findByStudy_Id(studyId);
+	}
+
 	@RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE)
 	@RabbitHandler
 	@Transactional

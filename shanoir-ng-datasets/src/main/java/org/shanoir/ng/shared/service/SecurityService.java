@@ -46,7 +46,7 @@ public class SecurityService {
 //		List<Pair<Long, Long>> studyCenters = new ArrayList<>();
 //		Set<Long> unrestrictedStudies = new HashSet<Long>();
 		for (StudyUser studyUser : studyUsers) {
-			if (CollectionUtils.isEmpty(studyUser.getCenterIds())) {
+			if (CollectionUtils.isEmpty(studyUser.getCenterIds()) && studyUser.isConfirmed()) {
 				unrestrictedStudies.add(studyUser.getStudyId());
 			} else {
 				for (Long centerId : studyUser.getCenterIds()) {
