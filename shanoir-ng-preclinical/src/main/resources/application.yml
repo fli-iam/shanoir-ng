@@ -90,6 +90,7 @@ ms.url:
   shanoir-ng-studycards: http://${SHANOIR_PREFIX}datasets:9904/studycards
   shanoir-ng-examinations: http://${SHANOIR_PREFIX}datasets:9904/examinations
   bruker2dicom: http://${SHANOIR_PREFIX}preclinical-bruker2dicom:5000/bruker2dicom
+migration-folder: /tmp
 # logging configuration
 logging:
   file:
