@@ -19,6 +19,7 @@ import { Task } from '../../async-tasks/task.model';
 import { TaskService } from '../../async-tasks/task.service';
 import * as AppUtils from '../../utils/app.utils';
 import { KeycloakService } from '../keycloak/keycloak.service';
+import { SuperTimeout } from 'src/app/utils/super-timeout';
 
 @Injectable()
 export class NotificationsService {
@@ -40,6 +41,7 @@ export class NotificationsService {
     readonly writeInterval: number = 500;
     readonly readInterval: number = 1000;
     readonly persistenceTime: number = 1800000;
+    private freshTimeouts: SuperTimeout[] = [];
 
 
     constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
@@ -99,16 +101,20 @@ export class NotificationsService {
             if (task.status == -1 && task.lastUpdate) {
                 let freshError: boolean = !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval + 1000);
                 if (freshError) {
+                    this.freshTimeouts[task.id]?.triggerNow();
                     this.pushToFreshError(task);
                 }
             } else if (task.status == 1) {
                 let freshDone: boolean = !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval + 1000);
                 if (freshDone) {
+                    this.freshTimeouts[task.id]?.triggerNow();
                     this.pushToFreshCompleted(task);
                 }
             } else if (task.status == 2 || task.status == 5) {
+                this.freshTimeouts[task.id]?.triggerNow();
                 tmpTasksInProgress.push(task);
             } else if (task.status == 4) {
+                this.freshTimeouts[task.id]?.triggerNow();
                 tmpTasksInWait.push(task);
             }
         }
@@ -122,7 +128,7 @@ export class NotificationsService {
         }
         this.nbNew++;
         // remove after 30min
-        setTimeout(() => {
+        this.freshTimeouts[task.id] = new SuperTimeout(() => {
             this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
         }, this.persistenceTime);
     }
@@ -133,7 +139,7 @@ export class NotificationsService {
         }
         this.nbNewError++;
         // remove after 30min
-        setTimeout(() => {
+        this.freshTimeouts[task.id] = new SuperTimeout(() => {
             this.freshCompletedTasks = this.freshCompletedTasks.filter(tip => tip.id != task.id);
         }, this.persistenceTime);
     }

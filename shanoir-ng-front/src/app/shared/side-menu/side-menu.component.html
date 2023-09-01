@@ -66,8 +66,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <!-- <span *ngIf="notificationsService.tasksInProgress.length > 0" (click)="state.jobsOpened = !state.jobsOpened; saveState();" class="chevron"><i class="fas fa-chevron-down"></i></span> -->
     </li>
     <!-- *ngIf="state.jobsOpened" -->
-    <div class="sub-menu jobs" [@slideDown]="state.jobsOpened">
-        <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait)" [ngSwitch]="task.eventType" [@disapearUp] [@.disabled]="task.status == 2 || task.status == 5">
+    <div class="sub-menu jobs" [@slideDown]="state.jobsOpened" [@disapearUp]>
+        <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait)" [ngSwitch]="task.eventType" [@.disabled]="task.status == 2 || task.status == 5">
             <a routerLink="/task"  routerLinkActive="active">
                 <progress-bar [progress]="task.progress" [width]="50" [warning]="task.status == 5"></progress-bar>
                 <i *ngIf="task.status == 4" class="fa-solid fa-hourglass-half status-icon"></i>

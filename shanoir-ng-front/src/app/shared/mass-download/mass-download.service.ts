@@ -26,10 +26,13 @@ import { Queue } from './queue.model';
 import { take } from 'rxjs/operators';
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
+import { ConsoleService } from '../console/console.service';
 
 declare var JSZip: any;
 
 export type Report = {
+    taskId: number,
+    folderName: string,
     requestedDatasetIds: number[],
     startTime: number,
     list?: {
@@ -42,6 +45,8 @@ export type Report = {
     nbSuccess?: number;
     nbError?: number;
     duration?: number;
+    format: Format;
+    nbQueues: number;
 };
 
 @Injectable()
@@ -49,10 +54,12 @@ export class MassDownloadService {
 
     private downloadQueue: Queue = new Queue();
     readonly BROWSER_COMPAT_ERROR_MSG: string = 'browser not compatible';
+    readonly REPORT_FILENAME: string = 'downloadReport.json';
 
     constructor(
         private datasetService: DatasetService,
         private notificationService: NotificationsService,
+        private consoleService: ConsoleService,
         private dialogService: ConfirmDialogService) {
     }
 
@@ -102,16 +109,22 @@ export class MassDownloadService {
         });
     }
 
-    private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4): Promise<void> {
+    private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4, task?: Task, report?: Report, parentHandle?: FileSystemDirectoryHandle): Promise<void> {
         if (datasetIds.length == 0) return;
-        return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
-            let task: Task = this.createTask(datasetIds.length);
+        let directoryHandlePromise: Promise<FileSystemDirectoryHandle>;
+        if (parentHandle) {
+            directoryHandlePromise = Promise.resolve(parentHandle);
+        } else {
+            directoryHandlePromise = this.getFolderHandle();
+        }
+        return directoryHandlePromise.then(parentFolderHandle => { // ask the user's parent directory
+            if (!task) task = this.createTask(datasetIds.length);
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
                     task.status = 2;
                     const start: number = Date.now();
                     let ids = [...datasetIds]; // copy array
-                    let report: Report = this.initReport(datasetIds);
+                    if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, format, nbQueues);
                     let promises: Promise<void>[] = [];
                     for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
@@ -120,6 +133,7 @@ export class MassDownloadService {
                     }
                     return Promise.all(promises).then(() => {
                         this.handleEnd(task, report, start);
+                        this.writeMyFile(this.REPORT_FILENAME, JSON.stringify(report), parentFolderHandle);
                     }).catch(reason => {
                         task.message = 'download error : ' + reason;
                         this.notificationService.pushLocalTask(task);
@@ -192,7 +206,7 @@ export class MassDownloadService {
                     task.status = 2;
                     const start: number = Date.now();
                     let ids = [...datasets.map(ds => ds.id)];
-                    let report: Report = this.initReport(datasets.map(ds => ds.id));
+                    let report: Report = this.initReport(datasets.map(ds => ds.id), task.id, parentFolderHandle.name, format, nbQueues);
                     let promises: Promise<void>[] = [];
                     let j = 0;
                     for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
@@ -202,6 +216,7 @@ export class MassDownloadService {
                     }
                     return Promise.all(promises).then(() => {
                         this.handleEnd(task, report, start);
+                        this.writeMyFile(this.REPORT_FILENAME, JSON.stringify(report), parentFolderHandle);
                     }).catch(reason => {
                         task.message = 'download error : ' + reason;
                         this.notificationService.pushLocalTask(task);
@@ -216,6 +231,12 @@ export class MassDownloadService {
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
 
+    private _downloadFromReport(report: Report, task: Task, parentHandle: FileSystemDirectoryHandle) {
+        if (!report) throw new Error('report can\'t be null !');
+        const noSuccessIds: number[] = Object.keys(report.list).filter(key => report.list[key].status != 'SUCCESS').map(key => parseInt(key));
+        this._downloadByIds(noSuccessIds, report.format, report.nbQueues, task, report, parentHandle);
+    }
+
     private handleEnd(task: Task, report: Report, start: number) {
         task.lastUpdate = new Date();
         report.duration = Date.now() - start;
@@ -224,7 +245,7 @@ export class MassDownloadService {
             const tab: string = '- ';
             task.message = 'download failed in ' + report.duration + 'ms.\n'
                 + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
-                + tab + report.nbError + ' datasets were downloaded but are (at least partially) in error and files could be missing.\n'
+                + tab + report.nbError + ' datasets are (at least partially) in error and files could be missing.\n'
                 + 'errors details :\n'
                 + JSON.stringify(report, null, 4);
             JSON.stringify(report);
@@ -270,6 +291,8 @@ export class MassDownloadService {
                     });
                 } else {
                     report.list[id].status = 'SUCCESS';
+                    delete report.list[id].error;
+                    delete report.list[id].errorTime;
                     task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
                 }
             });
@@ -306,15 +329,25 @@ export class MassDownloadService {
     private writeMyFile(path: string, content: any, userFolderHandle: FileSystemDirectoryHandle): Promise<void> {
         path = path.trim();
         if (path.startsWith('/')) path = path.substring(1); // remove 1st '/'
-        let splited: string[] = path.split('/');
-        const filename = splited.pop(); // separate filename from dir path
-
-        return this.createDirectoriesIn(splited, userFolderHandle).then(lastFolderHandle => { // create the sub directories
-            lastFolderHandle.getFileHandle(filename, { create: true } // create the file handle
-            ).then(fileHandler => {
-                this.writeFile(fileHandler, content); // write the file
+        let splitted: string[];
+        if (path.includes('/')) {
+            splitted = path.split('/');
+        } else {
+            splitted = [path];
+        }
+        const filename = splitted.pop(); // separate filename from dir path
+        if (splitted.length > 0) { // if dirs to create
+            return this.createDirectoriesIn(splitted, userFolderHandle).then(lastFolderHandle => { // create the sub directories
+                lastFolderHandle.getFileHandle(filename, { create: true } // create the file handle
+                ).then(fileHandler => {
+                    this.writeFile(fileHandler, content); // write the file
+                });
             });
-        });
+        } else { // if no dir to create
+            userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
+                this.writeFile(fileHandler, content);
+            }); 
+        }
     }
 
     private async getFolderHandle(): Promise<FileSystemDirectoryHandle> {
@@ -336,6 +369,7 @@ export class MassDownloadService {
     }
 
     private createDirectoriesIn(dirs: string[], parentFolderHandle: FileSystemDirectoryHandle): Promise<FileSystemDirectoryHandle> {
+        if (dirs.length == 0) return;
         const dirToCreate: string = dirs.shift(); // separate the first element
         return parentFolderHandle.getDirectoryHandle(dirToCreate, { create: true })
             .then(handle => {
@@ -351,13 +385,17 @@ export class MassDownloadService {
         return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace('/', '_');
     }
 
-    private initReport(datasetIds: number[]): Report {
+    private initReport(datasetIds: number[], taskId: number, folderName: string, format: Format, nbQueues: number): Report {
         let report: Report = {
+            taskId: taskId,
+            folderName: folderName,
             requestedDatasetIds: datasetIds,
             startTime: Date.now(),
             list: {},
             nbError: 0,
-            nbSuccess: 0
+            nbSuccess: 0,
+            format : format,
+            nbQueues: nbQueues
         };
         datasetIds.forEach(id => report.list[id] = { status: 'QUEUED' });
         return report;
@@ -405,6 +443,42 @@ export class MassDownloadService {
             resPromise.reject(error);
         });
         return resPromise;
+    }
+
+    retry(task: Task): Promise<void> {
+        // @ts-ignore
+        if (!window.showDirectoryPicker) {
+            throw new Error(this.BROWSER_COMPAT_ERROR_MSG);
+        }
+        let report: Report = this.getReportFromTask(task);
+        let msg: string = 'Please now select the directory of the download you want to resume or retry. ';
+        if (report) msg += 'Recorded directory name : ' + report.folderName;
+
+        return this.dialogService.confirm('Select data directory', msg)
+            .then(agreed => {
+                if (agreed) {
+                    return this.getFolderHandle().then(parentFolderHandle => {
+                        return parentFolderHandle.getFileHandle(this.REPORT_FILENAME).then(fileHandle => {
+                            return fileHandle.getFile().then(file => {
+                                return file.text().then(text => {
+                                    let reportFromFile: Report = JSON.parse(text);
+                                    reportFromFile.nbError = 0;
+                                    return this._downloadFromReport(reportFromFile, task, parentFolderHandle);
+                                });
+                            });
+                        });
+                    });
+                }
+            });
+    }
+
+    private getReportFromTask(task: Task): Report {
+        try {
+            return JSON.parse(task?.message?.split('errors details :')?.[1]);
+        } catch (e) {
+            this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.message]);
+            return null;
+        }
     }
 }
 
