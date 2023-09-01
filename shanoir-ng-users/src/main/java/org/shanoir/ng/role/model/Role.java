@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.role.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.shared.core.model.AbstractEntity;

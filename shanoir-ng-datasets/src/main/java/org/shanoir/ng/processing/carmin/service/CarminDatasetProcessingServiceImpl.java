@@ -2,7 +2,6 @@ package org.shanoir.ng.processing.carmin.service;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
-import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
 import org.shanoir.ng.processing.carmin.repository.CarminDatasetProcessingRepository;
@@ -10,8 +9,6 @@ import org.shanoir.ng.processing.carmin.security.CarminDatasetProcessingSecurity
 import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
 import org.shanoir.ng.shared.core.service.BasicEntityServiceImpl;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

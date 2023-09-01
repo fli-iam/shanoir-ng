@@ -1,8 +1,6 @@
 package org.shanoir.ng.processing.carmin.schedule;
 
-import java.time.LocalDate;
-import java.util.*;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.model.Execution;
@@ -18,16 +16,11 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
 import org.shanoir.ng.utils.KeycloakUtil;
-import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,10 +28,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javax.annotation.PostConstruct;
-
+import java.time.LocalDate;
 /**
  * CRON job to request VIP api and create processedDataset
  * 
@@ -46,8 +36,6 @@ import javax.annotation.PostConstruct;
  */
 @Service
 public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
-
-	private static final String DEFAULT_OUTPUT = "default";
 
 	@Value("${vip.uri}")
 	private String VIP_URI;
@@ -69,12 +57,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 	@Autowired
 	private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
-
-	@Autowired
-	private ObjectMapper mapper;
-
-	@Autowired
-	private List<OutputProcessing> outputProcessings;
 
 	@Autowired
 	private ShanoirEventService eventService;

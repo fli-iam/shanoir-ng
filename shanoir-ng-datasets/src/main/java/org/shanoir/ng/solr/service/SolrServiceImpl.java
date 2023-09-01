@@ -19,14 +19,7 @@
  */
 package org.shanoir.ng.solr.service;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.model.Center;
@@ -35,12 +28,11 @@ import org.shanoir.ng.shared.model.Tag;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.shanoir.ng.solr.repository.ShanoirMetadataRepository;
-import org.shanoir.ng.solr.repository.SolrRepository;
+import org.shanoir.ng.solr.solrj.SolrJWrapper;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
@@ -58,17 +50,19 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * @author yyao
  *
  */
 @Service
 public class SolrServiceImpl implements SolrService {
-
-	//	private static final Logger LOG = LoggerFactory.getLogger(SolrServiceImpl.class);
-
+	
 	@Autowired
-	private SolrRepository solrRepository;
+	private SolrJWrapper solrJWrapper;
 
 	@Autowired
 	private ShanoirMetadataRepository shanoirMetadataRepository;
@@ -82,42 +76,32 @@ public class SolrServiceImpl implements SolrService {
 	@Autowired
 	private CenterRepository centerRepository;
 
-	@Transactional
-	@Override
-	public void addToIndex (final ShanoirSolrDocument document) {
-		solrRepository.save(document);
+	public void addToIndex (final ShanoirSolrDocument document) throws SolrServerException, IOException {
+		solrJWrapper.addToIndex(document);
 	}
 
-	@Transactional
-	@Override
-	public void addAllToIndex (final List<ShanoirSolrDocument> documents) {
-		solrRepository.saveAll(documents);
+	public void addAllToIndex (final List<ShanoirSolrDocument> documents) throws SolrServerException, IOException {
+		solrJWrapper.addAllToIndex(documents);
 	}
 
-	@Transactional
-	@Override
-	public void deleteFromIndex(Long datasetId) {
-		solrRepository.deleteByDatasetId(datasetId);
+	public void deleteFromIndex(Long datasetId) throws SolrServerException, IOException {
+		solrJWrapper.deleteFromIndex(datasetId);
 	}
 
-	@Transactional
-	@Override
-	public void deleteFromIndex(List<Long> datasetIds) {
-		solrRepository.deleteByDatasetIdIn(datasetIds);
+	public void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException {
+		solrJWrapper.deleteFromIndex(datasetIds);
 	}
 
-	@Transactional
-	public void deleteAll() {
-		solrRepository.deleteAll();
+	public void deleteAll() throws SolrServerException, IOException {
+		solrJWrapper.deleteAll();
 	}
-
+	
 	@Transactional
 	@Override
 	@Scheduled(cron = "0 0 6 * * *", zone="Europe/Paris")
-	public void indexAll() {
+	public void indexAll() throws SolrServerException, IOException {
 		// 1. delete all
 		deleteAll();
-
 		// 2. get all datasets
 		List<ShanoirMetadata> documents = shanoirMetadataRepository.findAllAsSolrDoc();
 		indexDocumentsInSolr(documents);
@@ -125,7 +109,7 @@ public class SolrServiceImpl implements SolrService {
 
 	@Transactional
 	@Override
-	public void indexDatasets(List<Long> datasetIds) {
+	public void indexDatasets(List<Long> datasetIds) throws SolrServerException, IOException {
 		// Get all associated datasets and index them to solr
 		List<ShanoirMetadata> shanoirMetadatas = shanoirMetadataRepository.findSolrDocs(datasetIds);
 		indexDocumentsInSolr(shanoirMetadatas);
@@ -133,7 +117,7 @@ public class SolrServiceImpl implements SolrService {
 
 	@Override
 	@Transactional(isolation = Isolation.READ_UNCOMMITTED,  propagation = Propagation.REQUIRES_NEW)
-	public void indexDataset(Long datasetId) {
+	public void indexDataset(Long datasetId) throws SolrServerException, IOException {
 		ShanoirMetadata shanoirMetadata = shanoirMetadataRepository.findOneSolrDoc(datasetId);
 		if (shanoirMetadata == null) throw new IllegalStateException("shanoir metadata with id " +  datasetId + " query failed to return any result");
 		ShanoirSolrDocument doc = getShanoirSolrDocument(shanoirMetadata);
@@ -151,13 +135,12 @@ public class SolrServiceImpl implements SolrService {
 				}
 			}
 		}
-
 		doc.setTags(tags);
 
-		solrRepository.save(doc);
+		solrJWrapper.addToIndex(doc);
 	}
 
-	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas) {
+	private void indexDocumentsInSolr(List<ShanoirMetadata> metadatas) throws SolrServerException, IOException {
 		Iterator<ShanoirMetadata> docIt = metadatas.iterator();
 
 		List<ShanoirSolrDocument> solrDocuments = new ArrayList<>();
@@ -193,7 +176,7 @@ public class SolrServiceImpl implements SolrService {
 			}
 		}
 
-		this.addAllToIndex(solrDocuments);
+		solrJWrapper.addAllToIndex(solrDocuments);
 	}
 
 	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
@@ -210,19 +193,24 @@ public class SolrServiceImpl implements SolrService {
 		SolrResultPage<ShanoirSolrDocument> result = null;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByFacetCriteriaForAdmin(query, pageable);
+			result = solrJWrapper.findByFacetCriteriaForAdmin(query, pageable);
 		} else {
-			List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(KeycloakUtil.getTokenUserId()));
-			Map<Long, List<String>> studiesCenter = new HashMap<>();
-			List<Center> centers = Utils.toList(centerRepository.findAll());
-			for(StudyUser su : studyUsers) {
-				if (su.isConfirmed()) {
-					studiesCenter.put(su.getStudyId(), su.getCenterIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
-				}
-			}
-			result = solrRepository.findByStudyIdInAndFacetCriteria(studiesCenter, query, pageable);
+			Map<Long, List<String>> studiesCenter = getStudiesCenter();
+			result = solrJWrapper.findByStudyIdInAndFacetCriteria(studiesCenter, query, pageable);
 		}
 		return result;
+	}
+
+	private Map<Long, List<String>> getStudiesCenter() {
+		List<StudyUser> studyUsers = Utils.toList(rightsRepository.findByUserId(KeycloakUtil.getTokenUserId()));
+		Map<Long, List<String>> studiesCenter = new HashMap<>();
+		List<Center> centers = Utils.toList(centerRepository.findAll());
+		for(StudyUser su : studyUsers) {
+			if (su.isConfirmed()) {
+				studiesCenter.put(su.getStudyId(), su.getCenterIds().stream().map(centerId -> findCenterName(centers, centerId)).collect(Collectors.toList()));
+			}
+		}
+		return studiesCenter;
 	}
 	
 	private String findCenterName(List<Center> centers, Long id) {
@@ -247,20 +235,17 @@ public class SolrServiceImpl implements SolrService {
 	}
 
 	@Override
-	public Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) {
+	public Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) throws RestServiceException {
 		if (datasetIds.isEmpty()) {
 			return new PageImpl<>();
 		}
 		Page<ShanoirSolrDocument> result;
 		pageable = prepareTextFields(pageable);
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
-			result = solrRepository.findByDatasetIdIn(datasetIds, pageable);
+			result = solrJWrapper.findByDatasetIdIn(datasetIds, pageable);
 		} else {
-			List<Long> studyIds = rightsRepository.findDistinctStudyIdByUserId(KeycloakUtil.getTokenUserId(), StudyUserRight.CAN_SEE_ALL.getId());
-			if (studyIds.isEmpty()) {
-				return new PageImpl<>();
-			}
-			result = solrRepository.findByStudyIdInAndDatasetIdIn(studyIds, datasetIds, pageable);
+			Map<Long, List<String>> studiesCenter = getStudiesCenter();
+			result = solrJWrapper.findByStudyIdInAndDatasetIdIn(studiesCenter, datasetIds, pageable);
 		}
 		return result;
 	}
@@ -270,12 +255,12 @@ public class SolrServiceImpl implements SolrService {
 	 * @param datasetIds the list of dataset IDs to update
 	 */
 	@Override
-	public void updateDatasets(List<Long> datasetIds) {
+	public void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException {
 		if (CollectionUtils.isEmpty(datasetIds)) {
 			return;
 		}
 		this.deleteFromIndex(datasetIds);
-		this.indexDatasets(datasetIds);;		
+		this.indexDatasets(datasetIds);		
 	}
 
 }

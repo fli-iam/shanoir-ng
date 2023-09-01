@@ -14,15 +14,13 @@
 
 package org.shanoir.ng.shared.model;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.validation.constraints.NotNull;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * This class represents a flip angle. It is used in the MR protocol to list and

@@ -19,17 +19,12 @@
  */
 package org.shanoir.ng.solr.model;
 
-import java.time.LocalDate;
-
-import javax.persistence.ColumnResult;
-import javax.persistence.ConstructorResult;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.SqlResultSetMapping;
-
+import jakarta.persistence.*;
 import org.shanoir.ng.dataset.modality.MrDatasetNature;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+
+import java.time.LocalDate;
 
 /**
  * @author yyao
@@ -92,7 +87,6 @@ public class ShanoirMetadata {
 	private Long subjectId;
 	
 	public ShanoirMetadata () {
-		
 	}
 	
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,

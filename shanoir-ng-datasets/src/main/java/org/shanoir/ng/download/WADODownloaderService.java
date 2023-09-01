@@ -14,11 +14,33 @@
 
 package org.shanoir.ng.download;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StringReader;
+import jakarta.annotation.PostConstruct;
+import jakarta.mail.BodyPart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.json.JSONReader;
+import org.json.JSONException;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetUtils;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.shared.model.Study;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import javax.json.Json;
+import javax.json.stream.JsonParser;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -33,37 +55,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import javax.annotation.PostConstruct;
-import javax.json.Json;
-import javax.json.stream.JsonParser;
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
-
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.json.JSONReader;
-import org.json.JSONException;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.service.DatasetUtils;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.shared.exception.PacsException;
-import org.shanoir.ng.shared.model.Study;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * This class is used to download files on using WADO URLs:
@@ -392,7 +383,7 @@ public class WADODownloaderService {
 			String json = downloadMetadataFromPACS(urlStr);
 			// transform from flat to tree
 			try {
-				return DicomJsonUtils.inflfateDCM4CheeJSON(json);
+				return DicomJsonUtils.inflateDCM4CheeJSON(json);
 				//tree.put
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block

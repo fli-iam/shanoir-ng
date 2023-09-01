@@ -16,10 +16,7 @@ package org.shanoir.ng.center.controler;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import javax.validation.Valid;
 
 import org.shanoir.ng.center.dto.CenterDTO;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
@@ -47,9 +44,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 @Controller
 public class CenterApiController implements CenterApi {
@@ -71,7 +67,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<Void> deleteCenter(
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") final Long centerId)
 					throws RestServiceException {
 		try {
 			if (centerId.equals(0L)) {
@@ -90,7 +86,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<CenterDTO> findCenterById(
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") final Long centerId) {
 		final Optional<Center> center = centerService.findById(centerId);
 		if (center.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -111,7 +107,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<List<CenterDTO>> findCentersByStudy (
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<Center> centers = centerService.findByStudy(studyId);
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -133,7 +129,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<List<IdName>> findCentersNames(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<IdName> centers = centerService.findIdsAndNames(studyId);
 		if (centers.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -143,7 +139,7 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<CenterDTO> saveNewCenter(
-			@ApiParam(value = "the center to create", required = true) @RequestBody @Valid final Center center,
+			@Parameter(name = "the center to create", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
 
 		forceCentersOfStudyCenterList(center);
@@ -157,8 +153,8 @@ public class CenterApiController implements CenterApi {
 
 	@Override
 	public ResponseEntity<Void> updateCenter(
-			@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
-			@ApiParam(value = "the center to update", required = true) @RequestBody @Valid final Center center,
+			@Parameter(name = "id of the center", required = true) @PathVariable("centerId") final Long centerId,
+			@Parameter(name = "the center to update", required = true) @RequestBody @Valid final Center center,
 			final BindingResult result) throws RestServiceException {
 		try {
 			if (centerId.equals(0L)) {

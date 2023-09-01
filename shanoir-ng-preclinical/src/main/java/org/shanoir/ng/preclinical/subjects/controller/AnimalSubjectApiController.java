@@ -16,24 +16,17 @@ package org.shanoir.ng.preclinical.subjects.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.security.auth.Subject;
-import javax.validation.Valid;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
-import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
-import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectUniqueValidator;
+import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
+import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.subjects.dto.AnimalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDto;
 import org.shanoir.ng.preclinical.subjects.dto.PreclinicalSubjectDtoService;
 import org.shanoir.ng.preclinical.subjects.dto.SubjectDto;
-import org.shanoir.ng.preclinical.pathologies.subject_pathologies.SubjectPathologyService;
-import org.shanoir.ng.preclinical.references.RefsService;
 import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectEditableByManager;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectUniqueValidator;
 import org.shanoir.ng.preclinical.therapies.subject_therapies.SubjectTherapyService;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -47,7 +40,6 @@ import org.shanoir.ng.shared.validation.RefValueExistsValidator;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +48,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 @Controller
 public class AnimalSubjectApiController implements AnimalSubjectApi {
@@ -90,7 +83,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<PreclinicalSubjectDto> createAnimalSubject(
-			@ApiParam(value = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto dto,
+			@Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto dto,
 			final BindingResult result) throws RestServiceException {
 
 		try {
@@ -119,6 +112,15 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	private SubjectDto createSubject(SubjectDto dto) throws ShanoirException, RestServiceException {
 
+		if(subjectService.isSubjectNameAlreadyUsed(dto.getName())){
+			FieldErrorMap errorMap = new FieldErrorMap();
+			List<FieldError> errors = new ArrayList();
+			errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", dto.getName()));
+			errorMap.put("name", errors);
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errorMap)));
+		}
+
 		dto.setPreclinical(true);
 
 		Long subjectId;
@@ -129,16 +131,6 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 			LOG.error(msg, ex);
 			throw new ShanoirException(msg, ex);
 		}
-
-		if(subjectService.isSubjectIdAlreadyUsed(subjectId)){
-			FieldErrorMap errorMap = new FieldErrorMap();
-			List<FieldError> errors = new ArrayList();
-			errors.add(new FieldError("unique", "The given value is already taken for this field, choose another", dto.getName()));
-			errorMap.put("name", errors);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errorMap)));
-		}
-
 		dto.setId(subjectId);
 
 		return dto;
@@ -166,7 +158,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<AnimalSubjectDto> getAnimalSubjectBySubjectId(
-			@ApiParam(value = "subject id of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "subject id of animalSubject that needs to be fetched", required = true) @PathVariable("id") Long id) {
 		final AnimalSubjectDto subject = dtoService.getPreclinicalDtoFromAnimalSubject(subjectService.getBySubjectId(id)).getAnimalSubject();
 		if (subject == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -175,8 +167,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<List<AnimalSubjectDto>> getAllAnimalSubjects() {
-		final List<AnimalSubjectDto> subjects = dtoService.getAnimalSubjectDtoListFromAnimalSubjectList(subjectService.findAll());
+	public ResponseEntity<List<AnimalSubjectDto>> findBySubjectIds(List<Long> subjectIds) {
+		final List<AnimalSubjectDto> subjects = dtoService.getAnimalSubjectDtoListFromAnimalSubjectList(subjectService.findBySubjectIds(subjectIds));
 		if (subjects.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -185,8 +177,8 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<Void> updateAnimalSubject(
-			@ApiParam(value = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long subjectId,
-			@ApiParam(value = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto dto,
+			@Parameter(name = "subject id of animalSubject that needs to be updated", required = true) @PathVariable("id") Long subjectId,
+			@Parameter(name = "Subject object that needs to be updated", required = true) @RequestBody AnimalSubjectDto dto,
 			final BindingResult result) throws RestServiceException {
 
 		// IMPORTANT : avoid any confusion that could lead to security breach
@@ -232,7 +224,7 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 
 	@Override
 	public ResponseEntity<Void> deleteAnimalSubject(
-			@ApiParam(value = "subject id of AnimalSubject to delete", required = true) @PathVariable("id") Long id) {
+			@Parameter(name = "subject id of AnimalSubject to delete", required = true) @PathVariable("id") Long id) {
 		try {
 			AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 			if (animalSubject == null) {
@@ -252,4 +244,5 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 	private FieldErrorMap getUniqueConstraintErrors(final AnimalSubject subject) {
 		return uniqueValidator.validate(subject);
 	}
+
 }

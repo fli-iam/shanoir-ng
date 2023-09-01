@@ -108,7 +108,7 @@ public class ImporterManagerService {
 	@Value("${shanoir.import.directory}")
 	private String importDir;
 	
-	@Async("asyncExecutor")
+	@Async
 	public void manageImportJob(final ImportJob importJob) {
 	    ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
 	    event.setTimestamp(importJob.getTimestamp());

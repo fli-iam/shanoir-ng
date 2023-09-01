@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.net.ConnectException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -18,18 +17,20 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
-import org.dcm4che2.data.DicomObject;
-import org.dcm4che2.data.Tag;
-import org.shanoir.ng.exchange.imports.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
+import org.shanoir.ng.importer.dicom.DicomDirToModelService;
+import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 import org.shanoir.uploader.dicom.IDicomServerClient;
-import org.shanoir.uploader.dicom.Serie;
-import org.shanoir.uploader.dicom.ShanoirDicomDirReader;
 import org.shanoir.uploader.dicom.query.Media;
-import org.shanoir.uploader.dicom.query.Patient;
+import org.shanoir.uploader.dicom.query.PatientTreeNode;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
+import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.DicomTree;
 import org.shanoir.uploader.gui.MainWindow;
-import org.shanoir.uploader.utils.Util;
 
 /**
  * This class implements the logic when the open file from CD/DVD menu or the
@@ -55,13 +56,17 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	private String filePathDicomDir;
 	
 	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
+	
+	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
 	public FindDicomActionListener(final MainWindow mainWindow,
 			final JFileChooser fileChooser,
-			final IDicomServerClient dicomServerClient) {
+			final IDicomServerClient dicomServerClient,
+			final ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer) {
 		this.mainWindow = mainWindow;
 		this.fileChooser = fileChooser;
 		this.dicomServerClient = dicomServerClient;
+		this.dicomFileAnalyzer = dicomFileAnalyzer;
 	}
 
 	/**
@@ -74,7 +79,6 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		mainWindow.lastNameTF.setText("");
 		mainWindow.firstNameTF.setText("");
 		mainWindow.birthNameTF.setText("");
-		mainWindow.newPatientIDTF.setText("");
 		mainWindow.birthDateTF.setText("");
 		mainWindow.mSexR.setSelected(true);
 		mainWindow.fSexR.setSelected(false);
@@ -82,7 +86,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		Media media = new Media();
 		// when the open file from CD/DVD menu is clicked
 		if (event.getSource().getClass() == JMenuItem.class) {
-			logger.info("Opening Dicom files from CD/DVD...");
+			logger.info("Opening DICOM files from CD/DVD/local file system...");
 			this.mainWindow.isFromPACS = false;
 
 			int returnVal = fileChooser.showOpenDialog(FindDicomActionListener.this);
@@ -98,17 +102,17 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 							dicomDirGenerated = true;
 							logger.info("DICOMDIR generated at path: " + dicomDirFile.getAbsolutePath());
 						}
-						final ShanoirDicomDirReader dicomDir = new ShanoirDicomDirReader(dicomDirFile);
-						fillMediaFromCD(media, selectedRootDir, dicomDir);
-						dicomDir.close();
+						final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
+						List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
+						fillMediaWithPatients(media, patients);
+						filePathDicomDir = selectedRootDir.toString();
+						dicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, selectedRootDir.getAbsolutePath(), false, null);
 						// clean up in case of dicomdir generated
 						if (dicomDirGenerated) {
 							dicomDirFile.delete();
 						}
-						logger.debug("populate : Media populated : " + media);
-						logger.debug("populate : End");
 					} catch (Exception e) {
-						logger.error(e.getMessage());
+						logger.error(e.getMessage(), e);
 					}
 				} else {
 					logger.error("Please choose a directory.");
@@ -191,16 +195,17 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 					patientNameFinal = patientName.toUpperCase();
 
 				// exitFlag: verify that the request is well written
-				// dicomServerClient.echoDicomServer(): verify that a connexion
+				// dicomServerClient.echoDicomServer(): verify that a connection
 				// is established to the PACS
 				// can not echo a GE PACS => control omitted
 				if (!exitFlag /* && dicomServerClient.echoDicomServer() */) {
 					// query Dicom Server
-					media = dicomServerClient.queryDicomServer(
+					List<Patient> patients = dicomServerClient.queryDicomServer(
 							patientNameFinal, mainWindow.patientIDTF.getText(),
 							mainWindow.studyDescriptionTF.getText(),
 							mainWindow.seriesDescriptionTF.getText(),
 							mainWindow.dateRS, mainWindow.studyDate);
+					fillMediaWithPatients(media, patients);
 				} else {
 					media = null;
 				}
@@ -237,82 +242,29 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	 * @param selectedRootDir
 	 * @param dicomDir
 	 */
-	private void fillMediaFromCD(Media media, File selectedRootDir,
-			final ShanoirDicomDirReader dicomDir) {
-		// Run through all patients
-		for (final Iterator<DicomObject> itePatient = dicomDir.getPatients().iterator(); itePatient.hasNext();) {
-			final DicomObject patientDicomObject = itePatient.next();
-			final DicomTreeNode patient = media.initChildTreeNode(patientDicomObject);
-			logger.info("Patient info read from DICOMDIR: " + ((Patient) patient).toString());
+	private void fillMediaWithPatients(Media media, final List<Patient> patients) {
+		for (Iterator iterator = patients.iterator(); iterator.hasNext();) {
+			Patient patient = (Patient) iterator.next();
+			final PatientTreeNode patientTreeNode = media.initChildTreeNode(patient);
+			logger.info("Patient info read from DICOMDIR: " + patient.toString());
 			// add patients
-			media.addTreeNode(patient.getId(), patient);
-			// Run through all studies
-			for (final Iterator<DicomObject> iteStudy = dicomDir.getStudiesFromPatients(patientDicomObject).iterator(); iteStudy.hasNext();) {
-				final DicomObject studyDicomObject = iteStudy.next();
-				final DicomTreeNode study = patient.initChildTreeNode(studyDicomObject);
+			media.addTreeNode(patient.getPatientID(), patientTreeNode);
+			List<Study> studies = patient.getStudies();
+			for (Iterator iterator2 = studies.iterator(); iterator2.hasNext();) {
+				Study study = (Study) iterator2.next();
+				final StudyTreeNode studyTreeNode = patientTreeNode.initChildTreeNode(study);
 				// add studies
-				patient.addTreeNode(study.getId(), study);
-				// Run through all series
-				for (final Iterator<DicomObject> iteSerie = dicomDir.getSeriesFromStudy(studyDicomObject).iterator(); iteSerie.hasNext();) {
-					final DicomObject seriesDicomObject = iteSerie.next();
-					try {
-						DicomTreeNode serie = study.initChildTreeNode(seriesDicomObject);
-						processSerie(selectedRootDir, dicomDir, study, seriesDicomObject, serie);
-						// permits to display MRI info for CD
-						Util.processSerieMriInfo(selectedRootDir, serie);
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
+				patientTreeNode.addTreeNode(studyTreeNode.getId(), studyTreeNode);
+				List<Serie> series = study.getSeries();
+				for (Iterator iterator3 = series.iterator(); iterator3.hasNext();) {
+					Serie serie = (Serie) iterator3.next();
+					if (!serie.isErroneous() && !serie.isIgnored()) {
+						final SerieTreeNode serieTreeNode = studyTreeNode.initChildTreeNode(serie);
+						// add series
+						studyTreeNode.addTreeNode(serieTreeNode.getId(), serieTreeNode);
 					}
 				}
-			}
-			logger.debug("populate : getting next patient");
-		}
-	}
-
-	/**
-	 * Process images for each serie.
-	 * @param selectedRootDir
-	 * @param dicomDir
-	 * @param study
-	 * @param seriesDicomObject
-	 * @param serie
-	 */
-	private void processSerie(File selectedRootDir, final ShanoirDicomDirReader dicomDir,
-			final DicomTreeNode study, final DicomObject seriesDicomObject,
-			DicomTreeNode serie) {
-		final String modality = serie.getDescriptionMap().get("modality");
-		if (modality != null) {
-			List<String> imageFileNames = new ArrayList<String>();
-			// Add all images path to the serie
-			for (final Iterator<DicomObject> iteImages =
-					dicomDir.getImagesFromSeries(seriesDicomObject).iterator(); iteImages.hasNext();) {
-				final DicomObject imageDicomObject = iteImages.next();
-				if (!"PR".equals(modality)) {
-					final String[] imagesPathArray = imageDicomObject.getStrings(Tag.ReferencedFileID);
-					if (imagesPathArray != null) {
-						filePathDicomDir = selectedRootDir.toString();
-						StringBuffer fileName = new StringBuffer();
-						for (int i = 0; i < imagesPathArray.length; i++) {
-							// do not append File.separator in case of last segment
-							if (i == imagesPathArray.length - 1) {
-								fileName.append(imagesPathArray[i]);
-							} else {
-								fileName.append(imagesPathArray[i] + File.separator);
-							}
-						}
-						imageFileNames.add(fileName.toString());
-					}
-				}
-			}
-			((Serie)serie).setFileNames(imageFileNames);
-			((Serie)serie).setImagesCount(imageFileNames.size());
-			if (!"PR".equals(modality) && !"SR".equals(modality)) {
-				if (logger.isDebugEnabled()) {
-					logger.debug("populate : adding serie " + serie);
-				}
-				study.addTreeNode(serie.getId(), serie);
-			} else {
-				logger.debug("populate : not adding serie " + serie + " because it is of modality " + modality);
+				
 			}
 		}
 	}
@@ -346,8 +298,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 			while (patientsIterator.hasNext()) {
 				Map.Entry pair = (Map.Entry) patientsIterator.next();
 				String patientKey = pair.getKey().toString();
-				patientNames[counter] = patientKey.substring(patientKey
-						.indexOf(" ") + 1);
+				patientNames[counter] = patientKey.substring(patientKey.indexOf(" ") + 1);
 				DicomTreeNode patient = (DicomTreeNode) pair.getValue();
 				patientNodes[counter] = patient;
 				logger.debug("Queried Subject Name " + counter + " : " + patientNames[counter].toString() );

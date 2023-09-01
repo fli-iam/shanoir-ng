@@ -14,17 +14,8 @@
 
 package org.shanoir.ng.studycard.model;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import jakarta.persistence.*;
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
@@ -37,8 +28,14 @@ import org.shanoir.ng.studycard.model.rule.DatasetAcquisitionRule;
 import org.shanoir.ng.studycard.model.rule.DatasetRule;
 import org.shanoir.ng.studycard.model.rule.StudyCardRule;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.util.List;
 
+/**
+ * Study card.
+ *
+ * @author msimon
+ *
+ */
 @SuppressWarnings("deprecation")
 @Entity
 @Table(name = "study_cards")

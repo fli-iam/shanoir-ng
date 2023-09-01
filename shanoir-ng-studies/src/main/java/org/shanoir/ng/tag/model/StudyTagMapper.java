@@ -1,9 +1,9 @@
 package org.shanoir.ng.tag.model;
 
+import java.util.List;
+
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring")
 @DecoratedWith(StudyTagDecorator.class)

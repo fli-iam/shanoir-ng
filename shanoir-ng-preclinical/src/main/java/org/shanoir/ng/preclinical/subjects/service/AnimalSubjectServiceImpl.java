@@ -118,8 +118,8 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 	}
 
 	@Override
-	public boolean isSubjectIdAlreadyUsed(Long subjectId){
-		return subjectsRepository.existsAnimalSubjectBySubjectId(subjectId);
+	public boolean isSubjectNameAlreadyUsed(String name){
+		return (boolean) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.SUBJECTS_NAME_QUEUE, name);
 	}
 
     @Override
@@ -130,6 +130,11 @@ public class AnimalSubjectServiceImpl implements AnimalSubjectService {
 			throw new ShanoirException("Created subject id is null.");
 		}
 		return subjectId;
+	}
+
+	@Override
+	public List<AnimalSubject> findBySubjectIds(List<Long> subjectIds) {
+		return subjectsRepository.findBySubjectIdIn(subjectIds);
 	}
 
 }

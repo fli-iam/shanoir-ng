@@ -1,9 +1,6 @@
 package org.shanoir.ng.processing.carmin.output;
 
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.util.List;

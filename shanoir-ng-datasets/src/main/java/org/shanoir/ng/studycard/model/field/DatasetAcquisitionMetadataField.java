@@ -14,19 +14,12 @@
 
 package org.shanoir.ng.studycard.model.field;
 
-import org.shanoir.ng.dataset.modality.BidsDataType;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.AcquisitionContrast;
-import org.shanoir.ng.datasetacquisition.model.mr.ContrastAgentUsed;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
-import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
-import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
-import org.shanoir.ng.datasetacquisition.model.mr.MrSequencePhysics;
-import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.google.common.primitives.Longs;
+import org.shanoir.ng.dataset.modality.BidsDataType;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.*;
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 
 @JsonTypeName("DatasetAcquisitionMetadataField")
 public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<DatasetAcquisition> {
@@ -105,7 +98,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
-			    Long longUpdatedValue = Longs.tryParse(updatedValue);
+			    Long longUpdatedValue = Long.getLong(updatedValue);
 			    if (longUpdatedValue != null) {
 			        MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
 			        if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
@@ -136,7 +129,7 @@ public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<Da
 		@Override
 		public void update(DatasetAcquisition datasetAcquisition, String updatedValue) throws CheckedIllegalClassException {
 			if (datasetAcquisition instanceof MrDatasetAcquisition) {
-			    Long longUpdatedValue = Longs.tryParse(updatedValue);
+			    Long longUpdatedValue = Long.getLong(updatedValue);
                 if (longUpdatedValue != null) {
                     MrDatasetAcquisition mrDsAcq = (MrDatasetAcquisition) datasetAcquisition;
                     if (mrDsAcq.getMrProtocol().getUpdatedMetadata() == null) mrDsAcq.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());

@@ -16,8 +16,6 @@ package org.shanoir.ng.importer.dicom.query;
 
 import java.io.File;
 
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,6 +25,8 @@ import org.weasis.dicom.param.ConnectOptions;
 import org.weasis.dicom.param.DicomNode;
 import org.weasis.dicom.param.ListenerParams;
 import org.weasis.dicom.tool.DicomListener;
+
+import jakarta.annotation.PostConstruct;
 
 /**
  * This class inits a DICOM server for StoreSCP within the microservice import.

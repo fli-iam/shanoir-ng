@@ -1,16 +1,6 @@
 package org.shanoir.ng.processing.carmin.output;
 
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
-import javax.ws.rs.NotFoundException;
-
+import jakarta.ws.rs.NotFoundException;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,14 +26,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 @Service
 public class ProcessedDatasetProcessing extends OutputProcessing {
 
 	@Value("${vip.result-file-name}")
 	private String resultFileName;
-
-	@Value("${vip.file-formats}")
-	private String[] listOfNiftiExt;
 
 	@Autowired
 	private ImporterService importerService;
@@ -173,7 +171,7 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 	 * @throws EntityNotFoundException 
 	 * @throws IOException 
 	 */
-	private void createProcessedDatasets(List<File> processedFiles, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws EntityNotFoundException, IOException {
+	private void createProcessedDatasets(List<File> processedFiles, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws Exception {
 
 		// Create dataset processing
 		DatasetProcessing processing = this.createProcessing(carminDatasetProcessing, inputDatasets);

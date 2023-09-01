@@ -19,8 +19,7 @@
  */
 package org.shanoir.ng.solr.service;
 
-import java.util.List;
-
+import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
@@ -29,6 +28,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import java.io.IOException;
+import java.util.List;
+
 /**
  * @author yyao
  *
@@ -36,24 +38,24 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface SolrService {
 	
 	@PreAuthorize("hasRole('ADMIN')")
-	void addToIndex(ShanoirSolrDocument document);
+	void addToIndex(ShanoirSolrDocument document) throws SolrServerException, IOException;
 	
-	void deleteFromIndex(Long datasetId);
+	void addAllToIndex(List<ShanoirSolrDocument> documents) throws SolrServerException, IOException;
+
+	void indexAll() throws SolrServerException, IOException;
+
+	void indexDataset(Long datasetId) throws SolrServerException, IOException;
 	
-	public void deleteFromIndex(List<Long> datasetIds);
+	void indexDatasets(List<Long> datasetIds) throws SolrServerException, IOException;
+
+	void deleteFromIndex(Long datasetId) throws SolrServerException, IOException;
 	
-	void indexAll();
+	void deleteFromIndex(List<Long> datasetIds) throws SolrServerException, IOException;
 
 	SolrResultPage<ShanoirSolrDocument> facetSearch(ShanoirSolrQuery query, Pageable pageable) throws RestServiceException;
 
-	void indexDataset(Long datasetId);
-	
-	void indexDatasets(List<Long> datasetIds);
+	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable) throws RestServiceException;
 
-	Page<ShanoirSolrDocument> getByIdIn(List<Long> datasetIds, Pageable pageable);
-
-	void addAllToIndex(List<ShanoirSolrDocument> documents);
-
-	void updateDatasets(List<Long> datasetIds);
+	void updateDatasets(List<Long> datasetIds) throws SolrServerException, IOException;
 
 }

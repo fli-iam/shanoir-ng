@@ -42,16 +42,6 @@ VALUES
 	(7,11,'OVERRIDEN','Dataset'),
 	(8,4,'4','Dataset');
 
-
-CREATE TABLE study_card_condition (
-    id bigint(20) NOT NULL AUTO_INCREMENT,
-    dicom_tag int(11) DEFAULT NULL,
-    operation int(11) NOT NULL,
-    shanoir_field int(11) DEFAULT NULL,
-    scope varchar(65) NOT NULL,
-    PRIMARY KEY (id)
-);
-
 INSERT INTO study_card_condition
 	(id, shanoir_field, operation, scope, dicom_tag)
 VALUES 

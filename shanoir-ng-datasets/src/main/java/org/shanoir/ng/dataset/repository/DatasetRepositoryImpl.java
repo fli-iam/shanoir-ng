@@ -1,13 +1,12 @@
 package org.shanoir.ng.dataset.repository;
 
-import java.util.List;
-
-import javax.persistence.EntityManager;
-import javax.persistence.ParameterMode;
-import javax.persistence.PersistenceContext;
-import javax.persistence.StoredProcedureQuery;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.ParameterMode;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.StoredProcedureQuery;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class DatasetRepositoryImpl implements DatasetRepositoryCustom {

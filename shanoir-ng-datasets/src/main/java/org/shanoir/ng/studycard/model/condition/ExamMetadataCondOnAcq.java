@@ -14,11 +14,9 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import java.util.List;
-
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
@@ -27,7 +25,7 @@ import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import java.util.List;
 
 /**
  * Condition valid for the given DatasetAcquisition if every of it's Datasets metadata fulfill the condition

@@ -1,11 +1,7 @@
 package org.shanoir.ng.processing.carmin.controller;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.validation.Valid;
-
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.schedule.ExecutionStatusMonitorService;
@@ -14,11 +10,8 @@ import org.shanoir.ng.processing.dto.CarminDatasetProcessingDTO;
 import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
 import org.shanoir.ng.processing.dto.mapper.CarminDatasetProcessingMapper;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.SecurityException;
+import org.shanoir.ng.shared.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +22,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.annotations.ApiParam;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author KhalilKes
@@ -78,8 +73,8 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
     @Override
     public ResponseEntity<Void> updateCarminDatasetProcessing(
-            @ApiParam(value = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
-            @ApiParam(value = "dataset processing to update", required = true) @Valid @RequestBody CarminDatasetProcessingDTO dto,
+            @Parameter(name = "id of the dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId,
+            @Parameter(name = "dataset processing to update", required = true) @Valid @RequestBody CarminDatasetProcessingDTO dto,
             boolean start,
             final BindingResult result) throws RestServiceException, SecurityException {
 
@@ -117,7 +112,7 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
     @Override
     public ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingByIdentifier(
-            @ApiParam(value = "id of the dataset processing", required = true) @RequestParam("identifier") String identifier) {
+            @Parameter(name = "id of the dataset processing", required = true) @RequestParam("identifier") String identifier) {
 
         final Optional<CarminDatasetProcessing> processing = carminDatasetProcessingService.findByIdentifier(identifier);
 
@@ -139,8 +134,8 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
     @Override
     public ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessingsByStudyIdAndSubjectId(
-            @ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @ApiParam(value = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
+            @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+            @Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
         List<CarminDatasetProcessing> processings = carminDatasetProcessingService.findAll();
         if (processings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

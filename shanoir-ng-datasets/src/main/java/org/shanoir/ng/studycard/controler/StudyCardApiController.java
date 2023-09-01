@@ -14,22 +14,15 @@
 
 package org.shanoir.ng.studycard.controler;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.Parameter;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.PacsException;
-import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -47,7 +40,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class StudyCardApiController implements StudyCardApi {
@@ -73,7 +69,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> deleteStudyCard(
-            @ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
+		@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) throws RestServiceException {
         try {
             if (datasetAcquisitionService.existsByStudyCardId(studyCardId)) {
                 throw new RestServiceException(
@@ -90,11 +86,11 @@ public class StudyCardApiController implements StudyCardApi {
                     new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), MICROSERVICE_COMMUNICATION_ERROR, null));
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
+    }    
+    
     @Override
     public ResponseEntity<StudyCard> findStudyCardById(
-            @ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
+			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId) {
         final StudyCard studyCard = studyCardService.findById(studyCardId);
         if (studyCard == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -102,10 +98,9 @@ public class StudyCardApiController implements StudyCardApi {
         return new ResponseEntity<>(studyCard, HttpStatus.OK);
     }
 
-
     @Override
     public ResponseEntity<List<StudyCard>> findStudyCardByStudyId(
-            @ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
         final List<StudyCard> studyCards = studyCardService.findByStudy(studyId);
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -115,7 +110,7 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<List<StudyCard>> findStudyCardByAcqEqId(
-            @ApiParam(value = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId) {
+			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acqEqId") Long acqEqId) {
         final List<StudyCard> studyCards = studyCardService.findStudyCardsByAcqEq(acqEqId);
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -134,8 +129,8 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<StudyCard> saveNewStudyCard(
-            @ApiParam(value = "study Card to create", required = true) @RequestBody StudyCard studyCard,
-            final BindingResult result) throws RestServiceException {
+			@Parameter(name = "study Card to create", required = true) @RequestBody StudyCard studyCard,
+			final BindingResult result) throws RestServiceException {
         validate(studyCard, result);
         StudyCard createdStudyCard;
         try {
@@ -150,7 +145,7 @@ public class StudyCardApiController implements StudyCardApi {
     // Attention: used by ShanoirUploader!
     @Override
     public ResponseEntity<List<StudyCard>> searchStudyCards(
-            @ApiParam(value = "study ids", required = true) @RequestBody final IdList studyIds) {
+			@Parameter(name = "study ids", required = true) @RequestBody final IdList studyIds) {
         final List<StudyCard> studyCards = studyCardService.search(studyIds.getIdList());
         if (studyCards.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -160,8 +155,8 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> updateStudyCard(
-            @ApiParam(value = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
-            @ApiParam(value = "study card to update", required = true) @RequestBody StudyCard studyCard,
+			@Parameter(name = "id of the study card", required = true) @PathVariable("studyCardId") Long studyCardId,
+			@Parameter(name = "study card to update", required = true) @RequestBody StudyCard studyCard,
             final BindingResult result) throws RestServiceException {
         validate(studyCard, result);
         try {
@@ -220,14 +215,13 @@ public class StudyCardApiController implements StudyCardApi {
 
     @Override
     public ResponseEntity<Void> applyStudyCard(
-            @ApiParam(value = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException {
+			@Parameter(name = "study card id and dataset ids", required = true) @RequestBody StudyCardApply studyCardApplyObject) throws PacsException, SolrServerException, IOException {
         if (studyCardApplyObject == null
                 || studyCardApplyObject.getDatasetAcquisitionIds() == null
                 || studyCardApplyObject.getDatasetAcquisitionIds().isEmpty()
                 || studyCardApplyObject.getStudyCardId() == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
         StudyCard studyCard = studyCardService.findById(studyCardApplyObject.getStudyCardId());
         LOG.debug("re-apply studycard n° " + studyCard.getId());
         List<DatasetAcquisition> acquisitions = datasetAcquisitionService.findById(studyCardApplyObject.getDatasetAcquisitionIds());

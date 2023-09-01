@@ -14,17 +14,9 @@
 
 package org.shanoir.ng.studycard.model;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
-import javax.validation.constraints.NotNull;
-
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
@@ -35,7 +27,7 @@ import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.util.List;
 
 /**
  * Study card.

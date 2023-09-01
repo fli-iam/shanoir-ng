@@ -12,10 +12,10 @@ import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.anonymize.Anonymizer;
-import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
@@ -31,6 +31,8 @@ import org.shanoir.uploader.utils.Util;
 public class ImportFinishRunnable implements Runnable {
 
 	private static Logger logger = Logger.getLogger(ImportFinishRunnable.class);
+	
+	public static final String IMPORT_JOB_JSON = "import-job.json";
 
 	private static final String ANONYMIZATION_PROFILE = "anonymization.profile";
 
@@ -69,7 +71,7 @@ public class ImportFinishRunnable implements Runnable {
 			 * Write import-job.json to disk
 			 */
 			try {
-				File importJobJson = new File(uploadFolder, ImportJob.IMPORT_JOB_JSON);
+				File importJobJson = new File(uploadFolder, IMPORT_JOB_JSON);
 				importJobJson.createNewFile();
 				Util.objectMapper.writeValue(importJobJson, importJob);
 			} catch (IOException e) {

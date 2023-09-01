@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -30,7 +30,7 @@ import { Option } from '../select/select.component';
           provide: NG_VALUE_ACCESSOR,
           useExisting: forwardRef(() => MultiSelectTableComponent),
           multi: true,
-        }]   
+        }]
 })
 
 export class MultiSelectTableComponent implements ControlValueAccessor, OnChanges {
@@ -77,13 +77,13 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
                         label = this.optionBuilder.getLabel(item);
                     } else if (this.optionBuilder.labelField) {
                         label = item[this.optionBuilder.labelField];
-                    } 
+                    }
                     this.options.push(new Option<any>(item, label));
                 });
             }
             this.updateData();
         } else if (changes.columnDefs && !this.readOnly) {
-            this.columnDefs?.push({tip: "Delete", type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.onRemoveItem(item)})
+            this.columnDefs?.push({tip: () => { return "Delete" }, type: "button", awesome: "fa-regular fa-trash-can", action: (item) => this.onRemoveItem(item)})
         }
     }
 
@@ -96,7 +96,7 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
         else if (item.value) label = item.value;
         return label;
     }
-    
+
     writeValue(obj: any): void {
         this.modelArray = obj;
         this.browserPaging = new BrowserPaging(this.modelArray, this.columnDefs);
@@ -153,12 +153,12 @@ export class MultiSelectTableComponent implements ControlValueAccessor, OnChange
         return Promise.resolve(this.browserPaging.getPage(pageable));
     }
 
-    @HostListener('focusout', ['$event']) 
+    @HostListener('focusout', ['$event'])
     onFocusOut(event: FocusEvent) {
         if (!this.element.nativeElement.contains(event.relatedTarget)) {
             this.onTouchedCallback();
             this.onTouch.emit();
-        } 
+        }
     }
 
 }

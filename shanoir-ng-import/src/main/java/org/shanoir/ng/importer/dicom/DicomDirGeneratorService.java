@@ -1,4 +1,4 @@
-package org.shanoir.ng.exchange.imports.dicom;
+package org.shanoir.ng.importer.dicom;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,7 +75,7 @@ public class DicomDirGeneratorService {
 			din = new DicomInputStream(f);
 			din.setIncludeBulkData(DicomInputStream.IncludeBulkData.NO);
 			fmi = din.readFileMetaInformation();
-			dataset = din.readDataset(-1, Tag.PixelData);
+			dataset = din.readDatasetUntilPixelData();
 		} catch (IOException e) {
 			return 0;
 		} finally {

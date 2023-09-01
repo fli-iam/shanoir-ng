@@ -1,11 +1,11 @@
 package org.shanoir.ng.datasetacquisition.repository;
 
-import java.util.List;
-
-import org.apache.commons.math3.util.Pair;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
+
+import java.util.List;
 
 public interface DatasetAcquisitionRepositoryCustom {
 	

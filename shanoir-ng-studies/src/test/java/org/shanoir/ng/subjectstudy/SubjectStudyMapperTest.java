@@ -17,9 +17,8 @@ package org.shanoir.ng.subjectstudy;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.subject.model.Subject;
 import org.shanoir.ng.subjectstudy.dto.SubjectStudyDTO;
@@ -29,8 +28,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 /**
  * Subject - study mapper test.
@@ -38,7 +35,7 @@ import org.springframework.test.context.web.WebAppConfiguration;
  * @author msimon
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT) 
 @ActiveProfiles("test")
 public class SubjectStudyMapperTest {
@@ -52,16 +49,16 @@ public class SubjectStudyMapperTest {
 	public void subjectStudyListToSubjectStudyDTOListTest() {
 		final List<SubjectStudyDTO> subjectStudyDTOs = subjectStudyMapper
 				.subjectStudyListToSubjectStudyDTOList(Arrays.asList(createSubjectStudy()));
-		Assert.assertNotNull(subjectStudyDTOs);
-		Assert.assertTrue(subjectStudyDTOs.size() == 1);
-		Assert.assertTrue(subjectStudyDTOs.get(0).getSubject().getId().equals(SUBJECT_ID));
+		Assertions.assertNotNull(subjectStudyDTOs);
+		Assertions.assertTrue(subjectStudyDTOs.size() == 1);
+		Assertions.assertTrue(subjectStudyDTOs.get(0).getSubject().getId().equals(SUBJECT_ID));
 	}
 
 	@Test
 	public void subjectStudyToSubjectStudyDTOTest() {
 		final SubjectStudyDTO subjectStudyDTO = subjectStudyMapper.subjectStudyToSubjectStudyDTO(createSubjectStudy());
-		Assert.assertNotNull(subjectStudyDTO);
-		Assert.assertTrue(subjectStudyDTO.getSubject().getId().equals(SUBJECT_ID));
+		Assertions.assertNotNull(subjectStudyDTO);
+		Assertions.assertTrue(subjectStudyDTO.getSubject().getId().equals(SUBJECT_ID));
 	}
 
 	private SubjectStudy createSubjectStudy() {

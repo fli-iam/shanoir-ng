@@ -22,6 +22,7 @@ import { StudyType } from './study-type.enum';
 import { StudyUser } from './study-user.model';
 import { Timepoint } from './timepoint.model';
 import {Profile} from '../../shared/models/profile.model';
+import {StudyStorageVolumeDTO} from "./study.dto";
 
 export class Study extends Entity {
     clinical: boolean;
@@ -42,7 +43,8 @@ export class Study extends Entity {
     studyCenterList: StudyCenter[] = [];
     studyStatus: 'IN_PROGRESS' | 'FINISHED'  = 'IN_PROGRESS';
     profile: Profile;
-    size: number = null;
+    detailedSizes: Map<String, number> = null;
+    totalSize: number;
     studyType: StudyType;
     subjectStudyList: SubjectStudy[] = [];
     studyUserList: StudyUser[] = [];

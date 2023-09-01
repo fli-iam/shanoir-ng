@@ -1,10 +1,8 @@
 package org.shanoir.ng.datasetacquisition.model.eeg;
 
-import javax.persistence.Entity;
-
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.persistence.Entity;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 
 /**
  * Dataset acquisition for EEG.

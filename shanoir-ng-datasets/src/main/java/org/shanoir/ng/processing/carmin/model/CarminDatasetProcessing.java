@@ -1,9 +1,8 @@
 package org.shanoir.ng.processing.carmin.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 
 /**

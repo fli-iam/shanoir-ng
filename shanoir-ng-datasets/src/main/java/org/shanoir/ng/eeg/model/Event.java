@@ -1,17 +1,15 @@
 package org.shanoir.ng.eeg.model;
 
-import java.util.Date;
-
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Date;
 
 /**
  * Event linked to an EEG dataset. Event happening during the acquisition of an EEG.

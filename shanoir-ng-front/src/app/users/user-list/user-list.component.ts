@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -35,7 +35,7 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
     constructor(private userService: UserService, private studyService: StudyService) {
            super('user');
     }
-    
+
     getService(): EntityService<User> {
         return this.userService;
     }
@@ -43,8 +43,8 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
     getOptions() {
         return {
             new: true,
-            view: true, 
-            edit: true, 
+            view: true,
+            edit: true,
             delete: true
         };
     }
@@ -56,7 +56,7 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
             users.forEach(user => {
                 user.studyUserList = [];
                 studies.forEach(study => Array.prototype.push.apply(
-                    user.studyUserList, 
+                    user.studyUserList,
                     study.studyUserList
                         .filter(studyUser => (studyUser.user ? studyUser.user.id : studyUser.userId) == user.id)
                         .map(studyUser => {
@@ -89,7 +89,7 @@ export class UserListComponent extends BrowserPaginEntityListComponent<User>{
                     return '';
                 }
             }},
-            {headerName: "O.D.", tip: "On Demand", field: "onDemand", type: "boolean", defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
+            {headerName: "O.D.", tip: () => { return "On Demand"}, field: "onDemand", type: "boolean", defaultSortCol: true, defaultAsc: false, cellRenderer: function (params: any) {
                 return params.data.accountRequestDemand || params.data.extensionRequestDemand;
             }},
             {headerName: "Challenge", field: "accountRequestInfo.challenge", type: "boolean", defaultSortCol: true},

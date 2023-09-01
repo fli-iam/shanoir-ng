@@ -87,7 +87,7 @@ public class BidsImporterService {
 	public void createAllBidsDatasetAcquisition(Message importJobStr) throws AmqpRejectAndDontRequeueException {
 		ShanoirEvent event = null;
 		try {
-			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 			ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 			Long userId = importJob.getUserId();
 			event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, importJob.getStudyId());
