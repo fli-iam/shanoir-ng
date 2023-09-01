@@ -64,22 +64,22 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
         };
         let colDef: ColumnDefinition[] = [
             { headerName: "Id", field: "id" },
-            {headerName: "Subject", field: "subjectId", cellRenderer: (params: any) => (params.data.subject) ? params.data.subject.name : ""},
+            {
+                headerName: "Subject", field: "subject.name", cellRenderer: (params: any) => (params.data.subject) ? params.data.subject.name : "",
+                route: (examination: Examination) => examination.subject ? '/preclinical-subject/details/' + examination.subject.id : null
+            },
             {
                 headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
                     return dateRenderer(params.data.examinationDate);
                 }, width: "100px"
             },
             {
-                headerName: "Study", field: "studyId", type: "link",
-                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.study.id]),
-                cellRenderer: (params: any) => (params.data.study) ? params.data.study.name : ""
+                headerName: "Study", field: "study.name",
+                route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null
             },
-            { headerName: "Examination executive", field: "" },
             {
-                headerName: "Center", field: "centerId", type: "link",
-                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.center.id]),
-                cellRenderer: (params: any) => (params.data.center) ? params.data.center.name : ""
+                headerName: "Center", field: "center.name",
+                route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];
         return colDef;
