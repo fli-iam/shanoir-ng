@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -297,11 +298,14 @@ public class StudyApiController implements StudyApi {
 			@Parameter(name = "file to upload", required = true) @Valid @RequestBody MultipartFile file)
 			throws RestServiceException {
 		try {
-			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
-			File fileToCreate = new File(filePath);
-			fileToCreate.getParentFile().mkdirs();
-			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
-			file.transferTo(new File(filePath));
+			String parentDir = dataDir + "/study-" + studyId;
+			Path path = Paths.get( parentDir);
+			Files.createDirectories(path);
+			LOG.info("path: {}", path.getFileName());
+			Path newFilePath = Paths.get(parentDir + "/" + file.getOriginalFilename());
+			Files.createFile(newFilePath);
+			LOG.info("newFilePath: {}", newFilePath.getFileName());
+			file.transferTo(newFilePath);
 		} catch (Exception e) {
 			LOG.error("Error while loading files on examination: {}. File not uploaded. {}", studyId, e);
 		}
@@ -338,7 +342,16 @@ public class StudyApiController implements StudyApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 	}
-	
+
+	@Override
+	public ResponseEntity<Boolean> hasDUAByStudyId(
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws ShanoirException {
+
+		DataUserAgreement dua = this.dataUserAgreementService.findDUAByUserIdAndStudyId(KeycloakUtil.getTokenUserId(), studyId);
+
+		return new ResponseEntity<>(dua != null, HttpStatus.OK);
+	}
+
 	@Override
 	public ResponseEntity<Void> acceptDataUserAgreement(
 		@Parameter(name = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
@@ -367,11 +380,14 @@ public class StudyApiController implements StudyApi {
 				studyService.update(study);
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
-			String filePath = studyService.getStudyFilePath(studyId, file.getOriginalFilename());
-			File fileToCreate = new File(filePath);
-			fileToCreate.getParentFile().mkdirs();
-			LOG.info("Saving file {} to destination: {}", file.getOriginalFilename(), filePath);
-			file.transferTo(new File(filePath));
+			String parentDir = dataDir + "/study-" + studyId;
+			Path path = Paths.get( parentDir);
+			Files.createDirectories(path);
+			LOG.info("path: {}", path.getFileName());
+			Path newFilePath = Paths.get(parentDir + "/" + file.getOriginalFilename());
+			Files.createFile(newFilePath);
+			LOG.info("newFilePath: {}", newFilePath.getFileName());
+			file.transferTo(newFilePath);
 		} catch (Exception e) {
 			LOG.error("Error while loading files on study: {}. File not uploaded. {}", studyId, e);
 		}
@@ -443,7 +459,16 @@ public class StudyApiController implements StudyApi {
 		}
 		return new ResponseEntity<>(studiesDTO, HttpStatus.OK);
 	}
-	
+
+	@Override
+	public ResponseEntity<List<StudyUser>> getStudyUserByStudyId(Long studyId) {
+		List<StudyUser> studyUserList = this.studyUserService.findStudyUsersByStudyId(studyId);
+		if (!studyUserList.isEmpty()) {
+			return new ResponseEntity<>(studyUserList, HttpStatus.OK);
+		}
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
 
 	@Override
 	public ResponseEntity<List<PublicStudyDTO>> findPublicStudiesData() {
