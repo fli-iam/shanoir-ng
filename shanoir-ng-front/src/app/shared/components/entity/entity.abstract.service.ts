@@ -86,7 +86,7 @@ export abstract class EntityService<T extends Entity> {
                         }
                         let warn = 'The ' + name + (entity['name'] ? ' ' + entity['name'] : '') + ' with id ' + entity.id + ' is linked to other entities, it was not deleted.';
                         if((reason.error && reason.error.code == 422)
-                            || reason.status == 422 || entity instanceof Manufacturer || entity instanceof ManufacturerModel){
+                            || reason.status == 422){
                             this.consoleService.log('warn', warn);
                             return false;
                         }
