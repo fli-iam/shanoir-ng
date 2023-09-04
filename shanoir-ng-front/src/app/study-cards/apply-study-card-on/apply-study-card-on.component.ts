@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
 import { ManufacturerModel } from '../../acquisition-equipments/shared/manufacturer-model.model';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
@@ -30,6 +30,7 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
+import { Location } from '@angular/common';
 
 export type Status = 'default' | 'loading' | 'done' | 'error';
 @Component({
@@ -64,7 +65,9 @@ export class ApplyStudyCardOnComponent implements OnInit {
             private breadcrumbsService: BreadcrumbsService,
             private confirmService: ConfirmDialogService,
             private router : Router,
-            private keycloakService: KeycloakService) {
+            private keycloakService: KeycloakService,
+            private activatedRoute: ActivatedRoute,
+            private location: Location) {
                 
         breadcrumbsService.nameStep('Reapply Study Card');
 
@@ -80,13 +83,21 @@ export class ApplyStudyCardOnComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        let datasetIds: number[] = this.breadcrumbsService.currentStep.data.datasetIds;
-        if (!datasetIds || datasetIds.length == 0) {
-            this.router.navigate(['/solr-search']);
+        const studyCardId: number = parseInt(this.activatedRoute.snapshot.paramMap.get('id'));
+        let datasetIds: number[] = Array.from(this.breadcrumbsService.currentStep.data.datasetIds || []);
+        let acquisitionPromise: Promise<DatasetAcquisition[]>;
+        let studycardPromise: Promise<StudyCard[] | StudyCard>;
+        if (datasetIds?.length > 0) {
+            acquisitionPromise = this.datasetAcquisitionService.getAllForDatasets(datasetIds);
+            studycardPromise = this.studycardService.getAll();
+        } else if (!Number.isNaN(studyCardId)) {
+            acquisitionPromise = this.datasetAcquisitionService.getByStudycardId(studyCardId);
+            studycardPromise = this.studycardService.get(studyCardId);
+        } else {
+            this.location.back();
             return;
         }
         
-        let acquisitionPromise: Promise<DatasetAcquisition[]> = this.datasetAcquisitionService.getAllForDatasets(datasetIds);
         let rightsPromise: Promise<Map<number, StudyUserRight[]>> = this.studyRightsService.getMyRights().then(rights => this.studyRights = rights);
 
         this.status = this.breadcrumbsService.currentStep.data.status ? this.breadcrumbsService.currentStep.data.status : 'default';
@@ -111,11 +122,15 @@ export class ApplyStudyCardOnComponent implements OnInit {
             return this.datasetAcquisitions;
         });
 
-        Promise.all([filteredAcquisitionsPromise, this.studycardService.getAll()]).then(([acquisitions, studycards]) => {
-            this.studyCards = studycards;
-            this.updateOptions();
-            if (this.breadcrumbsService.currentStep.data.studyCardId) {
-                this.studycard = this.studyCards.find(sc => sc.id == this.breadcrumbsService.currentStep.data.studyCardId);
+        Promise.all([filteredAcquisitionsPromise, studycardPromise]).then(([acquisitions, studycards]) => {
+            if (Array.isArray(studycards)) {
+                this.studyCards = studycards;
+                this.updateOptions();
+                if (this.breadcrumbsService.currentStep.data.studyCardId) {
+                    this.studycard = this.studyCards.find(sc => sc.id == this.breadcrumbsService.currentStep.data.studyCardId);
+                }
+            } else {
+                this.studycard = studycards;
             }
         });
     }
@@ -224,12 +239,6 @@ export class ApplyStudyCardOnComponent implements OnInit {
             }
         });
         this.updateOptions();
-    }
-
-    showStudyCard() {
-        if (this.studycard) {
-            this.router.navigate(['/study-card/details/' + this.studycard.id]);
-        }
     }
 
     isCompatible(equipmentId: number): Boolean {

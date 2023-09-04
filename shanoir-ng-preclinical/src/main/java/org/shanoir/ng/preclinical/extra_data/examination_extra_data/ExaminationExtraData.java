@@ -16,10 +16,10 @@ package org.shanoir.ng.preclinical.extra_data.examination_extra_data;
 
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
+import jakarta.persistence.Entity;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 /**
  * Examination Extra Data
  */
@@ -68,7 +68,7 @@ public class ExaminationExtraData extends HalEntity {
     return this;
   }
 
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Long getExaminationId() {
     return examinationId;
   }
@@ -82,7 +82,7 @@ public class ExaminationExtraData extends HalEntity {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getFilename() {
     return filename;
   }
@@ -92,7 +92,7 @@ public class ExaminationExtraData extends HalEntity {
   }
 	   
   @JsonIgnore
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getFilepath() {
     return filepath;
   }
@@ -106,7 +106,7 @@ public class ExaminationExtraData extends HalEntity {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getExtradatatype() {
     return extradatatype;
   }

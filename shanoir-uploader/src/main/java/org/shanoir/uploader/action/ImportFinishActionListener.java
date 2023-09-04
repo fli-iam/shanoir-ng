@@ -12,6 +12,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
 import org.apache.log4j.Logger;
+import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.gui.ImportDialog;
@@ -27,7 +28,6 @@ import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
-import org.shanoir.uploader.model.rest.importer.ImportJob;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
 import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.utils.ImportUtils;
@@ -74,6 +74,9 @@ public class ImportFinishActionListener implements ActionListener {
 		final Study study = (Study) mainWindow.importDialog.studyCB.getSelectedItem();
 		final StudyCard studyCard = (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem();
 		if (study == null || study.getId() == null || studyCard == null || studyCard.getName() == null) {
+			JOptionPane.showMessageDialog(mainWindow.frame,
+					mainWindow.resourceBundle.getString("shanoir.uploader.systemErrorDialog.error.import.study"),
+					"Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
 		if (ShUpConfig.isModeSubjectCommonNameManual()) {
@@ -151,15 +154,10 @@ public class ImportFinishActionListener implements ActionListener {
 			examinationDTO.setSubjectId(subject.getId());
 			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
 			examinationDTO.setCenterId(center.getId());
-//			Investigator investigator = (Investigator) mainWindow.importDialog.mrExaminationExamExecutiveCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
 			examinationDTO.setExaminationDate(examinationDate);
 			examinationDTO.setComment(examinationComment);
-
-			/**
-			 * TODO handle investigators here or decide finally to delete them in sh-ng
-			 */
 			examinationDTO = shanoirUploaderServiceClient.createExamination(examinationDTO);
 			if (examinationDTO == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,
@@ -181,7 +179,6 @@ public class ImportFinishActionListener implements ActionListener {
 		/**
 		 * 3. Fill import-job.json
 		 */
-		//Exchange exchange = prepareExchange(mainWindow.importDialog, subject.getName(), subject.getId(), examinationId);
 		ImportJob importJob = ImportUtils.prepareImportJob(uploadJob, subject.getName(), subject.getId(), examinationId, (Study) mainWindow.importDialog.studyCB.getSelectedItem(), (StudyCard) mainWindow.importDialog.studyCardCB.getSelectedItem());
 		Runnable runnable = new ImportFinishRunnable(uploadJob, uploadFolder, importJob, subject.getName());
 		Thread thread = new Thread(runnable);

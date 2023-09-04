@@ -17,9 +17,8 @@ package org.shanoir.ng.studycenter;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.center.dto.mapper.CenterMapper;
 import org.shanoir.ng.study.model.Study;
@@ -28,7 +27,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * Subject - study mapper test.
@@ -36,7 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author msimon
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class StudyCenterMapperTest {
@@ -56,16 +54,16 @@ public class StudyCenterMapperTest {
 	public void studyCenterListToStudyCenterDTOListTest() {
 		final List<StudyCenterDTO> subjectStudyDTOs = studyCenterMapper
 				.studyCenterListToStudyCenterDTOList(Arrays.asList(createStudyCenter()));
-		Assert.assertNotNull(subjectStudyDTOs);
-		Assert.assertTrue(subjectStudyDTOs.size() == 1);
-		Assert.assertTrue(subjectStudyDTOs.get(0).getStudy().getId().equals(STUDY_ID));
+		Assertions.assertNotNull(subjectStudyDTOs);
+		Assertions.assertTrue(subjectStudyDTOs.size() == 1);
+		Assertions.assertTrue(subjectStudyDTOs.get(0).getStudy().getId().equals(STUDY_ID));
 	}
 
 	@Test
 	public void studyCenterToStudyCenterDTOTest() {
 		final StudyCenterDTO subjectStudyDTO = studyCenterMapper.studyCenterToStudyCenterDTO(createStudyCenter());
-		Assert.assertNotNull(subjectStudyDTO);
-		Assert.assertTrue(subjectStudyDTO.getStudy().getId().equals(STUDY_ID));
+		Assertions.assertNotNull(subjectStudyDTO);
+		Assertions.assertTrue(subjectStudyDTO.getStudy().getId().equals(STUDY_ID));
 	}
 
 	private StudyCenter createStudyCenter() {

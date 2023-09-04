@@ -14,7 +14,7 @@
 
 package org.shanoir.ng.studycard;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
 import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
@@ -22,9 +22,8 @@ import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -39,7 +38,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 
@@ -49,7 +47,7 @@ import org.springframework.validation.BindingResult;
  * @author jlouis
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class StudyCardSecurityTest {
@@ -64,7 +62,7 @@ public class StudyCardSecurityTest {
 	@MockBean
 	StudyRightsService commService;
 	
-	@Before
+	@BeforeEach
 	public void setup() {
 		mockBindingResult = new BeanPropertyBindingResult(mockStudyCard(1L), "dataset");
 	}

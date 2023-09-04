@@ -34,7 +34,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class ContrastAgentApiController implements ContrastAgentApi {
@@ -57,8 +57,8 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 
 	@Override
 	public ResponseEntity<ContrastAgent> createContrastAgent(
-			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid,
-			@ApiParam(value = "Contrast Agent to create", required = true) @RequestBody ContrastAgent contrastagent,
+			@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid,
+			@Parameter(name = "Contrast Agent to create", required = true) @RequestBody ContrastAgent contrastagent,
 			BindingResult result) throws RestServiceException {
 
 		final FieldErrorMap accessErrors = this.getCreationRightsErrors(contrastagent);
@@ -89,8 +89,8 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 
 	@Override
 	public ResponseEntity<Void> deleteContrastAgent(
-			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid,
-			@ApiParam(value = "Contrast Agent id to delete", required = true) @PathVariable("cid") Long cid) {
+			@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid,
+			@Parameter(name = "Contrast Agent id to delete", required = true) @PathVariable("cid") Long cid) {
 		if (contrastAgentService.findById(cid) == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
@@ -104,7 +104,7 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 
 	@Override
 	public ResponseEntity<ContrastAgent> getContrastAgentByProtocolId(
-			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid) {
+			@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid) {
 		final ContrastAgent agent = contrastAgentService.findByProtocolId(pid);
 		if (agent == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -114,8 +114,8 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 
 	@Override
 	public ResponseEntity<ContrastAgent> getContrastAgentById(
-			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid,
-			@ApiParam(value = "ID of contrast agent that needs to be fetched", required = true) @PathVariable("cid") Long cid) {
+			@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid,
+			@Parameter(name = "ID of contrast agent that needs to be fetched", required = true) @PathVariable("cid") Long cid) {
 		final ContrastAgent agent = contrastAgentService.findById(cid);
 		if (agent == null) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -125,8 +125,8 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 
 	@Override
 	public ResponseEntity<ContrastAgent> getContrastAgentByName(
-			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid,
-			@ApiParam(value = "Name of contrast agent that needs to be fetched", required = true) @PathVariable("name") String name) {
+			@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid,
+			@Parameter(name = "Name of contrast agent that needs to be fetched", required = true) @PathVariable("name") String name) {
 		// Does name exists as reference
 		Reference agentName = referencesService.findByCategoryTypeAndValue(ReferenceEnum.REF_CATEGORY_CONTRASTAGENT,
 				ReferenceEnum.REF_TYPE_CONTRASTAGENT_NAME, name);
@@ -142,7 +142,7 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 
 	@Override
 	public ResponseEntity<List<ContrastAgent>> getContrastAgents(
-			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid) {
+			@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid) {
 		final List<ContrastAgent> agents = contrastAgentService.findAll();
 		if (agents.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -152,9 +152,9 @@ public class ContrastAgentApiController implements ContrastAgentApi {
 
 	@Override
 	public ResponseEntity<Void> updateContrastAgent(
-			@ApiParam(value = "protocol id", required = true) @PathVariable("pid") Long pid,
-			@ApiParam(value = "ID of contrast agent that needs to be updated", required = true) @PathVariable("cid") Long cid,
-			@ApiParam(value = "Contrast Agent object that needs to be updated", required = true) @RequestBody ContrastAgent agent,
+			@Parameter(name = "protocol id", required = true) @PathVariable("pid") Long pid,
+			@Parameter(name = "ID of contrast agent that needs to be updated", required = true) @PathVariable("cid") Long cid,
+			@Parameter(name = "Contrast Agent object that needs to be updated", required = true) @RequestBody ContrastAgent agent,
 			final BindingResult result) throws RestServiceException {
 
 		agent.setId(cid);

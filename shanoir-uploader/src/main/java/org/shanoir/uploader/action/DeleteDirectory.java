@@ -67,7 +67,7 @@ public class DeleteDirectory {
 		} else {
 			// if file, then delete it
 			file.delete();
-			logger.info("File is deleted : " + file.getAbsolutePath());
+			logger.debug("File is deleted : " + file.getAbsolutePath());
 		}
 	}
 }

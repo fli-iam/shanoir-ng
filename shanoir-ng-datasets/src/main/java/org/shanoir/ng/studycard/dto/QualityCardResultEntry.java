@@ -17,6 +17,7 @@ package org.shanoir.ng.studycard.dto;
 import java.time.LocalDate;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.quality.QualityTag;
 
 /**
  * @author mkain
@@ -31,6 +32,8 @@ public class QualityCardResultEntry {
 	private String examinationComment;
 	
 	private String message;
+	
+	private QualityTag tagSet;
 
 	public String getSubjectName() {
 		return subjectName;
@@ -62,5 +65,13 @@ public class QualityCardResultEntry {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public QualityTag getTagSet() {
+        return tagSet;
+    }
+
+    public void setTagSet(QualityTag tagSet) {
+        this.tagSet = tagSet;
     }
 }

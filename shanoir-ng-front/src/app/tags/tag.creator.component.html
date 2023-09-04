@@ -26,7 +26,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <i class="fas fa-times"></i>
         </span>
         <span class="input-box">
-            <i class="fas fa-paint-roller"></i>
+            <i class="fa-solid fa-palette"></i>
             <input type="color" [(ngModel)]="selectedColor" (ngModelChange)="onColorChange()"/>
         </span>
         <input type="text" [(ngModel)]="text" placeholder="enter tag label..."/>
@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </span>
     </span>
 </div>
-<div *ngIf="addTagVisible" class="form-validation-alert warn">
+<div *ngIf="addTagVisible" class="warn left-icon">
     <i class="fas fa-exclamation-triangle"></i>
     <strong>Warning :</strong> Identifying informations should not be added to tags.
 </div>  

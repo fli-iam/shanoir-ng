@@ -31,8 +31,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
           <menu-item *ngIf="!related" label="Details..." awesome="fa-regular fa-eye" (click)="showDatasetDetails()"></menu-item>
         </a>
         <menu-item *ngIf="node.type != 'Eeg' && !node.processed" label="Download as DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
-        <menu-item *ngIf="node.type != 'Eeg'" label="Download as NIfTI" awesome="fas fa-download" (click)="download('nii')"></menu-item>
-        <menu-item *ngIf="node.type == 'Eeg'" label="Download as EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
+        <menu-item *ngIf="node.type != 'Eeg' && !node.processed" label="Download as NIfTI" awesome="fas fa-download" (click)="download('nii')"></menu-item>
+        <menu-item *ngIf="node.type == 'Eeg' && !node.processed" label="Download as EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
+        <menu-item *ngIf="node.processed" label="Download processed data" awesome="fas fa-download" (click)="download('nii')"></menu-item>
     </dropdown-menu>
 
 </node>

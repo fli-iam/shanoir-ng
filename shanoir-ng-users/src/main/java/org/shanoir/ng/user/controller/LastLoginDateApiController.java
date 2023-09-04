@@ -14,9 +14,6 @@
 
 package org.shanoir.ng.user.controller;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.Context;
-
 import org.shanoir.ng.shared.controller.AbstractUserRequestApiController;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -26,9 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
-
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-16T08:28:10.257Z")
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 
 @Controller
 public class LastLoginDateApiController extends AbstractUserRequestApiController implements LastLoginDateApi {
@@ -39,7 +36,7 @@ public class LastLoginDateApiController extends AbstractUserRequestApiController
 	private static final Logger LOG = LoggerFactory.getLogger(LastLoginDateApiController.class);
 
 	public ResponseEntity<Void> lastLoginDate(
-			@ApiParam(value = "username of user for last login date update", required = true) @RequestBody final String username,
+			@Parameter(name = "username of user for last login date update", required = true) @RequestBody final String username,
 			@Context final HttpServletRequest httpRequest) {
 		try {
 			// Update user login date

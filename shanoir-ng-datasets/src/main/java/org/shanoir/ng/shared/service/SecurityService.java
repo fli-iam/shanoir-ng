@@ -17,13 +17,13 @@ package org.shanoir.ng.shared.service;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.math3.util.Pair;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -46,11 +46,11 @@ public class SecurityService {
 //		List<Pair<Long, Long>> studyCenters = new ArrayList<>();
 //		Set<Long> unrestrictedStudies = new HashSet<Long>();
 		for (StudyUser studyUser : studyUsers) {
-			if (CollectionUtils.isEmpty(studyUser.getCenterIds())) {
+			if (CollectionUtils.isEmpty(studyUser.getCenterIds()) && studyUser.isConfirmed()) {
 				unrestrictedStudies.add(studyUser.getStudyId());
 			} else {
 				for (Long centerId : studyUser.getCenterIds()) {
-					studyCenters.add(new Pair<Long, Long>(studyUser.getStudyId(), centerId));						
+					studyCenters.add(Pair.of(studyUser.getStudyId(), centerId));						
 				}
 			}
 		}

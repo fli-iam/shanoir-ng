@@ -50,12 +50,12 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return '/imports/upload';
     }
 
-    importData(): Promise<any> {
-        let importJob = this.buildImportJob();
+    importData(timestamp: number): Promise<any> {
+        let importJob = this.buildImportJob(timestamp);
         return this.importService.startImportJob(importJob);
     }
 
-    protected buildImportJob(): ImportJob {
+    protected buildImportJob(timestamp: number): ImportJob {
         let importJob = new ImportJob();
         let context = this.importDataService.contextData;
         importJob.patients = new Array<PatientDicom>();
@@ -81,6 +81,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
         importJob.anonymisationProfileToUse = context.study.profile?.profileName;
+        importJob.timestamp = timestamp;
         return importJob;
     }
 

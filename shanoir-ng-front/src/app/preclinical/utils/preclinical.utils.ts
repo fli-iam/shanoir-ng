@@ -2,26 +2,25 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import * as AppUtils from '../../utils/app.utils';
 
 import { process } from '../../process';
-  
+
 // PRECLINICAL Rest Service
 export const PRECLINICAL_API_ROOT_URL:string = AppUtils.BACKEND_API_PRECLINICAL_MS_URL;
 
 //Subjects http api
 export const PRECLINICAL_API_SUBJECTS_URL:string = PRECLINICAL_API_ROOT_URL + '/subject';
 export const PRECLINICAL_API_SUBJECT_FIND_URL:string = PRECLINICAL_API_ROOT_URL + '/subject/find';
-export const PRECLINICAL_API_SUBJECTS_ALL_URL:string = PRECLINICAL_API_SUBJECTS_URL + '/all';
 
 //References http api
 export const PRECLINICAL_API_REFERENCES_URL:string = PRECLINICAL_API_ROOT_URL + '/refs';

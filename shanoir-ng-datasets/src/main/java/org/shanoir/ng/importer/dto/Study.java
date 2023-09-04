@@ -37,40 +37,54 @@ public class Study {
      @JsonProperty("series")
      private List<Serie> series;
 
-	public String getStudyInstanceUID() {
-		return studyInstanceUID;
-	}
+    public String getStudyInstanceUID() {
+        return studyInstanceUID;
+    }
 
-	public void setStudyInstanceUID(String studyInstanceUID) {
-		this.studyInstanceUID = studyInstanceUID;
-	}
+    public void setStudyInstanceUID(String studyInstanceUID) {
+        this.studyInstanceUID = studyInstanceUID;
+    }
 
-	public LocalDate getStudyDate() {
-		return studyDate;
-	}
+    public LocalDate getStudyDate() {
+        return studyDate;
+    }
 
-	public void setStudyDate(LocalDate studyDate) {
-		this.studyDate = studyDate;
-	}
+    public void setStudyDate(LocalDate studyDate) {
+        this.studyDate = studyDate;
+    }
 
-	public String getStudyDescription() {
-		return studyDescription;
-	}
+    public String getStudyDescription() {
+        return studyDescription;
+    }
 
-	public void setStudyDescription(String studyDescription) {
-		this.studyDescription = studyDescription;
-	}
+    public void setStudyDescription(String studyDescription) {
+        this.studyDescription = studyDescription;
+    }
 
-	public List<Serie> getSeries() {
-		return series;
-	}
+    public List<Serie> getSeries() {
+        return series;
+    }
 
-	public List<Serie> getSelectedSeries() {
-		return series.stream().filter(s -> s.getSelected() != null && s.getSelected()).collect(Collectors.toList());
-	}
+    public List<Serie> getSelectedSeries() {
+        return series.stream().filter(s -> s.getSelected() != null && s.getSelected()).collect(Collectors.toList());
+    }
 
-	public void setSeries(List<Serie> series) {
-		this.series = series;
-	}
+    public void setSeries(List<Serie> series) {
+        this.series = series;
+    }
+    
+    public DatasetFile getFirstDatasetFileForCurrentStudy() {
+        if (getSeries() == null
+                || getSeries().get(0) == null
+                || getSeries().get(0).getDatasets() == null
+                || getSeries().get(0).getDatasets().get(0) == null
+                || getSeries().get(0).getDatasets().get(0).getExpressionFormats() == null
+                || getSeries().get(0).getDatasets().get(0).getExpressionFormats().get(0) == null
+                || getSeries().get(0).getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles() == null) {
+            return null;
+        } else {
+            return getSeries().get(0).getDatasets().get(0).getExpressionFormats().get(0).getDatasetFiles().get(0);
+        }
+    }
 
 }

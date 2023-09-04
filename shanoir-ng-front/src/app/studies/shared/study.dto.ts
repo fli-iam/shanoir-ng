@@ -28,6 +28,7 @@ import { StudyType } from './study-type.enum';
 import { StudyUser, StudyUserDTO } from './study-user.model';
 import { Study } from './study.model';
 import {Profile} from '../../shared/models/profile.model';
+import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
 
 @Injectable()
 export class StudyDTOService {
@@ -156,7 +157,30 @@ export class StudyDTOService {
         } else {
           entity.studyTags = [];
         }
+
+        if(dto.storageVolume){
+            entity.totalSize = dto.storageVolume.total;
+            entity.detailedSizes = this.studyStorageVolumeDTOToDetailedSizes(dto.storageVolume)
+        }
+
         return entity;
+    }
+
+    static studyStorageVolumeDTOToDetailedSizes(dto: StudyStorageVolumeDTO): Map<String, number> {
+        let datasetSizes = dto;
+        let sizesByLabel = new Map<String, number>()
+
+        for(let sizeByFormat of datasetSizes.volumeByFormat){
+            if(sizeByFormat.size > 0){
+                sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+            }
+        }
+
+        if(datasetSizes.extraDataSize > 0){
+            sizesByLabel.set("Other files (DUA, protocol...)", datasetSizes.extraDataSize);
+        }
+
+        return sizesByLabel;
     }
 
     static tagDTOToTag(tagDTO: any): Tag {
@@ -192,6 +216,7 @@ export class StudyDTOService {
             subjectStudy.subject.id = subjectStudyDto.subject.id;
             subjectStudy.subjectId = subjectStudyDto.subject.id;
             subjectStudy.subject.name = subjectStudyDto.subject.name;
+            subjectStudy.subject.preclinical = subjectStudyDto.subjectPreclinical;
         }
         subjectStudy.subjectStudyIdentifier = subjectStudyDto.subjectStudyIdentifier;
         subjectStudy.subjectType = subjectStudyDto.subjectType;
@@ -267,6 +292,7 @@ export class StudyDTO {
     studyCards: StudyCardDTO[];
     description: string;
     license: string;
+    storageVolume: StudyStorageVolumeDTO;
 
     constructor(study: Study) {
         this.id = study.id ? study.id : null;
@@ -347,4 +373,21 @@ export class PublicStudyData {
   description: string;
   license: string;
   studyTags: Tag[];
+}
+
+
+export class StudyStorageVolumeDTO {
+
+    total: number;
+    volumeByFormat: VolumeByFormatDTO[];
+    extraDataSize: number;
+
+}
+
+
+export class VolumeByFormatDTO {
+
+    format: DatasetExpressionFormat;
+    size: number;
+
 }

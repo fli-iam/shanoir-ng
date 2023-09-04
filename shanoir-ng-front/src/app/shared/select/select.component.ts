@@ -88,6 +88,8 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     @Input() newHidden: boolean;
     @Input() addDisabled: boolean;
     @Input() addHidden: boolean;
+    @Input() viewRoute: string;
+    @Input() newRoute: string;
     @Output() onViewClick = new EventEmitter();
     @Output() onNewClick = new EventEmitter();
     @Output() onAddClick = new EventEmitter();
@@ -420,7 +422,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
             event.preventDefault();
         } else if (' ' == event.key) {
             if (!this.isOpen()) this.open();
-        }  else if (this.search && event.keyCode >= 65 && event.keyCode <= 90) {
+        }  else if (this.search && event.keyCode >= 65 && event.keyCode <= 90 && this.textInput) {
             if (this.textInput.nativeElement != document.activeElement) {
                 this.inputText = null;
                 this.textInput.nativeElement.focus();
@@ -577,7 +579,7 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
     }
 
     public onInputFocus() {
-        this.textInput.nativeElement.select();
+        this.textInput?.nativeElement.select();
     }    
     
     registerOnChange(fn: any): void {

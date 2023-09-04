@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
@@ -40,7 +40,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.util.UriUtils;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 /**
  * Carmin data upload results from VIP to tmp folder endpoint
@@ -69,7 +69,7 @@ public class CarminDataApiController implements CarminDataApi {
 
     @Override
     public ResponseEntity<Path> uploadPath(
-            @ApiParam(value = "") @Valid @RequestBody UploadData body)
+            @Parameter(name = "") @Valid @RequestBody UploadData body)
             throws RestServiceException {
 
         String importPath = getImportPathFromRequest(httpServletRequest);

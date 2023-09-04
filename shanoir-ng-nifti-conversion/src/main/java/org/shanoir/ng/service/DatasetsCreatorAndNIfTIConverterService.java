@@ -30,6 +30,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
+import jakarta.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -93,9 +94,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 	@Value("${shanoir.import.series.seriesProperties}")
 	private String seriesProperties;
-
-	@Value("${shanoir.import.series.donotseparatedatasetsinserie}")
-	private String doNotSeparateDatasetsInSerie;
 
 	@Value("${shanoir.conversion.converters.convertwithclidcm}")
 	private String convertWithClidcm;
@@ -165,9 +163,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 					// conversion
 					serie.setDatasets(new ArrayList<Dataset>());
 					constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
-					// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub
-					// Wiki
-					if (!serie.getIsSpectroscopy()) {
+					// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
+					if (serie.getIsSpectroscopy() != null && !serie.getIsSpectroscopy()) {
 						constructNifti(serieIDFolderFile, serie, converterId);
 					}
 				} catch (NoSuchFieldException | SecurityException e) {
