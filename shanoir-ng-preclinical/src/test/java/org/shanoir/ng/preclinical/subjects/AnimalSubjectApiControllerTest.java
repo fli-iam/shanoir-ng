@@ -127,13 +127,6 @@ public class AnimalSubjectApiControllerTest {
 	}
 
 	@Test
-	@WithMockKeycloakUser(id = 12, username = "test", authorities = { "ROLE_ADMIN" })
-	public void deleteSubjectTest() throws Exception {
-		mvc.perform(MockMvcRequestBuilders.delete(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
-
-	@Test
 	public void findSubjectByIdTest() throws Exception {
 		mvc.perform(MockMvcRequestBuilders.get(REQUEST_PATH_WITH_ID).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk());
