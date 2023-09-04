@@ -233,8 +233,13 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         let studies = page.content
         let ids = new Set<number>();
         studies.forEach(study => {
-            ids.add(study.id);
+            if(study.totalSize == null){
+                ids.add(study.id);
+            }
         });
+        if(ids.size == 0){
+            return;
+        }
         this.studyService.getStudiesStorageVolume(ids).then(volumes => {
             studies.forEach( study => {
                 (study as Study).totalSize = volumes.get(study.id)?.total;

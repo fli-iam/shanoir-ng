@@ -144,11 +144,11 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 savedState.selection.forEach(id => this.selection.add(id));
                 this.emitSelectionChange();
             }
-            this.goToPage(savedState.currentPage ? savedState.currentPage : 1, true)
+            this.goToPage(savedState.currentPage ? savedState.currentPage : 1)
                 .then(() => this.firstLoading = false);
         } else {
             this.getDefaultSorting();
-            this.goToPage(1, true)
+            this.goToPage(1)
                 .then(() => this.firstLoading = false);
         }
     }
@@ -326,9 +326,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         let getPage: Page<any> | Promise<Page<any>> =  this.getPage(this.getPageable(), forceRefresh)
         if (getPage instanceof Promise) {
             return getPage.then(page => {
-                if(forceRefresh){
                     this.pageLoaded.emit(page);
-                }
                 return this.computePage(page);
             }).catch(reason => {
                 setTimeout(() => {
@@ -339,9 +337,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             });
         } else if (getPage instanceof Page) {
             return Promise.resolve(this.computePage(getPage)).then(page => {
-                if(forceRefresh){
-                    this.pageLoaded.emit(page);
-                }
+                this.pageLoaded.emit(page);
                 return page;
             });
         }
