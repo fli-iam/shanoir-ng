@@ -48,6 +48,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
+    @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
@@ -143,11 +144,11 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 savedState.selection.forEach(id => this.selection.add(id));
                 this.emitSelectionChange();
             }
-            this.goToPage(savedState.currentPage ? savedState.currentPage : 1)
+            this.goToPage(savedState.currentPage ? savedState.currentPage : 1, true)
                 .then(() => this.firstLoading = false);
         } else {
             this.getDefaultSorting();
-            this.goToPage(1)
+            this.goToPage(1, true)
                 .then(() => this.firstLoading = false);
         }
     }
@@ -325,6 +326,9 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         let getPage: Page<any> | Promise<Page<any>> =  this.getPage(this.getPageable(), forceRefresh)
         if (getPage instanceof Promise) {
             return getPage.then(page => {
+                if(forceRefresh){
+                    this.pageLoaded.emit(page);
+                }
                 return this.computePage(page);
             }).catch(reason => {
                 setTimeout(() => {
@@ -334,7 +338,12 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 throw reason;
             });
         } else if (getPage instanceof Page) {
-            return Promise.resolve(this.computePage(getPage));
+            return Promise.resolve(this.computePage(getPage)).then(page => {
+                if(forceRefresh){
+                    this.pageLoaded.emit(page);
+                }
+                return page;
+            });
         }
     }
 

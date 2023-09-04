@@ -26,6 +26,7 @@ import {StudyCardComponent} from "../../study-cards/study-card/study-card.compon
 import {PublicStudyData} from "../shared/study.dto";
 import {User} from "../../users/shared/user.model";
 import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
+import {Page} from "../../shared/components/table/pageable.model";
 
 
 @Component({
@@ -92,31 +93,6 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
-            let ids = new Set<number>();
-            studies.forEach(study => {
-               ids.add(study.id);
-            });
-            this.studyService.getStudiesStorageVolume(ids).then(volumes => {
-                studies.forEach( study => {
-                    (study as Study).totalSize = volumes.get(study.id)?.total;
-                    let sizesByLabel = new Map<String, number>()
-
-                    if(volumes.get(study.id)?.volumeByFormat){
-                        for(let sizeByFormat of volumes.get(study.id)?.volumeByFormat){
-                            if(sizeByFormat.size > 0){
-                                sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
-                            }
-                        }
-                    }
-
-                    if(volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0){
-                        sizesByLabel.set("Other files (DUA, protocol...)", volumes.get(study.id)?.extraDataSize);
-                    }
-
-                    (study as Study).detailedSizes = sizesByLabel;
-                    this.isStudyVolumesFetching = false;
-                });
-            })
         });
         return earlyResult;
     }
@@ -215,4 +191,33 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             }
         }
     }
+
+    fetchStorageVolumes(page: Page<Study>) {
+        let studies = page.content
+        let ids = new Set<number>();
+        studies.forEach(study => {
+            ids.add(study.id);
+        });
+        this.studyService.getStudiesStorageVolume(ids).then(volumes => {
+            studies.forEach( study => {
+                (study as Study).totalSize = volumes.get(study.id)?.total;
+                let sizesByLabel = new Map<String, number>()
+
+                if(volumes.get(study.id)?.volumeByFormat){
+                    for(let sizeByFormat of volumes.get(study.id)?.volumeByFormat){
+                        if(sizeByFormat.size > 0){
+                            sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+                        }
+                    }
+                }
+
+                if(volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0){
+                    sizesByLabel.set("Other files (DUA, protocol...)", volumes.get(study.id)?.extraDataSize);
+                }
+
+                (study as Study).detailedSizes = sizesByLabel;
+                this.isStudyVolumesFetching = false;
+            });
+        });
+    };
 }
