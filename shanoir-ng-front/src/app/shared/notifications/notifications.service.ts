@@ -42,6 +42,7 @@ export class NotificationsService {
     readonly readInterval: number = 1000;
     readonly persistenceTime: number = 1800000;
     private freshTimeouts: SuperTimeout[] = [];
+    private readonly TIMEOUT: number = 30000;
 
 
     constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
@@ -98,6 +99,12 @@ export class NotificationsService {
         let tmpTasksInProgress = [];
         let tmpTasksInWait = [];
         for (let task of this.allTasks) {
+            if ((task.status == 2 || task.status == 4 || task.status == 5) && task.lastUpdate) {
+                if (Date.now() - new Date(task.lastUpdate).getTime() > this.TIMEOUT) {
+                    task.status = -1;
+                    task.message = 'timeout';
+                }
+            }
             if (task.status == -1 && task.lastUpdate) {
                 let freshError: boolean = !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval + 1000);
                 if (freshError) {

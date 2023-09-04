@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <form>
     <fieldset>
-        <legend>Details</legend>
+        <legend>Details {{task.status}}</legend>
         <ol>
             <li>
                 <label>Id</label>
@@ -58,6 +58,14 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <li>
                 <label>Last update</label>
                 <span class="right-col">{{task.lastUpdate | date: 'dd/MM/yyyy HH:mm:ss'}}</span>
+            </li>
+            <li class="message-li" *ngIf="task?.report">
+                <label>Details</label>
+                <span class="right-col">
+                    <div class="message">
+                        <pre><code>{{task?.report}}</code></pre>
+                    </div>
+                </span>
             </li>
         </ol>
     </fieldset>

@@ -122,6 +122,8 @@ export class MassDownloadService {
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
                     task.status = 2;
+                    task.lastUpdate = new Date();
+                    this.notificationService.pushLocalTask(task);
                     const start: number = Date.now();
                     let ids = [...datasetIds]; // copy array
                     if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, format, nbQueues);
@@ -136,6 +138,7 @@ export class MassDownloadService {
                         this.writeMyFile(this.REPORT_FILENAME, JSON.stringify(report), parentFolderHandle);
                     }).catch(reason => {
                         task.message = 'download error : ' + reason;
+                        task.lastUpdate = new Date();
                         this.notificationService.pushLocalTask(task);
                     }).finally(() => {
                         releaseQueue();
@@ -154,6 +157,7 @@ export class MassDownloadService {
         return this.downloadQueue.waitForTurn().then(releaseQueue => {
             try {
                 task.status = 2;
+                task.lastUpdate = new Date();
                 const start: number = Date.now();
                 const downloadObs: Observable<{status?: TaskStatus, progress?: number}> = this.datasetService.downloadDatasets(datasetIds, format);
                 let endPromise: SuperPromise<void> = new SuperPromise();
@@ -204,6 +208,7 @@ export class MassDownloadService {
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
                     task.status = 2;
+                    task.lastUpdate = new Date();
                     const start: number = Date.now();
                     let ids = [...datasets.map(ds => ds.id)];
                     let report: Report = this.initReport(datasets.map(ds => ds.id), task.id, parentFolderHandle.name, format, nbQueues);
@@ -240,14 +245,13 @@ export class MassDownloadService {
     private handleEnd(task: Task, report: Report, start: number) {
         task.lastUpdate = new Date();
         report.duration = Date.now() - start;
+        task.report = JSON.stringify(report, null, 4);
         if (report.nbError > 0) {
             task.status = -1;
             const tab: string = '- ';
             task.message = 'download failed in ' + report.duration + 'ms.\n'
                 + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
-                + tab + report.nbError + ' datasets are (at least partially) in error and files could be missing.\n'
-                + 'errors details :\n'
-                + JSON.stringify(report, null, 4);
+                + tab + report.nbError + ' datasets are (at least partially) in error and files could be missing.\n';
             JSON.stringify(report);
         } else {
             task.status = task.status == -1 ? -1 : 1;
@@ -278,7 +282,6 @@ export class MassDownloadService {
 
             // Check ERRORS file in zip
             var zip = new JSZip();
-            let unzipTs: number = Date.now();
             const errorsCheckPromise: Promise<void> = zip.loadAsync(httpResponse.body).then(dataFiles => {
                 if (dataFiles.files['ERRORS.json']) {
                     return dataFiles.files['ERRORS.json'].async('string').then(content => {
@@ -286,6 +289,7 @@ export class MassDownloadService {
                         report.list[id].status = 'ERROR';
                         report.list[id].error = errorsJson;
                         report.list[id].errorTime = Date.now();
+                        task.lastUpdate = new Date();
                         task.message = 'saving dataset n°' + id + ' failed';
                         task.status = 5;
                     });
@@ -293,6 +297,7 @@ export class MassDownloadService {
                     report.list[id].status = 'SUCCESS';
                     delete report.list[id].error;
                     delete report.list[id].errorTime;
+                    task.lastUpdate = new Date();
                     task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
                 }
             });
@@ -303,6 +308,7 @@ export class MassDownloadService {
             report.list[id].status = 'ERROR';
             report.list[id].error = reason;
             report.list[id].errorTime = Date.now();
+            task.lastUpdate = new Date();
             task.message = 'saving dataset n°' + id + ' failed';
             task.status = 5;
         }).finally(() => {
@@ -311,7 +317,9 @@ export class MassDownloadService {
             } else if (report.list[id].status == 'ERROR') {
                 report.nbError++;
             }
-            task.lastUpdate = task.creationDate;
+            task.report = JSON.stringify(report, null, 4);
+            this.writeMyFile(this.REPORT_FILENAME, task.report, userFolderHandle);
+            task.lastUpdate = new Date();
             task.progress = (report.nbSuccess + report.nbError) / report.requestedDatasetIds.length;
             this.notificationService.pushLocalTask(task);
         });
@@ -474,9 +482,9 @@ export class MassDownloadService {
 
     private getReportFromTask(task: Task): Report {
         try {
-            return JSON.parse(task?.message?.split('errors details :')?.[1]);
+            return JSON.parse(task?.report);
         } catch (e) {
-            this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.message]);
+            this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.report]);
             return null;
         }
     }

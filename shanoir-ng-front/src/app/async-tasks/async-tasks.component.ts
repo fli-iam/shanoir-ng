@@ -74,9 +74,9 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
                cellRenderer: params => { return {progress: params.data?.progress, status: params.data?.status}; }
             }, { 
                headerName: "Creation", field: "creationDate", width: '130px', type: 'date'
-            },{
+            }, {
                 headerName: "Last update", field: "lastUpdate", width: '130px', defaultSortCol: true, defaultAsc: false, type: 'date'
-            },
+            }
         ];
     }
 

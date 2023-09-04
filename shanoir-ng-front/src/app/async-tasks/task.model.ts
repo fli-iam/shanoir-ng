@@ -25,6 +25,7 @@ export type TaskStatus =
 
 export class Task extends Entity {
 
+    debugTs: number = Date.now();
     id: number;
     creationDate: Date;
     lastUpdate: Date;
@@ -35,7 +36,8 @@ export class Task extends Entity {
     eventLabel: string;
     objectId: number;
     route: string;
-    private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route'];
+    report: string;
+    private readonly FIELDS: string[] = ['id', 'creationDate', 'lastUpdate','_status','_message', '_progress', '_eventType', 'eventLabel', 'objectId', 'route', 'report'];
 
     set eventType(eventType: string) {
         this._eventType = eventType;
