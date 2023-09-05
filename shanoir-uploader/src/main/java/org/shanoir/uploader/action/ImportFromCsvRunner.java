@@ -340,21 +340,19 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		List<String> allFileNames = null;
 		try {
 			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeries, uploadFolder, this.dicomFileAnalyzer, this.dicomServerClient, null);
+			/**
+			 * 5. Fill MRI information into serie from first DICOM file of each serie
+			 * This has already been done for CD/DVD import, but not yet here for PACS
+			 */
+			logger.info("5 Fill MRI info");
+			for (Iterator<SerieTreeNode> iterator = selectedSeries.iterator(); iterator.hasNext();) {
+				SerieTreeNode serie = iterator.next();
+				dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serie.getSerie(), null, true);
+			}
 		} catch (Exception e) {
 			logger.error("Could not copy data from PACS !");
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
-		}
-
-		/**
-		 * 5. Fill MRI information into serie from first DICOM file of each serie
-		 * This has already been done for CD/DVD import, but not yet here for PACS
-		 */
-		logger.info("5 Fill MRI info");
-
-		for (Iterator<SerieTreeNode> iterator = selectedSeries.iterator(); iterator.hasNext();) {
-			SerieTreeNode serie = iterator.next();
-// @todo			Util.processSerieMriInfo(uploadFolder, serie);
 		}
 
 		/**

@@ -82,8 +82,7 @@ public class ExtraDataApiControllerTest {
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH_EXTRADATA + "/1";
 	private static final String REQUEST_PATH_PHYSIO_WITH_ID = REQUEST_PATH_PHYSIOLOGICALDATA + "/1";
 	private static final String REQUEST_PATH_BLOODGAS_WITH_ID = REQUEST_PATH_BLOODGASDATA + "/1";
-	private static final String REQUEST_PATH_UPLOAD = REQUEST_PATH_EXAMINATION + REQUEST_EXTRADATA + REQUEST_UPLOAD
-			+ "/1";
+	private static final String REQUEST_PATH_UPLOAD = REQUEST_PATH_EXAMINATION + REQUEST_EXTRADATA + REQUEST_UPLOAD + "/1";
 
 	private Gson gson;
 
@@ -123,9 +122,12 @@ public class ExtraDataApiControllerTest {
 
 	    gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
+		ExaminationExtraData extraData = new ExaminationExtraData();
+		extraData.setId(1L);
+
 		doNothing().when(extraDataServiceMock).deleteById(1L);
-		given(extraDataServiceMock.findAllByExaminationId(1L)).willReturn(Arrays.asList(new ExaminationExtraData()));
-		given(extraDataServiceMock.findById(1L)).willReturn(new ExaminationExtraData());
+		given(extraDataServiceMock.findAllByExaminationId(1L)).willReturn(Arrays.asList(extraData));
+		given(extraDataServiceMock.findById(1L)).willReturn(extraData);
 		given(extraDataServiceMock.save(Mockito.mock(ExaminationExtraData.class)))
 				.willReturn(new ExaminationExtraData());
 		
@@ -166,7 +168,7 @@ public class ExtraDataApiControllerTest {
 	@Test
 	@WithMockUser
 	public void uploadExtraDataTest() throws Exception {
-		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain",
+		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", MediaType.MULTIPART_FORM_DATA_VALUE,
 				"some xml".getBytes());
 		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD).file(firstFile)).andExpect(status().isOk());
 	}

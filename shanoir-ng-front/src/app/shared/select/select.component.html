@@ -96,7 +96,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <div *ngIf="dragging" class="list-drag-extend" (dragover)="allowDrop($event)"></div>
     </div>
     <div *ngIf="noResult" class="list down empty empty-list">
-        No results - <span class="reset" (click)="onTypeText(null)">reset search</span>
+        No results <ng-container *ngIf="options?.length > 0"> - <span class="reset" (click)="onTypeText(null)">reset search</span></ng-container>
     </div>
 </div>
 <div #hiddenOption id="hiddenOption" class="option"></div>

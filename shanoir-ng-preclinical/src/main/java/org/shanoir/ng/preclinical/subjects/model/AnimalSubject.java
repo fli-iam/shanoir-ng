@@ -25,13 +25,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Index;
 
 /**
  * Animal Subject
  */
 
 @Entity
-@Table(name = "animal_subject")
+@Table(name = "animal_subject", indexes = @Index(name = "subject_id_idx", columnList = "subjectId", unique = true))
 @JsonPropertyOrder({ "_links", "subjectId", "specie", "strain", "biotype", "provider", "stabulation" })
 public class AnimalSubject extends HalEntity {
 

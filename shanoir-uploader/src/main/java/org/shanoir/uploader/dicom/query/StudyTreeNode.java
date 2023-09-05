@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -43,7 +44,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 */
 	public StudyTreeNode(final Study study) {
 		this.study = study;
-		this.relatedSeries = new HashMap<String, DicomTreeNode>();
+		this.relatedSeries = new LinkedHashMap<String, DicomTreeNode>();
 	}
 
 	/**

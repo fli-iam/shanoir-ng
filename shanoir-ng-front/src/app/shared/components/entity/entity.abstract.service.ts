@@ -11,18 +11,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
-import {Page} from '../table/pageable.model';
-import {Entity, EntityRoutes} from './entity.abstract';
-import {ConfirmDialogService} from "../confirm-dialog/confirm-dialog.service";
-import {ConsoleService} from "../../console/console.service";
-import {Router} from "@angular/router";
-import {Location} from "@angular/common";
-import {UntypedFormBuilder} from "@angular/forms";
-import {KeycloakService} from "../../keycloak/keycloak.service";
-import {ServiceLocator} from "../../../utils/locator.service";
-import {ShanoirError} from "../../models/error.model";
+import { ServiceLocator } from "../../../utils/locator.service";
+import { ConsoleService } from "../../console/console.service";
+import { ShanoirError } from "../../models/error.model";
+import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
+import { Page } from '../table/pageable.model';
+import { Entity } from './entity.abstract';
 
 
 export abstract class EntityService<T extends Entity> {

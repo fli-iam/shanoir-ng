@@ -14,7 +14,7 @@
 import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { saveAs } from 'file-saver-es';
-import { Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
 import { BidsElement } from '../../bids/model/bidsElement.model';
@@ -27,9 +27,16 @@ import { Profile } from '../../shared/models/profile.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { StudyUserRight } from './study-user-right.enum';
-import { CenterStudyDTO, PublicStudyData, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
+import { StudyUser } from "./study-user.model";
+import {
+    CenterStudyDTO,
+    PublicStudyData,
+    StudyDTO,
+    StudyDTOService,
+    StudyStorageVolumeDTO,
+    SubjectWithSubjectStudyDTO
+} from './study.dto';
 import { Study } from './study.model';
-import { combineAll } from 'rxjs/operators';
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -38,16 +45,23 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     private _duasToSign: number = 0;
 
-    subscribtions: Subscription[] = [];
+    subscriptions: Subscription[] = [];
 
     // currently uploads, number is the studyId and Subjet is a rxjs Subject
-    fileUploadings: Map<number, Promise<void>> = new Map();
+    fileUploads: Map<number, Promise<void>> = new Map();
 
     constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService) {
         super(http)
     }
 
     getEntityInstance() { return new Study(); }
+
+    get(id: number, mode: 'eager' | 'lazy' = 'eager', withStorageVolume = false): Promise<Study> {
+        return this.http.get<any>(this.API_URL + '/' + id
+            + (withStorageVolume ? '?withStorageVolume=true' : ''))
+            .toPromise()
+            .then(this.mapEntity);
+    }
 
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
@@ -92,6 +106,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise().then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));
     }
 
+    getStudyUserFromStudyId(studyId: number): Promise<StudyUser[]> {
+        return this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_DELETE_USER + '/' + studyId)
+            .toPromise().then((su : StudyUser[]) => {
+                return su;
+            });
+    }
+
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         return this.http.get<SubjectWithSubjectStudyDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
             .toPromise().then(this.mapSubjectWithSubjectStudyList);
@@ -133,14 +154,14 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         }
         const promise: Promise<void> = this.http.post<any>(endpoint, formData).toPromise();
         // keep a track on the current uploadings
-        if (this.fileUploadings.has(studyId)) {
-            this.fileUploadings.set(studyId, Promise.all([this.fileUploadings.get(studyId), promise]).then(() => null));
+        if (this.fileUploads.has(studyId)) {
+            this.fileUploads.set(studyId, Promise.all([this.fileUploads.get(studyId), promise]).then(() => null));
         } else {
-            this.fileUploadings.set(studyId, promise);
+            this.fileUploads.set(studyId, promise);
         }
         return promise;
     }
-    
+
 
     deleteFile(studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
         const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId;
@@ -150,7 +171,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     downloadFile(fileName: string, studyId: number, fileType: 'protocol-file'|'dua', progressBar: LoadingBarComponent): Promise<HttpResponse<Blob>> {
        const endpoint = this.API_URL + '/' + fileType + '-download/' + studyId + "/" + fileName + "/";
        if (progressBar) {
-           this.subscribtions.push(
+           this.subscriptions.push(
            this.http.get(endpoint, {
                     reportProgress: true,
                     observe: 'events',
@@ -188,6 +209,14 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
                 });
     }
 
+    hasDUAByStudyId(studyId: number): Promise<boolean> {
+        return this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_URL + '/dua/study/' + studyId)
+            .toPromise()
+            .then(dua => {
+                return dua;
+            });
+    }
+
     deleteUserFromStudy(studyId: number, userId: number): Promise<void> {
       return this.http.delete<void>(AppUtils.BACKEND_API_STUDY_DELETE_USER + "/" + studyId + "/" + userId)
         .toPromise();
@@ -215,7 +244,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     exportBIDSByStudyId(studyId: number, progressBar: LoadingBarComponent) {
         if (!studyId) throw Error('study id is required');
-        this.subscribtions.push(
+        this.subscriptions.push(
                this.http.get(AppUtils.BACKEND_API_BIDS_EXPORT_URL + '/studyId/' + studyId, {
                     reportProgress: true,
                     observe: 'events',
@@ -258,13 +287,45 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscribtions) {
+        for(let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }
 
-    getSizeByStudyId(id: number): Promise<number> {
-        return this.http.get<number>(AppUtils.BACKEND_API_STUDY_URL + '/sizeByStudyId/' + id)
-        .toPromise();
+    getStudyDetailedStorageVolume(id: number): Promise<StudyStorageVolumeDTO> {
+        return this.http.get<StudyStorageVolumeDTO>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume/' + id)
+            .toPromise();
+    }
+
+    getStudiesStorageVolume(ids: Set<number>): Promise<Map<number, StudyStorageVolumeDTO>> {
+        const formData: FormData = new FormData();
+        formData.set('studyIds', Array.from(ids).join(","));
+
+        return this.http.post<Map<number, StudyStorageVolumeDTO>>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume', formData)
+            .toPromise()
+            .then(volumes => {
+                return volumes ? Object.entries(volumes).reduce((map: Map<number, StudyStorageVolumeDTO>, entry) => map.set(parseInt(entry[0]), entry[1]), new Map()) : new Map();
+            });
+    }
+
+    storageVolumePrettyPrint(size: number) {
+
+        const base: number = 1024;
+        const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+        if(size == null){
+            return "";
+        }
+        
+        if(size == 0){
+            return "0 " + units[0];
+        }
+
+        const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+        let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
+        let unit: string = units[exponent];
+
+        return value + " " + unit;
+
     }
 }

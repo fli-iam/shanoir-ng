@@ -95,7 +95,7 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
                 headerName: "",
                 type: "button",
                 awesome: "fa-solid fa-magnet",
-                tip: "Add coil",
+                tip: () => { return "Add coil"},
                 action: (acqEquip) => this.openCreateCoil(acqEquip)
             });
         }

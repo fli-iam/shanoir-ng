@@ -75,6 +75,19 @@ public class StudySecurityService {
 		return hasPrivilege(study, right);
 	}
 
+	public boolean filterVolumesHasRightOnStudies(List<Long> studyIds, String rightStr) throws EntityNotFoundException {
+
+		List<Long> invalidStudyIds = new ArrayList<>();
+
+		for(Long id : studyIds){
+			 if(!this.hasRightOnStudy(id, rightStr)){
+				 invalidStudyIds.add(id);
+			 }
+		}
+		studyIds.removeAll(invalidStudyIds);
+		return true;
+	}
+
 	/**
 	 * Check that the connected user has the given right for the given study.
 	 * 

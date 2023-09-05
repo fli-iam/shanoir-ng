@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -27,6 +27,7 @@ import { DatasetProcessing } from './dataset-processing.model';
 import { DatasetProcessingService } from '../../datasets/shared/dataset-processing.service';
 import { DatasetAcquisitionDTO, DatasetAcquisitionDTOService } from '../../dataset-acquisitions/shared/dataset-acquisition.dto';
 import { DatasetAcquisitionUtils } from '../../dataset-acquisitions/shared/dataset-acquisition.utils';
+import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
 
 @Injectable()
 export class DatasetDTOService {
@@ -45,7 +46,7 @@ export class DatasetDTOService {
     public toEntity(dto: DatasetDTO, result?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> {   
         if(!this.datasetProcessingService) {
             this.datasetProcessingService = this.injector.get<DatasetProcessingService>(DatasetProcessingService);
-        }   
+        }
         if (!result) result = DatasetUtils.getDatasetInstance(dto.type);
         DatasetDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
@@ -88,13 +89,13 @@ export class DatasetDTOService {
         let promises = [
             this.studyService.getStudiesNames().then(studies => {
                 for (let entity of result) {
-                    if (entity.study) 
+                    if (entity.study)
                         entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
                 }
             }),
             this.subjectService.getSubjectsNames().then(subjects => {
                 for (let entity of result) {
-                    if (entity.subject) 
+                    if (entity.subject)
                         entity.subject.name = subjects.find(subject => subject.id == entity.subject.id)?.name;
                 }
             })

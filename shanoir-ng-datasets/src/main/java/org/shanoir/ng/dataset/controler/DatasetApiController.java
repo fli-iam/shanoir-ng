@@ -24,6 +24,7 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -36,6 +37,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
+import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.EegDatasetMapper;
@@ -227,16 +229,6 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
-	}
-
-    @Override
-    public ResponseEntity<Long> getSizeByStudyId(Long studyId) {
-		Long size = datasetService.getExpressionSizeByStudyId(studyId);
-		if(size == null){
-			size = 0L;
-		}
-		size += examinationService.getExtraDataSizeByStudyid(studyId);
-		return new ResponseEntity<>(size, HttpStatus.OK);
 	}
 
 	@Override
