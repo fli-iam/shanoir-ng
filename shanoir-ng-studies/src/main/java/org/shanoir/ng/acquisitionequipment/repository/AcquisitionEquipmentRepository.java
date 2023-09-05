@@ -32,4 +32,6 @@ public interface AcquisitionEquipmentRepository extends CrudRepository<Acquisiti
 
 	AcquisitionEquipment findBySerialNumber(String serialNumber);
 
+	List<AcquisitionEquipment> findByManufacturerModelId(Long manufacturerModelId);
+
 }

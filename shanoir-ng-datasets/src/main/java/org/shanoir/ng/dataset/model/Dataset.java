@@ -150,7 +150,7 @@ public abstract class Dataset extends AbstractEntity {
 	/** Subject. */
 	private Long subjectId;
 
-	/** Can we download the dataset */
+	/** Can we download the subject */
 	private boolean downloadable = true;
 
 	/** Metadata updated by study card. */

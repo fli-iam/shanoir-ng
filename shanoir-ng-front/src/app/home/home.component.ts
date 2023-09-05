@@ -52,6 +52,7 @@ export class HomeComponent {
     nbExtensionRequests: number;
     accessRequests: AccessRequest[] = [];
 
+
     constructor(
             private breadcrumbsService: BreadcrumbsService,
             private studyService: StudyService,
