@@ -20,8 +20,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     [columnDefs]="columnDefs"
     [customActionDefs]="customActionDefs"
     [rowRoute]="getRowRoute.bind(this)"
-    (rowClick)="goToViewFromEntity($event)"
-    (pageLoaded)="fetchStorageVolumes($event)">
+    (rowClick)="goToViewFromEntity($event)">
 </shanoir-table>
 
 <!-- <study-detail *ngIf="selectedId" [id]="selectedId" mode="view"></study-detail> -->

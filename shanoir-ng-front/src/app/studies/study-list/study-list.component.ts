@@ -97,6 +97,28 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
+            let ids = new Set<number>(studies.map(study => study.id));
+            this.studyService.getStudiesStorageVolume(ids).then(volumes => {
+                studies.forEach(study => {
+                    (study as Study).totalSize = volumes.get(study.id)?.total;
+                    let sizesByLabel = new Map<String, number>()
+
+                    if(volumes.get(study.id)?.volumeByFormat){
+                        for(let sizeByFormat of volumes.get(study.id)?.volumeByFormat){
+                            if(sizeByFormat.size > 0){
+                                sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+                            }
+                        }
+                    }
+
+                    if(volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0){
+                        sizesByLabel.set("Other files (DUA, protocol...)", volumes.get(study.id)?.extraDataSize);
+                    }
+
+                    (study as Study).detailedSizes = sizesByLabel;
+                    this.isStudyVolumesFetching = false;
+                });
+            });
         });
         return earlyResult;
     }
@@ -134,7 +156,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 headerName: "Members", field: "nbMembers", type: "number", width: '30px'
             },
             {
-                headerName: "Storage volume", field: "totalSize", disableSearch: true, type: "number", orderBy: ["totalSize"],
+                headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: this.isStudyVolumesFetching, type: "number", orderBy: ["totalSize"],
                 cellRenderer: (params: any) => {
                     if (this.isStudyVolumesFetching) {
                         return "Fetching..."
@@ -228,38 +250,4 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             }
         });
     }
-
-    fetchStorageVolumes(page: Page<Study>) {
-        let studies = page.content
-        let ids = new Set<number>();
-        studies.forEach(study => {
-            if(study.totalSize == null){
-                ids.add(study.id);
-            }
-        });
-        if(ids.size == 0){
-            return;
-        }
-        this.studyService.getStudiesStorageVolume(ids).then(volumes => {
-            studies.forEach( study => {
-                (study as Study).totalSize = volumes.get(study.id)?.total;
-                let sizesByLabel = new Map<String, number>()
-
-                if(volumes.get(study.id)?.volumeByFormat){
-                    for(let sizeByFormat of volumes.get(study.id)?.volumeByFormat){
-                        if(sizeByFormat.size > 0){
-                            sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
-                        }
-                    }
-                }
-
-                if(volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0){
-                    sizesByLabel.set("Other files (DUA, protocol...)", volumes.get(study.id)?.extraDataSize);
-                }
-
-                (study as Study).detailedSizes = sizesByLabel;
-                this.isStudyVolumesFetching = false;
-            });
-        });
-    };
 }
