@@ -118,6 +118,9 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initView(): Promise<void> {
+
+        console.log(this.breadcrumbsService.currentStep.entity);
+
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
@@ -159,6 +162,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
+
         let studyPromise: Promise<Study> = this.studyService.get(this.id, true).then(study => {
             this.study = study;
 
