@@ -99,7 +99,6 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 }
             }
             this.fetchStorageVolumes(studies);
-            this.isStudyVolumesFetching = false;
         });
         return earlyResult;
     }
@@ -109,28 +108,28 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         let promises = [];
         for (let i = 0; i < studies.length; i += pageSize) {
             let ids = new Set<number>(studies.slice(i, i + pageSize).map(study => study.id));
-            promises.push(() => this.studyService.getStudiesStorageVolume(ids));
-        }
-
-        Promise.all(promises.map( func => func().then(volumes => {
-            studies.forEach(study => {
-                (study as Study).totalSize = volumes.get(study.id)?.total;
-                let sizesByLabel = new Map<String, number>()
-                if (volumes.get(study.id)?.volumeByFormat) {
-                    for (let sizeByFormat of volumes.get(study.id)?.volumeByFormat) {
-                        if (sizeByFormat.size > 0) {
-                            sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+            promises.push(() => this.studyService.getStudiesStorageVolume(ids).then(volumes => {
+                studies.forEach(study => {
+                    (study as Study).totalSize = volumes.get(study.id)?.total;
+                    let sizesByLabel = new Map<String, number>()
+                    if (volumes.get(study.id)?.volumeByFormat) {
+                        for (let sizeByFormat of volumes.get(study.id)?.volumeByFormat) {
+                            if (sizeByFormat.size > 0) {
+                                sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+                            }
                         }
                     }
-                }
 
-                if (volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0) {
-                    sizesByLabel.set("Other files (DUA, protocol...)", volumes.get(study.id)?.extraDataSize);
-                }
+                    if (volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0) {
+                        sizesByLabel.set("Other files (DUA, protocol...)", volumes.get(study.id)?.extraDataSize);
+                    }
 
-                (study as Study).detailedSizes = sizesByLabel;
-            });
-        }))).then();
+                    (study as Study).detailedSizes = sizesByLabel;
+                });
+            }));
+        }
+
+        Promise.all(promises).then(() => this.isStudyVolumesFetching = false );
     }
 
     getColumnDefs(): ColumnDefinition[] {
