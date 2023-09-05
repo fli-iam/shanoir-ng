@@ -171,7 +171,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             {
                 headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: this.isStudyVolumesFetching, type: "number", orderBy: ["totalSize"],
                 cellRenderer: (params: any) => {
-                    if (params.data.totalSize != null && this.isStudyVolumesFetching) {
+                    if (params.data.totalSize == null && this.isStudyVolumesFetching) {
                         return "Fetching..."
                     }
                     return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
