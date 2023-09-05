@@ -26,6 +26,7 @@ import {ConfirmDialogService} from "../../shared/components/confirm-dialog/confi
 import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
 import {Page} from "../../shared/components/table/pageable.model";
 import {StudyUser} from "../shared/study-user.model";
+import {AccessRequest} from "../../users/access-request/access-request.model";
 
 
 @Component({
@@ -97,21 +98,29 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
-            let ids = new Set<number>(studies.map(study => study.id));
+            this.fetchStorageVolumes(studies);
+        });
+        return earlyResult;
+    }
+
+    private fetchStorageVolumes(studies: Study[] | AccessRequest[]) {
+        let pageSize = Number(this.table.maxResults);
+        for (let i = 0; i < studies.length; i += pageSize) {
+            let studiesChunk = studies.slice(i, i + pageSize);
+            let ids = new Set<number>(studiesChunk.map(study => study.id));
             this.studyService.getStudiesStorageVolume(ids).then(volumes => {
-                studies.forEach(study => {
+                studiesChunk.forEach(study => {
                     (study as Study).totalSize = volumes.get(study.id)?.total;
                     let sizesByLabel = new Map<String, number>()
-
-                    if(volumes.get(study.id)?.volumeByFormat){
-                        for(let sizeByFormat of volumes.get(study.id)?.volumeByFormat){
-                            if(sizeByFormat.size > 0){
+                    if (volumes.get(study.id)?.volumeByFormat) {
+                        for (let sizeByFormat of volumes.get(study.id)?.volumeByFormat) {
+                            if (sizeByFormat.size > 0) {
                                 sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
                             }
                         }
                     }
 
-                    if(volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0){
+                    if (volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0) {
                         sizesByLabel.set("Other files (DUA, protocol...)", volumes.get(study.id)?.extraDataSize);
                     }
 
@@ -119,8 +128,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     this.isStudyVolumesFetching = false;
                 });
             });
-        });
-        return earlyResult;
+        }
     }
 
     getColumnDefs(): ColumnDefinition[] {
