@@ -1,7 +1,17 @@
 package org.shanoir.ng.shared.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.shared.quality.QualityTag;
 
@@ -29,11 +39,13 @@ public class SubjectStudy {
 	
 	/** Tags associated to the subject. */
     @ManyToMany
-    @JoinTable( name = "subject_study_tag",
-                joinColumns = @JoinColumn( name = "subject_study_id" ))
+    @JoinTable( name = "subject_study_tag", joinColumns = @JoinColumn( name = "subject_study_id" ))
 	private List<Tag> tags;
     
     private Integer qualityTag;
+
+	/** Subject type. */
+	private Integer subjectType;
 
     
 	/**
@@ -102,4 +114,22 @@ public class SubjectStudy {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
 
+	/**
+	 * @return the subjectType
+	 */
+	public SubjectType getSubjectType() {
+		return SubjectType.getType(subjectType);
+	}
+
+	/**
+	 * @param subjectType
+	 *            the subjectType to set
+	 */
+	public void setSubjectType(SubjectType subjectType) {
+		if (subjectType == null) {
+			this.subjectType = null;
+		} else {
+			this.subjectType = subjectType.getId();
+		}
+	}
 }

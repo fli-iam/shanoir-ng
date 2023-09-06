@@ -123,5 +123,4 @@ public class ManufacturerModelApiController implements ManufacturerModelApi {
 			throw new RestServiceException(error);
 		} 
 	}
-
 }

@@ -30,7 +30,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subject.model.SubjectType;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;

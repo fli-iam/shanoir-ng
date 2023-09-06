@@ -221,26 +221,6 @@ public class AnimalSubjectApiController implements AnimalSubjectApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), BAD_ARGUMENTS, new ErrorDetails(errors)));
 		}
 	}
-
-	@Override
-	public ResponseEntity<Void> deleteAnimalSubject(
-			@Parameter(name = "subject id of AnimalSubject to delete", required = true) @PathVariable("id") Long id) {
-		try {
-			AnimalSubject animalSubject = subjectService.getBySubjectId(id);
-			if (animalSubject == null) {
-				return new ResponseEntity<>(HttpStatus.OK);
-			}
-			subjectPathologyService.deleteByAnimalSubject(animalSubject);
-			subjectTherapyService.deleteByAnimalSubject(animalSubject);
-			subjectService.deleteBySubjectId(id);
-			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_PRECLINICAL_SUBJECT_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
-		} catch (ShanoirException e) {
-			LOG.error("ERROR while deleting animal subject " + id, e);
-			return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-		}
-		return new ResponseEntity<>(HttpStatus.OK);
-	}
-
 	private FieldErrorMap getUniqueConstraintErrors(final AnimalSubject subject) {
 		return uniqueValidator.validate(subject);
 	}

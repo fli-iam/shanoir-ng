@@ -37,6 +37,8 @@ import {
 } from './study.dto';
 import { Study } from './study.model';
 import { combineAll } from 'rxjs/operators';
+import {StudyUser, StudyUserDTO} from "./study-user.model";
+import {BACKEND_API_STUDY_DELETE_USER} from "../../utils/app.utils";
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -97,6 +99,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     getStudyNamesAndCenters(): Promise<Study[]> {
         return this.http.get<CenterStudyDTO[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL)
             .toPromise().then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));
+    }
+
+    getStudyUserFromStudyId(studyId: number): Promise<StudyUser[]> {
+        return this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_DELETE_USER + '/' + studyId)
+            .toPromise().then((su : StudyUser[]) => {
+                return su;
+            });
     }
 
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
@@ -193,6 +202,14 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
                 .then(() => {
                     this.getMyDUA();
                 });
+    }
+
+    hasDUAByStudyId(studyId: number): Promise<boolean> {
+        return this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_URL + '/dua/study/' + studyId)
+            .toPromise()
+            .then(dua => {
+                return dua;
+            });
     }
 
     deleteUserFromStudy(studyId: number, userId: number): Promise<void> {
