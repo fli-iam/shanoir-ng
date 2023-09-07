@@ -16,25 +16,25 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<legend>Mr Dataset Data</legend>
 	<ol>
 		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset echo time@@mrDatasetEchoTime">Echo Time ({{unit.MS}})</label>
+			<label i18n="Mr Dataset detail|Mr Dataset echo time@@mrDatasetEchoTime">Echo Time ({{getUnit("MS")}})</label>
 			<span class="right-col">
 				<span class="multi" *ngFor="let echoTime of dataset.echoTime">{{echoTime.echoTimeValue}}</span>
 			</span>
 		</li>
 		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset flip angle@@mrDatasetFlipAngle">Flip Angle ({{unit.DEGREES}})</label>
+			<label i18n="Mr Dataset detail|Mr Dataset flip angle@@mrDatasetFlipAngle">Flip Angle ({{getUnit("DEGREES")}})</label>
 			<span class="right-col">
 				<span class="multi" *ngFor="let flipAngle of dataset.flipAngle">{{flipAngle.flipAngleValue}}</span>
 			</span>
 		</li>
 		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset inversion time@@mrDatasetInversionTime">Inversion Time ({{unit.MS}})</label>
+			<label i18n="Mr Dataset detail|Mr Dataset inversion time@@mrDatasetInversionTime">Inversion Time ({{getUnit("MS")}})</label>
 			<span class="right-col">
 				<span class="multi" *ngFor="let inversionTime of dataset.inversionTime">{{inversionTime.inversionTimeValue}}</span>
 			</span>
 		</li>
 		<li>
-			<label i18n="Mr Dataset detail|Mr Dataset repetition time id@@mrDatasetRepetitionTimeId">Repetition Time ({{unit.MS}})</label>
+			<label i18n="Mr Dataset detail|Mr Dataset repetition time id@@mrDatasetRepetitionTimeId">Repetition Time ({{getUnit("MS")}})</label>
 			<span class="right-col">
 				<span class="multi" *ngFor="let repetitionTime of dataset.repetitionTime">{{repetitionTime.repetitionTimeValue}}</span>
 			</span>

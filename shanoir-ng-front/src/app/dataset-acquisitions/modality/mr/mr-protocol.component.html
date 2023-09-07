@@ -16,15 +16,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<legend>MR protocol</legend>
 	<ol>
 		<li>
-			<label>Acquisition duration ({{unit.MS}})</label>
+			<label>Acquisition duration ({{getUnit("MS")}})</label>
 			<span class="right-col">{{protocol.acquisitionDuration}}</span>
 		</li>
 		<li>
-			<label>Acquisition resolution X ({{unit.PX}})</label>
+			<label>Acquisition resolution X ({{getUnit("PX")}})</label>
 			<span class="right-col">{{protocol.acquisitionResolutionX}}</span>
 		</li>
 		<li>
-			<label>Acquisition resolution Y ({{unit.PX}})</label>
+			<label>Acquisition resolution Y ({{getUnit("PX")}})</label>
 			<span class="right-col">{{protocol.acquisitionResolutionY}}</span>
 		</li>
 		<li>
@@ -40,11 +40,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col">{{protocol.filters}}</span>
 		</li>
 		<li>
-			<label>FOV X ({{unit.MM}})</label>
+			<label>FOV X ({{getUnit("MM")}})</label>
 			<span class="right-col">{{protocol.fovX}}</span>
 		</li>
 		<li>
-			<label>FOV Y ({{unit.MM}})</label>
+			<label>FOV Y ({{getUnit("MM")}})</label>
 			<span class="right-col">{{protocol.fovY}}</span>
 		</li>
 		<li>
@@ -52,7 +52,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col">{{protocol.imagedNucleus}}</span>
 		</li>
 		<li>
-			<label>Imaging frequency ({{unit.MHZ}})</label>
+			<label>Imaging frequency ({{getUnit("MHZ")}})</label>
 			<span class="right-col">{{protocol.imagingFrequency}}</span>
 		</li>
 		<li>
@@ -72,39 +72,39 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col">{{protocol.patientPosition}}</span>
 		</li>
 		<li>
-			<label>Percent phase FOV ({{unit.PERCENT}})</label>
+			<label>Percent phase FOV ({{getUnit("PERCENT")}})</label>
 			<span class="right-col">{{protocol.percentPhaseFov}}</span>
 		</li>
 		<li>
-			<label>Percent sampling ({{unit.PERCENT}})</label>
+			<label>Percent sampling ({{getUnit("PERCENT")}})</label>
 			<span class="right-col">{{protocol.percentSampling}}</span>
 		</li>
 		<li>
-			<label>Pixel bandwidth ({{unit.HZ_PX}})</label>
+			<label>Pixel bandwidth ({{getUnit("HZ_PX")}})</label>
 			<span class="right-col">{{protocol.pixelBandwidth}}</span>
 		</li>
 		<li>
-			<label>Pixel spacing X ({{unit.PX}})</label>
+			<label>Pixel spacing X ({{getUnit("PX")}})</label>
 			<span class="right-col">{{protocol.pixelSpacingX}}</span>
 		</li>
 		<li>
-			<label>Pixel spacing Y ({{unit.PX}})</label>
+			<label>Pixel spacing Y ({{getUnit("PX")}})</label>
 			<span class="right-col">{{protocol.pixelSpacingY}}</span>
 		</li>
 		<li>
-			<label>Slice spacing ({{unit.MM}})</label>
+			<label>Slice spacing ({{getUnit("MM")}})</label>
 			<span class="right-col">{{protocol.sliceSpacing}}</span>
 		</li>
 		<li>
-			<label>Slice thickness ({{unit.MM}})</label>
+			<label>Slice thickness ({{getUnit("MM")}})</label>
 			<span class="right-col">{{protocol.sliceThickness}}</span>
 		</li>
 		<li>
-			<label>Temporal resolution ({{unit.MS}})</label>
+			<label>Temporal resolution ({{getUnit("MS")}})</label>
 			<span class="right-col">{{protocol.temporalResolution}}</span>
 		</li>
         <li>
-            <label>Magnetic field strength ({{unit.TESLA}})</label>
+            <label>Magnetic field strength ({{getUnit("TESLA")}})</label>
             <span class="right-col">{{protocol.magneticFieldStrength}}</span>
         </li>
 	</ol>
@@ -117,7 +117,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col">{{protocol.updatedMetadata?.acquisitionContrast ? protocol.updatedMetadata.acquisitionContrast : protocol.originMetadata?.acquisitionContrast }}</span>
 		</li>
 		<li>
-			<label>Contrast agent concentration ({{unit.MG_ML}})</label>
+			<label>Contrast agent concentration ({{getUnit("MG_ML")}})</label>
 			<span class="right-col">{{protocol.updatedMetadata?.contrastAgentConcentration ? protocol.updatedMetadata.contrastAgentConcentration : protocol.originMetadata?.contrastAgentConcentration}}</span>
 		</li>
 		<li>
@@ -125,7 +125,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			<span class="right-col">{{protocol.updatedMetadata?.contrastAgentUsed ? protocol.updatedMetadata.contrastAgentUsed : protocol.originMetadata?.contrastAgentUsed}}</span>
 		</li>
 		<li>
-			<label>Injected volume ({{unit.ML}})</label>
+			<label>Injected volume ({{getUnit("ML")}})</label>
 			<span class="right-col">{{protocol.updatedMetadata?.injectedVolume ? protocol.updatedMetadata.injectedVolume : protocol.originMetadata?.injectedVolume}}</span>
 		</li>
 		<li>

@@ -35,7 +35,6 @@ export class PetProtocolComponent implements ControlValueAccessor {
     protected disabled: boolean = false;
     protected propagateChange = (_: any) => {};
     protected propagateTouched = () => {};
-    unit = UnitOfMeasure;
 
     writeValue(obj: any): void {
         this.protocol = obj;
@@ -52,6 +51,10 @@ export class PetProtocolComponent implements ControlValueAccessor {
 
     onChange() {
         this.propagateChange(this.protocol);
+    }
+
+    getUnit(key: string) {
+        return UnitOfMeasure.getLabelByKey(key);
     }
 
 }

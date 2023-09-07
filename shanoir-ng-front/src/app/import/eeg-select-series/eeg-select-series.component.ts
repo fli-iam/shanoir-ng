@@ -36,7 +36,6 @@ export class EegSelectSeriesComponent {
     public datasets: EegDatasetDTO[];
     protected selectedDatasets: EegDatasetDTO[] = [];
     public datasetDetail: EegDatasetDTO;
-    unit = UnitOfMeasure;
 
     constructor(
             private importService: ImportService,
@@ -92,6 +91,10 @@ export class EegSelectSeriesComponent {
     public next() {
         this.importDataService.eegImportJob.datasets = this.selectedDatasets;
         this.router.navigate(['imports/eegcontext']);
+    }
+
+    getUnit(key: string) {
+        return UnitOfMeasure.getLabelByKey(key);
     }
 
 }

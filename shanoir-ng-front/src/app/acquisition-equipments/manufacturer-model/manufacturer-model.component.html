@@ -71,7 +71,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</span>
 					</li>
                     <li *ngIf="isMR">
-						<label i18n="ManufModel detail|Magnetic field label@@manufModelDetailMagneticField">Magnetic field ({{unit.TESLA}})</label>
+						<label i18n="ManufModel detail|Magnetic field label@@manufModelDetailMagneticField">Magnetic field ({{getUnit("TESLA")}})</label>
 						<span class="right-col" [ngSwitch]="mode">
 							<ng-template [ngSwitchCase]="'view'">
 								{{manufModel.magneticField}}

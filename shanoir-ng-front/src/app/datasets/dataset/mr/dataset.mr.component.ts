@@ -31,7 +31,6 @@ export class MrDatasetComponent implements OnInit{
     @Input() parentFormGroup: UntypedFormGroup;
     // allMrDatasetNatures: any[];
     public natureOptions: Option<MrDatasetNature>[];
-    public unit = UnitOfMeasure;
 
     constructor() {
         this.natureOptions = MrDatasetNature.options;
@@ -49,4 +48,8 @@ export class MrDatasetComponent implements OnInit{
         this.parentFormGroup.markAsDirty();
         this.parentFormGroup.updateValueAndValidity();
     }
+    getUnit(key: string) {
+        return UnitOfMeasure.getLabelByKey(key);
+    }
+
 }

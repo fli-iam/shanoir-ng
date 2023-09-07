@@ -37,7 +37,6 @@ export class EegDatasetComponent implements OnInit  {
 
     private browserPaging: BrowserPaging<Channel>;
     private channelPromise: Promise<any>;
-    unit = UnitOfMeasure;
 
     ngOnInit(): void {
 
@@ -71,5 +70,9 @@ export class EegDatasetComponent implements OnInit  {
                 resolve(this.browserPaging.getPage(pageable));
             });
         });
+    }
+
+    getUnit(key: string) {
+        return UnitOfMeasure.getLabelByKey(key);
     }
 }

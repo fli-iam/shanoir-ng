@@ -37,7 +37,6 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
 
     manufs: Manufacturer[];
     datasetModalityTypes: Option<DatasetModalityType>[];
-    unit = UnitOfMeasure;
 
     constructor(
             private route: ActivatedRoute,
@@ -138,4 +137,9 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
             );
         });
     }
+
+    getUnit(key: string) {
+        return UnitOfMeasure.getLabelByKey(key);
+    }
+
 }
