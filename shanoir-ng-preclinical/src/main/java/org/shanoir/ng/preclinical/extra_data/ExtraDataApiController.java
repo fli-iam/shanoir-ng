@@ -106,8 +106,8 @@ public class ExtraDataApiController implements ExtraDataApi {
 		ExaminationExtraData extradata = extraDataService.findById(id);
 
 		try {
-			extradata = saveUploadedFile(extradata, uploadfiles[0]);
-			extraDataService.save(extradata);
+			ExaminationExtraData uploadedData = saveUploadedFile(extradata, uploadfiles[0]);
+			extraDataService.save(uploadedData);
 			return new ResponseEntity<>(extradata, HttpStatus.OK);
 		} catch (IOException e) {
 			throw new RestServiceException(e,
@@ -361,6 +361,7 @@ public class ExtraDataApiController implements ExtraDataApi {
 		createdFolder.mkdirs();
 		// Path to file
 		File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
+		fileToGet.createNewFile();
 		file.transferTo(fileToGet);
 
 		extradata.setFilename(file.getOriginalFilename());

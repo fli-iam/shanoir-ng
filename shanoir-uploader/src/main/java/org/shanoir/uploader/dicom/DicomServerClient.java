@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import org.dcm4che3.net.Status;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
 import org.shanoir.ng.importer.dicom.query.QueryPACSService;
-import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.dicom.query.ConfigBean;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
@@ -38,7 +37,7 @@ public class DicomServerClient implements IDicomServerClient {
 		
 	private DcmRcvManager dcmRcvManager = new DcmRcvManager();
 	
-	private QueryPACSService queryPACSService;
+	private QueryPACSService queryPACSService = new QueryPACSService();
 	
 	private File workFolder;
 	
@@ -48,8 +47,9 @@ public class DicomServerClient implements IDicomServerClient {
 		// Initialize connection configuration parameters here: to be used for all queries
 		DicomNode calling = new DicomNode(config.getLocalDicomServerAETCalling(), config.getLocalDicomServerHost(), config.getLocalDicomServerPort());
 		DicomNode called = new DicomNode(config.getDicomServerAETCalled(), config.getDicomServerHost(), config.getDicomServerPort());
-		queryPACSService = new QueryPACSService();
-		queryPACSService.setDicomNodes(calling, called);
+		// attention: we use calling here (== ShUp) to inform the DICOM server to send to ShUp,
+		// who becomes the "called" afterwards from the point of view of the DICOM server (switch)
+		queryPACSService.setDicomNodes(calling, called, config.getLocalDicomServerAETCalling());
 		dcmRcvManager.configure(config);
 	}
 	
@@ -58,8 +58,14 @@ public class DicomServerClient implements IDicomServerClient {
 	 */
 	@Override
 	public boolean echoDicomServer() {
-		// @todo add echo here
-		logger.info("Echoing of the DICOM server was successful? -> ");
+		int port = Integer.valueOf(config.getDicomServerPort());
+		boolean result = queryPACSService.queryECHO(config.getDicomServerAETCalled(), config.getDicomServerHost(), port, config.getLocalDicomServerAETCalling());
+		if (result) {
+			logger.info("Echoing of the DICOM server was successful? -> " + result);
+		} else {
+			logger.info("Echoing of the DICOM server was successful? -> " + result);
+			return false;
+		}
 		return true;
 	}
 	
@@ -89,7 +95,8 @@ public class DicomServerClient implements IDicomServerClient {
 	 */
 	@Override
 	public synchronized List<String> retrieveDicomFiles(final Collection<SerieTreeNode> selectedSeries, final File uploadFolder) {
-		dcmRcvManager.setDestination(uploadFolder.getAbsolutePath());
+		// for each exam/patient download: create a new mini-pacs that uses the specific download folder within the workFolder
+		dcmRcvManager.startSCPServer(uploadFolder.getAbsolutePath());
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		final List<String> oldFileNames = new ArrayList<String>();
 		// Iterate over all series and send command for sending DICOM files.
@@ -100,20 +107,26 @@ public class DicomServerClient implements IDicomServerClient {
 				// move files from server directly into uploadFolder
 				boolean noError = getFilesFromServer(seriesInstanceUID, serieTreeNode.getDescription());
 				if(noError) {
-					// create file name filter for old files
-					final FilenameFilter oldFileNamesFilter = new FilenameFilter() {
+					// create file name filter for old files and only use .dcm files (ignore /tmp folder)
+					final FilenameFilter oldFileNamesAndDICOMFilter = new FilenameFilter() {
 						@Override
 						public boolean accept(File dir, String name) {
+							// ignore files from other series before
 							for (Iterator iterator = oldFileNames.iterator(); iterator.hasNext();) {
 								String oldFileName = (String) iterator.next();
 								if (name.equals(oldFileName)) {
 									return false;
 								}
 							}
-							return true;
+							// only take .dcm files into consideration, ignore others
+							if (name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
+								return true;
+							} else {
+								return false;
+							}
 						}
 					};
-					File[] newFileNames = uploadFolder.listFiles(oldFileNamesFilter);
+					File[] newFileNames = uploadFolder.listFiles(oldFileNamesAndDICOMFilter);
 					logger.debug("newFileNames: " + newFileNames.length);
 					for (int i = 0; i < newFileNames.length; i++) {
 						fileNamesForSerie.add(newFileNames[i].getName());
@@ -148,9 +161,9 @@ public class DicomServerClient implements IDicomServerClient {
 	private boolean getFilesFromServer(final String seriesInstanceUID, final String seriesDescription) throws Exception {
 		final DicomState state;
 		try {
-			logger.info("\n\n C_MOVE, serie (" + seriesDescription + ") command: launching dcmqr with args:\n\n");
+			logger.info("\n C_MOVE, serie (" + seriesDescription + ") command: launching c-move with args: " + seriesDescription + ", " + seriesInstanceUID + "\n");
 			state = queryPACSService.queryCMOVE(seriesInstanceUID);
-			logger.debug("\n\n Dicom Query list:\n " + state.toString() + "\n");
+			logger.debug("\n Dicom Query list:\n " + state.toString() + "\n");
 		} catch (final Exception e) {
 			logger.error(e.getMessage(), e);
 			return false;

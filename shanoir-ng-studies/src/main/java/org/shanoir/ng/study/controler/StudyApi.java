@@ -21,23 +21,21 @@ import java.util.Map;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.PublicStudyDTO;
 import org.shanoir.ng.study.dto.StudyDTO;
+import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,6 +45,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+
 
 @Tag(name = "studies", description = "the studies API")
 @RequestMapping("/studies")
@@ -117,7 +116,10 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("@studySecurityService.hasRightOnTrustedStudyDTO(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<StudyDTO> findStudyById(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+			@Parameter(name = "Fetch detailed storage volume of study")
+			@Valid
+			@RequestParam(value = "withStorageVolume", required = false, defaultValue="false") boolean withStorageVolume);
 
 	@Operation(summary = "", description = "Saves a new study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "created study"),
@@ -132,15 +134,30 @@ public interface StudyApi {
 			@Parameter(name = "study to create", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
 
-	@Operation(summary = "", description = "If exists, returns the size of the study files corresponding to the given id")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Size of the study files in bytes"),
+  @Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Sizes of the study files in bytes by format"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no study found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error")})
+	@GetMapping(value = "/detailedStorageVolume/{studyId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
+	ResponseEntity<StudyStorageVolumeDTO> getDetailedStorageVolume(@PathVariable("studyId") Long studyId) throws RestServiceException;
+
+	@Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "Sizes of the study files in bytes by format"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "404", description = "no study found"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/sizeByStudyId/{studyId}", produces = { "application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-	ResponseEntity<Long> getStudyFilesSize(@PathVariable("studyId") Long studyId);
+	@PostMapping(value = "/detailedStorageVolume", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @studySecurityService.filterVolumesHasRightOnStudies(#studyIds, 'CAN_SEE_ALL'))")
+	ResponseEntity<Map<Long, StudyStorageVolumeDTO>> getDetailedStorageVolumeByStudy(
+			@Parameter(name = "study ids") @RequestParam List<Long> studyIds
+	) throws RestServiceException;
+
 
 	@Operation(summary = "", description = "Updates a study")
 	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "study updated"),
@@ -241,6 +258,20 @@ public interface StudyApi {
 			@Parameter(name = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
 			throws RestServiceException, MicroServiceCommunicationException;
 
+	@Operation(summary = "", description = "Returns the data user agreement (DUA) of a specific study")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "204", description = "dua confirmed"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/dua/study/{studyId}", produces = { "application/json" }, consumes = {"application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<Boolean> hasDUAByStudyId(
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws RestServiceException, ShanoirException;
+
+
 	@Operation(summary = "", description = "Add DUA to a study")
 	@ApiResponses(value = {
 	        @ApiResponse(responseCode = "200", description = "dua uploaded"),
@@ -304,5 +335,15 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/public/connected", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<IdName>> findPublicStudiesConnected();
+
+	@Operation(summary = "", description = "If exists, returns a list of StudyUser corresponding to the given studyId")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "List of study users"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no study found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/studyUser/{studyId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
+	ResponseEntity<List<StudyUser>> getStudyUserByStudyId(@PathVariable("studyId") Long studyId);
 
 }

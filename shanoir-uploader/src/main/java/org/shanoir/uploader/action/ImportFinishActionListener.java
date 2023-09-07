@@ -154,15 +154,10 @@ public class ImportFinishActionListener implements ActionListener {
 			examinationDTO.setSubjectId(subject.getId());
 			IdName center = (IdName) mainWindow.importDialog.mrExaminationCenterCB.getSelectedItem();
 			examinationDTO.setCenterId(center.getId());
-//			Investigator investigator = (Investigator) mainWindow.importDialog.mrExaminationExamExecutiveCB.getSelectedItem();
 			Date examinationDate = (Date) mainWindow.importDialog.mrExaminationDateDP.getModel().getValue();
 			String examinationComment = mainWindow.importDialog.mrExaminationCommentTF.getText();
 			examinationDTO.setExaminationDate(examinationDate);
 			examinationDTO.setComment(examinationComment);
-
-			/**
-			 * TODO handle investigators here or decide finally to delete them in sh-ng
-			 */
 			examinationDTO = shanoirUploaderServiceClient.createExamination(examinationDTO);
 			if (examinationDTO == null) {
 				JOptionPane.showMessageDialog(mainWindow.frame,

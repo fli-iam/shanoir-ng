@@ -1,5 +1,7 @@
 package org.shanoir.ng.shared.model;
 
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
+
 import java.util.List;
 
 public class SubjectStudyDTO {
@@ -7,6 +9,8 @@ public class SubjectStudyDTO {
 	private Long id;
 	
 	private List<Tag> tags;
+
+	private SubjectType subjectType;
 
 	/**
 	 * @return the tags
@@ -34,5 +38,13 @@ public class SubjectStudyDTO {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public SubjectType getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(SubjectType subjectType) {
+		this.subjectType = subjectType;
 	}
 }

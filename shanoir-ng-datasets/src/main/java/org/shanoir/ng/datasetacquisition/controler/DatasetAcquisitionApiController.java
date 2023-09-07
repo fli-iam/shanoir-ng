@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
+import org.shanoir.ng.utils.SecurityContextUtil;
+
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDTO;
 import org.shanoir.ng.datasetacquisition.dto.DatasetAcquisitionDatasetsDTO;
@@ -103,11 +105,17 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
-	@Override
-	public ResponseEntity<Void> createNewEegDatasetAcquisition(@Parameter(name = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) throws IOException {
+	@RabbitListener(queues = RabbitMQConfiguration.IMPORT_EEG_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public int createNewEegDatasetAcquisition(Message importJobAsString) throws IOException {
+        SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+
+		EegImportJob importJob = objectMapper.readValue(importJobAsString.getBody(), EegImportJob.class);
+		
 		eegImporterService.createEegDataset(importJob);
 		importerService.cleanTempFiles(importJob.getWorkFolder());
-		return new ResponseEntity<Void>(HttpStatus.OK);
+		return HttpStatus.OK.value();
 	}
 
 	@RabbitListener(queues = RabbitMQConfiguration.IMPORTER_QUEUE_DATASET)

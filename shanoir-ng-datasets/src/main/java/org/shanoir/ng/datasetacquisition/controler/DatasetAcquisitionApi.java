@@ -59,20 +59,6 @@ public interface DatasetAcquisitionApi {
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
     ResponseEntity<Void> createNewDatasetAcquisition(@Parameter(name = "DatasetAcquisition to create" ,required=true ) @Valid @RequestBody ImportJob importJob) throws RestServiceException;
 
-	@Operation(summary = "", description = "Creates new EEG dataset acquisition")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "204", description = "created EEG Dataset Acquitistion"),
-        @ApiResponse(responseCode = "401", description = "unauthorized"),
-        @ApiResponse(responseCode = "403", description = "forbidden"),
-        @ApiResponse(responseCode = "422", description = "bad parameters"),
-        @ApiResponse(responseCode = "500", description = "unexpected error") })
-    @RequestMapping(value = "/datasetacquisition_eeg",
-        produces = { "application/json" },
-        consumes = { "application/json" },
-        method = RequestMethod.POST)
-    @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#importJob.getExaminationId(), 'CAN_IMPORT'))")
-    ResponseEntity<Void> createNewEegDatasetAcquisition(@Parameter(name = "DatasetAcquisition to create" ,required=true )  @Valid @RequestBody EegImportJob importJob) throws IOException;
-	
 	@Operation(summary = "", description = "If exists, returns the dataset acquisitions corresponding to the given study card")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found dataset acquisitions"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),

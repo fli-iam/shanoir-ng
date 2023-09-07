@@ -5,6 +5,7 @@ import java.util.List;
 import org.shanoir.ng.shared.quality.QualityTag;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -39,11 +40,13 @@ public class SubjectStudy {
 	
 	/** Tags associated to the subject. */
     @ManyToMany
-    @JoinTable( name = "subject_study_tag",
-                joinColumns = @JoinColumn( name = "subject_study_id" ))
+    @JoinTable( name = "subject_study_tag", joinColumns = @JoinColumn( name = "subject_study_id" ))
 	private List<Tag> tags;
     
     private Integer qualityTag;
+
+	/** Subject type. */
+	private Integer subjectType;
 
     
 	/**
@@ -112,4 +115,22 @@ public class SubjectStudy {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
 
+	/**
+	 * @return the subjectType
+	 */
+	public SubjectType getSubjectType() {
+		return SubjectType.getType(subjectType);
+	}
+
+	/**
+	 * @param subjectType
+	 *            the subjectType to set
+	 */
+	public void setSubjectType(SubjectType subjectType) {
+		if (subjectType == null) {
+			this.subjectType = null;
+		} else {
+			this.subjectType = subjectType.getId();
+		}
+	}
 }

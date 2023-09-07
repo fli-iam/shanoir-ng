@@ -27,9 +27,18 @@ import { Profile } from '../../shared/models/profile.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { StudyUserRight } from './study-user-right.enum';
-import { CenterStudyDTO, PublicStudyData, StudyDTO, StudyDTOService, SubjectWithSubjectStudyDTO} from './study.dto';
+import {
+    CenterStudyDTO,
+    PublicStudyData,
+    StudyDTO,
+    StudyDTOService,
+    StudyStorageVolumeDTO,
+    SubjectWithSubjectStudyDTO
+} from './study.dto';
 import { Study } from './study.model';
 import { combineAll } from 'rxjs/operators';
+import {StudyUser, StudyUserDTO} from "./study-user.model";
+import {BACKEND_API_STUDY_DELETE_USER} from "../../utils/app.utils";
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -92,6 +101,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise().then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));
     }
 
+    getStudyUserFromStudyId(studyId: number): Promise<StudyUser[]> {
+        return this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_DELETE_USER + '/' + studyId)
+            .toPromise().then((su : StudyUser[]) => {
+                return su;
+            });
+    }
+
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         return this.http.get<SubjectWithSubjectStudyDTO[]>(AppUtils.BACKEND_API_SUBJECT_URL + '/' + studyId + '/allSubjects')
             .toPromise().then(this.mapSubjectWithSubjectStudyList);
@@ -140,7 +156,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         }
         return promise;
     }
-    
+
 
     deleteFile(studyId: number, fileType: 'protocol-file'|'dua'): Observable<any> {
         const endpoint = this.API_URL + '/' + fileType + '-delete/' + studyId;
@@ -186,6 +202,14 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
                 .then(() => {
                     this.getMyDUA();
                 });
+    }
+
+    hasDUAByStudyId(studyId: number): Promise<boolean> {
+        return this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_URL + '/dua/study/' + studyId)
+            .toPromise()
+            .then(dua => {
+                return dua;
+            });
     }
 
     deleteUserFromStudy(studyId: number, userId: number): Promise<void> {
@@ -263,8 +287,40 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         }
     }
 
-    getSizeByStudyId(id: number): Promise<number> {
-        return this.http.get<number>(AppUtils.BACKEND_API_STUDY_URL + '/sizeByStudyId/' + id)
-        .toPromise();
+    getStudyDetailedStorageVolume(id: number): Promise<StudyStorageVolumeDTO> {
+        return this.http.get<StudyStorageVolumeDTO>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume/' + id)
+            .toPromise();
+    }
+
+    getStudiesStorageVolume(ids: Set<number>): Promise<Map<number, StudyStorageVolumeDTO>> {
+        const formData: FormData = new FormData();
+        formData.set('studyIds', Array.from(ids).join(","));
+
+        return this.http.post<Map<number, StudyStorageVolumeDTO>>(AppUtils.BACKEND_API_STUDY_URL + '/detailedStorageVolume', formData)
+            .toPromise()
+            .then(volumes => {
+                return volumes ? Object.entries(volumes).reduce((map: Map<number, StudyStorageVolumeDTO>, entry) => map.set(parseInt(entry[0]), entry[1]), new Map()) : new Map();
+            });
+    }
+
+    storageVolumePrettyPrint(size: number) {
+
+        const base: number = 1024;
+        const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+        if(size == null){
+            return "";
+        }
+        
+        if(size == 0){
+            return "0 " + units[0];
+        }
+
+        const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+        let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
+        let unit: string = units[exponent];
+
+        return value + " " + unit;
+
     }
 }

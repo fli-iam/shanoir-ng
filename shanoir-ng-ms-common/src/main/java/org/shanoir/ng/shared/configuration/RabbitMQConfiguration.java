@@ -58,6 +58,9 @@ public class RabbitMQConfiguration {
 	/** BIDS purpose => Get a list of subjects to create bids participants file. */
 	public static final String SUBJECTS_QUEUE = "subjects-queue";
 
+	/** Preclinical subject creation => Check if a subject with this name already exists **/
+	public static final String SUBJECTS_NAME_QUEUE = "subjects-name-queue";
+
 	/** Study name updated => notify dataset MS to change database. */
 	public static final String STUDY_NAME_UPDATE_QUEUE = "study-name-update-queue";
 
@@ -69,6 +72,10 @@ public class RabbitMQConfiguration {
 	
 	/** Get the list of subjects for a given study. */
 	public static final String DATASET_SUBJECT_QUEUE = "dataset-subjects-queue";
+
+	public static final String STUDY_DATASETS_DETAILED_STORAGE_VOLUME = "study-datasets-detailed-storage-volume";
+
+	public static final String STUDY_DATASETS_TOTAL_STORAGE_VOLUME = "study-datasets-total-storage-volume";
 
 	/** Get the type of dataset from a given study. */
 	public static final String STUDY_DATASET_TYPE = "study-dataset-type";
@@ -99,6 +106,8 @@ public class RabbitMQConfiguration {
 
 	/** Queue to retrieve the center ID from an acquisition equipement ID. */
 	public static final String ACQUISITION_EQUIPEMENT_CENTER_QUEUE = "acquisition-equipement-center-queue";
+	/** Queue to retrieve the center ID from an acquisition equipement ID. */
+	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipement-update-queue";
 	
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
@@ -153,6 +162,9 @@ public class RabbitMQConfiguration {
 
 	/** Queue used to get the name of a study from ID */
 	public static final String STUDY_NAME_QUEUE = "study-name-queue";
+	
+	/** Queue used to import eeg data */
+	public static final String IMPORT_EEG_QUEUE = "import-eeg-queue";
 
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
@@ -166,10 +178,6 @@ public class RabbitMQConfiguration {
 	private static final String DELETE_CENTER_QUEUE_NAME_OUT = "delete_center_queue_from_ng";
 
 	private static final String DELETE_COIL_QUEUE_NAME_OUT = "delete_coil_queue_from_ng";
-	
-	private static final String MANUFACTURER_MODEL_QUEUE_NAME_OUT = "manufacturer_model_queue_from_ng";
-
-	private static final String MANUFACTURER_QUEUE_NAME_OUT = "manufacturer_queue_from_ng";
 
 	private static final String STUDY_QUEUE_NAME_IN = "study_queue_to_ng";
 
@@ -227,8 +235,23 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
+	public static Queue subjectsNameQueue() {
+		return new Queue(SUBJECTS_NAME_QUEUE, true);
+	}
+
+	@Bean
 	public static Queue datasetSubjectQueue() {
 		return new Queue(DATASET_SUBJECT_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue studyDatasetsDetailedStorageVolumeQueue() {
+		return new Queue(STUDY_DATASETS_DETAILED_STORAGE_VOLUME, true);
+	}
+
+	@Bean
+	public static Queue studyDatasetsTotalStorageVolumeQueue() {
+		return new Queue(STUDY_DATASETS_TOTAL_STORAGE_VOLUME, true);
 	}
 
 	@Bean
@@ -268,7 +291,7 @@ public class RabbitMQConfiguration {
 	public static Queue studyNameUpdateQueue() {
 		return new Queue(STUDY_NAME_UPDATE_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue subjectNameUpdateQueue() {
 		return new Queue(SUBJECT_NAME_UPDATE_QUEUE, true);
@@ -288,10 +311,14 @@ public class RabbitMQConfiguration {
 	public static Queue findStudyCardQueue() {
 		return new Queue(FIND_STUDY_CARD_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue acquisitionEquipementCenterQueue() {
 		return new Queue(ACQUISITION_EQUIPEMENT_CENTER_QUEUE, true);
+	}
+	@Bean
+	public static Queue acquisitionEquipementUpdateQueue() {
+		return new Queue(ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, true);
 	}
 	
 	@Bean
@@ -386,5 +413,10 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue studyNameQueue() {
 		return new Queue(STUDY_NAME_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue importEEGQueue() {
+		return new Queue(IMPORT_EEG_QUEUE, true);
 	}
 }

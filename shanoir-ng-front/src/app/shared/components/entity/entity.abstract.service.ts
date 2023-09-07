@@ -23,6 +23,8 @@ import {UntypedFormBuilder} from "@angular/forms";
 import {KeycloakService} from "../../keycloak/keycloak.service";
 import {ServiceLocator} from "../../../utils/locator.service";
 import {ShanoirError} from "../../models/error.model";
+import {ManufacturerModel} from "../../../acquisition-equipments/shared/manufacturer-model.model";
+import {Manufacturer} from "../../../acquisition-equipments/shared/manufacturer.model";
 
 
 export abstract class EntityService<T extends Entity> {
@@ -95,6 +97,7 @@ export abstract class EntityService<T extends Entity> {
                             this.consoleService.log('warn', warn);
                             return false;
                         }
+
                         throw Error(reason);
                     });
                 }
@@ -102,8 +105,9 @@ export abstract class EntityService<T extends Entity> {
             })
     }
 
-    get(id: number): Promise<T> {
-        return this.http.get<any>(this.API_URL + '/' + id)
+    get(id: number, withStorageVolume = false): Promise<T> {
+        return this.http.get<any>(this.API_URL + '/' + id
+            + (withStorageVolume ? '?withStorageVolume=true' : ''))
             .toPromise()
             .then(this.mapEntity);
     }
