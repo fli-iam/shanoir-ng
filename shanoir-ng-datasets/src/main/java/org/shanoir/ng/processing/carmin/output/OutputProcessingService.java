@@ -3,6 +3,7 @@ package org.shanoir.ng.processing.carmin.output;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
@@ -132,11 +133,8 @@ public class OutputProcessingService {
     }
 
     private void deleteCache(File cacheFolder) {
-
-        try (Stream<Path> stream = Files.walk(cacheFolder.toPath()) ) {
-            stream.sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
+        try {
+            FileUtils.deleteDirectory(cacheFolder);
         } catch (IOException e) {
             LOG.error("I/O error while deleting cache dir [{}]", cacheFolder.getAbsolutePath());
         }

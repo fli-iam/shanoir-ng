@@ -40,7 +40,6 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     private static final Logger LOG = LoggerFactory.getLogger(OFSEPSeqIdProcessing.class);
 
     public static final String PIPELINE_OUTPUT = "output.json";
-
     private static final String[] SERIE_PROPERTIES = {
             "coil",
             "type",
@@ -75,6 +74,11 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
             "axis"
 
     };
+    public static final String TYPE = "type";
+    public static final String SERIES = "series";
+    public static final String ID = "id";
+    public static final String VOLUMES = "volumes";
+    public static final String ORIENTATION = "orientation";
 
     @Autowired
     private DatasetRepository datasetRepository;
@@ -108,7 +112,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
                 try (InputStream is = new FileInputStream(file)) {
                     JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
-                    JSONArray series = json.getJSONArray("series");
+                    JSONArray series = json.getJSONArray(SERIES);
 
                     if(series.length() < 1){
                         LOG.warn("Series list is empty in result file [{}].", file.getAbsolutePath());
@@ -141,7 +145,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
         for (int i = 0; i < series.length(); i++) {
 
             JSONObject serie = series.getJSONObject(i);
-            Long serieId = serie.getLong("id");
+            Long serieId = serie.getLong(ID);
 
 
             List<Dataset> datasets = processing.getInputDatasets().stream()
@@ -189,12 +193,12 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      */
     public void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException {
 
-        DatasetMetadataField.NAME.update(ds, vol.getString("type"));
+        DatasetMetadataField.NAME.update(ds, vol.getString(TYPE));
         datasetRepository.save(ds);
 
         if(ds.getDatasetAcquisition() instanceof MrDatasetAcquisition){
             DatasetAcquisition acq = ds.getDatasetAcquisition();
-            DatasetAcquisitionMetadataField.MR_SEQUENCE_NAME.update(acq, serie.getString("type"));
+            DatasetAcquisitionMetadataField.MR_SEQUENCE_NAME.update(acq, serie.getString(TYPE));
             acquisitionService.update(acq);
         }
 
@@ -256,7 +260,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      */
     public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie) throws JSONException, PacsException {
 
-        JSONArray volumes = serie.getJSONArray("volumes");
+        JSONArray volumes = serie.getJSONArray(VOLUMES);
 
         Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(dataset);
 
@@ -265,7 +269,17 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
         for (int i = 0 ; i < volumes.length(); i++) {
 
             JSONObject volume = volumes.getJSONObject(i);
-            JSONArray volOrientation = volume.getJSONArray("orientation");
+            JSONArray volOrientation = volume.getJSONArray(ORIENTATION);
+
+            if(dsOrientation == null || dsOrientation.length == 0){
+                LOG.error("ImageOrientationPatient DICOM property is empty for dataset [{}]", dataset.getId());
+                continue;
+            }
+
+            if(volOrientation == null || volOrientation.length() == 0){
+                LOG.error("Orientation is empty in result file for volume [{}]", volume.getString(ID));
+                continue;
+            }
 
             if(this.areOrientationsEquals(dsOrientation, volOrientation)){
                 return volume;
@@ -286,6 +300,10 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @throws JSONException
      */
     public boolean areOrientationsEquals(double[] dsOrientation, JSONArray volOrientation) throws JSONException {
+
+        if(dsOrientation == null || dsOrientation.length == 0 || volOrientation == null || volOrientation.length() == 0){
+            return false;
+        }
 
         if(dsOrientation.length != volOrientation.length()){
             return false;

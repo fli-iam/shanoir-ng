@@ -56,7 +56,7 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
 
         List<ParameterResourcesDTO> parametersDatasets = carminDatasetProcessingService.createProcessingResources(createdProcessing, dto.getParametersResources());
 
-        if(start){
+        if (start) {
             if (createdProcessing.getIdentifier() == null || createdProcessing.getIdentifier().isEmpty()) {
                 throw new RestServiceException(
                         new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Monitoring job has been set to start but processing identifier is null or empty.", null));
@@ -81,7 +81,7 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
         try {
             CarminDatasetProcessing updatedProcessing = carminDatasetProcessingService.updateCarminDatasetProcessing(mapper.carminDatasetProcessingDTOToCarminDatasetProcessing(dto));
 
-            if(start){
+            if (start) {
                 if (updatedProcessing.getIdentifier() == null || updatedProcessing.getIdentifier().isEmpty()) {
                     throw new RestServiceException(
                             new ErrorModel(HttpStatus.BAD_REQUEST.value(), "Monitoring job has been set to start but processing identifier is null or empty.", null));
@@ -99,14 +99,14 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
     @Override
     public ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingById(Long datasetProcessingId) {
         final Optional<CarminDatasetProcessing> processing = carminDatasetProcessingService.findById(datasetProcessingId);
-		if (processing.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		// Avoid infinite loop error -> We should be using datasetDTO here in a general matter.
-		for (Dataset dataset : processing.get().getInputDatasets()) {
-			dataset.setDatasetAcquisition(null);
-		}
-		return new ResponseEntity<>(mapper.carminDatasetProcessingToCarminDatasetProcessingDTO(processing.get()), HttpStatus.OK);
+        if (processing.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // Avoid infinite loop error -> We should be using datasetDTO here in a general matter.
+        for (Dataset dataset : processing.get().getInputDatasets()) {
+            dataset.setDatasetAcquisition(null);
+        }
+        return new ResponseEntity<>(mapper.carminDatasetProcessingToCarminDatasetProcessingDTO(processing.get()), HttpStatus.OK);
     }
 
     @Override
@@ -125,10 +125,10 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
     @Override
     public ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessings() {
         final List<CarminDatasetProcessing> processings = carminDatasetProcessingService.findAllAllowed();
-		if (processings.isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		return new ResponseEntity<>(mapper.carminDatasetProcessingsToCarminDatasetProcessingDTOs(processings), HttpStatus.OK);
+        if (processings.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(mapper.carminDatasetProcessingsToCarminDatasetProcessingDTOs(processings), HttpStatus.OK);
     }
 
     @Override
@@ -142,8 +142,8 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
         processings = processings.stream()
                 .filter(processing ->
                         !CollectionUtils.isEmpty(processing.getInputDatasets())
-                && processing.getInputDatasets().get(0).getStudyId().equals(studyId)
-                && processing.getInputDatasets().get(0).getSubjectId().equals(subjectId))
+                                && processing.getInputDatasets().get(0).getStudyId().equals(studyId)
+                                && processing.getInputDatasets().get(0).getSubjectId().equals(subjectId))
                 .collect(Collectors.toList());
 
         if (processings.isEmpty()) {
@@ -162,5 +162,5 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
         }
     }
 
-    
+
 }
