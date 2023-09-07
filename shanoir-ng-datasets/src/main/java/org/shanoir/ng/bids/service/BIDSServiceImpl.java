@@ -315,6 +315,19 @@ public class BIDSServiceImpl implements BIDSService {
 				buffer.append("session_id").append(TABULATION)
 				.append("acq_time").append(TABULATION)
 				.append(NEW_LINE);
+				
+				for (Examination examination : examinationList) {
+					String sessionLabel = "" + examination.getId();
+					sessionLabel += (examination.getComment() != null ? "-" + examination.getComment() : "");
+			
+					sessionLabel = sessionLabel.replaceAll(" ", "");
+					sessionLabel = sessionLabel.replaceAll("_", "");
+			
+					buffer.append(sessionLabel).append(TABULATION)
+					.append(examination.getExaminationDate()).append(TABULATION)
+					.append(NEW_LINE);
+				}
+				
 				Files.write(Paths.get(sessionFile.getAbsolutePath()), buffer.toString().getBytes());
 			}
 			// Iterate over examinations to export them as BIDS
@@ -401,13 +414,6 @@ public class BIDSServiceImpl implements BIDSService {
 		sessionLabel = sessionLabel.replaceAll(" ", "");
 		sessionLabel = sessionLabel.replaceAll("_", "");
 
-		// Write the session file
-		StringBuilder buffer = new StringBuilder();
-		buffer.append(sessionLabel).append(TABULATION)
-		.append(examination.getExaminationDate()).append(TABULATION)
-		.append(NEW_LINE);
-		Files.write(Paths.get(sessionFile.getAbsolutePath()), buffer.toString().getBytes());
-
 		// Create exam/session folder
 		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  sessionLabel);
 		if (!examFolder.exists()) {
@@ -450,11 +456,11 @@ public class BIDSServiceImpl implements BIDSService {
 				MrDataset mrDataset = (MrDataset) dataset;
 				if (mrDataset.getUpdatedMrMetadata() != null && mrDataset.getUpdatedMrMetadata().getMrDatasetNature() != null) {
 					nature = mrDataset.getUpdatedMrMetadata().getMrDatasetNature().name();
+					fileName += natureMap.get(nature) + "_";
 				} else if (mrDataset.getOriginMrMetadata() != null && mrDataset.getOriginMrMetadata().getMrDatasetNature() != null) {
 					nature = mrDataset.getOriginMrMetadata().getMrDatasetNature().name();
+					fileName += natureMap.get(nature) + "_";
 				}
-				fileName += natureMap.get(nature);
-				fileName += "_";
 			}
 
 			fileName += srcFile.getName();
