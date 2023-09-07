@@ -83,8 +83,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(selectedRulesChange)="selectedRules = $event"> <!-- (importRules)="importRules()" -->
 				</study-card-rules>
 			</fieldset>
-			<fieldset *ngIf="progress > 0 && progress < 1">
-				<progress-bar [progress]="progress" class="progress"></progress-bar>
+			<fieldset *ngIf="progress > 0 && progress < 1" class="progress">
+				<progress-bar [progress]="progress"></progress-bar>
 				Computing quality checks...
 			</fieldset>
 			<fieldset class="report" *ngIf="report">

@@ -120,7 +120,7 @@ public interface ExaminationApi {
 	@GetMapping(value = "/study/{studyId}", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterSubjectExaminationDTOList(returnObject.getBody(), 'CAN_SEE_ALL')")
-	ResponseEntity<List<SubjectExaminationDTO>> findExaminationsByStudyId(
+	ResponseEntity<List<Long>> findExaminationsByStudyId(
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
 
 	@Operation(summary = "", description = "Returns the list of examinations by subject id")

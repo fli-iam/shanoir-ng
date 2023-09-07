@@ -19,6 +19,7 @@ import java.util.List;
 import org.shanoir.ng.examination.model.Examination;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
@@ -69,13 +70,19 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	/**
 	 * Get a list of examinations for a study.
 	 * 
-	 * @param subjectId
-	 * @return
-	 * @author yyao
-	 *            subject id.
+	 * @param studyId
 	 * @return list of examinations.
 	 */
 	List<Examination> findByStudy_Id(Long studyId);
+
+	/**
+	 * Get a list of examinations for a study.
+	 * 
+	 * @param studyId
+	 * @return list of examinations.
+	 */
+	@Query("select e.id from Examination e where e.study.id = :studyId")
+	List<Long> findIdsByStudyId(Long studyId);
 	
 	/**
 	 * Get all examinations, clinical or preclinical.

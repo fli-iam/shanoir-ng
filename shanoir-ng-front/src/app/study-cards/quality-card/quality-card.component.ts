@@ -203,14 +203,14 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         this.testing = true;
         this.report = null;
 
-        this.examinationService.findExaminationsByStudy(this.qualityCard.study.id).then(exams => {
-            if (exams?.length > 0) {
-                this.nbExaminations = exams.length;
+        this.examinationService.findExaminationIdsByStudy(this.qualityCard.study.id).then(examIds => {
+            if (examIds?.length > 0) {
+                this.nbExaminations = examIds.length;
                 this.progress = 0;
                 let qualityQueue: Promise<any> = Promise.resolve([]);
-                exams.forEach(exam => {
+                examIds.forEach(examId => {
                     qualityQueue = qualityQueue.then(cumulatedResult => {
-                        return this.qualityCardService.testOnExamination(this.qualityCard.id, exam.id).then(result => {
+                        return this.qualityCardService.testOnExamination(this.qualityCard.id, examId).then(result => {
                             return cumulatedResult.concat(result);
                         }).finally(() => {
                             this.progress += 1 / this.nbExaminations;
