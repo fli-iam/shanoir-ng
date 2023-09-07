@@ -30,7 +30,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
-import jakarta.transaction.Transactional;
+import javax.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;

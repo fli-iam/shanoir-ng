@@ -26,6 +26,8 @@ import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+
 
 /**
  * Validator for edition by role.
@@ -35,6 +37,7 @@ import org.springframework.util.StringUtils;
  * @param <T>
  */
 @Service
+@ConditionalOnProperty(prefix = "shanoir", name = "database", matchIfMissing = true)
 public abstract class UniqueConstraintManagerImpl <T extends AbstractEntity> implements UniqueConstraintManager<T> {
 	
 	@Autowired

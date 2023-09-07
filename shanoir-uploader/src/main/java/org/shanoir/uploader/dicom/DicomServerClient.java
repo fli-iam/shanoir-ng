@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.io.FileSystemUtils;
 import org.apache.log4j.Logger;
 import org.dcm4che3.net.Status;
 import org.shanoir.ng.importer.dicom.query.DicomQuery;
