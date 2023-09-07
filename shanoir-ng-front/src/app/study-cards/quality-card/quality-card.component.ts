@@ -36,6 +36,7 @@ import { QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import * as AppUtils from '../../utils/app.utils';
+import { ExaminationService } from 'src/app/examinations/shared/examination.service';
 
 @Component({
     selector: 'quality-card',
@@ -67,11 +68,14 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         {headerName: 'Details', field: 'message', wrap: true}
     ];
     forceStudyId: number;
+    nbExaminations: number;
+    progress: number;
 
     constructor(
             private route: ActivatedRoute,
             private qualityCardService: QualityCardService, 
             private studyService: StudyService,
+            private examinationService: ExaminationService,
             private studyRightsService: StudyRightsService,
             keycloakService: KeycloakService,
             coilService: CoilService,
@@ -192,6 +196,36 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             this.report = new BrowserPaging(result, this.reportColumns);
             this.reportIsTest = true;
         }).finally(() => this.testing = false);
+    }
+
+    testTest() {
+        if (!this.qualityCard?.study?.id) return;
+        this.testing = true;
+        this.report = null;
+
+        this.examinationService.findExaminationsByStudy(this.qualityCard.study.id).then(exams => {
+            if (exams?.length > 0) {
+                this.nbExaminations = exams.length;
+                this.progress = 0;
+                let qualityQueue: Promise<any> = Promise.resolve([]);
+                exams.forEach(exam => {
+                    qualityQueue = qualityQueue.then(cumulatedResult => {
+                        return this.qualityCardService.testOnExamination(this.qualityCard.id, exam.id).then(result => {
+                            return cumulatedResult.concat(result);
+                        }).finally(() => {
+                            this.progress += 1 / this.nbExaminations;
+                        });
+                    });
+                });
+                qualityQueue.then(result => {
+                    this.report = new BrowserPaging(result, this.reportColumns);
+                    this.reportIsTest = true;
+                }).finally(() => {
+                    this.testing = false;
+                    this.progress = 1;
+                });
+            }
+        });    
     }
 
 

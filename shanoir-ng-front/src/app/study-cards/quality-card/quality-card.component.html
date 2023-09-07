@@ -30,7 +30,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					<li>
 						<label>Name</label>
 						<span class="right-col" [ngSwitch]="mode">
-							<ng-template [ngSwitchCase]="'view'">	
+							<ng-template [ngSwitchCase]="'view'">
 								{{qualityCard.name}}
 							</ng-template>
 							<ng-template ngSwitchDefault>
@@ -83,12 +83,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(selectedRulesChange)="selectedRules = $event"> <!-- (importRules)="importRules()" -->
 				</study-card-rules>
 			</fieldset>
+			<fieldset *ngIf="progress > 0 && progress < 1">
+				<progress-bar [progress]="progress" class="progress"></progress-bar>
+				Computing quality checks...
+			</fieldset>
 			<fieldset class="report" *ngIf="report">
 				<legend>
 					Application Report 
 					<span *ngIf="reportIsTest">(test)</span>
 				</legend>
-				<shanoir-table class="report"
+				<shanoir-table #table class="report"
                     [getPage]="getPage.bind(this)"
                     [columnDefs]="reportColumns"
                     [browserSearch]="false"
@@ -116,6 +120,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						(click)="test()" 
 						[disabled]="applying || testing">
 					Test
+                    <i *ngIf="!testing" class="fa-solid fa-play"></i>
+                    <i *ngIf="testing" class="fa fa-cog fa-spin"></i> 
+                </button>
+				<button 
+						*ngIf="mode == 'view' && isStudyAdmin"
+						type="button"
+						class="right-icon apply test" 
+						(click)="testTest()"
+						[disabled]="applying || testing">
+					Test (test)
                     <i *ngIf="!testing" class="fa-solid fa-play"></i>
                     <i *ngIf="testing" class="fa fa-cog fa-spin"></i> 
                 </button>
