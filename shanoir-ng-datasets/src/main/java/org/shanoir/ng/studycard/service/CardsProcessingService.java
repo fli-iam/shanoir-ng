@@ -27,6 +27,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -55,6 +56,9 @@ public class CardsProcessingService {
 	
 	@Autowired
 	private StudyService studyService;
+
+    @Autowired
+    private ExaminationService examinationService;
 	
 	@Autowired
     private DatasetAcquisitionService datasetAcquisitionService;
@@ -86,6 +90,60 @@ public class CardsProcessingService {
         }
     }	
 	
+    /**
+	 * Study cards for quality control: apply on entire study.
+	 * 
+	 * @param studyCard
+	 * @throws MicroServiceCommunicationException 
+	 */
+	public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Long examinationId, boolean updateTags) throws MicroServiceCommunicationException {
+	    if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
+		Examination examination = examinationService.findById(examinationId);
+		if (examination == null ) throw new IllegalArgumentException("examination can't be null");
+		if (qualityCard.getStudyId() != examination.getStudy().getId()) throw new IllegalStateException("study and studycard ids don't match");
+		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
+		    QualityCardResult result = new QualityCardResult();
+            List<SubjectStudy> subjectsStudies = subjectStudyService.get(examination.getSubject().getId(), examination.getStudy().getId());
+		    resetSubjectStudies(subjectsStudies);
+            try {
+                subjectStudyService.update(subjectsStudies);
+            } catch (EntityNotFoundException e) {} // too bad
+            // For now, just take the first DICOM instance
+            // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
+            try {
+                Attributes examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
+                List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
+                // today study cards are only used for MR modality
+                // acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
+                if (CollectionUtils.isNotEmpty(acquisitions)) {
+                    LOG.info(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
+                    LOG.info(qualityCard.getRules().size() + " rules found for study card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
+                    for (QualityExaminationRule rule : qualityCard.getRules()) {
+                        rule.apply(examination, examinationDicomAttributes, result);
+                    }
+                }				
+            } catch (PacsException e) {
+                long ts = new Date().getTime();
+                LOG.warn("Examination" + examination.getId() + " metadata could not be retreived from the Shanoir pacs (ts:" + ts + ")");
+                QualityCardResultEntry resultEntry = initResult(examination);
+                resultEntry.setTagSet(QualityTag.ERROR);
+                resultEntry.setMessage("Examination " + examination.getId() + " could not be checked because its metadata could not be retreived from the Shanoir pacs (ts:" + ts + ")");
+                result.add(resultEntry);
+            }
+			//result.removeUnchanged(study);
+			if (updateTags) {
+			    try {
+			        subjectStudyService.update(result.getUpdatedSubjectStudies());
+			    } catch (EntityNotFoundException e) {
+			        throw new IllegalStateException("Could not update subject-studies", e);
+			    }	    
+			}
+			return result;
+		} else {
+			throw new RestClientException("Study card used with emtpy rules.");
+		}
+	}
+
 	/**
 	 * Study cards for quality control: apply on entire study.
 	 * 
@@ -144,6 +202,14 @@ public class CardsProcessingService {
 	private void resetSubjectStudies(Study study) {
         if (study != null && study.getSubjectStudyList() != null) {
             for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+                subjectStudy.setQualityTag(null);
+            }
+        }
+    }
+
+    private void resetSubjectStudies(List<SubjectStudy> subjectStudies) {
+        if (subjectStudies != null) {
+            for (SubjectStudy subjectStudy : subjectStudies) {
                 subjectStudy.setQualityTag(null);
             }
         }

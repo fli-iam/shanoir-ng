@@ -94,4 +94,9 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
         }
         return dtos;
     }
+
+    @Override
+    public List<SubjectStudy> get(Long subjectId, Long studyId) {
+        return subjectStudyRepository.findByStudy_IdAndSubjectId(studyId, subjectId);
+    }
 }
