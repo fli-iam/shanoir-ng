@@ -13,7 +13,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <div class="header command-zone">2. Select datasets</div>
-<fieldset class="step"> 
+<fieldset class="step">
     <p>Please select only the datasets useful for your study</p>
     <ul>
         <li>Please select the series of <strong class="warning">one</strong> patient at the time.</li>
@@ -26,11 +26,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [hasBox]="true"
         (chkbxChange)="changeDatasets();"
         [hasChildren]="datasets && datasets.length > 0">
-            <node  
-                *ngFor="let dataset of datasets" 
-                [label]="dataset.name" 
+            <node
+                *ngFor="let dataset of datasets"
+                [label]="dataset.name"
                 [(ngModel)]="dataset.selected"
-                awesome="fa fa-bolt" 
+                awesome="fa fa-bolt"
                 (labelClick)="showDatasetDetail(dataset)"
                 [class.selected]="datasetDetail == dataset"
                 [deploy]="false"
@@ -54,7 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <td class="value">{{datasetDetail?.channelCount}}</td>
             </tr>
             <tr class="item">
-                <td class="label">Sampling frequency (Hz)'</td>
+                <td class="label">Sampling frequency ({{unit.HZ}})'</td>
                 <td class="value">{{datasetDetail?.samplingFrequency}}</td>
             </tr>
         </table>

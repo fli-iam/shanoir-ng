@@ -22,7 +22,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </li>
             <li>
-                <label>Sampling frequency (Hz)</label>
+                <label>Sampling frequency ({{unit.HZ}})</label>
                 <span class="right-col">
                     {{dataset.samplingFrequency}}
                 </span>
@@ -42,7 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li>
             <legend> Channels </legend>
             <shanoir-table #channelsTable
-                [getPage]="getPage.bind(this)" 
+                [getPage]="getPage.bind(this)"
                 [columnDefs]="columnDefs">
             </shanoir-table>
         </li>
