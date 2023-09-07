@@ -321,12 +321,13 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			return;
 		}
 		String converterPath = convertersPath + converter.getName();
-		// Mcverter
-		if (converter.isMcverter()) {
+
+	    switch (converter.getNIfTIConverterType()) {
+		case MCVERTER:
 			is4D = true;
 			conversionLogs += shanoirExec.mcverterExec(inputFolder, converterPath, outputFolder, is4D);
-			// Clidcm
-		} else if (converter.isClidcm()) {
+			break;
+		case CLIDCM:
 			try {
 				conversionLogs += shanoirExec.clidcmExec(inputFolder, converterPath, outputFolder);
 			} catch (Exception e) {
@@ -338,17 +339,20 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			 * dcm2nii .
 			 */
 			createBvecAndBval(outputFolder);
-			// Dicom2Nifti
-		} else if (converter.isDicom2Nifti()) {
+			break;
+		case DICOM2NIFTI:
 			conversionLogs += shanoirExec.dicom2niftiExec(inputFolder, converterPath, outputFolder);
-			// dcm2nii
-		} else if (converter.isDicomifier()) {
+			break;
+		case DICOMIFIER:
 			conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder);
-		} else if (converter.isMriConverter()) {
+			break;
+		case MRICONVERTER:
 			conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, reconversion);
-		} else {
+			break;
+		default:
 			is4D = true;
 			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converterPath, outputFolder, is4D);
+			break;
 		}
 	}
 

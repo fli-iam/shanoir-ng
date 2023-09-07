@@ -627,7 +627,7 @@ public class ShanoirExec {
 	 */
 	public String mriConverter(String inputFolder, String outputFolder, boolean reconversion) {
 		String logs = "mriConverter: ";
-		StringBuffer buffer = new StringBuffer();
+		String execString = "";
 		
 		// We force the dataset0 folder here as MRIConverter does not search recursively in the files..
 		if (!reconversion && !inputFolder.contains("dataset")) {
@@ -637,29 +637,12 @@ public class ShanoirExec {
 		LOG.error(outputFolder);
 		
 		// java -classpath MRIManager.jar DicomToNifti Subject4/ /tmp/ "PatientName-SerialNumber-Protocol" "[ExportOptions] 00000"
-		buffer.append("xvfb-run")
-			.append(" ")
-			.append("java")
-			.append(" ")
-			.append("-classpath")
-			.append(" ")
-			.append(mriConverterPath)
-			.append(" ")
-			.append("DicomToNifti")
-			.append(" ")
-			.append(inputFolder)
-			.append(" ")
-			.append(outputFolder)
-			.append(" ")
-			.append("PatientName-SerialNumber-SequenceName")
-			.append(" ")
-			.append("[ExportOptions]00000");
+		execString += "xvfb-run java -classpath " + mriConverterPath + " DicomToNifti "	+ inputFolder + " "	+ outputFolder
+			+ " PatientName-SerialNumber-SequenceName [ExportOptions]00000";
 		
-		logs.concat(buffer.toString());
+		logs.concat(execString);
 		
-		final String result = exec(buffer.toString().split(" "));
-		
-		LOG.error(result);
+		final String result = exec(execString.split(" "));
 		
 		return logs.concat("\n Result: " + result);
 		}
