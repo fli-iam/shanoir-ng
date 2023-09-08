@@ -106,8 +106,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
             if (file.getAbsolutePath().endsWith(PIPELINE_OUTPUT)) {
 
                 if (file.length() == 0) {
-                    LOG.warn("Result file [{}] is present but empty.", file.getAbsolutePath());
-                    return;
+                    throw new OutputProcessingException("Result file [" + file.getAbsolutePath() + "] is present but empty.", null);
                 }
 
                 try (InputStream is = new FileInputStream(file)) {

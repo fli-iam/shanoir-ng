@@ -209,7 +209,7 @@ export class ExecutionComponent implements OnInit {
                             });
                     },
                     (error) => {
-                        this.msgService.log('error', 'Sorry, an error occurred while starting the execution.');
+                        this.msgService.log('error', 'Sorry, an error occurred while creating the execution on VIP.');
                         console.error(error);
                     }
                 )
