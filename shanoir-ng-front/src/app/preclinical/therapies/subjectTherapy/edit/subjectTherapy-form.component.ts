@@ -132,7 +132,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     }
 
     loadUnits() {
-        this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT, PreclinicalUtils.PRECLINICAL_UNIT_VOLUME).then(units => this.units = units);
+        this.referenceService.getReferencesByCategory(PreclinicalUtils.PRECLINICAL_CAT_UNIT).then(units => this.units = units);
     }
 
     getEnums(): void {
