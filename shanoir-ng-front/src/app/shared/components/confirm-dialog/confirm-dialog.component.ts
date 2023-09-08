@@ -23,9 +23,9 @@ export class ConfirmDialogComponent {
     
     title: string;
     message: string;
-    buttons: {ok: string, cancel: string};
-    mode: 'confirm' | 'info' | 'error';
-    private closeResolve: (value?: boolean | PromiseLike<boolean>) => void;
+    buttons: any;
+    mode: 'confirm' | 'choose' | 'info' | 'error';
+    private closeResolve: (value?: any | PromiseLike<any>) => void;
 
 
     public openConfirm(title: string, message: string, buttons?: {ok: string, cancel: string}): Promise<boolean> {
@@ -33,6 +33,16 @@ export class ConfirmDialogComponent {
         this.message = message;
         this.buttons = buttons;
         this.mode = 'confirm';
+        return new Promise((resolve, reject) => {
+            this.closeResolve = resolve;
+        });
+    }
+
+    public openChoose(title: string, message: string, buttons?: {yes: string, no: string, cancel: string}): Promise<'yes' | 'no' | false> {
+        this.title = title;
+        this.message = message;
+        this.buttons = buttons;
+        this.mode = 'choose';
         return new Promise((resolve, reject) => {
             this.closeResolve = resolve;
         });
@@ -56,8 +66,8 @@ export class ConfirmDialogComponent {
         });
     }
 
-    public close(answer: boolean) {
-        this.closeResolve(answer == true); // forces boolean to be returned
+    public close(answer: any) {
+        this.closeResolve(answer); // forces boolean to be returned
     }
 
 }

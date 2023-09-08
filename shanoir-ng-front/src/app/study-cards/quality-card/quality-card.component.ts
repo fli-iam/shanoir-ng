@@ -200,34 +200,66 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
 
     testTest() {
         if (!this.qualityCard?.study?.id) return;
-        this.testing = true;
-        this.report = null;
-
         this.examinationService.findExaminationIdsByStudy(this.qualityCard.study.id).then(examIds => {
+            this.nbExaminations = examIds.length;
             if (examIds?.length > 0) {
-                this.nbExaminations = examIds.length;
-                this.progress = 0;
-                let qualityQueue: Promise<any> = Promise.resolve([]);
-                examIds.forEach(examId => {
-                    qualityQueue = qualityQueue.then(cumulatedResult => {
-                        return this.qualityCardService.testOnExamination(this.qualityCard.id, examId).then(result => {
-                            return cumulatedResult.concat(result);
-                        }).finally(() => {
-                            this.progress += 1 / this.nbExaminations;
-                        });
+                if (examIds.length > 500) {
+                    this.confirmDialogService.choose('Large Volume', 'This study contains ' + examIds.length 
+                        + ' examinations. Do you want to test the quality card only on the first 100 to reduce the computing time ?'
+                    ).then(response => {
+                        if (response == 'yes') {
+                            this.performTest(examIds.slice(0, 99));
+                        } else if (response == 'no') {
+                            this.performTest(examIds);
+                        }
                     });
-                });
-                qualityQueue.then(result => {
-                    this.report = new BrowserPaging(result, this.reportColumns);
-                    this.reportIsTest = true;
-                }).finally(() => {
-                    this.testing = false;
-                    this.progress = 1;
-                });
+                } else {
+                    this.performTest(examIds);
+                }
             }
         });    
     }
 
+    nbQueues = 4;
+
+    performTest(examIds: number[]): Promise<void> {
+        this.progress = 0;
+        this.report = null;
+        const nbQueues: number = this.nbQueues;
+
+        let cumulatedResult: any[] = [];
+        let promises: Promise<void>[] = [];
+        for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
+            promises.push(
+                this.recursiveTest(examIds.shift(), examIds)
+                    .then(result => {
+                        cumulatedResult = cumulatedResult.concat(result);
+                    })
+            );
+        }
+        this.testing = true;
+        return Promise.all(promises).then(() => {
+            this.report = new BrowserPaging(cumulatedResult, this.reportColumns);
+            this.reportIsTest = true;
+        }).finally(() => {
+            this.testing = false;
+            this.progress = 1;
+        });
+    }
+
+    private recursiveTest(examId: number, remainingIds: number[]): Promise<any[]> {
+        if (!examId) return Promise.resolve([]);
+
+        return this.qualityCardService.testOnExamination(this.qualityCard.id, examId).then(result => {
+            if (remainingIds.length > 0) {
+                return this.recursiveTest(remainingIds.shift(), remainingIds).then(cumulatedResult => cumulatedResult.concat(result));
+            } else {
+                return Promise.resolve(result);
+            }
+        }).finally(() => {
+            this.progress += 1 / this.nbExaminations;
+        });
+    }
 
     getPage(pageable: FilterablePageable): Promise<Page<any>> {
         return Promise.resolve(this.report.getPage(pageable));
