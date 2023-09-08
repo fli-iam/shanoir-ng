@@ -103,31 +103,32 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     public void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException {
 
         for(File file : resultFiles){
-            if (file.getAbsolutePath().endsWith(PIPELINE_OUTPUT)) {
-
-                if (file.length() == 0) {
-                    throw new OutputProcessingException("Result file [" + file.getAbsolutePath() + "] is present but empty.", null);
-                }
-
-                try (InputStream is = new FileInputStream(file)) {
-                    JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
-                    JSONArray series = json.getJSONArray(SERIES);
-
-                    if(series.length() < 1){
-                        LOG.warn("Series list is empty in result file [{}].", file.getAbsolutePath());
-                        return;
-                    }
-
-                    this.processSeries(series, processing);
-
-                }catch (Exception e) {
-                    throw new OutputProcessingException("An error occured while extracting result from result archive.", e);
-                }
-
-                return;
+            if (!file.getAbsolutePath().endsWith(PIPELINE_OUTPUT)) {
+                continue;
             }
-        }
 
+            if (file.length() == 0) {
+                throw new OutputProcessingException("Result file [" + file.getAbsolutePath() + "] is present but empty.", null);
+            }
+
+            try (InputStream is = new FileInputStream(file)) {
+                JSONObject json = new JSONObject(IOUtils.toString(is, StandardCharsets.UTF_8));
+                JSONArray series = json.getJSONArray(SERIES);
+
+                if(series.length() < 1){
+                    LOG.warn("Series list is empty in result file [{}].", file.getAbsolutePath());
+                    return;
+                }
+
+                this.processSeries(series, processing);
+
+            }catch (Exception e) {
+                throw new OutputProcessingException("An error occured while extracting result from result archive.", e);
+            }
+
+            return;
+        }
+        throw new OutputProcessingException("Expected result file [" + parentFolder.getAbsolutePath() + "/" + PIPELINE_OUTPUT + "] is not present.", null);
     }
 
     /**
