@@ -13,7 +13,7 @@ public class DatasetPropertyServiceImpl implements DatasetPropertyService {
     @Autowired
     private DatasetPropertyRepository repository;
     @Override
-    public List<DatasetProperty> create(List<DatasetProperty> properties) {
+    public List<DatasetProperty> createAll(List<DatasetProperty> properties) {
         repository.saveAll(properties);
         return properties;
     }

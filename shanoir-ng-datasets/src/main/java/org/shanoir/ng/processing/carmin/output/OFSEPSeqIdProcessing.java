@@ -13,7 +13,6 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
-import org.shanoir.ng.processing.carmin.service.ProcessingResourceService;
 import org.shanoir.ng.property.model.DatasetProperty;
 import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
@@ -95,7 +94,10 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
 
     @Override
-    public boolean canProcess(CarminDatasetProcessing processing) {
+    public boolean canProcess(CarminDatasetProcessing processing) throws OutputProcessingException {
+        if(processing.getPipelineIdentifier() == null || processing.getPipelineIdentifier().isEmpty()){
+            throw new OutputProcessingException("Pipeline identifier is not set for processing [" + processing.getName() + "]", null);
+        }
         return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification");
     }
 
@@ -103,7 +105,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     public void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException {
 
         for(File file : resultFiles){
-            if (!file.getAbsolutePath().endsWith(PIPELINE_OUTPUT)) {
+            if (!file.getName().equals(PIPELINE_OUTPUT)) {
                 continue;
             }
 
@@ -176,7 +178,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
                 }
 
                 List<DatasetProperty> properties = this.getDatasetPropertiesFromVolume(ds, vol, processing);
-                datasetPropertyService.create(properties);
+                datasetPropertyService.createAll(properties);
 
             }
         }

@@ -14,7 +14,7 @@
 
 import { DatasetProcessing } from "src/app/datasets/shared/dataset-processing.model";
 import { StatusEnum } from "./execution";
-import {ParameterResourcesDTO} from "./parameter-resources-d-t.o";
+import {ParameterResourcesDto} from "./parameter-resources.dto";
 
 
 export class CarminDatasetProcessing extends DatasetProcessing {
@@ -28,5 +28,5 @@ export class CarminDatasetProcessing extends DatasetProcessing {
     startDate?: number;
     endDate?: number;
     outputProcessing?: string;
-    parametersResources: ParameterResourcesDTO[];
+    parametersResources: ParameterResourcesDto[];
 }

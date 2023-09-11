@@ -28,9 +28,11 @@ import { formatDate } from '@angular/common';
 import {DatasetAcquisition} from "../../dataset-acquisitions/shared/dataset-acquisition.model";
 import {FileEntity} from "./file-entity";
 import {Examination} from "../../examinations/shared/examination.model";
-import {ParameterResourcesDTO} from "../../carmin/models/parameter-resources-d-t.o";
+import {ParameterResourcesDto} from "../../carmin/models/parameter-resources.dto";
 import {GroupByEnum} from "../../carmin/models/groupby.enum";
 import {PipelineParameter} from "../../carmin/models/pipelineParameter";
+import {ServiceLocator} from "../../utils/locator.service";
+import {ConsoleService} from "../../shared/console/console.service";
 
 @Component({
     selector: 'app-execution',
@@ -39,6 +41,7 @@ import {PipelineParameter} from "../../carmin/models/pipelineParameter";
 })
 export class ExecutionComponent implements OnInit {
 
+    protected consoleService = ServiceLocator.injector.get(ConsoleService);
     pipeline: Pipeline;
     executionForm: UntypedFormGroup;
     selectedDatasets: Set<Dataset>;
@@ -142,6 +145,7 @@ export class ExecutionComponent implements OnInit {
         this.parametersApplied = false;
 
         let availableDatasets: Dataset[] = Array.from(this.selectedDatasets);
+        let excludedDatasetsCount = 0;
 
         this.datasetsOptions = [];
         availableDatasets.forEach(dataset => {
@@ -165,7 +169,9 @@ export class ExecutionComponent implements OnInit {
                     let paramDatasets: Dataset[] = [];
 
                     availableDatasets.forEach(dataset => {
-                        if (nameFilter.test(dataset.name)) {
+                        if(dataset.datasetProcessing){
+                            excludedDatasetsCount++;
+                        } else if (nameFilter.test(dataset.name)) {
                             paramDatasets.push(dataset);
                         }
                     });
@@ -179,6 +185,9 @@ export class ExecutionComponent implements OnInit {
                 }
             }
         )
+        if(excludedDatasetsCount > 0){
+            this.consoleService.log('warn', "[" + excludedDatasetsCount + "] processed datasets has been excluded from the selection.");
+        }
         this.parametersApplied = true;
     }
 
@@ -287,7 +296,7 @@ export class ExecutionComponent implements OnInit {
         this.pipeline.parameters.forEach(
             parameter => {
                 if (this.isAFile(parameter)) {
-                    let dto = new ParameterResourcesDTO();
+                    let dto = new ParameterResourcesDto();
                     dto.parameter = parameter.name;
                     dto.groupBy = this.getGroupByEnumByLabel(this.groupBy);
                     dto.datasetIds = this.datasetsByParam[parameter.name].map(dataset => { return dataset.id});

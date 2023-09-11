@@ -8,7 +8,7 @@
     </div>
 
     <div>
-    Default execution parameters: please choose default parameters value for every parameter.<br/>
+    Execution parameters: please choose value for every parameter if needed.<br/>
     Please note that for file parameters, the text box is used for regular expression if you want to organize dataset in different arguments
     </div>
 
@@ -22,12 +22,13 @@
              <span *ngIf="isAFile(parameter)">
                  <input *ngIf="isAFile(parameter)"
                     formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
+                 <tool-tip>Use a regular expression to filter the selected datasets</tool-tip>
                  <ng-template #loading>Loading datasets...</ng-template>
              </span>
 	   </div>
     </div>
     <div>
-        <label>Group by <tool-tip>Datasets may be added to selection to complete acquisition(s) / examination(s) if selected</tool-tip></label>
+        <label>Group by <tool-tip>Selected datasets will be grouped by the chosen entity. Choose what the selected pipeline expect.</tool-tip></label>
         <span class="right-col">
             <input id="dataset" type="radio" formControlName="group_by" name="group_by" [(ngModel)]="groupBy" value="dataset" />Dataset(s)
             <input id="acquisition" type="radio" formControlName="group_by" name="group_by" [(ngModel)]="groupBy" value="acquisition" />Acquisition(s)
@@ -35,7 +36,7 @@
         </span>
     </div>
     <div>
-    <label>Dataset export format</label>
+    <label>Dataset export format <tool-tip>Selected datasets can be exported as Dicom of NIfTI. Choose what the selected pipeline expect.</tool-tip></label>
     <span class="right-col">
         <input id="nii" type="radio" formControlName="export_format" name="export_format" [(ngModel)]="exportFormat" value="nii" />NIfTI
         <input id="dcm" type="radio" formControlName="export_format" name="export_format" [(ngModel)]="exportFormat" value="dcm" />DICOM

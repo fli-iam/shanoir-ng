@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface DatasetPropertyService {
 
-    List<DatasetProperty> create(List<DatasetProperty> properties);
+    List<DatasetProperty> createAll(List<DatasetProperty> properties);
 }

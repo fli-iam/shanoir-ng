@@ -102,54 +102,15 @@ public class CarminDatasetProcessingApiController implements CarminDatasetProces
         if (processing.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        // Avoid infinite loop error -> We should be using datasetDTO here in a general matter.
-        for (Dataset dataset : processing.get().getInputDatasets()) {
-            dataset.setDatasetAcquisition(null);
-        }
         return new ResponseEntity<>(mapper.carminDatasetProcessingToCarminDatasetProcessingDTO(processing.get()), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingByIdentifier(
-            @Parameter(name = "id of the dataset processing", required = true) @RequestParam("identifier") String identifier) {
-
-        final Optional<CarminDatasetProcessing> processing = carminDatasetProcessingService.findByIdentifier(identifier);
-
-        if (processing.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        return new ResponseEntity<>(mapper.carminDatasetProcessingToCarminDatasetProcessingDTO(processing.get()), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessings() {
+    public ResponseEntity<List<CarminDatasetProcessingDTO>> getAllCarminDatasetProcessings() {
         final List<CarminDatasetProcessing> processings = carminDatasetProcessingService.findAllAllowed();
         if (processings.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return new ResponseEntity<>(mapper.carminDatasetProcessingsToCarminDatasetProcessingDTOs(processings), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessingsByStudyIdAndSubjectId(
-            @Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-            @Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId) {
-        List<CarminDatasetProcessing> processings = carminDatasetProcessingService.findAll();
-        if (processings.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        processings = processings.stream()
-                .filter(processing ->
-                        !CollectionUtils.isEmpty(processing.getInputDatasets())
-                                && processing.getInputDatasets().get(0).getStudyId().equals(studyId)
-                                && processing.getInputDatasets().get(0).getSubjectId().equals(subjectId))
-                .collect(Collectors.toList());
-
-        if (processings.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
         return new ResponseEntity<>(mapper.carminDatasetProcessingsToCarminDatasetProcessingDTOs(processings), HttpStatus.OK);
     }
 

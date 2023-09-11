@@ -63,18 +63,6 @@ public interface CarminDatasetProcessingApi {
         ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingById(
                         @Parameter(name = "id of the carmin dataset processing", required = true) @PathVariable("datasetProcessingId") Long datasetProcessingId);
 
-        @Operation(summary = "", description = "If exists, returns the carmin dataset processing corresponding to the given execution identifier with carmin new fields")
-        @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "found dataset processing"),
-                        @ApiResponse(responseCode = "401", description = "unauthorized"),
-                        @ApiResponse(responseCode = "403", description = "forbidden"),
-                        @ApiResponse(responseCode = "404", description = "no dataset processing found"),
-                        @ApiResponse(responseCode = "500", description = "unexpected error") })
-        @GetMapping(value = "", produces = { "application/json" })
-        @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-        ResponseEntity<CarminDatasetProcessingDTO> findCarminDatasetProcessingByIdentifier(
-                        @Parameter(name = "identifier of the execution", required = true) @RequestParam("identifier") String identifier);
-
         @Operation(summary = "", description = "If exists, returns the dataset processing corresponding to the given id with carmin new fields")
         @ApiResponses(value = {
                         @ApiResponse(responseCode = "200", description = "found dataset processing"),
@@ -82,21 +70,8 @@ public interface CarminDatasetProcessingApi {
                         @ApiResponse(responseCode = "403", description = "forbidden"),
                         @ApiResponse(responseCode = "404", description = "no dataset processing found"),
                         @ApiResponse(responseCode = "500", description = "unexpected error") })
-        @GetMapping(value = "carminDatasetProcessings", produces = { "application/json" })
+        @GetMapping(value = "all", produces = { "application/json" })
         @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-        ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessings();
-
-        @Operation(summary = "", description = "Returns all the carmin dataset processings with given study and subject")
-        @ApiResponses(value = {
-                @ApiResponse(responseCode = "200", description = "found carmin dataset processings"),
-                @ApiResponse(responseCode = "204", description = "no dataset processing found"),
-                @ApiResponse(responseCode = "401", description = "unauthorized"),
-                @ApiResponse(responseCode = "403", description = "forbidden"),
-                @ApiResponse(responseCode = "500", description = "unexpected error") })
-        @GetMapping(value = "/study/{studyId}/subject/{subjectId}", produces = { "application/json" })
-        @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudy(#studyId, 'CAN_SEE_ALL'))")
-        ResponseEntity<List<CarminDatasetProcessingDTO>> findCarminDatasetProcessingsByStudyIdAndSubjectId(
-        		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-        		@Parameter(name = "id of the subject", required = true) @PathVariable("subjectId") Long subjectId);
+        ResponseEntity<List<CarminDatasetProcessingDTO>> getAllCarminDatasetProcessings();
 
 }

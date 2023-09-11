@@ -33,7 +33,7 @@ public class OFSEPSeqIdProcessingTest {
     private OFSEPSeqIdProcessing outputProcessing;
 
     @Test
-    public void canProcessTest() {
+    public void canProcessTest() throws OutputProcessingException {
         CarminDatasetProcessing processing = new CarminDatasetProcessing();
         processing.setPipelineIdentifier("ofsep_sequences_identification/0.1");
         assertTrue(outputProcessing.canProcess(processing));

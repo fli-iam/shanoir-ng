@@ -32,7 +32,7 @@ export class CarminDatasetProcessingService extends EntityService<CarminDatasetP
     getEntityInstance() { return new CarminDatasetProcessing(); }
 
     public getAllCarminDatasetProcessings(): Observable<CarminDatasetProcessing[]>{
-        return this.httpClient.get<CarminDatasetProcessing[]>(`${this.API_URL}/carminDatasetProcessings`);
+        return this.httpClient.get<CarminDatasetProcessing[]>(`${this.API_URL}/all`);
     }
 
     public getCarminDatasetProcessing(id: number): Observable<CarminDatasetProcessing>{

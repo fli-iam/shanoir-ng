@@ -1,6 +1,6 @@
 import {GroupByEnum} from "./groupby.enum";
 
-export class ParameterResourcesDTO {
+export class ParameterResourcesDto {
 
     parameter: string;
     resourceIds : string[];

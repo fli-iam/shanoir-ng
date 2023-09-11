@@ -18,7 +18,7 @@ public abstract class OutputProcessing {
 	 * @param processing CarminDatasetProcessing
 	 * @return
 	 */
-	public abstract boolean canProcess(CarminDatasetProcessing processing);
+	public abstract boolean canProcess(CarminDatasetProcessing processing) throws OutputProcessingException;
 
 	/**
 	 * This methods manages the single result of a Carmin  dataset processing
