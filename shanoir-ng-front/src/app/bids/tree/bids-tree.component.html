@@ -11,7 +11,7 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-
+<p>Caution: This tree proposes a structure that is BIDS compliant but the files and folders naming has to be checked by a study expert to be BIDS compliant.</p>
 <ng-template #recursiveList let-datas let-id="id">
     <node *ngFor="let item of datas; let i = index" 
         [label]="getFileName(item.path)" 
@@ -27,7 +27,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
     </node>
 </ng-template>
 
-<node label="BIDS" awesome="far fa-folder" class="root-node" (firstOpen)="getBidsStructure()" [dataLoading]="load=='loading'" [hasChildren]="list ? (list.length > 0 ? true : false) : 'unknown' ">
+<node label="BIDS" awesome="far fa-folder" class="root-node" (firstOpen)="getBidsStructure()" [dataLoading]="load=='loading'" [hasChildren]="list ? (list.length > 0 ? true : false) : 'unknown' "
+        [buttonPicto]="'fas fa-refresh'"
+        (buttonClick)="refresh()">
     <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list, id: 'ID' }"></ng-container>
 </node>
 
