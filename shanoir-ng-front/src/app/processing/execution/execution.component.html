@@ -14,7 +14,8 @@
 
     <div *ngFor="let parameter of pipeline.parameters">
         <div *ngIf="parameter.name != 'executable'">
-             <label>{{parameter.name}}{{!parameter.isOptional && parameter.type != 'Boolean' ? '*' : ''}} <tool-tip> {{parameter.description}} </tool-tip></label>
+             <label>{{parameter.name}}{{!parameter.isOptional && parameter.type != 'Boolean' ? '*' : ''}}
+                 <tool-tip> {{isAFile(parameter) ? 'Regular expression to filter among the selected datasets. ' + parameter.description : parameter.description}} </tool-tip></label>
              <input *ngIf="!isAFile(parameter) && parameter.type != 'Boolean'" formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
              <span *ngIf="parameter.type == 'Boolean'">
                  <checkbox formControlName="{{parameter.name}}" id="{{parameter.name}}"></checkbox>
@@ -22,7 +23,6 @@
              <span *ngIf="isAFile(parameter)">
                  <input *ngIf="isAFile(parameter)"
                     formControlName="{{parameter.name}}" name="{{parameter.name}}" id="{{parameter.name}}">
-                 <tool-tip>Use a regular expression to filter the selected datasets</tool-tip>
                  <ng-template #loading>Loading datasets...</ng-template>
              </span>
 	   </div>
