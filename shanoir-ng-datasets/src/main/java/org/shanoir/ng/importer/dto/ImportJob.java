@@ -40,6 +40,8 @@ public class ImportJob implements Serializable {
     private boolean fromShanoirUploader;
 
     private boolean fromPacs;
+    
+    private boolean multipleExams = false;
 
     private String workFolder;
 
@@ -235,5 +237,13 @@ public class ImportJob implements Serializable {
             return getPatients().get(0).getStudies().get(0).getSeries().get(0);
         }
     }
+
+	public boolean isMultipleExams() {
+		return multipleExams;
+	}
+
+	public void setMultipleExams(boolean multipleExams) {
+		this.multipleExams = multipleExams;
+	}
 
 }
