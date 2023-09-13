@@ -52,8 +52,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<ng-template [ngSwitchCase]="'view'">
 								<a [routerLink]="['/study/details/', datasetAcquisition.examination?.study?.id]">
 									{{datasetAcquisition.examination?.study?.name}}
-								</a> 
-							</ng-template> 
+								</a>
+							</ng-template>
 						</span>
 					</li>
 					<li>
@@ -62,8 +62,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                             <ng-template [ngSwitchCase]="'view'">
                                 <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
                                     {{datasetAcquisition.examination?.comment}}
-                                </a> 
-                            </ng-template> 
+                                </a>
+                            </ng-template>
                         </span>
                     </li>
 					<li>
@@ -93,7 +93,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 								<a [routerLink]="['/acquisition-equipment/details/', datasetAcquisition.acquisitionEquipment?.id]">
 									{{datasetAcquisition.acquisitionEquipment | acqEqptLabel}}
 								</a>
-							</ng-template> 
+							</ng-template>
 							<ng-template ngSwitchDefault>
 								<select-box formControlName="acq-eq" [(ngModel)]="datasetAcquisition.acquisitionEquipment" [optionArr]="acquisitionEquipments" [pipe]="acqEqPipe">
 								</select-box>
@@ -143,11 +143,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 			<fieldset *ngIf="mode=='view'">
 				<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
-				<dataset-acquisition-node 
-						[input]="acquisitionNode" 
+				<dataset-acquisition-node
+						[input]="acquisitionNode"
 						(nodeInit)="onNodeInit($event)"></dataset-acquisition-node >
 			</fieldset>
-			
+
 			<form-footer
 				[state]="footerState"
 				(save)="save()"
@@ -155,7 +155,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 (delete) = "delete()"
 				(cancel)="goToView()"
 				(back)="goBack()"
-			></form-footer>
+			>
+            <button *ngIf="mode == 'view' && hasDownloadRight && !noDatasets && hasEEG" [disabled]="progressBar.progress != 0 || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('eeg')">Download EEG<i class="fas fa-download"></i></button>
+            <button *ngIf="mode == 'view' && hasDownloadRight && hasDicom" [disabled]="progressBar.progress != 0 || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download DICOM<i class="fas fa-download"></i></button>
+            <button *ngIf="mode == 'view' && hasDownloadRight && hasDicom" [disabled]="progressBar.progress != 0 || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download NIfTI<i class="fas fa-download"></i></button>
+            <div [hidden]="progressBar.progress == 0">
+                <progress-bar #progressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+            </div>
+
+
+            </form-footer>
 		</div>
 	</form>
 </div>

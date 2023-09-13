@@ -339,10 +339,11 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid sets of dataset IDs."));
 		}
+		int size = datasetIds.size();
 
-		if (datasetIds.size() > DATASET_LIMIT) {
+		if (size > DATASET_LIMIT) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can't download more than " + DATASET_LIMIT + " datasets."));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This selection includes " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
@@ -360,14 +361,15 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 0: Check data integrity
 		if (studyId == null) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid study ID."));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid study id."));
 		}
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByStudyId(studyId);
+		int size = datasets.size();
 
-		if (datasets.size() > DATASET_LIMIT) {
+		if (size > DATASET_LIMIT) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has more than " + DATASET_LIMIT + " datasets, that is the limit. Please download them from solr search." ));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets." ));
 		}
 
 		datasetDownloaderService.massiveDownload(format, datasets, response, false);
@@ -382,20 +384,41 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 0: Check data integrity
 		if (examinationId == null) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid examination ID."));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid examination id."));
 		}
 		// STEP 1: Retrieve all datasets all in one
 		List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
 
-		if (datasets.size() > DATASET_LIMIT) {
+		int size = datasets.size();
+
+		if (size > DATASET_LIMIT) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can't download more than " + DATASET_LIMIT + " datasets."));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This examination has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
 		datasetDownloaderService.massiveDownload(format, datasets, response, true);
 	}
 
-	/**
+    @Override
+    public void massiveDownloadByAcquisitionId(Long acquisitionId, String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+		// STEP 0: Check data integrity
+		if (acquisitionId == null) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid acquisition id."));
+		}
+		// STEP 1: Retrieve all datasets all in one
+		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
+		int size = datasets.size();
+
+		if (size > DATASET_LIMIT) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This acquisition has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
+		}
+
+		datasetDownloaderService.massiveDownload(format, datasets, response, true);
+    }
+
+    /**
 	 * Zip a single file
 	 * 
 	 * @param sourceFile
