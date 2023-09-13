@@ -1,6 +1,7 @@
 package org.shanoir.ng.processing.carmin.output;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.json.JSONArray;
@@ -18,6 +19,7 @@ import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.slf4j.Logger;
@@ -27,9 +29,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -91,6 +95,8 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
     @Autowired
     private DatasetPropertyService datasetPropertyService;
 
+    @Autowired
+    private SolrService solrService;
 
 
     @Override
@@ -142,7 +148,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @throws PacsException
      * @throws EntityNotFoundException
      */
-    public void processSeries(JSONArray series, CarminDatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException {
+    public void processSeries(JSONArray series, CarminDatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
 
         for (int i = 0; i < series.length(); i++) {
 
@@ -172,7 +178,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
                 try {
                     this.updateDataset(serie, ds, vol);
-                } catch (CheckedIllegalClassException | EntityNotFoundException e) {
+                } catch (CheckedIllegalClassException | EntityNotFoundException | SolrServerException | IOException e) {
                     LOG.error("Error while updating dataset [{}]", ds.getId(), e);
                     throw e;
                 }
@@ -193,7 +199,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @throws JSONException
      * @throws EntityNotFoundException
      */
-    public void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException {
+    public void updateDataset(JSONObject serie, Dataset ds, JSONObject vol) throws JSONException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
 
         DatasetMetadataField.NAME.update(ds, vol.getString(TYPE));
         datasetRepository.save(ds);
@@ -203,6 +209,8 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
             DatasetAcquisitionMetadataField.MR_SEQUENCE_NAME.update(acq, serie.getString(TYPE));
             acquisitionService.update(acq);
         }
+
+        solrService.updateDatasets(Arrays.asList(ds.getId()));
 
     }
 
