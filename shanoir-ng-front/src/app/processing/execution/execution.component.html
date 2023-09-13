@@ -67,15 +67,21 @@
                  Subject
                  </th>
             </tr>
-            <tr *ngFor="let dataset of datasetsByParam[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
-                <td>{{dataset.name}} ({{dataset.id}})</td>
-                <td>{{dataset.datasetAcquisition?.id}}</td>
-                <td>{{dataset.datasetAcquisition?.examination?.id}}</td>
-                <td>{{dataset.subject?.name}}</td>
-                <td *ngIf="datasetsByParam[parameter.name].length > 1" class="icon icon-clickable" (click)="removeDatasetFromParam(dataset, parameter.name)">
-                    <i class="fas fa-times"></i>
+            <tr *ngIf="isLoading">
+                <td [attr.colspan]="4" class="empty">
+                    The data is loading
+                    <span class="refresh"><i class="fas fa-sync-alt fa-spin"></i></span>
                 </td>
             </tr>
+                <tr *ngFor="let dataset of datasetsByParam[parameter.name]; let i = index; let even = even; let odd = odd;" [class.even]="even" [class.odd]="odd">
+                    <td>{{dataset.name}} ({{dataset.id}})</td>
+                    <td>{{dataset.datasetAcquisition?.id}}</td>
+                    <td>{{dataset.datasetAcquisition?.examination?.id}}</td>
+                    <td>{{dataset.subject?.name}}</td>
+                    <td *ngIf="datasetsByParam[parameter.name].length > 1" class="icon icon-clickable" (click)="removeDatasetFromParam(dataset, parameter.name)">
+                        <i class="fas fa-times"></i>
+                    </td>
+                </tr>
         </table>
         <br/>
     </div>

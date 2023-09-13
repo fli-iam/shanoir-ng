@@ -25,9 +25,6 @@ import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
 import {ProcessingService} from '../processing.service';
 import {Option} from '../../shared/select/select.component';
 import { formatDate } from '@angular/common';
-import {DatasetAcquisition} from "../../dataset-acquisitions/shared/dataset-acquisition.model";
-import {FileEntity} from "./file-entity";
-import {Examination} from "../../examinations/shared/examination.model";
 import {ParameterResourcesDto} from "../../carmin/models/parameter-resources.dto";
 import {GroupByEnum} from "../../carmin/models/groupby.enum";
 import {PipelineParameter} from "../../carmin/models/pipelineParameter";
@@ -60,6 +57,8 @@ export class ExecutionComponent implements OnInit {
     execDefaultName= "";
     exportFormat="nii";
     groupBy = "dataset";
+    isLoading = true;
+    datasetsPromise: Promise<void>;
 
     constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
         this.breadcrumbsService.nameStep('2. Executions');
@@ -77,10 +76,11 @@ export class ExecutionComponent implements OnInit {
                 this.initExecutionForm();
                 this.processingService.selectedDatasets.subscribe(
                     (datasets: Set<number>) => {
-                        this.datasetService.getByIds(datasets).then(
+                        this.datasetsPromise = this.datasetService.getByIds(datasets).then(
                             result => {
                                 this.selectedDatasets = new Set(result);
                                 this.createColumnDefs();
+                                this.isLoading = false;
                             });
                     });
             }
@@ -105,6 +105,7 @@ export class ExecutionComponent implements OnInit {
     removeDatasetFromParam(event, paramName) {
         this.datasetsByParam[paramName].splice(this.datasetsByParam[paramName].indexOf(event), 1);
     }
+
 
     initExecutionForm() {
         this.executionForm = new UntypedFormGroup({
@@ -142,53 +143,57 @@ export class ExecutionComponent implements OnInit {
     // Here we create a bunch of executions with default parameters
 
     onApplyParameters() {
-        this.parametersApplied = false;
 
-        let availableDatasets: Dataset[] = Array.from(this.selectedDatasets);
-        let excludedDatasetsCount = 0;
-
-        this.datasetsOptions = [];
-        availableDatasets.forEach(dataset => {
-            this.datasetsOptions.push(new Option<Dataset>(dataset, dataset.name + '(' + dataset.id + ')'));
-        });
-
-        // By default, we order by alphabtical order
-        // TODO: Propose another possible order (by ID?)
-        availableDatasets.sort((a: Dataset, b: Dataset) => {
-            return a.name.localeCompare(b.name);
-        })
-
-        this.pipeline.parameters.forEach(
-            parameter => {
-                if (this.isAFile(parameter)) {
-                    // If we have a file, we try to set up the adapted dataset
-                    // We try to find all adapted datasets
-                    let exp = this.executionForm.get(parameter.name).value?.toString() ? this.executionForm.get(parameter.name).value.toString()  : ".*";
-                    let nameFilter: RegExp = new RegExp(exp);
-
-                    let paramDatasets: Dataset[] = [];
-
-                    availableDatasets.forEach(dataset => {
-                        if(dataset.datasetProcessing){
-                            excludedDatasetsCount++;
-                        } else if (nameFilter.test(dataset.name)) {
-                            paramDatasets.push(dataset);
-                        }
-                    });
-
-                    paramDatasets.forEach(dataset => {
-                        availableDatasets.splice(availableDatasets.indexOf(dataset), 1);
-                    });
-
-                    this.datasetsByParam[parameter.name] = paramDatasets;
-
-                }
-            }
-        )
-        if(excludedDatasetsCount > 0){
-            this.consoleService.log('warn', "[" + excludedDatasetsCount + "] processed datasets has been excluded from the selection.");
-        }
         this.parametersApplied = true;
+
+
+        this.datasetsPromise.then(() => {
+
+            let availableDatasets: Dataset[] = Array.from(this.selectedDatasets);
+            let excludedDatasetsCount = 0;
+
+            this.datasetsOptions = [];
+            availableDatasets.forEach(dataset => {
+                this.datasetsOptions.push(new Option<Dataset>(dataset, dataset.name + '(' + dataset.id + ')'));
+            });
+
+            // By default, we order by alphabtical order
+            // TODO: Propose another possible order (by ID?)
+            availableDatasets.sort((a: Dataset, b: Dataset) => {
+                return a.name.localeCompare(b.name);
+            })
+
+            this.pipeline.parameters.forEach(
+                parameter => {
+                    if (this.isAFile(parameter)) {
+                        // If we have a file, we try to set up the adapted dataset
+                        // We try to find all adapted datasets
+                        let exp = this.executionForm.get(parameter.name).value?.toString() ? this.executionForm.get(parameter.name).value.toString()  : ".*";
+                        let nameFilter: RegExp = new RegExp(exp);
+
+                        let paramDatasets: Dataset[] = [];
+
+                        availableDatasets.forEach(dataset => {
+                            if(dataset.datasetProcessing){
+                                excludedDatasetsCount++;
+                            } else if (nameFilter.test(dataset.name)) {
+                                paramDatasets.push(dataset);
+                            }
+                        });
+
+                        paramDatasets.forEach(dataset => {
+                            availableDatasets.splice(availableDatasets.indexOf(dataset), 1);
+                        });
+
+                        this.datasetsByParam[parameter.name] = paramDatasets;
+
+                    }
+                }
+            )
+            if(excludedDatasetsCount > 0){
+                this.consoleService.log('warn', "[" + excludedDatasetsCount + "] processed datasets has been excluded from the selection.");
+            }
+        });
     }
 
     async onSubmitExecutionForm() {
