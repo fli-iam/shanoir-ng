@@ -35,6 +35,18 @@ public interface BidsApi {
     		@Parameter(name = "id of the study", required=true) @PathVariable("studyId") Long studyId,
     		@Parameter(name = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
 
+    @Operation(summary = "refreshBids", description = "Refresh the BIDS structure for a given study ID and study name")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "OK"),
+        @ApiResponse(responseCode = "401", description = "unauthorized"),
+        @ApiResponse(responseCode = "403", description = "forbidden"),
+        @ApiResponse(responseCode = "404", description = "no study found"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
+    @GetMapping(value = "refreshBids/studyId/{studyId}/studyName/{studyName}")
+    ResponseEntity<BidsElement>  refreshBIDSByStudyId(
+    		@Parameter(name = "id of the study", required=true) @PathVariable("studyId") Long studyId,
+    		@Parameter(name = "name of the study", required=true) @PathVariable("studyName") String studyName) throws RestServiceException, IOException;
+
     @Operation(summary = "exportBIDSBySubjectId", description = "If exists, returns a zip file of the BIDS structure corresponding to the given study id and path")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "zip file"),

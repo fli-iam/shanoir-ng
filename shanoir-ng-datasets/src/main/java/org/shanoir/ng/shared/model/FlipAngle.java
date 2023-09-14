@@ -18,8 +18,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.examination.model.UnitOfMeasure;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
@@ -45,7 +47,7 @@ public class FlipAngle extends AbstractEntity {
 	
 	/**
 	 * Comes from the dicom tag (0018,1314) VR=DS, VM=1 Flip Angle. The unit of
-	 * measure must be in millisec.
+	 * measure must be in degrees.
 	 */
 	@NotNull
 	private String flipAngleValue;
@@ -72,5 +74,5 @@ public class FlipAngle extends AbstractEntity {
 	public void setMrDataset(MrDataset mrDataset) {
 		this.mrDataset = mrDataset;
 	}
-
+  
 }

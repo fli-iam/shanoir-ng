@@ -2,20 +2,20 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Option } from '../../../shared/select/select.component';
-import { allOfEnum, capitalsAndUnderscoresToDisplayable } from '../../../utils/app.utils';
-import { Dataset } from '../../shared/dataset.model';
-import { DiffusionGradient } from '../../../dataset-acquisitions/modality/mr/mr-protocol.model';
-import { DatasetType } from '../../shared/dataset-type.model';
+import {Option} from '../../../shared/select/select.component';
+import {allOfEnum, capitalsAndUnderscoresToDisplayable} from '../../../utils/app.utils';
+import {Dataset} from '../../shared/dataset.model';
+import {DiffusionGradient} from '../../../dataset-acquisitions/modality/mr/mr-protocol.model';
+import {DatasetType} from '../../shared/dataset-type.model';
 
 export class MrDataset extends Dataset {
     diffusionGradients: DiffusionGradient[];
@@ -53,6 +53,7 @@ export class InversionTime {
 export class RepetitionTime {
     id: number;
     repetitionTimeValue: number;
+
 }
 
 export class MrDatasetMetadata {
@@ -79,7 +80,7 @@ export enum MrDatasetNature {
     H1_SPECTROSCOPIC_IMAGING_DATASET = 'H1_SPECTROSCOPIC_IMAGING_DATASET'
 
 } export namespace MrDatasetNature {
-    
+
     export function all(): Array<MrDatasetNature> {
         return allOfEnum<MrDatasetNature>(MrDatasetNature);
     }
@@ -97,7 +98,7 @@ export enum MrQualityProcedureType {
     MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME = 'MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME'
 
 } export namespace MrQualityProcedureType {
-    
+
     export function all(): Array<MrQualityProcedureType> {
         return allOfEnum<MrQualityProcedureType>(MrQualityProcedureType);
     }

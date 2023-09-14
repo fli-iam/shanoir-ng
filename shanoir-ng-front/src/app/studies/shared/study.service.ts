@@ -254,6 +254,12 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
             .toPromise();
     }
 
+    refreshBidsStructure(studyId: number, studyName: string): Promise<BidsElement> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_REFRESH_URL + '/studyId/' + studyId + '/studyName/' + studyName)
+            .toPromise();
+    }
+
     protected getIgnoreList(): string[] {
         return super.getIgnoreList().concat(['completeMembers']);
     }

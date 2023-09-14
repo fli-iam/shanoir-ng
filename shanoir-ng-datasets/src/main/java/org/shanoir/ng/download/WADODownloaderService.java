@@ -442,7 +442,6 @@ public class WADODownloaderService {
 	}
 
 	private String downloadMetadataFromPACS(final String url) throws IOException {
-		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
 		HttpEntity<String> entity = new HttpEntity<>(headers);

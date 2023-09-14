@@ -18,8 +18,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.modality.MrDataset;
+import org.shanoir.ng.examination.model.UnitOfMeasure;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
@@ -72,5 +74,5 @@ public class InversionTime extends AbstractEntity {
 	public void setMrDataset(MrDataset mrDataset) {
 		this.mrDataset = mrDataset;
 	}
-
+  
 }

@@ -243,6 +243,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		examinationDb.setNote(examination.getNote());
 		examinationDb.setStudy(examination.getStudy());
 		examinationDb.setSubjectWeight(examination.getSubjectWeight());
+		examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
 		examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
 		examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
 		return examinationDb;

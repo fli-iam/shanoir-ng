@@ -46,7 +46,7 @@ public class MrProtocolMetadata extends AbstractEntity {
 
 	/**
 	 * (0018,1049) Contrast/Bolus Ingredient Concentration. The unit of measure
-	 * of injected volume must be in ml.
+	 * of injected volume must be in mg/ml.
 	 */
 	private Double contrastAgentConcentration;
 
