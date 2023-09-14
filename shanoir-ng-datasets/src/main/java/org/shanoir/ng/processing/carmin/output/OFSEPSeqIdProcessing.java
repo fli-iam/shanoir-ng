@@ -168,8 +168,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
             for(Dataset ds : datasets){
 
-                JSONObject vol;
-                vol = this.getMatchingVolume(ds, serie);
+                JSONObject vol = this.getMatchingVolume(ds, serie);
 
                 if(vol == null){
                     LOG.error("No volume from serie [{}] could be match with dataset [{}].", serieId, ds.getId());
@@ -270,6 +269,11 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      */
     public JSONObject getMatchingVolume(Dataset dataset, JSONObject serie) throws JSONException, PacsException {
 
+        if(serie.isNull(VOLUMES)){
+            LOG.error("Volumes set is null in result file for serie [{}]", serie.getLong(ID));
+            return null;
+        }
+
         JSONArray volumes = serie.getJSONArray(VOLUMES);
 
         Attributes attributes = wadoDownloaderService.getDicomAttributesForDataset(dataset);
@@ -279,6 +283,12 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
         for (int i = 0 ; i < volumes.length(); i++) {
 
             JSONObject volume = volumes.getJSONObject(i);
+
+            if(volume.isNull(ORIENTATION)){
+                LOG.error("Orientation is null in result file for volume [{}]", volume.getString(ID));
+                continue;
+            }
+
             JSONArray volOrientation = volume.getJSONArray(ORIENTATION);
 
             if(dsOrientation == null || dsOrientation.length == 0){
