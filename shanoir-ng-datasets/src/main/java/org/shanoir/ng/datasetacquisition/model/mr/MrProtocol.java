@@ -189,7 +189,7 @@ public class MrProtocol extends AbstractEntity {
 
 	/**
 	* (0018,0087) Magnetic Field Strength
-	* The Magnetic field strength.
+	* The Magnetic field strength in Teslas.
 	*/
 	private Double magneticFieldStrength;
 
