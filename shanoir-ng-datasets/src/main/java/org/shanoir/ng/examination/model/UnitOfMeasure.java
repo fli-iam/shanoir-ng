@@ -53,7 +53,7 @@ public enum UnitOfMeasure {
 	TESLA(15),
 	KEV(16),
 	SEC(17),
-	BQ(18),
+	MBQ(18),
 	HZ(19);
 
 	private int id;

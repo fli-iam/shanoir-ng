@@ -37,7 +37,7 @@ export enum UnitOfMeasure {
 
     SEC = "S",
 
-    BQ = "BQ",
+    MBQ = "MBQ",
 
     HZ = "HZ"
 
@@ -105,8 +105,8 @@ export enum UnitOfMeasure {
             case UnitOfMeasure.KEV:
                 return "keV";
                 break;
-            case UnitOfMeasure.BQ:
-                return "Bq";
+            case UnitOfMeasure.MBQ:
+                return "MBq";
                 break;
             case UnitOfMeasure.HZ:
                 return "Hz";

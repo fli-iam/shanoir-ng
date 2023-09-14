@@ -145,7 +145,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     initCreate(): Promise<void> {
-        console.log("create !")
         this.entity = new Examination();
         this.examination.weightUnitOfMeasure = this.defaultUnit;
         this.examination.preclinical = true;
@@ -399,7 +398,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     }
 
     getUnit(key: string) {
-        console.log(key);
         return UnitOfMeasure.getLabelByKey(key);
     }
 

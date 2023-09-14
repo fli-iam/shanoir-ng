@@ -16,7 +16,6 @@ import {allOfEnum, capitalsAndUnderscoresToDisplayable} from '../../../utils/app
 import {Dataset} from '../../shared/dataset.model';
 import {DiffusionGradient} from '../../../dataset-acquisitions/modality/mr/mr-protocol.model';
 import {DatasetType} from '../../shared/dataset-type.model';
-import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
 export class MrDataset extends Dataset {
     diffusionGradients: DiffusionGradient[];
