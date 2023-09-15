@@ -111,14 +111,15 @@ public class ExtraDataApiControllerTest {
 	private ExtraDataEditableByManager editableOnlyValidator;
 
 	@TempDir
-	public File tempFolder;
-	
-	public String tempFolderPath;
+	public static File tempFolder;
+
+	@BeforeAll
+	public static void beforeClass() {
+		System.setProperty("preclinical.uploadExtradataFolder",  tempFolder.getAbsolutePath() + "/tmp/");
+	}
 
 	@BeforeEach
 	public void setup() throws ShanoirException {
-		tempFolderPath = tempFolder.getAbsolutePath() + "/tmp/";
-	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
 
 	    gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 
