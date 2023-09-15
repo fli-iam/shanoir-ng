@@ -111,10 +111,10 @@ public class ExtraDataApiController implements ExtraDataApi {
 			return new ResponseEntity<>(extradata, HttpStatus.OK);
 		} catch (IOException e) {
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", e));
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					"Error while saving updated extradata", null));
+					"Error while saving updated extradata", e));
 		}
 	}
 
