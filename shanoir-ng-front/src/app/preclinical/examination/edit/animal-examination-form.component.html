@@ -35,7 +35,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<ng-template [ngSwitchCase]="'view'">
 							<a [routerLink]="['/study/details/', examination.study?.id]">
 								{{examination.study?.name}}
-							</a>		
+							</a>
 						</ng-template>
 						<ng-template ngSwitchDefault>
 							<div [ngSwitch]="examination.hasStudyCenterData">
@@ -146,7 +146,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 				<li>
-					<label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">Subject weight</label>
+					<label i18n="Examination detail|Subject weight label@@examinationDetailSubjectWeight">Subject weight ({{getUnit(examination.weightUnitOfMeasure?.toString())}})</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
 							{{examination.subjectWeight}}
@@ -155,12 +155,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<input type="text" id="subjectWeight" formControlName="subjectWeight" [(ngModel)]="examination.subjectWeight" />
 						</ng-template>
 
-						<!-- <ng-template ngSwitchDefault>
-							<select id="measureUnit" required>
-								<option value="kg">kg</option>
-								<option value="g">g</option>
-							</select>
-						</ng-template> -->
+                        <span class="right-col" *ngIf="mode != 'view'">
+                                <input id="{{unit.KG}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" [(ngModel)]="examination.weightUnitOfMeasure" value="{{unit.KG}}" />{{getUnit(unit.KG.toString())}}
+                            <input id="{{unit.G}}" type="radio" formControlName="weightUnitOfMeasure" name="weightUnitOfMeasure" [(ngModel)]="examination.weightUnitOfMeasure" value="{{unit.G}}" />{{getUnit(unit.G.toString())}}
+                            </span>
 
 					</span>
 				</li>
@@ -174,7 +172,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<button i18n="Examination detail|Create new Instrument Based Assessment	label@@examinationDetailNewInstrumentBasedAssessment"
 							disabled (click)="instAssessment()">
 								<i class="fas fa-plus-square"></i>
-								new Instrument Based Assessment										
+								new Instrument Based Assessment
 							</button>
 						</ng-template>
 					</span>
@@ -194,30 +192,30 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</fieldset>
 
 		<examination-anesthetic-form
-			[examination_id]="examination.id" 
-			[mode]="mode" 
+			[examination_id]="examination.id"
+			[mode]="mode"
 			(examAnestheticChange)="onExamAnestheticChange($event)">
 		</examination-anesthetic-form>
 
 		<!--
-			<contrast-agent-form 
-			[protocol_id]="protocol_id" 
-			[agent]="contrastAgent" 
-			[newAgentForm]="newExamForm.controls.newAgentForm"  
-			[mode]="mode" 
-			[canModify]="canModify" 
+			<contrast-agent-form
+			[protocol_id]="protocol_id"
+			[agent]="contrastAgent"
+			[newAgentForm]="newExamForm.controls.newAgentForm"
+			[mode]="mode"
+			[canModify]="canModify"
 			(agentChange)="onAgentChange($event)">
 		</contrast-agent-form>
--->		
+-->
 
-		<physiological-data-upload-form 
+		<physiological-data-upload-form
 			(physioDataReady)="onUploadPhysiologicalData($event)"
 			[mode]="mode"
-			[canModify]="true" 
+			[canModify]="true"
 			[examination_id]="examination.id">
 		</physiological-data-upload-form>
 
-		<bloodgas-data-upload-form 
+		<bloodgas-data-upload-form
 			(bloodGasDataReady)="onUploadBloodGasData($event)"
 			[mode]="mode"
 			[canModify]="true"
@@ -226,8 +224,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 		<fieldset *ngIf="examination && mode=='view'">
 			<legend i18n="Examination data|Title@@examinationDetailDataTitle">Data</legend>
-			<examination-node 
-					[input]="breadcrumbsService.currentStep.data.examinationNode ? breadcrumbsService.currentStep.data.examinationNode : examination" 
+			<examination-node
+					[input]="breadcrumbsService.currentStep.data.examinationNode ? breadcrumbsService.currentStep.data.examinationNode : examination"
 					(nodeInit)="onExaminationNodeInit($event)"></examination-node>
 		</fieldset>
 		<form-footer
@@ -239,4 +237,4 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		></form-footer>
 	</div>
 	</form>
-  
+
