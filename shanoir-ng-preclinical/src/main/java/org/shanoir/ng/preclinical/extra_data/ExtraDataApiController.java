@@ -357,11 +357,16 @@ public class ExtraDataApiController implements ExtraDataApi {
 	private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file) throws IOException {
 		
 		File createdFolder = new File(extraDataPath + "/models/" + extradata.getId());
-		createdFolder.mkdirs();
+		if(!createdFolder.mkdirs()){
+			LOG.error("Could not create directory [{}]", createdFolder.getAbsolutePath());
+		}
+
 		// Path to file
 		File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
 		try {
-			fileToGet.createNewFile();
+			if(!fileToGet.createNewFile()){
+				LOG.error("Could not create file [{}]", fileToGet.getAbsolutePath());
+			}
 			file.transferTo(fileToGet);
 		} catch (IOException e) {
 			LOG.error("Error while saving file [{}] to [{}].", file.getOriginalFilename(), fileToGet.getAbsolutePath());
