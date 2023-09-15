@@ -354,15 +354,19 @@ public class ExtraDataApiController implements ExtraDataApi {
 		return editableOnlyValidator.validate(extraData);
 	}
 
-	private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file)
-			throws IOException {
+	private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file) throws IOException {
 		
 		File createdFolder = new File(extraDataPath + "/models/" + extradata.getId());
 		createdFolder.mkdirs();
 		// Path to file
 		File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
-		fileToGet.createNewFile();
-		file.transferTo(fileToGet);
+		try {
+			fileToGet.createNewFile();
+			file.transferTo(fileToGet);
+		} catch (IOException e) {
+			LOG.error("Error while saving file [{}] to [{}].", file.getOriginalFilename(), fileToGet.getAbsolutePath());
+			throw e;
+		}
 
 		extradata.setFilename(file.getOriginalFilename());
 		extradata.setFilepath(fileToGet.getAbsolutePath());
