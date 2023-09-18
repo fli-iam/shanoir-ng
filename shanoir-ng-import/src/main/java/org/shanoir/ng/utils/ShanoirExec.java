@@ -249,7 +249,8 @@ public class ShanoirExec {
 			}
 		}
 
-		LOG.debug("CMD DCM2NII {}", Arrays.asList(cmd));
+		LOG.error("#######################################################################");
+		LOG.error("CMD DCM2NII {}", Arrays.asList(cmd));
 
 		final String result = exec(cmd);
 
