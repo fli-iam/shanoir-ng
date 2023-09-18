@@ -794,7 +794,6 @@ public class ImporterApiController implements ImporterApi {
 
 				// STEP 4.0 "Fake" upload file to get create the dicomdir and temporary folder
 				job = this.uploadDicomZipFile(mockedFile).getBody();
-				job.setMultipleExams(true);
 				Patient patient = job.getPatients().get(0);
 
 				// Create subject only once.
