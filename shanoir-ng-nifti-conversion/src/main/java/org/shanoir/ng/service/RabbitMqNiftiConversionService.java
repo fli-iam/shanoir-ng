@@ -3,7 +3,7 @@ package org.shanoir.ng.service;
 import java.io.File;
 import java.util.Collections;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.shanoir.ng.model.Dataset;
 import org.shanoir.ng.model.NiftiConverter;

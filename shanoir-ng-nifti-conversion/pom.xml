@@ -1,11 +1,29 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Shanoir NG - Import, manage and share neuroimaging data
+Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+Contact us on https://project.inria.fr/shanoir/
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+-->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.shanoir-ng</groupId>
         <artifactId>shanoir-ng-back</artifactId>
-        <version>2.6.6</version>
+        <version>3.1.2</version>
         <relativePath>../shanoir-ng-back</relativePath>
     </parent>
+
   <artifactId>nifti-conversion</artifactId>
   <packaging>jar</packaging>
 
@@ -20,12 +38,7 @@
         <dependency>
             <groupId>org.shanoir-ng</groupId>
             <artifactId>shanoir-ng-ms-common</artifactId>
-            <exclusions>
-		        <exclusion>
-		          <groupId>org.shanoir-ng</groupId> <!-- Exclude Project-D from Project-B -->
-		          <artifactId>shared</artifactId>
-		        </exclusion>
-	        </exclusions>
+            <version>3.1.2</version>
         </dependency>
         <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -70,22 +83,26 @@
             <!-- Package shanoir-ng-nifti-conversion.jar as Spring Boot executable: Avoid error: 
                 no main manifest attribute, in /shanoir-ng-nifti-converter.jar -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <classpathDependencyExcludes>
-                        <classpathDependencyExclude>org.slf4j:slf4j-log4j12</classpathDependencyExclude>
-                    </classpathDependencyExcludes>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <profiles>
+                        <profile>${spring.active.profile}</profile>
+                    </profiles>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Copy shanoir-ng-nifti-conversion.jar for docker-compose up running -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -109,39 +126,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <repositories>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>mvn-repo-master</id>
-            <url>https://raw.github.com/nroduit/mvn-repo/master/</url>
-        </repository>
-    </repositories>
-
-    <profiles>
-        <profile>
-            <id>dev</id>
-            <properties>
-                <spring-active-profile>dev</spring-active-profile>
-            </properties>
-        </profile>
-        <profile>
-            <id>qualif</id>
-            <properties>
-                <spring.active.profile>qualif</spring.active.profile>
-                <maven.test.skip>true</maven.test.skip>
-            </properties>
-        </profile>
-    </profiles>
-    <dependencyManagement>
-    	<dependencies>
-    		<dependency>
-    			<groupId>org.shanoir-ng</groupId>
-    			<artifactId>shanoir-ng-ms-common</artifactId>
-    			<version>2.6.6</version>
-    		</dependency>
-    	</dependencies>
-    </dependencyManagement>
 </project>

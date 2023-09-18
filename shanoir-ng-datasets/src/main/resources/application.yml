@@ -75,6 +75,9 @@ spring:
         jwt:
           issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
 
+shanoir:
+  database: other
+
 springdoc:
   api-docs:
     path: /api-docs
@@ -195,7 +198,7 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
-    
+
 ---
 spring:
   config.activate.on-profile: test

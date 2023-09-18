@@ -33,7 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
  *
  */
 @Component
-@ConditionalOnProperty(prefix = "shanoir", name = "database", matchIfMissing = true)
+@ConditionalOnProperty(prefix = "shanoir", name = "database", havingValue = "other", matchIfMissing = true)
 public class FindByRepositoryImpl<T extends AbstractEntity> implements FindByRepository<T> {
 	
 	@PersistenceContext

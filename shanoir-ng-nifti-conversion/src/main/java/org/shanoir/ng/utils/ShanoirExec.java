@@ -20,23 +20,16 @@ import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ShanoirExec {
 	
-	/** Dicomifier error. */
-	private static final String ERROR_DICOM2NIFTI_REQUEST = "Error on dicom2nifti microservice request";
-
 	/**
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirExec.class);
 	
-	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.lib}")
-    private String clidcmPathLib;
-
 	/**
 	 * Exec the clidcm command to convert Dicom files to Nifti files.
 	 *
@@ -75,7 +68,7 @@ public class ShanoirExec {
 		
 		if (!systemEnv.containsKey("VISTAL_FMT")) {
 			envp[i] = "VISTAL_FMT=NII";
-			envp[i + 1] = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + clidcmPathLib;
+			envp[i + 1] = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:";
 		}
 
 		final String result = exec(cmd, envp);
@@ -575,7 +568,6 @@ public class ShanoirExec {
 	 * @param inputFolder the input folder where the DICOM are
 	 * @param outputFolder the output folder where to set the nifti
 	 * @return Informations about the conversion
-	 * @throws RestServiceException when the request fails.
 	 */
 	public String dicomifier(String inputFolder, String outputFolder) {
 		//TODO: to be completed.

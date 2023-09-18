@@ -37,7 +37,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
  * @param <T>
  */
 @Service
-@ConditionalOnProperty(prefix = "shanoir", name = "database", matchIfMissing = true)
 public abstract class UniqueConstraintManagerImpl <T extends AbstractEntity> implements UniqueConstraintManager<T> {
 	
 	@Autowired

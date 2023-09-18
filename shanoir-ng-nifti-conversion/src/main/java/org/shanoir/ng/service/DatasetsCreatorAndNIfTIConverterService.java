@@ -30,7 +30,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -100,21 +100,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 	@Value("${shanoir.conversion.converters.path}")
 	private String convertersPath;
-
-	@Value("${shanoir.conversion.dcm2nii.converters.convertas4d}")
-	private String convertAs4D;
-
-	@Value("${shanoir.conversion.dcm2nii.converters.path.linux}")
-	private String convertersPathLinux;
-
-	@Value("${shanoir.conversion.dcm2nii.converters.path.windows}")
-	private String convertersPathWindows;
-
-	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.linux}")
-	private String clidcmPathLinux;
-
-	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.windows}")
-	private String clidcmPathWindows;
 
 	/** Logs of the conversion. */
 	private String conversionLogs;
