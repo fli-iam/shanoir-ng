@@ -37,8 +37,6 @@ public class ImportJob implements Serializable {
 
     private boolean fromPacs;
     
-    private boolean multipleExams = false;
-
 	private String workFolder;
 
     private List<Patient> patients;
@@ -265,14 +263,6 @@ public class ImportJob implements Serializable {
 
 	public void setCenterId(Long centerId) {
 		this.centerId = centerId;
-	}
-
-	public boolean isMultipleExams() {
-		return multipleExams;
-	}
-
-	public void setMultipleExams(boolean multipleExams) {
-		this.multipleExams = multipleExams;
 	}
 	
 }

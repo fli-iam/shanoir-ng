@@ -101,9 +101,7 @@ public class DatasetAcquisitionApiController implements DatasetAcquisitionApi {
 			ErrorModel error = new ErrorModel(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Error", e);
 			throw new RestServiceException(error);
 		}
-		if (!importJob.isMultipleExams()) {
-			importerService.cleanTempFiles(importJob.getWorkFolder());
-		}
+		importerService.cleanTempFiles(importJob.getWorkFolder());
 		return new ResponseEntity<Void>(HttpStatus.OK);
 	}
 
