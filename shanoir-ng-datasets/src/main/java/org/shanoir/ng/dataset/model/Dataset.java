@@ -83,7 +83,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 		@JsonSubTypes.Type(value = StatisticalDataset.class, name = "Statistical"),
 		@JsonSubTypes.Type(value = TemplateDataset.class, name = "Template"),
 		@JsonSubTypes.Type(value = BidsDataset.class, name = "BIDS"),
-		@JsonSubTypes.Type(value = BidsDataset.class, name = "NIRS"),
 		@JsonSubTypes.Type(value = MeasurementDataset.class, name = "Measurement") })
 public abstract class Dataset extends AbstractEntity {
 
