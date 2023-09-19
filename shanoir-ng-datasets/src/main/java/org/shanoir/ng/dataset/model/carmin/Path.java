@@ -1,9 +1,9 @@
 package org.shanoir.ng.dataset.model.carmin;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 
-import jakarta.validation.constraints.NotNull;
 import java.util.Objects;
 
 /**

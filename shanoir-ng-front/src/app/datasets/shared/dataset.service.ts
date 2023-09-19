@@ -70,12 +70,20 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
+
+
+    getByExaminationId(examinationId: number) {
+        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/examination/' + examinationId)
+            .toPromise()
+            .then(dtos => this.datasetDTOService.toEntityList(dtos));
+    }
+
     getByStudycardId(studycardId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/studycard/' + studycardId)
             .toPromise()
             .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
-    
+
     getByStudyId(studyId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
                 .toPromise()
@@ -99,6 +107,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
             .toPromise()
             .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
     }
+
 
     progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
        switch (event.type) {
@@ -271,4 +280,5 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
             subscribtion.unsubscribe();
         }
     }
+
 }

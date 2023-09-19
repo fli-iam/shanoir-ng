@@ -14,18 +14,15 @@
 
 package org.shanoir.ng.shared.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
-
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.examination.model.UnitOfMeasure;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * This class represents a flip angle. It is used in the MR protocol to list and
@@ -55,10 +52,6 @@ public class FlipAngle extends AbstractEntity {
 	@NotNull
 	private String flipAngleValue;
 
-	@Transient
-	@JsonInclude
-	private UnitOfMeasure unit = UnitOfMeasure.DEGREES;
-
 	/**
 	 * @return the flipAngleValue
 	 */
@@ -81,12 +74,5 @@ public class FlipAngle extends AbstractEntity {
 	public void setMrDataset(MrDataset mrDataset) {
 		this.mrDataset = mrDataset;
 	}
-
-	public UnitOfMeasure getUnit() {
-		return unit;
-	}
-
-	public void setUnit(UnitOfMeasure unit) {
-		this.unit = unit;
-	}
+  
 }

@@ -14,11 +14,6 @@
 
 package org.shanoir.ng.examination;
 
-import static org.mockito.BDDMockito.given;
-
-import java.io.IOException;
-import java.util.Optional;
-
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +36,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.io.IOException;
+import java.util.Optional;
+
+import static org.mockito.BDDMockito.given;
 
 /**
  * Examination service test.

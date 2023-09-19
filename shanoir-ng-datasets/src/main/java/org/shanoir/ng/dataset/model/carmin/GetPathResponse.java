@@ -1,8 +1,8 @@
 package org.shanoir.ng.dataset.model.carmin;
 
-import java.util.Objects;
-
 import org.springframework.validation.annotation.Validated;
+
+import java.util.Objects;
 
 /**
  * GetPathResponse

@@ -14,13 +14,11 @@
 
 package org.shanoir.ng.datasetacquisition.model.ct;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
-
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-
-import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * CT dataset acquisition.

@@ -1,7 +1,6 @@
 package org.shanoir.ng.dataset.modality;
 
 import jakarta.persistence.Entity;
-
 import org.shanoir.ng.dataset.model.Dataset;
 
 @Entity
