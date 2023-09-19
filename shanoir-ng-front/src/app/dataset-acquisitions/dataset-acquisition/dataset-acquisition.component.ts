@@ -45,7 +45,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     public acquisitionEquipments: AcquisitionEquipment[];
     acquisitionNode: DatasetAcquisition | DatasetAcquisitionNode;
     hasDownloadRight: boolean = false;
-    datasetIdsLoaded: boolean = false;
     noDatasets: boolean = false;
     hasEEG: boolean = false;
     hasDicom: boolean = false;
@@ -75,7 +74,19 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     initView(): Promise<void> {
         return this.datasetAcquisitionService.get(this.id).then(dsAcq => {
             this.datasetAcquisition = dsAcq;
-            this.fetchDatasetIdsFromTree() ;
+            this.datasetService.getByAcquisitionId(dsAcq.id).then(datasets => {
+                dsAcq.datasets = datasets;
+                this.datasetAcquisition.datasets.forEach(ds => {
+                    this.noDatasets = false;
+                    if (ds.type == 'Eeg') {
+                        this.hasEEG = true;
+                    } else if (ds.type == 'BIDS') {
+                        this.hasBids = true;
+                    } else {
+                        this.hasDicom = true;
+                    }
+                });
+            })
 
             if (this.keycloakService.isUserAdmin()) {
                 this.hasDownloadRight = true;
@@ -118,7 +129,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     download(format: string) {
-        this.datasetService.downloadDatasetsByExamination(this.id, format, this.progressBar);
+        this.datasetService.downloadDatasetsByAcquisition(this.id, format, this.progressBar);
     }
 
 
@@ -129,30 +140,5 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     onNodeInit(node: DatasetAcquisitionNode) {
         node.open = true;
         this.breadcrumbsService.currentStep.data.datasetAcquisitionNode = node;
-    }
-
-    fetchDatasetIdsFromTree() {
-        if (!this.datasetIdsLoaded) {
-            let node: DatasetAcquisitionNode = this.breadcrumbsService.currentStep.data.acquisitionNode;
-            let found: boolean = false;
-            if (node && node.datasets != 'UNLOADED') {
-                found = true;
-                node.datasets.forEach(ds => {
-                    console.log("FOUND !")
-                    this.noDatasets = false;
-                    if (ds.type == 'Eeg') {
-                        this.hasEEG = true;
-                    } else if (ds.type == 'BIDS') {
-                        this.hasBids = true;
-                    } else {
-                        this.hasDicom = true;
-                    }
-                });
-            }
-            if (found) {
-                console.log("FOUND !")
-                this.datasetIdsLoaded = true;
-            }
-        }
     }
 }
