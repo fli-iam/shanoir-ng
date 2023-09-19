@@ -574,36 +574,70 @@ public class DatasetSecurityService {
     	}
     }
 
+	/**
+	 * Check the connected user has the given right for the given dataset acquisition.
+	 * If the study is updated, check the user has the given right in both former and new studies.
+	 *
+	 * @param datasetAcq the dataset acquisition
+	 * @param rightStr the right
+	 * @return true or false
+	 * @throws EntityNotFoundException
+	 */
+	public boolean hasUpdateRightOnDatasetAcquisition(DatasetAcquisition datasetAcq, String rightStr) throws EntityNotFoundException {
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			return true;
+		}
+		if (datasetAcq == null) {
+			throw new IllegalArgumentException("Dataset acquisition cannot be null here.");
+		}
+		if (datasetAcq.getId() == null) {
+			throw new IllegalArgumentException("Dataset acquisition id cannot be null here.");
+		}
+		if (datasetAcq.getExamination() == null || datasetAcq.getExamination().getStudyId() == null) {
+			return false;
+		}
+		DatasetAcquisition dbDatasetAcq = datasetAcquisitionRepository.findById(datasetAcq.getId()).orElse(null);
+		if (dbDatasetAcq == null) {
+			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + datasetAcq.getId());
+		}
+		if (datasetAcq.getExamination().getStudyId() == dbDatasetAcq.getExamination().getStudyId()) { // study hasn't changed
+			return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr);
+		} else { // study has changed : check user has right on both studies
+			return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr) &&
+					this.hasRightOnStudyCenter(dbDatasetAcq.getExamination().getCenterId(), dbDatasetAcq.getExamination().getStudyId(), rightStr);
+		}
+	}
+
     /**
-     * Check the connected user has the given right for the given dataset acquisition.
+     * Check the connected user has the given right for the given dataset acquisition DTO.
      * If the study is updated, check the user has the given right in both former and new studies.
      * 
-     * @param datasetAcq the dataset acquisition
+     * @param datasetAcqDto the dataset acquisition dto
      * @param rightStr the right
      * @return true or false
      * @throws EntityNotFoundException
      */
-    public boolean hasUpdateRightOnDatasetAcquisition(DatasetAcquisition datasetAcq, String rightStr) throws EntityNotFoundException {
+    public boolean hasUpdateRightOnDatasetAcquisition(DatasetAcquisitionDTO datasetAcqDto, String rightStr) throws EntityNotFoundException {
     	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return true;
 		}
-    	if (datasetAcq == null) {
+    	if (datasetAcqDto == null) {
 			throw new IllegalArgumentException("Dataset acquisition cannot be null here.");
 		}
-    	if (datasetAcq.getId() == null) {
+    	if (datasetAcqDto.getId() == null) {
 			throw new IllegalArgumentException("Dataset acquisition id cannot be null here.");
 		}
-    	if (datasetAcq.getExamination() == null || datasetAcq.getExamination().getStudyId() == null) {
+    	if (datasetAcqDto.getExamination() == null || datasetAcqDto.getExamination().getStudyId() == null) {
 			return false;
 		}
-    	DatasetAcquisition dbDatasetAcq = datasetAcquisitionRepository.findById(datasetAcq.getId()).orElse(null);
+    	DatasetAcquisition dbDatasetAcq = datasetAcquisitionRepository.findById(datasetAcqDto.getId()).orElse(null);
     	if (dbDatasetAcq == null) {
-			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + datasetAcq.getId());
+			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + datasetAcqDto.getId());
 		}
-    	if (datasetAcq.getExamination().getStudyId() == dbDatasetAcq.getExamination().getStudyId()) { // study hasn't changed
-    		return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr);
+    	if (datasetAcqDto.getExamination().getStudyId() == dbDatasetAcq.getExamination().getStudyId()) { // study hasn't changed
+    		return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr);
     	} else { // study has changed : check user has right on both studies
-    		return this.hasRightOnStudyCenter(datasetAcq.getExamination().getCenterId(), datasetAcq.getExamination().getStudyId(), rightStr) &&
+    		return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr) &&
     				this.hasRightOnStudyCenter(dbDatasetAcq.getExamination().getCenterId(), dbDatasetAcq.getExamination().getStudyId(), rightStr);
     	}
     }
