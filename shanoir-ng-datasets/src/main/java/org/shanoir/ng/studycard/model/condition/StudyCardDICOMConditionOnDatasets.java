@@ -43,8 +43,6 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
     private static final Logger LOG = LoggerFactory.getLogger(StudyCardDICOMConditionOnDatasets.class);
     
 	private int dicomTag;
-
-    private  DicomTagType tagType;
 	
 	public Integer getDicomTag() {
         return dicomTag;
@@ -52,8 +50,6 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
 
     public void setDicomTag(Integer dicomTag) {
         this.dicomTag = dicomTag;
-        VR tagVr = StandardElementDictionary.INSTANCE.vrOf(dicomTag);
-        tagType = DicomTagType.valueOf(tagVr);
     }
     
     public boolean fulfilled(ExaminationAttributes dicomAttributes) {
@@ -133,6 +129,8 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
                 + "] failed on dataset " + datasetId + " because no value was found in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
             return false;
         }
+        VR tagVr = StandardElementDictionary.INSTANCE.vrOf(dicomTag);
+        DicomTagType tagType = DicomTagType.valueOf(tagVr);
         // get all possible values, that can fulfill the condition
         for (String value : this.getValues()) {
             if (tagType.isNumerical()) {
