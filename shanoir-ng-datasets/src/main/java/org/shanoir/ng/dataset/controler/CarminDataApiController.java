@@ -75,11 +75,7 @@ public class CarminDataApiController implements CarminDataApi{
                     return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
                 }
 
-                if(datasets.size() == 1){
-                    datasetDownloaderService.downloadDatasetById(datasets.get(0).getId(), null, format, response, true);
-                }else{
-                    datasetDownloaderService.massiveDownload(format, datasets, response, true);
-                }
+                datasetDownloaderService.massiveDownload(format, datasets, response, true);
 
                 return new ResponseEntity<Void>(HttpStatus.OK);
         }
