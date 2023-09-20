@@ -24,6 +24,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.pet.PetProtocol;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
@@ -53,7 +54,7 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 	
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, Attributes dicomAttributes)
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes dicomAttributes)
 			throws Exception {
 		
 		PetDatasetAcquisition datasetAcquisition = new PetDatasetAcquisition();
@@ -64,9 +65,9 @@ public class PetDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 
 		datasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		datasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));
+		datasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
 		
-		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes);
+		PetProtocol protocol = protocolStrategy.generateProtocolForSerie(dicomAttributes.getFirstDatasetAttributes());
 		datasetAcquisition.setPetProtocol(protocol);
 	
 		// TODO ATO add Compatibility check between study card Equipment and dicomEquipment if not done at front level.

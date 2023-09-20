@@ -28,6 +28,7 @@ import jakarta.validation.constraints.NotNull;
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
+import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -103,7 +104,7 @@ public class QualityCard extends HalEntity implements Card {
     * @param studyCard
     * @param dicomAttributes
     */
-    public QualityCardResult apply(Examination examination, Attributes dicomAttributes) {
+    public QualityCardResult apply(Examination examination, ExaminationAttributes dicomAttributes) {
         QualityCardResult result = new QualityCardResult();
         if (this.getRules() != null) {
             for (QualityExaminationRule rule : this.getRules()) {

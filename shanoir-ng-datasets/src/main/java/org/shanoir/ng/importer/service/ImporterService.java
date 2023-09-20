@@ -51,6 +51,8 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.download.AcquisitionAttributes;
+import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -63,6 +65,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
@@ -240,10 +243,10 @@ public class ImporterService {
                 float progress = 0.5f;
                 for (Serie serie : study.getSelectedSeries() ) {
                     // get dicomAttributes
-                    Attributes dicomAttributes = null;
+                    AcquisitionAttributes dicomAttributes = null;
                     try {
-                        dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced());
-                    } catch (IOException e) {
+                        dicomAttributes = dicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
+                    } catch (PacsException e) {
                         throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
                     }
                     
@@ -253,7 +256,7 @@ public class ImporterService {
                     // apply study card if needed
                     if (studyCard != null) { 
                         importJob.setStudyCardName(studyCard.getName());
-                        studyCard.apply(acquisition, dicomAttributes);
+                        studyCard.apply(acquisition, dicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced()));
                     }
                     
                     // add acq to collection
@@ -272,20 +275,21 @@ public class ImporterService {
     }
 
     private QualityCardResult checkQuality(Examination examination, ImportJob importJob) throws ShanoirException {
-        Attributes dicomAttributes = null;
-        try {
-            Serie firstSerie = importJob.getFirstSerie();
-            if (firstSerie == null) {
+        ExaminationAttributes dicomAttributes = null;
+        try {            
+            Study firstStudy = importJob.getFirstStudy();
+            if (firstStudy == null) {
                 throw new ShanoirException("The given import job does not provide any serie. Examination : " + examination.getId());
             }
-            dicomAttributes = dicomProcessing.getDicomObjectAttributes(firstSerie.getFirstDatasetFileForCurrentSerie(), firstSerie.getIsEnhanced());
-        } catch (IOException e) {
+            dicomAttributes = dicomProcessing.getDicomExaminationAttributes(firstStudy);
+        } catch (PacsException e) {
             throw new ShanoirException("Unable to retrieve dicom attributes for examination " + examination.getId(), e);
         }
         List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
         QualityCardResult qualityResult = new QualityCardResult();
         for (QualityCard qualityCard : qualityCards) {
             if (qualityCard.isToCheckAtImport()) {
+
                 qualityResult.merge(qualityCard.apply(examination, dicomAttributes));                       
             }
         }
@@ -337,7 +341,7 @@ public class ImporterService {
         }           
     }
 
-    public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, Attributes dicomAttributes) throws Exception {
+    public DatasetAcquisition createDatasetAcquisitionForSerie(Serie serie, int rank, Examination examination, ImportJob importJob, AcquisitionAttributes dicomAttributes) throws Exception {
         if (checkSerieForDicomImages(serie)) {
             DatasetAcquisition datasetAcquisition = datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, rank, importJob, dicomAttributes);			
             datasetAcquisition.setExamination(examination);

@@ -102,7 +102,7 @@ public abstract class Dataset extends AbstractEntity {
 
 	/** Dataset expression list. */
 	@JsonIgnore
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "dataset", cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.EAGER, mappedBy = "dataset", cascade = CascadeType.ALL)
 	private List<DatasetExpression> datasetExpressions;
 
 	/** Dataset Processing. */

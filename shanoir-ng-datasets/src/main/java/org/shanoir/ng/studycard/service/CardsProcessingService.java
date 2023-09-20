@@ -14,28 +14,23 @@
 
 package org.shanoir.ng.studycard.service;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.dcm4che3.data.Attributes;
-import org.shanoir.ng.configuration.amqp.RabbitMQSendService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
+import org.shanoir.ng.download.AcquisitionAttributes;
+import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.quality.QualityTag;
-import org.shanoir.ng.shared.quality.SubjectStudyQualityTagDTO;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectStudyService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
@@ -47,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 
 @Service
@@ -81,7 +77,7 @@ public class CardsProcessingService {
         boolean changeInAtLeastOneAcquisition = false;
         for (DatasetAcquisition acquisition : acquisitions) {
             if (CollectionUtils.isNotEmpty(acquisition.getDatasets()) && CollectionUtils.isNotEmpty(studyCard.getRules())) {
-                Attributes dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
+                AcquisitionAttributes dicomAttributes = downloader.getDicomAttributesForAcquisition(acquisition);
                 changeInAtLeastOneAcquisition = studyCard.apply(acquisition, dicomAttributes);
             }
         }
@@ -96,6 +92,7 @@ public class CardsProcessingService {
 	 * @param studyCard
 	 * @throws MicroServiceCommunicationException 
 	 */
+    @Transactional
 	public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Long examinationId, boolean updateTags) throws MicroServiceCommunicationException {
 	    if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
 		Examination examination = examinationService.findById(examinationId);
@@ -111,7 +108,7 @@ public class CardsProcessingService {
             // For now, just take the first DICOM instance
             // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
             try {
-                Attributes examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
+                ExaminationAttributes examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
                 List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
                 // today study cards are only used for MR modality
                 // acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
@@ -165,7 +162,7 @@ public class CardsProcessingService {
 			    // For now, just take the first DICOM instance
 			    // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
                 try {
-                    Attributes examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
+                    ExaminationAttributes examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
                     List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
                     // today study cards are only used for MR modality
                     // acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());

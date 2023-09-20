@@ -19,7 +19,6 @@ import java.util.List;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.MapperConfig;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingInheritanceStrategy;
 import org.mapstruct.ObjectFactory;
 import org.shanoir.ng.dataset.dto.DatasetDTO;

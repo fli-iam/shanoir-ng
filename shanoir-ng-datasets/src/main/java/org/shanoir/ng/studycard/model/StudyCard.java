@@ -21,6 +21,7 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
@@ -151,7 +152,7 @@ public class StudyCard extends HalEntity implements Card {
     * @param dicomAttributes
     * @return true if the application had any effect on acquisitions
     */
-    public boolean apply(DatasetAcquisition acquisition, Attributes dicomAttributes) {
+    public boolean apply(DatasetAcquisition acquisition, AcquisitionAttributes dicomAttributes) {
         boolean changeInAtLeastOneAcquisition = false;
         if (this.getRules() != null) {
             for (StudyCardRule<?> rule : this.getRules()) {
@@ -161,7 +162,7 @@ public class StudyCard extends HalEntity implements Card {
                 } else if (rule instanceof DatasetRule && acquisition.getDatasets() != null) {
                     for (Dataset dataset : acquisition.getDatasets()) {
                         changeInAtLeastOneAcquisition = true;
-                        ((DatasetRule) rule).apply(dataset, dicomAttributes);                       
+                        ((DatasetRule) rule).apply(dataset, dicomAttributes.getDatasetAttributes(dataset.getId()));                       
                     }
                 } else {
                     throw new IllegalStateException("unknown type of rule");

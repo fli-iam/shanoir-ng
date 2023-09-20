@@ -29,14 +29,15 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
-import org.shanoir.ng.importer.dto.EchoTime;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.importer.strategies.datasetexpression.DatasetExpressionContext;
+import org.shanoir.ng.shared.dicom.EchoTime;
 import org.shanoir.ng.shared.mapper.EchoTimeMapper;
 import org.shanoir.ng.shared.mapper.FlipAngleMapper;
 import org.shanoir.ng.shared.mapper.InversionTimeMapper;
@@ -70,7 +71,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 	private FlipAngleMapper flipAngleMapper;
 	
 	@Override
-	public DatasetsWrapper<MrDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
+	public DatasetsWrapper<MrDataset> generateDatasetsForSerie(AcquisitionAttributes serieAttributes, Serie serie,
 			ImportJob importJob) throws Exception {
 		
 		DatasetsWrapper<MrDataset> datasetWrapper = new DatasetsWrapper<>();
@@ -90,7 +91,7 @@ public class MrDatasetStrategy implements DatasetStrategy<MrDataset> {
 			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
 
 			MrDataset mrDataset = new MrDataset();
-			mrDataset = generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);
+			mrDataset = generateSingleDataset(serieAttributes.getDatasetAttributes(dataset.hashCode()), serie, dataset, datasetIndex, importJob);
 			if (mrDataset.getFirstImageAcquisitionTime() != null) {
 				if (datasetWrapper.getFirstImageAcquisitionTime() == null) {
 					datasetWrapper.setFirstImageAcquisitionTime(mrDataset.getFirstImageAcquisitionTime());

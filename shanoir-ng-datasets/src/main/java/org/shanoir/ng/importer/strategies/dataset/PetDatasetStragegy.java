@@ -20,6 +20,7 @@ import org.shanoir.ng.dataset.model.CardinalityOfRelatedSubjects;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
@@ -40,7 +41,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 	DatasetExpressionContext datasetExpressionContext;
 
 	@Override
-	public DatasetsWrapper<PetDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
+	public DatasetsWrapper<PetDataset> generateDatasetsForSerie(AcquisitionAttributes dicomAttributes, Serie serie,
 			ImportJob importJob) throws Exception {
 		
 		DatasetsWrapper<PetDataset> datasetWrapper = new DatasetsWrapper<>();
@@ -58,7 +59,7 @@ public class PetDatasetStragegy implements DatasetStrategy<PetDataset>{
 
 		for (Dataset dataset : serie.getDatasets()) {
 			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-			PetDataset petDataset = generateSingleDataset(dicomAttributes, serie, dataset, datasetIndex, importJob);
+			PetDataset petDataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(dataset.hashCode()), serie, dataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(petDataset);
 			datasetIndex++;
 		}

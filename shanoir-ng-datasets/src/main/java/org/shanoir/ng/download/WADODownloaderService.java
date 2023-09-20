@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -57,6 +59,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -65,6 +69,8 @@ import jakarta.mail.BodyPart;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
 
 /**
  * This class is used to download files on using WADO URLs:
@@ -354,33 +360,59 @@ public class WADODownloaderService {
 		}
 		return null;
 	}
-
-	public Attributes getDicomAttributesForStudy(Study study) throws PacsException {
+	
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public ExaminationAttributes getDicomAttributesForExamination(Examination examination) throws PacsException {
 		long ts = new Date().getTime();
-		Examination exam = getFirstIfExist(study.getExaminations());
-		if (exam == null) return null;
-		Attributes result = getDicomAttributesForExamination(exam);
-		LOG.debug("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
-		return result;
+		List<Dataset> datasets = new ArrayList<>();
+		if (examination.getDatasetAcquisitions() != null) {
+			for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
+				if (acquisition.getDatasets() != null) {
+					for (Dataset dataset : acquisition.getDatasets()) {
+						datasets.add(dataset);
+					}
+				}
+			}
+		}
+		ExaminationAttributes examAttributes = new ExaminationAttributes();
+		try {
+			datasets.parallelStream().forEach(
+				dataset -> {
+					try {
+						examAttributes.addDatasetAttributes(dataset.getId(), dataset.getDatasetAcquisition().getId(), getDicomAttributesForDataset(dataset));
+					} catch (PacsException e) {
+						throw new RuntimeException("pacs exception while parallel stream", e);
+					}
+				}
+			);
+		} catch (RuntimeException e) {
+			throw new PacsException("could not get dicom attributes from pacs", e);
+		}
+		LOG.debug("get DICOM attributes for examination " + examination.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		return examAttributes;
 	}
 
-
-	public Attributes getDicomAttributesForExamination(Examination examination) throws PacsException {
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public AcquisitionAttributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
 		long ts = new Date().getTime();
-		DatasetAcquisition acquisition = getFirstIfExist(examination.getDatasetAcquisitions());
-		if (acquisition == null) return null;
-		Attributes result = getDicomAttributesForAcquisition(acquisition);
+		List<Dataset> datasets = new ArrayList<>();
+		if (acquisition.getDatasets() != null) {
+			for (Dataset dataset : acquisition.getDatasets()) {
+				datasets.add(dataset);
+			}
+		}
+		AcquisitionAttributes dAcquisitionAttributes = new AcquisitionAttributes();
+		datasets.parallelStream().forEach(
+			dataset -> {
+				try {
+					dAcquisitionAttributes.addDatasetAttributes(dataset.getId(), getDicomAttributesForDataset(dataset));
+				} catch (PacsException e) {
+					throw new RuntimeException("could not get dicom attributes from pacs", e);
+				}
+			}
+		);
 		LOG.debug("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
-		return result;
-	}
-
-	public Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
-		long ts = new Date().getTime();
-		Dataset ds = getFirstIfExist(acquisition.getDatasets());
-		if (ds == null) return null;
-		Attributes result = getDicomAttributesForDataset(ds);
-		LOG.debug("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
-		return result;
+		return dAcquisitionAttributes;
 	}
 
 	public String getDicomJson(Examination examination) throws IOException {

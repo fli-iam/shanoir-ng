@@ -19,7 +19,7 @@ import jakarta.persistence.Entity;
 @Entity
 public abstract class StudyCardMetadataConditionWithCardinality<T> extends StudyCardMetadataCondition<T> {
 	
-private int cardinality;
+    private int cardinality;
     
     public int getCardinality() {
         return cardinality;

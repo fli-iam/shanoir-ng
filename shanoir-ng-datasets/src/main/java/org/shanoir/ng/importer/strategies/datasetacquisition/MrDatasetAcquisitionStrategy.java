@@ -31,6 +31,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
@@ -80,14 +81,14 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
     }
 	
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, Attributes dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes dicomAttributes) throws Exception {
 		MrDatasetAcquisition mrDatasetAcquisition = new MrDatasetAcquisition();
 		LOG.info("Generating DatasetAcquisition for   : {} - {} - Rank:{}", serie.getSequenceName(), serie.getProtocolName(), rank);
 		mrDatasetAcquisition.setCreationDate(LocalDate.now());
 		mrDatasetAcquisition.setRank(rank);
 		importJob.getProperties().put(ImportJob.RANK_PROPERTY, String.valueOf(rank));
 		mrDatasetAcquisition.setSortingIndex(serie.getSeriesNumber());
-		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getString(Tag.SoftwareVersions));
+		mrDatasetAcquisition.setSoftwareRelease(dicomAttributes.getFirstDatasetAttributes().getString(Tag.SoftwareVersions));
 		MrProtocol mrProtocol = mrProtocolStrategy.generateProtocolForSerie(dicomAttributes, serie);
 		mrDatasetAcquisition.setMrProtocol(mrProtocol);
 	
@@ -112,9 +113,8 @@ public class MrDatasetAcquisitionStrategy implements DatasetAcquisitionStrategy 
 		}
 
 		// Can be overridden by study cards
-		String imageType = dicomAttributes.getString(Tag.ImageType, 2);		
+		String imageType = dicomAttributes.getFirstDatasetAttributes().getString(Tag.ImageType, 2);		
 		if (imageType != null && dataTypeMapping.get(imageType) != null) {
-			MrProtocolSCMetadata metadata = mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata();
 			if (mrDatasetAcquisition.getMrProtocol().getUpdatedMetadata() == null) {
 				mrDatasetAcquisition.getMrProtocol().setUpdatedMetadata(new MrProtocolSCMetadata());
 			}

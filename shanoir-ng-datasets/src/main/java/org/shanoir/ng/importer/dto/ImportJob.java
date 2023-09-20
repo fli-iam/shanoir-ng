@@ -236,4 +236,14 @@ public class ImportJob implements Serializable {
         }
     }
 
+    public Study getFirstStudy() {
+        if ( getPatients() == null
+                || getPatients().get(0) == null
+                || getPatients().get(0).getStudies() == null) {
+            return null;        
+        } else {
+            return getPatients().get(0).getStudies().get(0);
+        }
+    }
+
 }

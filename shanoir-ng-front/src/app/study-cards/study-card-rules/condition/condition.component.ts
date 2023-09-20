@@ -80,18 +80,18 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
         if (changes.ruleScope && this.ruleScope) {
             if (this.ruleScope == 'Dataset') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMCondition', 'the DICOM field'),
+                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
                     new Option('DatasetMetadataCondOnDataset', 'the dataset field'),
                 ];
             } else if (this.ruleScope == 'DatasetAcquisition') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMCondition', 'the DICOM field'),
+                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
                     new Option('AcqMetadataCondOnAcq', 'the acquisition field'),
                     new Option('AcqMetadataCondOnDatasets', 'the dataset field'),
                 ];
             } else if (this.ruleScope == 'Examination') {
                 this.conditionTypeOptions = [
-                    new Option('StudyCardDICOMCondition', 'the DICOM field'),
+                    new Option('StudyCardDICOMConditionOnDatasets', 'the DICOM field'),
                     new Option('ExamMetadataCondOnAcq', 'the acquisition field'),
                     new Option('ExamMetadataCondOnDatasets', 'the dataset field'),
                 ];
@@ -179,7 +179,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     }
 
     onFieldChange(field: string) {
-        if (!(this.condition.scope == 'StudyCardDICOMCondition' && this.condition.dicomTag.code+"" == field)) {
+        if (!(this.condition.scope == 'StudyCardDICOMConditionOnDatasets' && this.condition.dicomTag.code+"" == field)) {
             this.computeConditionOptions();
             if (this.shanoirFieldOptions?.length > 0) this.condition.operation = 'EQUALS';
             else this.condition.operation = null;
@@ -211,7 +211,7 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
             this.computeConditionOptionsSubscription.unsubscribe();
             this.computeConditionOptionsSubscription = null;
         }
-        if (this.condition.scope != 'StudyCardDICOMCondition') {
+        if (this.condition.scope != 'StudyCardDICOMConditionOnDatasets') {
             let conditionField: ShanoirMetadataField = this.fields.find(metadataField => metadataField.field == this.condition.shanoirField);
             if (conditionField && conditionField.options) {
                 this.computeConditionOptionsSubscription = conditionField.options.subscribe(opts => {

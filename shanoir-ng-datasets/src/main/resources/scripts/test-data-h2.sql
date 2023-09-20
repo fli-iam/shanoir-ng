@@ -43,13 +43,13 @@ VALUES
 	(8,4,'4','Dataset');
 
 INSERT INTO study_card_condition
-	(id, shanoir_field, operation, scope, dicom_tag)
+	(id, shanoir_field, operation, scope, dicom_tag, cardinality)
 VALUES 
-	(1,2,4,'AcqMetadataCondOnAcq', null),
-	(2,2,4,'AcqMetadataCondOnAcq', null),
-	(3,1573009,5,'AcqMetadataCondOnAcq', null),
-	(4,1573009,6,'AcqMetadataCondOnAcq', null),
-	(5,1573013,6,'AcqMetadataCondOnAcq', null);
+	(1,2,4,'AcqMetadataCondOnAcq', null, 1),
+	(2,2,4,'AcqMetadataCondOnAcq', null, 1),
+	(3,1573009,5,'AcqMetadataCondOnAcq', null, 1),
+	(4,1573009,6,'AcqMetadataCondOnAcq', null, 1),
+	(5,1573013,6,'AcqMetadataCondOnAcq', null, 1);
 
 INSERT INTO study_card_condition_values
 	(value, study_card_condition_id)

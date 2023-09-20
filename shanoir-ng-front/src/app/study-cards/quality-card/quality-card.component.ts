@@ -220,12 +220,11 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         });    
     }
 
-    nbQueues = 4;
-
     performTest(examIds: number[]): Promise<void> {
+        //examIds = [examIds?.[0]];
         this.progress = 0;
         this.report = null;
-        const nbQueues: number = this.nbQueues;
+        const nbQueues: number = 16;
 
         let cumulatedResult: any[] = [];
         let promises: Promise<void>[] = [];

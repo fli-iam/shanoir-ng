@@ -16,11 +16,23 @@ package org.shanoir.ng.dicom;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.io.DicomInputStream;
+import org.shanoir.ng.download.AcquisitionAttributes;
+import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.importer.dto.DatasetFile;
+import org.shanoir.ng.importer.dto.Image;
+import org.shanoir.ng.importer.dto.Serie;
+import org.shanoir.ng.importer.dto.Study;
+import org.shanoir.ng.shared.dicom.SerieToDatasetsSeparator;
+import org.shanoir.ng.shared.exception.PacsException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -39,6 +51,48 @@ public class DicomProcessing {
 			}
 			return datasetAttributes;
 		}
+	}
+
+    public ExaminationAttributes getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws PacsException {
+		ExaminationAttributes attributes = new ExaminationAttributes();
+		if (study != null) {
+			for (Serie serie : study.getSeries()) {
+				attributes.addAcquisitionAttributes(serie.hashCode(), getDicomAcquisitionAttributes(serie, isEnhanced));
+			}
+		}
+		return attributes;
+    }
+
+	public ExaminationAttributes getDicomExaminationAttributes(Study study) throws PacsException {
+		ExaminationAttributes attributes = new ExaminationAttributes();
+		if (study != null) {
+			for (Serie serie : study.getSeries()) {
+				attributes.addAcquisitionAttributes(serie.hashCode(), getDicomAcquisitionAttributes(serie));
+			}
+		}
+		return attributes;
+    }
+
+	public AcquisitionAttributes getDicomAcquisitionAttributes(Serie serie, Boolean isEnhanced) throws PacsException {
+		Set<SerieToDatasetsSeparator> recordedTuples = new HashSet<>();
+		AcquisitionAttributes attributes = new AcquisitionAttributes();
+		for (Image image : serie.getImages()) {
+			SerieToDatasetsSeparator currentTuple = new SerieToDatasetsSeparator(Integer.parseInt(image.getAcquisitionNumber()), Set.copyOf(image.getEchoTimes()), 
+				ArrayUtils.toPrimitive(image.getImageOrientationPatient().toArray(new Double[image.getImageOrientationPatient().size()]), 0));
+			if (!recordedTuples.contains(currentTuple)) {
+				recordedTuples.add(currentTuple);
+				try {
+					attributes.addDatasetAttributes(image.hashCode(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
+				} catch (IOException e) {
+					throw new PacsException("Could not get dicom metadata for serie " + serie.getSopClassUID(), e);
+				}
+			}
+		}
+		return attributes;
+	}
+
+	public AcquisitionAttributes getDicomAcquisitionAttributes(Serie serie) throws PacsException {
+		return getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
 	}
 
 }

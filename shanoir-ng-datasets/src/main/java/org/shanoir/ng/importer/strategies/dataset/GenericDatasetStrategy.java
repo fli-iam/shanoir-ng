@@ -9,6 +9,7 @@ import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetsWrapper;
 import org.shanoir.ng.importer.dto.ExpressionFormat;
@@ -28,7 +29,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 	DatasetExpressionContext datasetExpressionContext;
 	
 	@Override
-	public DatasetsWrapper<GenericDataset> generateDatasetsForSerie(Attributes dicomAttributes, Serie serie,
+	public DatasetsWrapper<GenericDataset> generateDatasetsForSerie(AcquisitionAttributes dicomAttributes, Serie serie,
 			ImportJob importJob) throws Exception {
 		DatasetsWrapper<GenericDataset> datasetWrapper = new DatasetsWrapper<>();
 		/**
@@ -45,7 +46,7 @@ public class GenericDatasetStrategy implements DatasetStrategy<GenericDataset> {
 
 		for (Dataset anyDataset : serie.getDatasets()) {
 			importJob.getProperties().put(ImportJob.INDEX_PROPERTY, String.valueOf(datasetIndex));
-			GenericDataset dataset = generateSingleDataset(dicomAttributes, serie, anyDataset, datasetIndex, importJob);
+			GenericDataset dataset = generateSingleDataset(dicomAttributes.getDatasetAttributes(anyDataset.hashCode()), serie, anyDataset, datasetIndex, importJob);
 			datasetWrapper.getDatasets().add(dataset);
 			datasetIndex++;
 		}

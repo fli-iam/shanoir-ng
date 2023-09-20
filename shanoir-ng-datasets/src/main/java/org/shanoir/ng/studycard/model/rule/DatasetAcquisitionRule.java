@@ -14,21 +14,21 @@
 
 package org.shanoir.ng.studycard.model.rule;
 
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-
-import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.studycard.model.assignment.DatasetAcquisitionAssignment;
 import org.shanoir.ng.studycard.model.assignment.DatasetAssignment;
 import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnAcq;
 import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
-import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
+import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 
 /**
  * A rule that applies to a {@link DatasetAcquisition}
@@ -38,18 +38,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonTypeName("DatasetAcquisition")
 public class DatasetAcquisitionRule extends StudyCardRule<DatasetAcquisition> {
 
-    @Override
-    public void apply(DatasetAcquisition acquisition, Attributes dicomAttributes) {
+    public void apply(DatasetAcquisition acquisition, AcquisitionAttributes dicomAttributes) {
         if (this.getConditions() == null || this.getConditions().isEmpty() || conditionsfulfilled(dicomAttributes, acquisition)) {
             if (this.getAssignments() != null) applyAssignments(acquisition);
         }
     }
    
-    private boolean conditionsfulfilled(Attributes dicomAttributes, DatasetAcquisition acquisition) {
+    private boolean conditionsfulfilled(AcquisitionAttributes dicomAttributes, DatasetAcquisition acquisition) {
         boolean fulfilled = true;
         for (StudyCardCondition condition : getConditions()) {
-            if (condition instanceof StudyCardDICOMCondition) {
-                fulfilled &= ((StudyCardDICOMCondition) condition).fulfilled(dicomAttributes);
+            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+                fulfilled &= ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes);
             } else if (condition instanceof AcqMetadataCondOnAcq) {
                 fulfilled &= ((AcqMetadataCondOnAcq) condition).fulfilled(acquisition);
             } else if (condition instanceof AcqMetadataCondOnDatasets) {

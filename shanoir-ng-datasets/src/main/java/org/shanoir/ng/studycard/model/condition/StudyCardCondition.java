@@ -44,7 +44,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 @DiscriminatorColumn(name="scope", discriminatorType = DiscriminatorType.STRING)
 @JsonTypeInfo(use = Id.NAME, include = As.PROPERTY, property = "scope")
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = StudyCardDICOMCondition.class, name = "StudyCardDICOMCondition"),
+    @JsonSubTypes.Type(value = StudyCardDICOMConditionOnDatasets.class, name = "StudyCardDICOMConditionOnDatasets"),
     @JsonSubTypes.Type(value = ExamMetadataCondOnDatasets.class, name = "ExamMetadataCondOnDatasets"),
     @JsonSubTypes.Type(value = ExamMetadataCondOnAcq.class, name = "ExamMetadataCondOnAcq"),
     @JsonSubTypes.Type(value = DatasetMetadataCondOnDataset.class, name = "DatasetMetadataCondOnDataset"),
@@ -60,6 +60,22 @@ public abstract class StudyCardCondition extends AbstractEntity {
 	
 	@NotNull
 	private int operation;
+
+    private int cardinality;
+    
+    public int getCardinality() {
+        return cardinality;
+    }
+
+    public void setCardinality(int cardinality) {
+        this.cardinality = cardinality;
+    }
+
+    protected boolean cardinalityComplies(int nbOk, int total) {
+        if (getCardinality() == -1) return total == nbOk;
+        if (getCardinality() == 0) return 0 == nbOk;
+        else return nbOk >= getCardinality();
+    } 
 
 	public Operation getOperation() {
 		return Operation.getType(operation);

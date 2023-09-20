@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.service;
 
 import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.download.AcquisitionAttributes;
 import org.shanoir.ng.importer.dto.ImportJob;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.strategies.datasetacquisition.CtDatasetAcquisitionStrategy;
@@ -52,7 +53,7 @@ public class DatasetAcquisitionContext implements DatasetAcquisitionStrategy {
 	// add other strategies for other modalities here
 
 	@Override
-	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, Attributes dicomAttributes) throws Exception {
+	public DatasetAcquisition generateDatasetAcquisitionForSerie(Serie serie, int rank, ImportJob importJob, AcquisitionAttributes dicomAttributes) throws Exception {
 		DatasetAcquisitionStrategy datasetAcquisitionStrategy;
 		String modality = serie.getModality();
 		if ("MR".equals(modality)) {

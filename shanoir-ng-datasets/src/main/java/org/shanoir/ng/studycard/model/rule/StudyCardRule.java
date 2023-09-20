@@ -16,6 +16,16 @@ package org.shanoir.ng.studycard.model.rule;
 
 import java.util.List;
 
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
+import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
+
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorType;
@@ -26,17 +36,6 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
-
-import org.dcm4che3.data.Attributes;
-import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
-import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
-
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -73,6 +72,4 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
 	public void setConditions(List<StudyCardCondition> conditions) {
 		this.conditions = conditions;
 	}
-	
-	abstract void apply(T object, Attributes dicomAttributes);
 }

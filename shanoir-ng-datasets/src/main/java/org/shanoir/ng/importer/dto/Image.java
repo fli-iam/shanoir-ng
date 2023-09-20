@@ -16,6 +16,8 @@ package org.shanoir.ng.importer.dto;
 
 import java.util.List;
 
+import org.shanoir.ng.shared.dicom.EchoTime;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Image {
@@ -63,8 +65,8 @@ public class Image {
 
 	public void setImageOrientationPatient(List<Double> imageOrientationPatient) {
 		this.imageOrientationPatient = imageOrientationPatient;
+		
 	}
-
 	public List<EchoTime> getEchoTimes() {
 		return echoTimes;
 	}

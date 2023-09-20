@@ -32,6 +32,7 @@ import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.model.SubjectStudy;
@@ -42,7 +43,7 @@ import org.shanoir.ng.studycard.model.ExaminationData;
 import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnAcq;
 import org.shanoir.ng.studycard.model.condition.ExamMetadataCondOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
-import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
+import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,7 @@ public class QualityExaminationRule extends AbstractEntity {
 		this.conditions = conditions;
 	}
 	
-	public void apply(Examination examination, Attributes examinationDicomAttributes, QualityCardResult result) {
+	public void apply(Examination examination, ExaminationAttributes examinationDicomAttributes, QualityCardResult result) {
 	    ExaminationData examData = convert(examination);
 	    if (examData.getSubjectStudy() == null) {
 	        Logger log = LoggerFactory.getLogger(QualityExaminationRule.class);
@@ -84,7 +85,7 @@ public class QualityExaminationRule extends AbstractEntity {
 	    }
     }
 
-    public void apply(ExaminationData examination, Attributes examinationDicomAttributes, QualityCardResult result) {
+    public void apply(ExaminationData examination, ExaminationAttributes examinationDicomAttributes, QualityCardResult result) {
         if (this.getConditions() == null || this.getConditions().isEmpty()) {
             result.addUpdatedSubjectStudy( 
                     setTagToSubjectStudy(examination.getSubjectStudy()));
@@ -126,15 +127,15 @@ public class QualityExaminationRule extends AbstractEntity {
         return subjectStudyCopy;
     }
 
-    private ConditionResult conditionsfulfilled(Attributes dicomAttributes, ExaminationData examination, QualityCardResult result) {
+    private ConditionResult conditionsfulfilled(ExaminationAttributes dicomAttributes, ExaminationData examination, QualityCardResult result) {
         boolean allFulfilled = true;
         ConditionResult condResult = new ConditionResult();
         Collections.sort(conditions, new ConditionComparator()); // sort by level
         for (StudyCardCondition condition : getConditions()) {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
-            if (condition instanceof StudyCardDICOMCondition) {
-                fulfilled = ((StudyCardDICOMCondition) condition).fulfilled(dicomAttributes, msg);
+            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+                fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
             } else if (condition instanceof ExamMetadataCondOnAcq) {
                 fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
             } else if (condition instanceof ExamMetadataCondOnDatasets) {
@@ -189,7 +190,7 @@ public class QualityExaminationRule extends AbstractEntity {
          * the higher the priority, the higher is the returned number.
          */
         private int priority(StudyCardCondition condition) {
-            if (condition instanceof StudyCardDICOMCondition) {
+            if (condition instanceof StudyCardDICOMConditionOnDatasets) {
                 return 1;
             } else if (condition instanceof ExamMetadataCondOnAcq) {
                 return 3;
