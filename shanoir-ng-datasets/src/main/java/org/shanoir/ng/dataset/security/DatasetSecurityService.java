@@ -617,7 +617,7 @@ public class DatasetSecurityService {
      * @return true or false
      * @throws EntityNotFoundException
      */
-    public boolean hasUpdateRightOnDatasetAcquisition(DatasetAcquisitionDTO datasetAcqDto, String rightStr) throws EntityNotFoundException {
+    public boolean hasUpdateRightOnDatasetAcquisitionDTO(DatasetAcquisitionDTO datasetAcqDto, String rightStr) throws EntityNotFoundException {
     	if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			return true;
 		}
@@ -635,9 +635,9 @@ public class DatasetSecurityService {
 			throw new EntityNotFoundException("Cannot find dataset acquisition with id " + datasetAcqDto.getId());
 		}
     	if (datasetAcqDto.getExamination().getStudyId() == dbDatasetAcq.getExamination().getStudyId()) { // study hasn't changed
-    		return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr);
-    	} else { // study has changed : check user has right on both studies
-    		return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr) &&
+			return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr);
+		} else { // study has changed : check user has right on both studies
+			return this.hasRightOnStudyCenter(datasetAcqDto.getExamination().getCenterId(), datasetAcqDto.getExamination().getStudyId(), rightStr) &&
     				this.hasRightOnStudyCenter(dbDatasetAcq.getExamination().getCenterId(), dbDatasetAcq.getExamination().getStudyId(), rightStr);
     	}
     }

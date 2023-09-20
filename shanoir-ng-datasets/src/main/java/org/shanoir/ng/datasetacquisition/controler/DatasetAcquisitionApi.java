@@ -138,7 +138,7 @@ public interface DatasetAcquisitionApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/datasetacquisition/{datasetAcquisitionId}", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.PUT)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #datasetAcquisitionId == #datasetAcquisition.getId() and @datasetSecurityService.hasUpdateRightOnDatasetAcquisition(#datasetAcquisition, 'CAN_ADMINISTRATE')")
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #datasetAcquisitionId == #datasetAcquisition.getId() and @datasetSecurityService.hasUpdateRightOnDatasetAcquisitionDTO(#datasetAcquisition, 'CAN_ADMINISTRATE')")
 	ResponseEntity<Void> updateDatasetAcquisition(
 			@Parameter(name = "id of the datasetAcquisition", required = true) @PathVariable("datasetAcquisitionId") Long datasetAcquisitionId,
 			@Parameter(name = "datasetAcquisition to update", required = true) @Valid @RequestBody DatasetAcquisitionDTO datasetAcquisition, BindingResult result)

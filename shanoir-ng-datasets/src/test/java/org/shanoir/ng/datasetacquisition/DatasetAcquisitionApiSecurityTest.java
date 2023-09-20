@@ -246,7 +246,8 @@ public class DatasetAcquisitionApiSecurityTest {
 		
 		// findDatasetAcquisitions(Pageable)
 		assertThat(api.findDatasetAcquisitions(PageRequest.of(0, 10)).getBody()).hasSize(1);
-		
+
+		given(rightsService.hasRightOnStudy(1L, "CAN_ADMINISTRATE")).willReturn(true);
 		// updateDatasetAcquisition(Long, DatasetAcquisitionDTO, BindingResult)
 		if ("ROLE_USER".equals(role)) {
 			assertAccessDenied(api::updateDatasetAcquisition, 1L, mockDsAcqDTO(1L), mockBindingResult);			
@@ -291,6 +292,8 @@ public class DatasetAcquisitionApiSecurityTest {
 		dto.setId(id);
 		dto.setAcquisitionEquipmentId(1L);
 		dto.setExamination(new ExaminationDTO());
+		dto.getExamination().setStudyId(1L);
+		dto.getExamination().setCenterId(1L);
 		dto.setRank(1);
 		dto.setSoftwareRelease("v1.0.0");
 		dto.setSortingIndex(1);
