@@ -56,6 +56,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         super(http)
     }
 
+    get(id: number, withStorageVolume = false): Promise<Study> {
+        return this.http.get<any>(this.API_URL + '/' + id
+            + (withStorageVolume ? '?withStorageVolume=true' : ''))
+            .toPromise()
+            .then(this.mapEntity);
+    }
+
     getEntityInstance() { return new Study(); }
 
     findStudiesByUserId(): Promise<Study[]> {
@@ -311,7 +318,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         if(size == null){
             return "";
         }
-        
+
         if(size == 0){
             return "0 " + units[0];
         }
