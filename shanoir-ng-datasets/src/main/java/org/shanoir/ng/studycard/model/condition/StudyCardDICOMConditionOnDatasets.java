@@ -208,6 +208,13 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
+        if (getCardinality() == -1) {
+                sb.append("all datasets ");
+            } else if (getCardinality() == 0) {
+                sb.append("no dataset ");
+            } else {
+                sb.append(getCardinality()).append(" datasets ");
+            }
         sb.append("DICOM field ").append(getDicomTagCodeAndLabel(getDicomTag()))
             .append(" ").append(getOperation().name())
             .append(" to ")
