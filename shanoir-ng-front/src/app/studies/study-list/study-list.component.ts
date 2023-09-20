@@ -133,7 +133,14 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             }));
         }
 
-        Promise.all(promises).then(() => this.isStudyVolumesFetching = false);
+        Promise.all(promises).then(() => {
+            this.table.columnDefs.forEach(column => {
+                if(column.headerName === "Storage volume"){
+                    column.disableSorting = false;
+                }
+            })
+            return this.isStudyVolumesFetching = false;
+        });
     }
 
     getColumnDefs(): ColumnDefinition[] {
@@ -169,9 +176,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 headerName: "Members", field: "nbMembers", type: "number", width: '30px'
             },
             {
-                headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: this.isStudyVolumesFetching, type: "number", orderBy: ["totalSize"],
+                headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: true, type: "number", orderBy: ["totalSize"],
                 cellRenderer: (params: any) => {
-                    if (params.data.totalSize == null && this.isStudyVolumesFetching) {
+                    if (this.isStudyVolumesFetching) {
                         return "Fetching..."
                     }
                     return this.studyService.storageVolumePrettyPrint(params.data.totalSize);

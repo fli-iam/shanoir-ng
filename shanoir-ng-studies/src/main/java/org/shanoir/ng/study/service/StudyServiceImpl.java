@@ -704,6 +704,14 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyIds) {
+
+		// DEBUG !!!
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+
 		Map<Long, StudyStorageVolumeDTO> detailedStorageVolumes;
 		try {
 			String resultAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyIds);
