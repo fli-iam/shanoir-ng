@@ -727,6 +727,9 @@ public class StudyServiceImpl implements StudyService {
 
 
 		this.studyRepository.findAllById(studyIds).forEach( study -> {
+				if(!detailedStorageVolumes.containsKey(study.getId())){
+					return;
+				}
 				Long filesSize = this.getStudyFilesSize(study);
 				StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
 				dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
