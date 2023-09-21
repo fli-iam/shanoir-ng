@@ -72,7 +72,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </fieldset>
 
 <upload-file [disabled]="!center" (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
-<label *ngIf="archiveStatus == 'uploaded'" > Data sucessufully imported.</label>
+<label *ngIf="archiveStatus == 'uploaded'" > Data successfully imported.</label>
 <label *ngIf="errorMessage" class="form-validation-alert" i18n="Import|ExtensionError label">
 {{errorMessage}}
 </label>

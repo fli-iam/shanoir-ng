@@ -31,7 +31,6 @@ export enum DatasetType {
   Statistical = 'Statistical',
   Template = 'Template',
   BIDS = 'BIDS',
-  NIRS = 'NIRS',
   Measurement = 'Measurement'
 } export namespace DatasetType {
 
