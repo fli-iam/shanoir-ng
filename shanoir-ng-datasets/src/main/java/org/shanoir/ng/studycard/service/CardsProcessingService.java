@@ -94,8 +94,11 @@ public class CardsProcessingService {
 	 */
     @Transactional
 	public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Long examinationId, boolean updateTags) throws MicroServiceCommunicationException {
-	    if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
+	    long startTs = new Date().getTime();
+        LOG.error("Quality check for examination " + examinationId + " started");
+        if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
 		Examination examination = examinationService.findById(examinationId);
+        LOG.error("Getting examination " + examinationId + " from the database took " + (new Date().getTime() - startTs)  + "ms");
 		if (examination == null ) throw new IllegalArgumentException("examination can't be null");
 		if (qualityCard.getStudyId() != examination.getStudy().getId()) throw new IllegalStateException("study and studycard ids don't match");
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
@@ -110,8 +113,11 @@ public class CardsProcessingService {
             try {
                 ExaminationAttributes examinationDicomAttributes;
                 if (qualityCard.hasDicomConditions()) { // don't query pacs if not needed
+                    long dicomStartTs = new Date().getTime();
+                    LOG.error("Getting DICOM data for examination " + examinationId + " took " + (new Date().getTime() - dicomStartTs)  + "ms");
                     examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
                 } else {
+                    LOG.error("No need to get DICOM data for examination " + examinationId);
                     examinationDicomAttributes = null;
                 }
                 List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
@@ -140,6 +146,8 @@ public class CardsProcessingService {
 			        throw new IllegalStateException("Could not update subject-studies", e);
 			    }	    
 			}
+            long totalMs = new Date().getTime() - startTs;
+            LOG.error("Quality check for examination " + examinationId + " finished in " + totalMs);
 			return result;
 		} else {
 			throw new RestClientException("Study card used with emtpy rules.");
