@@ -34,6 +34,8 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
+import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
+import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -120,5 +122,16 @@ public class QualityCard extends HalEntity implements Card {
 
     public void setToCheckAtImport(boolean toCheckAtImport) {
         this.toCheckAtImport = toCheckAtImport;
+    }
+
+    public boolean hasDicomConditions() {
+		if (getRules() != null) {
+			for (QualityExaminationRule rule : getRules()) {
+				if (rule.hasDicomConditions()) {
+					return true;
+				}
+			}
+		}
+        return false;
     }
 }

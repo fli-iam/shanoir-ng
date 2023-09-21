@@ -232,4 +232,15 @@ public class QualityExaminationRule extends AbstractEntity {
             this.unfulfilledConditionsMsgList.add(msg);
         }
     }
+
+    public boolean hasDicomConditions() {
+        if (getConditions() != null) {
+            for (StudyCardCondition condition: getConditions()) {
+                if (condition instanceof StudyCardDICOMConditionOnDatasets) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

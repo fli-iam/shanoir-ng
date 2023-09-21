@@ -37,7 +37,18 @@ export class StudyCardConditionComponent implements OnInit, OnDestroy, OnChanges
     @Input() fields: ShanoirMetadataField[];
     tagOptions: Option<DicomTag>[];
     shanoirFieldOptions: Option<any>[];
-    operations: Operation[] = ['STARTS_WITH', 'EQUALS', 'ENDS_WITH', 'CONTAINS', "DOES_NOT_CONTAIN", 'SMALLER_THAN', 'BIGGER_THAN'];
+    operations: Option<Operation>[] = [
+        new Option('EQUALS', ' ', null, null, 'fa-solid fa-equals'),
+        new Option('NOT_EQUALS', ' ', null, null, 'fa-solid fa-not-equal'),
+        new Option('SMALLER_THAN', ' ', null, null, 'fa-solid fa-less-than'),
+        new Option('BIGGER_THAN', ' ', null, null, 'fa-solid fa-greater-than'),
+        new Option('CONTAINS', 'contains', null, null),
+        new Option('DOES_NOT_CONTAIN', '! contains', null, null),
+        new Option('STARTS_WITH', 'starts with', null, null),
+        new Option('DOES_NOT_START_WITH', '! starts with', null, null),
+        new Option('ENDS_WITH', 'ends with', null, null),
+        new Option('DOES_NOT_END_WITH', '! ends with'),
+    ];
     @Output() delete: EventEmitter<void> = new EventEmitter();
     init: boolean = false;
     conditionTypeOptions: Option<ConditionScope>[];

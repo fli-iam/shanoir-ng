@@ -108,7 +108,12 @@ public class CardsProcessingService {
             // For now, just take the first DICOM instance
             // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
             try {
-                ExaminationAttributes examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
+                ExaminationAttributes examinationDicomAttributes;
+                if (qualityCard.hasDicomConditions()) { // don't query pacs if not needed
+                    examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
+                } else {
+                    examinationDicomAttributes = null;
+                }
                 List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
                 // today study cards are only used for MR modality
                 // acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());

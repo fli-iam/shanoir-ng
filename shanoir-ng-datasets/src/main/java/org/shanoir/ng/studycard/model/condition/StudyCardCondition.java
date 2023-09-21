@@ -100,6 +100,8 @@ public abstract class StudyCardCondition extends AbstractEntity {
             return comparison == 0;
         } else if (Operation.SMALLER_THAN.equals(operation)) {
             return comparison < 0;
+        } else if (Operation.NOT_EQUALS.equals(operation)) {
+            return comparison != 0;
         }
         throw new IllegalArgumentException("Cannot use this method for non-numerical operations (" + operation + ")");
     }
@@ -108,7 +110,9 @@ public abstract class StudyCardCondition extends AbstractEntity {
         if (original != null) {
             if (Operation.EQUALS.equals(operation)) {
                 return original.equals(studycardStr);
-            } else if (Operation.CONTAINS.equals(operation)) {
+            } else if (Operation.NOT_EQUALS.equals(operation)) {
+                return !original.equals(studycardStr);
+             } else if (Operation.CONTAINS.equals(operation)) {
                 return original.contains(studycardStr);
             } else if (Operation.DOES_NOT_CONTAIN.equals(operation)) {
                 return !original.contains(studycardStr);
@@ -116,6 +120,10 @@ public abstract class StudyCardCondition extends AbstractEntity {
                 return original.startsWith(studycardStr);
             } else if (Operation.ENDS_WITH.equals(operation)) {
                 return original.endsWith(studycardStr);
+            } else if (Operation.DOES_NOT_START_WITH.equals(operation)) {
+                return !original.startsWith(studycardStr);
+            } else if (Operation.DOES_NOT_END_WITH.equals(operation)) {
+                return !original.endsWith(studycardStr);
             }
         } else {
             LOG.error("Error in studycard processing: tag (from pacs) or field (from database) null.");

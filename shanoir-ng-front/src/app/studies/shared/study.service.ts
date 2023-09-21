@@ -124,7 +124,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         } else {
             return this.getAll().then(studies => {
                 const myId: number = KeycloakService.auth.userId;
-                return studies.filter(study => {
+                return studies?.filter(study => {
                     return study.studyUserList.filter(su => su.userId == myId && su.studyUserRights.includes(StudyUserRight.CAN_ADMINISTRATE)).length > 0;
                 });
             });
@@ -132,11 +132,11 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     findStudyIdsIcanAdmin(): Promise<number[]> {
-        return this.findStudiesIcanAdmin().then(studies => studies.map(study => study.id));
+        return this.findStudiesIcanAdmin().then(studies => studies?.map(study => study.id));
     }
 
     findStudyIdNamesIcanAdmin(): Promise<IdName[]> {
-        return this.findStudiesIcanAdmin().then(studies => studies.map(study => new IdName(study.id, study.name)));
+        return this.findStudiesIcanAdmin().then(studies => studies?.map(study => new IdName(study.id, study.name)));
     }
 
     uploadFile(fileToUpload: File, studyId: number, fileType: 'protocol-file'|'dua'): Promise<any> {

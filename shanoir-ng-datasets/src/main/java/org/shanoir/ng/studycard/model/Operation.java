@@ -22,7 +22,10 @@ public enum Operation {
 	CONTAINS(4),
 	SMALLER_THAN(5),
 	BIGGER_THAN(6),
-	DOES_NOT_CONTAIN(7);
+	DOES_NOT_CONTAIN(7),
+	DOES_NOT_START_WITH(8),
+	NOT_EQUALS(9),
+	DOES_NOT_END_WITH(10);
 	
 	private int id;
 	
@@ -53,11 +56,11 @@ public enum Operation {
 	}
 	
 	public boolean isNumerical() {
-		return this.equals(BIGGER_THAN) || this.equals(EQUALS) || this.equals(SMALLER_THAN);
+		return this.equals(BIGGER_THAN) || this.equals(EQUALS) || this.equals(SMALLER_THAN) || this.equals(NOT_EQUALS);
 	}
 	
 	public boolean isTextual() {
-		return this.equals(CONTAINS) || this.equals(DOES_NOT_CONTAIN) || this.equals(ENDS_WITH) || this.equals(EQUALS) || this.equals(STARTS_WITH);
+		return this.equals(CONTAINS) || this.equals(DOES_NOT_CONTAIN) || this.equals(ENDS_WITH) || this.equals(DOES_NOT_END_WITH) || this.equals(EQUALS) || this.equals(STARTS_WITH) || this.equals(DOES_NOT_START_WITH);
 	}
 
 }

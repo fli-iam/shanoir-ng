@@ -101,7 +101,7 @@ export class DicomTag {
     }
 }
 
-export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'DOES_NOT_CONTAIN' | 'SMALLER_THAN' | 'BIGGER_THAN';
+export type Operation = 'STARTS_WITH' | 'EQUALS' | 'ENDS_WITH' | 'CONTAINS' | 'DOES_NOT_CONTAIN' | 'SMALLER_THAN' | 'BIGGER_THAN' | 'DOES_NOT_START_WITH' | 'NOT_EQUALS' | 'DOES_NOT_END_WITH';
 
 export type ConditionScope = 'StudyCardDICOMConditionOnDatasets' | 'AcqMetadataCondOnAcq' | 'AcqMetadataCondOnDatasets' | 
     'DatasetMetadataCondOnDataset' | 'ExamMetadataCondOnAcq' | 'ExamMetadataCondOnDatasets';

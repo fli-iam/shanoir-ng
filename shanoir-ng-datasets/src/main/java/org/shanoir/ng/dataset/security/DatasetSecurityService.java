@@ -180,11 +180,13 @@ public class DatasetSecurityService {
     public boolean hasRightOnSubjectStudies(List<SubjectStudy> subjectstudies, String rightStr) {
         if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
             return true;
-        }
-        for (SubjectStudy subjectStudy : subjectstudies) {
-            boolean hasRight = commService.hasRightOnStudy(subjectStudy.getStudy().getId(), rightStr);
-            if (!hasRight) {
-                return false;
+        } 
+        if (subjectstudies != null) {
+            for (SubjectStudy subjectStudy : subjectstudies) {
+                boolean hasRight = commService.hasRightOnStudy(subjectStudy.getStudy().getId(), rightStr);
+                if (!hasRight) {
+                    return false;
+                }
             }
         }
         return true;
