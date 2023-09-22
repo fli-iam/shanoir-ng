@@ -704,21 +704,24 @@ public class StudyServiceImpl implements StudyService {
 
 	@Override
 	public Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyIds) {
+
 		Map<Long, StudyStorageVolumeDTO> detailedStorageVolumes;
 		try {
 			String resultAsString = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME, studyIds);
 			if(resultAsString != null && !resultAsString.isEmpty()){
 				detailedStorageVolumes = objectMapper.readValue(resultAsString,  new TypeReference<HashMap<Long, StudyStorageVolumeDTO>>() {});
 			}else{
-				detailedStorageVolumes = new HashMap<>();
+				return new HashMap<>();
 			}
 		} catch (AmqpException | JsonProcessingException e) {
 			LOG.error("Error while fetching studies [{}] datasets volume storage details.", studyIds, e);
 			return null;
 		}
 
-
 		this.studyRepository.findAllById(studyIds).forEach( study -> {
+				if(!detailedStorageVolumes.containsKey(study.getId())){
+					return;
+				}
 				Long filesSize = this.getStudyFilesSize(study);
 				StudyStorageVolumeDTO dto = detailedStorageVolumes.get(study.getId());
 				dto.setExtraDataSize(filesSize + dto.getExtraDataSize());
