@@ -147,24 +147,8 @@ public class NIfTIConverter extends HalEntity {
 		return toString();
 	}
 
-	public boolean isDcm2Nii() {
-		return this.getNIfTIConverterType().equals(NIfTIConverterType.DCM2NII);
-	}
-
-	public boolean isMcverter() {
-		return this.getNIfTIConverterType().equals(NIfTIConverterType.MCVERTER);
-	}
-
-	public boolean isClidcm() {
-		return this.getNIfTIConverterType().equals(NIfTIConverterType.CLIDCM);
-	}
-
-	public boolean isDicom2Nifti() {
-		return this.getNIfTIConverterType().equals(NIfTIConverterType.DICOM2NIFTI);
-	}
-
 	public boolean isDicomifier() {
-		return this.getNIfTIConverterType().equals(NIfTIConverterType.DICOMIFIER);
+		return NIfTIConverterType.DICOMIFIER.equals(this.getNIfTIConverterType());
 	}
 
 }

@@ -3,7 +3,6 @@ package org.shanoir.ng.processing.carmin.model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
-
 import org.shanoir.ng.processing.model.DatasetProcessing;
 
 /**

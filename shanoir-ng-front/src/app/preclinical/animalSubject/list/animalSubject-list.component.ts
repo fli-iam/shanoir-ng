@@ -63,7 +63,7 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                 subMap.set(sub.id, sub);
             }
 
-            return this.animalSubjectService.getAnimalSubjects().then(animalSubject => {
+            return this.animalSubjectService.getAnimalSubjects(subMap.keys()).then(animalSubject => {
 
                 if (!animalSubject) {
                     return [];
@@ -86,6 +86,9 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
         let colDef: ColumnDefinition[] = [
             {headerName: "Common name", field: "subject.name"},
             {headerName: "Imaged object category", field: "subject.imagedObjectCategory", cellRenderer: function (params: any) {
+                    if(!params.data.subject){
+                        return "";
+                    }
                     let imagedObjectCat: ImagedObjectCategory = <ImagedObjectCategory> params.data.subject.imagedObjectCategory;
                     if (ImagedObjectCategory[imagedObjectCat] === ImagedObjectCategory.PHANTOM) {
                     	return 'Phantom';
@@ -128,14 +131,14 @@ export class AnimalSubjectsListComponent  extends BrowserPaginEntityListComponen
                 'Delete', 'Are you sure you want to delete preclinical-subject n° ' + entity.id + ' ?'
             ).then(res => {
                 if (res) {
-                    this.animalSubjectService.delete(entity.id).then((res) => {
+                    this.subjectService.delete(entity.id).then((res) => {
                         this.onDelete.next({entity: entity});
                         const index: number = this.preclinicalSubjects.indexOf(entity);
                         if (index !== -1) {
                             this.preclinicalSubjects.splice(index);
                         }
                         this.table.refresh();
-                        this.consoleService.log('info', 'The preclinical-subject n°' + entity.id + ' sucessfully deleted');
+                        this.consoleService.log('info', 'The preclinical-subject n°' + entity.id + ' was sucessfully deleted');
                     }
                     ).catch(reason => {
                         if (reason && reason.error) {

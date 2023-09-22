@@ -412,7 +412,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </fieldset>
             <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'bids'">
 				        <legend>BIDS tree</legend>
-                <bids-tree [studyId]="id"></bids-tree>
+                <bids-tree [studyId]="id" [studyName]="study.name"></bids-tree>
             </fieldset>
 			<form-footer
 					[state]="footerState"

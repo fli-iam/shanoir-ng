@@ -22,10 +22,9 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { UserService } from '../../users/shared/user.service';
-import {StudyCardComponent} from "../../study-cards/study-card/study-card.component";
-import {PublicStudyData} from "../shared/study.dto";
-import {User} from "../../users/shared/user.model";
+import {ConfirmDialogService} from "../../shared/components/confirm-dialog/confirm-dialog.service";
 import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
+import {StudyUser} from "../shared/study-user.model";
 
 
 @Component({
@@ -40,8 +39,13 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
     @ViewChild('table', { static: false }) table: TableComponent;
 
+
+    accessRequestValidated = false;
+    hasDUA: boolean;
+    isSuConfirmed: boolean;
     constructor(
         private studyService: StudyService,
+        private confirmService: ConfirmDialogService,
         private userService: UserService) {
 
         super('study');
@@ -198,21 +202,54 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         );
     }
 
+    private fetchStudyUsers(study: any): Promise<StudyUser[]> {
+        return this.studyService.getStudyUserFromStudyId(study.id).then(studyUsers => {
+            return studyUsers;
+        });
+    }
+
+    private fetchHasDUA(study: any): Promise<boolean> {
+        return this.studyService.hasDUAByStudyId(study.id).then(hasDUA => {
+            return hasDUA;
+        });
+    }
+
     goToViewFromEntity(study: any): void {
-        if (study instanceof Study) {
+
+        Promise.all([
+            this.fetchHasDUA(study),
+            this.fetchStudyUsers(study),
+        ]).then(([hasDUA, studyUsers]) => {
+            for (let su of studyUsers) {
+                if (su.userId == this.keycloakService.getUserId()) {
+                    this.accessRequestValidated = true;
+                    this.isSuConfirmed = su.confirmed;
+                }
+            }
             if (study.visibleByDefault && study.locked && !this.keycloakService.isUserAdmin()) {
                 if (study.accessRequestedByCurrentUser) {
                     this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.');
-                } else {
+                } else if (!this.accessRequestValidated) {
                     this.confirmDialogService.confirm('Authorization needed',
                         'Before accessing this study you have to request an access to its administrator, do you want to proceed ?'
                     ).then(result => {
-                        if (result) this.router.navigate(['/access-request/study/' + study.id]);
+                        if (result) {
+                            this.router.navigate(['/access-request/study/' + study.id]);
+                        }
                     });
+                } else if (hasDUA && !this.isSuConfirmed) {
+                    const title: string = 'Data User Agreement awaiting for signing';
+                    const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
+                        + 'Until you have agreed those terms you cannot access to any data from these studies. '
+                        + 'Would you like to review those terms now?';
+                    const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
+                    this.confirmService.confirm(title, text, buttons).then(response => {
+                        if (response == true) this.router.navigate(['/dua']);
+                    });
+                } else {
+                    super.goToViewFromEntity(study);
                 }
-            } else {
-                super.goToViewFromEntity(study);
             }
-        }
+        });
     }
 }

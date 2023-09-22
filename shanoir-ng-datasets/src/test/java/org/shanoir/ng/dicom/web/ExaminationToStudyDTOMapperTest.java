@@ -14,10 +14,6 @@
 
 package org.shanoir.ng.dicom.web;
 
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.util.ArrayList;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.shanoir.ng.dicom.web.dto.StudyDTO;
@@ -28,6 +24,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)

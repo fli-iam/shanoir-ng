@@ -14,10 +14,8 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import java.io.IOException;
-import java.util.*;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
@@ -32,11 +30,8 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.model.Center;
-import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.model.SubjectStudy;
-import org.shanoir.ng.shared.model.Tag;
+import org.shanoir.ng.shared.model.*;
+import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -49,11 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
@@ -62,7 +54,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * RabbitMQ configuration.
@@ -86,6 +79,9 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private CenterRepository centerRepository;
+
+	@Autowired
+	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
 	@Autowired
 	private SolrService solrService;
@@ -240,6 +236,13 @@ public class RabbitMQDatasetsService {
 	}
 
 	@Transactional
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE)
+	@RabbitHandler
+	public void receiveAcEqUpdate(final String acEqStr) {
+		receiveAndUpdateIdNameEntity(acEqStr, AcquisitionEquipment.class, acquisitionEquipmentRepository);
+	}
+
+	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public void receiveCenterNameUpdate(final String centerStr) {
@@ -303,10 +306,11 @@ public class RabbitMQDatasetsService {
 		}
 	}
 
+
 	/**
-	 * Receives a shanoirEvent as a json object, concerning a subject deletion
-	 * @param commandArrStr the task as a json string.
-	 */
+         * Receives a shanoirEvent as a json object, concerning a subject deletion
+         * @param commandArrStr the task as a json string.
+         */
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),

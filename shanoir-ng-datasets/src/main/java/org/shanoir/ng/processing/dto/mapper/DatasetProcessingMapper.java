@@ -12,11 +12,12 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-package org.shanoir.ng.dataset.dto.mapper;
+package org.shanoir.ng.processing.dto.mapper;
 
 import java.util.List;
 
 import org.mapstruct.Mapper;
+import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
 
@@ -26,7 +27,7 @@ public interface DatasetProcessingMapper {
 	/**
 	 * Map a @DatasetMetadata to a @DatasetMetadataDTO.
 	 * 
-	 * @param datasets
+	 * @param processing
 	 *            dataset.
 	 * @return dataset DTO.
 	 */
@@ -35,7 +36,7 @@ public interface DatasetProcessingMapper {
 	/**
 	 * Map list of @DatasetProcessing to list of @DatasetProcessingDTO.
 	 * 
-	 * @param dataset processings
+	 * @param datasetProcessings processings
 	 *            list of dataset processings.
 	 * @return list of dataset processings DTO.
 	 */

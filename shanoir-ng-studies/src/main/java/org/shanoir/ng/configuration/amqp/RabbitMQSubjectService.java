@@ -30,7 +30,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.subject.model.Subject;
-import org.shanoir.ng.subject.model.SubjectType;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.subject.repository.SubjectRepository;
 import org.shanoir.ng.subject.service.SubjectService;
 import org.shanoir.ng.subject.service.SubjectUniqueConstraintManager;
@@ -137,6 +137,13 @@ public class RabbitMQSubjectService {
 		}
 	}
 
+	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_NAME_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public boolean existsSubjectName(String name){
+		return this.subjectService.existsSubjectWithName(name);
+	}
+
 	@RabbitListener(queues = RabbitMQConfiguration.SUBJECTS_QUEUE)
 	@RabbitHandler
 	@Transactional
@@ -205,12 +212,11 @@ public class RabbitMQSubjectService {
 
 			Optional<Subject> subject = subjectRepository.findById(id);
 
-			if(subject.isEmpty()){
+			if(subject.isEmpty() || !subject.get().isPreclinical()){
 				return;
 			}
 
 			subjectService.deleteById(subject.get().getId());
-
 			LOG.info("Subject [{}] has been deleted following deletion of preclinical subject [{}]", subject.get().getId(), id);
 
 
