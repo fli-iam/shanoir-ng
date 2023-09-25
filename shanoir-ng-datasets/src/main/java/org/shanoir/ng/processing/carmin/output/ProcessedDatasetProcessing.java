@@ -1,22 +1,6 @@
 package org.shanoir.ng.processing.carmin.output;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import jakarta.ws.rs.NotFoundException;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -28,10 +12,10 @@ import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.service.ProcessingResourceService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
@@ -42,17 +26,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import jakarta.ws.rs.NotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
-public class DefaultOutputProcessing extends OutputProcessing {
+public class ProcessedDatasetProcessing extends OutputProcessing {
 
-	public static final String JSON_INFILE = "infile";
 	@Value("${vip.result-file-name}")
 	private String resultFileName;
-
-	@Value("${vip.file-formats}")
-	private String[] listOfNiftiExt;
 
 	@Autowired
 	private ImporterService importerService;
@@ -69,78 +58,65 @@ public class DefaultOutputProcessing extends OutputProcessing {
 	@Autowired
 	private DatasetService datasetService;
 
-	private static final Logger LOG = LoggerFactory.getLogger(DefaultOutputProcessing.class);
+	@Autowired
+	private ProcessingResourceService processingResourceService;
+
+	private static final Logger LOG = LoggerFactory.getLogger(ProcessedDatasetProcessing.class);
+
 
 	@Override
-	public void manageTarGzResult(File in, File parent, CarminDatasetProcessing processing) {
+	public boolean canProcess(CarminDatasetProcessing processing) {
+		return true;
+	}
 
-		LOG.info("Processing result file [{}]...", in.getAbsolutePath());
+	@Override
+	public void manageTarGzResult(List<File> resultFiles, File parent, CarminDatasetProcessing processing) throws OutputProcessingException {
 
-		try (TarArchiveInputStream fin = new TarArchiveInputStream(
-				new GzipCompressorInputStream(new FileInputStream(in)))) {
-			TarArchiveEntry entry;
-
-			File cacheFolder = new File(parent.getAbsolutePath() + File.separator + "cache");
-
-			if (!cacheFolder.exists()) {
-				cacheFolder.mkdirs();
-			}
+		try {
 
 			List<File> outputFiles = new ArrayList<>();
-
 			File resultJson = null;
 
-			// first, find "result.json" file
-			while ((entry = fin.getNextTarEntry()) != null) {
-
-				String parsedEntry = entry.getName();
-
-				if (entry.isDirectory()) {
-					continue;
-				}
-
-				File currentFile = new File(cacheFolder, Paths.get(parsedEntry).getFileName().toString());
-				IOUtils.copy(fin, Files.newOutputStream(currentFile.toPath()));
-
-				if (parsedEntry.endsWith(this.resultFileName)) {
-					resultJson = currentFile;
+			for(File file : resultFiles){
+				if (file.getAbsolutePath().endsWith("/" + this.resultFileName)) {
+					resultJson = file;
 				} else {
 					// For all other files that are not a result.json or a folder, create a processed dataset and a dataset processing
-					outputFiles.add(currentFile);
-					LOG.info("Output file [{}] found in archive.", parsedEntry);
+					outputFiles.add(file);
+					LOG.info("Output file [{}] found in archive.", file.getAbsolutePath());
 				}
 			}
 
-			List<Dataset> inputDatasets = this.getInputDatasets(resultJson, in.getName());
+			List<Dataset> inputDatasets = this.getInputDatasets(resultJson, parent.getName());
 
 			if(inputDatasets.isEmpty()) {
-				throw new Exception("No input datasets found.");
+				throw new OutputProcessingException("No input datasets found.", null);
 			}
 
 			if(outputFiles.isEmpty()){
-				throw new Exception("No processable file found in Tar result.");
+				throw new OutputProcessingException("No processable file found in Tar result.", null);
 			}
 
 			this.createProcessedDatasets(outputFiles, processing, inputDatasets);
 
-			this.deleteCacheDir(Paths.get(cacheFolder.getAbsolutePath()));
-
 		} catch (Exception e) {
-			LOG.error("An error occured while extracting result from result archive.", e);
-			importerService.createFailedJob(in.getPath());
+			importerService.createFailedJob(parent.getPath());
+			throw new OutputProcessingException("An error occured while extracting result from result archive.", e);
 		}
 	}
 
 
 	private List<Dataset> getInputDatasets(File resultJson, String tarName) throws IOException, JSONException {
 
-		List<Long> datasetIds = new ArrayList<>();
+		HashSet<Long> datasetIds = new HashSet<>();
 		List<String> candidates = new ArrayList<>();
 
 		candidates.add(tarName);
 
 		if (resultJson == null) {
 			LOG.info("No result JSON found in archive.");
+		} else if (resultJson.length() == 0) {
+			LOG.warn("Result JSON [{}] is present but empty.", resultJson.getAbsolutePath());
 		} else {
 			LOG.info("Processing result JSON [{}]...", resultJson.getName());
 
@@ -152,39 +128,40 @@ public class DefaultOutputProcessing extends OutputProcessing {
 			Iterator<String> keys = json.keys();
 			while (keys.hasNext()) {
 				String key = keys.next();
-				Object value = json.get(key);
-				if (value instanceof JSONArray) {
-					// case "["id+XXX+filename.nii", "YYY+filename.nii", ...]"
-					JSONArray array = (JSONArray) value;
+				JSONArray array = json.optJSONArray(key);
+				if (array != null) {
+					// case "["resource_id+XXX+filename.nii", "resource_id+YYY+filename.nii", ...]"
 					for (int i = 0; i < array.length(); i++) {
-						candidates.add(array.getString(i));
+						String value = array.optString(i);
+						if(value != null){
+							candidates.add(array.getString(i));
+						}
 					}
 				} else {
-					// Case "id+XXX+filename.nii"
-					candidates.add((String) value);
+					String value = json.optString(key);
+					if(value != null){
+						// Case "resource_id+XXX+filename.nii"
+						candidates.add(value);
+					}
 				}
 			}
 		}
 
 		for (String name : candidates) {
-			Long id = this.getDatasetIdFromFilename(name);
-
-			if (id != null && !datasetIds.contains(id)) {
-				datasetIds.add(id);
-			}
+			datasetIds.addAll(this.getDatasetIdsFromFilename(name));
 		}
 
-		return datasetService.findByIdIn(datasetIds);
+		return datasetService.findByIdIn(new ArrayList<>(datasetIds));
 	}
 
-	private Long getDatasetIdFromFilename(String name){
-		// "id+[dataset id]+whatever.nii"
-		Pattern p = Pattern.compile("id\\+(\\d+)\\+.*");
-		Matcher m = p.matcher(name);
-		if (m.matches()) {
-			return Long.valueOf(m.group(1));
+	public List<Long> getDatasetIdsFromFilename(String name){
+		// "resource_id+[processing resource id]+whatever.nii"
+		Matcher matcher = Pattern.compile("resource_id\\+(.+)\\+.*").matcher(name);
+		if (matcher.matches()) {
+			return this.processingResourceService.findDatasetIdsByResourceId(matcher.group(1));
 		}
-		return null;
+
+		return new ArrayList<>();
 	}
 
 	/**
@@ -194,7 +171,7 @@ public class DefaultOutputProcessing extends OutputProcessing {
 	 * @throws EntityNotFoundException 
 	 * @throws IOException 
 	 */
-	private void createProcessedDatasets(List<File> processedFiles, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws EntityNotFoundException, IOException, Exception {
+	private void createProcessedDatasets(List<File> processedFiles, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws Exception {
 
 		// Create dataset processing
 		DatasetProcessing processing = this.createProcessing(carminDatasetProcessing, inputDatasets);
@@ -212,7 +189,7 @@ public class DefaultOutputProcessing extends OutputProcessing {
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
 			processedDataset.setStudyId(carminDatasetProcessing.getStudyId());
 			processedDataset.setStudyName(study.getName());
-			processedDataset.setProcessedDatasetName(getNameWithoutExtension(file.getName()));
+			processedDataset.setProcessedDatasetName(carminDatasetProcessing.getName());
 
 			if(inputDatasets.size() != 0) {
 
@@ -243,10 +220,6 @@ public class DefaultOutputProcessing extends OutputProcessing {
 
 		datasetProcessingService.update(processing);
 
-		// Remove datasets from current Carmin processing
-		carminDatasetProcessing.setInputDatasets(Collections.emptyList());
-		datasetProcessingService.update(carminDatasetProcessing);
-
 	}
 
 	private DatasetProcessing createProcessing(CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) {
@@ -259,17 +232,6 @@ public class DefaultOutputProcessing extends OutputProcessing {
 		processing.setOutputDatasets(new ArrayList<>());
 		processing = datasetProcessingService.create(processing);
 		return processing;
-	}
-
-	private void deleteCacheDir(Path directory) {
-		try {
-			Files.walk(directory)
-			.sorted(Comparator.reverseOrder())
-			.map(Path::toFile)
-			.forEach(File::delete);
-		} catch (IOException e) {
-			LOG.error("I/O error while deleting cache dir [{}]", directory.toString());
-		}
 	}
 
 	private String getNameWithoutExtension(String file) {

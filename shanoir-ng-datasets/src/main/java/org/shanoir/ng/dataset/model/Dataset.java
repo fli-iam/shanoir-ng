@@ -14,49 +14,22 @@
 
 package org.shanoir.ng.dataset.model;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Transient;
-
-import org.apache.commons.lang3.StringUtils;
-import org.shanoir.ng.dataset.modality.BidsDataset;
-import org.shanoir.ng.dataset.modality.CalibrationDataset;
-import org.shanoir.ng.dataset.modality.CtDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.GenericDataset;
-import org.shanoir.ng.dataset.modality.MeasurementDataset;
-import org.shanoir.ng.dataset.modality.MegDataset;
-import org.shanoir.ng.dataset.modality.MeshDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
-import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.modality.RegistrationDataset;
-import org.shanoir.ng.dataset.modality.SegmentationDataset;
-import org.shanoir.ng.dataset.modality.SpectDataset;
-import org.shanoir.ng.dataset.modality.StatisticalDataset;
-import org.shanoir.ng.dataset.modality.TemplateDataset;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.processing.model.DatasetProcessing;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import jakarta.persistence.*;
+import org.apache.commons.lang3.StringUtils;
+import org.shanoir.ng.dataset.modality.*;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Dataset.

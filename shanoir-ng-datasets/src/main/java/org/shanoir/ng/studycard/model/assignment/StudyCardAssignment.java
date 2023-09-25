@@ -14,20 +14,14 @@
 
 package org.shanoir.ng.studycard.model.assignment;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import org.hibernate.annotations.GenericGenerator;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 
 @Entity

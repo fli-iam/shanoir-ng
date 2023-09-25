@@ -19,17 +19,12 @@
  */
 package org.shanoir.ng.solr.model;
 
-import java.time.LocalDate;
-
-import jakarta.persistence.ColumnResult;
-import jakarta.persistence.ConstructorResult;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.SqlResultSetMapping;
-
+import jakarta.persistence.*;
 import org.shanoir.ng.dataset.modality.MrDatasetNature;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+
+import java.time.LocalDate;
 
 /**
  * @author yyao

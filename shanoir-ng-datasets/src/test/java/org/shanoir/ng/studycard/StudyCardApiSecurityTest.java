@@ -14,23 +14,11 @@
 
 package org.shanoir.ng.studycard;
 
-import static org.mockito.BDDMockito.given;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import jakarta.transaction.Transactional;
-
-import org.springframework.data.util.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.internal.util.collections.Sets;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -57,10 +45,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.util.Pair;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 
-import org.mockito.internal.util.collections.Sets;
+import java.util.*;
+
+import static org.mockito.BDDMockito.given;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 /**
  * User security service test.

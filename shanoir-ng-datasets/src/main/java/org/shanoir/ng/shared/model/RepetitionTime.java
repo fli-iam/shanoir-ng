@@ -14,18 +14,15 @@
 
 package org.shanoir.ng.shared.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
-
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.examination.model.UnitOfMeasure;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * This class represents an repetition time. It is used in the MR protocol to
@@ -56,10 +53,6 @@ public class RepetitionTime extends AbstractEntity {
 	@NotNull
 	private Double repetitionTimeValue;
 
-	@Transient
-	@JsonInclude
-	private UnitOfMeasure unit = UnitOfMeasure.MS;
-
 	/**
 	 * @return the repetitionTimeValue
 	 */
@@ -78,11 +71,4 @@ public class RepetitionTime extends AbstractEntity {
 		this.mrDataset = mrDataset;
 	}
 
-	public UnitOfMeasure getUnit() {
-		return unit;
-	}
-
-	public void setUnit(UnitOfMeasure unit) {
-		this.unit = unit;
-	}
 }

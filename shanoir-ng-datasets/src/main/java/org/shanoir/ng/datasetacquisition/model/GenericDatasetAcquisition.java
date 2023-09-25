@@ -1,8 +1,7 @@
 package org.shanoir.ng.datasetacquisition.model;
 
-import jakarta.persistence.Entity;
-
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.persistence.Entity;
 
 @Entity
 @JsonTypeName("Generic")

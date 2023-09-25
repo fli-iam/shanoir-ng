@@ -1,11 +1,5 @@
 package org.shanoir.ng.bids.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
-import java.io.File;
-import java.io.IOException;
-
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
@@ -14,6 +8,12 @@ import org.shanoir.ng.bids.BidsDeserializer;
 import org.shanoir.ng.bids.model.BidsElement;
 import org.shanoir.ng.bids.model.BidsFile;
 import org.shanoir.ng.bids.model.BidsFolder;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Test class for deserializer.

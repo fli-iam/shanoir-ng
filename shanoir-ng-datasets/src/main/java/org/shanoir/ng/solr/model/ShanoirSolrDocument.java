@@ -19,12 +19,12 @@
  */
 package org.shanoir.ng.solr.model;
 
-import java.util.Date;
-import java.util.List;
-
 import org.apache.solr.client.solrj.beans.Field;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.springframework.data.annotation.Id;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author yyao

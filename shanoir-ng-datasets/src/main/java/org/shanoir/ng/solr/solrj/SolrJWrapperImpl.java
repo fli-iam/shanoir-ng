@@ -3,18 +3,6 @@
  */
 package org.shanoir.ng.solr.solrj;
 
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
@@ -50,6 +38,13 @@ import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /**
  * @author yyao
@@ -171,6 +166,20 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException {
 		final SolrQuery query = new SolrQuery();
 		filterByDatasetIds(datasetIds, query);
+		/* add sorting */
+		if (pageable.getSort() != null) {
+			for (Sort.Order order : pageable.getSort()) {
+				query.addSort(order.getProperty(), order.getDirection().equals(Direction.ASC) ? ORDER.asc : ORDER.desc);				
+			}
+		}
+		/* add paging */
+		query.setRows(pageable.getPageSize());
+		query.setStart(pageable.getPageNumber() * pageable.getPageSize());
+
+		/* results with all the columns */
+		for (String fieldStr : DOCUMENT_FACET_LIST) {			
+			query.addField(fieldStr);
+		}
 		QueryResponse response = querySolrServer(query);
 		return buildShanoirSolrPage(response, pageable, null);
 	}
