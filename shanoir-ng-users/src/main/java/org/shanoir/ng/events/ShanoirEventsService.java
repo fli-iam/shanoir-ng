@@ -36,13 +36,19 @@ public class ShanoirEventsService {
 		repository.save(event);
 
 		// Push notification to UI
-		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())) {
+		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())
+				|| ShanoirEventType.CHECK_QUALITY_EVENT.equals(event.getEventType())) { 
+
 			sendSseEventsToUI(event);
 		}
 	}
 
-	public List<ShanoirEvent> getEventsByUserAndType(Long userId, String eventType) {
-		return Utils.toList(repository.findByUserIdAndEventType(userId, eventType));
+	public List<ShanoirEvent> getEventsByUserAndType(Long userId, String... eventType) {
+		List<String> list = new ArrayList<String>();
+		for (String type : eventType) {
+			list.add(type);
+		}
+		return Utils.toList(repository.findByUserIdAndEventTypeIn(userId, list));
 	}
 
 	/**

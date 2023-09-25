@@ -18,6 +18,8 @@ public class ShanoirEvent {
 
 	protected String message;
 
+	protected String report;
+
 	protected int status;
 
 	protected Float progress;
@@ -126,6 +128,14 @@ public class ShanoirEvent {
 		this.message = message;
 	}
 
+	public String getReport() {
+		return report;
+	}
+
+	public void setReport(String report) {
+		this.report = report;
+	}
+
 	/**
 	 * @return the status
 	 */
@@ -175,5 +185,7 @@ public class ShanoirEvent {
     public void setTimestamp(Long timestamp) {
         this.timestamp = timestamp;
     }
+
+	
 
 }

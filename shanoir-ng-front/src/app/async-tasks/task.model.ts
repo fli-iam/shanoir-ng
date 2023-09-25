@@ -22,6 +22,7 @@ export class Task extends Entity {
     lastUpdate: Date;
     _status: -1 | 1 | 2;
     _message: string;
+    report: string;
     _progress: number;
     _eventType: string;
     eventLabel: string;

@@ -32,9 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label>Last message</label>
                 <span class="right-col">
                     <div class="message">
-                        <code *ngFor="let line of task?.message.split('\n')" [class.tab]="line.startsWith('- ')">
-                            {{line}}
-                        </code>
+                        <pre><code>{{task?.message}}</code></pre>
                     </div>
                 </span>
             </li>

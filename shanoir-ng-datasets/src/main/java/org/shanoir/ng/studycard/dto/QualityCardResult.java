@@ -21,6 +21,9 @@ import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.quality.QualityTag;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * This class contains the result of an application of a study card
  * on an entire study. For each examination, when the result is wrong
@@ -91,6 +94,17 @@ public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
             }
         }
         return false;
+    }
+    
+    @Override
+    public String toString() {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+        try {
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
+        } catch (JsonProcessingException e) {
+            return "json error";
+        }
     }
     
 }

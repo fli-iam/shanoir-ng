@@ -361,7 +361,7 @@ public class WADODownloaderService {
 		return null;
 	}
 	
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	//@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public ExaminationAttributes getDicomAttributesForExamination(Examination examination) throws PacsException {
 		long ts = new Date().getTime();
 		List<Dataset> datasets = new ArrayList<>();
@@ -388,11 +388,11 @@ public class WADODownloaderService {
 		} catch (RuntimeException e) {
 			throw new PacsException("could not get dicom attributes from pacs", e);
 		}
-		LOG.debug("get DICOM attributes for examination " + examination.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.error("get DICOM attributes for examination " + examination.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return examAttributes;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	//@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public AcquisitionAttributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
 		long ts = new Date().getTime();
 		List<Dataset> datasets = new ArrayList<>();

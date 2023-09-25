@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -38,7 +37,6 @@ import org.shanoir.ng.shared.model.Tag;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
-import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
