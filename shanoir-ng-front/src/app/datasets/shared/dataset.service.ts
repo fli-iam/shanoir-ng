@@ -179,6 +179,23 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
     );
   }
 
+    public downloadDatasetsByAcquisition(acquisitionId: number, format: string, progressBar: LoadingBarComponent) {
+        let params = new HttpParams().set("acquisitionId", '' + acquisitionId).set("format", format);
+        this.subscribtions.push(
+            this.http.get(
+                AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByAcquisition',{
+                    reportProgress: true,
+                    observe: 'events',
+                    responseType: 'blob',
+                    params: params
+                }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
+                error =>  {
+                    this.errorService. handleError(error);
+                    progressBar.progress = 0;
+                })
+        );
+    }
+
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
         let params = new HttpParams().set("studyNameInRegExp", studyNameInRegExp)
                                         .set("studyNameOutRegExp", studyNameOutRegExp)
