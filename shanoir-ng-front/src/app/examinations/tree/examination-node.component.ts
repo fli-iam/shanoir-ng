@@ -26,6 +26,7 @@ import {ExaminationPipe} from '../shared/examination.pipe';
 import {ExaminationService} from '../shared/examination.service';
 import {LoadingBarComponent} from '../../shared/components/loading-bar/loading-bar.component';
 import {environment} from '../../../environments/environment';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 @Component({
     selector: 'examination-node',
@@ -57,6 +58,7 @@ export class ExaminationNodeComponent implements OnChanges {
         private datasetAcquisitionService: DatasetAcquisitionService,
         private examPipe: ExaminationPipe,
         private datasetService: DatasetService,
+        private downloadService: MassDownloadService,
         private consoleService: ConsoleService) {
     }
 
@@ -152,7 +154,7 @@ export class ExaminationNodeComponent implements OnChanges {
             datasetIdsReady = Promise.resolve();
         }
         datasetIdsReady.then(() => {
-            //this.datasetService.downloadDatasets(this.datasetIds, format, this.progressBar);
+            this.downloadService.downloadByIds(this.datasetIds);
             this.downloading = false;
         });
     }
