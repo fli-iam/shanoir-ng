@@ -31,6 +31,7 @@ import {
 } from '../../tree/tree.model';
 import {Subject} from '../shared/subject.model';
 import {SubjectService} from "../shared/subject.service";
+import { QualityTag } from 'src/app/study-cards/shared/quality-card.model';
 
 
 @Component({
