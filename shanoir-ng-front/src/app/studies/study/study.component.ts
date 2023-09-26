@@ -172,7 +172,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
             return study;
         });
-        this.getSubjects();
+        this.getAllSubjects();
 
         this.protocolFiles = [];
 
@@ -204,7 +204,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.selectedCenter = null;
         this.protocolFiles = [];
         this.dataUserAgreement = null;
-        this.getSubjects();
+        this.getAllSubjects();
 
         this.fetchUsers().then(users => {
             // Add the connected user by default
@@ -344,14 +344,18 @@ export class StudyComponent extends EntityComponent<Study> {
         });
     }
 
-    private getSubjects(): void {
+    private getAllSubjects(): void {
+        let ids = new Set<number>();
+        this.study.subjectStudyList.forEach(subStud => {
+            ids.add(subStud.subject.id);
+        });
         this.subjectService
-            .getSubjectsNames()
+            .getAllSubjectsNames()
             .then(subjects => {
                 this.subjects = subjects?.sort(function(a:Subject, b:Subject){
                     return a.name.localeCompare(b.name);
                 });
-        });
+            });
     }
 
     /** Center section management  **/

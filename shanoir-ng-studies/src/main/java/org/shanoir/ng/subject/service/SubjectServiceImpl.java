@@ -129,7 +129,7 @@ public class SubjectServiceImpl implements SubjectService {
 	
 
 	@Override
-	public List<IdName> findNames() {
+	public List<IdName> findAllNames() {
 		Iterable<Subject> subjects;
 		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
 			subjects = subjectRepository.findAll();
@@ -138,6 +138,24 @@ public class SubjectServiceImpl implements SubjectService {
 			List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			subjects = subjectRepository.findBySubjectStudyListStudyIdIn(studyIds);
 		}
+		return getIdNamesFromSubject(subjects);
+	}
+
+	@Override
+    public List<IdName> findNames(List<Long> subjectIds) {
+		Iterable<Subject> subjects;
+		if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
+			subjects = subjectRepository.findAllById(subjectIds);
+		} else {
+			Long userId = KeycloakUtil.getTokenUserId();
+			List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
+			subjects = subjectRepository.findBySubjectStudyListStudyIdInAndIdIn(studyIds, subjectIds);
+		}
+		return getIdNamesFromSubject(subjects);
+	}
+
+
+	private List<IdName> getIdNamesFromSubject(Iterable<Subject> subjects) {
 		List<IdName> names = new ArrayList<IdName>();
 		if (subjects != null) {
 			for (Subject subject : subjects) {
@@ -148,7 +166,7 @@ public class SubjectServiceImpl implements SubjectService {
 		return names;
 	}
 
-	@Override
+    @Override
 	public Subject findByData(final String name) {
 		return subjectRepository.findByName(name);
 	}
