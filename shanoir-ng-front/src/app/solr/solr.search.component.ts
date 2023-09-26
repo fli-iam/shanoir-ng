@@ -202,10 +202,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         }
         TextualFacetNames.forEach(facetName => {
             if (this.solrRequest[facetName] && Array.isArray(this.solrRequest[facetName])) {
-                (this.solrRequest[facetName] as []).forEach((facetVal, index) => {
+                (this.solrRequest[facetName] as []).forEach(facetVal => {
                     this.selections = this.selections.concat(
                         new SimpleValueSelectionBlock(facetVal, () => {
-                            this.solrRequest[facetName].splice(index, 1);
+                            this.solrRequest[facetName] = this.solrRequest[facetName].filter(val => val != facetVal);
                         })
                     );
 
