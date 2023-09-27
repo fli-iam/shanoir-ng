@@ -81,6 +81,8 @@ public class DatasetDownloaderServiceImpl {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetDownloaderServiceImpl.class);
 
+	private static final String JSON_ERROR_FILENAME = "ERRORS.json";
+
 	@Autowired
 	DatasetService datasetService;
 
@@ -243,7 +245,7 @@ public class DatasetDownloaderServiceImpl {
 	}
 
 	private void writeErrorFileInZip(DatasetError error, ZipOutputStream zipOutputStream) throws IOException {
-		ZipEntry zipEntry = new ZipEntry("ERRORS.json");
+		ZipEntry zipEntry = new ZipEntry(JSON_ERROR_FILENAME);
 		zipEntry.setTime(System.currentTimeMillis());
 		zipOutputStream.putNextEntry(zipEntry);
 		zipOutputStream.write(objectMapper.writeValueAsString(error).getBytes());
