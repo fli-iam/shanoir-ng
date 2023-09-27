@@ -63,7 +63,6 @@ import { DatasetProcessingDTOService } from './datasets/shared/dataset-processin
 import { DatasetProcessingPipe } from './datasets/dataset-processing/dataset-processing.pipe';
 import { EegDatasetComponent } from './datasets/dataset/eeg/dataset.eeg.component';
 import { MrDatasetComponent } from './datasets/dataset/mr/dataset.mr.component';
-import { DatasetDownloadComponent } from './datasets/download/dataset-download.component';
 import { DownloadStatisticsComponent } from './datasets/download-statistics/download-statistics.component';
 import { DatasetDTOService } from './datasets/shared/dataset.dto';
 import { DatasetService } from './datasets/shared/dataset.service';
@@ -330,7 +329,6 @@ import { DownloadSetupAltComponent } from './shared/mass-download/download-setup
         DatasetProcessingComponent,
         DatasetProcessingListComponent,
         DatasetProcessingPipe,
-        DatasetDownloadComponent,
         DownloadStatisticsComponent,
         DatepickerComponent,
         MrDatasetComponent,
