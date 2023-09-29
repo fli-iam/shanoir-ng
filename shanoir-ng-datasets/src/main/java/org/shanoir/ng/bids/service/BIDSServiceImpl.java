@@ -426,13 +426,13 @@ public class BIDSServiceImpl implements BIDSService {
 	 * @return A list of newly created specific BIDS files associated to the dataset in entry
 	 * @throws IOException when we fail to create a file
 	 */
-	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, String subjectName) throws IOException {
+	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
 		File dataFolder = null;
 
-		subjectName = subjectName.replaceAll("[ _] ", ""); 
-		String datasetFilePrefix = workDir.getName();
+		String subjectNameUpdated = subjectName.replaceAll("[ _] ", ""); 
+		String datasetFilePrefix = workDir.getName().contains(SESSION_PREFIX) ? workDir.getParentFile().getName() + "_" + workDir.getName() : workDir.getName();
 		
-		dataFolder = createSpecificDataFolder(dataset, workDir, dataFolder, subjectName, studyName);
+		dataFolder = createSpecificDataFolder(dataset, workDir, dataFolder, subjectNameUpdated, studyName);
 
 		// Copy dataset files in the directory AS hard link to avoid duplicating files
 		List<URL> pathURLs = new ArrayList<>();
@@ -458,7 +458,11 @@ public class BIDSServiceImpl implements BIDSService {
 				}
 			}
 
-			fileName += srcFile.getName();
+			String fileSuffix = srcFile.getName();
+			if (srcFile.getName().startsWith(subjectName)) {
+				fileSuffix = srcFile.getName().substring(fileSuffix.indexOf(subjectName) + subjectName.length());
+			}
+			fileName += fileSuffix;
 
 			try {
 			Path pathToGo = Paths.get(dataFolder.getAbsolutePath() + File.separator + fileName);
@@ -488,7 +492,7 @@ public class BIDSServiceImpl implements BIDSService {
 			dataFolder = createDataFolder("eeg", workDir);
 			String examComment = dataset.getDatasetAcquisition().getExamination().getComment();
 			String sessionLabel = examComment != null ? examComment : dataset.getDatasetAcquisition().getExamination().getId().toString();
-			exportSpecificEegFiles((EegDataset) dataset, subjectName, sessionLabel, studyName, dataset.getId().toString(), dataFolder);
+			exportSpecificEegFiles((EegDataset) dataset, subjectName, sessionLabel, studyName, dataset.getName(), dataFolder);
 		} else if (dataset instanceof PetDataset) {
 			dataFolder = createDataFolder("pet", workDir);
 		} else if (dataset instanceof MrDataset) {
@@ -621,8 +625,11 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private void exportSpecificEegFiles(final EegDataset dataset, final String subjectName, final String sessionId, final String studyName, final String runId, File dataFolder) throws IOException {
 		// Create _eeg.json
-		String fileName = "task_" + studyName + "_eeg.json";
-		String destFile = dataFolder.getAbsolutePath() + File.separator + fileName;
+		
+		String datasetFilePrefix = dataFolder.getParentFile().getName().contains(SESSION_PREFIX) ? dataFolder.getParentFile().getParentFile().getName() + "_" + dataFolder.getParentFile().getName() : dataFolder.getParentFile().getName();
+		
+		String fileName = TASK + studyName + "_eeg.json";
+		String destFile = dataFolder.getAbsolutePath() + File.separator + datasetFilePrefix + "_" + fileName;
 
 		EegDataSetDescription datasetDescription = new EegDataSetDescription();
 		datasetDescription.setTaskName(studyName);
@@ -636,7 +643,7 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 
 		// Create channels.tsv file
-		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_channel.tsv";
+		fileName = datasetFilePrefix + TASK + studyName + "_" + runId + "_channel.tsv";
 		destFile = destWorkFolderFile.getAbsolutePath() + File.separator + fileName;
 
 		StringBuilder buffer = new StringBuilder();
@@ -657,7 +664,7 @@ public class BIDSServiceImpl implements BIDSService {
 		addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
 
 		// Create events.tsv file
-		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_event.tsv";
+		fileName = datasetFilePrefix + TASK + studyName + "_" + runId + "_event.tsv";
 		destFile = destWorkFolderFile.getAbsolutePath() + File.separator + fileName;
 
 		buffer = new StringBuilder();
@@ -683,7 +690,7 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 
 		// Create electrode.csv file
-		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_electrodes.tsv";
+		fileName = datasetFilePrefix + TASK + studyName + "_" + runId + "_electrodes.tsv";
 		destFile = destWorkFolderFile.getAbsolutePath() + File.separator + fileName;
 
 		buffer = new StringBuilder();
@@ -701,7 +708,7 @@ public class BIDSServiceImpl implements BIDSService {
 		addToTsvFile(dataFolder.getParentFile(), fileName, dataset, subjectName);
 
 		// Create _coordsystem.json file
-		fileName = subjectName + "_" + sessionId + TASK + studyName + "_" + runId + "_coordsystem.json";
+		fileName = datasetFilePrefix + TASK + studyName + "_" + runId + "_coordsystem.json";
 		destFile = destWorkFolderFile.getAbsolutePath() + File.separator + fileName;
 
 		buffer = new StringBuilder();
