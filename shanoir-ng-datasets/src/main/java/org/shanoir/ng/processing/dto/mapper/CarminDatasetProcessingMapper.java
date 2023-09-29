@@ -15,17 +15,14 @@
 package org.shanoir.ng.processing.dto.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.MapperConfig;
 import org.mapstruct.Mapping;
 import org.mapstruct.ObjectFactory;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetUtils;
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
-import org.shanoir.ng.processing.dto.CarminDatasetProcessingDTO;
-import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
-import org.shanoir.ng.processing.model.DatasetProcessing;
+import org.shanoir.ng.processing.carmin.model.ExecutionMonitoring;
+import org.shanoir.ng.processing.dto.ExecutionMonitoringDTO;
 
 import java.util.List;
 
@@ -40,7 +37,7 @@ public interface CarminDatasetProcessingMapper {
 	 * @return dataset DTO.
 	 */
 	@Mapping(target = "parametersResources", ignore = true)
-	CarminDatasetProcessingDTO carminDatasetProcessingToCarminDatasetProcessingDTO(CarminDatasetProcessing processing);
+	ExecutionMonitoringDTO carminDatasetProcessingToCarminDatasetProcessingDTO(ExecutionMonitoring processing);
 
 	/**
 	 * Map list of @CarminDatasetProcessing to list of @CarminDatasetProcessingDTO.
@@ -49,7 +46,7 @@ public interface CarminDatasetProcessingMapper {
 	 *            list of dataset processings.
 	 * @return list of dataset processings DTO.
 	 */
-	List<CarminDatasetProcessingDTO> carminDatasetProcessingsToCarminDatasetProcessingDTOs(List<CarminDatasetProcessing> datasetProcessings);
+	List<ExecutionMonitoringDTO> carminDatasetProcessingsToCarminDatasetProcessingDTOs(List<ExecutionMonitoring> datasetProcessings);
 
 	/**
 	 * Map @CarminDatasetProcessingDTO to @CarminDatasetProcessing
@@ -57,7 +54,7 @@ public interface CarminDatasetProcessingMapper {
 	 * @param dto
 	 * @return
 	 */
-	CarminDatasetProcessing carminDatasetProcessingDTOToCarminDatasetProcessing(CarminDatasetProcessingDTO dto);
+	ExecutionMonitoring carminDatasetProcessingDTOToCarminDatasetProcessing(ExecutionMonitoringDTO dto);
 
 	@ObjectFactory
 	default Dataset createDataset(DatasetDTO dto) {

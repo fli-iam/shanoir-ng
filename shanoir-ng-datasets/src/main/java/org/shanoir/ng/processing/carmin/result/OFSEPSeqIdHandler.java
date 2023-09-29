@@ -1,4 +1,4 @@
-package org.shanoir.ng.processing.carmin.output;
+package org.shanoir.ng.processing.carmin.result;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -13,7 +13,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.model.ExecutionMonitoring;
 import org.shanoir.ng.property.model.DatasetProperty;
 import org.shanoir.ng.property.service.DatasetPropertyService;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
@@ -38,9 +38,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class OFSEPSeqIdProcessing extends OutputProcessing {
+public class OFSEPSeqIdHandler extends ResultHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OFSEPSeqIdProcessing.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OFSEPSeqIdHandler.class);
 
     public static final String PIPELINE_OUTPUT = "output.json";
     private static final String[] SERIE_PROPERTIES = {
@@ -100,15 +100,15 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
 
 
     @Override
-    public boolean canProcess(CarminDatasetProcessing processing) throws OutputProcessingException {
+    public boolean canProcess(ExecutionMonitoring processing) throws ResultHandlerException {
         if(processing.getPipelineIdentifier() == null || processing.getPipelineIdentifier().isEmpty()){
-            throw new OutputProcessingException("Pipeline identifier is not set for processing [" + processing.getName() + "]", null);
+            throw new ResultHandlerException("Pipeline identifier is not set for processing [" + processing.getName() + "]", null);
         }
         return processing.getPipelineIdentifier().startsWith("ofsep_sequences_identification");
     }
 
     @Override
-    public void manageTarGzResult(List<File> resultFiles, File parentFolder, CarminDatasetProcessing processing) throws OutputProcessingException {
+    public void manageTarGzResult(List<File> resultFiles, File parentFolder, ExecutionMonitoring processing) throws ResultHandlerException {
 
         for(File file : resultFiles){
             if (!file.getName().equals(PIPELINE_OUTPUT)) {
@@ -116,7 +116,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
             }
 
             if (file.length() == 0) {
-                throw new OutputProcessingException("Result file [" + file.getAbsolutePath() + "] is present but empty.", null);
+                throw new ResultHandlerException("Result file [" + file.getAbsolutePath() + "] is present but empty.", null);
             }
 
             try (InputStream is = new FileInputStream(file)) {
@@ -131,12 +131,12 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
                 this.processSeries(series, processing);
 
             }catch (Exception e) {
-                throw new OutputProcessingException("An error occured while extracting result from result archive.", e);
+                throw new ResultHandlerException("An error occured while extracting result from result archive.", e);
             }
 
             return;
         }
-        throw new OutputProcessingException("Expected result file [" + parentFolder.getAbsolutePath() + "/" + PIPELINE_OUTPUT + "] is not present.", null);
+        throw new ResultHandlerException("Expected result file [" + parentFolder.getAbsolutePath() + "/" + PIPELINE_OUTPUT + "] is not present.", null);
     }
 
     /**
@@ -148,7 +148,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @throws PacsException
      * @throws EntityNotFoundException
      */
-    public void processSeries(JSONArray series, CarminDatasetProcessing processing) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
+    public void processSeries(JSONArray series, ExecutionMonitoring processing) throws JSONException, PacsException, EntityNotFoundException, CheckedIllegalClassException, SolrServerException, IOException {
 
         for (int i = 0; i < series.length(); i++) {
 
@@ -221,7 +221,7 @@ public class OFSEPSeqIdProcessing extends OutputProcessing {
      * @param volume JSONObject
      * @return
      */
-    private List<DatasetProperty> getDatasetPropertiesFromVolume(Dataset ds, JSONObject volume, CarminDatasetProcessing processing) throws JSONException {
+    private List<DatasetProperty> getDatasetPropertiesFromVolume(Dataset ds, JSONObject volume, ExecutionMonitoring processing) throws JSONException {
         List<DatasetProperty> properties = new ArrayList<>();
 
         for(String name : SERIE_PROPERTIES){

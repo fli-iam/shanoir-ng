@@ -4,7 +4,7 @@ import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
 
 import java.util.List;
 
-public class CarminDatasetProcessingDTO extends DatasetProcessingDTO {
+public class ExecutionMonitoringDTO extends DatasetProcessingDTO {
 
     private String identifier;
 

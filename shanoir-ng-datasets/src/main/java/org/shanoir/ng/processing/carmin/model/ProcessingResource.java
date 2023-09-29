@@ -25,7 +25,7 @@ public class ProcessingResource extends AbstractEntity {
 
     public ProcessingResource() {}
 
-    public ProcessingResource(CarminDatasetProcessing processing, Dataset dataset, String resourceId) {
+    public ProcessingResource(ExecutionMonitoring processing, Dataset dataset, String resourceId) {
         this.processing = processing;
         this.dataset = dataset;
         this.resourceId = resourceId;

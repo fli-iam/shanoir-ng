@@ -2,7 +2,7 @@ package org.shanoir.ng.processing.carmin.service;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.model.ExecutionMonitoring;
 import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
 import org.shanoir.ng.processing.carmin.repository.CarminDatasetProcessingRepository;
 import org.shanoir.ng.processing.carmin.security.CarminDatasetProcessingSecurityService;
@@ -34,7 +34,7 @@ public class CarminDatasetProcessingServiceImpl implements CarminDatasetProcessi
 
     private final String RIGHT_STR = "CAN_SEE_ALL";
 
-    private CarminDatasetProcessing updateValues(CarminDatasetProcessing from, CarminDatasetProcessing to) {
+    private ExecutionMonitoring updateValues(ExecutionMonitoring from, ExecutionMonitoring to) {
         to.setIdentifier(from.getIdentifier());
         to.setStatus(from.getStatus());
         to.setName(from.getName());
@@ -55,24 +55,24 @@ public class CarminDatasetProcessingServiceImpl implements CarminDatasetProcessi
     }
 
     @Override
-    public Optional<CarminDatasetProcessing> findById(Long id) {
+    public Optional<ExecutionMonitoring> findById(Long id) {
         return repository.findById(id);
     }
 
     @Override
-    public List<CarminDatasetProcessing> findAll() {
+    public List<ExecutionMonitoring> findAll() {
         return Utils.toList(repository.findAll());
     }
 
     @Override
-    public CarminDatasetProcessing create(CarminDatasetProcessing entity) {
+    public ExecutionMonitoring create(ExecutionMonitoring entity) {
         return repository.save(entity);
     }
 
     @Override
-    public CarminDatasetProcessing update(CarminDatasetProcessing entity) throws EntityNotFoundException {
-        final CarminDatasetProcessing processing = repository.findById(entity.getId()).orElse(null);
-        if (processing == null) throw new EntityNotFoundException(CarminDatasetProcessing.class, entity.getId());
+    public ExecutionMonitoring update(ExecutionMonitoring entity) throws EntityNotFoundException {
+        final ExecutionMonitoring processing = repository.findById(entity.getId()).orElse(null);
+        if (processing == null) throw new EntityNotFoundException(ExecutionMonitoring.class, entity.getId());
         return repository.save(processing);
     }
 
@@ -82,43 +82,43 @@ public class CarminDatasetProcessingServiceImpl implements CarminDatasetProcessi
     }
 
     @Override
-    public CarminDatasetProcessing createCarminDatasetProcessing(
-            final CarminDatasetProcessing carminDatasetProcessing) {
-        CarminDatasetProcessing savedEntity = repository.save(carminDatasetProcessing);
+    public ExecutionMonitoring createCarminDatasetProcessing(
+            final ExecutionMonitoring executionMonitoring) {
+        ExecutionMonitoring savedEntity = repository.save(executionMonitoring);
         return savedEntity;
     }
 
     @Override
-    public Optional<CarminDatasetProcessing> findByIdentifier(String identifier) {
+    public Optional<ExecutionMonitoring> findByIdentifier(String identifier) {
         return repository.findByIdentifier(identifier);
     }
 
     @Override
-    public List<CarminDatasetProcessing> findAllAllowed() {
+    public List<ExecutionMonitoring> findAllAllowed() {
         return carminDatasetProcessingSecurityService.filterCarminDatasetList(findAll(), RIGHT_STR);
     }
 
     @Override
-    public CarminDatasetProcessing updateCarminDatasetProcessing(final CarminDatasetProcessing carminDatasetProcessing)
+    public ExecutionMonitoring updateCarminDatasetProcessing(final ExecutionMonitoring executionMonitoring)
             throws EntityNotFoundException {
-        final Optional<CarminDatasetProcessing> entityDbOpt = repository
-                .findById(carminDatasetProcessing.getId());
-        final CarminDatasetProcessing entityDb = entityDbOpt.orElseThrow(
-                () -> new EntityNotFoundException(carminDatasetProcessing.getClass(),
-                        carminDatasetProcessing.getId()));
+        final Optional<ExecutionMonitoring> entityDbOpt = repository
+                .findById(executionMonitoring.getId());
+        final ExecutionMonitoring entityDb = entityDbOpt.orElseThrow(
+                () -> new EntityNotFoundException(executionMonitoring.getClass(),
+                        executionMonitoring.getId()));
 
-        this.updateValues(carminDatasetProcessing, entityDb);
+        this.updateValues(executionMonitoring, entityDb);
         return repository.save(entityDb);
 
     }
 
     @Override
-    public List<CarminDatasetProcessing> findAllRunning() {
+    public List<ExecutionMonitoring> findAllRunning() {
         return repository.findByStatus(ExecutionStatus.RUNNING);
     }
 
     @Override
-    public List<ParameterResourcesDTO> createProcessingResources(CarminDatasetProcessing processing, List<ParameterResourcesDTO> parameterDatasets) {
+    public List<ParameterResourcesDTO> createProcessingResources(ExecutionMonitoring processing, List<ParameterResourcesDTO> parameterDatasets) {
 
         if(parameterDatasets ==  null || parameterDatasets.isEmpty()){
             return new ArrayList<>();

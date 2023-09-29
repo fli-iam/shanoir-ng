@@ -13,7 +13,7 @@ import org.shanoir.ng.processing.model.DatasetProcessing;
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-public class CarminDatasetProcessing extends DatasetProcessing {
+public class ExecutionMonitoring extends DatasetProcessing {
 
     private String identifier;
 

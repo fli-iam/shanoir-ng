@@ -1,4 +1,4 @@
-package org.shanoir.ng.processing.carmin.output;
+package org.shanoir.ng.processing.carmin.result;
 
 import jakarta.ws.rs.NotFoundException;
 import org.apache.commons.io.IOUtils;
@@ -11,7 +11,7 @@ import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.importer.service.ImporterService;
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.model.ExecutionMonitoring;
 import org.shanoir.ng.processing.carmin.service.ProcessingResourceService;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
-public class ProcessedDatasetProcessing extends OutputProcessing {
+public class DefaultHandler extends ResultHandler {
 
 	@Value("${vip.result-file-name}")
 	private String resultFileName;
@@ -61,16 +61,16 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 	@Autowired
 	private ProcessingResourceService processingResourceService;
 
-	private static final Logger LOG = LoggerFactory.getLogger(ProcessedDatasetProcessing.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultHandler.class);
 
 
 	@Override
-	public boolean canProcess(CarminDatasetProcessing processing) {
+	public boolean canProcess(ExecutionMonitoring processing) {
 		return true;
 	}
 
 	@Override
-	public void manageTarGzResult(List<File> resultFiles, File parent, CarminDatasetProcessing processing) throws OutputProcessingException {
+	public void manageTarGzResult(List<File> resultFiles, File parent, ExecutionMonitoring processing) throws ResultHandlerException {
 
 		try {
 
@@ -90,18 +90,18 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 			List<Dataset> inputDatasets = this.getInputDatasets(resultJson, parent.getName());
 
 			if(inputDatasets.isEmpty()) {
-				throw new OutputProcessingException("No input datasets found.", null);
+				throw new ResultHandlerException("No input datasets found.", null);
 			}
 
 			if(outputFiles.isEmpty()){
-				throw new OutputProcessingException("No processable file found in Tar result.", null);
+				throw new ResultHandlerException("No processable file found in Tar result.", null);
 			}
 
 			this.createProcessedDatasets(outputFiles, processing, inputDatasets);
 
 		} catch (Exception e) {
 			importerService.createFailedJob(parent.getPath());
-			throw new OutputProcessingException("An error occured while extracting result from result archive.", e);
+			throw new ResultHandlerException("An error occured while extracting result from result archive.", e);
 		}
 	}
 
@@ -167,17 +167,17 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 	/**
 	 * Creates a list of processed dataset and a dataset processing associated to the list of files given in entry.
 	 * @param processedFiles the list of files to treat as processed files
-	 * @param carminDatasetProcessing The carmin dataset processing created before the execution
+	 * @param executionMonitoring The carmin dataset processing created before the execution
 	 * @throws EntityNotFoundException 
 	 * @throws IOException 
 	 */
-	private void createProcessedDatasets(List<File> processedFiles, CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) throws Exception {
+	private void createProcessedDatasets(List<File> processedFiles, ExecutionMonitoring executionMonitoring, List<Dataset> inputDatasets) throws Exception {
 
 		// Create dataset processing
-		DatasetProcessing processing = this.createProcessing(carminDatasetProcessing, inputDatasets);
+		DatasetProcessing processing = this.createProcessing(executionMonitoring, inputDatasets);
 
-		Study study = studyRepository.findById(carminDatasetProcessing.getStudyId())
-				.orElseThrow(() -> new NotFoundException("Study [" + carminDatasetProcessing.getStudyId() + "] not found."));
+		Study study = studyRepository.findById(executionMonitoring.getStudyId())
+				.orElseThrow(() -> new NotFoundException("Study [" + executionMonitoring.getStudyId() + "] not found."));
 
 		for (File file : processedFiles) {
 
@@ -187,9 +187,9 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 			processedDataset.setDatasetProcessing(processing);
 			processedDataset.setProcessedDatasetFilePath(file.getAbsolutePath());
 			processedDataset.setProcessedDatasetType(ProcessedDatasetType.RECONSTRUCTEDDATASET);
-			processedDataset.setStudyId(carminDatasetProcessing.getStudyId());
+			processedDataset.setStudyId(executionMonitoring.getStudyId());
 			processedDataset.setStudyName(study.getName());
-			processedDataset.setProcessedDatasetName(carminDatasetProcessing.getName());
+			processedDataset.setProcessedDatasetName(executionMonitoring.getName());
 
 			if(inputDatasets.size() != 0) {
 
@@ -222,13 +222,13 @@ public class ProcessedDatasetProcessing extends OutputProcessing {
 
 	}
 
-	private DatasetProcessing createProcessing(CarminDatasetProcessing carminDatasetProcessing, List<Dataset> inputDatasets) {
+	private DatasetProcessing createProcessing(ExecutionMonitoring executionMonitoring, List<Dataset> inputDatasets) {
 		DatasetProcessing processing = new DatasetProcessing();
-		processing.setComment(carminDatasetProcessing.getPipelineIdentifier());
+		processing.setComment(executionMonitoring.getPipelineIdentifier());
 		processing.setInputDatasets(inputDatasets);
-		processing.setProcessingDate(carminDatasetProcessing.getProcessingDate());
-		processing.setStudyId(carminDatasetProcessing.getStudyId());
-		processing.setDatasetProcessingType(carminDatasetProcessing.getDatasetProcessingType());
+		processing.setProcessingDate(executionMonitoring.getProcessingDate());
+		processing.setStudyId(executionMonitoring.getStudyId());
+		processing.setDatasetProcessingType(executionMonitoring.getDatasetProcessingType());
 		processing.setOutputDatasets(new ArrayList<>());
 		processing = datasetProcessingService.create(processing);
 		return processing;

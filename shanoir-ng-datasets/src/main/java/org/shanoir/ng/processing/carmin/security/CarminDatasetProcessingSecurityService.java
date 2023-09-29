@@ -1,7 +1,6 @@
 package org.shanoir.ng.processing.carmin.security;
 
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
-import org.shanoir.ng.shared.model.Study;
+import org.shanoir.ng.processing.carmin.model.ExecutionMonitoring;
 import org.shanoir.ng.study.rights.StudyRightsService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class CarminDatasetProcessingSecurityService {
@@ -20,22 +18,22 @@ public class CarminDatasetProcessingSecurityService {
     /**
      * Check that the connected user has the given right for the given carmin dataset processing.
      *
-     * @param carminDatasetProcessing
+     * @param executionMonitoring
      * @param rightStr
      * @return
      */
-    public boolean hasRightOnCarminDatasetProcessing(CarminDatasetProcessing carminDatasetProcessing, String rightStr){
+    public boolean hasRightOnCarminDatasetProcessing(ExecutionMonitoring executionMonitoring, String rightStr){
         if (KeycloakUtil.getTokenRoles().contains("ROLE_ADMIN")) {
             return true;
         }
-        if(carminDatasetProcessing == null){
+        if(executionMonitoring == null){
             throw new IllegalArgumentException("CarminDatasetProcessing cannot be null here.");
         }
-        if(carminDatasetProcessing.getStudyId() == null){
+        if(executionMonitoring.getStudyId() == null){
             throw new IllegalArgumentException("Study id cannot be null here.");
         }
 
-        return studyRightsService.hasRightOnStudy(carminDatasetProcessing.getStudyId(), rightStr);
+        return studyRightsService.hasRightOnStudy(executionMonitoring.getStudyId(), rightStr);
     }
 
     /**
@@ -50,25 +48,25 @@ public class CarminDatasetProcessingSecurityService {
     /**
      * Filter a list of carmin dataset processing depending on the connected user rights
      *
-     * @param carminDatasetProcessings
+     * @param executionMonitorings
      * @param rightStr
      * @return
      */
-    public List<CarminDatasetProcessing> filterCarminDatasetList(List<CarminDatasetProcessing> carminDatasetProcessings, String rightStr){
-        if(hasRightOnEveryCarminDatasetProcessing()) return carminDatasetProcessings;
+    public List<ExecutionMonitoring> filterCarminDatasetList(List<ExecutionMonitoring> executionMonitorings, String rightStr){
+        if(hasRightOnEveryCarminDatasetProcessing()) return executionMonitorings;
 
-        List<CarminDatasetProcessing> validCarminDatasetProcessings = new ArrayList<>();
+        List<ExecutionMonitoring> validExecutionMonitorings = new ArrayList<>();
 
-        for(CarminDatasetProcessing carminDatasetProcessing : carminDatasetProcessings){
-            if(carminDatasetProcessing.getStudyId() == null){
-                throw new IllegalArgumentException("Study id cannot be null here. carmin datasetId is : "+carminDatasetProcessing.getId());
+        for(ExecutionMonitoring executionMonitoring : executionMonitorings){
+            if(executionMonitoring.getStudyId() == null){
+                throw new IllegalArgumentException("Study id cannot be null here. carmin datasetId is : "+ executionMonitoring.getId());
             }
-            if(studyRightsService.hasRightOnStudy(carminDatasetProcessing.getStudyId(), rightStr)){
-                validCarminDatasetProcessings.add(carminDatasetProcessing);
+            if(studyRightsService.hasRightOnStudy(executionMonitoring.getStudyId(), rightStr)){
+                validExecutionMonitorings.add(executionMonitoring);
             }
         }
 
-        return validCarminDatasetProcessings;
+        return validExecutionMonitorings;
     }
 
 

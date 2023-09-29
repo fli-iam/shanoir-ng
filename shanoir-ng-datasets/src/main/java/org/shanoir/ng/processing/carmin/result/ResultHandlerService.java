@@ -1,4 +1,4 @@
-package org.shanoir.ng.processing.carmin.output;
+package org.shanoir.ng.processing.carmin.result;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -6,7 +6,7 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.model.ExecutionMonitoring;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -24,21 +24,20 @@ import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public class OutputProcessingService {
+public class ResultHandlerService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OutputProcessingService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResultHandlerService.class);
 
     @Value("${vip.upload-folder}")
     private String importDir;
 
     @Autowired
-    private List<OutputProcessing> outputProcessings;
+    private List<ResultHandler> resultHandlers;
     @Autowired
     private DatasetProcessingService datasetProcessingService;
 
@@ -48,9 +47,9 @@ public class OutputProcessingService {
      * Process the result of the given processing
      *
      * @param processing
-     * @throws OutputProcessingException
+     * @throws ResultHandlerException
      */
-    public void process(CarminDatasetProcessing processing) throws OutputProcessingException, EntityNotFoundException {
+    public void process(ExecutionMonitoring processing) throws ResultHandlerException, EntityNotFoundException {
 
         final File userImportDir = new File(
                 this.importDir + File.separator +
@@ -62,10 +61,10 @@ public class OutputProcessingService {
 
             List<File> outputFiles = this.extractTarIntoCache(archive, cacheFolder);
 
-            for (OutputProcessing outputProcessing : outputProcessings) {
-                if (outputProcessing.canProcess(processing)) {
-                    LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), outputProcessing.getClass().getSimpleName());
-                    outputProcessing.manageTarGzResult(outputFiles, userImportDir, processing);
+            for (ResultHandler resultHandler : resultHandlers) {
+                if (resultHandler.canProcess(processing)) {
+                    LOG.info("Processing result file [{}] with [{}] output processing", archive.getAbsolutePath(), resultHandler.getClass().getSimpleName());
+                    resultHandler.manageTarGzResult(outputFiles, userImportDir, processing);
                 }
             }
 
@@ -76,7 +75,7 @@ public class OutputProcessingService {
         datasetProcessingService.update(processing);
     }
 
-    private List<File> getArchivesToProcess(File userImportDir) throws OutputProcessingException {
+    private List<File> getArchivesToProcess(File userImportDir) throws ResultHandlerException {
 
         LOG.info("Processing result in import directory [{}]...", userImportDir.getAbsolutePath());
 
@@ -88,12 +87,12 @@ public class OutputProcessingService {
             return  stream.filter(matcher::matches).map(Path::toFile).collect(Collectors.toList());
 
         } catch (IOException e) {
-            throw new OutputProcessingException("I/O error while listing files in import directory", e);
+            throw new ResultHandlerException("I/O error while listing files in import directory", e);
         }
 
     }
 
-    private List<File> extractTarIntoCache(File archive, File cacheFolder) throws OutputProcessingException {
+    private List<File> extractTarIntoCache(File archive, File cacheFolder) throws ResultHandlerException {
 
         List<File> outputFiles = new ArrayList<>();
 
@@ -121,11 +120,11 @@ public class OutputProcessingService {
             }
 
         } catch (IOException e) {
-            throw new OutputProcessingException("I/O error while extracting files from result archive [" + archive.getAbsolutePath() + "]", e);
+            throw new ResultHandlerException("I/O error while extracting files from result archive [" + archive.getAbsolutePath() + "]", e);
         }
 
         if(outputFiles.isEmpty()) {
-            throw new OutputProcessingException("No processable file found in result archive [" + archive.getAbsolutePath() + "]", null);
+            throw new ResultHandlerException("No processable file found in result archive [" + archive.getAbsolutePath() + "]", null);
         }
 
         return outputFiles;

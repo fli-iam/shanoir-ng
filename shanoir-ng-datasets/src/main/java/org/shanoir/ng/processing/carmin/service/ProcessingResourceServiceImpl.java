@@ -2,7 +2,7 @@ package org.shanoir.ng.processing.carmin.service;
 
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.service.DatasetService;
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.model.ExecutionMonitoring;
 import org.shanoir.ng.processing.carmin.model.ProcessingResource;
 import org.shanoir.ng.processing.carmin.repository.ProcessingResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class ProcessingResourceServiceImpl implements ProcessingResourceService 
     }
 
     @Override
-    public String create(CarminDatasetProcessing processing, List<Dataset> datasets) {
+    public String create(ExecutionMonitoring processing, List<Dataset> datasets) {
         List<ProcessingResource> processingResources = new ArrayList<>();
         String resourceId = UUID.randomUUID().toString();
         for(Dataset dataset : datasets){

@@ -14,7 +14,9 @@ import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.download.WADODownloaderService;
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.model.ExecutionMonitoring;
+import org.shanoir.ng.processing.carmin.result.OFSEPSeqIdHandler;
+import org.shanoir.ng.processing.carmin.result.ResultHandlerException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -30,11 +32,11 @@ public class OFSEPSeqIdProcessingTest {
     private WADODownloaderService wadoDownloaderService;
     
     @InjectMocks
-    private OFSEPSeqIdProcessing outputProcessing;
+    private OFSEPSeqIdHandler outputProcessing;
 
     @Test
-    public void canProcessTest() throws OutputProcessingException {
-        CarminDatasetProcessing processing = new CarminDatasetProcessing();
+    public void canProcessTest() throws ResultHandlerException {
+        ExecutionMonitoring processing = new ExecutionMonitoring();
         processing.setPipelineIdentifier("ofsep_sequences_identification/0.1");
         assertTrue(outputProcessing.canProcess(processing));
         processing.setPipelineIdentifier("ofsep_sequences_identification/1.0");

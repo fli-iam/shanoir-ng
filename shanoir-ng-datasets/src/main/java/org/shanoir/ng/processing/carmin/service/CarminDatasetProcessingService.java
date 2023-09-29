@@ -1,6 +1,6 @@
 package org.shanoir.ng.processing.carmin.service;
 
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.model.ExecutionMonitoring;
 import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
@@ -18,7 +18,7 @@ public interface CarminDatasetProcessingService {
 	 * @return an entity or null.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	Optional<CarminDatasetProcessing> findById(Long id);
+	Optional<ExecutionMonitoring> findById(Long id);
 
 	/**
 	 * Get all entities.
@@ -26,7 +26,7 @@ public interface CarminDatasetProcessingService {
 	 * @return a list of manufacturers.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<CarminDatasetProcessing> findAll();
+	List<ExecutionMonitoring> findAll();
 
 	/**
 	 * Save an entity.
@@ -35,7 +35,7 @@ public interface CarminDatasetProcessingService {
 	 * @return created entity.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #entity.getId() == null")
-	CarminDatasetProcessing create(CarminDatasetProcessing entity);
+	ExecutionMonitoring create(ExecutionMonitoring entity);
 
 	/**
 	 * Update an entity.
@@ -46,7 +46,7 @@ public interface CarminDatasetProcessingService {
 	 * @throws MicroServiceCommunicationException
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	CarminDatasetProcessing update(CarminDatasetProcessing entity) throws EntityNotFoundException;
+	ExecutionMonitoring update(ExecutionMonitoring entity) throws EntityNotFoundException;
 
 	/**
 	 * Delete an entity.
@@ -60,22 +60,22 @@ public interface CarminDatasetProcessingService {
     /**
      * save a CarminDatasetProcessing
      * 
-     * @param carminDatasetProcessing
+     * @param executionMonitoring
      * @return
      */
-    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #carminDatasetProcessing.getId() == null")
-    CarminDatasetProcessing createCarminDatasetProcessing(CarminDatasetProcessing carminDatasetProcessing);
+    @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and #executionMonitoring.getId() == null")
+	ExecutionMonitoring createCarminDatasetProcessing(ExecutionMonitoring executionMonitoring);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    List<CarminDatasetProcessing> findAllAllowed();
+    List<ExecutionMonitoring> findAllAllowed();
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    Optional<CarminDatasetProcessing> findByIdentifier(String identifier);
+    Optional<ExecutionMonitoring> findByIdentifier(String identifier);
 
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-    CarminDatasetProcessing updateCarminDatasetProcessing(CarminDatasetProcessing carminDatasetProcessing) throws EntityNotFoundException;
+	ExecutionMonitoring updateCarminDatasetProcessing(ExecutionMonitoring executionMonitoring) throws EntityNotFoundException;
 
-    List<CarminDatasetProcessing> findAllRunning();
+    List<ExecutionMonitoring> findAllRunning();
 
-    List<ParameterResourcesDTO> createProcessingResources(CarminDatasetProcessing createdProcessing, List<ParameterResourcesDTO> parameterDatasets);
+    List<ParameterResourcesDTO> createProcessingResources(ExecutionMonitoring createdProcessing, List<ParameterResourcesDTO> parameterDatasets);
 }

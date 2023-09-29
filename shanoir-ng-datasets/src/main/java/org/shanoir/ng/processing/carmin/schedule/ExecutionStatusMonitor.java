@@ -1,13 +1,11 @@
 package org.shanoir.ng.processing.carmin.schedule;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.keycloak.representations.AccessTokenResponse;
-import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.carmin.model.ExecutionMonitoring;
 import org.shanoir.ng.processing.carmin.model.Execution;
 import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
-import org.shanoir.ng.processing.carmin.output.OutputProcessing;
-import org.shanoir.ng.processing.carmin.output.OutputProcessingException;
-import org.shanoir.ng.processing.carmin.output.OutputProcessingService;
+import org.shanoir.ng.processing.carmin.result.ResultHandlerException;
+import org.shanoir.ng.processing.carmin.result.ResultHandlerService;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -62,7 +60,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	private ShanoirEventService eventService;
 
 	@Autowired
-	private OutputProcessingService outputProcessingService;
+	private ResultHandlerService outputProcessingService;
 
 	/**
 	 * Async job that monitor the state of the VIP execution and process its outcome
@@ -86,7 +84,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		// refresh the token
 		String token = this.refreshServiceAccountAccessToken();
 
-		CarminDatasetProcessing processing = this.carminDatasetProcessingService
+		ExecutionMonitoring processing = this.carminDatasetProcessingService
 				.findByIdentifier(this.identifier)
 				.orElseThrow(() -> new EntityNotFoundException(
 						"Processing [" + this.identifier + "] not found"));
@@ -135,7 +133,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 						try{
 							Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
 						} catch (InterruptedException e) {
-							throw new OutputProcessingException("Thread exception", e);
+							throw new ResultHandlerException("Thread exception", e);
 						}
 						break;
 					default:
@@ -143,7 +141,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 						break;
 				}
 
-			}catch (OutputProcessingException e){
+			}catch (ResultHandlerException e){
 				LOG.error(e.getMessage(), e.getCause());
 				this.setJobInError(event, execLabel + " : " + e.getMessage());
 				LOG.warn("Stopping thread...");
@@ -152,11 +150,11 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		}
 	}
 
-	private String getExecLabel(CarminDatasetProcessing processing) {
+	private String getExecLabel(ExecutionMonitoring processing) {
 		return "VIP Execution [" + processing.getName() + "]";
 	}
 
-	public void processKilledJob(CarminDatasetProcessing processing, ShanoirEvent event, Execution execution) throws EntityNotFoundException {
+	public void processKilledJob(ExecutionMonitoring processing, ShanoirEvent event, Execution execution) throws EntityNotFoundException {
 
 		String execLabel = this.getExecLabel(processing);
 
@@ -173,7 +171,7 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				+ (execution.getErrorCode() != null ? " (Error code : " + execution.getErrorCode() + ")" : ""));
 	}
 
-	public void processFinishedJob(CarminDatasetProcessing processing, ShanoirEvent event) throws EntityNotFoundException, OutputProcessingException {
+	public void processFinishedJob(ExecutionMonitoring processing, ShanoirEvent event) throws EntityNotFoundException, ResultHandlerException {
 
 		String execLabel = this.getExecLabel(processing);
 		processing.setStatus(ExecutionStatus.FINISHED);
@@ -197,11 +195,11 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		eventService.publishEvent(event);
 	}
 
-	private Execution getExecutionFromVIP(String token, int attempts, RestTemplate restTemplate, String uri) throws OutputProcessingException {
+	private Execution getExecutionFromVIP(String token, int attempts, RestTemplate restTemplate, String uri) throws ResultHandlerException {
 
 		// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
 		if(attempts >= 3){
-			throw new OutputProcessingException("Failed to get execution details from VIP in " + attempts + " attempts", null);
+			throw new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", null);
 		}
 
 		// init headers with the active access token
@@ -218,10 +216,10 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 				LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
 				return null;
 			} else {
-				throw new OutputProcessingException("Failed to get execution details from VIP in " + attempts + " attempts", e);
+				throw new ResultHandlerException("Failed to get execution details from VIP in " + attempts + " attempts", e);
 			}
 		} catch (RestClientException e) {
-			throw new OutputProcessingException("No response payload in execution infos from VIP", e);
+			throw new ResultHandlerException("No response payload in execution infos from VIP", e);
 		}
 	}
 
