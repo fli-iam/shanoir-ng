@@ -119,6 +119,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 		}
 		ImportJob importJob = new ImportJob();
 		importJob.setStudyId(studyId);
+		importJob.setStudyName(studyName);
 		importJob.setUserId(KeycloakUtil.getTokenUserId());
 
 		// Create tmp folder and unzip archive
