@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -800,7 +801,9 @@ public class ImporterApiController implements ImporterApi {
 				if (subject == null) {
 
 					// Create subject
-					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
+					// Update birth date to 1st of january of the year
+					LocalDate updateBirthdate = patient.getPatientBirthDate().withDayOfYear(1);
+					subject = ImportUtils.createSubject(subjectName, updateBirthdate, patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
 
 					LOG.debug("We found a subject " + subjectName);
 
@@ -845,6 +848,9 @@ public class ImporterApiController implements ImporterApi {
 				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
 				// STEP 4.3 Complete importJob with subject / study /examination
+				
+				String anonymizationProfile = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, studyId);
+				
 				job.setSubjectName(subjectName);
 				job.setExaminationId(examId);
 				job.setFromDicomZip(true);
@@ -853,6 +859,7 @@ public class ImporterApiController implements ImporterApi {
 				job.setCenterId(centerId);
 				job.setStudyName(studyName);
 				job.setAcquisitionEquipmentId(equipmentId);
+				job.setAnonymisationProfileToUse(anonymizationProfile);
 				for (Patient pat : job.getPatients()) {
 					pat.setSubject(subject);
 				}

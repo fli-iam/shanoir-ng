@@ -97,7 +97,9 @@ public class DIMSEService {
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
         while ((line = reader.readLine()) != null) {
-            LOG.info(line);
+        	if (line.contains(" ERROR ")) {
+        		LOG.error(line);
+        	}
         }
         int exitCode = process.waitFor();
 		if (exitCode != 0) {
