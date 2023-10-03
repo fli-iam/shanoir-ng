@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="header command-zone">1. Select DICOM archive</div>
 	<fieldset class="step dicom">
-	    <checkbox [(ngModel)]="multipleExamImport"></checkbox> 
+	    <checkbox [(ngModel)]="multipleExamImport" [disabled]="archiveStatus != 'none'" ></checkbox> 
 	    <label> Multiple examination import.</label>
 	    <div *ngIf="!multipleExamImport">
 	    <p>Please select a DICOM zip archive to import.</p>
