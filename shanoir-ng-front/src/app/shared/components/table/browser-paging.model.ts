@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -29,20 +29,20 @@ export class BrowserPaging<T> {
     public setItems(items: T[]) {
         this.items = items;
     }
-    
+
     public setColumnDefs(columnDefs: ColumnDefinition[]) {
         this.columnDefs = columnDefs;
     }
 
     public getPage(pageable: FilterablePageable): Page<T> {
-        if ((!this.lastSort || !this.lastSort.equals(pageable.sort)) 
+        if ((!this.lastSort || !this.lastSort.equals(pageable.sort))
                 && pageable.sort && pageable.sort.orders && pageable.sort.orders.length > 0 ) {
             this.lastSort = pageable.sort;
             this.items = this.sortItems(this.items, pageable); // SORT
         }
         let filtered: T[] = this.filter(this.items, pageable.filter); // FILTER
         let result: T[] = this.slice(filtered, pageable); // SLICE
-        
+
         let page: Page<T> = new Page();
         page.content = result;
         page.number = pageable.pageNumber;
@@ -81,7 +81,7 @@ export class BrowserPaging<T> {
         if (col["disableSorting"] || col["type"] == "button") {
             return;
         }
-        // Regarding the data type, we set a neg infinity because unless this, 
+        // Regarding the data type, we set a neg infinity because unless this,
         // null values can't be compared
         let negInf: any;
         switch (col["type"]) {
@@ -98,7 +98,7 @@ export class BrowserPaging<T> {
         items.sort((n1, n2) => {
             let cell1 = TableComponent.getCellValue(n1, col);
             let cell2 = TableComponent.getCellValue(n2, col);
-            if (col["type"] == "date") {
+            if (col["type"] == "date" || col["type"] == "number") {
                 // Real value for date
                 cell1 = TableComponent.getFieldRawValue(n1, col["field"])
                 cell2 = TableComponent.getFieldRawValue(n2, col["field"])

@@ -64,7 +64,9 @@ export class ExaminationNodeComponent implements OnChanges {
         if (changes['input']) {
             if (this.input instanceof ExaminationNode) {
                 this.node = this.input;
-                if (this.input.datasetAcquisitions != 'UNLOADED') this.fetchDatasetIds(this.input.datasetAcquisitions);
+                if (this.input.datasetAcquisitions != 'UNLOADED') {
+                    this.fetchDatasetIds(this.input.datasetAcquisitions);
+                }
             } else {
                 this.node = new ExaminationNode(
                     this.input.id,
@@ -111,26 +113,27 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     fetchDatasetIds(datasetAcquisitions: DatasetAcquisitionNode[]) {
-        let datasetIds: number[] = [];
-        if (datasetAcquisitions) {
-            datasetAcquisitions.forEach(dsAcq => {
-                if (dsAcq.datasets == 'UNLOADED') {
-                    datasetIds = undefined; // abort
-                    return;
-                } else {
-                    dsAcq.datasets.forEach(ds => {
-                        datasetIds.push(ds.id);
-                        if (ds.type === 'Eeg') {
-                            this.hasEEG = true;
-                        } else if (ds.type === 'BIDS') {
-                            this.hasBids = true;
-                        } else {
-                            this.hasDicom = true;
-                        }
-                    });
-                }
-            });
+        if (!datasetAcquisitions) {
+            return;
         }
+        let datasetIds: number[] = [];
+        datasetAcquisitions.forEach(dsAcq => {
+            if (dsAcq.datasets == 'UNLOADED') {
+                datasetIds = undefined; // abort
+                return;
+            } else {
+                dsAcq.datasets.forEach(ds => {
+                    datasetIds.push(ds.id);
+                    if (ds.type === 'Eeg') {
+                        this.hasEEG = true;
+                    } else if (ds.type === 'BIDS') {
+                        this.hasBids = true;
+                    } else {
+                        this.hasDicom = true;
+                    }
+                });
+            }
+        });
         this.datasetIds = datasetIds;
     }
 

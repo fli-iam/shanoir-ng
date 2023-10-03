@@ -24,7 +24,10 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { UserService } from '../../users/shared/user.service';
 import {ConfirmDialogService} from "../../shared/components/confirm-dialog/confirm-dialog.service";
 import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
+import {Page} from "../../shared/components/table/pageable.model";
 import {StudyUser} from "../shared/study-user.model";
+import {AccessRequest} from "../../users/access-request/access-request.model";
+import {EntityRoutes} from "../../shared/components/entity/entity.abstract";
 
 
 @Component({
@@ -96,33 +99,48 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
-            let ids = new Set<number>();
-            studies.forEach(study => {
-               ids.add(study.id);
-            });
-            this.studyService.getStudiesStorageVolume(ids).then(volumes => {
-                studies.forEach( study => {
-                    (study as Study).totalSize = volumes.get(study.id)?.total;
-                    let sizesByLabel = new Map<String, number>()
-
-                    if(volumes.get(study.id)?.volumeByFormat){
-                        for(let sizeByFormat of volumes.get(study.id)?.volumeByFormat){
-                            if(sizeByFormat.size > 0){
-                                sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
-                            }
-                        }
-                    }
-
-                    if(volumes.get(study.id)?.extraDataSize && volumes.get(study.id)?.extraDataSize > 0){
-                        sizesByLabel.set("Other files (DUA, protocol...)", volumes.get(study.id)?.extraDataSize);
-                    }
-
-                    (study as Study).detailedSizes = sizesByLabel;
-                    this.isStudyVolumesFetching = false;
-                });
-            })
+            this.fetchStorageVolumes(studies);
         });
         return earlyResult;
+    }
+
+    private fetchStorageVolumes(studies: Study[] | AccessRequest[]) {
+        let pageSize = Number(this.table.maxResults);
+        let promises = [];
+        for (let i = 0; i < studies.length; i += pageSize) {
+            let ids = new Set<number>(studies.slice(i, i + pageSize).map(study => study.id));
+            promises.push(this.studyService.getStudiesStorageVolume(ids).then(volumes => {
+                studies.forEach(study => {
+                    let volume = volumes.get(study.id);
+                    if(volume) {
+                        (study as Study).totalSize = volume.total;
+                        let sizesByLabel = new Map<String, number>()
+                        if (volume.volumeByFormat) {
+                            for (let sizeByFormat of volume.volumeByFormat) {
+                                if (sizeByFormat.size > 0) {
+                                    sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+                                }
+                            }
+                        }
+
+                        if (volume.extraDataSize && volume.extraDataSize > 0) {
+                            sizesByLabel.set("Other files (DUA, protocol...)", volume.extraDataSize);
+                        }
+
+                        (study as Study).detailedSizes = sizesByLabel;
+                    }
+                });
+            }));
+        }
+
+        Promise.all(promises).then(() => {
+            this.table.columnDefs.forEach(column => {
+                if(column.headerName === "Storage volume"){
+                    column.disableSorting = false;
+                }
+            })
+            return this.isStudyVolumesFetching = false;
+        });
     }
 
     getColumnDefs(): ColumnDefinition[] {
@@ -158,7 +176,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                 headerName: "Members", field: "nbMembers", type: "number", width: '30px'
             },
             {
-                headerName: "Storage volume", field: "totalSize", disableSearch: true, type: "number", orderBy: ["totalSize"],
+                headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: true, type: "number", orderBy: ["totalSize"],
                 cellRenderer: (params: any) => {
                     if (this.isStudyVolumesFetching) {
                         return "Fetching..."
@@ -213,6 +231,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             return hasDUA;
         });
     }
+
 
     goToViewFromEntity(study: any): void {
 

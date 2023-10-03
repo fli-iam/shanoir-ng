@@ -149,26 +149,28 @@ public class ImporterManagerService {
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = patientsIt.next();
 				// perform anonymization only in case of profile explicitly set
-				if (importJob.getAnonymisationProfileToUse() != null && !importJob.getAnonymisationProfileToUse().isEmpty()) {
-					ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
-					final Subject subject = patient.getSubject();
+				if (importJob.getAnonymisationProfileToUse() == null || !importJob.getAnonymisationProfileToUse().isEmpty()) {
+					String anonymizationProfile = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, importJob.getStudyId());
+					importJob.setAnonymisationProfileToUse(anonymizationProfile);
+				}
+				ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
+				final Subject subject = patient.getSubject();
 
-					if (subject == null) {
-						LOG.error("Error: subject == null in importJob.");
-						throw new ShanoirException("Error: subject == null in importJob.");
-					}
+				if (subject == null) {
+					LOG.error("Error: subject == null in importJob.");
+					throw new ShanoirException("Error: subject == null in importJob.");
+				}
 
-					final String subjectName = subject.getName();
+				final String subjectName = subject.getName();
 
-					event.setMessage("Pseudonymizing DICOM files for subject [" + subjectName + "]...");
-					eventService.publishEvent(event);
+				event.setMessage("Pseudonymizing DICOM files for subject [" + subjectName + "]...");
+				eventService.publishEvent(event);
 
-					try {
-						ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
-					} catch (Exception e) {
-						LOG.error(e.getMessage(), e);
-						throw new ShanoirException("Error during pseudonymization.");
-					}
+				try {
+					ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
+				} catch (Exception e) {
+					LOG.error(e.getMessage(), e);
+					throw new ShanoirException("Error during pseudonymization.");
 				}
 				Long converterId = importJob.getConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
