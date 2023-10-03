@@ -86,8 +86,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             {{otherErrorMessage}}
         </label>
 	    
-	    <p *ngIf="modality" class="modality">
+	    <p *ngIf="modality && !multipleExamImport" class="modality">
 	        The modality of the dataset(s) that you are importing is {{modality}}
 	    </p>
+	   <p *ngIf="multipleExamImport && archiveStatus=='uploaded'" class="modality">
+            The import successfully started. Please check "Jobs" tab to follow its progress.
+        </p>
 	</fieldset>
 <button *ngIf="!multipleExamImport" class="next" [disabled]="!valid" (click)="next()">Next</button>
