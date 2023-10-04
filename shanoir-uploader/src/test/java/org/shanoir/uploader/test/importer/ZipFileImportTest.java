@@ -13,6 +13,7 @@ import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
+import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
@@ -30,13 +31,13 @@ public class ZipFileImportTest extends AbstractTest {
 
 	private static Logger logger = Logger.getLogger(ZipFileImportTest.class);
 	
+	private static final String ACR_PHANTOM_T1_ZIP = "acr_phantom_t1.zip";
+
 	@Test
 	public void importDicomZipTest() throws Exception {
-		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
-		study.setId(Long.valueOf(3));
-		study.setName("DemoStudy");
+		org.shanoir.uploader.model.rest.Study study = createStudyAndStudyCard();
 		for (int i = 0; i < 1; i++) {
-			ImportJob importJob = step1UploadDicom("acr_phantom_t1.zip");
+			ImportJob importJob = step1UploadDicom(ACR_PHANTOM_T1_ZIP);
 			if (!importJob.getPatients().isEmpty()) {
 				selectAllSeriesForImport(importJob);
 				Subject subject = step2CreateSubject(importJob, study);
@@ -44,6 +45,20 @@ public class ZipFileImportTest extends AbstractTest {
 				step4StartImport(importJob, subject, examination, study);
 			}
 		}
+	}
+	
+	private org.shanoir.uploader.model.rest.Study createStudyAndStudyCard() {
+		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
+		final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
+		study.setName(randomStudyName);
+		study.setStudyStatus(1); // 1, in progress
+		List<Center> centers = new ArrayList<Center>();
+		final Center center = new Center();
+		final String randomCenterName = "Center-Name" + UUID.randomUUID().toString();
+		center.setName(randomCenterName);
+		study.setCenters(centers);
+		shUpClient.createStudy(study);
+		return study;
 	}
 
 	private void createSubjectStudy(org.shanoir.uploader.model.rest.Study study, Subject subject) {

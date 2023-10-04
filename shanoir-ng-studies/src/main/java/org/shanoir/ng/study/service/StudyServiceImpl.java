@@ -113,7 +113,6 @@ public class StudyServiceImpl implements StudyService {
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 
-
 	@Override
 	public void deleteById(final Long id) throws EntityNotFoundException {
 		final Study study = studyRepository.findById(id).orElse(null);
@@ -149,8 +148,10 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 
-		for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
-			subjectStudy.setStudy(study);
+		if (study.getSubjectStudyList() != null) {
+			for (SubjectStudy subjectStudy : study.getSubjectStudyList()) {
+				subjectStudy.setStudy(study);
+			}
 		}
 
 		if (study.getTags() != null) {
@@ -180,15 +181,16 @@ public class StudyServiceImpl implements StudyService {
 			}
 		}
 
-		List<SubjectStudy> subjectStudyListSave = new ArrayList<SubjectStudy>(study.getSubjectStudyList());
+		List<SubjectStudy> subjectStudyListSave = null;
+		if (study.getSubjectStudyList() != null) {
+			subjectStudyListSave = new ArrayList<SubjectStudy>(study.getSubjectStudyList());
+		}
 		Map<Long, List<SubjectStudyTag>> subjectStudyTagSave = new HashMap<>();
 		study.setSubjectStudyList(null);
 		Study studyDb = studyRepository.save(study);
-		//studyDb.setSubjectStudyList(new ArrayList<SubjectStudy>());
 
 		if (subjectStudyListSave != null) {
 			updateTags(subjectStudyListSave, studyDb.getTags());
-			//ListDependencyUpdate.updateWith(studyDb.getSubjectStudyList(), subjectStudyListSave);
 			studyDb.setSubjectStudyList(new ArrayList<>());
 			for (SubjectStudy subjectStudy : subjectStudyListSave) {
 				SubjectStudy newSubjectStudy = new SubjectStudy();
@@ -198,7 +200,6 @@ public class StudyServiceImpl implements StudyService {
 				newSubjectStudy.setSubjectType(subjectStudy.getSubjectType());
 				newSubjectStudy.setStudy(studyDb);
 				subjectStudyTagSave.put(subjectStudy.getSubject().getId(), subjectStudy.getSubjectStudyTags());
-				//newSubjectStudy.setSubjectStudyTags(subjectStudy.getSubjectStudyTags());
 				studyDb.getSubjectStudyList().add(newSubjectStudy);
 			}
 			studyDb = studyRepository.save(studyDb);

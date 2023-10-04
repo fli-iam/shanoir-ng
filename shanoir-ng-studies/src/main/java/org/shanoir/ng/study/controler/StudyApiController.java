@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -197,6 +198,7 @@ public class StudyApiController implements StudyApi {
 
 		Study createdStudy;
 		try {
+			addCurrentUserAsStudyUserIfEmptyStudyUsers(study);
 			createdStudy = studyService.create(study);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT,
 					createdStudy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
@@ -205,6 +207,19 @@ public class StudyApiController implements StudyApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", e));
 		}
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
+	}
+
+	private void addCurrentUserAsStudyUserIfEmptyStudyUsers(final Study study) {
+		if (study.getStudyUserList() == null) {
+			List<StudyUser> studyUserList = new ArrayList<StudyUser>();
+			StudyUser studyUser = new StudyUser();
+			studyUser.setStudy(study);
+			studyUser.setUserId(KeycloakUtil.getTokenUserId());
+			studyUser.setUserName(KeycloakUtil.getTokenUserName());
+			studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE));
+			studyUserList.add(studyUser);
+			study.setStudyUserList(studyUserList);
+		}
 	}
 
 	@Override

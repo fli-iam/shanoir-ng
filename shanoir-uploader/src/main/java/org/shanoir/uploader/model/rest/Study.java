@@ -13,6 +13,8 @@ public class Study implements Comparable<Study> {
 
 	private String name;
 
+	private Integer studyStatus;
+	
 	private List<StudyCard> studyCards;
 
 	@JsonProperty("studyCenterList")
@@ -34,6 +36,14 @@ public class Study implements Comparable<Study> {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Integer getStudyStatus() {
+		return studyStatus;
+	}
+
+	public void setStudyStatus(Integer studyStatus) {
+		this.studyStatus = studyStatus;
 	}
 
 	public List<StudyCard> getStudyCards() {
