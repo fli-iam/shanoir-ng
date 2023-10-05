@@ -54,8 +54,9 @@ public class ZipFileImportTest extends AbstractTest {
 		study.setStudyStatus(1); // 1, in progress
 		List<Center> centers = new ArrayList<Center>();
 		final Center center = new Center();
-		final String randomCenterName = "Center-Name" + UUID.randomUUID().toString();
+		final String randomCenterName = "Center-Name-" + UUID.randomUUID().toString();
 		center.setName(randomCenterName);
+		centers.add(center);
 		study.setCenters(centers);
 		shUpClient.createStudy(study);
 		return study;
