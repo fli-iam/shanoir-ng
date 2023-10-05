@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -56,9 +56,9 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
 
     constructor(
         private route: ActivatedRoute,
-        private  subjectTherapyService: SubjectTherapyService, 
+        private  subjectTherapyService: SubjectTherapyService,
         private therapyService: TherapyService,
-        private referenceService: ReferenceService, 
+        private referenceService: ReferenceService,
         public enumUtils: EnumUtils
         ) {
 
@@ -66,7 +66,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         }
 
     get subjectTherapy(): SubjectTherapy { return this.entity; }
-    set subjectTherapy(subjectTherapy: SubjectTherapy) { this.entity = subjectTherapy; }
+    set subjectTherapy(subjectTherapy: SubjectTherapy) { this.entity = subjectTherapy; }
 
     getService(): EntityService<SubjectTherapy> {
         return this.subjectTherapyService;
@@ -87,7 +87,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             });
         });
 
-        
+
     }
 
     initEdit(): Promise<void> {
@@ -113,7 +113,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         this.loadUnits();
         return Promise.resolve();
     }
-    
+
     buildForm(): UntypedFormGroup {
         return this.formBuilder.group({
             'id': [this.subjectTherapy.id],
@@ -126,13 +126,13 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             'endDate': [this.subjectTherapy.endDate]
         });
     }
-    
+
     loadTherapies() {
         this.therapyService.getAll().then(therapies => this.therapies = therapies);
     }
 
     loadUnits() {
-        this.referenceService.getReferencesByCategoryAndType(PreclinicalUtils.PRECLINICAL_CAT_UNIT, PreclinicalUtils.PRECLINICAL_UNIT_VOLUME).then(units => this.units = units);
+        this.referenceService.getReferencesByCategory(PreclinicalUtils.PRECLINICAL_CAT_UNIT).then(units => this.units = units);
     }
 
     getEnums(): void {
@@ -151,7 +151,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         }
         this.createSTMode = creation;
     }
-    
+
     toggleFormSTAndReset(creation: boolean): void {
         this.toggleFormST(creation);
         this.subjectTherapy = new SubjectTherapy();
@@ -195,7 +195,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
             }
         }
     }
-    
+
     goToAddTherapy(){
         this.router.navigate(['/preclinical-therapy/create']);
     }
@@ -205,7 +205,7 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         this.toggleFormSTAndReset(false);
     }
 
-    
+
     canUpdateTherapy(): boolean{
         return !this.createSTMode && this.keycloakService.isUserAdminOrExpert && this.mode != 'view';
     }
@@ -217,10 +217,10 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
     cancelTherapy(){
         this.toggleFormST(false);
     }
-   
+
     addTherapy(): Promise<void> {
         if (!this.subjectTherapy) {
-            return; 
+            return;
         }
         if(this.preclinicalSubject.therapies === undefined){
             this.preclinicalSubject.therapies = [];
@@ -231,10 +231,10 @@ export class SubjectTherapyFormComponent extends EntityComponent<SubjectTherapy>
         this.toggleForm = false;
         this.subjectTherapy = new SubjectTherapy();
     }
-    
+
     updateTherapy(): void {
         if (!this.subjectTherapy) {
-            return; 
+            return;
         }
         if (this.onEvent.observers.length > 0) {
             this.onEvent.emit([this.subjectTherapy, false]);
