@@ -16,7 +16,7 @@ import {Router} from '@angular/router';
 import {DatasetAcquisitionService} from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
 import {Dataset} from '../../datasets/shared/dataset.model';
-import {DatasetService} from '../../datasets/shared/dataset.service';
+import {DatasetService, Format} from '../../datasets/shared/dataset.service';
 import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
 import {ConsoleService} from '../../shared/console/console.service';
 
@@ -136,7 +136,7 @@ export class ExaminationNodeComponent implements OnChanges {
         this.datasetIds = datasetIds;
     }
 
-    download(format: string) {
+    download(format: Format) {
         if (this.downloading) {
             return;
         }
@@ -154,7 +154,7 @@ export class ExaminationNodeComponent implements OnChanges {
             datasetIdsReady = Promise.resolve();
         }
         datasetIdsReady.then(() => {
-            this.downloadService.downloadByIds(this.datasetIds);
+            this.downloadService.downloadByIds(this.datasetIds, format);
             this.downloading = false;
         });
     }

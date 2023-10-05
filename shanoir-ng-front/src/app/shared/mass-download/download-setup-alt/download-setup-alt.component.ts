@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ElementRef, EventEmitter, HostListener, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Format } from 'src/app/datasets/shared/dataset.service';
 import { GlobalService } from '../../services/global.service';
@@ -24,12 +24,13 @@ import { Option } from '../../select/select.component';
     styleUrls: ['download-setup-alt.component.css']
 })
 
-export class DownloadSetupAltComponent {
+export class DownloadSetupAltComponent implements OnInit {
 
     @Output() go: EventEmitter<Format> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
     form: UntypedFormGroup;
     @ViewChild('window') window: ElementRef;
+    @Input() format: Format; 
     formatOptions: Option<Format>[] = [
         new Option<Format>('nii', 'Nifti'),
         new Option<Format>('dcm', 'Dicom'),
@@ -38,16 +39,18 @@ export class DownloadSetupAltComponent {
     ];
         
     constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
-        this.form = this.buildForm();
-
         globalService.onNavigate.subscribe(() => {
             this.cancel();
         });
     }
+    
+    ngOnInit(): void {
+        this.form = this.buildForm();
+    }
 
     private buildForm(): UntypedFormGroup {
         let formGroup = this.formBuilder.group({
-            'format': ['dcm', [Validators.required]],
+            'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
         });
         return formGroup;
     }

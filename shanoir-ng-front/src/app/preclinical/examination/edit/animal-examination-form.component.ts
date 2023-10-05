@@ -193,7 +193,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
 
     manageSaveEntity(): void {
-        this.subscribtions.push(
+        this.subscriptions.push(
             this.onSave.subscribe(response => {
                 this.manageExaminationAnesthetic(response.id);
                 //this.manageContrastAgent();

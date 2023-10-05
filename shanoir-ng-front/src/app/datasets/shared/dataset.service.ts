@@ -31,7 +31,7 @@ export type Format = 'eeg' | 'nii' | 'BIDS' | 'dcm';
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
-
+    
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
 
     httpOptions = {
@@ -64,6 +64,12 @@ export class DatasetService extends EntityService<Dataset> {
                 return page;
             })
             .then(this.mapPage);
+    }
+
+    getByExaminationId(examinationId: number) : Promise<Dataset[]> {
+        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/examination/' + examinationId)
+                .toPromise()
+                .then(dtos => this.datasetDTOService.toEntityList(dtos, null, 'lazy'));
     }
 
     getByAcquisitionId(acquisitionId: number): Promise<Dataset[]> {
@@ -129,42 +135,30 @@ export class DatasetService extends EntityService<Dataset> {
         });
     }
 
-    public downloadDatasetsByStudy(studyId: number, format: string, state: {status?: TaskStatus, progress?: number}) {
+    public downloadDatasetsByStudy(studyId: number, format: string): Observable<{status?: TaskStatus, progress?: number}>  {
         let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
-        this.http.get(
+        return this.http.get(
            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',{
                 reportProgress: true,
                 observe: 'events',
                 responseType: 'blob',
                 params: params
-            }).subscribe((event: HttpEvent<any>) => {
-                let newState = this.extractProgression(event);
-                state.progress = newState.progress;
-                state.status = newState.status;
-            }, error =>  {
-                this.errorService.handleError(error);
-                state.progress = 0;
-            }
-        )
+            }).map(event => {
+                return this.extractProgression(event);
+            });
     }
 
-    public downloadDatasetsByExamination(examinationId: number, format: string, state: {status?: TaskStatus, progress?: number}) {
+    public downloadDatasetsByExamination(examinationId: number, format: string): Observable<{status?: TaskStatus, progress?: number}>  {
         let params = new HttpParams().set("examinationId", '' + examinationId).set("format", format);
-        this.http.get(
+        return this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination',{
                 reportProgress: true,
                 observe: 'events',
                 responseType: 'blob',
                 params: params
-            }).subscribe((event: HttpEvent<any>) => {
-                let newState = this.extractProgression(event);
-                state.progress = newState.progress;
-                state.status = newState.status;
-            }, error =>  {
-                this.errorService.handleError(error);
-                state.progress = 0;
-            }
-        )
+            }).map(event => {
+                return this.extractProgression(event);
+            });
   }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {

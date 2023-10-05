@@ -128,7 +128,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             'niftiConverter': [this.studyCard.niftiConverter, [Validators.required]],
             'rules': [this.studyCard.rules, [StudyCardRulesComponent.validator]]
         });
-        this.subscribtions.push(
+        this.subscriptions.push(
             form.get('study').valueChanges.subscribe(study => this.onStudyChange(study, form))
         );
         return form;
@@ -204,7 +204,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/study-card/select-rule/list/' + this.entity.id]).then(success => {
             this.breadcrumbsService.currentStep.label = 'Select study-card';
-            this.subscribtions.push(
+            this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe((rules: StudyCardRule[]) => {
                     rules.forEach(rule => {
                         this.studyCard.rules.push(rule);
@@ -245,7 +245,7 @@ export class StudyCardComponent extends EntityComponent<StudyCard> {
             if (this.centers.length == 1) {
                 this.breadcrumbsService.currentStep.addPrefilled('center', this.centers[0]);
             }
-            this.subscribtions.push(
+            this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     (currentStep.entity as StudyCard).acquisitionEquipment = entity as AcquisitionEquipment;
                 })

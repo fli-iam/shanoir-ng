@@ -63,27 +63,19 @@ export class MassDownloadService {
         private dialogService: ConfirmDialogService) {
     }
 
-    downloadByIds(datasetIds: number[]): Promise<void> {
-        return this.openModal().then(ret => {
+    downloadByIds(datasetIds: number[], format?: Format): Promise<void> {
+        return this.openModal(format).then(ret => {
             if (ret != 'cancel') {
                 return this._downloadByIds(datasetIds, ret.format, ret.nbQueues)
             } else return Promise.resolve();
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
-                return this.openAltModal().then(ret => {
+                return this.openAltModal(format).then(ret => {
                     if (ret != 'cancel') {
-                        return this._downloadByIdsAlt(datasetIds, ret);
+                        return this._downloadAlt('datasetIds', datasetIds, ret);
                     } else return Promise.resolve();
                 });
             } else throw error;
-        });
-    }
-
-    downloadDatasets(datasets: Dataset[]): Promise<void> {
-        return this.openModal().then(ret => {
-            if (ret != 'cancel') {
-                return this._downloadDatasets(datasets, ret.format, ret.nbQueues);
-            } else return Promise.resolve();
         });
     }
 
@@ -94,6 +86,35 @@ export class MassDownloadService {
                     this._downloadDatasets(datasets, ret.format, ret.nbQueues);
                 })
             } else return Promise.resolve();
+        }).catch(error => {
+            if (error == this.BROWSER_COMPAT_ERROR_MSG) {
+                return this.openAltModal().then(ret => {
+                    if (ret != 'cancel') {
+                        return this._downloadAlt('studyId', studyId, ret);
+                    } else return Promise.resolve();
+                });
+            } else throw error;
+        });
+    }
+
+    downloadAllByExaminationId(examinationId: number, format?: Format): Promise<void> {
+        const datasetsPromise: Promise<Dataset[]> = this.datasetService.getByExaminationId(examinationId);
+        return this.openModal(format).then(ret => {
+            if (ret != 'cancel') {
+                return datasetsPromise.then(datasets => {
+                    this._downloadDatasets(datasets, ret.format, ret.nbQueues);
+                })
+            } else return Promise.resolve();
+        }).catch(error => {
+            if (error == this.BROWSER_COMPAT_ERROR_MSG) {
+                return datasetsPromise.then(datasets => {
+                    return this.openAltModal().then(ret => {
+                        if (ret != 'cancel') {
+                            return this._downloadAlt('datasetIds', datasets.map(ds => ds.id), ret);
+                        } else return Promise.resolve();
+                    });
+                });
+            } else throw error;
         });
     }
 
@@ -151,15 +172,25 @@ export class MassDownloadService {
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
 
-    private _downloadByIdsAlt(datasetIds: number[], format: Format): Promise<void> {
-        if (datasetIds.length == 0) return;
-        let task: Task = this.createTask(datasetIds.length);
+    private _downloadAlt(inputDef: 'studyId' | 'datasetIds', input: number | number[], format: Format): any {
+        if (!inputDef || !input || (inputDef == 'datasetIds' && !(input as [])?.length)) throw new Error('bad arguments : ' + inputDef + ', ' + input);
+        let task: Task;
+        if (inputDef == 'studyId') {
+            task = this.createStudyTask(input as number);
+        } else if (inputDef == 'datasetIds') {
+            task = this.createTask((input as number[]).length);
+        }
         return this.downloadQueue.waitForTurn().then(releaseQueue => {
             try {
                 task.status = 2;
                 task.lastUpdate = new Date();
                 const start: number = Date.now();
-                const downloadObs: Observable<{status?: TaskStatus, progress?: number}> = this.datasetService.downloadDatasets(datasetIds, format);
+                let downloadObs: Observable<{status?: TaskStatus, progress?: number}>;
+                if (inputDef == 'studyId') {
+                    downloadObs = this.datasetService.downloadDatasetsByStudy(input as number, format);
+                } else if (inputDef == 'datasetIds') {
+                    downloadObs = this.datasetService.downloadDatasets(input as number[], format);
+                }
                 let endPromise: SuperPromise<void> = new SuperPromise();
 
                 let errorFunction = error => {
@@ -181,7 +212,11 @@ export class MassDownloadService {
                 const endSubscription: Subscription = downloadObs.last().subscribe(state => {
                     flowSubscription.unsubscribe();
                     let duration: number = Date.now() - start;
-                    task.message = 'download completed in ' + duration + 'ms, ' + datasetIds.length + ' datasets zipped';
+                    if (inputDef == 'studyId') {
+                        task.message = 'download completed in ' + duration + 'ms for study ' + input;
+                    } else if (inputDef == 'datasetIds') {
+                        task.message = 'download completed in ' + duration + 'ms for ' + (input as number[]).length + ' datasets';
+                    }
                     task.lastUpdate = new Date();
                     task.status = 1;
                     task.progress = 1;
@@ -410,11 +445,19 @@ export class MassDownloadService {
     }
 
     private createTask(nbDatasets: number): Task {
+        return this._createTask('Download launched for ' + nbDatasets + ' datasets');
+    }
+
+     private createStudyTask(studyId: number): Task {
+        return this._createTask('Download launched for study ' + studyId);
+    }
+
+    private _createTask(message: string): Task {
         let task: Task = new Task();
         task.id = Date.now();
         task.creationDate = new Date();
         task.lastUpdate = task.creationDate;
-        task.message = 'Download launched for ' + nbDatasets + ' datasets';
+        task.message = message;
         task.progress = 0;
         task.status = 2;
         task.eventType = 'downloadDataset.event';
@@ -422,18 +465,20 @@ export class MassDownloadService {
         return task;
     }
 
-    private openModal(): Promise<{format: Format, nbQueues: number} | 'cancel'> {
+    private openModal(format?: Format): Promise<{format: Format, nbQueues: number} | 'cancel'> {
         // @ts-ignore
         if (window.showDirectoryPicker) { // test compatibility
             let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
+            modalRef.instance.format = format;
             return this.waitForEnd(modalRef);
         } else {
             return Promise.reject(this.BROWSER_COMPAT_ERROR_MSG);
         }
     }
 
-    private openAltModal(): Promise<Format | 'cancel'> {
+    private openAltModal(format?: Format): Promise<Format | 'cancel'> {
         let modalRef: ComponentRef<DownloadSetupAltComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupAltComponent);
+        modalRef.instance.format = format;
         return this.waitForEnd(modalRef);
     }
 

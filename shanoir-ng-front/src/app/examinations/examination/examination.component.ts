@@ -21,7 +21,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
-import { DatasetService } from '../../datasets/shared/dataset.service';
+import { DatasetService, Format } from '../../datasets/shared/dataset.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
@@ -33,6 +33,7 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ExaminationNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 @Component({
     selector: 'examination',
@@ -71,9 +72,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             private examinationService: ExaminationService,
             private centerService: CenterService,
             private studyService: StudyService,
-            private datasetService: DatasetService,
             private studyRightsService: StudyRightsService,
-            public breadcrumbsService: BreadcrumbsService) {
+            public breadcrumbsService: BreadcrumbsService,
+            private downloadService: MassDownloadService) {
 
         super(route, 'examination');
         this.inImport = this.breadcrumbsService.isImporting();
@@ -147,8 +148,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         });
     }
 
-    download(format: string) {
-        this.datasetService.downloadDatasetsByExamination(this.id, format, this.downloadState);
+    download(format: Format) {
+        this.downloadService.downloadAllByExaminationId(this.examination?.id, format);
     }
 
     openViewer() {
