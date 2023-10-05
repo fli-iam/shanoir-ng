@@ -270,6 +270,7 @@ import { AccessRequestService } from './users/access-request/access-request.serv
 import { AccessRequestListComponent } from './users/access-request/access-request-list.component';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
+import {DatasetCopyDialogComponent} from "./shared/components/user-action-dialog/dataset-copy-dialog.component";
 
 @NgModule({
     imports: [
@@ -296,6 +297,7 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
         CenterComponent,
         CenterListComponent,
         ConfirmDialogComponent,
+        DatasetCopyDialogComponent,
         DropdownMenuComponent,
         UserComponent,
         ExaminationListComponent,
@@ -461,7 +463,7 @@ import { TaskStatusComponent } from './async-tasks/status/task-status.component'
     ],
     // Not required anymore with Angular > 9.0
     // entryComponents: [
-    //     ConfirmDialogComponent,
+    //     DatasetCopyDialogComponent,
     //     ModalsComponent
     // ],
     providers: [

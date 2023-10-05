@@ -12,7 +12,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import { formatDate } from '@angular/common';
-import { AfterContentInit, Component, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { AfterContentInit, Component, ComponentRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -40,6 +40,14 @@ import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { SolrService } from "./solr.service";
 import { Clipboard } from '@angular/cdk/clipboard';
+import {StudyService} from "../studies/shared/study.service";
+import {Study} from "../studies/shared/study.model";
+import {DatasetCopyDialogComponent} from "../shared/components/user-action-dialog/dataset-copy-dialog.component";
+import {ServiceLocator} from "../utils/locator.service";
+import { Observable } from 'rxjs-compat';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import {take} from "rxjs/operators";
+import {Format} from "@angular-devkit/build-angular/src/builders/extract-i18n/schema";
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -76,11 +84,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     solrRequest: SolrRequest = new SolrRequest();
     private facetPageable: Map<string, FacetPageable>;
 
+    studies: Study[];
+
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
             private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private clipboard: Clipboard,
-            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
+            private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService, private studyService: StudyService) {
 
         this.getRole();
         if (this.role != 'admin') this.getRights();
@@ -93,6 +103,9 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selectionColumnDefs = this.getSelectionColumnDefs();
         this.customActionDefs = this.getCustomActionsDefs();
         this.selectionCustomActionDefs = this.getSelectionCustomActionsDefs();
+        this.studyService.getAll().then(studies => {
+            this.studies = studies;
+        });
 
         let input: string = this.router.getCurrentNavigation().extras && this.router.getCurrentNavigation().extras.state ? this.router.getCurrentNavigation().extras.state['input'] : null;
         if (input) {
@@ -464,7 +477,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoSelected: true },
-            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
+            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true },
+            {title: "Copy to study", awesome: "fa-solid fa-copy", action: () => this.copyToStudy(), disabledIfNoSelected: true }
         );
         return customActionDefs;
     }
@@ -484,7 +498,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoResult: true },
-            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
+            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true },
+            {title: "Copy to study", awesome: "fa-solid fa-copy", action: () => this.copyToStudy(), disabledIfNoSelected: true }
         );
         return customActionDefs;
     }
@@ -536,6 +551,17 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     copyIds() {
         this.clipboard.copy(Array.from(this.selectedDatasetIds || []).toString());
     }
+
+    copyToStudy() {
+        let modalRef: ComponentRef<DatasetCopyDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(DatasetCopyDialogComponent);
+        modalRef.instance.title = "Copy of datasets to study";
+        modalRef.instance.studies = this.studies;
+        modalRef.instance.datasetsIds = Array.from(this.selectedDatasetIds);
+        modalRef.instance.message = "Please make sure you have administrative rights on both source(s) and destination(s) studies. Also, note that the dataset's center will be added to destination study.";
+        modalRef.instance.statusMessage = 'Failed - copy didn\'t work !';
+        modalRef.instance.ownRef = modalRef;
+    }
+
 
 }
 
