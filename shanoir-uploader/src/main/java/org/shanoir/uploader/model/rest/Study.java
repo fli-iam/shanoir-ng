@@ -13,7 +13,7 @@ public class Study implements Comparable<Study> {
 
 	private String name;
 
-	private Integer studyStatus;
+	private String studyStatus;
 	
 	private List<StudyCard> studyCards;
 
@@ -37,11 +37,11 @@ public class Study implements Comparable<Study> {
 		this.name = name;
 	}
 
-	public Integer getStudyStatus() {
+	public String getStudyStatus() {
 		return studyStatus;
 	}
 
-	public void setStudyStatus(Integer studyStatus) {
+	public void setStudyStatus(String studyStatus) {
 		this.studyStatus = studyStatus;
 	}
 

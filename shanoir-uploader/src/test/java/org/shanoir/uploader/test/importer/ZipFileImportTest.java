@@ -52,7 +52,7 @@ public class ZipFileImportTest extends AbstractTest {
 		org.shanoir.uploader.model.rest.Study study = new org.shanoir.uploader.model.rest.Study();
 		final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
 		study.setName(randomStudyName);
-		study.setStudyStatus(1); // 1, in progress
+		study.setStudyStatus("IN_PROGRESS");
 		List<StudyCenter> studyCenterList = new ArrayList<StudyCenter>();
 		final StudyCenter studyCenter = new StudyCenter();
 		final Center center = new Center();
