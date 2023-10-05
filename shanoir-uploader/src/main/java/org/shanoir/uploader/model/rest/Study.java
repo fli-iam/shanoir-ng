@@ -17,8 +17,7 @@ public class Study implements Comparable<Study> {
 	
 	private List<StudyCard> studyCards;
 
-	@JsonProperty("studyCenterList")
-	private List<Center> centers;
+	private List<StudyCenter> studyCenterList;
 
 	private Boolean compatible;
 
@@ -54,13 +53,12 @@ public class Study implements Comparable<Study> {
 		this.studyCards = studyCards;
 	}
 
-	public List<Center> getCenters() {
-		return centers;
+	public List<StudyCenter> getStudyCenterList() {
+		return studyCenterList;
 	}
 
-	public void setCenters(List<Center> centers) {
-		this.centers = centers;
-		Collections.sort(this.centers);
+	public void setStudyCenterList(List<StudyCenter> studyCenterList) {
+		this.studyCenterList = studyCenterList;
 	}
 
 	public Boolean getCompatible() {

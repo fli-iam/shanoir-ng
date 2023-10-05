@@ -19,6 +19,7 @@ import org.shanoir.uploader.model.rest.HemisphericDominance;
 import org.shanoir.uploader.model.rest.IdName;
 import org.shanoir.uploader.model.rest.ImagedObjectCategory;
 import org.shanoir.uploader.model.rest.Sex;
+import org.shanoir.uploader.model.rest.StudyCenter;
 import org.shanoir.uploader.model.rest.Subject;
 import org.shanoir.uploader.model.rest.SubjectStudy;
 import org.shanoir.uploader.model.rest.SubjectType;
@@ -52,12 +53,13 @@ public class ZipFileImportTest extends AbstractTest {
 		final String randomStudyName = "Study-Name-" + UUID.randomUUID().toString();
 		study.setName(randomStudyName);
 		study.setStudyStatus(1); // 1, in progress
-		List<Center> centers = new ArrayList<Center>();
+		List<StudyCenter> studyCenterList = new ArrayList<StudyCenter>();
+		final StudyCenter studyCenter = new StudyCenter();
 		final Center center = new Center();
-		final String randomCenterName = "Center-Name-" + UUID.randomUUID().toString();
-		center.setName(randomCenterName);
-		centers.add(center);
-		study.setCenters(centers);
+		center.setId(Long.valueOf(1));
+		studyCenter.setCenter(center);
+		studyCenterList.add(studyCenter);
+		study.setStudyCenterList(studyCenterList);
 		shUpClient.createStudy(study);
 		return study;
 	}
