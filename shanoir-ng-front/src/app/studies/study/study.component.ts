@@ -48,6 +48,8 @@ import { DatasetService } from "../../datasets/shared/dataset.service";
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { KeyValue } from "@angular/common";
+import { StudyStorageVolumeDTO } from '../shared/study.dto';
+import { TaskState } from 'src/app/async-tasks/task.model';
 
 @Component({
     selector: 'study-detail',
@@ -58,11 +60,12 @@ import { KeyValue } from "@angular/common";
 
 export class StudyComponent extends EntityComponent<Study> {
 
-    @ViewChild('DUAprogressBar') DUAprogressBar: LoadingBarComponent;
-    @ViewChild('PFprogressBar') PFprogressBar: LoadingBarComponent;
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
+
+    protected pfDownloadState: TaskState = {};
+    protected duaDownloadState: TaskState = {};
 
     subjects: IdName[];
     selectedCenter: IdName;
@@ -120,12 +123,14 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initView(): Promise<void> {
+
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
         let studyPromise: Promise<Study> = this.studyService.get(this.id, null, true).then(study => {
 
           this.study = study;
+          this.setLabeledSizes(this.study);
 
           if (study.profile == null) {
                 let pro = new Profile();
@@ -249,32 +254,27 @@ export class StudyComponent extends EntityComponent<Study> {
         return formGroup;
     }
 
-    private getLabeledSizes(id: number): Promise<Map<String, number>> {
-        let waitUploads: Promise<void> = this.studyService.fileUploads.has(id)
-            ? this.studyService.fileUploads.get(id)
+    private setLabeledSizes(study: Study): Promise<void> {
+        let waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
+            ? this.studyService.fileUploads.get(study.id)
             : Promise.resolve();
 
         this.uploading = true;
         return waitUploads.then(() => {
-            return this.studyService.getStudyDetailedStorageVolume(id).then(dto => {
-
+            return this.studyService.getStudyDetailedStorageVolume(study.id).then(dto => {
                 let datasetSizes = dto;
+                study.totalSize = datasetSizes.total
                 let sizesByLabel = new Map<String, number>()
-
-                for(let sizeByFormat of datasetSizes.volumeByFormat){
+                for (let sizeByFormat of datasetSizes.volumeByFormat) {
                     if(sizeByFormat.size > 0){
                         sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
                     }
                 }
-
-                if(datasetSizes.extraDataSize > 0){
+                if (datasetSizes.extraDataSize > 0){
                     sizesByLabel.set("Other files (DUA, protocol...)", datasetSizes.extraDataSize);
                 }
-
                 let total = datasetSizes.total;
-                sizesByLabel.set("Total", total);
-
-                return sizesByLabel;
+                study.detailedSizes = sizesByLabel;
             });
         }).finally(() => {
             this.uploading = false;
@@ -490,7 +490,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public downloadFile(file) {
-        this.studyService.downloadFile(file, this.study.id, 'protocol-file', this.PFprogressBar);
+        this.studyService.downloadFile(file, this.study.id, 'protocol-file', this.pfDownloadState);
     }
 
     public attachNewFile(event: any) {
@@ -514,7 +514,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public downloadDataUserAgreement() {
-        this.studyService.downloadFile(this.study.dataUserAgreementPaths[0], this.study.id, 'dua', this.DUAprogressBar);
+        this.studyService.downloadFile(this.study.dataUserAgreementPaths[0], this.study.id, 'dua', this.duaDownloadState);
     }
 
     public attachDataUserAgreement(event: any) {

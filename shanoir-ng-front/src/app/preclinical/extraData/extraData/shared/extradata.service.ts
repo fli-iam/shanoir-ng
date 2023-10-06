@@ -57,13 +57,7 @@ export class ExtraDataService extends EntityService<ExtraData>{
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
-    }
-
-    private getFilename(response: HttpResponse<any>): string {
-        const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
+        AppUtils.browserDownloadFileFromResponse(response.body, response);
     }
     
     createExtraData(datatype:string,extradata: any): Promise<any> {

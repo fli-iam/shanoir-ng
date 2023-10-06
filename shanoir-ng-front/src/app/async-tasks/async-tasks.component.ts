@@ -45,7 +45,7 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     }
 
     ngAfterViewInit(): void {
-        this.subscribtions.push(
+        this.subscriptions.push(
             this.notificationsService.getNotifications().subscribe(tasks => {
                 this.tasks = tasks;
                 this.table.refresh();

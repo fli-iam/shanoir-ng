@@ -47,6 +47,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
+    @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
@@ -324,6 +325,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         let getPage: Page<any> | Promise<Page<any>> =  this.getPage(this.getPageable(), forceRefresh)
         if (getPage instanceof Promise) {
             return getPage.then(page => {
+                    this.pageLoaded.emit(page);
                 return this.computePage(page);
             }).catch(reason => {
                 setTimeout(() => {
@@ -333,7 +335,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 throw reason;
             });
         } else if (getPage instanceof Page) {
-            return Promise.resolve(this.computePage(getPage));
+            return Promise.resolve(this.computePage(getPage)).then(page => {
+                this.pageLoaded.emit(page);
+                return page;
+            });
         }
     }
 

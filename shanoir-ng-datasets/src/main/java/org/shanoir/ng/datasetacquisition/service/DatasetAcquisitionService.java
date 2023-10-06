@@ -14,10 +14,6 @@
 
 package org.shanoir.ng.datasetacquisition.service;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -26,6 +22,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 public interface DatasetAcquisitionService {
 	

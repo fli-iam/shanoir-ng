@@ -231,8 +231,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</li>
 					<li *ngIf="mode == 'view'">
 						<label i18n="Study detail|dua label@@studyDetailDataUserAgreement">DUA file</label>
-						<div [hidden]="DUAprogressBar.progress == 0">
-                            <progress-bar #DUAprogressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+						<div [hidden]="duaDownloadState.progress == 0">
+                            <progress-bar [progress]="duaDownloadState" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                         </div>
                         <span class="right-col">
 							<span *ngIf="study.dataUserAgreementPaths && study.dataUserAgreementPaths[0]">
@@ -356,8 +356,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         </span>
 					</li>
                     <li *ngIf="mode == 'view'">
-                        <div [hidden]="PFprogressBar.progress == 0">
-                            <progress-bar #PFprogressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+                        <div [hidden]="pfDownloadState.progress == 0">
+                            <progress-bar [progress]="pfDownloadState" [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
                         </div>
                         <span class="right-col">
                             <span *ngIf="study.protocolFilePaths && study.protocolFilePaths[0]">
@@ -412,7 +412,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </fieldset>
             <fieldset *ngIf="mode == 'view'" [class.hidden-tab]="activeTab != 'bids'">
 				        <legend>BIDS tree</legend>
-                <bids-tree [studyId]="id"></bids-tree>
+                <bids-tree [studyId]="id" [studyName]="study.name"></bids-tree>
             </fieldset>
 			<form-footer
 					[state]="footerState"

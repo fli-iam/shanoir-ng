@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -22,6 +22,8 @@ export type TaskStatus =
     | 2 // in progress
     | 4 // queued
     | 5; // in progress but warning
+
+export type TaskState = {status?: TaskStatus, progress?: number};
 
 export class Task extends Entity {
 
@@ -77,12 +79,12 @@ export class Task extends Entity {
 
     private buildRoute(): string {
         if (this.eventType === 'importDataset.event' && this.status != -1) {
-            if (this.message.lastIndexOf('in examination ') != -1) {
-                return '/examination/details/' + this.message.slice(this.message.lastIndexOf('in examination ') + ('in examination '.length));
-            } else if (this.message.lastIndexOf('for examination ') != -1) {
-                return '/examination/details/' + this.message.slice(this.message.lastIndexOf('for examination ') + ('for examination '.length));
-            } else if (this.message.indexOf('in dataset') != -1) {
-                return '/dataset/details/' + this.message.slice(this.message.lastIndexOf('in dataset ') + ('in dataset '.length));
+            if (this.message.lastIndexOf('examination [') != -1) {
+                let substring = this.message.match(/examination \[\d+\]/g)[0];
+                return '/examination/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
+            } else if (this.message.indexOf('dataset [') != -1) {
+                let substring = this.message.match(/dataset \[\d+\]/g)[0];
+                return '/dataset/details/' + substring.slice(substring.lastIndexOf("[") + 1, substring.lastIndexOf("]"));
             } else if (this.message.indexOf('VIP Execution') != -1) {
                return '/dataset-processing/details/' + this.objectId
             }

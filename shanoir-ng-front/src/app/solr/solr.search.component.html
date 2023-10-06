@@ -116,13 +116,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </solr-paging-criterion>
 
         <solr-paging-criterion
-                label="Mr Dataset Nature"
-                awesome="fa-solid fa-sliders"
-                facetName="datasetNature"
-                [getPage]="getFacetFieldPage.bind(this)"
-                [(ngModel)]="solrRequest.datasetNature"
-                [ngModelOptions]="{standalone: true}"
-                (onChange)="updateSelections(); refreshTable('datasetNature')">
+            label="Mr Dataset Nature"
+            awesome="fa-solid fa-sliders"
+            facetName="datasetNature"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.datasetNature"
+            [ngModelOptions]="{standalone: true}"
+            (onChange)="updateSelections(); refreshTable('datasetNature')">
+        </solr-paging-criterion>
+
+        <solr-paging-criterion
+            label="Acquisition equipment"
+            awesome="fa-solid fa-x-ray"
+            facetName="acquisitionEquipmentName"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.acquisitionEquipmentName"
+            [ngModelOptions]="{standalone: true}"
+            (onChange)="updateSelections(); refreshTable('acquisitionEquipmentName')">
+        </solr-paging-criterion>
+
+        <solr-paging-criterion
+            label="Subject type"
+            awesome="fa-solid fa-head-side-mask"
+            facetName="subjectType"
+            [getPage]="getFacetFieldPage.bind(this)"
+            [(ngModel)]="solrRequest.subjectType"
+            [ngModelOptions]="{standalone: true}"
+            (onChange)="updateSelections(); refreshTable('subjectType')">
         </solr-paging-criterion>
 
         <solr-range-criterion
@@ -172,8 +192,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </div>
 
-        <div [hidden]="progressBar.progress == 0">
-            <progress-bar #progressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+        <div [hidden]="progressState.progress == 0">
+            <progress-bar [progress]="progressState.progress"  [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
         </div>
 
         <div class="tabs">

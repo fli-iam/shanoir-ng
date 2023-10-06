@@ -14,38 +14,10 @@
 
 package org.shanoir.ng.importer.service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.dcm4che3.data.Attributes;
-import org.shanoir.ng.dataset.modality.CalibrationDataset;
-import org.shanoir.ng.dataset.modality.CtDataset;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.MegDataset;
-import org.shanoir.ng.dataset.modality.MeshDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
-import org.shanoir.ng.dataset.modality.ParameterQuantificationDataset;
-import org.shanoir.ng.dataset.modality.PetDataset;
-import org.shanoir.ng.dataset.modality.RegistrationDataset;
-import org.shanoir.ng.dataset.modality.SegmentationDataset;
-import org.shanoir.ng.dataset.modality.SpectDataset;
-import org.shanoir.ng.dataset.modality.StatisticalDataset;
-import org.shanoir.ng.dataset.modality.TemplateDataset;
+import org.shanoir.ng.dataset.modality.*;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.model.DatasetMetadata;
-import org.shanoir.ng.dataset.model.DatasetModalityType;
+import org.shanoir.ng.dataset.model.*;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
@@ -54,11 +26,7 @@ import org.shanoir.ng.dicom.DicomProcessing;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.dto.ImportJob;
-import org.shanoir.ng.importer.dto.Patient;
-import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
-import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.importer.dto.Study;
+import org.shanoir.ng.importer.dto.*;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventService;
@@ -81,6 +49,15 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.time.LocalDate;
+import java.util.*;
 
 @Service
 @Scope("prototype")
@@ -178,9 +155,9 @@ public class ImporterService {
             event.setProgress(1f);
             event.setStatus(ShanoirEvent.SUCCESS);
 
-            event.setMessage(importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")"
-                    +" : Successfully created datasets for subject " + importJob.getSubjectName()
-                    + " in examination " + examination.getId());
+            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
+                    +" Successfully created datasets for subject [" + importJob.getSubjectName()
+                    + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 
             // Manage archive
@@ -530,9 +507,10 @@ public class ImporterService {
             dataset = datasetService.create(dataset);
             
             event.setStatus(ShanoirEvent.SUCCESS);
-            event.setMessage(importJob.getStudyName() + "(" + importJob.getStudyId() + ")"
-                    +": Successfully created processed dataset for subject " + importJob.getSubjectName() + " in dataset "
-                    + dataset.getId());
+
+            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")] " +
+                    "Successfully created processed dataset [" + dataset.getId() + "] " +
+                    "for subject [" + importJob.getSubjectName() + "]");
             event.setProgress(1f);
             eventService.publishEvent(event);
             

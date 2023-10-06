@@ -14,18 +14,16 @@
 
 package org.shanoir.ng.studycard.model.assignment;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 
 @Entity

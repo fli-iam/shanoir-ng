@@ -1,7 +1,8 @@
 package org.shanoir.ng.datasetacquisition.repository;
 
-import java.util.List;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.springframework.data.domain.Page;
@@ -10,9 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import java.util.List;
 
 @Component
 public class DatasetAcquisitionRepositoryImpl implements DatasetAcquisitionRepositoryCustom {

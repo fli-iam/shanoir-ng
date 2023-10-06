@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <div class="header command-zone">1. Select DICOM archive</div>
 	<fieldset class="step dicom">
-	    <checkbox [(ngModel)]="multipleExamImport"></checkbox> 
+	    <checkbox [(ngModel)]="multipleExamImport" [disabled]="archiveStatus != 'none'" ></checkbox> 
 	    <label> Multiple examination import.</label>
 	    <div *ngIf="!multipleExamImport">
 	    <p>Please select a DICOM zip archive to import.</p>
@@ -70,8 +70,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	    </ol>
         </div>
 	    <upload-file [disabled]="multipleExamImport && !studyCard" (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
-	    <div [hidden]="progressBar.progress == 0">
-	        <progress-bar #progressBar [text]="'Preparing upload'"></progress-bar>
+	    <div [hidden]="uploadState.progress == 0">
+	        <progress-bar [progress]="uploadState.progress" [text]="'Preparing upload'"></progress-bar>
 	    </div>
 	    <label *ngIf="extensionError==true" class="form-validation-alert" i18n="Import|ExtensionError label">
 	        A DICOM zip archive is required!
@@ -86,8 +86,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             {{otherErrorMessage}}
         </label>
 	    
-	    <p *ngIf="modality" class="modality">
+	    <p *ngIf="modality && !multipleExamImport" class="modality">
 	        The modality of the dataset(s) that you are importing is {{modality}}
 	    </p>
+	   <p *ngIf="multipleExamImport && archiveStatus=='uploaded'" class="modality">
+            The import successfully started. Please check "Jobs" tab to follow its progress.
+        </p>
 	</fieldset>
 <button *ngIf="!multipleExamImport" class="next" [disabled]="!valid" (click)="next()">Next</button>

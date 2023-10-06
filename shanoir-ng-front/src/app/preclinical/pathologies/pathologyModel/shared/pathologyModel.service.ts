@@ -59,16 +59,6 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+        AppUtils.browserDownloadFileFromResponse(response.body, response);
     }
-   
-    private getFilename(response: HttpResponse<any>): string {
-        const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
-    }
-    
-    
-    
-    
 }

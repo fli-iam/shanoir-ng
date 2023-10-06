@@ -11,16 +11,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { saveAs } from 'file-saver-es';
 import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { BidsElement } from '../../bids/model/bidsElement.model';
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from '../../shared/models/profile.model';
@@ -168,24 +167,23 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return this.http.delete(endpoint);
     }
 
-    downloadFile(fileName: string, studyId: number, fileType: 'protocol-file'|'dua', progressBar: LoadingBarComponent): Promise<HttpResponse<Blob>> {
-       const endpoint = this.API_URL + '/' + fileType + '-download/' + studyId + "/" + fileName + "/";
-       if (progressBar) {
-           this.subscriptions.push(
-           this.http.get(endpoint, {
+    downloadFile(fileName: string, studyId: number, fileType: 'protocol-file'|'dua', state?: TaskState): Promise<HttpResponse<Blob>>  {
+        const endpoint = this.API_URL + '/' + fileType + '-download/' + studyId + "/" + fileName + "/";
+        if (state) {
+            return this.http.get(endpoint, {
                     reportProgress: true,
                     observe: 'events',
-                    responseType: 'blob'
-                }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar))
-           );
+                    responseType: 'blob',
+                }).map(event => {
+                    state = this.extractProgression(event);
+                    return event as HttpResponse<Blob>;
+                }).toPromise();
         } else {
             return this.http.get(endpoint, {
-                    observe: 'response',
-                    responseType: 'blob'
-                }).toPromise();
-
+                observe: 'response',
+                responseType: 'blob',
+            }).toPromise();
         }
-        return null;
     }
 
     getMyDUA(): Promise<DataUserAgreement[]> {
@@ -222,40 +220,24 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .toPromise();
     }
 
-    private getFilename(response: HttpResponse<any>): string {
-        const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
-    }
-
-    progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
-       switch (event.type) {
-            case HttpEventType.Sent:
-              progressBar.progress = -1;
-              break;
-            case HttpEventType.DownloadProgress:
-              progressBar.progress = event.loaded;
-              break;
-            case HttpEventType.Response:
-                saveAs(event.body, this.getFilename(event));
-                progressBar.progress = 0;
-        }
-    }
-
-    exportBIDSByStudyId(studyId: number, progressBar: LoadingBarComponent) {
+    exportBIDSByStudyId(studyId: number) {
         if (!studyId) throw Error('study id is required');
-        this.subscriptions.push(
-               this.http.get(AppUtils.BACKEND_API_BIDS_EXPORT_URL + '/studyId/' + studyId, {
-                    reportProgress: true,
-                    observe: 'events',
-                    responseType: 'blob'
-                }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar))
-         );
+        this.http.get(AppUtils.BACKEND_API_BIDS_EXPORT_URL + '/studyId/' + studyId, {
+            reportProgress: true,
+            observe: 'events',
+            responseType: 'blob'
+        });
     }
 
     getBidsStructure(studyId: number): Promise<BidsElement> {
         if (!studyId) throw Error('study id is required');
         return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
+            .toPromise();
+    }
+
+    refreshBidsStructure(studyId: number, studyName: string): Promise<BidsElement> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_REFRESH_URL + '/studyId/' + studyId + '/studyName/' + studyName)
             .toPromise();
     }
 
@@ -316,7 +298,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         if(size == null){
             return "";
         }
-        
+
         if(size == 0){
             return "0 " + units[0];
         }

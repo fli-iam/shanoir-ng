@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -743,7 +744,8 @@ public class ImporterApiController implements ImporterApi {
 			@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
 			@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
-			@Parameter(name = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException {
+			@Parameter(name = "converterId", required = true) @PathVariable("converterId") Long converterId, 
+			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
@@ -799,7 +801,9 @@ public class ImporterApiController implements ImporterApi {
 				if (subject == null) {
 
 					// Create subject
-					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
+					// Update birth date to 1st of january of the year
+					LocalDate updateBirthdate = patient.getPatientBirthDate().withDayOfYear(1);
+					subject = ImportUtils.createSubject(subjectName, updateBirthdate, patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
 
 					LOG.debug("We found a subject " + subjectName);
 
@@ -813,12 +817,12 @@ public class ImporterApiController implements ImporterApi {
 
 				// STEP 4.1 Get informations about center / study card
 				// Get equipment id
-				Long equipmentId = null;
+				Long equipmentIdFromDicom = null;
 				if (job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber() != null) {
-					equipmentId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
-					if (equipmentId != null) {
+					equipmentIdFromDicom = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
+					if (equipmentIdFromDicom != null) {
 						Properties props = new Properties();
-						props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentId);
+						props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentIdFromDicom);
 						props.setProperty("STUDY_ID_PROPERTY", "" + studyId);
 						props.setProperty("STUDYCARD_ID_PROPERTY", "" + studyCardId);
 
@@ -826,7 +830,7 @@ public class ImporterApiController implements ImporterApi {
 						if (newStudyCardId != null)  {
 							studyCardId = newStudyCardId;
 						}
-						job.setAcquisitionEquipmentId(equipmentId);
+						job.setAcquisitionEquipmentId(equipmentIdFromDicom);
 					}
 				}
 
@@ -844,6 +848,9 @@ public class ImporterApiController implements ImporterApi {
 				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
 				// STEP 4.3 Complete importJob with subject / study /examination
+				
+				String anonymizationProfile = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, studyId);
+				
 				job.setSubjectName(subjectName);
 				job.setExaminationId(examId);
 				job.setFromDicomZip(true);
@@ -851,6 +858,8 @@ public class ImporterApiController implements ImporterApi {
 				job.setStudyId(studyId);
 				job.setCenterId(centerId);
 				job.setStudyName(studyName);
+				job.setAcquisitionEquipmentId(equipmentId);
+				job.setAnonymisationProfileToUse(anonymizationProfile);
 				for (Patient pat : job.getPatients()) {
 					pat.setSubject(subject);
 				}

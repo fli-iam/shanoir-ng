@@ -11,8 +11,8 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<div [hidden]="progressBar.progress == 0">
-    <progress-bar #progressBar [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
+<div [hidden]="downloadState.progress == 0">
+    <progress-bar [progress]="downloadState.progress"  [text]="'Preparing download'" [unknownDownload]="true"></progress-bar>
 </div>
 <node
         *ngIf="node"
@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 label="{{file}}"
                 awesome="fas fa-file"
                 [buttonPicto]="'fas fa-download'"
-                (buttonClick)=downloadFile(file)
+                (buttonClick)="downloadFile(file)"
                 [hasChildren]="false">
         </node>
     </node>

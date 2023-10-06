@@ -27,6 +27,7 @@ import {ExaminationService} from '../shared/examination.service';
 import {LoadingBarComponent} from '../../shared/components/loading-bar/loading-bar.component';
 import {environment} from '../../../environments/environment';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { TaskState } from 'src/app/async-tasks/task.model';
 
 @Component({
     selector: 'examination-node',
@@ -39,8 +40,8 @@ export class ExaminationNodeComponent implements OnChanges {
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
+    protected downloadState: TaskState = {};
     node: ExaminationNode;
     loading: boolean = false;
     menuOpened: boolean = false;
@@ -66,7 +67,9 @@ export class ExaminationNodeComponent implements OnChanges {
         if (changes['input']) {
             if (this.input instanceof ExaminationNode) {
                 this.node = this.input;
-                if (this.input.datasetAcquisitions != 'UNLOADED') this.fetchDatasetIds(this.input.datasetAcquisitions);
+                if (this.input.datasetAcquisitions != 'UNLOADED') {
+                    this.fetchDatasetIds(this.input.datasetAcquisitions);
+                }
             } else {
                 this.node = new ExaminationNode(
                     this.input.id,
@@ -90,7 +93,7 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     downloadFile(file) {
-        this.examinationService.downloadFile(file, this.node.id, this.progressBar);
+        this.examinationService.downloadFile(file, this.node.id, this.downloadState);
     }
 
     firstOpen() {
@@ -113,26 +116,27 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     fetchDatasetIds(datasetAcquisitions: DatasetAcquisitionNode[]) {
-        let datasetIds: number[] = [];
-        if (datasetAcquisitions) {
-            datasetAcquisitions.forEach(dsAcq => {
-                if (dsAcq.datasets == 'UNLOADED') {
-                    datasetIds = undefined; // abort
-                    return;
-                } else {
-                    dsAcq.datasets.forEach(ds => {
-                        datasetIds.push(ds.id);
-                        if (ds.type === 'Eeg') {
-                            this.hasEEG = true;
-                        } else if (ds.type === 'BIDS') {
-                            this.hasBids = true;
-                        } else {
-                            this.hasDicom = true;
-                        }
-                    });
-                }
-            });
+        if (!datasetAcquisitions) {
+            return;
         }
+        let datasetIds: number[] = [];
+        datasetAcquisitions.forEach(dsAcq => {
+            if (dsAcq.datasets == 'UNLOADED') {
+                datasetIds = undefined; // abort
+                return;
+            } else {
+                dsAcq.datasets.forEach(ds => {
+                    datasetIds.push(ds.id);
+                    if (ds.type === 'Eeg') {
+                        this.hasEEG = true;
+                    } else if (ds.type === 'BIDS') {
+                        this.hasBids = true;
+                    } else {
+                        this.hasDicom = true;
+                    }
+                });
+            }
+        });
         this.datasetIds = datasetIds;
     }
 

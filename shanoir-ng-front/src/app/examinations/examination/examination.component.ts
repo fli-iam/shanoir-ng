@@ -1,4 +1,3 @@
-
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -16,12 +15,11 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
-import { TaskStatus } from 'src/app/async-tasks/task.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
-import { DatasetService, Format } from '../../datasets/shared/dataset.service';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
@@ -33,7 +31,9 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ExaminationNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
+import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Format } from 'src/app/datasets/shared/dataset.service';
 
 @Component({
     selector: 'examination',
@@ -57,7 +57,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
     examNode: Examination | ExaminationNode;
-    downloadState: {status?: TaskStatus, progress?: number} = {};
+    downloadState: TaskState = {};
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
@@ -65,6 +65,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 	hasEEG: boolean = false;
 	hasDicom: boolean = false;
     hasBids: boolean = false;
+    unit = UnitOfMeasure;
+    defaultUnit = this.unit.KG;
 
 
     constructor(
@@ -106,16 +108,19 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     initView(): Promise<void> {
         return this.examinationService.get(this.id).then((examination: Examination) => {
             this.examination = examination;
+            if(!this.examination.weightUnitOfMeasure){
+                this.examination.weightUnitOfMeasure = this.defaultUnit;
+            }
             if (this.keycloakService.isUserAdmin()) {
                 this.hasAdministrateRight = true;
-        this.hasDownloadRight = true;
-        this.hasImportRight = true;
-        return;
-    } else {
-        return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
-            this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
-            this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
-            this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                this.hasDownloadRight = true;
+                this.hasImportRight = true;
+                return;
+            } else {
+                return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
+                    this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
                 });
             }
         });
@@ -126,6 +131,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.getStudies();
         return this.examinationService.get(this.id).then((examination: Examination) => {
             this.examination = examination
+            if(!this.examination.weightUnitOfMeasure){
+                this.examination.weightUnitOfMeasure = this.defaultUnit;
+            }
         }).then(exam => this.getSubjects());
     }
 
@@ -133,6 +141,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.getCenters();
         this.getStudies();
         this.examination = new Examination();
+        this.examination.weightUnitOfMeasure = this.defaultUnit;
         return Promise.resolve();
     }
 
@@ -144,7 +153,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
             'note': [this.examination.note],
-            'subjectWeight': [this.examination.subjectWeight]
+            'subjectWeight': [this.examination.subjectWeight],
+            'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
     }
 
@@ -279,5 +289,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
                 this.noDatasets = datasetIds.length == 0;
             }
         }
+    }
+
+    getUnit(key: string) {
+        return UnitOfMeasure.getLabelByKey(key);
     }
 }

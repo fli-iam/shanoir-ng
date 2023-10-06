@@ -16,6 +16,7 @@ import { Component, Input, ViewChild } from '@angular/core';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+import { TaskState } from 'src/app/async-tasks/task.model';
 
 @Component({
     selector: 'challenge-block',
@@ -25,16 +26,15 @@ import { StudyService } from '../../studies/shared/study.service';
 
 export class ChallengeBlockComponent {
 
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
     @Input() challengeStudy: Study;
-
+    protected downloadState: TaskState = {};
 
     constructor(
             private studyService: StudyService) {
     }
 
     downloadFile(filePath: string) {
-        this.studyService.downloadFile(filePath, this.challengeStudy.id, 'protocol-file', this.progressBar);
+        this.studyService.downloadFile(filePath, this.challengeStudy.id, 'protocol-file', this.downloadState);
     }
 
 }

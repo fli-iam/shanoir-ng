@@ -14,14 +14,12 @@
 
 package org.shanoir.ng.datasetacquisition.model.pet;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
-
 import org.shanoir.ng.shared.core.model.AbstractEntity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * PET protocol.

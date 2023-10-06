@@ -19,6 +19,7 @@ import { EegDataset } from '../datasets/dataset/eeg/dataset.eeg.model';
 import { Dataset } from '../datasets/shared/dataset.model';
 import { process } from '../process';
 import { environment } from '../../environments/environment';
+import { HttpResponse } from '@angular/common/http';
 
 
 // Base urls
@@ -105,6 +106,7 @@ export const BACKEND_API_SOLR_FULLTEXT_SEARCH_URL: string = BACKEND_API_SOLR_URL
 export const BACKEND_API_BIDS_URL: string = BACKEND_API_DATASET_MS_URL + '/bids';
 export const BACKEND_API_BIDS_EXPORT_URL: string = BACKEND_API_BIDS_URL + '/exportBIDS';
 export const BACKEND_API_BIDS_STRUCTURE_URL: string = BACKEND_API_BIDS_URL + '/bidsStructure';
+export const BACKEND_API_BIDS_REFRESH_URL: string = BACKEND_API_BIDS_URL + '/refreshBids';
 
 export const BACKEND_API_TASKS_URL: string = BACKEND_API_USERS_MS_URL + '/tasks';
 export const BACKEND_API_UPDATE_TASKS_URL: string = BACKEND_API_TASKS_URL + '/updateTasks';
@@ -185,6 +187,32 @@ export function browserDownloadFile(blob: Blob, filename: string){
             document.body.removeChild(link);
         }
     }
+}
+
+export function browserDownloadFileFromResponse(blob: Blob, response: HttpResponse<any>){
+  if (window.navigator.msSaveBlob) {
+      // IE 10+
+      window.navigator.msSaveBlob(blob, getFilename(response));
+  } else {
+      var link = document.createElement('a');
+      // Browsers that support HTML5 download attribute
+      if (link.download !== undefined)
+      {
+          var url = URL.createObjectURL(blob);
+          link.setAttribute('href', url);
+          link.setAttribute('download', getFilename(response));
+          link.style.visibility = 'hidden';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+      }
+  }
+}
+
+export function getFilename(response: HttpResponse<any>): string {
+    const prefix = 'attachment;filename=';
+    let contentDispHeader: string = response.headers.get('Content-Disposition');
+    return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
 }
 
 export function pad(n, width, z?): string {

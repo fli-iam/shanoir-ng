@@ -13,7 +13,7 @@
  */
 
 import { Component, ViewChild } from '@angular/core';
-import { Task } from '../async-tasks/task.model';
+import { Task, TaskState } from '../async-tasks/task.model';
 import { TaskService } from '../async-tasks/task.service';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
@@ -35,8 +35,6 @@ import { UserService } from '../users/shared/user.service';
 
 export class HomeComponent {
 
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
-
     shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
 
     challengeDua: DataUserAgreement;
@@ -51,6 +49,8 @@ export class HomeComponent {
     nbAccountRequests: number;
     nbExtensionRequests: number;
     accessRequests: AccessRequest[] = [];
+    protected downloadState: TaskState = {};
+
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
@@ -114,7 +114,7 @@ export class HomeComponent {
     }
 
     downloadFile(filePath: string, studyId: number) {
-        this.studyService.downloadFile(filePath, studyId, 'protocol-file', this.progressBar);
+        this.studyService.downloadFile(filePath, studyId, 'protocol-file', this.downloadState);
     }
 
     isAuthenticated(): boolean {

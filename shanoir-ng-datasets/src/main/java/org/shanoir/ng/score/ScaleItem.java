@@ -1,18 +1,16 @@
 package org.shanoir.ng.score;
 
-import java.sql.Types;
-
-import org.hibernate.annotations.JdbcTypeCode;
-import org.shanoir.ng.examination.model.CodedVariable;
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.shanoir.ng.examination.model.CodedVariable;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
+import java.sql.Types;
 
 /**
  * The Class ScaleItem.

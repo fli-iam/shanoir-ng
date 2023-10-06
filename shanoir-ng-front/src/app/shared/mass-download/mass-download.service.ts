@@ -15,7 +15,7 @@
 import { HttpResponse } from '@angular/common/http';
 import { ComponentRef, Injectable } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs-compat';
-import { Task, TaskStatus } from 'src/app/async-tasks/task.model';
+import { Task, TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
@@ -185,7 +185,7 @@ export class MassDownloadService {
                 task.status = 2;
                 task.lastUpdate = new Date();
                 const start: number = Date.now();
-                let downloadObs: Observable<{status?: TaskStatus, progress?: number}>;
+                let downloadObs: Observable<TaskState>;
                 if (inputDef == 'studyId') {
                     downloadObs = this.datasetService.downloadDatasetsByStudy(input as number, format);
                 } else if (inputDef == 'datasetIds') {

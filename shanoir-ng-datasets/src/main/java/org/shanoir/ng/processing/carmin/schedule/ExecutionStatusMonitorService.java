@@ -5,5 +5,5 @@ import org.shanoir.ng.shared.exception.SecurityException;
 
 public interface ExecutionStatusMonitorService {
 
-    void startJob(String identifier) throws EntityNotFoundException, SecurityException;
+    void startMonitoringJob(String identifier) throws EntityNotFoundException, SecurityException;
 }

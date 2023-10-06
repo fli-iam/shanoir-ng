@@ -14,12 +14,8 @@
 
 package org.shanoir.ng.dataset.service;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
-import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -27,6 +23,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Dataset service.
@@ -93,7 +93,7 @@ public interface DatasetService {
 	 */
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasUpdateRightOnDataset(#dataset, 'CAN_ADMINISTRATE'))")
 	Dataset update(Dataset dataset) throws EntityNotFoundException;
-	
+
 	/**
 	 * Find every dataset
 	 * 

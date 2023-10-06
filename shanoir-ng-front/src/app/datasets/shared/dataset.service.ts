@@ -11,21 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpEvent, HttpEventType, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { ErrorHandler, Injectable, OnDestroy } from '@angular/core';
-import { saveAs } from 'file-saver-es';
-import { Subscription } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { ErrorHandler, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
+import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
+import { DatasetDTO, DatasetDTOService } from "./dataset.dto";
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
-import { TaskStatus } from 'src/app/async-tasks/task.model';
-import { DatasetDTO, DatasetDTOService } from "./dataset.dto";
 
 export type Format = 'eeg' | 'nii' | 'BIDS' | 'dcm';
 
@@ -83,7 +80,7 @@ export class DatasetService extends EntityService<Dataset> {
             .toPromise()
             .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
-    
+
     getByStudyId(studyId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
                 .toPromise()
@@ -107,20 +104,7 @@ export class DatasetService extends EntityService<Dataset> {
             .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
     }
 
-    extractProgression(event: HttpEvent<any>): {status?: TaskStatus, progress?: number} {
-        switch (event.type) {
-            case HttpEventType.Sent:
-            case HttpEventType.ResponseHeader:
-                return {status: 4, progress: 1};
-            case HttpEventType.DownloadProgress:
-                return {status: 2, progress: event.loaded};
-            case HttpEventType.Response:
-                saveAs(event.body, this.getFilename(event));
-                return {status: 1, progress: 1}
-        }
-    }
-
-    public downloadDatasets(ids: number[], format: string): Observable<{status?: TaskStatus, progress?: number}> {
+    public downloadDatasets(ids: number[], format: string, state?: TaskState): Observable<TaskState> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
@@ -131,24 +115,26 @@ export class DatasetService extends EntityService<Dataset> {
                 observe: 'events',
                 responseType: 'blob'
         }).map(event => {
-            return this.extractProgression(event);
+            state = this.extractProgression(event);
+            return state;
         });
     }
 
-    public downloadDatasetsByStudy(studyId: number, format: string): Observable<{status?: TaskStatus, progress?: number}>  {
+    public downloadDatasetsByStudy(studyId: number, format: string, state?: TaskState): Observable<TaskState>  {
         let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
         return this.http.get(
-           AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',{
+            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',{
                 reportProgress: true,
                 observe: 'events',
                 responseType: 'blob',
                 params: params
             }).map(event => {
-                return this.extractProgression(event);
+                state = this.extractProgression(event);
+                return state;
             });
     }
 
-    public downloadDatasetsByExamination(examinationId: number, format: string): Observable<{status?: TaskStatus, progress?: number}>  {
+    public downloadDatasetsByExamination(examinationId: number, format: string, state?: TaskState): Observable<TaskState>  {
         let params = new HttpParams().set("examinationId", '' + examinationId).set("format", format);
         return this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination',{
@@ -157,15 +143,31 @@ export class DatasetService extends EntityService<Dataset> {
                 responseType: 'blob',
                 params: params
             }).map(event => {
-                return this.extractProgression(event);
+                state = this.extractProgression(event);
+                return state;
             });
   }
 
+    public downloadDatasetsByAcquisition(acquisitionId: number, format: string, state?: TaskState): Observable<TaskState> {
+        let params = new HttpParams().set("acquisitionId", '' + acquisitionId).set("format", format);
+        return this.http.get(
+            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByAcquisition',{
+                reportProgress: true,
+                observe: 'events',
+                responseType: 'blob',
+                params: params
+            }).map(event => {
+                state = this.extractProgression(event);
+                return state;
+            });
+    }
+
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
-        let params = new HttpParams().set("studyNameInRegExp", studyNameInRegExp)
-                                        .set("studyNameOutRegExp", studyNameOutRegExp)
-                                        .set("subjectNameInRegExp", subjectNameInRegExp)
-                                        .set("subjectNameOutRegExp", subjectNameOutRegExp);
+        let params = new HttpParams()
+            .set("studyNameInRegExp", studyNameInRegExp)
+            .set("studyNameOutRegExp", studyNameOutRegExp)
+            .set("subjectNameInRegExp", subjectNameInRegExp)
+            .set("subjectNameOutRegExp", subjectNameOutRegExp);
         return this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/downloadStatistics', { observe: 'response', responseType: 'blob', params: params})
             .toPromise().then(
@@ -211,7 +213,7 @@ export class DatasetService extends EntityService<Dataset> {
         this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/subjectId/' + subjectId
             + '/subjectName/' + subjectName + '/studyName/' + studyName,
             { observe: 'response', responseType: 'blob' }
-        ).subscribe(response => {this.downloadIntoBrowser(response);});
+        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
     }
 
     getUrls(id: number): Observable<HttpResponse<any>> {
@@ -228,14 +230,8 @@ export class DatasetService extends EntityService<Dataset> {
         return this.http.post<string>(`${AppUtils.BACKEND_API_DATASET_URL}/prepare-url/${encodeURIComponent(id)}?format=${encodeURIComponent(format)}`, { url: url }, httpOptions);
     }
 
-    private getFilename(response: HttpResponse<any>): string {
-        const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
-    }
-
     private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFile(response.body, this.getFilename(response));
+        AppUtils.browserDownloadFileFromResponse(response.body, response);
     }
 
     protected mapEntity = (dto: DatasetDTO, quickResult?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> => {

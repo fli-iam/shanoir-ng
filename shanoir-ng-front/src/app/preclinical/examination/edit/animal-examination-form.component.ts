@@ -43,6 +43,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
+import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -72,6 +73,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     animalSubjectId: number;
     private inImport: boolean;
     private files: File[] = [];
+    unit = UnitOfMeasure;
+    defaultUnit = this.unit.KG;
 
     constructor(
         private route: ActivatedRoute,
@@ -101,6 +104,9 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     initView(): Promise<void> {
         return this.examinationService.get(this.id).then(examination => {
             this.examination = examination;
+            if(!this.examination.weightUnitOfMeasure){
+                this.examination.weightUnitOfMeasure = this.defaultUnit;
+            }
             this.updateExam();
             //this.loadExaminationAnesthetic();
             if(this.examination && this.examination.subject && this.examination.subject.id ){
@@ -119,6 +125,9 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.getStudies();
         return this.examinationService.get(this.id).then(examination => {
             this.examination = examination;
+            if(!this.examination.weightUnitOfMeasure){
+                this.examination.weightUnitOfMeasure = this.defaultUnit;
+            }
             this.updateExam();
             //this.loadExaminationAnesthetic(this.id);
             if(this.examination && this.examination.subject && this.examination.subject.id){
@@ -134,6 +143,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     initCreate(): Promise<void> {
         this.entity = new Examination();
+        this.examination.weightUnitOfMeasure = this.defaultUnit;
         this.examination.preclinical = true;
         this.getCenters();
         this.getStudies();
@@ -150,7 +160,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
-            'subjectWeight': [this.examination.subjectWeight, [Validators.pattern(numericRegex)]]
+            'subjectWeight': [this.examination.subjectWeight, [Validators.pattern(numericRegex)]],
+            'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
     }
 
@@ -228,20 +239,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             }
         }
     }
-
-  /*  manageContrastAgent() {
-        if (this.protocol_id && this.contrastAgent) {
-            if (this.contrastAgent.id) {
-                this.contrastAgentsService.update(this.protocol_id, this.contrastAgent)
-                    .subscribe(agent => {
-                    });
-            } else {
-                this.contrastAgentsService.create(this.protocol_id, this.contrastAgent)
-                    .subscribe(agent => {
-                    });
-            }
-        }
-    }*/
 
     addExtraDataToExamination(examination_id: number, isUpdate: boolean) {
         if (!examination_id) { return; }
@@ -390,6 +387,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     onExaminationNodeInit(node: ExaminationNode) {
         node.open = true;
         this.breadcrumbsService.currentStep.data.examinationNode = node;
+    }
+
+    getUnit(key: string) {
+        return UnitOfMeasure.getLabelByKey(key);
     }
 
 }
