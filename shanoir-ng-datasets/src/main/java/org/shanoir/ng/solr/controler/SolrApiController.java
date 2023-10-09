@@ -19,11 +19,8 @@
  */
 package org.shanoir.ng.solr.controler;
 
-import java.io.IOException;
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
-
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
@@ -38,7 +35,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.v3.oas.annotations.Parameter;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @author yyao

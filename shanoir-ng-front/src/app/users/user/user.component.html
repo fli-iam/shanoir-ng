@@ -96,7 +96,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
         </li>
         <li>
-          <label i18n="Edit user|CanAccess to Dicom association label@@editUserCanAccessToDicomAssociation">Can import from Neurinfo-PACS</label>
+          <label i18n="Edit user|CanAccess to Dicom association label@@editUserCanAccessToDicomAssociation">Can import from PACS</label>
           <span class="right-col" [ngSwitch]="mode">
 						<ng-container *ngIf="mode == 'view' || !isUserAdmin()">
 							<span *ngIf="user.canAccessToDicomAssociation" class="bool-true"><i class="fas fa-check"></i></span>

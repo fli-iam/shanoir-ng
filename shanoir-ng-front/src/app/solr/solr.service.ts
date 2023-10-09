@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -22,7 +22,7 @@ import { FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPa
 
 @Injectable()
 export class SolrService {
-    
+
     constructor(private http: HttpClient, private keycloakService: KeycloakService) {
 
     }
@@ -34,7 +34,7 @@ export class SolrService {
     }
 
     public search(solrReq: SolrRequest, pageable: Pageable): Promise<SolrResultPage> {
-        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(solrReq), { 'params': pageable.toParams() })    
+        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(solrReq), { 'params': pageable.toParams() })
         .toPromise().then(solrResPage => {
             solrResPage.content?.forEach(doc => doc.id = parseInt(doc.id as unknown as string));
             return solrResPage;
@@ -46,7 +46,7 @@ export class SolrService {
         let fakePageable: Pageable = new Pageable(1, 1, new Sort([new Order('DESC', 'id')]));
         mainRequest.facetPaging = new Map();
         mainRequest.facetPaging.set(facetName, pageable);
-        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(mainRequest), { 'params': fakePageable.toParams() })  
+        return this.http.post<SolrResultPage>(AppUtils.BACKEND_API_SOLR_URL, this.stringifySolrRequest(mainRequest), { 'params': fakePageable.toParams() })
             .toPromise().then(solrResPage => {
                 solrResPage.content?.forEach(doc => doc.id = parseInt(doc.id as unknown as string));
                 return solrResPage && solrResPage.facetResultPages ? solrResPage.facetResultPages[0] : null;
@@ -54,9 +54,9 @@ export class SolrService {
     }
 
     public getByDatasetIds(datasetIds: number[], pageable: Pageable): Promise<Page<SolrDocument>> {
-        return this.http.post<Page<SolrDocument>>(AppUtils.BACKEND_API_SOLR_URL + '/byIds', 
-                JSON.stringify(datasetIds), 
-                { 'params': pageable.toParams() })    
+        return this.http.post<Page<SolrDocument>>(AppUtils.BACKEND_API_SOLR_URL + '/byIds',
+                JSON.stringify(datasetIds),
+                { 'params': pageable.toParams() })
             .toPromise().then(page => {
                 if (page) page.content.forEach(solrDoc => solrDoc.id = parseInt(solrDoc.datasetId));
                 return page;

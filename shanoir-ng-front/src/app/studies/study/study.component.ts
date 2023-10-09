@@ -118,12 +118,14 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initView(): Promise<void> {
+
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, true).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id).then(study => {
 
           this.study = study;
+          this.setLabeledSizes(this.study);
 
           if (study.profile == null) {
                 let pro = new Profile();
@@ -159,6 +161,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
+
         let studyPromise: Promise<Study> = this.studyService.get(this.id, true).then(study => {
             this.study = study;
 
@@ -247,16 +250,18 @@ export class StudyComponent extends EntityComponent<Study> {
         return formGroup;
     }
 
-    private getLabeledSizes(id: number): Promise<Map<String, number>> {
-        let waitUploads: Promise<void> = this.studyService.fileUploadings.has(id)
-            ? this.studyService.fileUploadings.get(id)
+    private setLabeledSizes(study: Study): void {
+        let waitUploads: Promise<void> = this.studyService.fileUploadings.has(study.id)
+            ? this.studyService.fileUploadings.get(study.id)
             : Promise.resolve();
 
         this.uploading = true;
-        return waitUploads.then(() => {
-            return this.studyService.getStudyDetailedStorageVolume(id).then(dto => {
+        waitUploads.then(() => {
+            return this.studyService.getStudyDetailedStorageVolume(study.id).then(dto => {
 
                 let datasetSizes = dto;
+
+                study.totalSize = datasetSizes.total
                 let sizesByLabel = new Map<String, number>()
 
                 for(let sizeByFormat of datasetSizes.volumeByFormat){
@@ -270,9 +275,7 @@ export class StudyComponent extends EntityComponent<Study> {
                 }
 
                 let total = datasetSizes.total;
-                sizesByLabel.set("Total", total);
-
-                return sizesByLabel;
+                study.detailedSizes = sizesByLabel;
             });
         }).finally(() => {
             this.uploading = false;

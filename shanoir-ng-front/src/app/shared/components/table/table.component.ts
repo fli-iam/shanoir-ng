@@ -48,6 +48,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
+    @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
@@ -247,7 +248,8 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         if (result == null || this.isValueBoolean(result)) {
             return "";
         } else if (col.type == 'date') {
-            return new Date(result).toLocaleString();
+            const date: any = new Date(result);
+            return isNaN(date) ? result : date.toLocaleDateString(undefined, {year: "numeric", month: "2-digit", day: "2-digit"});
         } else if (result.text) {
             return result;
         } else {
@@ -324,6 +326,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         let getPage: Page<any> | Promise<Page<any>> =  this.getPage(this.getPageable(), forceRefresh)
         if (getPage instanceof Promise) {
             return getPage.then(page => {
+                    this.pageLoaded.emit(page);
                 return this.computePage(page);
             }).catch(reason => {
                 setTimeout(() => {
@@ -333,7 +336,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 throw reason;
             });
         } else if (getPage instanceof Page) {
-            return Promise.resolve(this.computePage(getPage));
+            return Promise.resolve(this.computePage(getPage)).then(page => {
+                this.pageLoaded.emit(page);
+                return page;
+            });
         }
     }
 

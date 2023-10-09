@@ -192,9 +192,9 @@ public class EegImporterService {
             event.setProgress(1f);
             event.setStatus(ShanoirEvent.SUCCESS);
             // This message is important for email service
-            event.setMessage(importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")"
-                    +" : Successfully created datasets for subject " + importJob.getSubjectName()
-                    + " in examination " + examination.getId());
+            event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
+                    +" Successfully created datasets for subject [" + importJob.getSubjectName()
+                    + "] in examination [" + examination.getId() + "]");
             eventService.publishEvent(event);
 
             // Send mail

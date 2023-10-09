@@ -14,9 +14,6 @@
 
 package org.shanoir.ng.shared.service;
 
-import java.util.List;
-import java.util.Set;
-
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
@@ -26,6 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class SecurityService {
@@ -46,7 +46,7 @@ public class SecurityService {
 //		List<Pair<Long, Long>> studyCenters = new ArrayList<>();
 //		Set<Long> unrestrictedStudies = new HashSet<Long>();
 		for (StudyUser studyUser : studyUsers) {
-			if (CollectionUtils.isEmpty(studyUser.getCenterIds())) {
+			if (CollectionUtils.isEmpty(studyUser.getCenterIds()) && studyUser.isConfirmed()) {
 				unrestrictedStudies.add(studyUser.getStudyId());
 			} else {
 				for (Long centerId : studyUser.getCenterIds()) {

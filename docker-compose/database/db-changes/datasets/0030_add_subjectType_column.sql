@@ -1,0 +1,1 @@
+ALTER TABLE subject_study ADD COLUMN subject_type int(11) DEFAULT NULL;

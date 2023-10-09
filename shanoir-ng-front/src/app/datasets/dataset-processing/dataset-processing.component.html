@@ -138,7 +138,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[columnDefs]="inputDatasetsColumnDefs"
 						[readOnly]="mode == 'view'">
 				</multi-select-table>
-			<li>
+			<li *ngIf="!isCarminDatasetProcessingEntity">
 				<legend>
 					Output datasets
 					<tool-tip>Datasets resulting from this dataset processing.</tool-tip>

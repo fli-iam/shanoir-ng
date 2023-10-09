@@ -15,18 +15,11 @@
 package org.shanoir.ng.studycard.model.field;
 
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.shanoir.ng.dataset.modality.BidsDataType;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.AcquisitionContrast;
-import org.shanoir.ng.datasetacquisition.model.mr.ContrastAgentUsed;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
-import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
-import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
-import org.shanoir.ng.datasetacquisition.model.mr.MrSequencePhysics;
+import org.shanoir.ng.datasetacquisition.model.mr.*;
 import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
-
-import com.fasterxml.jackson.annotation.JsonTypeName;
 
 @JsonTypeName("DatasetAcquisitionMetadataField")
 public enum DatasetAcquisitionMetadataField implements MetadataFieldInterface<DatasetAcquisition> {

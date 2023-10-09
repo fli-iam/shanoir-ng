@@ -1,27 +1,28 @@
 package org.shanoir.ng.processing.carmin.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
+import org.shanoir.ng.processing.dto.ParameterResourcesDTO;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface CarminDatasetProcessingService {
 
 	/**
-	 * Find entity by its id. 
+	 * Find entity by its id.
 	 *
 	 * @param id id
 	 * @return an entity or null.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	Optional<CarminDatasetProcessing> findById(Long id);
-	
+
 	/**
 	 * Get all entities.
-	 * 
+	 *
 	 * @return a list of manufacturers.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -42,20 +43,20 @@ public interface CarminDatasetProcessingService {
 	 * @param entity the entity to update.
 	 * @return updated entity.
 	 * @throws EntityNotFoundException
-	 * @throws MicroServiceCommunicationException 
+	 * @throws MicroServiceCommunicationException
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	CarminDatasetProcessing update(CarminDatasetProcessing entity) throws EntityNotFoundException;
-	
+
 	/**
 	 * Delete an entity.
-	 * 
+	 *
 	 * @param id the entity id to be deleted.
 	 * @throws EntityNotFoundException if the entity cannot be found.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	void deleteById(Long id) throws EntityNotFoundException;
-	
+
     /**
      * save a CarminDatasetProcessing
      * 
@@ -74,4 +75,7 @@ public interface CarminDatasetProcessingService {
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
     CarminDatasetProcessing updateCarminDatasetProcessing(CarminDatasetProcessing carminDatasetProcessing) throws EntityNotFoundException;
 
+    List<CarminDatasetProcessing> findAllRunning();
+
+    List<ParameterResourcesDTO> createProcessingResources(CarminDatasetProcessing createdProcessing, List<ParameterResourcesDTO> parameterDatasets);
 }

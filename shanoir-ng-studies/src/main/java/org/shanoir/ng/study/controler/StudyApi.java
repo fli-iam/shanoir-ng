@@ -21,6 +21,7 @@ import java.util.Map;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.IdNameCenterStudyDTO;
 import org.shanoir.ng.study.dto.PublicStudyDTO;
@@ -28,6 +29,8 @@ import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
+import org.shanoir.ng.study.model.StudyUser;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -255,6 +258,20 @@ public interface StudyApi {
 			@Parameter(name = "id of the dua", required = true) @PathVariable("duaId") Long duaId)
 			throws RestServiceException, MicroServiceCommunicationException;
 
+	@Operation(summary = "", description = "Returns the data user agreement (DUA) of a specific study")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "204", description = "dua confirmed"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/dua/study/{studyId}", produces = { "application/json" }, consumes = {"application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<Boolean> hasDUAByStudyId(
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
+			throws RestServiceException, ShanoirException;
+
+
 	@Operation(summary = "", description = "Add DUA to a study")
 	@ApiResponses(value = {
 	        @ApiResponse(responseCode = "200", description = "dua uploaded"),
@@ -318,5 +335,15 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/public/connected", produces = { "application/json" }, method = RequestMethod.GET)
 	ResponseEntity<List<IdName>> findPublicStudiesConnected();
+
+	@Operation(summary = "", description = "If exists, returns a list of StudyUser corresponding to the given studyId")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "List of study users"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no study found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/studyUser/{studyId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
+	ResponseEntity<List<StudyUser>> getStudyUserByStudyId(@PathVariable("studyId") Long studyId);
 
 }

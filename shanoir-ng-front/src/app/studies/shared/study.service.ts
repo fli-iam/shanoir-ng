@@ -37,6 +37,8 @@ import {
 } from './study.dto';
 import { Study } from './study.model';
 import { combineAll } from 'rxjs/operators';
+import {StudyUser, StudyUserDTO} from "./study-user.model";
+import {BACKEND_API_STUDY_DELETE_USER} from "../../utils/app.utils";
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -52,6 +54,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService) {
         super(http)
+    }
+
+    get(id: number, withStorageVolume = false): Promise<Study> {
+        return this.http.get<any>(this.API_URL + '/' + id
+            + (withStorageVolume ? '?withStorageVolume=true' : ''))
+            .toPromise()
+            .then(this.mapEntity);
     }
 
     getEntityInstance() { return new Study(); }
@@ -97,6 +106,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     getStudyNamesAndCenters(): Promise<Study[]> {
         return this.http.get<CenterStudyDTO[]>(AppUtils.BACKEND_API_STUDY_ALL_NAMES_AND_CENTERS_URL)
             .toPromise().then(dtos => dtos.map(dto => StudyDTOService.centerStudyDTOtoStudy(dto)));
+    }
+
+    getStudyUserFromStudyId(studyId: number): Promise<StudyUser[]> {
+        return this.http.get<StudyUser[]>(AppUtils.BACKEND_API_STUDY_DELETE_USER + '/' + studyId)
+            .toPromise().then((su : StudyUser[]) => {
+                return su;
+            });
     }
 
     findSubjectsByStudyId(studyId: number): Promise<SubjectWithSubjectStudy[]> {
@@ -195,6 +211,14 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
                 });
     }
 
+    hasDUAByStudyId(studyId: number): Promise<boolean> {
+        return this.http.get<boolean>(AppUtils.BACKEND_API_STUDY_URL + '/dua/study/' + studyId)
+            .toPromise()
+            .then(dua => {
+                return dua;
+            });
+    }
+
     deleteUserFromStudy(studyId: number, userId: number): Promise<void> {
       return this.http.delete<void>(AppUtils.BACKEND_API_STUDY_DELETE_USER + "/" + studyId + "/" + userId)
         .toPromise();
@@ -234,6 +258,12 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     getBidsStructure(studyId: number): Promise<BidsElement> {
         if (!studyId) throw Error('study id is required');
         return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
+            .toPromise();
+    }
+
+    refreshBidsStructure(studyId: number, studyName: string): Promise<BidsElement> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_REFRESH_URL + '/studyId/' + studyId + '/studyName/' + studyName)
             .toPromise();
     }
 
@@ -294,7 +324,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         if(size == null){
             return "";
         }
-        
+
         if(size == 0){
             return "0 " + units[0];
         }

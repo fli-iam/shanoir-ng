@@ -46,14 +46,6 @@ public interface AnimalSubjectApi {
 			@Parameter(name = "AnimalSubject object to add", required = true) @RequestBody @Valid final PreclinicalSubjectDto animalSubject,
 			final BindingResult result) throws RestServiceException;
 
-	@Operation(summary = "Deletes an animalSubject", description = "")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
-			@ApiResponse(responseCode = "400", description = "Invalid subject value"),
-			@ApiResponse(responseCode = "500", description = "Unexpected Error") })
-	@DeleteMapping(value = "/{id}", produces = { "application/json" })
-	ResponseEntity<Void> deleteAnimalSubject(
-			@Parameter(name = "AnimalSubject id to delete", required = true) @PathVariable("id") Long id);
-
 	@Operation(summary  = "Find animalSubject by subject Id", description = "Returns a subject")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Successful operation"),
 		@ApiResponse(responseCode = "400", description = "Invalid ID supplied"),
