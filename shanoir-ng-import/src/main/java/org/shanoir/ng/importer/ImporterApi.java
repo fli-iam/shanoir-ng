@@ -52,7 +52,7 @@ public interface ImporterApi {
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "", produces = { "application/json" })
+	@GetMapping(value = {"", "/"}, produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<String> createTempDir() throws RestServiceException;
     
@@ -63,7 +63,7 @@ public interface ImporterApi {
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-    @PostMapping(value = "{tempDirId}", consumes = { "multipart/form-data" })
+    @PostMapping(value = "/{tempDirId}", consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<Void> uploadFile(
     		@Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
