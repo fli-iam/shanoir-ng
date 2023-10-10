@@ -158,6 +158,8 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
             this.progressStatus = {progress: 0, status: 2};
             this.subscriptions.push(this.datasetService.downloadDatasets(this.datasetIds, format).subscribe(status => {
                 this.progressStatus = status;
+                if ([2, 4, 5].includes(status?.status)) this.downloading = true;
+                else this.downloading = false;
             }, error => {
                 this.progressStatus.progress = 0;
                 this.progressStatus.status = -1;

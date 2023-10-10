@@ -182,12 +182,12 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
         switch (event.type) {
             case HttpEventType.Sent:
             case HttpEventType.ResponseHeader:
-                return {status: 4, progress: 1};
+                return {status: 4, progress: 0};
             case HttpEventType.DownloadProgress:
                 return {status: 2, progress: event.loaded};
             case HttpEventType.Response:
                 saveAs(event.body, this.getFilename(event));
-                return {status: 1, progress: 1}
+                return {status: 1}
         }
     }
 

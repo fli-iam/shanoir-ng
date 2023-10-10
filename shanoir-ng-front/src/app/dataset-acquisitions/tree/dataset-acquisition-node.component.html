@@ -11,9 +11,9 @@ the Free Software Foundation, either version 3 of the License, or
 You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
-<div [hidden]="progressStatus.progress == 0">
-    <progress-bar [progress]="progressStatus.progress" [text]="'Preparing download'" [unknownDownload]="true" 
-        [class.error]="progressStatus.status == -1" [class.done]="progressStatus.status == 1"></progress-bar>
+<div [hidden]="!progressStatus?.progress">
+    <progress-bar [progress]="progressStatus?.progress" [text]="'Preparing download'" [unknownDownload]="true" 
+        [class.error]="progressStatus?.status == -1" [class.done]="progressStatus?.status == 1"></progress-bar>
 </div>
 <node
         *ngIf="node"

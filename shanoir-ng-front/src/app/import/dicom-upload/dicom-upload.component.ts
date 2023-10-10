@@ -103,7 +103,7 @@ export class DicomUploadComponent implements OnDestroy {
                 .subscribe(
                     event => {
                     if (event.type === HttpEventType.Sent) {
-                        this.uploadState.progress = -1;
+                        this.uploadState.progress = 0;
                     } else if (event.type === HttpEventType.UploadProgress) {
                         this.uploadState.progress = (event.loaded / (event.total + 0.05));
                     } else if (event instanceof HttpResponse) {
