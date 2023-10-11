@@ -80,131 +80,7 @@ public class DatasetDownloaderServiceImpl {
 	@Autowired
 	ShanoirEventService eventService;
 
-	public void downloadDatasetById(Long datasetId, Long converterId, String format, HttpServletResponse response, boolean withManifest) throws RestServiceException {
-
-		final Dataset dataset = datasetService.findById(datasetId);
-		if (dataset == null) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
-		}
-		
-		if (!dataset.isDownloadable()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNAUTHORIZED.value(), "Dataset cannot be downloaded for security reasons.", null));
-		}
-
-		Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
-
-		String subjectName = "unknownSubject";
-		Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
-		if (subjectOpt.isPresent()) {
-			subjectName = subjectOpt.get().getName();
-		}
-
-		String datasetName = subjectName + "_" + dataset.getId() + "_" + dataset.getName();
-		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
-			datasetName += "_" + dataset.getUpdatedMetadata().getComment();
-		}
-		// Replace all forbidden characters.
-		datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-
-		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-
-		String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
-
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-		File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
-
-		String zipFileName = datasetName + "_" + format + ZIP;
-
-		response.setContentType("application/zip");
-		response.setHeader("Content-Disposition", "attachment;filename=" + zipFileName);
-
-		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
-			List<URL> pathURLs = new ArrayList<>();
-			
-			switch (format) {
-			case DCM:
-				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-				List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, null);
-
-				if(withManifest){
-					filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
-					filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(files);
-				}
-
-				break;
-			case NII:
-				// Check if we want a specific converter -> nifti reconversion
-				if (converterId != null) {
-					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
-					// Create temporary workfolder with dicom files, to be able to convert them
-					workFolder.mkdirs();
-
-					downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
-
-					// Convert them, sending to import microservice
-					boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
-					if (!result) {
-						throw new RestServiceException(
-								new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-					} 
-					workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
-
-					for (File res : workFolder.listFiles()) {
-						if (!res.isDirectory()) {
-							// Then send workFolder to zipOutputFile
-							FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
-							ZipEntry zipEntry = new ZipEntry(res.getName());
-							zipEntry.setSize(fileSystemResource.contentLength());
-							zipEntry.setTime(System.currentTimeMillis());
-							zipOutputStream.putNextEntry(zipEntry);
-							StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
-							zipOutputStream.closeEntry();
-						}
-					}
-				} else  {
-					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, null);
-				}
-				break;
-			case EEG:
-				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG);
-				DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, null);
-				break;
-			case BIDS:
-				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS);
-				DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, null);
-				break;
-			default:
-				throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-			}
-
-			// Check folder emptiness
-			if (pathURLs.isEmpty()) {
-				// Folder is empty => return an error
-				LOG.error("No files could be found for the dataset(s).");
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for this dataset(s)."));
-			}
-
-			if(!filesByAcquisitionId.isEmpty()){
-				DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
-			}
-
-			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.SUCCESS);
-			eventService.publishEvent(event);
-		} catch (Exception e) {
-			LOG.error("Error while retrieveing dataset data.", e);
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while retrieveing dataset data.", e));
-		} finally {
-			FileUtils.deleteQuietly(workFolder);
-		}
-	}
-
-	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withInputFile) throws EntityNotFoundException, RestServiceException, IOException {
+	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withInputFile, Long converterId) throws EntityNotFoundException, RestServiceException, IOException {
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 
@@ -220,13 +96,15 @@ public class DatasetDownloaderServiceImpl {
 		response.setHeader("Content-Disposition", "attachment;filename=" + "Datasets" + formatter.format(new DateTime().toDate()));
 
 		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
+			
+			String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
+			File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
 
 			for (Dataset dataset : datasets) {
 				if (!dataset.isDownloadable()) {
 					continue;
 				}
 				try {
-
 					List<String> datasetFiles = new ArrayList<>();
 
 					// Ignore non adapted datasets
@@ -280,6 +158,47 @@ public class DatasetDownloaderServiceImpl {
 						}
 
 					} else if (NII.equals(format)) {
+						
+						// Check if we want a specific converter -> nifti reconversion
+						if (converterId != null) {
+							String tmpFilePath = userDir + File.separator + dataset.getId() + "_" + format;
+							File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
+
+							DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+
+							// Create temporary workfolder with dicom files, to be able to convert them
+							workFolder.mkdirs();
+
+							downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
+
+							// Convert them, sending to import microservice
+							boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
+							if (!result) {
+								throw new RestServiceException(
+										new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+							} 
+							workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
+							List<String> files = new ArrayList<>();
+							for (File res : workFolder.listFiles()) {
+								if (!res.isDirectory()) {
+									// Then send workFolder to zipOutputFile
+									FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
+									ZipEntry zipEntry = new ZipEntry(res.getName());
+									zipEntry.setSize(fileSystemResource.contentLength());
+									zipEntry.setTime(System.currentTimeMillis());
+									zipOutputStream.putNextEntry(zipEntry);
+									StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
+									zipOutputStream.closeEntry();
+									files.add(res.getName());
+								}
+							}
+							datasetFiles.addAll(files);
+						} else  {
+							DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
+							List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
+							datasetFiles.addAll(files);
+						}
+						
 						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
 						datasetFiles.addAll(files);

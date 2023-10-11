@@ -27,6 +27,7 @@ import java.nio.file.Files;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -299,16 +300,6 @@ public class DatasetApiController implements DatasetApi {
 	}
 	
 	@Override
-	public void downloadDatasetById(
-			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
-			@Parameter(name = "Dowloading nifti, decide the nifti converter id") final Long converterId,
-			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
-			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response)
-					throws RestServiceException, IOException {
-		this.datasetDownloaderService.downloadDatasetById(datasetId, converterId, format, response, false);
-	}
-
-	@Override
 	public ResponseEntity<String> getDicomMetadataByDatasetId(
 		@Parameter(name = "id of the dataset", required=true) @PathVariable("datasetId") Long datasetId) throws IOException, MessagingException {
 		final Dataset dataset = datasetService.findById(datasetId);		
@@ -326,6 +317,17 @@ public class DatasetApiController implements DatasetApi {
 		File originalNiftiName = new File(importJob.getProcessedDatasetFilePath());
 		importerService.cleanTempFiles(originalNiftiName.getParent());
 		return new ResponseEntity<Void>(HttpStatus.OK);
+	}
+
+	@Override
+	public void downloadDatasetById(
+			@Parameter(name = "id of the dataset", required = true) @PathVariable("datasetId") final Long datasetId,
+			@Parameter(name = "Dowloading nifti, decide the nifti converter id") final Long converterId,
+			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
+			@Valid @RequestParam(value = "format", required = false, defaultValue = DCM) final String format, HttpServletResponse response)
+					throws EntityNotFoundException, RestServiceException, IOException {
+		
+		this.datasetDownloaderService.massiveDownload(format, Collections.singletonList(this.datasetService.findById(datasetId)), response, false, converterId);
 	}
 
 	@Override
@@ -348,7 +350,7 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, false);
+		datasetDownloaderService.massiveDownload(format, datasets, response, false, null);
 	}	
 
 	@Override
@@ -370,7 +372,7 @@ public class DatasetApiController implements DatasetApi {
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has more than " + DATASET_LIMIT + " datasets, that is the limit. Please download them from solr search." ));
 		}
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, false);
+		datasetDownloaderService.massiveDownload(format, datasets, response, false, null);
 	}
 
 	@Override
@@ -392,7 +394,7 @@ public class DatasetApiController implements DatasetApi {
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, true);
+		datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
 	}
 
 	/**
