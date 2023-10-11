@@ -48,7 +48,6 @@ RUN apt-get update -qq \
     libglib2.0-0:i386 \
     locales \
     locales-all \
-    openjdk-11-jdk \
     xvfb \
     python
 
