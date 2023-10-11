@@ -1,7 +1,8 @@
 package org.shanoir.ng.examination.repository;
 
-import java.util.List;
-
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.paging.PageImpl;
 import org.slf4j.Logger;
@@ -12,9 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import java.util.List;
 
 @Component
 public class ExaminationRepositoryImpl implements ExaminationRepositoryCustom {

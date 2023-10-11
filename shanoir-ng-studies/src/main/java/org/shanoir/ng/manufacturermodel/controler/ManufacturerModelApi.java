@@ -22,12 +22,7 @@ import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -113,5 +108,4 @@ public interface ManufacturerModelApi {
 			@Parameter(name = "id of the manufacturer model", required = true) @PathVariable("manufacturerModelId") Long manufacturerModelId,
 			@Parameter(name = "manufacturer model to update", required = true) @RequestBody ManufacturerModel manufacturerModel,
 			final BindingResult result) throws RestServiceException;
-
 }

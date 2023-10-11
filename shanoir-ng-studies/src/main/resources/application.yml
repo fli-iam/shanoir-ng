@@ -60,6 +60,8 @@ spring:
     port: 5672
     username: guest
     password: guest
+    template:
+      reply-timeout: 60000
   session:
     store-type: none
   servlet:

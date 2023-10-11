@@ -91,20 +91,22 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 				int cpt = 1;
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
-					if(event != null){
-						event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
-						eventService.publishEvent(event);
-					}
-					try {
-						filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
-					} catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
-						handleError(event, nbSeries, cpt, serie, e);
-					}
-					// use a second try here, in case error is on serie, to get at least the serie name for error tracing
-					try {
-						getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
-					} catch (Exception e) {
-						handleError(event, nbSeries, cpt, serie, e);						
+					if (!serie.isIgnored()) {
+						if(event != null) {
+							event.setMessage("Creating images and analyzing DICOM files for serie [" + (serie.getSeriesDescription() == null ? serie.getSeriesInstanceUID() : serie.getSeriesDescription()) + "] " + cpt + "/" + nbSeries + ")");
+							eventService.publishEvent(event);
+						}
+						try {
+							filterAndCreateImages(folderFileAbsolutePath, serie, isImportFromPACS);
+						} catch (Exception e) { // one serie/file could cause problems, log and mark as erroneous, but continue with next serie
+							handleError(event, nbSeries, cpt, serie, e);
+						}
+						// use a second try here, in case error is on serie, to get at least the serie name for error tracing
+						try {
+							getAdditionalMetaDataFromFirstInstanceOfSerie(folderFileAbsolutePath, serie, patient, isImportFromPACS);
+						} catch (Exception e) {
+							handleError(event, nbSeries, cpt, serie, e);						
+						}
 					}
 					cpt++;
 				}
@@ -128,10 +130,10 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param serie
 	 * @throws FileNotFoundException
 	 */
-	private void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Serie serie, Patient patient, boolean isImportFromPACS)
+	public void getAdditionalMetaDataFromFirstInstanceOfSerie(String folderFileAbsolutePath, Serie serie, Patient patient, boolean isImportFromPACS)
 			throws FileNotFoundException {
 		List<Instance> instances = serie.getInstances();
-		if (!instances.isEmpty()) {
+		if (instances != null && !instances.isEmpty()) {
 			Instance firstInstance = instances.get(0);
 			File firstInstanceFile = getFileFromInstance(firstInstance, serie, folderFileAbsolutePath, isImportFromPACS);
 			processDicomFileForFirstInstance(firstInstanceFile, serie, patient);
@@ -151,15 +153,17 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		List<Image> images = new ArrayList<Image>();
 		List<Object> nonImages = new ArrayList<Object>();
 		List<Instance> instances = serie.getInstances();
-		for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
-			Instance instance = instancesIt.next();
-			File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
-			processOneDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
+		if (instances != null) {
+			for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
+				Instance instance = instancesIt.next();
+				File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
+				processOneDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
+			}
+			serie.setNonImages(nonImages);
+			serie.setNonImagesNumber(nonImages.size());
+			serie.setImages(images);
+			serie.setImagesNumber(images.size());
 		}
-		serie.setNonImages(nonImages);
-		serie.setNonImagesNumber(nonImages.size());
-		serie.setImages(images);
-		serie.setImagesNumber(images.size());
 	}
 
 	/**
@@ -394,21 +398,23 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param attributes
 	 */
 	private void checkPatientData(Patient patient, Attributes attributes) {
-		if (patient.getPatientBirthDate() == null) {
-			// has not been found in dicomdir, so we get it from .dcm file:
-			patient.setPatientBirthDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate)));
-		}
-		if (StringUtils.isEmpty(patient.getPatientSex())) {
-			// has not been found in dicomdir, so we get it from .dcm file:
-			patient.setPatientSex(attributes.getString(Tag.PatientSex));
-		}
-		// we can not display this information for the pacs in select series: as info not available
-		String patientIdentityRemoved = attributes.getString(Tag.PatientIdentityRemoved);
-		if (StringUtils.isNotBlank(patientIdentityRemoved)) {
-			if (YES.equals(patientIdentityRemoved)) {
-				patient.setPatientIdentityRemoved(true);
-				String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
-				patient.setDeIdentificationMethod(deIdentificationMethod);
+		if (patient != null) {
+			if (patient.getPatientBirthDate() == null) {
+				// has not been found in dicomdir, so we get it from .dcm file:
+				patient.setPatientBirthDate(DateTimeUtils.dateToLocalDate(attributes.getDate(Tag.PatientBirthDate)));
+			}
+			if (StringUtils.isEmpty(patient.getPatientSex())) {
+				// has not been found in dicomdir, so we get it from .dcm file:
+				patient.setPatientSex(attributes.getString(Tag.PatientSex));
+			}
+			// we can not display this information for the pacs in select series: as info not available
+			String patientIdentityRemoved = attributes.getString(Tag.PatientIdentityRemoved);
+			if (StringUtils.isNotBlank(patientIdentityRemoved)) {
+				if (YES.equals(patientIdentityRemoved)) {
+					patient.setPatientIdentityRemoved(true);
+					String deIdentificationMethod = attributes.getString(Tag.DeidentificationMethod);
+					patient.setDeIdentificationMethod(deIdentificationMethod);
+				}
 			}
 		}
 	}

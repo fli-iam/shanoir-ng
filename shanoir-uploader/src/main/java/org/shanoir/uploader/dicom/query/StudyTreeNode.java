@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -13,7 +14,6 @@ import javax.swing.tree.TreeNode;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.SerieTreeNode;
 
 /**
  * Study representation from DICOMDIR.
@@ -44,7 +44,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 */
 	public StudyTreeNode(final Study study) {
 		this.study = study;
-		this.relatedSeries = new HashMap<String, DicomTreeNode>();
+		this.relatedSeries = new LinkedHashMap<String, DicomTreeNode>();
 	}
 
 	/**

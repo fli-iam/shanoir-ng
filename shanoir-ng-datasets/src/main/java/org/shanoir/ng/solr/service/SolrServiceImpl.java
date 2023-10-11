@@ -19,16 +19,6 @@
  */
 package org.shanoir.ng.solr.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.exception.RestServiceException;
@@ -39,6 +29,8 @@ import org.shanoir.ng.shared.paging.PageImpl;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
+
 import org.shanoir.ng.solr.model.ShanoirMetadata;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
 import org.shanoir.ng.solr.model.ShanoirSolrQuery;
@@ -60,6 +52,10 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author yyao
@@ -119,6 +115,7 @@ public class SolrServiceImpl implements SolrService {
 	public void indexDatasets(List<Long> datasetIds) throws SolrServerException, IOException {
 		// Get all associated datasets and index them to solr
 		List<ShanoirMetadata> shanoirMetadatas = shanoirMetadataRepository.findSolrDocs(datasetIds);
+
 		indexDocumentsInSolr(shanoirMetadatas);
 	}
 
@@ -189,8 +186,8 @@ public class SolrServiceImpl implements SolrService {
 	private ShanoirSolrDocument getShanoirSolrDocument(ShanoirMetadata shanoirMetadata) {
 		return new ShanoirSolrDocument(String.valueOf(shanoirMetadata.getDatasetId()), shanoirMetadata.getDatasetId(), shanoirMetadata.getDatasetName(),
 				shanoirMetadata.getDatasetType(), shanoirMetadata.getDatasetNature(), DateTimeUtils.localDateToDate(shanoirMetadata.getDatasetCreationDate()),
-				shanoirMetadata.getExaminationId(), shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()),
-				shanoirMetadata.getSubjectName(), shanoirMetadata.getSubjectId(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
+				shanoirMetadata.getExaminationId(), shanoirMetadata.getExaminationComment(), DateTimeUtils.localDateToDate(shanoirMetadata.getExaminationDate()), shanoirMetadata.getAcquisitionEquipmentName(),
+				shanoirMetadata.getSubjectName(), SubjectType.getType(shanoirMetadata.getSubjectType()) != null ? SubjectType.getType(shanoirMetadata.getSubjectType()).name() : null, shanoirMetadata.getSubjectId(), shanoirMetadata.getStudyName(), shanoirMetadata.getStudyId(), shanoirMetadata.getCenterName(),
 				shanoirMetadata.getCenterId(), shanoirMetadata.getSliceThickness(), shanoirMetadata.getPixelBandwidth(), shanoirMetadata.getMagneticFieldStrength());
 	}
 
@@ -230,7 +227,7 @@ public class SolrServiceImpl implements SolrService {
 			if (order.getProperty().equals("studyName") || order.getProperty().equals("subjectName")
 					|| order.getProperty().equals("datasetName") || order.getProperty().equals("datasetNature")
 					|| order.getProperty().equals("datasetType") || order.getProperty().equals("examinationComment")
-					|| order.getProperty().equals("tags")) {
+					|| order.getProperty().equals("tags") || order.getProperty().equals("subjectType") || order.getProperty().equals("acquisitionEquipmentName")) {
 				pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
 						order.getDirection(), order.getProperty());
 			} else if (order.getProperty().equals("id")) {

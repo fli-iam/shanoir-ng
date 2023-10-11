@@ -15,10 +15,12 @@
 package org.shanoir.ng.study.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.shanoir.ng.shared.exception.AccessDeniedException;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -143,5 +145,7 @@ public interface StudyService {
 	 */
 	List<Study> findPublicStudies();
 
-    Long getStudyFilesSize(Long studyId);
+    StudyStorageVolumeDTO getDetailedStorageVolume(Long studyId);
+
+	Map<Long, StudyStorageVolumeDTO> getDetailedStorageVolumeByStudy(List<Long> studyId);
 }

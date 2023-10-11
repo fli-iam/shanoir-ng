@@ -22,7 +22,12 @@ import { Study } from '../shared/study.model';
 import { StudyService } from '../shared/study.service';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { UserService } from '../../users/shared/user.service';
-import {StudyCardComponent} from "../../study-cards/study-card/study-card.component";
+import {ConfirmDialogService} from "../../shared/components/confirm-dialog/confirm-dialog.service";
+import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
+import {Page} from "../../shared/components/table/pageable.model";
+import {StudyUser} from "../shared/study-user.model";
+import {AccessRequest} from "../../users/access-request/access-request.model";
+import {EntityRoutes} from "../../shared/components/entity/entity.abstract";
 
 
 @Component({
@@ -33,10 +38,17 @@ import {StudyCardComponent} from "../../study-cards/study-card/study-card.compon
 
 export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
 
+    private isStudyVolumesFetching = true;
+
     @ViewChild('table', { static: false }) table: TableComponent;
 
+
+    accessRequestValidated = false;
+    hasDUA: boolean;
+    isSuConfirmed: boolean;
     constructor(
         private studyService: StudyService,
+        private confirmService: ConfirmDialogService,
         private userService: UserService) {
 
         super('study');
@@ -46,7 +58,9 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         return this.studyService;
     }
 
+
     getEntities(): Promise<Study[]> {
+        this.isStudyVolumesFetching = true;
         let earlyResult: Promise<Study[]> = Promise.all([
             this.studyService.getAll(),
             this.studyService.getPublicStudiesData()
@@ -76,7 +90,7 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         })
         Promise.all([
             earlyResult,
-            this.userService.getAccessRequests()
+            this.userService.getAccessRequests(),
         ]).then(([studies, accessRequests]) => {
             if (accessRequests?.length > 0) {
                 for (let accessRequest of accessRequests) {
@@ -85,8 +99,48 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
                     }
                 }
             }
+            this.fetchStorageVolumes(studies);
         });
         return earlyResult;
+    }
+
+    private fetchStorageVolumes(studies: Study[] | AccessRequest[]) {
+        let pageSize = Number(this.table.maxResults);
+        let promises = [];
+        for (let i = 0; i < studies.length; i += pageSize) {
+            let ids = new Set<number>(studies.slice(i, i + pageSize).map(study => study.id));
+            promises.push(this.studyService.getStudiesStorageVolume(ids).then(volumes => {
+                studies.forEach(study => {
+                    let volume = volumes.get(study.id);
+                    if(volume) {
+                        (study as Study).totalSize = volume.total;
+                        let sizesByLabel = new Map<String, number>()
+                        if (volume.volumeByFormat) {
+                            for (let sizeByFormat of volume.volumeByFormat) {
+                                if (sizeByFormat.size > 0) {
+                                    sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
+                                }
+                            }
+                        }
+
+                        if (volume.extraDataSize && volume.extraDataSize > 0) {
+                            sizesByLabel.set("Other files (DUA, protocol...)", volume.extraDataSize);
+                        }
+
+                        (study as Study).detailedSizes = sizesByLabel;
+                    }
+                });
+            }));
+        }
+
+        Promise.all(promises).then(() => {
+            this.table.columnDefs.forEach(column => {
+                if(column.headerName === "Storage volume"){
+                    column.disableSorting = false;
+                }
+            })
+            return this.isStudyVolumesFetching = false;
+        });
     }
 
     getColumnDefs(): ColumnDefinition[] {
@@ -120,6 +174,27 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
             },
             {
                 headerName: "Members", field: "nbMembers", type: "number", width: '30px'
+            },
+            {
+                headerName: "Storage volume", field: "totalSize", disableSearch: true, disableSorting: true, type: "number", orderBy: ["totalSize"],
+                cellRenderer: (params: any) => {
+                    if (this.isStudyVolumesFetching) {
+                        return "Fetching..."
+                    }
+                    return this.studyService.storageVolumePrettyPrint(params.data.totalSize);
+                },
+                tip: (data: any) => {
+                    let tip = ""
+                    if(this.isStudyVolumesFetching){
+                        return "Calculating the detailed study storage volume, this may take up to a minute"
+                    }
+                    if(data.detailedSizes){
+                        data.detailedSizes.forEach((size: number, label: string) => {
+                            tip += label + " : " + this.studyService.storageVolumePrettyPrint(size) + "\n";
+                        });
+                    }
+                    return tip;
+                }
             }
         ];
         return colDef;
@@ -145,21 +220,55 @@ export class StudyListComponent extends BrowserPaginEntityListComponent<Study> {
         );
     }
 
+    private fetchStudyUsers(study: any): Promise<StudyUser[]> {
+        return this.studyService.getStudyUserFromStudyId(study.id).then(studyUsers => {
+            return studyUsers;
+        });
+    }
+
+    private fetchHasDUA(study: any): Promise<boolean> {
+        return this.studyService.hasDUAByStudyId(study.id).then(hasDUA => {
+            return hasDUA;
+        });
+    }
+
+
     goToViewFromEntity(study: any): void {
-        if (study instanceof Study) {
+
+        Promise.all([
+            this.fetchHasDUA(study),
+            this.fetchStudyUsers(study),
+        ]).then(([hasDUA, studyUsers]) => {
+            for (let su of studyUsers) {
+                if (su.userId == this.keycloakService.getUserId()) {
+                    this.accessRequestValidated = true;
+                    this.isSuConfirmed = su.confirmed;
+                }
+            }
             if (study.visibleByDefault && study.locked && !this.keycloakService.isUserAdmin()) {
                 if (study.accessRequestedByCurrentUser) {
                     this.confirmDialogService.inform('Access request pending', 'You already have asked an access request for this study, wait for the administrator to confirm your access.');
-                } else {
+                } else if (!this.accessRequestValidated) {
                     this.confirmDialogService.confirm('Authorization needed',
                         'Before accessing this study you have to request an access to its administrator, do you want to proceed ?'
                     ).then(result => {
-                        if (result) this.router.navigate(['/access-request/study/' + study.id]);
+                        if (result) {
+                            this.router.navigate(['/access-request/study/' + study.id]);
+                        }
                     });
+                } else if (hasDUA && !this.isSuConfirmed) {
+                    const title: string = 'Data User Agreement awaiting for signing';
+                    const text: string = 'You are a member of at least one study that needs you to accept its data user agreement. '
+                        + 'Until you have agreed those terms you cannot access to any data from these studies. '
+                        + 'Would you like to review those terms now?';
+                    const buttons = {ok: 'Yes, proceed to the signing page', cancel: 'Later'};
+                    this.confirmService.confirm(title, text, buttons).then(response => {
+                        if (response == true) this.router.navigate(['/dua']);
+                    });
+                } else {
+                    super.goToViewFromEntity(study);
                 }
-            } else {
-                super.goToViewFromEntity(study);
             }
-        }
+        });
     }
 }

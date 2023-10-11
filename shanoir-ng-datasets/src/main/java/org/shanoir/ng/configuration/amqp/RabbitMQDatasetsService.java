@@ -14,15 +14,13 @@
 
 package org.shanoir.ng.configuration.amqp;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.examination.model.Examination;
@@ -32,11 +30,8 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
-import org.shanoir.ng.shared.model.Center;
-import org.shanoir.ng.shared.model.Study;
-import org.shanoir.ng.shared.model.Subject;
-import org.shanoir.ng.shared.model.SubjectStudy;
-import org.shanoir.ng.shared.model.Tag;
+import org.shanoir.ng.shared.model.*;
+import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
@@ -49,11 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
-import org.springframework.amqp.rabbit.annotation.QueueBinding;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
@@ -62,7 +54,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.*;
 
 /**
  * RabbitMQ configuration.
@@ -71,6 +64,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class RabbitMQDatasetsService {
 	
 	private static final String RABBIT_MQ_ERROR = "Something went wrong deserializing the event.";
+
+	@Autowired
+	private DatasetService datasetService;
 
 	@Autowired
 	private RabbitMqStudyUserService listener;
@@ -83,6 +79,9 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private CenterRepository centerRepository;
+
+	@Autowired
+	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
 
 	@Autowired
 	private SolrService solrService;
@@ -237,6 +236,13 @@ public class RabbitMQDatasetsService {
 	}
 
 	@Transactional
+	@RabbitListener(queues = RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE)
+	@RabbitHandler
+	public void receiveAcEqUpdate(final String acEqStr) {
+		receiveAndUpdateIdNameEntity(acEqStr, AcquisitionEquipment.class, acquisitionEquipmentRepository);
+	}
+
+	@Transactional
 	@RabbitListener(queues = RabbitMQConfiguration.CENTER_NAME_UPDATE_QUEUE)
 	@RabbitHandler
 	public void receiveCenterNameUpdate(final String centerStr) {
@@ -300,10 +306,11 @@ public class RabbitMQDatasetsService {
 		}
 	}
 
+
 	/**
-	 * Receives a shanoirEvent as a json object, concerning a subject deletion
-	 * @param commandArrStr the task as a json string.
-	 */
+         * Receives a shanoirEvent as a json object, concerning a subject deletion
+         * @param commandArrStr the task as a json string.
+         */
 	@RabbitListener(bindings = @QueueBinding(
 			key = ShanoirEventType.DELETE_SUBJECT_EVENT,
 			value = @Queue(value = RabbitMQConfiguration.DELETE_SUBJECT_QUEUE, durable = "true"),
@@ -369,6 +376,44 @@ public class RabbitMQDatasetsService {
 		} catch (Exception e) {
 			LOG.error("Something went wrong deserializing the event. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(RABBIT_MQ_ERROR + e.getMessage(), e);
+		}
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_DETAILED_STORAGE_VOLUME)
+	@RabbitHandler
+	@Transactional
+	public String getDetailedStudyStorageVolume(Long studyId) {
+
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+
+		StudyStorageVolumeDTO dto = new StudyStorageVolumeDTO(datasetService.getVolumeByFormat(studyId),
+				examinationService.getExtraDataSizeByStudyId(studyId));
+
+		try {
+			return objectMapper.writeValueAsString(dto);
+		} catch (JsonProcessingException e) {
+			LOG.error("Error while serializing StudyVolumeStorageDTO.", e);
+			throw new AmqpRejectAndDontRequeueException(e);
+		}
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_DATASETS_TOTAL_STORAGE_VOLUME)
+	@RabbitHandler
+	@Transactional
+	public String getDetailedStorageVolumeByStudy(List<Long> studyIds) {
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+
+		Map<Long, StudyStorageVolumeDTO> studyStorageVolumes = new HashMap<>();
+
+		datasetService.getVolumeByFormatByStudyId(studyIds).forEach((id, volumeByFormat) -> {
+			studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
+		});
+		
+		try {
+			return objectMapper.writeValueAsString(studyStorageVolumes);
+		} catch (JsonProcessingException e) {
+			LOG.error("Error while serializing HashMap<Long, StudyVolumeStorageDTO>.", e);
+			throw new AmqpRejectAndDontRequeueException(e);
 		}
 	}
 }

@@ -105,6 +105,7 @@ export const BACKEND_API_SOLR_FULLTEXT_SEARCH_URL: string = BACKEND_API_SOLR_URL
 export const BACKEND_API_BIDS_URL: string = BACKEND_API_DATASET_MS_URL + '/bids';
 export const BACKEND_API_BIDS_EXPORT_URL: string = BACKEND_API_BIDS_URL + '/exportBIDS';
 export const BACKEND_API_BIDS_STRUCTURE_URL: string = BACKEND_API_BIDS_URL + '/bidsStructure';
+export const BACKEND_API_BIDS_REFRESH_URL: string = BACKEND_API_BIDS_URL + '/refreshBids';
 
 export const BACKEND_API_TASKS_URL: string = BACKEND_API_USERS_MS_URL + '/tasks';
 export const BACKEND_API_UPDATE_TASKS_URL: string = BACKEND_API_TASKS_URL + '/updateTasks';
@@ -318,10 +319,9 @@ export function arraysEqual(array1: any[], array2: any[]) {
 }
 
 export function isDarkColor(colorInp: string): boolean {
-  if (!parseInt(colorInp)) return false;
-  var color = (colorInp.charAt(0) === '#') ? colorInp.substring(1, 7) : colorInp;
-  var r = parseInt(color.substring(0, 2), 16); // hexToR
-  var g = parseInt(color.substring(2, 4), 16); // hexToG
-  var b = parseInt(color.substring(4, 6), 16); // hexToB
-  return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
+    colorInp = colorInp?.replace('#', '');
+    var r = parseInt(colorInp.substring(0, 2), 16); // hexToR
+    var g = parseInt(colorInp.substring(2, 4), 16); // hexToG
+    var b = parseInt(colorInp.substring(4, 6), 16); // hexToB
+    return (((r * 0.299) + (g * 0.587) + (b * 0.114)) < 145);
 }

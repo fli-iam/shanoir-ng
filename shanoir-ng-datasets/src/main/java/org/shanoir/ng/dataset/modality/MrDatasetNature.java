@@ -68,7 +68,25 @@ public enum MrDatasetNature {
 	H1_SINGLE_VOXEL_SPECTROSCOPY_DATASET(15),
 
 	// H1 spectroscopic imaging dataset
-	H1_SPECTROSCOPIC_IMAGING_DATASET(16);
+	H1_SPECTROSCOPIC_IMAGING_DATASET(16),
+
+	// Apparent diffusion coefficient mr dataset
+	APPARENT_DIFFUSION_COEFFICIENT_MR_DATASET(17),
+	
+	// Flair mr dataset
+	FLAIR_MR_DATASET(18),
+	
+	// Flair dce mr dataset
+	FLAIR_DCE_MR_DATASET(19),
+	
+	// Perfusion weighted mr dataset
+	PERFUSION_WEIGHTED_MR_DATASET(20),
+	
+	// Susceptibility weighted angiography mr dataset
+	SUSCEPTIBILITY_WEIGHTED_ANGIOGRAPHY_MR_DATASET(21),
+	
+	// Susceptibility weighted mr dataset
+	SUSCEPTIBILITY_WEIGHTED_MR_DATASET(22);
 
 	private int id;
 

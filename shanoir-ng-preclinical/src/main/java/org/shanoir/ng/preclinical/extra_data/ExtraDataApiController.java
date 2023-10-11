@@ -106,15 +106,15 @@ public class ExtraDataApiController implements ExtraDataApi {
 		ExaminationExtraData extradata = extraDataService.findById(id);
 
 		try {
-			extradata = saveUploadedFile(extradata, uploadfiles[0]);
-			extraDataService.save(extradata);
+			ExaminationExtraData uploadedData = saveUploadedFile(extradata, uploadfiles[0]);
+			extraDataService.save(uploadedData);
 			return new ResponseEntity<>(extradata, HttpStatus.OK);
 		} catch (IOException e) {
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", e));
 		} catch (ShanoirException e) {
 			throw new RestServiceException(e, new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-					"Error while saving updated extradata", null));
+					"Error while saving updated extradata", e));
 		}
 	}
 
@@ -354,14 +354,24 @@ public class ExtraDataApiController implements ExtraDataApi {
 		return editableOnlyValidator.validate(extraData);
 	}
 
-	private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file)
-			throws IOException {
+	private ExaminationExtraData saveUploadedFile(ExaminationExtraData extradata, MultipartFile file) throws IOException {
 		
 		File createdFolder = new File(extraDataPath + "/models/" + extradata.getId());
-		createdFolder.mkdirs();
+		if(!createdFolder.mkdirs()){
+			LOG.error("Could not create directory [{}]", createdFolder.getAbsolutePath());
+		}
+
 		// Path to file
 		File fileToGet = new File(createdFolder + "/" + file.getOriginalFilename());
-		file.transferTo(fileToGet);
+		try {
+			if(!fileToGet.createNewFile()){
+				LOG.error("Could not create file [{}]", fileToGet.getAbsolutePath());
+			}
+			file.transferTo(fileToGet);
+		} catch (IOException e) {
+			LOG.error("Error while saving file [{}] to [{}].", file.getOriginalFilename(), fileToGet.getAbsolutePath());
+			throw e;
+		}
 
 		extradata.setFilename(file.getOriginalFilename());
 		extradata.setFilepath(fileToGet.getAbsolutePath());

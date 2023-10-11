@@ -15,24 +15,11 @@
 
 package org.shanoir.ng.dataset.controler;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.annotation.PostConstruct;
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
@@ -76,11 +63,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.annotation.PostConstruct;
-import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Controller
 public class DatasetApiController implements DatasetApi {
@@ -217,23 +207,25 @@ public class DatasetApiController implements DatasetApi {
 	}
 
 	@Override
-	public ResponseEntity<List<DatasetDTO>> findDatasetsByIds(
+	public ResponseEntity<List<DatasetAndProcessingsDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds) {
 		List<Dataset> datasets = datasetService.findByIdIn(datasetIds);
 		if (datasets.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
-		return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
-	}
 
-    @Override
-    public ResponseEntity<Long> getSizeByStudyId(Long studyId) {
-		Long size = datasetService.getExpressionSizeByStudyId(studyId);
-		if(size == null){
-			size = 0L;
+		List<DatasetAndProcessingsDTOInterface> dtos = new ArrayList<>();
+		for(Dataset dataset : datasets){
+			if (dataset instanceof MrDataset) {
+				dtos.add(mrDatasetMapper.datasetToDatasetAndProcessingsDTO((MrDataset) dataset));
+			} else if (dataset instanceof EegDataset) {
+				dtos.add(eegDatasetMapper.datasetToDatasetAndProcessingsDTO((EegDataset) dataset));
+			} else {
+				dtos.add(datasetMapper.datasetToDatasetAndProcessingsDTO(dataset));
+			}
 		}
-		size += examinationService.getExtraDataSizeByStudyid(studyId);
-		return new ResponseEntity<>(size, HttpStatus.OK);
+
+		return new ResponseEntity<>(dtos, HttpStatus.OK);
 	}
 
 	@Override
@@ -245,7 +237,17 @@ public class DatasetApiController implements DatasetApi {
 			return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
 		}
 	}
-	
+
+	@Override
+	public ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(Long examinationId) {
+		List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
+		if (datasets.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} else {
+			return new ResponseEntity<>(datasetMapper.datasetToDatasetDTO(datasets), HttpStatus.OK);
+		}
+	}
+
 	@Override
 	public ResponseEntity<List<DatasetDTO>> findDatasetsByStudycardId(@Parameter(name = "id of the studycard", required = true) @PathVariable("studycardId") Long studycardId) {
 		List<Dataset> datasets = datasetService.findByStudycard(studycardId);
@@ -347,10 +349,11 @@ public class DatasetApiController implements DatasetApi {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid sets of dataset IDs."));
 		}
+		int size = datasetIds.size();
 
-		if (datasetIds.size() > DATASET_LIMIT) {
+		if (size > DATASET_LIMIT) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can't download more than " + DATASET_LIMIT + " datasets."));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This selection includes " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
@@ -368,14 +371,15 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 0: Check data integrity
 		if (studyId == null) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid study ID."));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid study id."));
 		}
 		// STEP 1: Retrieve all datasets all in one with only the one we can see
 		List<Dataset> datasets = datasetService.findByStudyId(studyId);
+		int size = datasets.size();
 
-		if (datasets.size() > DATASET_LIMIT) {
+		if (size > DATASET_LIMIT) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has more than " + DATASET_LIMIT + " datasets, that is the limit. Please download them from solr search." ));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This study has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets." ));
 		}
 
 		datasetDownloaderService.massiveDownload(format, datasets, response, false);
@@ -390,20 +394,41 @@ public class DatasetApiController implements DatasetApi {
 		// STEP 0: Check data integrity
 		if (examinationId == null) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid examination ID."));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid examination id."));
 		}
 		// STEP 1: Retrieve all datasets all in one
 		List<Dataset> datasets = datasetService.findByExaminationId(examinationId);
 
-		if (datasets.size() > DATASET_LIMIT) {
+		int size = datasets.size();
+
+		if (size > DATASET_LIMIT) {
 			throw new RestServiceException(
-					new ErrorModel(HttpStatus.FORBIDDEN.value(), "You can't download more than " + DATASET_LIMIT + " datasets."));
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This examination has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
 		datasetDownloaderService.massiveDownload(format, datasets, response, true);
 	}
 
-	/**
+    @Override
+    public void massiveDownloadByAcquisitionId(Long acquisitionId, String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+		// STEP 0: Check data integrity
+		if (acquisitionId == null) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "Please use a valid acquisition id."));
+		}
+		// STEP 1: Retrieve all datasets all in one
+		List<Dataset> datasets = datasetService.findByAcquisition(acquisitionId);
+		int size = datasets.size();
+
+		if (size > DATASET_LIMIT) {
+			throw new RestServiceException(
+					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This acquisition has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
+		}
+
+		datasetDownloaderService.massiveDownload(format, datasets, response, true);
+    }
+
+    /**
 	 * Zip a single file
 	 * 
 	 * @param sourceFile

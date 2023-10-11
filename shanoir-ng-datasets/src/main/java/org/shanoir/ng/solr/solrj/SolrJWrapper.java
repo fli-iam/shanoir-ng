@@ -19,11 +19,6 @@
  */
 package org.shanoir.ng.solr.solrj;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
@@ -31,6 +26,13 @@ import org.shanoir.ng.solr.model.ShanoirSolrQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.solr.repository.Facet;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author yyao

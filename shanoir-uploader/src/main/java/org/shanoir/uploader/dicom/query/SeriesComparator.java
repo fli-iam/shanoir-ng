@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.Map.Entry;
 
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.SerieTreeNode;
 
 /**
  * Dicom Serie comparator based on their serie number.

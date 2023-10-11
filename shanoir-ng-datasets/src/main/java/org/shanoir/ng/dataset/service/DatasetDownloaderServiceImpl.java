@@ -1,18 +1,6 @@
 package org.shanoir.ng.dataset.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -41,7 +29,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 public class DatasetDownloaderServiceImpl {
@@ -95,11 +90,7 @@ public class DatasetDownloaderServiceImpl {
 
 		Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
 
-		String subjectName = "unknownSubject";
-		Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
-		if (subjectOpt.isPresent()) {
-			subjectName = subjectOpt.get().getName();
-		}
+		String subjectName = getSubjectName(dataset);
 
 		String datasetName = subjectName + "_" + dataset.getId() + "_" + dataset.getName();
 		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
@@ -204,7 +195,7 @@ public class DatasetDownloaderServiceImpl {
 		}
 	}
 
-	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withInputFile) throws EntityNotFoundException, RestServiceException, IOException {
+	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withManifest) throws EntityNotFoundException, RestServiceException, IOException {
 		// STEP 3: Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 
@@ -237,7 +228,7 @@ public class DatasetDownloaderServiceImpl {
 						continue;
 					}
 					// Create a new folder organized by subject / examination
-					String subjectName = subjectRepository.findById(dataset.getSubjectId()).orElse(null).getName();
+					String subjectName = getSubjectName(dataset);
 					if (subjectName.contains(File.separator)) {
 						subjectName = subjectName.replaceAll(File.separator, "_");
 					}
@@ -274,7 +265,7 @@ public class DatasetDownloaderServiceImpl {
 						List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, datasetFilePath);
 						datasetFiles.addAll(files);
 
-						if(withInputFile){
+						if(withManifest){
 							filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
 							filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(datasetFiles);
 						}
@@ -344,6 +335,17 @@ public class DatasetDownloaderServiceImpl {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Unexpected error while downloading dataset files"));
 		}
+	}
+
+	private String getSubjectName(Dataset dataset) {
+		String subjectName = "unknownSubject";
+		if(dataset.getSubjectId() != null){
+			Optional<Subject> subjectOpt = subjectRepository.findById(dataset.getSubjectId());
+			if (subjectOpt.isPresent()) {
+				subjectName = subjectOpt.get().getName();
+			}
+		}
+		return subjectName;
 	}
 
 }

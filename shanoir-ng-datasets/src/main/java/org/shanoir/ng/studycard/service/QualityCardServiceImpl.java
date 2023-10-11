@@ -14,9 +14,6 @@
 
 package org.shanoir.ng.studycard.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.QualityCard;
@@ -27,6 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Study Card service implementation.

@@ -1,17 +1,9 @@
 package org.shanoir.ng.utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
-
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.mail.MessagingException;
 import org.apache.commons.io.FilenameUtils;
 import org.shanoir.ng.dataset.dto.InputDTO;
 import org.shanoir.ng.dataset.modality.EegDataset;
@@ -23,11 +15,17 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.util.UriUtils;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.mail.MessagingException;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class DatasetFileUtils {
 

@@ -14,12 +14,6 @@
 
 package org.shanoir.ng.studycard;
 
-import static org.mockito.BDDMockito.given;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +28,12 @@ import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.BDDMockito.given;
 
 /**
  * Study card service test.

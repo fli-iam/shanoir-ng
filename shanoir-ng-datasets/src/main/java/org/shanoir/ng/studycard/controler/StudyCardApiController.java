@@ -14,11 +14,7 @@
 
 package org.shanoir.ng.studycard.controler;
 
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.Parameter;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -26,12 +22,7 @@ import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.shared.core.model.IdList;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.PacsException;
-import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.studycard.dto.DicomTag;
 import org.shanoir.ng.studycard.model.StudyCard;
@@ -49,7 +40,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.v3.oas.annotations.Parameter;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class StudyCardApiController implements StudyCardApi {

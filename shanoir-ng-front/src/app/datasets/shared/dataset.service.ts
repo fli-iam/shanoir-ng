@@ -22,9 +22,9 @@ import { LoadingBarComponent } from '../../shared/components/loading-bar/loading
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
-import { DatasetDTO, DatasetDTOService } from './dataset.dto';
 import { Dataset } from './dataset.model';
 import { DatasetUtils } from './dataset.utils';
+import {DatasetDTO, DatasetDTOService} from "./dataset.dto";
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> implements OnDestroy {
@@ -70,21 +70,24 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
+
+
+    getByExaminationId(examinationId: number) {
+        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/examination/' + examinationId)
+            .toPromise()
+            .then(dtos => this.datasetDTOService.toEntityList(dtos));
+    }
+
     getByStudycardId(studycardId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/studycard/' + studycardId)
             .toPromise()
             .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
-    
+
     getByStudyId(studyId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
                 .toPromise()
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
-    }
-
-    getSizeByStudyId(id: number): Promise<number> {
-      return this.http.get<number>(AppUtils.BACKEND_API_DATASET_URL + '/sizeByStudyId/' + id)
-        .toPromise();
     }
 
     getByStudyIdAndSubjectId(studyId: number, subjectId: number): Promise<Dataset[]> {
@@ -104,6 +107,7 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
             .toPromise()
             .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
     }
+
 
     progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
        switch (event.type) {
@@ -174,6 +178,23 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
         })
     );
   }
+
+    public downloadDatasetsByAcquisition(acquisitionId: number, format: string, progressBar: LoadingBarComponent) {
+        let params = new HttpParams().set("acquisitionId", '' + acquisitionId).set("format", format);
+        this.subscribtions.push(
+            this.http.get(
+                AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByAcquisition',{
+                    reportProgress: true,
+                    observe: 'events',
+                    responseType: 'blob',
+                    params: params
+                }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar),
+                error =>  {
+                    this.errorService. handleError(error);
+                    progressBar.progress = 0;
+                })
+        );
+    }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
         let params = new HttpParams().set("studyNameInRegExp", studyNameInRegExp)
@@ -276,4 +297,5 @@ export class DatasetService extends EntityService<Dataset> implements OnDestroy 
             subscribtion.unsubscribe();
         }
     }
+
 }

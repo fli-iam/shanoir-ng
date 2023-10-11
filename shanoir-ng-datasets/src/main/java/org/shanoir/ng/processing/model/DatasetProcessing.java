@@ -14,21 +14,15 @@
 
 package org.shanoir.ng.processing.model;
 
-import java.util.ArrayList;
-import java.time.LocalDate;
-import java.util.List;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Dataset Processing.

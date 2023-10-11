@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,15 +35,8 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.validation.Valid;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.shanoir.ng.exchange.model.ExExamination;
-import org.shanoir.ng.exchange.model.ExStudy;
-import org.shanoir.ng.exchange.model.ExStudyCard;
-import org.shanoir.ng.exchange.model.ExSubject;
-import org.shanoir.ng.exchange.model.Exchange;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
@@ -84,6 +78,7 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
@@ -98,6 +93,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 
 /**
  * This is the main component of the import of Shanoir-NG. The front-end in
@@ -272,7 +268,7 @@ public class ImporterApiController implements ImporterApi {
 		final File importJobDir = new File(userImportDir, tempDirId);
 		if (importJobDir.exists()) {
 			importJob.setWorkFolder(importJobDir.getAbsolutePath());
-			removeUnselectedSeries(importJob);
+			cleanSeries(importJob);
 			LOG.info("Starting import job for user {} (userId: {}) with import job folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
 			importerManagerService.manageImportJob(importJob);
 			return new ResponseEntity<>(HttpStatus.OK);
@@ -283,7 +279,7 @@ public class ImporterApiController implements ImporterApi {
 		}
 	}
 
-	private void removeUnselectedSeries(final ImportJob importJob) {
+	private void cleanSeries(final ImportJob importJob) {
 		for (Iterator<Patient> patientIt = importJob.getPatients().iterator(); patientIt.hasNext();) {
 			Patient patient = patientIt.next();
 			List<Study> studies = patient.getStudies();
@@ -292,7 +288,8 @@ public class ImporterApiController implements ImporterApi {
 				List<Serie> series = study.getSeries();
 				for (Iterator<Serie> serieIt = series.iterator(); serieIt.hasNext();) {
 					Serie serie = serieIt.next();
-					if (!serie.getSelected()) {
+					if (serie.isIgnored() || serie.isErroneous() || !serie.getSelected()) {
+						LOG.info("Serie {} cleaned from import (ignored, erroneous, not selected).", serie.getSeriesDescription());
 						serieIt.remove();
 					}
 				}
@@ -658,15 +655,13 @@ public class ImporterApiController implements ImporterApi {
 	public ResponseEntity<Void> startImportEEGJob(
 			@Parameter(name = "EegImportJob", required = true) @Valid @RequestBody final EegImportJob importJob) {
 		// Comment: Anonymisation is not necessary for pure brainvision EEGs data
-		// For .EDF, anonymisation could be done here.
-		// Comment: BIDS translation will be done during export and not during import.
-
-		// HttpEntity represents the request
-		final HttpEntity<EegImportJob> requestBody = new HttpEntity<>(importJob, KeycloakUtil.getKeycloakHeader());
-		// Post to dataset MS to finish import and create associated datasets
-		ResponseEntity<String> response = restTemplate.exchange(datasetsMsUrl, HttpMethod.POST, requestBody,
-				String.class);
-		return new ResponseEntity<>(response.getStatusCode());
+		try {
+			Integer integg = (Integer) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.IMPORT_EEG_QUEUE,  objectMapper.writeValueAsString(importJob));
+			return new ResponseEntity<Void>(HttpStatusCode.valueOf(integg.intValue()));			
+		} catch (Exception e) {
+			LOG.error("Error during EEG import", e);
+			return new ResponseEntity<Void>(HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@Override
@@ -702,67 +697,6 @@ public class ImporterApiController implements ImporterApi {
 			throw new RestServiceException(new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 					"Upload file called with not existing tempDirId.", null));
 		}
-		return null;
-	}
-
-	@Override
-	public ResponseEntity<Void> startImport(@RequestBody Exchange exchange)
-			throws RestServiceException, FileNotFoundException, IOException {
-		// 1. Check if uploaded data are complete (to be done a little later)
-		final File userImportDir = ImportUtils.getUserImportDir(importDir);
-		final File tempDir = new File(userImportDir, exchange.getTempDirId());
-
-		final File dicomDir = new File(tempDir, DICOMDIR);
-		if (!dicomDir.exists()) {
-			dicomDirGeneratorService.generateDicomDirFromDirectory(dicomDir, tempDir);
-			LOG.info("DICOMDIR generated at path: " + dicomDir.getAbsolutePath());
-		}
-
-		/**
-		 * 2. STEP: prepare patients list to be put into ImportJob: read DICOMDIR and
-		 * complete with meta-data from files
-		 */
-		ImportJob importJob = new ImportJob();
-		importJob.setUserId(KeycloakUtil.getTokenUserId());
-		List<Patient> patients = preparePatientsForImportJob(tempDir);
-		importJob.setPatients(patients);
-		importJob.setFromDicomZip(true);
-		importJob.setAnonymisationProfileToUse(exchange.getAnonymisationProfileToUse());
-		// Work folder is always relative to general import directory and userId (not
-		// shown to outside world)
-		importJob.setWorkFolder(tempDir.getAbsolutePath());
-		/**
-		 * Handle Study and StudyCard settings:
-		 */
-		ExStudy exStudy = exchange.getExStudy();
-		if (exStudy != null && exStudy.getStudyId() != null) {
-			importJob.setStudyId(exStudy.getStudyId());
-			ExStudyCard exStudyCard = exStudy.getExStudyCards().get(0);
-			importJob.setStudyCardName(exStudyCard.getName());
-			int i = 0;
-			List<ExSubject> exSubjects = exStudy.getExSubjects();
-			for (Iterator<ExSubject> iterator = exSubjects.iterator(); iterator.hasNext();) {
-				ExSubject exSubject = iterator.next();
-				Subject subject = new Subject();
-				subject.setId(exSubject.getSubjectId());
-				subject.setName(exSubject.getSubjectName());
-				patients.get(i).setSubject(subject);
-				if (exSubject != null && exSubject.getSubjectName() != null) {
-					List<ExExamination> exExaminations = exSubject.getExExaminations();
-					for (Iterator<ExExamination> iterator2 = exExaminations.iterator(); iterator2.hasNext();) {
-						ExExamination exExamination = iterator2.next();
-						// @TODO: adapt ImportJob later for multiple-exams
-						importJob.setExaminationId(exExamination.getId());
-					}
-				} else {
-					// handle creation of subject and exams later here
-				}
-				i++;
-			}
-		} else {
-			// handle creation of study and study cards later here
-		}
-		importerManagerService.manageImportJob(importJob);
 		return null;
 	}
 
@@ -810,7 +744,8 @@ public class ImporterApiController implements ImporterApi {
 			@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
 			@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
 			@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
-			@Parameter(name = "converterId", required = true) @PathVariable("converterId") Long converterId) throws RestServiceException {
+			@Parameter(name = "converterId", required = true) @PathVariable("converterId") Long converterId, 
+			@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException {
 		// STEP 1: Unzip file
 		if (dicomZipFile == null || !ImportUtils.isZipFile(dicomZipFile)) {
 			throw new RestServiceException(
@@ -866,7 +801,9 @@ public class ImporterApiController implements ImporterApi {
 				if (subject == null) {
 
 					// Create subject
-					subject = ImportUtils.createSubject(subjectName, patient.getPatientBirthDate(), patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
+					// Update birth date to 1st of january of the year
+					LocalDate updateBirthdate = patient.getPatientBirthDate().withDayOfYear(1);
+					subject = ImportUtils.createSubject(subjectName, updateBirthdate, patient.getPatientSex(), 1, Collections.singletonList(new SubjectStudy(new IdName(null, subjectName), new IdName(studyId, studyName))));
 
 					LOG.debug("We found a subject " + subjectName);
 
@@ -880,12 +817,12 @@ public class ImporterApiController implements ImporterApi {
 
 				// STEP 4.1 Get informations about center / study card
 				// Get equipment id
-				Long equipmentId = null;
+				Long equipmentIdFromDicom = null;
 				if (job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber() != null) {
-					equipmentId = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
-					if (equipmentId != null) {
+					equipmentIdFromDicom = (Long) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EQUIPMENT_FROM_CODE_QUEUE, job.getPatients().get(0).getStudies().get(0).getSeries().get(0).getEquipment().getDeviceSerialNumber());
+					if (equipmentIdFromDicom != null) {
 						Properties props = new Properties();
-						props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentId);
+						props.setProperty("EQUIPMENT_ID_PROPERTY", "" + equipmentIdFromDicom);
 						props.setProperty("STUDY_ID_PROPERTY", "" + studyId);
 						props.setProperty("STUDYCARD_ID_PROPERTY", "" + studyCardId);
 
@@ -893,7 +830,7 @@ public class ImporterApiController implements ImporterApi {
 						if (newStudyCardId != null)  {
 							studyCardId = newStudyCardId;
 						}
-						job.setAcquisitionEquipmentId(equipmentId);
+						job.setAcquisitionEquipmentId(equipmentIdFromDicom);
 					}
 				}
 
@@ -911,6 +848,9 @@ public class ImporterApiController implements ImporterApi {
 				eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
 				// STEP 4.3 Complete importJob with subject / study /examination
+				
+				String anonymizationProfile = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, studyId);
+				
 				job.setSubjectName(subjectName);
 				job.setExaminationId(examId);
 				job.setFromDicomZip(true);
@@ -918,6 +858,8 @@ public class ImporterApiController implements ImporterApi {
 				job.setStudyId(studyId);
 				job.setCenterId(centerId);
 				job.setStudyName(studyName);
+				job.setAcquisitionEquipmentId(equipmentId);
+				job.setAnonymisationProfileToUse(anonymizationProfile);
 				for (Patient pat : job.getPatients()) {
 					pat.setSubject(subject);
 				}
