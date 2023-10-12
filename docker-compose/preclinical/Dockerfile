@@ -1,15 +1,11 @@
-FROM debian:bullseye
+#--------------- common jre base image -------------------------------------
+FROM debian:bookworm
+# NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
+RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
+    && apt-get update -qq \
+    && apt-get install -qqy openjdk-17-jre-headless ca-certificates-java
+#----------------------------------------------------------------------------
 
-RUN set -ex && \
-    echo 'deb http://deb.debian.org/debian bullseye-backports main' \
-      > /etc/apt/sources.list.d/bullseye-backports.list && \
-    apt update -y && \
-    apt install -t \
-      bullseye-backports \
-      openjdk-17-jre \
-      ca-certificates-java -y
-
-RUN apt-get update
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 ADD shanoir-ng-preclinical.jar shanoir-ng-preclinical.jar
