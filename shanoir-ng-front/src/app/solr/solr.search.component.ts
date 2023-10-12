@@ -55,7 +55,7 @@ export type TextualFacet = typeof TextualFacetNames[number];
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
-    progressState: TaskState = {};
+    progressState: TaskState = new TaskState();
     @ViewChildren(SolrPagingCriterionComponent) pagingCriterion: QueryList<SolrPagingCriterionComponent>;
     selections: SelectionBlock[] = [];
     columnDefs: ColumnDefinition[];

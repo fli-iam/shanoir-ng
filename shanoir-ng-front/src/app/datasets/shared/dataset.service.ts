@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { ErrorHandler, Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
@@ -108,58 +108,26 @@ export class DatasetService extends EntityService<Dataset> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
-
-        return this.http.post(
-            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload', formData, {
-                reportProgress: true,
-                observe: 'events',
-                responseType: 'blob'
-        }).map(event => {
-            state = this.extractProgression(event);
-            return state;
-        });
+        const url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload';
+        return AppUtils.downloadWithStatusPOST(url, formData, state);
     }
 
     public downloadDatasetsByStudy(studyId: number, format: string, state?: TaskState): Observable<TaskState>  {
         let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
-        return this.http.get(
-            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy',{
-                reportProgress: true,
-                observe: 'events',
-                responseType: 'blob',
-                params: params
-            }).map(event => {
-                state = this.extractProgression(event);
-                return state;
-            });
+        let url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy';
+        return AppUtils.downloadWithStatusGET(url, params, state);
     }
 
     public downloadDatasetsByExamination(examinationId: number, format: string, state?: TaskState): Observable<TaskState>  {
         let params = new HttpParams().set("examinationId", '' + examinationId).set("format", format);
-        return this.http.get(
-            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination',{
-                reportProgress: true,
-                observe: 'events',
-                responseType: 'blob',
-                params: params
-            }).map(event => {
-                state = this.extractProgression(event);
-                return state;
-            });
-  }
+        let url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination';
+        return AppUtils.downloadWithStatusGET(url, params, state);
+    }
 
     public downloadDatasetsByAcquisition(acquisitionId: number, format: string, state?: TaskState): Observable<TaskState> {
         let params = new HttpParams().set("acquisitionId", '' + acquisitionId).set("format", format);
-        return this.http.get(
-            AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByAcquisition',{
-                reportProgress: true,
-                observe: 'events',
-                responseType: 'blob',
-                params: params
-            }).map(event => {
-                state = this.extractProgression(event);
-                return state;
-            });
+        let url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByAcquisition';
+        return AppUtils.downloadWithStatusGET(url, params, state);
     }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
@@ -231,7 +199,7 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response.body, response);
+        AppUtils.browserDownloadFileFromResponse(response);
     }
 
     protected mapEntity = (dto: DatasetDTO, quickResult?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> => {

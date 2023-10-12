@@ -57,7 +57,7 @@ export class ExtraDataService extends EntityService<ExtraData>{
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response.body, response);
+        AppUtils.browserDownloadFileFromResponse(response);
     }
     
     createExtraData(datatype:string,extradata: any): Promise<any> {

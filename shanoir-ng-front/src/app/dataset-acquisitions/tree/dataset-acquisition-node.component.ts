@@ -19,7 +19,7 @@ import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
 import { Subscription } from 'rxjs';
-import { TaskState } from 'src/app/async-tasks/task.model';
+import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { ConsoleService } from "../../shared/console/console.service";
 import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
@@ -155,14 +155,14 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         }
 
         datasetIdsReady.then(() => {
-            this.progressStatus = {progress: 0, status: 2};
+            this.progressStatus = new TaskState(TaskStatus.IN_PROGRESS, 0);
             this.subscriptions.push(this.datasetService.downloadDatasets(this.datasetIds, format).subscribe(status => {
                 this.progressStatus = status;
-                if ([2, 4, 5].includes(status?.status)) this.downloading = true;
+                if (this.progressStatus?.isActive()) this.downloading = true;
                 else this.downloading = false;
             }, error => {
                 this.progressStatus.progress = 0;
-                this.progressStatus.status = -1;
+                this.progressStatus.status = TaskStatus.ERROR;
             }));
         });
     }

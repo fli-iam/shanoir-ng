@@ -420,7 +420,12 @@ public class DatasetApiController implements DatasetApi {
 	}
 
     @Override
-    public void massiveDownloadByAcquisitionId(Long acquisitionId, String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+	public void massiveDownloadByAcquisitionId(
+			@Parameter(name = "id of the acquisition", required=true) @Valid
+			@RequestParam(value = "acquisitionId", required = true) Long acquisitionId,
+			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
+			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException {
+		
 		// STEP 0: Check data integrity
 		if (acquisitionId == null) {
 			throw new RestServiceException(

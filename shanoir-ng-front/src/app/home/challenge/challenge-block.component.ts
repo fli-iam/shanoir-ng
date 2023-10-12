@@ -27,14 +27,14 @@ import { TaskState } from 'src/app/async-tasks/task.model';
 export class ChallengeBlockComponent {
 
     @Input() challengeStudy: Study;
-    protected downloadState: TaskState = {};
+    protected downloadState: TaskState = new TaskState();
 
     constructor(
             private studyService: StudyService) {
     }
 
     downloadFile(filePath: string) {
-        this.studyService.downloadFile(filePath, this.challengeStudy.id, 'protocol-file', this.downloadState);
+        this.studyService.downloadProtocolFile(filePath, this.challengeStudy.id, this.downloadState);
     }
 
 }

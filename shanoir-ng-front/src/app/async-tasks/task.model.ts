@@ -16,14 +16,22 @@ import { Entity } from '../shared/components/entity/entity.abstract';
 import { Report } from '../shared/mass-download/mass-download.service';
 import { camelToSpaces } from '../utils/app.utils';
 
-export type TaskStatus = 
-    -1 // error
-    | 1 // done
-    | 2 // in progress
-    | 4 // queued
-    | 5; // in progress but warning
+export enum TaskStatus {
+    ERROR = -1,
+    DONE = 1,
+    IN_PROGRESS = 2,
+    QUEUED = 4,
+    IN_PROGRESS_BUT_WARNING = 5
+}
 
-export type TaskState = {status?: TaskStatus, progress?: number};
+export class TaskState {
+
+    constructor(public status?: TaskStatus, public progress?: number) {}
+
+    isActive(): boolean {
+        return [TaskStatus.IN_PROGRESS, TaskStatus.QUEUED, TaskStatus.IN_PROGRESS_BUT_WARNING].includes(this.status);
+    }
+}
 
 export class Task extends Entity {
 

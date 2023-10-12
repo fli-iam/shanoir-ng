@@ -49,7 +49,7 @@ export class HomeComponent {
     nbAccountRequests: number;
     nbExtensionRequests: number;
     accessRequests: AccessRequest[] = [];
-    protected downloadState: TaskState = {};
+    protected downloadState: TaskState = new TaskState();
 
 
     constructor(
@@ -114,7 +114,7 @@ export class HomeComponent {
     }
 
     downloadFile(filePath: string, studyId: number) {
-        this.studyService.downloadFile(filePath, studyId, 'protocol-file', this.downloadState);
+        this.studyService.downloadProtocolFile(filePath, studyId, this.downloadState);
     }
 
     isAuthenticated(): boolean {

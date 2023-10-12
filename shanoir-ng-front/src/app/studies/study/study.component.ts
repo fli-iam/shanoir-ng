@@ -64,8 +64,8 @@ export class StudyComponent extends EntityComponent<Study> {
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
 
-    protected pfDownloadState: TaskState = {};
-    protected duaDownloadState: TaskState = {};
+    protected pfDownloadState: TaskState = new TaskState();
+    protected duaDownloadState: TaskState = new TaskState();
 
     subjects: IdName[];
     selectedCenter: IdName;
@@ -490,7 +490,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public downloadFile(file) {
-        this.studyService.downloadFile(file, this.study.id, 'protocol-file', this.pfDownloadState);
+        this.studyService.downloadProtocolFile(file, this.study.id, this.pfDownloadState);
     }
 
     public attachNewFile(event: any) {
@@ -514,7 +514,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public downloadDataUserAgreement() {
-        this.studyService.downloadFile(this.study.dataUserAgreementPaths[0], this.study.id, 'dua', this.duaDownloadState);
+        this.studyService.downloadDuaFile(this.study.dataUserAgreementPaths[0], this.study.id, this.duaDownloadState);
     }
 
     public attachDataUserAgreement(event: any) {

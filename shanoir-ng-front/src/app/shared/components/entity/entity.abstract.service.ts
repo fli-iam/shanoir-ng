@@ -11,18 +11,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
+import { Injectable, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ServiceLocator } from "../../../utils/locator.service";
 import { ConsoleService } from "../../console/console.service";
 import { ShanoirError } from "../../models/error.model";
 import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
 import { Page } from '../table/pageable.model';
 import { Entity } from './entity.abstract';
-import { Subscription } from 'rxjs';
-import { TaskState } from 'src/app/async-tasks/task.model';
-import { saveAs } from 'file-saver-es';
-import { Injectable, OnDestroy } from '@angular/core';
 
 @Injectable()
 export abstract class EntityService<T extends Entity> implements OnDestroy {
@@ -176,24 +174,5 @@ export abstract class EntityService<T extends Entity> implements OnDestroy {
             + ('0' + (date.getMonth() + 1)).slice(-2)
             + '-'
             + ('0' + date.getDate()).slice(-2);
-    }
-
-    extractProgression(event: HttpEvent<any>): TaskState {
-        switch (event.type) {
-            case HttpEventType.Sent:
-            case HttpEventType.ResponseHeader:
-                return {status: 4, progress: 0};
-            case HttpEventType.DownloadProgress:
-                return {status: 2, progress: event.loaded};
-            case HttpEventType.Response:
-                saveAs(event.body, this.getFilename(event));
-                return {status: 1}
-        }
-    }
-
-    private getFilename(response: HttpResponse<any>): string {
-        const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
     }
 }

@@ -57,7 +57,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
     examNode: Examination | ExaminationNode;
-    downloadState: TaskState = {};
+    downloadState: TaskState = new TaskState();
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;

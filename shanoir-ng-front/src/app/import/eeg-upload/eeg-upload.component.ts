@@ -37,7 +37,7 @@ export class EegUploadComponent {
     protected extensionError: boolean;
     private modality: string;
     public errorMessage: string;
-    uploadState: TaskState = {};
+    uploadState: TaskState = new TaskState();
 
     constructor(
             private importService: ImportService, 

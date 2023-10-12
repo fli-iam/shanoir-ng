@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
@@ -167,23 +167,21 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return this.http.delete(endpoint);
     }
 
-    downloadFile(fileName: string, studyId: number, fileType: 'protocol-file'|'dua', state?: TaskState): Promise<HttpResponse<Blob>>  {
-        const endpoint = this.API_URL + '/' + fileType + '-download/' + studyId + "/" + fileName + "/";
-        if (state) {
-            return this.http.get(endpoint, {
-                    reportProgress: true,
-                    observe: 'events',
-                    responseType: 'blob',
-                }).map(event => {
-                    state = this.extractProgression(event);
-                    return event as HttpResponse<Blob>;
-                }).toPromise();
-        } else {
-            return this.http.get(endpoint, {
-                observe: 'response',
-                responseType: 'blob',
-            }).toPromise();
-        }
+    downloadProtocolFile(fileName: string, studyId: number, state?: TaskState) {
+        const endpoint = this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName + "/";
+        return AppUtils.downloadWithStatusGET(endpoint, null, state);
+    }
+
+    downloadDuaFile(fileName: string, studyId: number, state?: TaskState) {
+        const endpoint = this.API_URL + '/dua-download/' + studyId + "/" + fileName + "/";
+        return AppUtils.downloadWithStatusGET(endpoint, null, state);
+    }
+
+    downloadDuaBlob(fileName: string, studyId: number): Promise<Blob> {
+        const endpoint = this.API_URL + '/dua-download/' + studyId + "/" + fileName + "/";
+        let params: HttpParams = new HttpParams();
+        //params
+        return AppUtils.downloadBlob(endpoint);
     }
 
     getMyDUA(): Promise<DataUserAgreement[]> {

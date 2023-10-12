@@ -48,7 +48,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     hasEEG: boolean = false;
     hasDicom: boolean = false;
     hasBids: boolean = false;
-    protected downloadState: TaskState = {};
+    protected downloadState: TaskState = new TaskState();
 
     constructor(
             private route: ActivatedRoute,

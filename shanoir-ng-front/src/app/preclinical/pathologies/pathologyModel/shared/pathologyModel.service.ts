@@ -59,6 +59,6 @@ export class PathologyModelService  extends EntityService<PathologyModel>{
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response.body, response);
+        AppUtils.browserDownloadFileFromResponse(response);
     }
 }

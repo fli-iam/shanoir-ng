@@ -72,19 +72,12 @@ export class ExaminationService extends EntityService<Examination> {
     }
 
     downloadFile(fileName: string, examId: number, state?: TaskState): Observable<TaskState>  {
-        const endpoint = this.API_URL + '/extra-data-download/' + examId + "/" + fileName + "/";
-        return this.http.get(endpoint, {
-                reportProgress: true,
-                observe: 'events',
-                responseType: 'blob',
-            }).map(event => {
-                state = this.extractProgression(event);
-                return state;
-            });
+        const endpoint: string = this.API_URL + '/extra-data-download/' + examId + "/" + fileName + "/";
+        return AppUtils.downloadWithStatusGET(endpoint, null, state);
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
-        AppUtils.browserDownloadFileFromResponse(response.body, response);
+        AppUtils.browserDownloadFileFromResponse(response);
     }
 
     public stringify(entity: Examination) {

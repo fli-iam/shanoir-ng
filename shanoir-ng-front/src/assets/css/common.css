@@ -114,7 +114,7 @@ form { color: var(--dark-grey); position: relative; }
     form fieldset fieldset label { display: block; width: auto; }
     form fieldset fieldset label { margin-left: 183px; }
   form legend { padding: 0 10px 0 0; color: var(--color-a); font-size: 14px; margin: 10px 0; color: var(--color-c); width: 100%; }
-  form li > label { display: inline-block; width: 250px; vertical-align: top; height: 20px; line-height: 20px; }
+  form li > label { display: inline-block; width: 250px; vertical-align: top; min-height: 20px; line-height: 20px; }
   form fieldset ol, form fieldset ul { margin: 0; padding: 0; }
   form fieldset li { list-style: none; padding: 3px 0; margin: 0; min-height: 22px; }
     form fieldset li input,

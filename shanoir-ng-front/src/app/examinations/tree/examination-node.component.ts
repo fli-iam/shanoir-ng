@@ -41,7 +41,7 @@ export class ExaminationNodeComponent implements OnChanges {
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
 
-    protected downloadState: TaskState = {};
+    protected downloadState: TaskState = new TaskState();
     node: ExaminationNode;
     loading: boolean = false;
     menuOpened: boolean = false;

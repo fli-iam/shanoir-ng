@@ -54,7 +54,7 @@ export class DicomUploadComponent implements OnDestroy {
     studyOptions: Option<Study>[] = [];
     studycardOptions: Option<StudyCard>[] = [];
     otherErrorMessage: string;
-    uploadState: TaskState = {};
+    uploadState: TaskState = new TaskState();
 
     constructor(
             private importService: ImportService,
