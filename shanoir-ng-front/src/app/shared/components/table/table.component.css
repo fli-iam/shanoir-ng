@@ -50,7 +50,8 @@ tr.disabled { opacity: 0.7; }
 td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis; position: relative; height: 100%; overflow: hidden; }
 	td + td { border-left: 1px solid var(--light-grey); }
 	td.bool, td.progress { text-align: center; }
-	td.cell input:not([type='checkbox']), td.cell select { width: auto; border: none; padding-right: 10px; }
+	td.cell input:not([type='checkbox']), td.cell select { z-index: 1; position: inherit; width: auto; border: none; padding-right: 10px; }
+    td.cell input[type='text'] { border-bottom: 1px solid var(--grey)};
 	td.cell-date { text-align: right; }
 	td.cell-number { text-align: right; }
 	td.cell-nofield { text-align: center; }
