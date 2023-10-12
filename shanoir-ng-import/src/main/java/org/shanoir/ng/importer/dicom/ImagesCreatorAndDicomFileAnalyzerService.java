@@ -228,7 +228,6 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			if (DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
 				// do nothing here as instances list will be emptied after split between images and non-images
 			} else {
-				// divide here between non-images and images, non-images at first
 				Image image = new Image();
 				/**
 				 * Attention: the path of each image is always relative: either to the temporary folder created
@@ -242,7 +241,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		} catch (IOException iOE) {
 			throw iOE;
 		} catch (Exception e) {
-			LOG.error("Error while processing DICOM file: " + dicomFile.getAbsolutePath());
+			LOG.error("Error while processing DICOM file, one for entire serie: " + dicomFile.getAbsolutePath());
 			throw e;
 		}
 	}

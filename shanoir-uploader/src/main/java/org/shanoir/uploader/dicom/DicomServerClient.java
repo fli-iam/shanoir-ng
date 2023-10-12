@@ -42,6 +42,7 @@ public class DicomServerClient implements IDicomServerClient {
 	private File workFolder;
 	
 	public DicomServerClient(final Properties dicomServerProperties, final File workFolder) {
+		logger.info("New DicomServerClient created with properties: " + dicomServerProperties.toString());
 		config.initWithPropertiesFile(dicomServerProperties);
 		this.workFolder = workFolder;
 		// Initialize connection configuration parameters here: to be used for all queries

@@ -12,8 +12,6 @@ import org.weasis.dicom.tool.DicomListener;
 
 /**
  * The DcmRcvHelper handles the download of DICOM files.
- * It's a local service / server which is started, when
- * the ShanoirUploader is started.
  * 
  * @author mkain
  *
