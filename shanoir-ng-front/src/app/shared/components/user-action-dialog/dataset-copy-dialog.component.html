@@ -27,10 +27,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
         <div class="container">
             <div class="list">
-                <div *ngFor="let study of studies">
+                <div *ngFor="let study of studies" (click)="pickStudy(study)">
                     <div class="studyRow">
-                        <checkbox [mode]="checkboxMode" (onChange)="pickStudy(study)"></checkbox>
-                        <div class="studyName">{{ study.name }}</div>
+                        <div [ngClass]="{'study-default': selectedStudy != study, 'study-change': selectedStudy == study}">{{ study.name }}</div>
                     </div>
                 </div>
             </div>
@@ -43,7 +42,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </div>
         <div class="footer-position">
             <div class="footer">
-                <button type="button" (click)="copy()">Copy</button>
+                <button type="button" (click)="copy()" [disabled]="!canCopy">Copy</button>
                 <button type="button" (click)="cancel()">Cancel</button>
             </div>
         </div>

@@ -156,6 +156,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <span>{{command.title}}</span>
             </button>
             <button type="button" *ngIf="command.action != undefined" (click)="command.action()" [disabled]="(command.disabledIfNoSelected && selection.size == 0) || (command.disabledIfNoResult && items?.length == 0)">
+                {{ command.hasCopyRight }}
                 <img *ngIf="command.img" src="{{command.img}}" />
                 <span *ngIf="command.awesome" class="awesome"><i class="fas {{command.awesome}}"></i></span>
                 <span>{{command.title}}</span>

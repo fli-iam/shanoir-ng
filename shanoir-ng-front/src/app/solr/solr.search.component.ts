@@ -83,8 +83,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     viewChecked: boolean = false;
     solrRequest: SolrRequest = new SolrRequest();
     private facetPageable: Map<string, FacetPageable>;
+    contentPage: SolrResultPage[] = [];
 
     studies: Study[];
+    selectedStudies: string[]=[];
+    hasCopyRight: boolean = false;
+    selectedLines: SolrDocument[]=[];
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
@@ -129,8 +133,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     hasAdminRight(studyId: number) {
         if (this.role == 'admin') return true;
-        else if (this.role == 'user') return false;
-        else if (this.role == 'expert') return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_ADMINISTRATE);
+        else return this.rights && this.rights.has(studyId) && this.rights.get(studyId).includes(StudyUserRight.CAN_ADMINISTRATE);
     }
 
     hasDownloadRight(studyId: number) {
@@ -287,6 +290,38 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     });
                 }
                 this.firstPageLoaded = true;
+                /**
+                 * TODO:
+                 * - stocker solrResultPage dans une autre variable contentPage
+                 * - à chaque nouvelle page chargée, on met à jour contentPage
+                 * - on filtre contentPage pour ne conserver que les row correspondant a des datasets sélectionnés
+                 * - on vérifie que pour chaque row restante, on a bien les droits d'admin
+                 * - si c'est le cas, on autorise la copie
+                 */
+                this.contentPage.push(solrResultPage);
+                // for (let i of solrResultPage.content) {
+                //     console.log("solrResultPage content : " + i.datasetId + " / " + i.studyName);
+                //     console.log("is admin for id = " + i.studyId + " ? " + this.hasAdminRight(Number(i.studyId)));
+                //     if (this.selectedDatasetIds.has(Number(i.datasetId))) {
+                //         this.selectedStudies.push(i.studyId);
+                //     }
+                // }
+
+                // console.log("content.size : " + this.contentPage.length);
+                // this.contentPage.forEach( item => {
+                //     for (let i of item.content) {
+                //         console.log("content studyName : " + i.studyName);
+                //     }
+                //
+                // });
+
+                // this.contentPage.filter(x => {
+                //     if (x.content.row.data.selectedDatasetIds.includes(this.selectedDatasetIds)) {
+                //
+                //     }
+                // })
+
+
                 return solrResultPage;
             }).catch(reason => {
                 if (reason?.error?.code == 422 && reason.error.message == 'solr query failed') {
@@ -462,20 +497,22 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         columnDefs.unshift({ headerName: "", type: "button", awesome: "fa-solid fa-ban", action: item => {
             this.selectedDatasetIds.delete(item.id);
             this.selectionTable.refresh();
+            this.prepareForCopy();
         }})
+
         return columnDefs;
     }
 
     getCustomActionsDefs(): any[] {
         let customActionDefs:any = [];
         customActionDefs.push(
-            {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
-            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
-            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
-            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
-            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
-            {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
-            {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
+            {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true },
+            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true },
+            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true },
+            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true },
+            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true },
+            {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true },
+            {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true },
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoSelected: true },
             {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true },
             {title: "Copy to study", awesome: "fa-solid fa-copy", action: () => this.copyToStudy(), disabledIfNoSelected: true }
@@ -491,12 +528,12 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 this.table.clearSelection();
                 this.selectionTable.refresh();
             }, disabledIfNoResult: true},
-            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
-            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
-            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
-            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
-            {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
-            {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
+            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true },
+            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true },
+            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true },
+            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true },
+            {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true },
+            {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true },
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoResult: true },
             {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true },
             {title: "Copy to study", awesome: "fa-solid fa-copy", action: () => this.copyToStudy(), disabledIfNoSelected: true }
@@ -512,6 +549,28 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
     onSelectionChange (selection: any) {
         this.selectedDatasetIds = selection;
+        this.prepareForCopy();
+    }
+
+    prepareForCopy() {
+        // Fill arrays with needed info for "copy to study" action
+        this.selectedStudies = [];
+        this.selectedLines = [];
+        this.hasCopyRight = false;
+        for (let page of this.contentPage) {
+            for (let line of page.content) {
+                if (this.selectedDatasetIds.has(Number(line.datasetId))) {
+                    this.selectedLines.push(line);
+                    if (!this.selectedStudies.includes(line.studyId)) {
+                        this.selectedStudies.push(line.studyId);
+                    }
+                }
+            }
+        }
+        this.hasCopyRight = this.selectedStudies.every(data => {
+            return (this.hasAdminRight(Number(data)) == true)
+        });
+        if (this.selectedDatasetIds.size == 0) this.hasCopyRight = false;
     }
 
     rowClick(item): string {
@@ -557,9 +616,11 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         modalRef.instance.title = "Copy of datasets to study";
         modalRef.instance.studies = this.studies;
         modalRef.instance.datasetsIds = Array.from(this.selectedDatasetIds);
-        modalRef.instance.message = "Please make sure you have administrative rights on both source(s) and destination(s) studies. Also, note that the dataset's center will be added to destination study.";
-        modalRef.instance.statusMessage = 'Failed - copy didn\'t work !';
+        modalRef.instance.message = "You need admin rights on dataset's study AND destination study. Also, note that the dataset's center will be added to destination study.";
+        modalRef.instance.statusMessage = 'Ready';
         modalRef.instance.ownRef = modalRef;
+        modalRef.instance.canCopy = this.hasCopyRight;
+        modalRef.instance.lines = this.selectedLines;
     }
 
 

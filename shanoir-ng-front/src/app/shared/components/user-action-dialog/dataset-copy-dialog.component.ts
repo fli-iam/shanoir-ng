@@ -12,10 +12,21 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { HttpClient, HttpParams } from '@angular/common/http';
 import {Component, ComponentRef, ElementRef, EventEmitter, HostListener, Input, Output, ViewChild} from '@angular/core';
 import {Study} from "../../../studies/shared/study.model";
 import {UntypedFormBuilder, UntypedFormGroup} from "@angular/forms";
 import { GlobalService } from '../../services/global.service';
+import {StudyStorageVolumeDTO} from "../../../studies/shared/study.dto";
+import * as AppUtils from "../../../utils/app.utils";
+import {KeycloakService} from "../../keycloak/keycloak.service";
+import {StudyUserRight} from "../../../studies/shared/study-user-right.enum";
+import {StudyRightsService} from "../../../studies/shared/study-rights.service";
+import {ServiceLocator} from "../../../utils/locator.service";
+import {ConsoleService} from "../../console/console.service";
+import {DatasetService} from "../../../datasets/shared/dataset.service";
+import {StudyService} from "../../../studies/shared/study.service";
+import {SolrDocument} from "../../../solr/solr.document.model";
 
 @Component({
     selector: 'user-action-dialog',
@@ -26,28 +37,78 @@ export class DatasetCopyDialogComponent {
     title: string;
     message: string;
     studies: Study[];
-    selectedStudyIds: Set<Study> = new Set();
+    selectedStudy: Study;
     datasetsIds: number[];
-    checkboxMode: 'edit';
     statusMessage: string;
     ownRef: any;
-
-    cancel() {
-        this.ownRef.destroy();
+    hasRight: boolean = false;
+    canCopy: boolean;
+    centerIds: string[]=[];
+    subjectIds: string[]=[];
+    lines: SolrDocument[];
+    protected consoleService = ServiceLocator.injector.get(ConsoleService);
+    constructor(private http: HttpClient,
+                private studyRightsService: StudyRightsService,
+                private studyService: StudyService,
+                private keycloakService: KeycloakService) {
     }
 
+    ngOnInit() {
+        for (let line of this.lines) {
+            if (!this.centerIds.includes(line.centerId)) {
+                this.centerIds.push(line.centerId);
+            }
+            if (!this.subjectIds.includes(line.subjectId)) {
+                this.subjectIds.push(line.subjectId);
+            }
+        }
+    }
     public copy() {
-        console.log("copy");
-        for (let item of Array.from(this.selectedStudyIds.values())) {
-            console.log(item.id + " / " + item.name);
+        this.checkRightsOnSelectedStudies(this.selectedStudy.id).then( () => {
+            if (!this.hasRight) {
+                this.statusMessage = 'Missing rights for study ' + this.selectedStudy.name + ' please make sure you have CAN_IMPORT or CAN_ADMIN right.';
+            }
+            else {
+                this.statusMessage = "Start copy";
+                const formData: FormData = new FormData();
+                formData.set('datasetIds', Array.from(this.datasetsIds).join(","));
+                formData.set('studyId', this.selectedStudy.id.toString());
+                formData.set('centerIds', Array.from(this.centerIds).join(","));
+                // formData.set('subjectIds', Array.from(this.subjectIds).join(","));
+                console.log("formData datasets : " + formData.get('datasetIds'));
+                console.log("formData studies : " + formData.get('studyId'));
+                console.log("formData centerIds : " + formData.get('centerIds'));
+                // console.log("formData subjectIds : " + formData.get('subjectIds'));
+                return this.http.post<void>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData)
+                    .toPromise()
+                    .then(res => {
+                        console.log("res : " + res);
+                    });
+            }
+        });
+    }
+
+    private async checkRightsOnSelectedStudies(id: number): Promise<void> {
+        await this.hasRightsOnStudyId(id).then(res => {
+            this.hasRight = res;
+        });
+    }
+
+    private async hasRightsOnStudyId(studyId: number): Promise<boolean> {
+        if (this.keycloakService.isUserAdmin()) {
+            return Promise.resolve(true);
+        } else {
+            return this.studyRightsService.getMyRightsForStudy(studyId).then(rights => {
+                return (rights.includes(StudyUserRight.CAN_IMPORT) || rights.includes(StudyUserRight.CAN_ADMINISTRATE));
+            });
         }
     }
 
     pickStudy(study: Study) {
-        if (!this.selectedStudyIds.has(study)) {
-            this.selectedStudyIds.add(study);
-        } else {
-            this.selectedStudyIds.delete(study);
-        }
+        this.selectedStudy = study;
+    }
+
+    cancel() {
+        this.ownRef.destroy();
     }
 }

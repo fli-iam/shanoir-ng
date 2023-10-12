@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -48,6 +49,7 @@ import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
+import org.shanoir.ng.study.service.RelatedDatasetService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
@@ -63,6 +65,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Parameter;
@@ -96,6 +99,9 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private ShanoirEventService eventService;
+
+	@Autowired
+	private RelatedDatasetService relatedDatasetService;
 
 	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
 
@@ -205,6 +211,25 @@ public class StudyApiController implements StudyApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", e));
 		}
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<StudyDTO> copyDatasetsToStudy(
+			@Parameter(name = "Dataset ids to copy", required = true)
+			@RequestParam(value = "datasetIds", required = true) String datasetIds,
+			@Parameter(name = "Study id to copy in", required = true)
+			@RequestParam(value = "studyId", required = true) String studyId,
+			@Parameter(name = "center id of datasets", required = true)
+			@RequestParam(value = "centerIds", required = true) String centerIds) {
+
+		System.out.println("datasetId : " + datasetIds);
+		System.out.println("studyId : " + studyId);
+		System.out.println("centerIds : " + centerIds);
+		for (String dataset : datasetIds.split(",")) {
+			relatedDatasetService.copyDatasetToStudy(dataset, studyId, centerIds);
+		}
+
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 
 	@Override

@@ -15,10 +15,12 @@
 package org.shanoir.ng.study.controler;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -134,7 +136,26 @@ public interface StudyApi {
 			@Parameter(name = "study to create", required = true) @RequestBody Study study, BindingResult result)
 			throws RestServiceException;
 
-  @Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
+	@Operation(summary = "", description = "Copy a list of dataset to a study")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "copy worked"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@RequestMapping(value = "/copyDatasets", produces = { "application/json" }, method = RequestMethod.POST)
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
+	ResponseEntity<StudyDTO> copyDatasetsToStudy(
+			@Parameter(name = "Dataset ids to copy", required = true)
+			@RequestParam(value = "datasetIds", required = true) String datasetIds,
+			@Parameter(name = "Study id to copy in", required = true)
+			@RequestParam(value = "studyId", required = true) String studyId,
+			@Parameter(name = "center id of datasets", required = true)
+			@RequestParam(value = "centerIds", required = true) String centerIds);
+
+	//  and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_IMPORT')
+
+	@Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "Sizes of the study files in bytes by format"),
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
