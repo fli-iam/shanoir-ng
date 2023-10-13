@@ -32,7 +32,6 @@ import org.dcm4che3.net.ApplicationEntity;
 import org.dcm4che3.net.Association;
 import org.dcm4che3.net.Connection;
 import org.dcm4che3.net.Device;
-import org.dcm4che3.net.DimseRSP;
 import org.dcm4che3.net.IncompatibleConnectionException;
 import org.dcm4che3.net.QueryOption;
 import org.dcm4che3.net.pdu.AAssociateRQ;
@@ -101,15 +100,26 @@ public class QueryPACSService {
 	@PostConstruct
 	private void initDicomNodes() {
 		// Initialize connection configuration parameters here: to be used for all queries
-		this.calling = new DicomNode(callingName, callingHost, callingPort); // ShUp
-		this.called = new DicomNode(calledName, calledHost, calledPort); // PACS
+		this.calling = new DicomNode(callingName, callingHost, callingPort);
+		this.called = new DicomNode(calledName, calledHost, calledPort);
+		LOG.info("Query: DicomNodes initialized via CDI: calling ({}, {}, {}) and called ({}, {}, {})",
+				callingName, callingHost, callingPort, calledName, calledHost, calledPort);
 	}
 	
+	/**
+	 * Do configuration of QueryPACSService from outside. Used by ShanoirUploader.
+	 * 
+	 * @param calling
+	 * @param called
+	 * @param calledNameSCP
+	 */
 	public void setDicomNodes(DicomNode calling, DicomNode called, String calledNameSCP) {
 		this.calling = calling;
 		this.called = called;
 		this.calledNameSCP = calledNameSCP;
 		this.maxPatientsFromPACS = 10;
+		LOG.info("Query: DicomNodes initialized via method call (ShUp): calling ({}, {}, {}) and called ({}, {}, {})",
+				calling.getAet(), calling.getHostname(), calling.getPort(), called.getAet(), called.getHostname(), called.getPort());
 	}
 	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws ShanoirImportException {
