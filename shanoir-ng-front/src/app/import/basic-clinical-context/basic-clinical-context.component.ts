@@ -72,6 +72,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
             study.series = study.series.filter(serie => serie.selected);
             return study;
         });
+        filteredPatient.studies = filteredPatient.studies.filter(study => study.series?.length > 0);
         importJob.patients.push(filteredPatient);
         importJob.workFolder = this.importDataService.patientList.workFolder;
         importJob.fromDicomZip = true;
