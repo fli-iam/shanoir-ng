@@ -1,9 +1,5 @@
 package org.shanoir.ng.shared.model;
 
-import java.util.List;
-
-import org.shanoir.ng.shared.quality.QualityTag;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.shanoir.ng.shared.subjectstudy.SubjectType;
 
@@ -17,6 +13,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
+import org.shanoir.ng.shared.quality.QualityTag;
+
+import java.util.List;
 
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "study_id", "subject_id" }, name = "study_subject_idx") })

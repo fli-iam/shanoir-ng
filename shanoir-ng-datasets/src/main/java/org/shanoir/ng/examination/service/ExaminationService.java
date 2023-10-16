@@ -14,10 +14,6 @@
 
 package org.shanoir.ng.examination.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -27,6 +23,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * Examination service.

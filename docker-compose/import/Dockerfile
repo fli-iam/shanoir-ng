@@ -10,23 +10,20 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
-FROM debian:bullseye
+#--------------- common jre base image -------------------------------------
+FROM debian:bookworm
+# NOTE: using bookworm-proposed-updates because of https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1039472
+RUN echo "deb http://deb.debian.org/debian bookworm-proposed-updates main" >> /etc/apt/sources.list \
+    && apt-get update -qq \
+    && apt-get install -qqy openjdk-17-jre-headless ca-certificates-java
+#----------------------------------------------------------------------------
 
-RUN set -ex && \
-    echo 'deb http://deb.debian.org/debian bullseye-backports main' \
-      > /etc/apt/sources.list.d/bullseye-backports.list && \
-    apt update -y && \
-    apt install -t \
-      bullseye-backports \
-      openjdk-17-jre \
-      ca-certificates-java -y
 
 #32 bits packages are necessary
 RUN dpkg --add-architecture i386
-RUN apt-get update
 
 RUN apt-get update -qq \
-    && apt-get install -y \
+    && apt-get install -qqy \
     git \
     curl \
     build-essential \
@@ -44,10 +41,11 @@ RUN apt-get update -qq \
     libsm6 \
     libxext6 \
     lib32stdc++6 \
-    libtiff5 \
+    libtiff6 \
     libglib2.0-0:i386 \
     locales \
     locales-all \
+    xvfb \
     python
 
 # Compile DCM2NIIX from source
@@ -77,6 +75,15 @@ RUN install -m 0755 external/dcm2nii/linux/dcm2nii /opt/nifti-converters/dcm2nii
 
 RUN install -m 0755 external/mcverter/linux/mcverter_* /opt/nifti-converters/
 RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-gnu/
+
+WORKDIR /opt/nifti-converters
+RUN mkdir mriconverter
+RUN curl -#L  https://github.com/populse/mri_conv/archive/refs/heads/master.zip | bsdtar -xf- -C mriconverter --strip-components 1
+
+RUN chmod 777 /opt/nifti-converters/mriconverter
+RUN chmod 777 /opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar
+
+WORKDIR /
 
 RUN mkdir -m 1777 /.dcm2nii_2008-03-31
 RUN mkdir -m 1777 /.dcm2nii_2014-08-04

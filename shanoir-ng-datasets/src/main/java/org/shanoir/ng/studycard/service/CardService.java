@@ -14,11 +14,11 @@
 
 package org.shanoir.ng.studycard.service;
 
-import java.util.List;
-
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.Card;
+
+import java.util.List;
 
 // MK: had to move down all sec annotations (Pre-/PostAuthorize) to -ServiceImpls as Spring Sec throws a duplicate
 // annotation exception, because of 2 interface hierarchy, that is not well managed by Spring Sec, so I could not

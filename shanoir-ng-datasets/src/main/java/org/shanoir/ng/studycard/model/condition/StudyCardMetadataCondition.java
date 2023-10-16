@@ -15,7 +15,6 @@
 package org.shanoir.ng.studycard.model.condition;
 
 import jakarta.persistence.Entity;
-
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 
 @Entity

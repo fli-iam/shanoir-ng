@@ -14,9 +14,9 @@
 
 package org.shanoir.ng.studycard.model.rule;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-
 import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.studycard.model.assignment.DatasetAssignment;
@@ -24,8 +24,6 @@ import org.shanoir.ng.studycard.model.assignment.StudyCardAssignment;
 import org.shanoir.ng.studycard.model.condition.DatasetMetadataCondOnDataset;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMConditionOnDatasets;
-
-import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * A rule that applies to a {@link Dataset}

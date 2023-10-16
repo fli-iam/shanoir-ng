@@ -91,17 +91,20 @@ public class DIMSEService {
 	private void execute(List<String> args) throws Exception {
 		LOG.debug("Calling command: " + args.toString());
 		ProcessBuilder processBuilder = new ProcessBuilder();
+		processBuilder.redirectErrorStream(true);
 		processBuilder.command(args);
 		Process process = processBuilder.start();
-        BufferedReader reader =
-                new BufferedReader(new InputStreamReader(process.getInputStream()));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String line;
         while ((line = reader.readLine()) != null) {
-            LOG.debug(line);
+        	if (line.contains(" ERROR ")) {
+        		LOG.error(line);
+        	}
         }
         int exitCode = process.waitFor();
-		if (exitCode != 0)
+		if (exitCode != 0) {
 			throw new ShanoirException("Send to PACS (c-store) error occured on cmd line.");
+		}
 	}
 
 }

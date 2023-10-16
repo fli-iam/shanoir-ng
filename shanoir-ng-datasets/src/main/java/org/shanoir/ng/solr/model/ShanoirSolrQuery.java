@@ -14,15 +14,14 @@
 
 package org.shanoir.ng.solr.model;
 
+import org.shanoir.ng.shared.paging.FacetPageable;
+import org.shanoir.ng.utils.Range;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import org.shanoir.ng.shared.paging.FacetPageable;
-import org.shanoir.ng.shared.subjectstudy.SubjectType;
-import org.shanoir.ng.utils.Range;
 
 /**
  * @author yyao

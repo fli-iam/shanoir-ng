@@ -14,16 +14,6 @@
 
 package org.shanoir.ng.examination.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -52,6 +42,12 @@ import org.springframework.data.util.Pair;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * Examination service implementation.
@@ -252,6 +248,7 @@ public class ExaminationServiceImpl implements ExaminationService {
 		examinationDb.setNote(examination.getNote());
 		examinationDb.setStudy(examination.getStudy());
 		examinationDb.setSubjectWeight(examination.getSubjectWeight());
+		examinationDb.setWeightUnitOfMeasure(examination.getWeightUnitOfMeasure());
 		examinationDb.setExtraDataFilePathList(examination.getExtraDataFilePathList());
 		examinationDb.setInstrumentBasedAssessmentList(examination.getInstrumentBasedAssessmentList());
 		return examinationDb;

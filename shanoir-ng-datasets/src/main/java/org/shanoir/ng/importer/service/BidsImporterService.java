@@ -267,9 +267,9 @@ public class BidsImporterService {
 		
 		event.setStatus(ShanoirEvent.SUCCESS);
 
-		event.setMessage(importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")"
-				+" : Successfully created datasets for subject " + importJob.getSubjectName()
-				+ " in examination " + examination.getId());
+		event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
+				+" Successfully created datasets for subject [" + importJob.getSubjectName()
+				+ "] in examination [" + examination.getId() + "]");
 		event.setProgress(1f);
 		eventService.publishEvent(event);
 	}

@@ -42,6 +42,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.DatasetFile;
 import org.shanoir.ng.importer.model.DiffusionGradient;
@@ -316,17 +317,18 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 * @param boolean is convert to clidcm
 	 *
 	 */
-	private void convertToNiftiExec(NIfTIConverter converter, String inputFolder, String outputFolder, boolean is4D) {
+	private void convertToNiftiExec(NIfTIConverter converter, String inputFolder, String outputFolder, boolean is4D, boolean reconversion) {
 		if (converter == null) {
 			return;
 		}
 		String converterPath = convertersPath + converter.getName();
-		// Mcverter
-		if (converter.isMcverter()) {
+
+	    switch (converter.getNIfTIConverterType()) {
+		case MCVERTER:
 			is4D = true;
 			conversionLogs += shanoirExec.mcverterExec(inputFolder, converterPath, outputFolder, is4D);
-			// Clidcm
-		} else if (converter.isClidcm()) {
+			break;
+		case CLIDCM:
 			try {
 				conversionLogs += shanoirExec.clidcmExec(inputFolder, converterPath, outputFolder);
 			} catch (Exception e) {
@@ -338,15 +340,20 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			 * dcm2nii .
 			 */
 			createBvecAndBval(outputFolder);
-			// Dicom2Nifti
-		} else if (converter.isDicom2Nifti()) {
+			break;
+		case DICOM2NIFTI:
 			conversionLogs += shanoirExec.dicom2niftiExec(inputFolder, converterPath, outputFolder);
-			// dcm2nii
-		} else if (converter.isDicomifier()) {
+			break;
+		case DICOMIFIER:
 			conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder);
-		} else {
+			break;
+		case MRICONVERTER:
+			conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, reconversion);
+			break;
+		default:
 			is4D = true;
 			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converterPath, outputFolder, is4D);
+			break;
 		}
 	}
 
@@ -522,7 +529,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			conversionLogs = "";
 		}
 		NIfTIConverter converter = findById(converterId);
-		convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D);
+		convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D, false);
 		LOG.debug("conversionLogs : {}", conversionLogs);
 		return converter;
 	}
@@ -898,7 +905,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 		result.mkdirs();
 
-		this.convertToNiftiExec(converter, workFolder, workFolderResult, false);
+		this.convertToNiftiExec(converter, workFolder, workFolderResult, false, true);
 		
 		if (converter.isDicomifier()) {
 			Dataset dataset = new Dataset();

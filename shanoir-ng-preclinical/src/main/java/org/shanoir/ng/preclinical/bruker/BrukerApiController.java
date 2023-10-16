@@ -117,11 +117,11 @@ public class BrukerApiController implements BrukerApi {
 		} catch (IOException e) {
 			LOG.error("Error while uploadBrukerFile: issue with file {}", e.getMessage(), e);
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", e));
 		} catch (Exception e) {
 			LOG.error("Error while zipping dicom files: {}", e.getMessage(), e);
 			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", null));
+					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Error while saving uploaded file", e));
 		}
 	}
 

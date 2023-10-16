@@ -142,7 +142,7 @@ public interface ExaminationApi {
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "422", description = "bad parameters"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@PostMapping(value = "", produces = { "application/json" }, consumes = {
+	@PostMapping(value = {"", "/"}, produces = { "application/json" }, consumes = {
 			"application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnStudyCenter(#examinationDTO.getCenterId(), #examinationDTO.getStudyId(), 'CAN_IMPORT'))")
 	ResponseEntity<ExaminationDTO> saveNewExamination(
