@@ -16,6 +16,7 @@ package org.shanoir.ng.importer.dicom.query;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -26,17 +27,21 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.ElementDictionary;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
+import org.dcm4che3.data.VR;
 import org.dcm4che3.net.ApplicationEntity;
 import org.dcm4che3.net.Association;
 import org.dcm4che3.net.Connection;
 import org.dcm4che3.net.Device;
 import org.dcm4che3.net.IncompatibleConnectionException;
 import org.dcm4che3.net.QueryOption;
+import org.dcm4che3.net.Status;
 import org.dcm4che3.net.pdu.AAssociateRQ;
 import org.dcm4che3.net.pdu.PresentationContext;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
+import org.dcm4che3.tool.findscu.FindSCU;
 import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
 import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
@@ -51,14 +56,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.weasis.core.api.util.FileUtil;
+import org.weasis.core.api.util.StringUtil;
 import org.weasis.dicom.op.CFind;
 import org.weasis.dicom.op.CMove;
 import org.weasis.dicom.param.AdvancedParams;
+import org.weasis.dicom.param.DeviceOpService;
 import org.weasis.dicom.param.DicomNode;
 import org.weasis.dicom.param.DicomParam;
 import org.weasis.dicom.param.DicomProgress;
 import org.weasis.dicom.param.DicomState;
 import org.weasis.dicom.param.ProgressListener;
+import org.weasis.dicom.util.ServiceUtil;
 
 import jakarta.annotation.PostConstruct;
 
@@ -92,11 +101,16 @@ public class QueryPACSService {
 	
 	private DicomNode called;
 	
+	private FindSCU findSCU;
+	
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
 	
 	public QueryPACSService() {} // for ShUp usage
 	
+	/**
+	 * Used within microservice MS Import on the server, via PostConstruct.
+	 */
 	@PostConstruct
 	private void initDicomNodes() {
 		// Initialize connection configuration parameters here: to be used for all queries
@@ -104,6 +118,7 @@ public class QueryPACSService {
 		this.called = new DicomNode(calledName, calledHost, calledPort);
 		LOG.info("Query: DicomNodes initialized via CDI: calling ({}, {}, {}) and called ({}, {}, {})",
 				callingName, callingHost, callingPort, calledName, calledHost, calledPort);
+		initFindSCU(calling, called);
 	}
 	
 	/**
@@ -120,6 +135,34 @@ public class QueryPACSService {
 		this.maxPatientsFromPACS = 10;
 		LOG.info("Query: DicomNodes initialized via method call (ShUp): calling ({}, {}, {}) and called ({}, {}, {})",
 				calling.getAet(), calling.getHostname(), calling.getPort(), called.getAet(), called.getHostname(), called.getPort());
+		initFindSCU(calling, called);
+	}
+	
+	private void initFindSCU(DicomNode calling, DicomNode called) {
+        try (FindSCU findSCU = new FindSCU()) {
+        	// calling configuration
+        	Connection connection = findSCU.getConnection();
+            findSCU.getApplicationEntity().setAETitle(calling.getAet());
+            connection.setHostname(calling.getHostname());
+            connection.setPort(calling.getPort());
+            // called configuration
+            Connection remote = findSCU.getRemoteConnection();
+            findSCU.getAAssociateRQ().setCalledAET(called.getAet());
+            remote.setHostname(called.getHostname());
+            remote.setPort(called.getPort());
+            try {
+                long t1 = System.currentTimeMillis();
+                findSCU.open();
+                long t2 = System.currentTimeMillis();
+                LOG.info("FindSCU initialized in {}ms.", t2 - t1);
+                this.findSCU = findSCU;
+            } catch (Exception e) {
+                LOG.error("FindSCU", e);
+                ServiceUtil.forceGettingAttributes(findSCU.getState(), findSCU);
+            }
+        } catch (Exception e) {
+            LOG.error("FindSCU", e);
+        }
 	}
 	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws ShanoirImportException {
@@ -437,8 +480,35 @@ public class QueryPACSService {
 			options.setInformationModel(InformationModel.StudyRoot);
 		}
 		logQuery(params, options);
-		DicomState state = CFind.process(options, calling, called, 0, level, params);
+		DicomState state = processCFind(options, 0, level, params);
 		return state.getDicomRSP();
+	}
+	
+	private DicomState processCFind(AdvancedParams params, int cancelAfter, QueryRetrieveLevel level, DicomParam... keys) {
+		this.findSCU.setInformationModel(getInformationModel(params), params.getTsuidOrder(), params.getQueryOptions());
+        if (level != null) {
+            this.findSCU.addLevel(level.name());
+        }
+        for (DicomParam p : keys) {
+            addAttributes(findSCU.getKeys(), p);
+        }
+        findSCU.setCancelAfter(cancelAfter);
+        findSCU.setPriority(params.getPriority());
+        try {
+            DicomState dcmState = findSCU.getState();
+            long t1 = System.currentTimeMillis();
+            findSCU.query();
+            ServiceUtil.forceGettingAttributes(dcmState, findSCU);
+            long t2 = System.currentTimeMillis();
+            String timeMsg =
+                MessageFormat.format("DICOM C-Find from {0} to {1}. Query in {3}ms.",
+                    findSCU.getAAssociateRQ().getCallingAET(), findSCU.getAAssociateRQ().getCalledAET(), t2 - t1);
+            return DicomState.buildMessage(dcmState, timeMsg, null);
+        } catch (Exception e) {
+            LOG.error("FindSCU", e);
+            ServiceUtil.forceGettingAttributes(findSCU.getState(), findSCU);
+            return DicomState.buildMessage(findSCU.getState(), null, e);
+        }
 	}
 
 	/**
@@ -452,5 +522,30 @@ public class QueryPACSService {
 			LOG.info("Tag: {}, Value: {}", params[i].getTagName(), Arrays.toString(params[i].getValues()));
 		}
 	}
+	
+    private InformationModel getInformationModel(AdvancedParams options) {
+        Object model = options.getInformationModel();
+        if (model instanceof InformationModel) {
+            return (InformationModel) model;
+        }
+        return InformationModel.StudyRoot;
+    }
+
+    private  void addAttributes(Attributes attrs, DicomParam param) {
+        int tag = param.getTag();
+        String[] ss = param.getValues();
+        VR vr = ElementDictionary.vrOf(tag, attrs.getPrivateCreator(tag));
+        if (ss == null || ss.length == 0) {
+            // Returning key
+            if (vr == VR.SQ) {
+                attrs.newSequence(tag, 1).add(new Attributes(0));
+            } else {
+                attrs.setNull(tag, vr);
+            }
+        } else {
+            // Matching key
+            attrs.setString(tag, vr, ss);
+        }
+    }
 
 }
