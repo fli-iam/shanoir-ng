@@ -21,12 +21,38 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.dcm4che3.data.Attributes;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
 
 public class ExaminationAttributes {
 
 	private ConcurrentMap<Long, AcquisitionAttributes> acquisitionMap = new ConcurrentHashMap<>();
 
-	public AcquisitionAttributes getAcquisitionAttributes(long id) {
+    public ExaminationAttributes() {}
+
+	public ExaminationAttributes(Examination examination, Attributes dicomAttributes) {
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ start ");
+        if (examination != null && examination.getDatasetAcquisitions() != null) {
+            for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
+                if (acquisition.getDatasets() != null) {
+                    for (Dataset dataset : acquisition.getDatasets()) {
+                        if (dicomAttributes.getProperties() != null) {
+                            for (String key : dicomAttributes.getProperties().keySet()) {
+                                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + key);
+                                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ - " + dicomAttributes.getProperties().get(key));
+                            }
+                        }
+
+                        // Attributes datasetAttributes;
+                        addDatasetAttributes(acquisition.getId(), dataset.getId(), dicomAttributes);
+                    }
+                }
+            }
+        }
+    }
+
+    public AcquisitionAttributes getAcquisitionAttributes(long id) {
 		return acquisitionMap.get(id);
 	}
 
