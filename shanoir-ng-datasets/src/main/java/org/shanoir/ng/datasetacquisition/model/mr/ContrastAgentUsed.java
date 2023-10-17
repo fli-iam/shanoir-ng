@@ -41,7 +41,10 @@ public enum ContrastAgentUsed {
 	GADOVIST(7),
 	
 	// Clariscan
-	CLARISCAN(8);
+	CLARISCAN(8),
+	
+	// Dotarem
+	DOTAREM(9);
 
 	private int id;
 
