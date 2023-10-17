@@ -16,7 +16,6 @@ package org.shanoir.ng.importer.dicom.query;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -35,14 +34,14 @@ import org.dcm4che3.net.ApplicationEntity;
 import org.dcm4che3.net.Association;
 import org.dcm4che3.net.Connection;
 import org.dcm4che3.net.Device;
+import org.dcm4che3.net.DimseRSPHandler;
 import org.dcm4che3.net.IncompatibleConnectionException;
+import org.dcm4che3.net.Priority;
 import org.dcm4che3.net.QueryOption;
 import org.dcm4che3.net.Status;
 import org.dcm4che3.net.pdu.AAssociateRQ;
 import org.dcm4che3.net.pdu.PresentationContext;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
-import org.dcm4che3.tool.findscu.FindSCU;
-import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
 import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
 import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
@@ -56,18 +55,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.weasis.core.api.util.FileUtil;
-import org.weasis.core.api.util.StringUtil;
-import org.weasis.dicom.op.CFind;
 import org.weasis.dicom.op.CMove;
 import org.weasis.dicom.param.AdvancedParams;
-import org.weasis.dicom.param.DeviceOpService;
 import org.weasis.dicom.param.DicomNode;
 import org.weasis.dicom.param.DicomParam;
 import org.weasis.dicom.param.DicomProgress;
 import org.weasis.dicom.param.DicomState;
 import org.weasis.dicom.param.ProgressListener;
-import org.weasis.dicom.util.ServiceUtil;
 
 import jakarta.annotation.PostConstruct;
 
@@ -101,7 +95,7 @@ public class QueryPACSService {
 	
 	private DicomNode called;
 	
-	private FindSCU findSCU;
+	private Association association;
 	
 	@Value("${shanoir.import.pacs.store.aet.called.name}")
 	private String calledNameSCP;
@@ -118,7 +112,7 @@ public class QueryPACSService {
 		this.called = new DicomNode(calledName, calledHost, calledPort);
 		LOG.info("Query: DicomNodes initialized via CDI: calling ({}, {}, {}) and called ({}, {}, {})",
 				callingName, callingHost, callingPort, calledName, calledHost, calledPort);
-		initFindSCU(calling, called);
+		initAssociation(calling, called);
 	}
 	
 	/**
@@ -135,34 +129,44 @@ public class QueryPACSService {
 		this.maxPatientsFromPACS = 10;
 		LOG.info("Query: DicomNodes initialized via method call (ShUp): calling ({}, {}, {}) and called ({}, {}, {})",
 				calling.getAet(), calling.getHostname(), calling.getPort(), called.getAet(), called.getHostname(), called.getPort());
-		initFindSCU(calling, called);
+		initAssociation(calling, called);
 	}
 	
-	private void initFindSCU(DicomNode calling, DicomNode called) {
-        try (FindSCU findSCU = new FindSCU()) {
-        	// calling configuration
-        	Connection connection = findSCU.getConnection();
-            findSCU.getApplicationEntity().setAETitle(calling.getAet());
-            connection.setHostname(calling.getHostname());
-            connection.setPort(calling.getPort());
-            // called configuration
-            Connection remote = findSCU.getRemoteConnection();
-            findSCU.getAAssociateRQ().setCalledAET(called.getAet());
-            remote.setHostname(called.getHostname());
-            remote.setPort(called.getPort());
-            try {
-                long t1 = System.currentTimeMillis();
-                findSCU.open();
-                long t2 = System.currentTimeMillis();
-                LOG.info("FindSCU initialized in {}ms.", t2 - t1);
-                this.findSCU = findSCU;
-            } catch (Exception e) {
-                LOG.error("FindSCU", e);
-                ServiceUtil.forceGettingAttributes(findSCU.getState(), findSCU);
-            }
-        } catch (Exception e) {
-            LOG.error("FindSCU", e);
-        }
+	private void initAssociation(DicomNode calling, DicomNode called) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
+        try {
+        	// calling: create a device, a connection and an application entity
+        	Device device = new Device(this.getClass().getName());
+            device.setExecutor(executor);
+            device.setScheduledExecutor(scheduledExecutor);
+        	ApplicationEntity callingAE = new ApplicationEntity(calling.getAet());
+            Connection callingConn = new Connection();
+            device.addConnection(callingConn);
+            device.addApplicationEntity(callingAE);
+            callingAE.addConnection(callingConn);
+            // called: create a connection and an AAssociateRQ
+            Connection calledConn = new Connection(null, called.getHostname(), called.getPort());
+            AAssociateRQ aarq = new AAssociateRQ();
+            aarq.setCallingAET(calling.getAet());
+            aarq.setCalledAET(called.getAet());
+            aarq.addPresentationContext(new PresentationContext(1,
+                    UID.Verification, UID.ImplicitVRLittleEndian));
+            aarq.addPresentationContext(new PresentationContext(2,
+            		UID.PatientRootQueryRetrieveInformationModelFind, UID.ImplicitVRLittleEndian));
+            aarq.addPresentationContext(new PresentationContext(3,
+            		UID.StudyRootQueryRetrieveInformationModelFind, UID.ImplicitVRLittleEndian));
+            this.association = callingAE.connect(calledConn, aarq);
+            LOG.info("initAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
+        } catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+		} catch (InterruptedException e) {
+			LOG.error(e.getMessage(), e);
+		} catch (IncompatibleConnectionException e) {
+			LOG.error(e.getMessage(), e);
+		} catch (GeneralSecurityException e) {
+			LOG.error(e.getMessage(), e);
+		}
 	}
 	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws ShanoirImportException {
@@ -175,7 +179,7 @@ public class QueryPACSService {
 			|| StringUtils.isNotBlank(dicomQuery.getPatientBirthDate())) {
 			// For Patient Name and Patient ID, wild card search is not allowed
 			if (!dicomQuery.getPatientName().contains("*") && !dicomQuery.getPatientID().contains("*")) {
-				queryPatientLevel(dicomQuery, calling, called, importJob);
+				queryPatientLevel(dicomQuery, importJob);
 			}
 			// @Todo: implement wild card search
 			// Do Fuzzy search on base of patient name here
@@ -189,7 +193,7 @@ public class QueryPACSService {
 		 */
 		} else if (StringUtils.isNotBlank(dicomQuery.getStudyDescription())
 			|| StringUtils.isNotBlank(dicomQuery.getStudyDate())) {
-			queryStudyLevel(dicomQuery, calling, called, importJob);
+			queryStudyLevel(dicomQuery, importJob);
 		} else {
 			throw new ShanoirImportException("DicomQuery: missing parameters.");
 		}
@@ -217,60 +221,29 @@ public class QueryPACSService {
 	
 	public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
 		LOG.info("DICOM ECHO: Starting with configuration {}, {}, {} <- {}", calledAET, hostName, port, callingAET);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         try {
-        	// set up calling configuration
-        	Device device = new Device("c-echo-scu");
-            ApplicationEntity callingAE = new ApplicationEntity(callingAET);
-            Connection callingConn = new Connection();
-            device.addApplicationEntity(callingAE);
-            device.addConnection(callingConn);
-            device.setExecutor(executor);
-            device.setScheduledExecutor(scheduledExecutor);
-            callingAE.addConnection(callingConn);
-            
-            Connection calledConn = new Connection(null, hostName, port);
-            AAssociateRQ aarq = new AAssociateRQ();
-            aarq.setCallingAET(callingAET);
-            aarq.setCalledAET(calledAET);
-            aarq.addPresentationContext(new PresentationContext(1,
-                    UID.Verification, UID.ImplicitVRLittleEndian));
-            Association as = callingAE.connect(calledConn, aarq);
-            as.cecho();
-            as.release();
+        	this.association.cecho();
         } catch (IOException e) {
 			LOG.error(e.getMessage(), e);
 			return false;
 		} catch (InterruptedException e) {
 			LOG.error(e.getMessage(), e);
 			return false;
-		} catch (IncompatibleConnectionException e) {
-			LOG.error(e.getMessage(), e);
-			return false;
-		} catch (GeneralSecurityException e) {
-			LOG.error(e.getMessage(), e);
-			return false;
-		} finally {
-            executor.shutdown();
-            scheduledExecutor.shutdown();
-        }
+		}
         return true;
 	}
 
 	/**
 	 * This method queries on patient root level.
 	 * @param dicomQuery
-	 * @param calling
-	 * @param called
 	 * @param importJob
 	 */
-	private void queryPatientLevel(DicomQuery dicomQuery, DicomNode calling, DicomNode called, ImportJob importJob) {
+	private void queryPatientLevel(DicomQuery dicomQuery, ImportJob importJob) {
 		DicomParam patientName = initDicomParam(Tag.PatientName, dicomQuery.getPatientName());
 		DicomParam patientID = initDicomParam(Tag.PatientID, dicomQuery.getPatientID());
 		DicomParam patientBirthDate = initDicomParam(Tag.PatientBirthDate, dicomQuery.getPatientBirthDate());
 		DicomParam[] params = { patientName, patientID, patientBirthDate, new DicomParam(Tag.PatientBirthName), new DicomParam(Tag.PatientSex) };
-		List<Attributes> attributesPatients = queryCFIND(params, QueryRetrieveLevel.PATIENT, calling, called);
+		List<Attributes> attributesPatients = queryCFind(params, QueryRetrieveLevel.PATIENT);
 		if (attributesPatients != null) {
 			// Limit the max number of patients returned
 			int patientsNbre = attributesPatients.size();
@@ -283,7 +256,7 @@ public class QueryPACSService {
 				boolean patientExists = patients.stream().anyMatch(p -> p.getPatientID().equals(patient.getPatientID()));
 				if (!patientExists) {
 					patients.add(patient);
-					queryStudies(calling, called, dicomQuery, patient);
+					queryStudies(dicomQuery, patient);
 				}
 			}
 			importJob.setPatients(patients);
@@ -297,13 +270,13 @@ public class QueryPACSService {
 	 * @param called
 	 * @param importJob
 	 */
-	private void queryStudyLevel(DicomQuery dicomQuery, DicomNode calling, DicomNode called, ImportJob importJob) {
+	private void queryStudyLevel(DicomQuery dicomQuery, ImportJob importJob) {
 		DicomParam studyDescription = initDicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription());
 		DicomParam studyDate = initDicomParam(Tag.StudyDate, dicomQuery.getStudyDate());
 		DicomParam[] params = { studyDescription, studyDate, new DicomParam(Tag.PatientName),
 			new DicomParam(Tag.PatientID), new DicomParam(Tag.PatientBirthDate), new DicomParam(Tag.PatientBirthName),
 			new DicomParam(Tag.PatientSex), new DicomParam(Tag.StudyInstanceUID) };
-		List<Attributes> attributesStudies = queryCFIND(params, QueryRetrieveLevel.STUDY, calling, called);
+		List<Attributes> attributesStudies = queryCFind(params, QueryRetrieveLevel.STUDY);
 		if (attributesStudies != null) {
 			List<Patient> patients = new ArrayList<>();
 			for (int i = 0; i < attributesStudies.size(); i++) {
@@ -313,7 +286,7 @@ public class QueryPACSService {
 				// handle studies
 				Study study = new Study(attributesStudies.get(i));
 				patient.getStudies().add(study);
-				querySeries(calling, called, study);
+				querySeries(study);
 			}
 			// Limit the max number of patients returned
 			if (maxPatientsFromPACS < patients.size()) {
@@ -363,7 +336,7 @@ public class QueryPACSService {
 	 * @param dicomQuery 
 	 * @param patient
 	 */
-	private void queryStudies(DicomNode calling, DicomNode called, DicomQuery dicomQuery, Patient patient) {
+	private void queryStudies(DicomQuery dicomQuery, Patient patient) {
 		DicomParam[] params = {
 			new DicomParam(Tag.PatientID, patient.getPatientID()),
 			new DicomParam(Tag.PatientName, patient.getPatientName()),
@@ -371,13 +344,13 @@ public class QueryPACSService {
 			new DicomParam(Tag.StudyDate, dicomQuery.getStudyDate()),
 			new DicomParam(Tag.StudyDescription, dicomQuery.getStudyDescription())
 		};
-		List<Attributes> attributesStudies = queryCFIND(params, QueryRetrieveLevel.STUDY, calling, called);
+		List<Attributes> attributesStudies = queryCFind(params, QueryRetrieveLevel.STUDY);
 		if (attributesStudies != null) {
 			List<Study> studies = new ArrayList<>();
 			for (int i = 0; i < attributesStudies.size(); i++) {
 				Study study = new Study(attributesStudies.get(i));
 				studies.add(study);
-				querySeries(calling, called, study);
+				querySeries(study);
 			}
 			studies.sort((p1, p2) -> p1.getStudyDate().compareTo(p2.getStudyDate()));
 			patient.setStudies(studies);
@@ -390,7 +363,7 @@ public class QueryPACSService {
 	 * @param called
 	 * @param study
 	 */
-	private void querySeries(DicomNode calling, DicomNode called, Study study) {
+	private void querySeries(Study study) {
 		DicomParam[] params = {
 			new DicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID()),
 			new DicomParam(Tag.SeriesInstanceUID),
@@ -404,14 +377,14 @@ public class QueryPACSService {
 			new DicomParam(Tag.ManufacturerModelName),
 			new DicomParam(Tag.DeviceSerialNumber)
 		};
-		List<Attributes> attributesList = queryCFIND(params, QueryRetrieveLevel.SERIES, calling, called);
+		List<Attributes> attributesList = queryCFind(params, QueryRetrieveLevel.SERIES);
 		if (attributesList != null) {
 			List<Serie> series = new ArrayList<Serie>();
 			for (int i = 0; i < attributesList.size(); i++) {
 				Attributes attributes = attributesList.get(i);
 				Serie serie = new Serie(attributes);
 				if (!DicomSerieAndInstanceAnalyzer.checkSerieIsIgnored(attributes)) {
-					queryInstances(calling, called, serie, study);
+					queryInstances(serie, study);
 					if (!serie.getInstances().isEmpty()) {
 						DicomSerieAndInstanceAnalyzer.checkSerieIsEnhanced(serie, attributes);
 						DicomSerieAndInstanceAnalyzer.checkSerieIsSpectroscopy(serie);
@@ -439,14 +412,14 @@ public class QueryPACSService {
 	 * @param called
 	 * @param serie
 	 */
-	private void queryInstances(DicomNode calling, DicomNode called, Serie serie, Study study) {
+	private void queryInstances(Serie serie, Study study) {
 		DicomParam[] params = {
 			new DicomParam(Tag.StudyInstanceUID, study.getStudyInstanceUID()),
 			new DicomParam(Tag.SeriesInstanceUID, serie.getSeriesInstanceUID()),
 			new DicomParam(Tag.SOPInstanceUID),
 			new DicomParam(Tag.InstanceNumber)
 		};
-		List<Attributes> attributes = queryCFIND(params, QueryRetrieveLevel.IMAGE, calling, called);
+		List<Attributes> attributes = queryCFind(params, QueryRetrieveLevel.IMAGE);
 		if (attributes != null) {
 			List<Instance> instances = new ArrayList<>();
 			for (int i = 0; i < attributes.size(); i++) {
@@ -462,76 +435,56 @@ public class QueryPACSService {
 	
 	/**
 	 * This method does a C-FIND query and returns the results.
-	 * @param params
+	 * 
+	 * The state of each c-find query is a local attribute of the method.
+	 * So, when e.g. on the server 3 users call in parallel queryCFind,
+	 * each one has its own DimseRSPHandler and its own state, so this
+	 * might work, in case the association is not caching aspects.
+	 * 
+	 * @param keys
 	 * @param level
-	 * @param calling
-	 * @param called
 	 * @return
 	 */
-	private List<Attributes> queryCFIND(DicomParam[] params, QueryRetrieveLevel level, final DicomNode calling, final DicomNode called) {
-		AdvancedParams options = new AdvancedParams();
+	private List<Attributes> queryCFind(DicomParam[] keys, QueryRetrieveLevel level) {
+		String cuid = null;
 		if (level.equals(QueryRetrieveLevel.PATIENT)) {
-			options.setInformationModel(InformationModel.PatientRoot);
+			cuid = UID.PatientRootQueryRetrieveInformationModelFind;
 		} else if (level.equals(QueryRetrieveLevel.STUDY)) {
-			options.setInformationModel(InformationModel.StudyRoot);
+			cuid = UID.StudyRootQueryRetrieveInformationModelFind;
 		} else if (level.equals(QueryRetrieveLevel.SERIES)) {
-			options.setInformationModel(InformationModel.StudyRoot);
+			cuid = UID.StudyRootQueryRetrieveInformationModelFind;
 		} else if (level.equals(QueryRetrieveLevel.IMAGE)) {
-			options.setInformationModel(InformationModel.StudyRoot);
+			cuid = UID.StudyRootQueryRetrieveInformationModelFind;
 		}
-		logQuery(params, options);
-		DicomState state = processCFind(options, 0, level, params);
+		Attributes attributes = new Attributes();
+		for (DicomParam p : keys) {
+			addAttributes(attributes, p);
+		}
+		DicomState state = new DicomState(new DicomProgress());
+		DimseRSPHandler rspHandler = new DimseRSPHandler(this.association.nextMessageID()) {
+			@Override
+			public void onDimseRSP(Association as, Attributes cmd, Attributes data) {
+				super.onDimseRSP(as, cmd, data);
+				int status = cmd.getInt(Tag.Status, -1);
+				if (Status.isPending(status)) {
+				} else {
+					state.setStatus(status);
+				}
+			}
+		};
+		try {
+			LOG.info("Calling PACS, C-FIND with level: {}", level);
+			for (int i = 0; i < keys.length; i++) {
+				LOG.info("Tag: {}, Value: {}", keys[i].getTagName(), Arrays.toString(keys[i].getValues()));
+			}
+			this.association.cfind(cuid, Priority.NORMAL, attributes, null, rspHandler);
+		} catch (IOException | InterruptedException e) {
+			LOG.error("Error in c-find query: ", e);
+		}
 		return state.getDicomRSP();
 	}
-	
-	private DicomState processCFind(AdvancedParams params, int cancelAfter, QueryRetrieveLevel level, DicomParam... keys) {
-		this.findSCU.setInformationModel(getInformationModel(params), params.getTsuidOrder(), params.getQueryOptions());
-        if (level != null) {
-            this.findSCU.addLevel(level.name());
-        }
-        for (DicomParam p : keys) {
-            addAttributes(findSCU.getKeys(), p);
-        }
-        findSCU.setCancelAfter(cancelAfter);
-        findSCU.setPriority(params.getPriority());
-        try {
-            DicomState dcmState = findSCU.getState();
-            long t1 = System.currentTimeMillis();
-            findSCU.query();
-            ServiceUtil.forceGettingAttributes(dcmState, findSCU);
-            long t2 = System.currentTimeMillis();
-            String timeMsg =
-                MessageFormat.format("DICOM C-Find from {0} to {1}. Query in {3}ms.",
-                    findSCU.getAAssociateRQ().getCallingAET(), findSCU.getAAssociateRQ().getCalledAET(), t2 - t1);
-            return DicomState.buildMessage(dcmState, timeMsg, null);
-        } catch (Exception e) {
-            LOG.error("FindSCU", e);
-            ServiceUtil.forceGettingAttributes(findSCU.getState(), findSCU);
-            return DicomState.buildMessage(findSCU.getState(), null, e);
-        }
-	}
 
-	/**
-	 * This method logs the params and options of the PACS query.
-	 * @param params
-	 * @param options
-	 */
-	private void logQuery(DicomParam[] params, AdvancedParams options) {
-		LOG.info("Calling PACS, C-FIND with level: {} and params:", options.getInformationModel());
-		for (int i = 0; i < params.length; i++) {
-			LOG.info("Tag: {}, Value: {}", params[i].getTagName(), Arrays.toString(params[i].getValues()));
-		}
-	}
-	
-    private InformationModel getInformationModel(AdvancedParams options) {
-        Object model = options.getInformationModel();
-        if (model instanceof InformationModel) {
-            return (InformationModel) model;
-        }
-        return InformationModel.StudyRoot;
-    }
-
-    private  void addAttributes(Attributes attrs, DicomParam param) {
+    public void addAttributes(Attributes attrs, DicomParam param) {
         int tag = param.getTag();
         String[] ss = param.getValues();
         VR vr = ElementDictionary.vrOf(tag, attrs.getPrivateCreator(tag));
