@@ -1,15 +1,17 @@
 package org.shanoir.ng.events;
 
+import java.sql.Types;
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.Table;
-
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 
 /**
  * A shanoir event is an event allowing to keep some history during CRUD events of shanoir elements
@@ -38,6 +40,7 @@ public class ShanoirEvent {
 	protected Long userId;
 
 	/** Message of the event, can be informative, or display an error **/
+	@JdbcTypeCode(Types.LONGVARCHAR)
 	protected String message;
 
 	/** Creation date, automatically generated **/
@@ -201,5 +204,4 @@ public class ShanoirEvent {
 	public void setStudyId(Long studyId) {
 		this.studyId = studyId;
 	}
-
 }

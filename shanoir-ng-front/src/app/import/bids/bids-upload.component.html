@@ -46,24 +46,24 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
         </legend>
         <li>
-            <label class="required-label">Select a research study</label> 
+            <label class="required-label">Select a research study</label>
             <span class="right-col">
-                <select-box 
+                <select-box
                         [(ngModel)]="study"
                         (userChange)="onSelectStudy();"
-                        (onViewClick)="showStudyDetails()" 
-                        [viewDisabled]="!study" 
+                        [viewRoute]="'/study/details/' + this.study?.id"
+                        [viewDisabled]="!study"
                         [options]="studyOptions">
                 </select-box>
             </span>
         </li>
         <li>
-            <label>Select an associated center</label> 
+            <label>Select an associated center</label>
             <span class="right-col">
                 <select-box
                         [disabled]="(!study || !centerOptions || study.monoCenter || this.study.studyCenterList.length == 1)"
                         [(ngModel)]="center"
-                        (onViewClick)="showCenterDetails()"
+                        [viewRoute]="'/center/details/' + this.center?.id"
                         [viewDisabled]="!center"
                         [options]="centerOptions">
                 </select-box>
@@ -72,7 +72,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 </fieldset>
 
 <upload-file (fileChange)="uploadArchive($event)" [loading]="archiveStatus == 'uploading'" [error]="archiveStatus == 'error'"></upload-file>
-<label *ngIf="archiveStatus == 'uploaded'" > Data sucessufully imported.</label>
+<label *ngIf="archiveStatus == 'uploaded'" > Data successfully imported.</label>
 <label *ngIf="errorMessage" class="form-validation-alert" i18n="Import|ExtensionError label">
 {{errorMessage}}
 </label>

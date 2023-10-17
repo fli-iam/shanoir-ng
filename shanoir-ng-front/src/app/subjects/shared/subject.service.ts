@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -23,6 +23,7 @@ import { HttpClient } from '@angular/common/http';
 import { SubjectDTO, SubjectDTOService } from './subject.dto';
 import { SubjectStudyDTO } from './subject-study.dto';
 import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
+import {BACKEND_API_SUBJECT_URL} from "../../utils/app.utils";
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
@@ -40,6 +41,16 @@ export class SubjectService extends EntityService<Subject> {
         .toPromise();
     }
 
+    getClinicalSubjects(): Promise<Subject[]> {
+        return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL + '?preclinical=false')
+            .toPromise();
+    }
+
+    getPreclinicalSubjects(): Promise<Subject[]> {
+        return this.http.get<Subject[]>(AppUtils.BACKEND_API_SUBJECT_URL + '?clinical=false')
+            .toPromise();
+    }
+
     getPage(pageable: Pageable, name: String):  Promise<Page<Subject>> {
         let params = { 'params': pageable.toParams() };
         params['params']['name'] = name;
@@ -53,7 +64,7 @@ export class SubjectService extends EntityService<Subject> {
 
     updateSubjectStudyValues(subjectStudy: SubjectStudy): Promise<void> {
         return this.http.put<void>(
-                AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id, 
+                AppUtils.BACKEND_API_SUBJECT_STUDY_URL + '/' + subjectStudy.id,
                 JSON.stringify(new SubjectStudyDTO(subjectStudy))
             ).toPromise();
     }

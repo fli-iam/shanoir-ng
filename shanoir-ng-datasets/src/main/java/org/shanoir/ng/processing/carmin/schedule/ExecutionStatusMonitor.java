@@ -1,24 +1,17 @@
 package org.shanoir.ng.processing.carmin.schedule;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.PathMatcher;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang3.StringUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.keycloak.representations.AccessTokenResponse;
 import org.shanoir.ng.processing.carmin.model.CarminDatasetProcessing;
 import org.shanoir.ng.processing.carmin.model.Execution;
 import org.shanoir.ng.processing.carmin.model.ExecutionStatus;
-import org.shanoir.ng.processing.carmin.output.DefaultOutputProcessing;
 import org.shanoir.ng.processing.carmin.output.OutputProcessing;
+import org.shanoir.ng.processing.carmin.output.OutputProcessingException;
+import org.shanoir.ng.processing.carmin.output.OutputProcessingService;
 import org.shanoir.ng.processing.carmin.service.CarminDatasetProcessingService;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.SecurityException;
 import org.shanoir.ng.shared.security.KeycloakServiceAccountUtils;
@@ -27,11 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +28,7 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
 /**
  * CRON job to request VIP api and create processedDataset
  * 
@@ -47,8 +36,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @Service
 public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
-
-	private static final String DEFAULT_OUTPUT = "default";
 
 	@Value("${vip.uri}")
 	private String VIP_URI;
@@ -63,8 +50,6 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 
 	private String identifier;
 
-	private String accessToken = "";
-
 	private static final Logger LOG = LoggerFactory.getLogger(ExecutionStatusMonitor.class);
 
 	@Autowired
@@ -74,26 +59,22 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	private KeycloakServiceAccountUtils keycloakServiceAccountUtils;
 
 	@Autowired
-	private ObjectMapper mapper;
+	private ShanoirEventService eventService;
 
 	@Autowired
-	private DefaultOutputProcessing defaultOutputProcessing;
-	
-	// Map of output methods to execute.
-    private static Map<String, OutputProcessing> outputProcessingMap;
+	private OutputProcessingService outputProcessingService;
 
-	@PostConstruct
-	public void Initialize() {
-		// Init output map
-        Map<String, OutputProcessing> aMap =  new HashMap<>();
-        aMap.put(DEFAULT_OUTPUT, defaultOutputProcessing);
-        outputProcessingMap = Collections.unmodifiableMap(aMap);
-	}
-
+	/**
+	 * Async job that monitor the state of the VIP execution and process its outcome
+	 *
+	 * @param identifier unique id of the VIP execution
+	 * @throws EntityNotFoundException
+	 * @throws SecurityException
+	 */
 	@Async
 	@Override
 	@Transactional
-	public void startJob(String identifier) throws EntityNotFoundException, SecurityException {
+	public void startMonitoringJob(String identifier) throws EntityNotFoundException, SecurityException {
 		int attempts = 1;
 		this.identifier = identifier;
 
@@ -102,110 +83,145 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 		String uri = VIP_URI + identifier + "/summary";
 		RestTemplate restTemplate = new RestTemplate();
 
-		// check if the token is initialized
-		if (this.accessToken.isEmpty()) {
-			// refresh the token
-			this.refreshServiceAccountAccessToken();
-		}
+		// refresh the token
+		String token = this.refreshServiceAccountAccessToken();
 
-		CarminDatasetProcessing carminDatasetProcessing = this.carminDatasetProcessingService
+		CarminDatasetProcessing processing = this.carminDatasetProcessingService
 				.findByIdentifier(this.identifier)
 				.orElseThrow(() -> new EntityNotFoundException(
-						"entity not found with identifier :" + this.identifier));
+						"Processing [" + this.identifier + "] not found"));
+		processing.setProcessingDate(LocalDate.now());
+
+		String execLabel = this.getExecLabel(processing);
+
+		ShanoirEvent event = new ShanoirEvent(
+				ShanoirEventType.IMPORT_DATASET_EVENT,
+				processing.getId().toString(),
+				KeycloakUtil.getTokenUserId(),
+				execLabel + " : " + ExecutionStatus.RUNNING.getRestLabel(),
+				ShanoirEvent.IN_PROGRESS,
+				0.5f);
+		eventService.publishEvent(event);
+
 
 		while (!stop.get()) {
 
-			// init headers with the active access token
-			HttpHeaders headers = new HttpHeaders();
-			headers.set("Authorization", "Bearer " + this.accessToken);
-			HttpEntity entity = new HttpEntity(headers);
+			try{
 
-			// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
-			if(attempts >= 3){
-				LOG.error("failed to get execution details in {} attempts.", attempts);
-				LOG.error("Stopping the thread...");
-				stop.set(true);
-				break;
-			}
+				Execution execution = this.getExecutionFromVIP(token, attempts, restTemplate, uri);
 
-			try {
-				ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
-				Execution execution = executionResponseEntity.getBody();
-				// init attempts due to successful response
-				attempts = 1;
-				switch (execution.getStatus()) {
-				case FINISHED:
-					/**
-					 * updates the status and finish the job
-					 */
-
-					carminDatasetProcessing.setStatus(ExecutionStatus.FINISHED);
-
-					this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
-
-					// untar the .tgz files
-					final File userImportDir = new File(
-							this.importDir + File.separator +
-							carminDatasetProcessing.getResultsLocation());
-
-					final PathMatcher matcher = userImportDir.toPath().getFileSystem()
-							.getPathMatcher("glob:**/*.{tgz,tar.gz}");
-					final Stream<java.nio.file.Path> stream = Files.list(userImportDir.toPath());
-
-					String outputProcessingKey = StringUtils.isEmpty(carminDatasetProcessing.getOutputProcessing()) ? DEFAULT_OUTPUT : carminDatasetProcessing.getOutputProcessing();
-					
-					stream.filter(matcher::matches)
-					.forEach(zipFile -> {
-						outputProcessingMap.get(outputProcessingKey).manageTarGzResult(zipFile.toFile(), userImportDir.getAbsoluteFile(), carminDatasetProcessing);
-					});
-
-					LOG.info("execution status updated, stopping job...");
-
-					stop.set(true);
-					break;
-
-				case UNKOWN:
-				case EXECUTION_FAILED:
-				case KILLED:
-
-					carminDatasetProcessing.setStatus(execution.getStatus());
-					this.carminDatasetProcessingService.updateCarminDatasetProcessing(carminDatasetProcessing);
-					LOG.info("execution status updated, stopping job...");
-
-					stop.set(true);
-					break;
-
-				case RUNNING:
-					Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
-					break;
-
-				default:
-					stop.set(true);
-					break;
-				}
-			} catch (HttpStatusCodeException e) {
-				// in case of an error with response payload
-				if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
-					LOG.warn("Unauthorized");
-					LOG.info("Getting new token...");
-					this.refreshServiceAccountAccessToken();
-					// inc attempts.
+				if(execution == null){
+					token = this.refreshServiceAccountAccessToken();
 					attempts++;
-				} else {
-					LOG.error("error while getting execution info with status : {} ,and message :", e.getStatusCode(), e.getMessage());
-					stop.set(true);
+					continue;
 				}
-			} catch (RestClientException e) {
-				// in case of an error with no response payload
-				LOG.error("there is no response payload while getting execution info", e);
-				stop.set(true);
-			} catch (InterruptedException e) {
-				LOG.error("sleep thread exception :", e);
-				stop.set(true);
-			} catch (IOException e) {
-				LOG.error("file exception :", e);
+
+				attempts = 1;
+
+				switch (execution.getStatus()) {
+					case FINISHED:
+
+						this.processFinishedJob(processing, event);
+						break;
+
+					case UNKOWN:
+					case EXECUTION_FAILED:
+					case KILLED:
+
+						this.processKilledJob(processing, event, execution);
+						break;
+
+					case RUNNING:
+						try{
+							Thread.sleep(sleepTime); // sleep/stop a thread for 20 seconds
+						} catch (InterruptedException e) {
+							throw new OutputProcessingException("Thread exception", e);
+						}
+						break;
+					default:
+						stop.set(true);
+						break;
+				}
+
+			}catch (OutputProcessingException e){
+				LOG.error(e.getMessage(), e.getCause());
+				this.setJobInError(event, execLabel + " : " + e.getMessage());
+				LOG.warn("Stopping thread...");
 				stop.set(true);
 			}
+		}
+	}
+
+	private String getExecLabel(CarminDatasetProcessing processing) {
+		return "VIP Execution [" + processing.getName() + "]";
+	}
+
+	public void processKilledJob(CarminDatasetProcessing processing, ShanoirEvent event, Execution execution) throws EntityNotFoundException {
+
+		String execLabel = this.getExecLabel(processing);
+
+		LOG.warn("{} status is [{}]", execLabel, execution.getStatus().getRestLabel());
+
+		processing.setStatus(execution.getStatus());
+		this.carminDatasetProcessingService.updateCarminDatasetProcessing(processing);
+
+		LOG.info("Execution status updated, stopping job...");
+
+		stop.set(true);
+
+		this.setJobInError(event, execLabel + " : "  + execution.getStatus().getRestLabel()
+				+ (execution.getErrorCode() != null ? " (Error code : " + execution.getErrorCode() + ")" : ""));
+	}
+
+	public void processFinishedJob(CarminDatasetProcessing processing, ShanoirEvent event) throws EntityNotFoundException, OutputProcessingException {
+
+		String execLabel = this.getExecLabel(processing);
+		processing.setStatus(ExecutionStatus.FINISHED);
+		processing.setProcessingDate(LocalDate.now());
+
+		this.carminDatasetProcessingService.updateCarminDatasetProcessing(processing);
+
+		LOG.info("{} status is [{}]", execLabel, ExecutionStatus.FINISHED.getRestLabel());
+		event.setMessage(execLabel + " : Finished. Processing imported results...");
+		eventService.publishEvent(event);
+
+		this.outputProcessingService.process(processing);
+
+		LOG.info("Execution status updated, stopping job...");
+
+		stop.set(true);
+
+		event.setMessage(execLabel + " : Finished");
+		event.setStatus(ShanoirEvent.SUCCESS);
+		event.setProgress(1f);
+		eventService.publishEvent(event);
+	}
+
+	private Execution getExecutionFromVIP(String token, int attempts, RestTemplate restTemplate, String uri) throws OutputProcessingException {
+
+		// check how many times the loop tried to get the execution's info without success (only UNAUTHORIZED error)
+		if(attempts >= 3){
+			throw new OutputProcessingException("Failed to get execution details from VIP in " + attempts + " attempts", null);
+		}
+
+		// init headers with the active access token
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity entity = new HttpEntity(headers);
+
+		try {
+			ResponseEntity<Execution> executionResponseEntity = restTemplate.exchange(uri, HttpMethod.GET, entity, Execution.class);
+			return executionResponseEntity.getBody();
+		} catch (HttpStatusCodeException e) {
+			// in case of an error with response payload
+			if (e.getStatusCode() == HttpStatus.UNAUTHORIZED) {
+				LOG.info("Unauthorized : refreshing token... ({} attempts)", attempts);
+				return null;
+			} else {
+				throw new OutputProcessingException("Failed to get execution details from VIP in " + attempts + " attempts", e);
+			}
+		} catch (RestClientException e) {
+			throw new OutputProcessingException("No response payload in execution infos from VIP", e);
 		}
 	}
 
@@ -213,8 +229,15 @@ public class ExecutionStatusMonitor implements ExecutionStatusMonitorService {
 	 * Get token from keycloak service account
 	 * @return
 	 */
-	private void refreshServiceAccountAccessToken() throws SecurityException {
+	private String refreshServiceAccountAccessToken() throws SecurityException {
 		AccessTokenResponse accessTokenResponse = keycloakServiceAccountUtils.getServiceAccountAccessToken();
-		this.accessToken = accessTokenResponse.getToken();
+		return accessTokenResponse.getToken();
+	}
+
+	private void setJobInError(ShanoirEvent event, String msg){
+		event.setMessage(msg);
+		event.setStatus(ShanoirEvent.ERROR);
+		event.setProgress(1f);
+		eventService.publishEvent(event);
 	}
 }

@@ -14,20 +14,22 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import java.math.BigDecimal;
-
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Keyword;
 import org.dcm4che3.data.StandardElementDictionary;
 import org.dcm4che3.data.VR;
 import org.shanoir.ng.studycard.model.DicomTagType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Entity
 @DiscriminatorValue("StudyCardDICOMCondition")
@@ -51,8 +53,18 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
     }
         
     public boolean fulfilled(Attributes dicomAttributes, StringBuffer errorMsg) {
-        LOG.info("conditionFulfilled: " + this.getId() + " processing one condition with all its values: ");
-        this.getValues().stream().forEach(s -> LOG.info(s));
+        LOG.debug("conditionFulfilled: " + this.getId() + " processing one condition with all its values: ");
+        this.getValues().stream().forEach(s -> LOG.debug(s));
+        if (dicomAttributes == null) {
+            if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                + "] was ignored because no dicom data was provided");
+            return true;
+        }
+        if (!dicomAttributes.contains(getDicomTag())) {
+            if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                + "] failed because no value was found in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+            return false;
+        }
         VR tagVr = StandardElementDictionary.INSTANCE.vrOf(this.getDicomTag());
         DicomTagType tagType = DicomTagType.valueOf(tagVr);
         // get all possible values, that can fulfill the condition
@@ -65,15 +77,43 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
                 BigDecimal scValue = new BigDecimal(value);
                 Integer comparison = null;
                 if (DicomTagType.Float.equals(tagType)) {
-                    Float floatValue = dicomAttributes.getFloat(this.getDicomTag(), Float.MIN_VALUE);          
-                    comparison = BigDecimal.valueOf(floatValue).compareTo(scValue);
+                    Float floatValue = dicomAttributes.getFloat(this.getDicomTag(), Float.NaN);
+                    if (floatValue.equals(Float.NaN)) {
+                        if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                            + "] failed because there was a problem when reading the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                        return false;
+                    } else comparison = BigDecimal.valueOf(floatValue).compareTo(scValue);
                 // There is no dicomAttributes.getLong() !
-                }   else if (DicomTagType.Double.equals(tagType) || DicomTagType.Long.equals(tagType)) {
-                    Double doubleValue = dicomAttributes.getDouble(this.getDicomTag(), Double.MIN_VALUE);          
-                    comparison = BigDecimal.valueOf(doubleValue).compareTo(scValue);
+                } else if (DicomTagType.Double.equals(tagType) || DicomTagType.Long.equals(tagType)) {
+                    Double doubleValue = dicomAttributes.getDouble(this.getDicomTag(), Double.NaN);
+                    if (doubleValue.equals(Double.NaN)) {
+                        if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                            + "] failed because there was a problem when reading the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                        return false;
+                    } else comparison = BigDecimal.valueOf(doubleValue).compareTo(scValue);
                 } else if (DicomTagType.Integer.equals(tagType)) {
                     Integer integerValue = dicomAttributes.getInt(this.getDicomTag(), Integer.MIN_VALUE);
-                    comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
+                    if (integerValue.equals(Integer.MIN_VALUE)) {
+                        if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                            + "] failed because there was a problem when reading the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                        return false;
+                    } else comparison = BigDecimal.valueOf(integerValue).compareTo(scValue);
+                } else if (DicomTagType.Date.equals(tagType)) {
+                    Date dateValue = dicomAttributes.getDate(this.getDicomTag());
+                    if (dateValue.equals(null)) {
+                        if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                            + "] failed because there was a problem when reading the date tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
+                        return false;
+                    } else {
+                        try {
+                            Date scDate = new SimpleDateFormat("yyyyMMdd").parse(value);
+                            comparison = dateValue.compareTo(scDate);
+                        } catch (ParseException e) {
+                            if (errorMsg != null) errorMsg.append("condition [" + toString() 
+                                + "] failed because there was a problem parsing the value as a date");
+                            return false;
+                        }
+                    }
                 }
                 if (comparison != null && numericalCompare(this.getOperation(), comparison)) {
                     if (errorMsg != null) errorMsg.append("condition [" + toString() + "] succeed");
@@ -82,13 +122,13 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
             } else if (tagType.isTextual()) {
                 if (!this.getOperation().isTextual()) {
                     throw new IllegalArgumentException("Study card processing : operation " + this.getOperation() + " is not compatible with dicom tag " 
-                            + this.getDicomTag() + " of type " + tagType + "(condition id : " + this.getId() + ")");
+                            + getDicomTagCodeAndLabel(this.getDicomTag()) + " of type " + tagType + "(condition id : " + this.getId() + ")");
                 }   
                 String stringValue = dicomAttributes.getString(this.getDicomTag());
                 if (stringValue == null) {
-                    LOG.warn("Could not find a value in the dicom for the tag " + this.getDicomTag());
+                    LOG.warn("Could not find a value in the dicom for the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
                     if (errorMsg != null) errorMsg.append("condition [" + toString() 
-                        + "] failed because no value was found in the dicom for the tag " + this.getDicomTag());
+                        + "] failed because there was a problem when reading the tag " + getDicomTagCodeAndLabel(this.getDicomTag()));
                     return false;
                 }               
                 if (textualCompare(this.getOperation(), stringValue, value)) {
@@ -104,7 +144,7 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("DICOM field n°").append(getDicomTagHexString(getDicomTag()))
+        sb.append("DICOM field ").append(getDicomTagCodeAndLabel(getDicomTag()))
             .append(" ").append(getOperation().name())
             .append(" to ")
             .append(StringUtils.join(getValues(), " or "));        
@@ -116,5 +156,9 @@ public class StudyCardDICOMCondition extends StudyCardCondition {
         hexStr = StringUtils.leftPad(hexStr, 8, "0");
         hexStr = hexStr.substring(0, 5) + "," + hexStr.substring(5);
         return hexStr;
+    }
+    
+    private String getDicomTagCodeAndLabel(int tag) {
+        return Keyword.valueOf(tag) + " (" + getDicomTagHexString(tag) + ")";
     }
 }

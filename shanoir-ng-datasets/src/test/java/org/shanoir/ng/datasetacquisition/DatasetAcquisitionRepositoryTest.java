@@ -14,36 +14,29 @@
 
 package org.shanoir.ng.datasetacquisition;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.data.util.Pair;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import org.apache.commons.math3.util.Pair;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper;
-import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests for repository 'examination'.
@@ -51,23 +44,14 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
  * @author ifakhfakh
  *
  */
-@RunWith(SpringRunner.class)
+
 @DataJpaTest
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class DatasetAcquisitionRepositoryTest {
 	
 	@Autowired
 	private DatasetAcquisitionRepository repository;
-
-	/*
-	 * Mocks used to avoid unsatisfied dependency exceptions.
-	 */
-	@MockBean
-	private AuthenticationManager authenticationManager;
-	@MockBean
-	private DocumentationPluginsBootstrapper documentationPluginsBootstrapper;
-	@MockBean
-	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
 
 	@Test
 	public void findAllTest() throws Exception {
@@ -83,7 +67,7 @@ public class DatasetAcquisitionRepositoryTest {
 	@Test
 	public void findPageByStudyCenterOrStudyIdInTest() throws Exception {
 		List<Pair<Long, Long>> studyCentersList = new ArrayList<>();
-		studyCentersList.add(new Pair<Long, Long>(1L, 1L));
+		studyCentersList.add(Pair.of(1L, 1L));
 		Set<Long> studyIds = new HashSet<>();
 		studyIds.add(3L);
 		

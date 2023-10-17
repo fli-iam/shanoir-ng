@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -45,6 +45,7 @@ import { EntityService } from 'src/app/shared/components/entity/entity.abstract.
 import { ExaminationService } from '../../../examinations/shared/examination.service';
 import { AnimalExaminationService } from '../shared/animal-examination.service';
 import { ExaminationNode } from '../../../tree/tree.model';
+import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
 @Component({
     selector: 'examination-preclinical-form',
@@ -75,25 +76,27 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     animalSubjectId: number;
     private inImport: boolean;
     private files: File[] = [];
-    
+    unit = UnitOfMeasure;
+    defaultUnit = this.unit.KG;
+
     constructor(
         private route: ActivatedRoute,
-        private examinationService: ExaminationService, 
-        private animalExaminationService: AnimalExaminationService, 
+        private examinationService: ExaminationService,
+        private animalExaminationService: AnimalExaminationService,
         private examAnestheticService: ExaminationAnestheticService,
         private extradatasService: ExtraDataService,
         private contrastAgentsService: ContrastAgentService,
-        private animalSubjectService: AnimalSubjectService, 
+        private animalSubjectService: AnimalSubjectService,
         private centerService: CenterService,
-        private studyService: StudyService, 
-        public breadcrumbsService: BreadcrumbsService) 
+        private studyService: StudyService,
+        public breadcrumbsService: BreadcrumbsService)
     {
 
         super(route, 'preclinical-examination');
         this.inImport = breadcrumbsService.isImporting();
         this.manageSaveEntity();
     }
-    
+
     get examination(): Examination { return this.entity; }
     set examination(examination: Examination) { this.entity = examination; }
 
@@ -103,33 +106,39 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     initView(): Promise<void> {
         return this.examinationService.get(this.id).then(examination => {
-            this.examination = examination; 
+            this.examination = examination;
+            if(!this.examination.weightUnitOfMeasure){
+                this.examination.weightUnitOfMeasure = this.defaultUnit;
+            }
             this.updateExam();
             //this.loadExaminationAnesthetic();
             if(this.examination && this.examination.subject && this.examination.subject.id ){
                 this.animalSubjectService
-        			.findAnimalSubjectBySubjectId(this.examination.subject.id)
+        			.getAnimalSubject(this.examination.subject.id)
         			.then(animalSubject => this.animalSubjectId = animalSubject.id)
                     .catch((error) => {});
-                
+
         	}
         });
     }
 
-    
+
     initEdit(): Promise<void> {
         this.getCenters();
         this.getStudies();
         return this.examinationService.get(this.id).then(examination => {
             this.examination = examination;
+            if(!this.examination.weightUnitOfMeasure){
+                this.examination.weightUnitOfMeasure = this.defaultUnit;
+            }
             this.updateExam();
             //this.loadExaminationAnesthetic(this.id);
             if(this.examination && this.examination.subject && this.examination.subject.id){
                 this.animalSubjectService
-        			.findAnimalSubjectBySubjectId(this.examination.subject.id)
+        			.getAnimalSubject(this.examination.subject.id)
         			.then(animalSubject => this.animalSubjectId = animalSubject.id)
                     .catch((error) => {});
-                
+
         	}
         });
 
@@ -137,6 +146,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
 
     initCreate(): Promise<void> {
         this.entity = new Examination();
+        this.examination.weightUnitOfMeasure = this.defaultUnit;
         this.examination.preclinical = true;
         this.getCenters();
         this.getStudies();
@@ -153,7 +163,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment],
             'note': [this.examination.note],
-            'subjectWeight': [this.examination.subjectWeight, [Validators.pattern(numericRegex)]]
+            'subjectWeight': [this.examination.subjectWeight, [Validators.pattern(numericRegex)]],
+            'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
     }
 
@@ -167,7 +178,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             this.examination.subjectStudy.name = this.examination.subject.name;
         }
     }
-    
+
     private getCenters(): void {
         this.centers = [];
         this.centerService
@@ -185,8 +196,8 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 this.studies = studies;
             });
     }
-    
-    
+
+
     public getSubjects(): void {
         if (!this.examination.study) return;
         this.studyService
@@ -203,7 +214,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
                 this.addExtraDataToExamination(response.id, false);
             })
         );
-       
+
     }
 
 
@@ -213,7 +224,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             for (let file of this.files) {
                 this.examinationService.postFile(file, this.entity.id);
             }
-            return result;         
+            return result;
         });
     }
 
@@ -231,20 +242,6 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
             }
         }
     }
-
-  /*  manageContrastAgent() {
-        if (this.protocol_id && this.contrastAgent) {
-            if (this.contrastAgent.id) {
-                this.contrastAgentsService.update(this.protocol_id, this.contrastAgent)
-                    .subscribe(agent => {
-                    });
-            } else {
-                this.contrastAgentsService.create(this.protocol_id, this.contrastAgent)
-                    .subscribe(agent => {
-                    });
-            }
-        }
-    }*/
 
     addExtraDataToExamination(examination_id: number, isUpdate: boolean) {
         if (!examination_id) { return; }
@@ -324,7 +321,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.physioData.has_respiratory_rate = this.physioDataFile.has_respiratory_rate;
         this.physioData.has_sao2 = this.physioDataFile.has_sao2;
         this.physioData.has_temperature = this.physioDataFile.has_temperature;
-        
+
     }
 
     onUploadBloodGasData(event) {
@@ -333,7 +330,7 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         this.bloodGasData.filename =  this.bloodGasDataFile.filename;
         this.bloodGasData.extradatatype = "Blood gas data"
     }
-    
+
     public exportBruker() {
         this.animalExaminationService.getBrukerArchive(this.examination.id)
             .then(response => {this.downloadIntoBrowser(response);});;
@@ -352,38 +349,38 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
         let contentDispHeader: string = response.headers.get('Content-Disposition');
         return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
     }
-    
+
     onExamAnestheticChange(event) {
         this.examAnesthetic = event;
     }
-    
+
     onAgentChange(event) {
         this.contrastAgent = event;
     }
-    
-    
+
+
     closePopin(instAssessmentId?: number) {
         this.instAssessmentModal.hide();
     }
-    
+
     public async hasEditRight(): Promise<boolean> {
         return false;
     }
-    
+
     public async hasDeleteRight(): Promise<boolean> {
         return false;
     }
-    
+
     // Extra data file management
-    
+
     public setFile() {
         this.fileInput.nativeElement.click();
     }
-    
+
     getFileName(element: string): string {
         return element.split('\\').pop().split('/').pop();
     }
-    
+
     public deleteFile(file: any) {
         this.examination.extraDataFilePathList = this.examination.extraDataFilePathList.filter(fileToKeep => fileToKeep != file);
         this.files = this.files.filter(fileToKeep => fileToKeep.name != file);
@@ -398,6 +395,10 @@ export class AnimalExaminationFormComponent extends EntityComponent<Examination>
     onExaminationNodeInit(node: ExaminationNode) {
         node.open = true;
         this.breadcrumbsService.currentStep.data.examinationNode = node;
+    }
+
+    getUnit(key: string) {
+        return UnitOfMeasure.getLabelByKey(key);
     }
 
 }

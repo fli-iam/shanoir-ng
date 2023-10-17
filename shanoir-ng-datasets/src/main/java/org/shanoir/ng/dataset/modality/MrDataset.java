@@ -14,23 +14,13 @@
 
 package org.shanoir.ng.dataset.modality;
 
+import jakarta.persistence.*;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.shared.model.*;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
-
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.shared.model.DiffusionGradient;
-import org.shanoir.ng.shared.model.EchoTime;
-import org.shanoir.ng.shared.model.FlipAngle;
-import org.shanoir.ng.shared.model.InversionTime;
-import org.shanoir.ng.shared.model.RepetitionTime;
 
 /**
  * MR dataset.

@@ -14,24 +14,10 @@
 
 package org.shanoir.ng.studycard.model.rule;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
-
+import jakarta.persistence.*;
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.model.SubjectStudy;
@@ -45,6 +31,11 @@ import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
@@ -100,6 +91,7 @@ public class QualityExaminationRule extends AbstractEntity {
             if ((conditionResult.isFulfilled() && !getQualityTag().equals(QualityTag.VALID))
                     || (!conditionResult.isFulfilled() && getQualityTag().equals(QualityTag.VALID))) {
                 QualityCardResultEntry resultEntry = initResult(examination);
+                resultEntry.setTagSet(getQualityTag());
                 if (conditionResult.isFulfilled()) {
                     resultEntry.setMessage("Tag " + getQualityTag().name() + " was set because those conditions were fulfilled : " + StringUtils.join(conditionResult.getFulfilledConditionsMsgList(), ", "));                   
                 } else {
@@ -121,6 +113,7 @@ public class QualityExaminationRule extends AbstractEntity {
         SubjectStudy subjectStudyCopy = new SubjectStudy();
         subjectStudyCopy.setId(subjectStudy.getId());
         subjectStudyCopy.setQualityTag(getQualityTag());
+        subjectStudyCopy.setStudy(subjectStudy.getStudy());
         return subjectStudyCopy;
     }
 
@@ -160,14 +153,14 @@ public class QualityExaminationRule extends AbstractEntity {
     }
     
     private ExaminationData convert(Examination examination) {
-        // Keep only MR acquisitions
         if (examination == null) throw new IllegalArgumentException("examination can't be null");
         if (examination.getDatasetAcquisitions() == null) throw new IllegalArgumentException("examination acquisitions can't be null");
         if (examination.getStudy() == null) throw new IllegalArgumentException("study can't be null");
         if (examination.getStudy().getSubjectStudyList() == null) throw new IllegalArgumentException("subjectStudyList can't be null");
-        List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions().stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
+        // Keep only MR acquisitions
+        // List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions().stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
         ExaminationData examData = new ExaminationData();
-        examData.setDatasetAcquisitions(acquisitions);
+        examData.setDatasetAcquisitions(examination.getDatasetAcquisitions());
         examData.setExaminationComment(examination.getComment());
         examData.setExaminationDate(examination.getExaminationDate());
         examData.setSubjectName(examination.getSubject().getName());

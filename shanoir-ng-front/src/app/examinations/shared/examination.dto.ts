@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -21,6 +21,7 @@ import { StudyService } from '../../studies/shared/study.service';
 import { Subject } from '../../subjects/shared/subject.model';
 import { Examination } from './examination.model';
 import { InstrumentBasedAssessment } from "../instrument-assessment/instrument.model"
+import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
 @Injectable()
 export class ExaminationDTOService {
@@ -34,7 +35,7 @@ export class ExaminationDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without async data
      */
-    public toEntity(dto: ExaminationDTO, result?: Examination): Promise<Examination> {        
+    public toEntity(dto: ExaminationDTO, result?: Examination): Promise<Examination> {
         if (!result) result = new Examination();
         ExaminationDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
@@ -74,6 +75,7 @@ export class ExaminationDTOService {
         entity.comment = dto.comment;
         entity.note = dto.note;
         entity.subjectWeight = dto.subjectWeight;
+        entity.weightUnitOfMeasure = dto.weightUnitOfMeasure;
         entity.preclinical = dto.preclinical;
         entity.extraDataFilePathList = dto.extraDataFilePathList;
         entity.instrumentBasedAssessmentList = dto.instrumentBasedAssessmentList;
@@ -103,6 +105,7 @@ export class ExaminationDTO {
     studyId: number;
     subject: IdName;
     subjectWeight: number;
+    weightUnitOfMeasure: UnitOfMeasure;
     preclinical: boolean;
     instrumentBasedAssessmentList: InstrumentBasedAssessment[];
     extraDataFilePathList: string[] = [];
@@ -117,6 +120,7 @@ export class ExaminationDTO {
             this.studyId = examination.study ? examination.study.id : null;
             this.subject = examination.subject ? new IdName(examination.subject.id, examination.subject.name) : null;
             this.subjectWeight = examination.subjectWeight;
+            this.weightUnitOfMeasure = examination.weightUnitOfMeasure;
             this.preclinical = examination.preclinical;
             this.extraDataFilePathList = examination.extraDataFilePathList;
             this.instrumentBasedAssessmentList = examination.instrumentBasedAssessmentList;

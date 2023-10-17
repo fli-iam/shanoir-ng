@@ -14,16 +14,6 @@
 
 package org.shanoir.ng.dataset.security;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -52,6 +42,10 @@ import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DatasetSecurityService {
@@ -101,6 +95,26 @@ public class DatasetSecurityService {
 		}
         return commService.hasRightOnStudy(studyId, rightStr);
     }
+
+	/**
+	 * Check that the connected user has the given right for all the given studies.
+	 *
+	 * @param studyIds the studies ids
+	 * @param rightStr the right
+	 * @return true or false
+	 */
+	public boolean hasRightOnStudies(List<Long> studyIds, String rightStr) {
+		if (KeycloakUtil.getTokenRoles().contains(ROLE_ADMIN)) {
+			return true;
+		}
+		if (studyIds == null|| studyIds.isEmpty()) {
+			return false;
+		}
+
+		Set<Long> givenIds = new HashSet<>(studyIds);
+
+		return givenIds.size() == commService.hasRightOnStudies(givenIds, rightStr).size();
+	}
     
     /**
      * Check that the connected user has the given right for the given subject.
@@ -837,6 +851,7 @@ public class DatasetSecurityService {
      * @return true
      */
     public boolean filterDatasetAcquisitionList(List<DatasetAcquisition> list, String rightStr) {
+        if (list == null) return true;
     	Set<DatasetAcquisition> toRemove = new HashSet<>();
     	list.forEach((DatasetAcquisition ds) -> {
         	if (!this.hasRightOnStudyCenter(ds.getExamination().getCenterId(), ds.getExamination().getStudyId(), rightStr)) {

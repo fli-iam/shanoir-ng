@@ -52,7 +52,6 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -109,15 +108,16 @@ public class ImporterManagerService {
 	@Value("${shanoir.import.directory}")
 	private String importDir;
 	
-	@Async("asyncExecutor")
-	public void manageImportJob(final Long userId, final HttpHeaders keycloakHeaders, final ImportJob importJob) {
-		ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
+	@Async
+	public void manageImportJob(final ImportJob importJob) {
+	    ShanoirEvent event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), importJob.getUserId(), "Starting import configuration", ShanoirEvent.IN_PROGRESS, 0f);
+	    event.setTimestamp(importJob.getTimestamp());
 		eventService.publishEvent(event);
 		importJob.setShanoirEvent(event);
 		try {
 			// Always create a userId specific folder in the import work folder (the root of everything):
 			// split imports to clearly separate them into separate folders for each user
-			final String userImportDirFilePath = importDir + File.separator + Long.toString(userId);
+			final String userImportDirFilePath = importDir + File.separator + Long.toString(importJob.getUserId());
 			final File userImportDir = new File(userImportDirFilePath);
 			if (!userImportDir.exists()) {
 				userImportDir.mkdirs(); // create if not yet existing, e.g. in case of PACS import
@@ -129,13 +129,13 @@ public class ImporterManagerService {
 			if (importJob.isFromPacs()) {
 				importJobDir = createImportJobDir(userImportDir.getAbsolutePath());
 				// at first all dicom files arrive normally in /tmp/shanoir-dcmrcv (see config DicomStoreSCPServer)
-				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients);
+				downloadAndMoveDicomFilesToImportJobDir(importJobDir, patients, event);
 				// convert instances to images, as already done after zip file upload
-				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true);
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), true, event);
 			} else if (importJob.isFromShanoirUploader()) {
 				importJobDir = new File(importJob.getWorkFolder());
 				// convert instances to images, as already done after zip file upload
-				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false);
+				imagesCreatorAndDicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, importJobDir.getAbsolutePath(), false, event);
 			} else if (importJob.isFromDicomZip()) {
 				// images creation and analyze of dicom files has been done after upload already
 				importJobDir = new File(importJob.getWorkFolder());
@@ -143,26 +143,34 @@ public class ImporterManagerService {
 				throw new ShanoirException("Unsupported type of import.");
 			}
 						
-			event.setMessage("Anonymizing dicom..");
+			event.setProgress(0.25F);
 			eventService.publishEvent(event);
+
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = patientsIt.next();
 				// perform anonymization only in case of profile explicitly set
-				if (importJob.getAnonymisationProfileToUse() != null && !importJob.getAnonymisationProfileToUse().isEmpty()) {
-					ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
-					final Subject subject = patient.getSubject();
-					if (subject != null) {
-						final String subjectName = subject.getName();
-						try {
-							ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
-						} catch (Exception e) {
-							LOG.error(e.getMessage(), e);
-							throw new ShanoirException("Error during anonymization.");
-						}						
-					} else {
-						LOG.error("Error: subject == null in importJob.");
-						throw new ShanoirException("Error: subject == null in importJob.");						
-					}
+				if (importJob.getAnonymisationProfileToUse() == null || !importJob.getAnonymisationProfileToUse().isEmpty()) {
+					String anonymizationProfile = (String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE, importJob.getStudyId());
+					importJob.setAnonymisationProfileToUse(anonymizationProfile);
+				}
+				ArrayList<File> dicomFiles = getDicomFilesForPatient(importJob, patient, importJobDir.getAbsolutePath());
+				final Subject subject = patient.getSubject();
+
+				if (subject == null) {
+					LOG.error("Error: subject == null in importJob.");
+					throw new ShanoirException("Error: subject == null in importJob.");
+				}
+
+				final String subjectName = subject.getName();
+
+				event.setMessage("Pseudonymizing DICOM files for subject [" + subjectName + "]...");
+				eventService.publishEvent(event);
+
+				try {
+					ANONYMIZER.anonymizeForShanoir(dicomFiles, importJob.getAnonymisationProfileToUse(), subjectName, subjectName);
+				} catch (Exception e) {
+					LOG.error(e.getMessage(), e);
+					throw new ShanoirException("Error during pseudonymization.");
 				}
 				Long converterId = importJob.getConverterId();
 				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, converterId, importJob);
@@ -172,25 +180,25 @@ public class ImporterManagerService {
 			LOG.info("user=" + KeycloakUtil.getTokenUserName() + ",size=" + ImportUtils.readableFileSize(importJobDirSize) + "," + importJob.toString());
 		} catch (Exception e) {
 			LOG.error("Error during import for study {} and examination {}", importJob.getStudyId(), importJob.getExaminationId(), e);
-			event.setMessage("ERROR while importing data for study " + importJob.getStudyId() + " for examination " + importJob.getExaminationId() + ", please contact an administrator");
+			event.setMessage("ERROR while importing data for study " + importJob.getStudyId() + " for examination " + importJob.getExaminationId());
 			event.setStatus(ShanoirEvent.ERROR);
-			event.setProgress(1f);
+			event.setProgress(-1f);
 			eventService.publishEvent(event);
-			sendFailureMail(importJob, userId, e.getMessage());
+			sendFailureMail(importJob, e.getMessage());
 		}
 	}
 
-	private void sendFailureMail(ImportJob importJob, Long userId, String errorMessage) {
+	private void sendFailureMail(ImportJob importJob, String errorMessage) {
 		EmailDatasetImportFailed generatedMail = new EmailDatasetImportFailed();
 		generatedMail.setExaminationId(importJob.getExaminationId().toString());
 		generatedMail.setStudyId(importJob.getStudyId().toString());
 		generatedMail.setSubjectName(importJob.getSubjectName());
 		generatedMail.setStudyName(importJob.getStudyName());
-		generatedMail.setUserId(userId);
+		generatedMail.setUserId(importJob.getUserId());
 		
 		generatedMail.setErrorMessage(errorMessage != null ? errorMessage : "An unexpected error occured, please contact Shanoir support.");
 
-		sendMail(importJob, generatedMail, RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE);
+		sendMail(importJob, generatedMail);
 	}
 
 	/**
@@ -198,7 +206,7 @@ public class ImporterManagerService {
 	 * @param job the imprt job
 	 * @param email the recipients
 	 */
-	private void sendMail(ImportJob job, EmailBase email, String queue) {
+	private void sendMail(ImportJob job, EmailBase email) {
 		List<Long> recipients = new ArrayList<>();
 
 		// Get all recpients
@@ -215,7 +223,7 @@ public class ImporterManagerService {
 		email.setRecipients(recipients);
 
 		try {
-			rabbitTemplate.convertAndSend(queue, objectMapper.writeValueAsString(email));
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE, objectMapper.writeValueAsString(email));
 		} catch (AmqpException | JsonProcessingException e) {
 			LOG.error("Could not send email for this import. ", e);
 		}
@@ -259,18 +267,24 @@ public class ImporterManagerService {
 	 * @param patients
 	 * @throws ShanoirException
 	 */
-	private void downloadAndMoveDicomFilesToImportJobDir(final File importJobDir, List<Patient> patients) throws ShanoirException {
+	private void downloadAndMoveDicomFilesToImportJobDir(final File importJobDir, List<Patient> patients, ShanoirEvent event) throws ShanoirException {
 		for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 			Patient patient = patientsIt.next();
 			List<Study> studies = patient.getStudies();
 			for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 				Study study = studiesIt.next();
-				List<Serie> series = study.getSeries();
+				List<Serie> series = study.getSelectedSeries();
+				int nbSeries = series.size();
+				int cpt = 1;
 				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 					Serie serie = seriesIt.next();
+					event.setMessage("Downloading DICOM files from PACS for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")");
+					eventService.publishEvent(event);
+
 					queryPACSService.queryCMOVE(serie);
 					String serieID = serie.getSeriesInstanceUID();
 					File serieIDFolderDir = new File(importJobDir + File.separator + serieID);
+
 					if(!serieIDFolderDir.exists()) {
 						serieIDFolderDir.mkdirs();
 					} else {
@@ -288,13 +302,14 @@ public class ImporterManagerService {
 							throw new ShanoirException("Error while creating serie id folder: file to copy does not exist.");
 						}
 					}
+					cpt++;
 				}
 			}
 		}
 	}
 
 	/**
-	 * Using Java HashSet here to avoid duplicate files for anonymization.
+	 * Using Java HashSet here to avoid duplicate files for Pseudonymization.
 	 * For performance reasons already init with 5000 buckets, assuming,
 	 * that we will normally never have more than 5000 files to process.
 	 * Maybe to be evaluated later with more bigger imports.

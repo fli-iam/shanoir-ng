@@ -1,5 +1,6 @@
 package org.shanoir.ng.importer.service;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
@@ -238,7 +239,7 @@ public class DicomSRImporterService {
 	 * @param datasetAttributes
 	 * @throws MalformedURLException
 	 */
-	private void createDataset(Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException {
+	private void createDataset(Examination examination, Dataset dataset, Attributes datasetAttributes) throws MalformedURLException, IOException, SolrServerException {
 		MeasurementDataset measurementDataset = new MeasurementDataset();
 		measurementDataset.setReferencedDatasetForSuperimposition(dataset); // keep link to original dataset
 		measurementDataset.setStudyId(examination.getStudyId());

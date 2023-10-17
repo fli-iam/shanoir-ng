@@ -18,7 +18,7 @@ import java.util.List;
 
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.quality.QualityTag;
-import org.shanoir.ng.subject.model.SubjectType;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 import org.shanoir.ng.tag.model.TagDTO;
 
 /**
@@ -32,6 +32,8 @@ public class SubjectStudyDTO {
 	private Long id;
 
 	private IdName subject;
+
+	private boolean subjectPreclinical;
 
 	private StudyTagsDTO study;
 
@@ -59,6 +61,15 @@ public class SubjectStudyDTO {
 
 	public void setSubject(IdName subject) {
 		this.subject = subject;
+	}
+
+
+	public boolean isSubjectPreclinical() {
+		return subjectPreclinical;
+	}
+
+	public void setSubjectPreclinical(boolean subjectPreclinical) {
+		this.subjectPreclinical = subjectPreclinical;
 	}
 
 	public StudyTagsDTO getStudy() {

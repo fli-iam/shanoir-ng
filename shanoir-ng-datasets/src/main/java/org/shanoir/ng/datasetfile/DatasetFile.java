@@ -14,12 +14,7 @@
 
 package org.shanoir.ng.datasetfile;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
-
+import jakarta.persistence.*;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 

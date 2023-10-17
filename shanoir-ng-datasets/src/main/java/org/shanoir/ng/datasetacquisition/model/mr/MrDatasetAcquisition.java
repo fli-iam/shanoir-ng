@@ -14,13 +14,11 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 
 /**
  * MR dataset acquisition.

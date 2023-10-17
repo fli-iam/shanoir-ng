@@ -14,16 +14,16 @@
 
 package org.shanoir.ng.center;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -36,10 +36,10 @@ import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.studycenter.StudyCenter;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Center service test.
@@ -47,7 +47,8 @@ import org.mockito.junit.MockitoJUnitRunner;
  * @author msimon
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class CenterServiceTest {
 
 	private static final Long CENTER_ID = 1L;
@@ -68,7 +69,7 @@ public class CenterServiceTest {
 	@Mock
 	private ObjectMapper objectMapper;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(centerRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createCenter()));
 		given(centerRepository.findIdsAndNames()).willReturn(Arrays.asList(new IdName()));
@@ -76,9 +77,11 @@ public class CenterServiceTest {
 		given(centerRepository.save(Mockito.any(Center.class))).willReturn(createCenter());
 	}
 
-	@Test(expected=EntityNotFoundException.class)
+	@Test
 	public void deleteByBadIdTest() throws EntityNotFoundException {
-		centerService.deleteById(2L);
+		assertThrows(EntityNotFoundException.class, () -> {
+			centerService.deleteById(2L);
+		});
 	}
 	
 	@Test
@@ -107,8 +110,8 @@ public class CenterServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<Center> centers = centerService.findAll();
-		Assert.assertNotNull(centers);
-		Assert.assertTrue(centers.size() == 1);
+		Assertions.assertNotNull(centers);
+		Assertions.assertTrue(centers.size() == 1);
 
 		Mockito.verify(centerRepository, Mockito.times(1)).findAll();
 	}
@@ -116,8 +119,8 @@ public class CenterServiceTest {
 	@Test
 	public void findByIdTest() {
 		final Center center = centerService.findById(CENTER_ID).orElse(null);
-		Assert.assertNotNull(center);
-		Assert.assertTrue(ModelsUtil.CENTER_NAME.equals(center.getName()));
+		Assertions.assertNotNull(center);
+		Assertions.assertTrue(ModelsUtil.CENTER_NAME.equals(center.getName()));
 
 		Mockito.verify(centerRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -125,8 +128,8 @@ public class CenterServiceTest {
 	@Test
 	public void findIdsAndNamesTest() {
 		final List<IdName> centers = centerService.findIdsAndNames();
-		Assert.assertNotNull(centers);
-		Assert.assertTrue(centers.size() == 1);
+		Assertions.assertNotNull(centers);
+		Assertions.assertTrue(centers.size() == 1);
 
 		Mockito.verify(centerRepository, Mockito.times(1)).findIdsAndNames();
 	}
@@ -141,8 +144,8 @@ public class CenterServiceTest {
 	@Test
 	public void updateTest() throws EntityNotFoundException {
 		final Center updatedCenter = centerService.update(createCenter());
-		Assert.assertNotNull(updatedCenter);
-		Assert.assertTrue(UPDATED_CENTER_NAME.equals(updatedCenter.getName()));
+		Assertions.assertNotNull(updatedCenter);
+		Assertions.assertTrue(UPDATED_CENTER_NAME.equals(updatedCenter.getName()));
 
 		Mockito.verify(centerRepository, Mockito.times(1)).save(Mockito.any(Center.class));
 	}

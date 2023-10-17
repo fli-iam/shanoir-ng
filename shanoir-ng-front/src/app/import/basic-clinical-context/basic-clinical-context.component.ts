@@ -11,19 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnDestroy } from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
-import { Center } from '../../centers/shared/center.model';
-import { Examination } from '../../examinations/shared/examination.model';
-import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
-import { IdName } from '../../shared/models/id-name.model';
-import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
-import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
-import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
+import {AcquisitionEquipment} from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import {Step} from '../../breadcrumbs/breadcrumbs.service';
+import {Center} from '../../centers/shared/center.model';
+import {Examination} from '../../examinations/shared/examination.model';
+import {preventInitialChildAnimations, slideDown} from '../../shared/animations/animations';
+import {IdName} from '../../shared/models/id-name.model';
+import {ImagedObjectCategory} from '../../subjects/shared/imaged-object-category.enum';
+import {SubjectStudy} from '../../subjects/shared/subject-study.model';
+import {SimpleSubject, Subject} from '../../subjects/shared/subject.model';
+import {AbstractClinicalContextComponent} from '../clinical-context/clinical-context.abstract.component';
+import {EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom} from '../shared/dicom-data.model';
+import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
 
 @Component({
@@ -37,7 +38,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
     patient: PatientDicom;
 
     postConstructor() {
-        this.patient = this.importDataService.patients[0];
+        this.patient = this.getFirstSelectedPatient();
         this.modality = this.getFirstSelectedSerie().modality.toString();
         this.useStudyCard = this.modality.toUpperCase() == "MR";
     }
@@ -50,12 +51,12 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return '/imports/upload';
     }
 
-    importData(): Promise<any> {
-        let importJob = this.buildImportJob();
+    importData(timestamp: number): Promise<any> {
+        let importJob = this.buildImportJob(timestamp);
         return this.importService.startImportJob(importJob);
     }
 
-    protected buildImportJob(): ImportJob {
+    protected buildImportJob(timestamp: number): ImportJob {
         let importJob = new ImportJob();
         let context = this.importDataService.contextData;
         importJob.patients = new Array<PatientDicom>();
@@ -82,6 +83,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         importJob.subjectName = context.subject.name;
         importJob.studyName = context.study.name;
         importJob.anonymisationProfileToUse = context.study.profile?.profileName;
+        importJob.timestamp = timestamp;
         return importJob;
     }
 
@@ -140,6 +142,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
         newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
 
@@ -170,22 +173,29 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         return names;
     }
 
-    protected getFirstSelectedSerie(): SerieDicom {
-        if (!this.patient) return null;
-        for (let study of this.patient.studies) {
-            for (let serie of study.series) {
-                if (serie.selected) return serie;
-            }
-        }
+  protected getFirstSelectedPatient(): PatientDicom {
+       for(let patient of this.importDataService.patients){
+         for(let study of patient.studies){
+           if (study.selected) return patient;
+         }
+       }
        return null;
-    }
+  }
+
+  protected getFirstSelectedSerie(): SerieDicom {
+      if (!this.patient) return null;
+      for (let study of this.patient.studies) {
+          for (let serie of study.series) {
+              if (serie.selected) return serie;
+          }
+      }
+     return null;
+  }
 
     protected getFirstSelectedStudy(): StudyDicom {
         if (!this.patient) return null;
         for (let study of this.patient.studies) {
-            for (let serie of study.series) {
-                if (serie.selected) return study;
-            }
+            if(study.selected) return study;
         }
        return null;
     }

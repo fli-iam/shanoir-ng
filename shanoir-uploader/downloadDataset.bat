@@ -1,1 +1,1 @@
-java -cp shanoir-uploader-7.0.1-jar-with-dependencies.jar org.shanoir.downloader.ShanoirDownloader %*
+java -cp shanoir-uploader-8.0.0-jar-with-dependencies.jar org.shanoir.downloader.ShanoirDownloader %*

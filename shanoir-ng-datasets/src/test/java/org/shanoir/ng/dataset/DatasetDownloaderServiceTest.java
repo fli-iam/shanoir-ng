@@ -1,29 +1,11 @@
 package org.shanoir.ng.dataset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.matchers.JUnitMatchers.containsString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.times;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.io.File;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
-import org.apache.http.entity.ContentType;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.shanoir.ng.bids.service.BIDSServiceImpl;
@@ -38,7 +20,6 @@ import org.shanoir.ng.dataset.model.DatasetMetadata;
 import org.shanoir.ng.dataset.security.DatasetSecurityService;
 import org.shanoir.ng.dataset.service.DatasetDownloaderServiceImpl;
 import org.shanoir.ng.dataset.service.DatasetService;
-import org.shanoir.ng.dataset.service.DatasetServiceImpl;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -57,20 +38,26 @@ import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
 import org.shanoir.ng.shared.security.ControlerSecurityService;
-import org.shanoir.ng.utils.DatasetFileUtils;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-@RunWith(SpringRunner.class)
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class DatasetDownloaderServiceTest {
@@ -99,8 +86,8 @@ public class DatasetDownloaderServiceTest {
 	@MockBean(name = "controlerSecurityService")
 	private ControlerSecurityService controlerSecurityService;
 	
-    @Rule
-    public TemporaryFolder testFolder = new TemporaryFolder();
+    @TempDir
+    public File tempDir;
 
 	@MockBean
 	private EegDatasetMapper eegDatasetMapper;
@@ -130,8 +117,8 @@ public class DatasetDownloaderServiceTest {
 	private DatasetMetadata updatedMetadata = new DatasetMetadata();
 	private Examination exam = new Examination();
 
-	@Before
-	public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	@BeforeEach
+	public void setup() throws ShanoirException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SolrServerException, IOException {
 		doNothing().when(datasetServiceMock).deleteById(1L);
 		given(datasetServiceMock.findById(1L)).willReturn(new MrDataset());
 		given(datasetServiceMock.create(Mockito.mock(MrDataset.class))).willReturn(new MrDataset());
@@ -151,8 +138,7 @@ public class DatasetDownloaderServiceTest {
 	@WithMockKeycloakUser(id = 3, username = "jlouis", authorities = { "ROLE_ADMIN" })
 	public void testMassiveDownloadByStudyWrongFormat() throws Exception {
 		// Create a file with some text
-		File datasetFile = testFolder.newFile("test.nii");
-		datasetFile.getParentFile().mkdirs();
+		File datasetFile = new File(tempDir, "test.nii");
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 
@@ -190,14 +176,14 @@ public class DatasetDownloaderServiceTest {
 	public void testMassiveDownloadByExaminationIdNifti() throws Exception {
 		// GIVEN a study with some datasets to export in nii format
 		// Create a file with some text
-		File datasetFile = testFolder.newFile("test.nii");
-		datasetFile.getParentFile().mkdirs();
+		File datasetFile = new File(tempDir, "test.nii");
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
 		dataset.setId(1L);
+		dataset.setDownloadable(true);
 		dataset.setSubjectId(3L);
 		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
 		dataset.setDatasetAcquisition(dsAcq);
@@ -234,13 +220,13 @@ public class DatasetDownloaderServiceTest {
 	public void testMassiveDownloadByDatasetsId() throws Exception {
 		// GIVEN a list of datasets to export
 		// Create a file with some text
-		File datasetFile = testFolder.newFile("test.nii");
-		datasetFile.getParentFile().mkdirs();
+		File datasetFile = new File(tempDir, "test.nii");
 		datasetFile.createNewFile();
 		FileUtils.write(datasetFile, "test");
 
 		// Link it to datasetExpression in a dataset in a study
 		Dataset dataset = new MrDataset();
+		dataset.setDownloadable(true);
 		dataset.setId(1L);
 		dataset.setSubjectId(3L);
 		given(subjectRepository.findById(3L)).willReturn(Optional.of(subject));
@@ -269,4 +255,5 @@ public class DatasetDownloaderServiceTest {
 		assertEquals(dataset.getId().toString(), event.getObjectId());
 		assertEquals(ShanoirEventType.DOWNLOAD_DATASET_EVENT, event.getEventType());
 	}
+
 }

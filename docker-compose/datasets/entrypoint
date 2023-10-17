@@ -10,6 +10,7 @@ require  SHANOIR_URL_HOST
 require  SHANOIR_URL_SCHEME
 require  VIP_URL_HOST
 require  VIP_URL_SCHEME
+require  VIP_CLIENT_SECRET
 
 handle_microservice_migration
 

@@ -1,17 +1,13 @@
 package org.shanoir.ng.dicom.web;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-
-import javax.mail.BodyPart;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.mail.BodyPart;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import org.shanoir.ng.importer.service.DicomSRImporterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +16,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 /**
  * The StowRSMultipartRelatedRequestFilter handles a POST request of

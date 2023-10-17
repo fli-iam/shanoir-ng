@@ -4,6 +4,7 @@
 .root.disabled { opacity: 0.3; }
 .root.disabled:after { content: ""; display: block; position: absolute; top: 0; bottom: 0; left: 0; right: -6px; }
 .frame { display: inline-flex; position: relative; overflow: hidden; height: 19px; width: 100%; }
+:host.read-only .frame { height: auto; }
 .input-container { position: relative; width: 100%; }
 :host:not(.read-only) .input-container { cursor: pointer; }
 .fake-input { color: transparent; }
@@ -40,7 +41,7 @@
     color: var(--very-dark-grey);
     position: absolute;
     z-index: 1000; 
-    max-height: 320px;
+    /*max-height: 320px;*/
     min-width: 216px;
     min-height: 20px;
     border: 1px solid var(--grey);
@@ -100,3 +101,5 @@ toggle-switch { margin: 0 10px; }
 
 :host.read-only { border: none !important; }
 .compact-button { cursor: pointer !important; color: var(--color-a); }
+
+a.button { color: inherit; text-decoration: inherit; }

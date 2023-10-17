@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,13 +43,13 @@ public class ShanoirExec {
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirExec.class);
-	
-	@Value("${shanoir.conversion.dcm2nii.converters.clidcm.path.lib}")
-    private String clidcmPathLib;
 
 	@Value("${ms.url.dicom2nifti}")
 	private String dicomifierMsUrl;
 
+	@Value("${shanoir.conversion.converters.mriconverter}")
+	private String mriConverterPath;
+	
 	@Autowired
 	RestTemplate restTemplate;
 	
@@ -90,7 +91,7 @@ public class ShanoirExec {
 		
 		if (!systemEnv.containsKey("VISTAL_FMT")) {
 			envp[i] = "VISTAL_FMT=NII";
-			envp[i + 1] = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:" + clidcmPathLib;
+			envp[i + 1] = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:";
 		}
 
 		final String result = exec(cmd, envp);
@@ -617,5 +618,33 @@ public class ShanoirExec {
 		}
 		return "Dicomifier: converting dicom to nifti, success.";
 	}
+
+	/**
+	 * This method converts a dicom using MRIConvert
+	 * @param inputFolder the nput folder
+	 * @param outputFolder the output folder
+	 * @return the olg to display.
+	 */
+	public String mriConverter(String inputFolder, String outputFolder, boolean reconversion) {
+		String logs = "mriConverter: ";
+		String execString = "";
+		
+		// We force the dataset0 folder here as MRIConverter does not search recursively in the files..
+		if (!reconversion && !inputFolder.contains("dataset")) {
+			inputFolder = inputFolder.concat("/dataset0");
+		}
+		LOG.error(inputFolder);
+		LOG.error(outputFolder);
+		
+		// java -classpath MRIManager.jar DicomToNifti Subject4/ /tmp/ "PatientName-SerialNumber-Protocol" "[ExportOptions] 00000"
+		execString += "xvfb-run java -classpath " + mriConverterPath + " DicomToNifti "	+ inputFolder + " "	+ outputFolder
+			+ " PatientName-SerialNumber-SequenceName [ExportOptions]00000";
+		
+		logs.concat(execString);
+		
+		final String result = exec(execString.split(" "));
+		
+		return logs.concat("\n Result: " + result);
+		}
 
 }

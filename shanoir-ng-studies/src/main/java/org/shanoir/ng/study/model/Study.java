@@ -18,9 +18,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -44,6 +41,23 @@ import org.shanoir.ng.timepoint.Timepoint;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ColumnResult;
+import jakarta.persistence.ConstructorResult;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.SqlResultSetMapping;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Study.
@@ -155,6 +169,9 @@ public class Study extends HalEntity {
 	@Lob
 	@Column(name = "description", columnDefinition = "TEXT")
 	private String description;
+
+	@Column(name = "license", columnDefinition = "TEXT")
+	private String license;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "study", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<StudyTag> studyTags;
@@ -512,6 +529,14 @@ public class Study extends HalEntity {
 
 	public void setDescription(String publicDescription) {
 		this.description = publicDescription;
+	}
+
+	public String getLicense() {
+		return license;
+	}
+
+	public void setLicense(String license) {
+		this.license = license;
 	}
 
 	public List<StudyTag> getStudyTags() {

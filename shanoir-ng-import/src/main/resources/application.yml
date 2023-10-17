@@ -26,13 +26,14 @@ spring:
     password: password
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
-    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    database-platform: org.hibernate.dialect.MySQL57Dialect
     defer-datasource-initialization: true
     generate-ddl: false # default, but prefer to set it explicitly (bootstrap.sh)
     hibernate:
       # Hibernate ddl auto (create, create-drop, update, validate)
       ddl-auto: validate
-      use-new-id-generator-mappings: false
+      id:
+        db_structure_naming_strategy: legacy
     properties:
       hibernate:
         connection:
@@ -66,29 +67,23 @@ spring:
       enabled: true
       max-file-size: 5000MB
       max-request-size: 5000MB
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
 
 front.server:
   address: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/shanoir-ng/
   url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}
-##### Keycloak #####
-keycloak:
-  # attention: this config for the token issuer needs to match the domain of the frontend
-  # used for token creation AND the server url needs to be known from inside the docker network:
-  auth-server-url: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth
-  cors: true
-  realm: shanoir-ng
-  resource: shanoir-ng-import
-  ssl-required: external
-  securityConstraints:
-    - authRoles: 
-      - ROLE_ADMIN
-      - ROLE_EXPERT
-      - ROLE_GUEST
-      - ROLE_USER
-    - securityCollections:
-      - name: import secured api
-      - patterns:
-        - /*
+
 # microservices url
 ms.url:
   shanoir-ng-datasets: http://${SHANOIR_PREFIX}datasets:9904/datasetacquisition
@@ -135,14 +130,14 @@ shanoir:
       # this long name has been kept, as Elise and Isabelle know it like this; to find it for further adaptions in later time
       # Also during the nifti conversion, it will be reconstructed as 4D volumes.
       seriesProperties: seriesDescription==*ASL*;seriesDescription==*asl*;protocolName==*ASL*;seriesDescription==*VIBE*DYN*;seriesDescription==*MoCoSeries*;seriesDescription==*DIFF*;seriesDescription==*Diff*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*;seriesDescription==*BOLD*;seriesDescription==*Bold*;seriesDescription==*bold*;seriesDescription==*intermediate t-Map*;protocolName==*DYN*;protocolName==*Dyn*;protocolName==*dyn*;seriesDescription==*QSM*;seriesDescription==*qsm*;seriesDescription==*RELAXO*;seriesDescription==*relaxo*;seriesDescription==*Relaxo*;seriesDescription==IRMF;protocolName==IRMF;seriesDescription==*mc*gse*;protocolName==*mc*gse*;seriesDescription==*MULTIGRE*;protocolName==*MULTIGRE*;seriesDescription==*multigre*;protocolName==*multigre*;seriesDescription==*Multigre*;protocolName==*Multigre*;
-      # If in the serie, the dicom value equals the "value" for the "tag", then the serie will be considered as spectroscopy
-      isspectroscopy: seriesDescription==*CSI*;seriesDescription==*csi*;seriesDescription==*SPECTRO*;seriesDescription==*spectro*;
   conversion:
     converters:
       path: /opt/nifti-converters/
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then use clidcm instead of dcmnii to convert from dicom to nifti
       convertwithclidcm: seriesDescription==*Diff*;seriesDescription==*DIFF*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*; 
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then output niftii file will be reconstructed as 4D volumes
+      mriconverter: "/opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar"
+
 ---
 
 ######################################
@@ -173,8 +168,6 @@ spring:
 front.server:
   address: https://shanoir-ng-nginx/shanoir-ng/
   url: https://shanoir-ng-nginx
-keycloak:
-  auth-server-url: https://shanoir-ng-nginx/auth
 ms.url:
   shanoir-ng-datasets: http://localhost:9904/datasetacquisition
   shanoir-ng-datasets-eeg: http://localhost:9904/datasetacquisition_eeg
@@ -224,7 +217,7 @@ spring:
     allow-bean-definition-overriding: true
     allow-circular-references: true
   datasource:
-    url: jdbc:h2:mem:SHANOIR_NG_IMPORT;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
+    url: jdbc:h2:mem:SHANOIR_NG_IMPORT;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
     username: sa
     password: 
     driver-class-name: org.h2.Driver
@@ -243,6 +236,3 @@ spring:
     init:
       data-locations: classpath:/scripts/test-data-h2.sql
       mode: always
-logging:
-  file:
-    name: /tmp/shanoir-ng-import.log

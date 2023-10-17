@@ -14,13 +14,11 @@
 
 package org.shanoir.ng.datasetacquisition.model.ct;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.OneToOne;
-
-import org.shanoir.ng.shared.core.model.AbstractEntity;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * CT protocol.

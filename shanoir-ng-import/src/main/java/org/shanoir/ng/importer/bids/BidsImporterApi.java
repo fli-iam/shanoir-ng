@@ -26,33 +26,33 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 /**
  * 
  * @author fli
  *
  */
-@Api(value = "bidsImporter", description = "BIDS Importer API")
+@Tag(name = "bidsImporter", description = "BIDS Importer API")
 @RequestMapping("/bidsImporter")
 public interface BidsImporterApi {
 
-    @ApiOperation(value = "Import datasets from a BIDS folder", notes = "Import from bids", response = ImportJob.class, tags={ "BIDS", "Import" })
+    @Operation(summary = "Import datasets from a BIDS folder", description = "Import from bids")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "import from bids", response = Void.class),
-        @ApiResponse(code = 400, message = "Invalid input / Bad Request", response = Void.class),
-        @ApiResponse(code = 500, message = "unexpected error", response = Error.class) })
+        @ApiResponse(responseCode = "200", description = "import from bids"),
+        @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
+        @ApiResponse(responseCode = "500", description = "unexpected error") })
     @PostMapping(value = "/{studyId}/{studyName}/{centerId}",
         produces = { "application/json" },
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-    ResponseEntity<ImportJob> importAsBids(@ApiParam(value = "file detail") @RequestPart("file") MultipartFile bidsZipFile,
-    		@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId,
-    		@ApiParam(value = "name of the study", required = true) @PathVariable("studyName") String studyName,
-    		@ApiParam(value = "id of the center", required = true) @PathVariable("centerId") Long centerId) throws RestServiceException, ShanoirException, IOException;
+    ResponseEntity<ImportJob> importAsBids(@Parameter(name = "file detail") @RequestPart("file") MultipartFile bidsZipFile,
+    		@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
+    		@Parameter(name = "name of the study", required = true) @PathVariable("studyName") String studyName,
+    		@Parameter(name = "id of the center", required = true) @PathVariable("centerId") Long centerId) throws RestServiceException, ShanoirException, IOException;
 
 }

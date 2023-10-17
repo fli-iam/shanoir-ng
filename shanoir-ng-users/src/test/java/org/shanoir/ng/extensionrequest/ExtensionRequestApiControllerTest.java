@@ -5,13 +5,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDate;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.shanoir.ng.email.EmailService;
 import org.shanoir.ng.extensionrequest.controller.ExtensionRequestApiController;
 import org.shanoir.ng.extensionrequest.model.ExtensionRequestInfo;
@@ -25,10 +20,12 @@ import org.shanoir.ng.user.utils.KeycloakClient;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -37,7 +34,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
  * @author fli
  *
  */
-@RunWith(SpringRunner.class)
 @WebMvcTest(controllers = {ExtensionRequestApiController.class, UserUniqueConstraintManager.class, UserRepository.class})
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -29,6 +29,7 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ServiceLocator } from '../../utils/locator.service';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
+import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
 
 @Component({
@@ -38,12 +39,12 @@ import { ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom
     animations: [slideDown, preventInitialChildAnimations]
 })
 export class PreClinicalContextComponent extends AbstractClinicalContextComponent implements OnDestroy {
-    
+
     private animalSubject: AnimalSubject = new AnimalSubject();
     private animalSubjectService: AnimalSubjectService = ServiceLocator.injector.get(AnimalSubjectService);
     patient: PatientDicom;
     editSubjectStudy: boolean = false;
-    
+
     postConstructor() {
         this.patient = this.importDataService.patients[0];
         this.useStudyCard = false;
@@ -56,7 +57,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     protected getSubjectList(studyId: number): Promise<SubjectWithSubjectStudy[]> {
         this.openSubjectStudy = false;
         if (!studyId) {
-            return Promise.resolve([]); 
+            return Promise.resolve([]);
         } else {
             return this.studyService.findSubjectsByStudyIdPreclinical(studyId, true);
         }
@@ -65,8 +66,8 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     getNextUrl(): string {
         return '/imports/bruker';
     }
-    
-    importData(): Promise<any> {
+
+    importData(timestamp: number): Promise<any> {
         let context = this.importDataService.contextData;
         let contextImportJob = this.importDataService.archiveUploaded;
         let importJob = new ImportJob();
@@ -74,8 +75,8 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         // this.patient.subject = new IdName(this.context.subject.id, this.context.subject.name);
         this.patient.subject = Subject.makeSubject(
                 context.subject.id,
-                context.subject.name, 
-                context.subject.identifier, 
+                context.subject.name,
+                context.subject.identifier,
                 context.subject.subjectStudy);
         importJob.patients.push(this.patient);
         importJob.workFolder = contextImportJob.workFolder;
@@ -87,6 +88,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         importJob.acquisitionEquipmentId = context.acquisitionEquipment.id;
         importJob.converterId = context.niftiConverter.id;
         importJob.archive = contextImportJob.archive;
+        importJob.timestamp = timestamp;
         return this.importService.startImportJob(importJob);
     }
 
@@ -94,7 +96,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         return super.onSelectSubject().then(() =>  {
             if (this.subject) {
                 return this.animalSubjectService
-                    .findAnimalSubjectBySubjectId(this.subject.id)
+                    .getAnimalSubject(this.subject.id)
                     .then(animalSubject => this.animalSubject = animalSubject);
             }
         });
@@ -137,8 +139,8 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         let newAnimalSubject = new AnimalSubject();
         newSubject.imagedObjectCategory = ImagedObjectCategory.LIVING_ANIMAL;
         newSubject.name = this.patient.patientName;
-        newPreclinicalSubject.subject = newSubject;
         newPreclinicalSubject.animalSubject = newAnimalSubject;
+        newPreclinicalSubject.subject = newSubject;
         return newPreclinicalSubject;
     }
 
@@ -160,11 +162,12 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
         newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
 
     /**
-     * Try to compute patient first name and last name from dicom tags. 
+     * Try to compute patient first name and last name from dicom tags.
      * eg. TOM^HANKS -> return TOM as first name and HANKS as last name
      */
      private computeNameFromDicomTag (patientName: string): string[] {
@@ -215,7 +218,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     }
 
     getImportedCenterDataStr(): string {
-        return this.patient?.studies[0]?.series[0]?.institution?.institutionName + " - " 
+        return this.patient?.studies[0]?.series[0]?.institution?.institutionName + " - "
                 + this.patient?.studies[0]?.series[0]?.institution?.institutionAddress;
     }
 

@@ -14,15 +14,11 @@
 
 package org.shanoir.ng.dicom.web;
 
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Arrays;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.dicom.web.dto.mapper.ExaminationToStudyDTOMapper;
 import org.shanoir.ng.examination.model.Examination;
@@ -41,14 +37,17 @@ import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.io.IOException;
+import java.util.Arrays;
 
-@RunWith(SpringRunner.class)
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+
 @WebMvcTest(controllers = DICOMJsonApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration()
@@ -72,8 +71,8 @@ public class DICOMJsonApiControllerTest {
 	@MockBean
 	private DicomSRImporterService dicomSRImporterService;
 
-	@Before
-	public void setup() throws ShanoirException {
+	@BeforeEach
+	public void setup() throws ShanoirException, SolrServerException, IOException {
 		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
 		doNothing().when(examinationServiceMock).deleteById(1L);
 		given(examinationServiceMock.findPage(Mockito.any(Pageable.class), Mockito.eq(false))).willReturn(new PageImpl<Examination>(Arrays.asList(new Examination())));

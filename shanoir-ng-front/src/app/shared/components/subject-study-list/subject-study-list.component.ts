@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,13 +28,15 @@ import { ColumnDefinition } from '../table/column.definition.type';
 import { combineLatest, Subscription } from 'rxjs';
 import { Router } from '@angular/router';
 import { Subject as RxjsSubject} from 'rxjs';
+import { ConfirmDialogService } from '../confirm-dialog/confirm-dialog.service';
+
 
 @Component({
   selector: 'subject-study-list',
   templateUrl: 'subject-study-list.component.html',
   styleUrls: ['subject-study-list.component.css'],
   providers: [
-    { 
+    {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => SubjectStudyListComponent),
       multi: true
@@ -43,7 +45,7 @@ import { Subject as RxjsSubject} from 'rxjs';
 })
 
 export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> implements OnChanges, OnDestroy {
-    
+
     @Input() mode: Mode;
     @Input() subject: Subject;
     @Input() study: Study;
@@ -58,8 +60,10 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     private subjectOrStudyObs: RxjsSubject <Subject | Study> = new RxjsSubject();
     private subjectStudyListObs: RxjsSubject<SubjectStudy[]> = new RxjsSubject();
     private subscriptions: Subscription[] = [];
-    
-    constructor(private router: Router) {
+    private warningDisplayed: boolean = false;
+
+    constructor(private router: Router,
+        private confirmDialogService: ConfirmDialogService) {
         super();
         this.subscriptions.push(
             combineLatest([this.subjectOrStudyObs, this.subjectStudyListObs]).subscribe(() => {
@@ -73,7 +77,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     get legend(): string {
         return this.compMode == 'study' ? 'Subject' : 'Study';
     }
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.selectableList) {
             this.optionList = [];
@@ -95,7 +99,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
     }
-    
+
     writeValue(obj: any): void {
         super.writeValue(obj);
         this.subjectStudyListObs.next(obj);
@@ -127,7 +131,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
                     }
                 }
             );
-        } 
+        }
         if (this.hasQualityTags) {
             this.columnDefs.push(
                 { headerName: 'Quality', field: 'qualityTag', editable: false, width: '90px', cellGraphics: (item) => {
@@ -136,7 +140,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
                     else if (item.qualityTag == 'ERROR') return {color: 'red', tag: true, awesome: 'fas fa-times-circle'};
                 }}
             );
-        } 
+        }
         this.columnDefs.push(
             { headerName: 'Subject id for this study', field: 'subjectStudyIdentifier', editable: true },
             { headerName: 'Physically Involved', field: 'physicallyInvolved', type: 'boolean', editable: true, width: '54px', disableSorting: true }
@@ -147,7 +151,7 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
             );
         }
         this.columnDefs.push(
-            { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item.subject?.id) }
+            { headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => this.goToView(item) }
         );
         if (this.mode != 'view') {
             this.columnDefs.push(
@@ -156,30 +160,46 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
         }
     }
 
-    goToView(id: number): void {
-        this.router.navigate(['/subject/details/' + id]);
+    goToView(item): void {
+        // case of study details > subject tab > open subject details
+        if (this.compMode == 'study') {
+            this.router.navigate(['/subject/details/' + item.subject?.id]);
+        }
+        // case of subject details > edit > open study details
+        else if (this.compMode == 'subject') {
+            this.router.navigate(['/study/details/' + item.study?.id]);
+        }
+    }
+
+    rowClick(item): string {
+        if (this.compMode == 'study') {
+            return '/subject/details/' + item.subject?.id;
+        }
+        else if (this.compMode == 'subject') {
+            return '/study/details/' + item.study?.id;
+        }
     }
 
     private updateDisabled() {
         if (this.selectableList && this.model) {
             if (this.compMode == 'study') {
                 for (let option of this.optionList) {
-                    if(this.model.find(subStu => subStu.subject.id == option.value.id)) option.disabled = true; 
+                    if(this.model.find(subStu => subStu.subject.id == option.value.id)) option.disabled = true;
                 }
             } else if (this.compMode == 'subject') {
                 for (let option of this.optionList) {
-                    if(this.model.find(subStu => subStu.study.id == option.value.id)) option.disabled = true; 
+                    if(this.model.find(subStu => subStu.study.id == option.value.id)) option.disabled = true;
                 }
             }
         }
     }
 
-    get compMode(): 'subject' | 'study' { 
+    get compMode(): 'subject' | 'study' {
         if (this.subject && this.study) throw Error('You cannot set both subject and study');
         if (this.subject) return 'subject';
         if (this.study) return 'study';
         throw Error('You have to set either subject or study');
-        
+
     }
 
     onAdd() {
@@ -218,6 +238,21 @@ export class SubjectStudyListComponent extends AbstractInput<SubjectStudy[]> imp
     }
 
     removeSubjectStudy(subjectStudy: SubjectStudy):void {
+        if (!this.warningDisplayed) {
+            this.confirmDialogService.confirm('Deleting subject',
+            'Warning: If this subject is only linked to this study, it will be completely deleted from the database.')
+            .then(userChoice => {
+                if (userChoice) {
+                    this.removeSubjectStudyOk(subjectStudy);
+                    this.warningDisplayed = true;
+                }
+            });
+        } else {
+            this.removeSubjectStudyOk(subjectStudy);
+        }
+    }
+
+    removeSubjectStudyOk(subjectStudy: SubjectStudy):void {
         const index: number = this.model.indexOf(subjectStudy);
         if (index > -1) {
             this.model.splice(index, 1);

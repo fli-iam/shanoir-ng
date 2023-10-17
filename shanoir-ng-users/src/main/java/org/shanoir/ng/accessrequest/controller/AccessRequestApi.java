@@ -19,107 +19,108 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 /**
  * Api for access request, to make a demand on 
  * @author jcome
  *
  */
-@Api(value = "accessrequest")
+@Tag(name = "accessrequest")
 @RequestMapping("/accessrequest")
 public interface AccessRequestApi {
 
-	@ApiOperation(value = "", notes = "Saves a new access request", response = AccessRequest.class, tags = {})
+	@Operation(summary = "", description = "Saves a new access request")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "created access request", response = AccessRequest.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
+			@ApiResponse(responseCode = "200", description = "created access request"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "", produces = { "application/json" }, consumes = {
 			"application/json" }, method = RequestMethod.POST)
 	ResponseEntity<AccessRequest> saveNewAccessRequest(
-			@ApiParam(value = "access request to create", required = true) @RequestBody AccessRequest request,
+			@Parameter(name = "access request to create", required = true) @RequestBody AccessRequest request,
 			BindingResult result) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Resolves a new access request", response = AccessRequest.class, tags = {})
+	@Operation(summary = "", description = "Resolves a new access request")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
+			@ApiResponse(responseCode = "200", description = "resolved access request"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "resolve/{accessRequestId}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<Void> resolveNewAccessRequest(
-			@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
-			@ApiParam(value = "Accept or refuse the request", required = true) @RequestBody boolean validation,
+			@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId,
+			@Parameter(name = "Accept or refuse the request", required = true) @RequestBody boolean validation,
 			BindingResult result) throws RestServiceException, AccountNotOnDemandException, EntityNotFoundException, JsonProcessingException, AmqpException;
 
-	@ApiOperation(value = "byAdmin", notes = "Find all the access request managed by the given adminstrator", response = AccessRequest.class, tags = {})
+	@Operation(summary = "byAdmin", description = "Find all the access request managed by the given adminstrator")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
+			@ApiResponse(responseCode = "200", description = "resolved access request"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "byAdmin", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<List<AccessRequest>> findAllByAdminId() throws RestServiceException;
 	
-	@ApiOperation(value = "byUser", notes = "Find all the access request by the given user", response = AccessRequest.class, tags = {})
+	@Operation(summary = "byUser", description = "Find all the access request by the given user")
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
-            @ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
-            @ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
-            @ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
-            @ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
+            @ApiResponse(responseCode = "200", description = "resolved access request"),
+            @ApiResponse(responseCode = "401", description = "unauthorized"),
+            @ApiResponse(responseCode = "403", description = "forbidden"),
+            @ApiResponse(responseCode = "422", description = "bad parameters"),
+            @ApiResponse(responseCode = "500", description = "unexpected error") })
     @GetMapping(value = "byUser", produces = { "application/json" }, consumes = {
             "application/json" })
     ResponseEntity<List<AccessRequest>> findAllByUserId() throws RestServiceException;
 
-	@ApiOperation(value = "byStudy", notes = "Find all the access request for the given study", response = AccessRequest.class, tags = {})
+	@Operation(summary = "byStudy", description = "Find all the access request for the given study")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
+			@ApiResponse(responseCode = "200", description = "resolved access request"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "byStudy/{studyId}", produces = { "application/json" }, consumes = {
 			"application/json" })
 	ResponseEntity<List<AccessRequest>> findAllByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId
 			) throws RestServiceException;
 
-	@ApiOperation(value = "get by id", notes = "Find the access request for the given id", response = AccessRequest.class, tags = {})
+	@Operation(summary = "get by id", description = "Find the access request for the given id")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "resolved access request", response = AccessRequest.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = AccessRequest.class),
-			@ApiResponse(code = 403, message = "forbidden", response = AccessRequest.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = AccessRequest.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = AccessRequest.class) })
+			@ApiResponse(responseCode = "200", description = "resolved access request"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/{accessRequestId}", produces = { "application/json" }, consumes = {
 			"application/json" })
-	ResponseEntity<AccessRequest> getByid(@ApiParam(value = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException;
+	ResponseEntity<AccessRequest> getByid(@Parameter(name = "id of the access request to resolve", required = true) @PathVariable("accessRequestId") Long accessRequestId) throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Invite an user to a study", response = AccessRequest.class, tags = {})
+	@Operation(summary = "", description = "Invite an user to a study")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "User invited, reponse message", response = String.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = Void.class) })
+			@ApiResponse(responseCode = "200", description = "User invited, reponse message"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PutMapping(value = "/invitation/")
 	ResponseEntity<AccessRequest> inviteUserToStudy(
-			@ApiParam(value = "Study the user is invited in", required = true) 
+			@Parameter(name = "Study the user is invited in", required = true) 
 			@RequestParam(value = "studyId", required = true) Long studyId,
-			@ApiParam(value = "Study name the user is invited in", required = true) 
+			@Parameter(name = "Study name the user is invited in", required = true) 
 			@RequestParam(value = "studyName", required = true) String studyName,
-			@ApiParam(value = "The email of the invited user.") 
-    		@RequestParam(value = "email", required = true) String email) throws RestServiceException, JsonProcessingException, AmqpException;
+			@Parameter(name = "The email or login of the invited user.") 
+    		@RequestParam(value = "email", required = true) String emailOrLogin) throws RestServiceException, JsonProcessingException, AmqpException;
+
 }

@@ -37,7 +37,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 /**
  * Implementation of study service.
@@ -94,12 +93,17 @@ public class StudyUserServiceImpl implements StudyUserService {
 		return false;
 	}
 
+	@Override
+	public List<StudyUser> findStudyUsersByStudyId(Long studyId) {
+		return studyUserRepository.findByStudy_Id(studyId);
+	}
+
 	@RabbitListener(queues = RabbitMQConfiguration.DELETE_USER_QUEUE)
 	@RabbitHandler
 	@Transactional
 	@Override
 	public void deleteUser(String eventAsString) throws AmqpRejectAndDontRequeueException {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 			ShanoirEvent event = mapper.readValue(eventAsString, ShanoirEvent.class);
 			Long userId = Long.valueOf(event.getObjectId());

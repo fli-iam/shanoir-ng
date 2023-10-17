@@ -14,28 +14,26 @@
 
 package org.shanoir.ng.studycard;
 
-import static org.mockito.BDDMockito.given;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
 import org.shanoir.ng.studycard.service.StudyCardServiceImpl;
 import org.shanoir.ng.utils.ModelsUtil;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.BDDMockito.given;
 
 /**
  * Study card service test.
@@ -43,7 +41,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author msimon
  * 
  */
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest
+@ActiveProfiles("test")
 public class StudyCardServiceTest {
 
 	private static final Long TEMPLATE_ID = 1L;
@@ -52,13 +51,10 @@ public class StudyCardServiceTest {
 	@Mock
 	private StudyCardRepository studyCardRepository;
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
-
 	@InjectMocks
 	private StudyCardServiceImpl studyCardService;
 
-	@Before
+	@BeforeEach
 	public void setup() {
 		given(studyCardRepository.findAll()).willReturn(Arrays.asList(ModelsUtil.createStudyCard()));
 		given(studyCardRepository.findById(TEMPLATE_ID)).willReturn(Optional.of(ModelsUtil.createStudyCard()));
@@ -74,8 +70,8 @@ public class StudyCardServiceTest {
 	@Test
 	public void findAllTest() {
 		final List<StudyCard> studyCards = studyCardService.findAll();
-		Assert.assertNotNull(studyCards);
-		Assert.assertTrue(studyCards.size() == 1);
+		Assertions.assertNotNull(studyCards);
+		Assertions.assertTrue(studyCards.size() == 1);
 
 		Mockito.verify(studyCardRepository, Mockito.times(1)).findAll();
 	}
@@ -83,7 +79,7 @@ public class StudyCardServiceTest {
 	@Test
 	public void findByIdTest() {
 		final StudyCard studyCard = studyCardService.findById(TEMPLATE_ID);
-		Assert.assertNotNull(studyCard);
+		Assertions.assertNotNull(studyCard);
 
 		Mockito.verify(studyCardRepository, Mockito.times(1)).findById(Mockito.anyLong());
 	}
@@ -98,8 +94,8 @@ public class StudyCardServiceTest {
 	@Test
 	public void updateTest() throws EntityNotFoundException, MicroServiceCommunicationException {
 		final StudyCard updatedStudyCard = studyCardService.update(createStudyCard());
-		Assert.assertNotNull(updatedStudyCard);
-		Assert.assertTrue(UPDATED_STUDYCARD_DATA.equals(updatedStudyCard.getName()));
+		Assertions.assertNotNull(updatedStudyCard);
+		Assertions.assertTrue(UPDATED_STUDYCARD_DATA.equals(updatedStudyCard.getName()));
 
 		Mockito.verify(studyCardRepository, Mockito.times(1)).save(Mockito.any(StudyCard.class));
 	}

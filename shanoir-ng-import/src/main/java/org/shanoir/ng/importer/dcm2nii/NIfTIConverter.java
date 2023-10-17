@@ -14,8 +14,8 @@
 
 package org.shanoir.ng.importer.dcm2nii;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
@@ -147,24 +147,8 @@ public class NIfTIConverter extends HalEntity {
 		return toString();
 	}
 
-	public boolean isDcm2Nii() {
-		return this.getNIfTIConverterType().equals(NIfTIConverterType.DCM2NII);
-	}
-
-	public boolean isMcverter() {
-		return this.getNIfTIConverterType().equals(NIfTIConverterType.MCVERTER);
-	}
-
-	public boolean isClidcm() {
-		return this.getNIfTIConverterType().equals(NIfTIConverterType.CLIDCM);
-	}
-
-	public boolean isDicom2Nifti() {
-		return this.getNIfTIConverterType().equals(NIfTIConverterType.DICOM2NIFTI);
-	}
-
 	public boolean isDicomifier() {
-		return this.getNIfTIConverterType().equals(NIfTIConverterType.DICOMIFIER);
+		return NIfTIConverterType.DICOMIFIER.equals(this.getNIfTIConverterType());
 	}
 
 }

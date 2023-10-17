@@ -27,7 +27,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class AccountRequestApiController extends AbstractUserRequestApiController implements AccountRequestApi {
@@ -37,7 +37,7 @@ public class AccountRequestApiController extends AbstractUserRequestApiControlle
 
 	@Override
 	public ResponseEntity<Void> saveNewAccountRequest(
-			@ApiParam(value = "user to create from account request", required = true) @RequestBody final User user,
+			@Parameter(name = "user to create from account request", required = true) @RequestBody final User user,
 			final BindingResult result) throws RestServiceException {
 		
 		/* Now we generate a username for the new user creation */

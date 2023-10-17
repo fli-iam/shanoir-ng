@@ -9,17 +9,15 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.log4j.Logger;
-import org.dcm4che2.data.DicomObject;
+import org.dcm4che3.net.Status;
+import org.shanoir.ng.importer.dicom.query.DicomQuery;
+import org.shanoir.ng.importer.dicom.query.QueryPACSService;
+import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.uploader.dicom.query.ConfigBean;
-//import org.shanoir.dicom.query.DicomQueryHelper;
-//import org.shanoir.services.dicom.server.ConfigBean;
-//import org.shanoir.services.dicom.server.Echo;
-import org.shanoir.uploader.dicom.query.DcmQR;
-import org.shanoir.uploader.dicom.query.DicomQueryHelper;
-import org.shanoir.uploader.dicom.query.Echo;
-import org.shanoir.uploader.dicom.query.Media;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
-import org.shanoir.uploader.utils.Util;
+import org.weasis.dicom.param.DicomNode;
+import org.weasis.dicom.param.DicomState;
 
 /**
  * This class is the communication interface to the DICOM server.
@@ -39,12 +37,20 @@ public class DicomServerClient implements IDicomServerClient {
 		
 	private DcmRcvManager dcmRcvManager = new DcmRcvManager();
 	
+	private QueryPACSService queryPACSService = new QueryPACSService();
+	
 	private File workFolder;
 	
 	public DicomServerClient(final Properties dicomServerProperties, final File workFolder) {
 		config.initWithPropertiesFile(dicomServerProperties);
 		this.workFolder = workFolder;
-		dcmRcvManager.start(config, workFolder.getAbsolutePath());
+		// Initialize connection configuration parameters here: to be used for all queries
+		DicomNode calling = new DicomNode(config.getLocalDicomServerAETCalling(), config.getLocalDicomServerHost(), config.getLocalDicomServerPort());
+		DicomNode called = new DicomNode(config.getDicomServerAETCalled(), config.getDicomServerHost(), config.getDicomServerPort());
+		// attention: we use calling here (== ShUp) to inform the DICOM server to send to ShUp,
+		// who becomes the "called" afterwards from the point of view of the DICOM server (switch)
+		queryPACSService.setDicomNodes(calling, called, config.getLocalDicomServerAETCalling());
+		dcmRcvManager.configure(config);
 	}
 	
 	/* (non-Javadoc)
@@ -52,17 +58,22 @@ public class DicomServerClient implements IDicomServerClient {
 	 */
 	@Override
 	public boolean echoDicomServer() {
-		Echo echo = new Echo();
-		boolean success = echo.echo(config);
-		logger.info("Echoing of the DICOM server was successful? -> " + success);
-		return success;
+		int port = Integer.valueOf(config.getDicomServerPort());
+		boolean result = queryPACSService.queryECHO(config.getDicomServerAETCalled(), config.getDicomServerHost(), port, config.getLocalDicomServerAETCalling());
+		if (result) {
+			logger.info("Echoing of the DICOM server was successful? -> " + result);
+		} else {
+			logger.info("Echoing of the DICOM server was successful? -> " + result);
+			return false;
+		}
+		return true;
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.shanoir.uploader.dicom.IDicomServerClient#queryDicomServer(java.lang.String, java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	public Media queryDicomServer(
+	public List<Patient> queryDicomServer(
 			final String patientName,
 			final String patientID,
 			final String studyDescription,
@@ -70,66 +81,65 @@ public class DicomServerClient implements IDicomServerClient {
 			final String patientBirthDate,
 			final String studyDate
 			) throws Exception {
-		DcmQR dcmqr = new DcmQR();
-		DicomQueryHelper dQH = new DicomQueryHelper(dcmqr, config, "MR");
-		Media media = new Media();
-		media = (Media) dQH.populateDicomTree(
-				patientName,
-				studyDescription,
-				seriesDescription,
-				patientID,
-				null, null, media,
-				patientBirthDate,
-				studyDate);
-		return media;
+		DicomQuery query = new DicomQuery();
+		query.setPatientID(patientID);
+		query.setPatientName(patientName);
+		query.setPatientBirthDate(patientBirthDate);
+		query.setStudyDescription(studyDescription);
+		query.setStudyDate(studyDate);
+		return queryPACSService.queryCFIND(query).getPatients();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.shanoir.uploader.dicom.IDicomServerClient#retrieveDicomFiles(java.util.Collection)
 	 */
 	@Override
-	public synchronized List<String> retrieveDicomFiles(final Collection<Serie> selectedSeries, final File uploadFolder) {
-		final DcmQR dcmqr = new DcmQR();
-		final DicomQueryHelper dQH = new DicomQueryHelper(dcmqr, config, "MR");
-		dcmRcvManager.setDestination(uploadFolder.getAbsolutePath());
+	public synchronized List<String> retrieveDicomFiles(final Collection<SerieTreeNode> selectedSeries, final File uploadFolder) {
+		// for each exam/patient download: create a new mini-pacs that uses the specific download folder within the workFolder
+		dcmRcvManager.startSCPServer(uploadFolder.getAbsolutePath());
 		final List<String> retrievedDicomFiles = new ArrayList<String>();
 		final List<String> oldFileNames = new ArrayList<String>();
 		// Iterate over all series and send command for sending DICOM files.
-		for (Serie serie : selectedSeries) {
+		for (SerieTreeNode serieTreeNode : selectedSeries) {
 			List<String> fileNamesForSerie = new ArrayList<String>();
-			final String seriesInstanceUID = serie.getDescriptionMap().get("id");
-			final String studyInstanceUID = serie.getStudyInstanceUID();
+			final String seriesInstanceUID = serieTreeNode.getId();
 			try {
 				// move files from server directly into uploadFolder
-				boolean noError = getFilesFromServer(dcmqr, dQH, studyInstanceUID, seriesInstanceUID);
+				boolean noError = getFilesFromServer(seriesInstanceUID, serieTreeNode.getDescription());
 				if(noError) {
-					// create file name filter for old files
-					final FilenameFilter oldFileNamesFilter = new FilenameFilter() {
+					// create file name filter for old files and only use .dcm files (ignore /tmp folder)
+					final FilenameFilter oldFileNamesAndDICOMFilter = new FilenameFilter() {
 						@Override
 						public boolean accept(File dir, String name) {
+							// ignore files from other series before
 							for (Iterator iterator = oldFileNames.iterator(); iterator.hasNext();) {
 								String oldFileName = (String) iterator.next();
 								if (name.equals(oldFileName)) {
 									return false;
 								}
 							}
-							return true;
+							// only take .dcm files into consideration, ignore others
+							if (name.endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
+								return true;
+							} else {
+								return false;
+							}
 						}
 					};
-					File[] newFileNames = uploadFolder.listFiles(oldFileNamesFilter);
+					File[] newFileNames = uploadFolder.listFiles(oldFileNamesAndDICOMFilter);
 					logger.debug("newFileNames: " + newFileNames.length);
 					for (int i = 0; i < newFileNames.length; i++) {
 						fileNamesForSerie.add(newFileNames[i].getName());
 					}
-					serie.setFileNames(fileNamesForSerie);
+					serieTreeNode.setFileNames(fileNamesForSerie);
 					retrievedDicomFiles.addAll(fileNamesForSerie);
 					oldFileNames.addAll(fileNamesForSerie);
 					logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-							+ " DICOM files for serie " + seriesInstanceUID
+							+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
 							+ " was successful.\n\n");
 				} else {
 					logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-							+ " DICOM files for serie " + seriesInstanceUID
+							+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
 							+ " has failed.\n\n");
 					return null;
 				}
@@ -148,18 +158,17 @@ public class DicomServerClient implements IDicomServerClient {
 	 * @param seriesInstanceUID
 	 * @return
 	 */
-	private boolean getFilesFromServer(DcmQR dcmqr, DicomQueryHelper dQH, final String studyInstanceUID, final String seriesInstanceUID) throws Exception {
-		final List<DicomObject> list;
-		try{
-			String[] argsArray = dQH.buildCommand("-S", true, null, studyInstanceUID, seriesInstanceUID);
-			logger.info("\n\n C_MOVE, serie command: launching dcmqr with args: " + Util.arrayToString(argsArray)+"\n\n");
-			list = dcmqr.query(argsArray);
-			logger.debug("\n\n Dicom Query list:\n "+list.toString()+"\n");
+	private boolean getFilesFromServer(final String seriesInstanceUID, final String seriesDescription) throws Exception {
+		final DicomState state;
+		try {
+			logger.info("\n C_MOVE, serie (" + seriesDescription + ") command: launching c-move with args: " + seriesDescription + ", " + seriesInstanceUID + "\n");
+			state = queryPACSService.queryCMOVE(seriesInstanceUID);
+			logger.debug("\n Dicom Query list:\n " + state.toString() + "\n");
 		} catch (final Exception e) {
 			logger.error(e.getMessage(), e);
 			return false;
 		}
-		if (list != null && !list.isEmpty()) {
+		if (state != null && state.getStatus() == Status.Success) {
 			return true;
 		} else {
 			return false;

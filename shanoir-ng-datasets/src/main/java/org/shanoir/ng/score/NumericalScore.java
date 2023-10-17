@@ -1,11 +1,6 @@
 package org.shanoir.ng.score;
 
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Table;
-
+import jakarta.persistence.*;
 import org.shanoir.ng.examination.model.ScientificArticle;
 
 /**

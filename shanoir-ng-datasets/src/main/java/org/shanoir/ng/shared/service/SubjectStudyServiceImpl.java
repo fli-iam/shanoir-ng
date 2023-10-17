@@ -14,12 +14,17 @@
 
 package org.shanoir.ng.shared.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.shanoir.ng.configuration.amqp.RabbitMQSendService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
+import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.quality.SubjectStudyQualityTagDTO;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,8 +42,11 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
 	@Autowired
 	private SubjectStudyRepository subjectStudyRepository;
 
+    @Autowired
+    private RabbitMQSendService rabbitSender;
+
 	@Override
-	public List<SubjectStudy> update(final Iterable<SubjectStudy> subjectStudies) throws EntityNotFoundException {
+	public List<SubjectStudy> update(final Iterable<SubjectStudy> subjectStudies) throws EntityNotFoundException, MicroServiceCommunicationException {
 		if (subjectStudies == null) return null;
 		Set<Long> ids = new HashSet<>();
 	    for (SubjectStudy subjectStudy : subjectStudies) {
@@ -54,6 +62,8 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
             }
         }
 		subjectStudyRepository.saveAll(subjectStudiesDb);
+        List<SubjectStudyQualityTagDTO> subjectStudyTagDTOs = getSubjectStudyTagDTOs(Utils.toList(subjectStudiesDb));
+			    rabbitSender.send(subjectStudyTagDTOs, RabbitMQConfiguration.STUDIES_SUBJECT_STUDY_STUDY_CARD_TAG);		
 		return Utils.toList(subjectStudiesDb);
 	}
 	
@@ -66,8 +76,22 @@ public class SubjectStudyServiceImpl implements SubjectStudyService {
      */
     private SubjectStudy updateSubjectStudyValues(final SubjectStudy subjectStudyDb, final SubjectStudy subjectStudy) {
         subjectStudyDb.setId(subjectStudy.getId());
+        subjectStudyDb.setSubjectType(subjectStudy.getSubjectType());
         subjectStudyDb.setQualityTag(subjectStudy.getQualityTag());
         return subjectStudyDb;
     }
-	
+
+
+    private List<SubjectStudyQualityTagDTO> getSubjectStudyTagDTOs(List<SubjectStudy> updatedSubjectStudies) {
+        List<SubjectStudyQualityTagDTO> dtos = new ArrayList<>();
+        if (updatedSubjectStudies != null) {
+            for (SubjectStudy subjectStudy : updatedSubjectStudies) {
+                SubjectStudyQualityTagDTO dto = new SubjectStudyQualityTagDTO();
+                dto.setSubjectStudyId(subjectStudy.getId());
+                dto.setTag(subjectStudy.getQualityTag());
+                dtos.add(dto);
+            }            
+        }
+        return dtos;
+    }
 }

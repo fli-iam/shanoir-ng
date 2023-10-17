@@ -16,12 +16,14 @@ package org.shanoir.ng.importer.model;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -80,6 +82,11 @@ public class Study {
 
 	public List<Serie> getSeries() {
 		return series;
+	}
+
+	@JsonIgnore
+	public List<Serie> getSelectedSeries() {
+		return series.stream().filter(Serie::getSelected).collect(Collectors.toList());
 	}
 
 	public void setSeries(List<Serie> series) {

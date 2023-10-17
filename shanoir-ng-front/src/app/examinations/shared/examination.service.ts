@@ -41,7 +41,11 @@ export class ExaminationService extends EntityService<Examination> implements On
     getEntityInstance() { return new Examination(); }
 
     findExaminationsBySubjectAndStudy(subjectId: number, studyId: number): Promise<SubjectExamination[]> {
-        return this.http.get<SubjectExamination[]>(AppUtils.BACKEND_API_EXAMINATION_URL + '/subject/' + subjectId + '/study/' + studyId)
+        let url = AppUtils.BACKEND_API_EXAMINATION_URL
+            + '/subject/' + subjectId
+            + '/study/' + studyId
+
+        return this.http.get<SubjectExamination[]>(url)
             .toPromise();
     }
 
@@ -76,7 +80,7 @@ export class ExaminationService extends EntityService<Examination> implements On
               progressBar.progress = -1;
               break;
             case HttpEventType.DownloadProgress:
-              progressBar.progress = (event.loaded / event.total);
+              progressBar.progress = event.loaded;
               break;
             case HttpEventType.Response:
                 saveAs(event.body, this.getFilename(event));

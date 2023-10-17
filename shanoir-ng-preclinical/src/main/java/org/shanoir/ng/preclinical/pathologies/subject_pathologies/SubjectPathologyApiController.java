@@ -20,8 +20,8 @@ import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.preclinical.pathologies.PathologyService;
 import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModel;
 import org.shanoir.ng.preclinical.pathologies.pathology_models.PathologyModelService;
-import org.shanoir.ng.preclinical.subjects.AnimalSubject;
-import org.shanoir.ng.preclinical.subjects.AnimalSubjectService;
+import org.shanoir.ng.preclinical.subjects.model.AnimalSubject;
+import org.shanoir.ng.preclinical.subjects.service.AnimalSubjectService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
@@ -37,9 +37,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
-
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-03-23T14:51:04.625Z")
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Controller
 public class SubjectPathologyApiController implements SubjectPathologyApi {
@@ -62,12 +60,12 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
 	@Override
 	public ResponseEntity<SubjectPathology> addSubjectPathology(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "pathology to add to subject", required = true) @RequestBody SubjectPathology pathos,
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "pathology to add to subject", required = true) @RequestBody SubjectPathology pathos,
 			BindingResult result) throws RestServiceException {
 
 		// First check if given user exists
-		AnimalSubject animalSubject = subjectService.findById(id);
+		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "animalSubject not found", new ErrorDetails()));
@@ -106,12 +104,12 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
 	@Override
 	public ResponseEntity<Void> deleteSubjectPathology(
-			@ApiParam(value = "Animal Subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "pathology id to delete", required = true) @PathVariable("pid") Long pid)
+			@Parameter(name = "Animal Subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "pathology id to delete", required = true) @PathVariable("pid") Long pid)
 			throws RestServiceException {
 
 		// First check if given subject exists
-		if (subjectService.findById(id) == null) {
+		if (subjectService.getBySubjectId(id) == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Subject not found", new ErrorDetails()));
 		} else {
@@ -130,9 +128,9 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
 	@Override
 	public ResponseEntity<Void> deleteSubjectPathologies(
-			@ApiParam(value = "animal subject id", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "animal subject id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
-		AnimalSubject animalSubject = subjectService.findById(id);
+		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
 		} else {
@@ -148,10 +146,10 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
 	@Override
 	public ResponseEntity<SubjectPathology> getSubjectPathologyById(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of subject pathology that needs to be fetched", required = true) @PathVariable("pid") Long pid)
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of subject pathology that needs to be fetched", required = true) @PathVariable("pid") Long pid)
 			throws RestServiceException {
-		if (subjectService.findById(id) == null) {
+		if (subjectService.getBySubjectId(id) == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Subject not found", new ErrorDetails()));
 		} else {
@@ -165,9 +163,9 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
 	@Override
 	public ResponseEntity<List<SubjectPathology>> getSubjectPathologies(
-			@ApiParam(value = "animalSubject id", required = true) @PathVariable("id") Long id)
+			@Parameter(name = "animalSubject id", required = true) @PathVariable("id") Long id)
 			throws RestServiceException {
-		AnimalSubject animalSubject = subjectService.findById(id);
+		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			return new ResponseEntity<List<SubjectPathology>>(HttpStatus.NOT_FOUND);
 		} else {
@@ -178,7 +176,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
 	@Override
 	public ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathology(
-			@ApiParam(value = "pathology id", required = true) @PathVariable("pid") Long pid)
+			@Parameter(name = "pathology id", required = true) @PathVariable("pid") Long pid)
 			throws RestServiceException {
 		Pathology pathology = pathologyService.findById(pid);
 		if (pathology == null) {
@@ -194,7 +192,7 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
 	@Override
 	public ResponseEntity<List<SubjectPathology>> getSubjectPathologiesByPathologyModel(
-			@ApiParam(value = "pathology model id", required = true) @PathVariable("pathoModelId") Long pathoModelId) {
+			@Parameter(name = "pathology model id", required = true) @PathVariable("pathoModelId") Long pathoModelId) {
 		PathologyModel patMod = pathosModelService.findById(pathoModelId);
 		List<SubjectPathology> subPathology = pathosService.findByPathologyModel(patMod);
 		if (subPathology == null || subPathology.isEmpty()) {
@@ -206,12 +204,12 @@ public class SubjectPathologyApiController implements SubjectPathologyApi {
 
 	@Override
 	public ResponseEntity<Void> updateSubjectPathology(
-			@ApiParam(value = "subject id", required = true) @PathVariable("id") Long id,
-			@ApiParam(value = "ID of subject pathology that needs to be updated", required = true) @PathVariable("pid") Long pid,
-			@ApiParam(value = "Subject pathology object that needs to be updated", required = true) @RequestBody SubjectPathology pathos,
+			@Parameter(name = "subject id", required = true) @PathVariable("id") Long id,
+			@Parameter(name = "ID of subject pathology that needs to be updated", required = true) @PathVariable("pid") Long pid,
+			@Parameter(name = "Subject pathology object that needs to be updated", required = true) @RequestBody SubjectPathology pathos,
 			final BindingResult result) throws RestServiceException {
 
-		AnimalSubject animalSubject = subjectService.findById(id);
+		AnimalSubject animalSubject = subjectService.getBySubjectId(id);
 		if (animalSubject == null) {
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.NOT_FOUND.value(), "animalSubject not found", new ErrorDetails()));

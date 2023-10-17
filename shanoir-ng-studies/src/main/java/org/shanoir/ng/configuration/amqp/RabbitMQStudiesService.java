@@ -31,13 +31,13 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Component
+@Service
 public class RabbitMQStudiesService {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RabbitMQStudiesService.class);
@@ -72,7 +72,7 @@ public class RabbitMQStudiesService {
 	@RabbitHandler
 	@Transactional
 	public void linkExamination(final String eventStr) {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
 			Long examinationId = Long.valueOf(event.getObjectId());
@@ -112,9 +112,8 @@ public class RabbitMQStudiesService {
 	@RabbitHandler
 	@Transactional
 	public void deleteExaminationStudy(final String eventStr) {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
-			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
 			ObjectMapper objectMapper = new ObjectMapper();
 			ShanoirEvent event =  objectMapper.readValue(eventStr, ShanoirEvent.class);
 			Long examinationId = Long.valueOf(event.getObjectId());
@@ -129,10 +128,21 @@ public class RabbitMQStudiesService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_NAME_QUEUE)
 	@Transactional
 	public String getStudyName(final long studyId) {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		Study study = this.studyRepo.findById(studyId).get();
 		if (study != null) {
 			return study.getName();
+		}
+		return null;
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE)
+	@Transactional
+	public String getStudyAnonymisationProfile(final long studyId) {
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+		Study study = this.studyRepo.findById(studyId).get();
+		if (study != null) {
+			return study.getProfile().getProfileName();
 		}
 		return null;
 	}
@@ -144,7 +154,7 @@ public class RabbitMQStudiesService {
 	@RabbitListener(queues = RabbitMQConfiguration.STUDY_SUBSCRIPTION_QUEUE)
 	@Transactional
 	public boolean studySubscription(final String studyStr) {
-		SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		try {
 			ShanoirEvent event =  objectMapper.readValue(studyStr, ShanoirEvent.class);
 			Long userId = event.getUserId();

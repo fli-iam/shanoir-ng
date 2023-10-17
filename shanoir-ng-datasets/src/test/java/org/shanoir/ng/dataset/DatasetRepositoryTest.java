@@ -14,15 +14,7 @@
 
 package org.shanoir.ng.dataset;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.modality.MrQualityProcedureType;
 import org.shanoir.ng.dataset.modality.PetDataset;
@@ -32,15 +24,14 @@ import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ModelsUtil;
 import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
-import springfox.documentation.spring.web.plugins.DocumentationPluginsBootstrapper;
-import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests for repository 'dataset'.
@@ -48,23 +39,14 @@ import springfox.documentation.spring.web.plugins.WebMvcRequestHandlerProvider;
  * @author msimon
  *
  */
-@RunWith(SpringRunner.class)
-@WebAppConfiguration
 @DataJpaTest
 @ActiveProfiles("test")
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 public class DatasetRepositoryTest {
 
 	@Autowired
 	private DatasetRepository repository;
- 
-	@MockBean
-	private AuthenticationManager authenticationManager;
-	@MockBean
-	private DocumentationPluginsBootstrapper documentationPluginsBootstrapper;
-	@MockBean
-	private WebMvcRequestHandlerProvider webMvcRequestHandlerProvider;
-	
-	
+ 	
 	/**
 	 * Test the hierarchy strategy :
 	 * A MR Dataset must be saved with its specific fields and those must be retrievable afterwards
@@ -119,6 +101,7 @@ public class DatasetRepositoryTest {
 	 */
 	@Test
 	public void heritageListTest() throws ShanoirException {
+		repository.deleteAll();
 		MrDataset mr1 = ModelsUtil.createMrDataset();
 		mr1.setMrQualityProcedureType(MrQualityProcedureType.MAGNETIC_FIELD_QUALITY_DATASET_SHORT_ECHO_TIME);
 		Long mr1Id = repository.save(mr1).getId();

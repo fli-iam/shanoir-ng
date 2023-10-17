@@ -87,7 +87,7 @@ public class BidsImporterService {
 	public void createAllBidsDatasetAcquisition(Message importJobStr) throws AmqpRejectAndDontRequeueException {
 		ShanoirEvent event = null;
 		try {
-			SecurityContextUtil.initAuthenticationContext("ADMIN_ROLE");
+			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 			ImportJob importJob = objectMapper.readValue(importJobStr.getBody(), ImportJob.class);
 			Long userId = importJob.getUserId();
 			event = new ShanoirEvent(ShanoirEventType.IMPORT_DATASET_EVENT, importJob.getExaminationId().toString(), userId, "Starting import...", ShanoirEvent.IN_PROGRESS, importJob.getStudyId());
@@ -137,7 +137,7 @@ public class BidsImporterService {
 					LOG.error("The data type folder is not recognized. Please update your BIDS archive following the rules.");
 					event.setStatus(ShanoirEvent.ERROR);
 					event.setMessage("The data type folder is not recognized. Please update your BIDS archive following the rules.");
-					event.setProgress(1f);
+					event.setProgress(-1f);
 					eventService.publishEvent(event);
 				}
 				break;
@@ -147,7 +147,7 @@ public class BidsImporterService {
 			if (event != null) {
 				event.setStatus(ShanoirEvent.ERROR);
 				event.setMessage("An unexpected error occured, please contact an administrator.");
-				event.setProgress(1f);
+				event.setProgress(-1f);
 				eventService.publishEvent(event);
 			}
 
@@ -263,12 +263,13 @@ public class BidsImporterService {
 		datasetAcquisition.setDatasets(new ArrayList<>(datasets));
 		datasetAcquisition.setAcquisitionEquipmentId(equipmentId);
 		datasetAcquisitionRepository.save(datasetAcquisition);
-		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(null), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
+		eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_DATASET_ACQUISITION_EVENT, datasetAcquisition.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, examination.getStudyId()));
 		
 		event.setStatus(ShanoirEvent.SUCCESS);
-		event.setMessage("(" + importJob.getStudyId() + ")"
-				+": Successfully created datasets for subject " + importJob.getSubjectName()
-				+ " in examination " + examination.getId());
+
+		event.setMessage("[" + importJob.getStudyName() + " (n°" + importJob.getStudyId() + ")]"
+				+" Successfully created datasets for subject [" + importJob.getSubjectName()
+				+ "] in examination [" + examination.getId() + "]");
 		event.setProgress(1f);
 		eventService.publishEvent(event);
 	}

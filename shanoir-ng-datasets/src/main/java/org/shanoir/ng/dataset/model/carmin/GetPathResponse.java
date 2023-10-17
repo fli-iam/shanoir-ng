@@ -8,9 +8,6 @@ import java.util.Objects;
  * GetPathResponse
  */
 @Validated
-@javax.annotation.Generated(value = "io.swagger.codegen.v3.generators.java.SpringCodegen", date = "2021-10-28T14:56:55.987Z[GMT]")
-
-
 public class GetPathResponse implements OneOfGetPathResponse {
 
   @Override

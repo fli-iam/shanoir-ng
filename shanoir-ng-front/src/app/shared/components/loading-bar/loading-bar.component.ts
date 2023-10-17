@@ -25,20 +25,44 @@ export class LoadingBarComponent {
 
     @Input() progress: number = 0;
     @Input() text: string = "";
+    @Input() unknownDownload: boolean = false;
     @Input() width: number = 200;
 
     @HostBinding('style.width') get pixelWidth() {
         return this.width + 'px';
-     }
+    }
+
+    @HostBinding('class.error') get isError() {
+        return this.progress == -1;
+    }
+
+    @HostBinding('class.done') get isDone() {
+        return this.progress == 1;
+    }
 
     getProgressText(): string {
-        if (this.progress === -1 && this.text) {
-            return this.text;
+        if (this.progress == -1) {
+            return this.text ? this.text : 'ERROR';
         }
-        return Math.floor(this.progress * 100) + "%";
+        else if (this.unknownDownload) {
+            return this.getSizeStr(this.progress);
+        }
+        else return Math.floor(this.progress * 100) + "%";
     }
 
-    onResized(event) {
-    }
+    getSizeStr(size: number): string {
 
+        const base: number = 1024;
+        const units: string[] = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+        if(size == null || size == 0){
+            return "0 " + units[0];
+        }
+
+        const exponent: number = Math.floor(Math.log(size) / Math.log(base));
+        let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
+        let unit: string = units[exponent];
+
+        return value + " " + unit;
+    }
 } 

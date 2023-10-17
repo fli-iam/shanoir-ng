@@ -15,8 +15,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 <h2 i18n="Manage therapies|Title@@therapiesListTitle">Manage therapies</h2>
 
 <shanoir-table #therapiesTable
-    [getPage]="getPage.bind(this)" 
-    [columnDefs]="columnDefs" 
-    [customActionDefs]="customActionDefs" 
-    (rowClick)="onRowClick($event)">
-</shanoir-table> 
+    [getPage]="getPage.bind(this)"
+    [columnDefs]="columnDefs"
+    [customActionDefs]="customActionDefs"
+    [rowRoute]="getRowRoute.bind(this)">
+</shanoir-table>

@@ -19,6 +19,7 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
     selector: 'datepicker',
     template: `
             <input type="date" 
+                [class.empty]="!this.dateString || this.dateString == ''"
                 [disabled]="disabled"
                 [ngModel]="dateString"
                 (ngModelChange)="onModelChange($event)"
@@ -27,7 +28,8 @@ import { AbstractControl, ControlValueAccessor, NG_VALUE_ACCESSOR, ValidationErr
     styles: [
         ':host { display: inline-block; height: 19px; }',
         ':host:has(input:focus) { border-bottom: 2px solid var(--color-a); }',
-        'input[type="date"] { border: none !important; }'
+        'input { border: none !important; }',
+        '.empty { color: var(--greyer); }'
     ],
     providers: [
         {

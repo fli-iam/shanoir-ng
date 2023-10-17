@@ -16,6 +16,7 @@ import { SimpleSubject } from "../../subjects/shared/subject.model";
 import { Sex } from "../../subjects/shared/subject.types";
 
 export class ImportJob {
+    timestamp: number;
     fromDicomZip: boolean;
     fromShanoirUploader: boolean;
     fromPacs: boolean;
@@ -36,6 +37,7 @@ export class ImportJob {
 }
 
 export class PatientDicom {
+
     subject: SimpleSubject;
     patientID: string;
     patientName: string;
@@ -51,6 +53,8 @@ export class StudyDicom {
     studyDescription: string;
     studyDate: Date;
     series: SerieDicom[];
+
+    selected: boolean;
 }
 
 export class SerieDicom {

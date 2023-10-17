@@ -1,28 +1,20 @@
 package org.shanoir.ng.dicom.web;
 
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.shanoir.ng.shared.exception.ErrorModel;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import java.util.Map;
 
 /**
  * This implements the DICOMWeb REST-API exposed by Shanoir-NG.
@@ -33,147 +25,147 @@ import io.swagger.annotations.ApiResponses;
  * @author mkain
  *
  */
-@Api(value = "dicomweb")
+@Tag(name = "dicomweb")
 @RequestMapping("/dicomweb")
 public interface DICOMWebApi {
 
-	@ApiOperation(value = "", notes = "Returns all DICOM patients/subjects", response = String.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all DICOM patients/subjects")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found patients/subjects", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no patient/subject found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found patients/subjects"),
+			@ApiResponse(responseCode = "204", description = "no patient/subject found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/patients", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findPatients() throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Returns all DICOM studies/examinations", response = String.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all DICOM studies/examinations")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found studies/examinations", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no study/exam found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found studies/examinations"),
+			@ApiResponse(responseCode = "204", description = "no study/exam found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/studies", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findStudies(@RequestParam Map<String, String> allParams) throws RestServiceException, JsonMappingException, JsonProcessingException;
 
-	@ApiOperation(value = "", notes = "Returns all DICOM series/acquisitions", response = String.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all DICOM series/acquisitions")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found series/acquisitions", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no serie/acquisition found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found series/acquisitions"),
+			@ApiResponse(responseCode = "204", description = "no serie/acquisition found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/series", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findSeries() throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Returns all DICOM series/acquisitions of an examination", response = String.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all DICOM series/acquisitions of an examination")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found series/acquisitions", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no serie/acquisition found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found series/acquisitions"),
+			@ApiResponse(responseCode = "204", description = "no serie/acquisition found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/studies/{examinationUID}/series", produces = { "application/dicom+json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity<String> findSeriesOfStudy(
-			@ApiParam(value = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID
+			@Parameter(name = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID
 		) throws RestServiceException, JsonMappingException, JsonProcessingException;
 	
-	@ApiOperation(value = "", notes = "Returns the metadata of a DICOM serie/acquisition of an examination", response = String.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns the metadata of a DICOM serie/acquisition of an examination")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found serie/acquisition metadata", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no serie/acquisition metadata found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found serie/acquisition metadata"),
+			@ApiResponse(responseCode = "204", description = "no serie/acquisition metadata found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/metadata", produces = { "application/dicom+json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity<String> findSerieMetadataOfStudy(
-			@ApiParam(value = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
+			@Parameter(name = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+			@Parameter(name = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
 		) throws RestServiceException, JsonMappingException, JsonProcessingException;
 
-	@ApiOperation(value = "", notes = "Returns all DICOM instances/datasets of a study and serie", response = String.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all DICOM instances/datasets of a study and serie")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found instances/datasets"),
+			@ApiResponse(responseCode = "204", description = "no instance/dataset found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances", produces = { "application/dicom+json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity<String> findInstancesOfStudyOfSerie(
-			@ApiParam(value = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
+			@Parameter(name = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+			@Parameter(name = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID
 		) throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "Returns a DICOM instance", response = String.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns a DICOM instance")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found instance/dataset", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found instance/dataset"),
+			@ApiResponse(responseCode = "204", description = "no instance/dataset found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}")
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity findInstance(
-			@ApiParam(value = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
-			@ApiParam(value = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID
+			@Parameter(name = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+			@Parameter(name = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
+			@Parameter(name = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID
 		) throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "Returns a frame of a DICOM instance/dataset, of a study and serie", response = String.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns a frame of a DICOM instance/dataset, of a study and serie")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found instances/datasets"),
+			@ApiResponse(responseCode = "204", description = "no instance/dataset found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/studies/{examinationUID}/series/{serieInstanceUID}/instances/{sopInstanceUID}/frames/{frame}")
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnExamination(#examinationUID, 'CAN_SEE_ALL'))")
 	ResponseEntity findFrameOfStudyOfSerieOfInstance(
-			@ApiParam(value = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
-			@ApiParam(value = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
-			@ApiParam(value = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID,
-			@ApiParam(value = "frame", required = true) @PathVariable("frame") String frame
+			@Parameter(name = "examinationUID", required = true) @PathVariable("examinationUID") String examinationUID,
+			@Parameter(name = "serieInstanceUID", required = true) @PathVariable("serieInstanceUID") String serieInstanceUID,
+			@Parameter(name = "sopInstanceUID", required = true) @PathVariable("sopInstanceUID") String sopInstanceUID,
+			@Parameter(name = "frame", required = true) @PathVariable("frame") String frame
 		) throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "Returns all DICOM instances/datasets", response = String.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all DICOM instances/datasets")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found instances/datasets"),
+			@ApiResponse(responseCode = "204", description = "no instance/dataset found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/instances", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findInstances() throws RestServiceException;
 
-	@ApiOperation(value = "", notes = "Returns all DICOM instances/datasets of a study", response = String.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all DICOM instances/datasets of a study")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found instances/datasets", response = String.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no instance/dataset found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found instances/datasets"),
+			@ApiResponse(responseCode = "204", description = "no instance/dataset found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/studies/{studyInstanceUID}/instances", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<String> findInstancesOfStudy(
-			@ApiParam(value = "studyInstanceUID", required = true) @PathVariable("studyInstanceUID") String studyInstanceUID
+			@Parameter(name = "studyInstanceUID", required = true) @PathVariable("studyInstanceUID") String studyInstanceUID
 		) throws RestServiceException;
 	
-	@ApiOperation(value = "", notes = "STOW-RS", response = Void.class, tags = {})
+	@Operation(summary = "", description = "STOW-RS")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "stored", response = Void.class),
-			@ApiResponse(code = 204, message = "updated", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 422, message = "bad parameters", response = ErrorModel.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "stored"),
+			@ApiResponse(responseCode = "204", description = "updated"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "422", description = "bad parameters"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "/studies", consumes = { MediaType.MULTIPART_RELATED_VALUE })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	ResponseEntity<Void> stow(HttpServletRequest request) throws RestServiceException;

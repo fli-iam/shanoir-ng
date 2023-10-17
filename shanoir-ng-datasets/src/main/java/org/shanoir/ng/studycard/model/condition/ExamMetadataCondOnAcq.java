@@ -14,19 +14,18 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import java.util.List;
-
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import java.util.List;
 
 /**
  * Condition valid for the given DatasetAcquisition if every of it's Datasets metadata fulfill the condition
@@ -59,7 +58,12 @@ public class ExamMetadataCondOnAcq extends StudyCardMetadataConditionWithCardina
         int nbOk = 0; int total = 0;
         for (DatasetAcquisition acquisition : acquisitions) {
             total++;
-            String valueFromDb = field.get(acquisition);
+            String valueFromDb;
+            try {
+                valueFromDb = field.get(acquisition);
+            } catch (CheckedIllegalClassException e) {
+                valueFromDb = null;
+            }
             if (valueFromDb != null) {
                 // get all possible values, that can fulfill the condition
                 for (String value : this.getValues()) {

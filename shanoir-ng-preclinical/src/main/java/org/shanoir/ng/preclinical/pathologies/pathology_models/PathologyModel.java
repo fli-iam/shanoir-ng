@@ -16,15 +16,6 @@ package org.shanoir.ng.preclinical.pathologies.pathology_models;
 
 import java.util.Objects;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.GenericGenerator;
 import org.shanoir.ng.preclinical.pathologies.Pathology;
 import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
@@ -34,7 +25,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 /**
  * PathologyModel
  */
@@ -63,7 +59,6 @@ public class PathologyModel extends HalEntity   {
   //@JoinColumn(name = "building_id")
   @NotNull
   @JsonProperty("pathology")
-  @JsonIgnore
   private Pathology pathology;
   
   /**
@@ -73,14 +68,6 @@ public class PathologyModel extends HalEntity   {
 	public void initLinks() {
 		this.addLink(Links.REL_SELF, "pathology/model/" + getId());
   }
-
-  @Override
-  @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "IdOrGenerate")
-  @GenericGenerator(name = "IdOrGenerate", strategy = "increment")
-  public Long getId() {
-	return super.getId();
-  }
- 
   
   public PathologyModel name(String name) {
     this.name = name;
@@ -91,7 +78,7 @@ public class PathologyModel extends HalEntity   {
    * none
    * @return type
   **/
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getName() {
     return name;
   }
@@ -109,7 +96,7 @@ public class PathologyModel extends HalEntity   {
    * none
    * @return type
   **/
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getComment() {
     return comment;
   }
@@ -123,7 +110,7 @@ public class PathologyModel extends HalEntity   {
     return this;
   }
   
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getFilename() {
     return filename;
   }
@@ -133,7 +120,7 @@ public class PathologyModel extends HalEntity   {
   }
 	   
   @JsonIgnore
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public String getFilepath() {
     return filepath;
   }
@@ -151,7 +138,7 @@ public class PathologyModel extends HalEntity   {
    * none
    * @return type
   **/
-  @ApiModelProperty(value = "none")
+  @Schema(name = "none")
   public Pathology getPathology() {
     return pathology;
   }
@@ -185,7 +172,7 @@ public class PathologyModel extends HalEntity   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    comment: ").append(toIndentedString(comment)).append("\n");
     sb.append("    specifications file: ").append(toIndentedString(filename)).append("\n");
-    sb.append("    pathology: ").append(toIndentedString(pathology.toString())).append("\n");
+    sb.append("    pathology: ").append(toIndentedString(pathology.getName())).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -14,16 +14,15 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetAcquisitionMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Condition valid for the given DatasetAcquisition if the acquisition metadata fulfill the condition
@@ -48,7 +47,12 @@ public class AcqMetadataCondOnAcq extends StudyCardMetadataCondition<DatasetAcqu
     public boolean fulfilled(DatasetAcquisition acquisition) {
         DatasetAcquisitionMetadataField field = this.getShanoirField();
         if (field != null) {
-            String valueFromDb = field.get(acquisition);
+            String valueFromDb;
+            try {
+                valueFromDb = field.get(acquisition);
+            } catch (CheckedIllegalClassException e) {
+                valueFromDb = null;
+            }
             if (valueFromDb != null) {
                 // get all possible values, that can fulfill the condition
                 for (String value : this.getValues()) {

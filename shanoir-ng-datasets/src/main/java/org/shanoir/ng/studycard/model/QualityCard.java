@@ -14,16 +14,9 @@
 
 package org.shanoir.ng.studycard.model;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.PostLoad;
-
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import org.dcm4che3.data.Attributes;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.NotBlank;
@@ -34,7 +27,7 @@ import org.shanoir.ng.shared.validation.Unique;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.util.List;
 
 /**
  * Study card.
@@ -56,6 +49,9 @@ public class QualityCard extends HalEntity implements Card {
 
 	/** The study for which is defined the study card. */
 	private Long studyId;
+	
+	@NotNull
+	private boolean toCheckAtImport;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name="quality_card_id")
@@ -107,5 +103,13 @@ public class QualityCard extends HalEntity implements Card {
             }
         }
         return result;
+    }
+
+    public boolean isToCheckAtImport() {
+        return toCheckAtImport;
+    }
+
+    public void setToCheckAtImport(boolean toCheckAtImport) {
+        this.toCheckAtImport = toCheckAtImport;
     }
 }

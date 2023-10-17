@@ -14,38 +14,44 @@
 
 package org.shanoir.ng.importer;
 
-import io.swagger.annotations.*;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.shanoir.ng.importer.model.carmin.Path;
 import org.shanoir.ng.importer.model.carmin.UploadData;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
-@Api(value = "carmin-data")
+@Tag(name = "carmin-data", description = "carmin-data API")
 @RequestMapping("/carmin-data")
 public interface CarminDataApi {
 
-        @ApiOperation(value = "Delete a path", notes = "Delete a path and transitively delete all its content if it is a directory.", tags = {})
-        @ApiResponses(value = {
-                        @ApiResponse(code = 200, message = "the deletion is successful and finished."),
-                        @ApiResponse(code = 500, message = "A functional or internal error occured processing the request") })
-        @RequestMapping(value = "/**", produces = {
-                        "application/json" }, method = RequestMethod.DELETE)
-        @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
-        ResponseEntity<Void> deletePath();
+	@Operation(summary = "Delete a path", description = "Delete a path and transitively delete all its content if it is a directory.")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "the deletion is successful and finished."),
+			@ApiResponse(responseCode = "500", description = "A functional or internal error occured processing the request") })
+	@RequestMapping(value = "/**", produces = { "application/json" }, method = RequestMethod.DELETE)
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
+	ResponseEntity<Void> deletePath();
 
-        @ApiOperation(value = "Upload data to a path", tags = "A request without content creates a directory (an error should be returned if the path already exists). A request with a specific content type (\"application/carmin+json\") allows to upload data encoded in base64. The base64 content (part of a json payload) can either be an encoded file, are an encoded zip archive that will create a directory. All other content (with any content type) will be considered as a raw file and will override the existing path content. If the parent directory of the file/directory to create does not exist, an error must be returned.")
-        @ApiResponses(value = {
-                        @ApiResponse(code = 200, message = "The upload is successful and finished.", response = Path.class),
-                        @ApiResponse(code = 500, message = "A functional or internal error occured processing the request") })
-        @RequestMapping(value = "/**", produces = { "application/json" }, consumes = { "application/carmin+json",
-                        "application/octet-stream" }, method = RequestMethod.PUT)
-        @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
-        ResponseEntity<Path> uploadPath(@Valid @RequestBody UploadData body)
-                        throws RestServiceException;
+	@Operation(summary = "Upload data to a path", description = "A request without content creates a directory (an error should be returned if the path already exists). " +
+			"A request with a specific content type (\"application/carmin+json\") allows to upload data encoded in base64. " +
+			"The base64 content (part of a json payload) can either be an encoded file, or an encoded zip archive that will create a directory. " +
+			"All other content (with any content type) will be considered as a raw file and will override the existing path content. " +
+			"If the parent directory of the file/directory to create does not exist, an error must be returned.")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "The upload is successful and finished."),
+			@ApiResponse(responseCode = "500", description = "A functional or internal error occured processing the request") })
+	@RequestMapping(value = "/**", produces = { "application/json" }, consumes = { "application/carmin+json",
+			"application/octet-stream" }, method = RequestMethod.PUT)
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
+	ResponseEntity<Path> uploadPath(@Valid @RequestBody String body) throws RestServiceException, JsonProcessingException;
 
 }

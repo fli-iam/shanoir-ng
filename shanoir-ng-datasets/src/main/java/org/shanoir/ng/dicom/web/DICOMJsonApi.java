@@ -14,19 +14,16 @@
 
 package org.shanoir.ng.dicom.web;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.shanoir.ng.dicom.web.dto.StudiesDTO;
-import org.shanoir.ng.dicom.web.dto.StudyDTO;
-import org.shanoir.ng.shared.exception.ErrorModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 
 /**
  * This API interface returns a DICOMJson as described in
@@ -42,17 +39,17 @@ import io.swagger.annotations.ApiResponses;
  * @author mkain
  *
  */
-@Api(value = "dicomjson")
+@Tag(name = "dicomjson")
 @RequestMapping("/dicomjson")
 public interface DICOMJsonApi {
 
-	@ApiOperation(value = "", notes = "Returns all studies", response = StudyDTO.class, responseContainer = "List", tags = {})
+	@Operation(summary = "", description = "Returns all studies")
 	@ApiResponses(value = {
-			@ApiResponse(code = 200, message = "found studies", response = StudyDTO.class, responseContainer = "List"),
-			@ApiResponse(code = 204, message = "no examination found", response = Void.class),
-			@ApiResponse(code = 401, message = "unauthorized", response = Void.class),
-			@ApiResponse(code = 403, message = "forbidden", response = Void.class),
-			@ApiResponse(code = 500, message = "unexpected error", response = ErrorModel.class) })
+			@ApiResponse(responseCode = "200", description = "found studies"),
+			@ApiResponse(responseCode = "204", description = "no examination found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/studies", produces = { "application/dicom+json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.filterExaminationDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")

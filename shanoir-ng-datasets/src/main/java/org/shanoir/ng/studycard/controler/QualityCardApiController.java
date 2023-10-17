@@ -14,14 +14,9 @@
 
 package org.shanoir.ng.studycard.controler;
 
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.Parameter;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
@@ -37,7 +32,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.annotations.ApiParam;
+import java.util.List;
 
 @Controller
 public class QualityCardApiController implements QualityCardApi {
@@ -57,7 +52,7 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<Void> deleteQualityCard(
-			@ApiParam(value = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException {
+			@Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException {
 		try {
 			qualityCardService.deleteById(qualityCardId);
 		} catch (EntityNotFoundException e) {
@@ -71,7 +66,7 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<QualityCard> findQualityCardById(
-			@ApiParam(value = "id of the study card", required = true) @PathVariable("qualityCardId") Long qualityCardId) {
+			@Parameter(name = "id of the study card", required = true) @PathVariable("qualityCardId") Long qualityCardId) {
 		final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
 		if (qualityCard == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -82,7 +77,7 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<List<QualityCard>> findQualityCardByStudyId(
-			@ApiParam(value = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
+			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) {
 		final List<QualityCard> qualityCards = qualityCardService.findByStudy(studyId);
 		if (qualityCards.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -101,7 +96,7 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<QualityCard> saveNewQualityCard(
-			@ApiParam(value = "Quality Card to create", required = true) @RequestBody QualityCard qualityCard,
+			@Parameter(name = "Quality Card to create", required = true) @RequestBody QualityCard qualityCard,
 			final BindingResult result) throws RestServiceException {
 		validate(qualityCard, result);
 		QualityCard createdQualityCard;
@@ -116,8 +111,8 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
 	public ResponseEntity<Void> updateQualityCard(
-			@ApiParam(value = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
-			@ApiParam(value = "quality card to update", required = true) @RequestBody QualityCard qualityCard,
+			@Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
+			@Parameter(name = "quality card to update", required = true) @RequestBody QualityCard qualityCard,
 			final BindingResult result) throws RestServiceException {
 		validate(qualityCard, result);
 		try {
@@ -150,15 +145,28 @@ public class QualityCardApiController implements QualityCardApi {
 
 	@Override
     public ResponseEntity<QualityCardResult> applyQualityCardOnStudy(
-	        @ApiParam(value = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
+	        @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
 		
 	    final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
 	    if (qualityCard == null) {
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 		LOG.info("apply quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
-		QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard);
+		QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, true);
 		return new ResponseEntity<>(results, HttpStatus.OK);
 	}
+	
+	@Override
+    public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+            @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId) throws RestServiceException, MicroServiceCommunicationException {
+        
+        final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
+        if (qualityCard == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+        QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, false);
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
 
 }

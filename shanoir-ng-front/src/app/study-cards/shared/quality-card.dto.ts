@@ -114,6 +114,7 @@ export class QualityCardDTOService {
                 entity.rules.push(rule);
             }
         }
+        entity.toCheckAtImport = dto.toCheckAtImport;
         return entity;
     }
 }

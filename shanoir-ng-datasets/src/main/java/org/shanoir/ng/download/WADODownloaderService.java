@@ -14,11 +14,33 @@
 
 package org.shanoir.ng.download;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StringReader;
+import jakarta.annotation.PostConstruct;
+import jakarta.mail.BodyPart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.json.JSONReader;
+import org.json.JSONException;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetUtils;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.shared.model.Study;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import javax.json.Json;
+import javax.json.stream.JsonParser;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -33,36 +55,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import javax.annotation.PostConstruct;
-import javax.json.Json;
-import javax.json.stream.JsonParser;
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.util.ByteArrayDataSource;
-
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.json.JSONReader;
-import org.json.JSONException;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.service.DatasetUtils;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.shared.model.Study;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 /**
  * This class is used to download files on using WADO URLs:
@@ -312,7 +304,7 @@ public class WADODownloaderService {
 		}
 	}
 
-	public Attributes getDicomAttributesForDataset(Dataset dataset) {
+	public Attributes getDicomAttributesForDataset(Dataset dataset) throws PacsException {
 		List<URL> urls = new ArrayList<>();
 		try {
 			DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
@@ -330,7 +322,7 @@ public class WADODownloaderService {
 				+ " : no pacs url for this dataset");
 			}
 		} catch (IOException | MessagingException | RestClientException e) {
-			throw new RestClientException("Can not get dicom attributes for dataset " + dataset.getId(), e);
+			throw new PacsException("Can not get dicom attributes for dataset " + dataset.getId(), e);
 		}
 		return null;
 	}	
@@ -353,31 +345,31 @@ public class WADODownloaderService {
 		return null;
 	}
 
-	public Attributes getDicomAttributesForStudy(Study study) {
+	public Attributes getDicomAttributesForStudy(Study study) throws PacsException {
 		long ts = new Date().getTime();
 		Examination exam = getFirstIfExist(study.getExaminations());
 		if (exam == null) return null;
 		Attributes result = getDicomAttributesForExamination(exam);
-		LOG.error("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for study " + study.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return result;
 	}
 
 
-	public Attributes getDicomAttributesForExamination(Examination examination) {
+	public Attributes getDicomAttributesForExamination(Examination examination) throws PacsException {
 		long ts = new Date().getTime();
 		DatasetAcquisition acquisition = getFirstIfExist(examination.getDatasetAcquisitions());
 		if (acquisition == null) return null;
 		Attributes result = getDicomAttributesForAcquisition(acquisition);
-		LOG.error("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for acquisition " + acquisition.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return result;
 	}
 
-	public Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) {
+	public Attributes getDicomAttributesForAcquisition(DatasetAcquisition acquisition) throws PacsException {
 		long ts = new Date().getTime();
 		Dataset ds = getFirstIfExist(acquisition.getDatasets());
 		if (ds == null) return null;
 		Attributes result = getDicomAttributesForDataset(ds);
-		LOG.error("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for dataset " + ds.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return result;
 	}
 
@@ -391,7 +383,7 @@ public class WADODownloaderService {
 			String json = downloadMetadataFromPACS(urlStr);
 			// transform from flat to tree
 			try {
-				return DicomJsonUtils.inflfateDCM4CheeJSON(json);
+				return DicomJsonUtils.inflateDCM4CheeJSON(json);
 				//tree.put
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -450,7 +442,6 @@ public class WADODownloaderService {
 	}
 
 	private String downloadMetadataFromPACS(final String url) throws IOException {
-		restTemplate.getMessageConverters().add(new ByteArrayHttpMessageConverter());
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_DICOM_JSON);
 		HttpEntity<String> entity = new HttpEntity<>(headers);

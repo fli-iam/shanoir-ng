@@ -22,27 +22,26 @@ import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 
 import { AfterViewChecked } from "@angular/core";
-import { Pageable } from "../shared/components/table/pageable.model";
-import { TableComponent } from "../shared/components/table/table.component";
-import { ColumnDefinition } from '../shared/components/table/column.definition.type';
-import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
-import { SolrService } from "./solr.service";
+import { environment } from "../../environments/environment";
+import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
+import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
+import { ProcessingService } from '../processing/processing.service';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
-import { Page } from '../shared/components/table/pageable.model';
-import { KeycloakService } from '../shared/keycloak/keycloak.service';
+import { ColumnDefinition } from '../shared/components/table/column.definition.type';
+import { Page, Pageable } from "../shared/components/table/pageable.model";
+import { TableComponent } from "../shared/components/table/table.component";
 import { ConsoleService } from '../shared/console/console.service';
+import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
+import { KeycloakService } from '../shared/keycloak/keycloak.service';
+import { Range } from '../shared/models/range.model';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
-import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
-import { Range } from '../shared/models/range.model';
-import { ProcessingService } from '../processing/processing.service';
 import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.paging-criterion.component';
-import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
-import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
-import {environment} from "../../environments/environment";
-import {DatasetType} from "../datasets/shared/dataset-type.model";
+import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
+import { SolrService } from "./solr.service";
+import { Clipboard } from '@angular/cdk/clipboard';
 
-const TextualFacetNames: string[] = ['studyName', 'subjectName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
+const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
 export type TextualFacet = typeof TextualFacetNames[number];
 @Component({
@@ -80,7 +79,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
-            private keycloakService: KeycloakService, private studyRightsService: StudyRightsService,
+            private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private clipboard: Clipboard,
             private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
 
         this.getRole();
@@ -143,7 +142,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     buildForm(): UntypedFormGroup {
-        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
+        const searchBarRegex = '^((studyName|subjectName|datasetName|examinationComment|datasetTypes|datasetNatures|acquisitionEquipmentName)[:][*]?[a-zA-Z0-9\\s_\W\.\!\@\#\$\%\^\&\*\(\)\_\+\-\=]+[*]?[;])+$';
         let formGroup = this.formBuilder.group({
             'startDate': [this.solrRequest.datasetStartDate, [DatepickerComponent.validator]],
             'endDate': [this.solrRequest.datasetEndDate, [DatepickerComponent.validator, this.dateOrderValidator]],
@@ -406,10 +405,18 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {headerName: "Type", field: "datasetType"},
             {headerName: "Nature", field: "datasetNature"},
             {headerName: "Creation", field: "datasetCreationDate", type: "date", hidden: true, cellRenderer: (params: any) => dateRenderer(params.data.datasetCreationDate)},
-            {headerName: "Study", field: "studyName"},
-            {headerName: "Subject", field: "subjectName"},
-            {headerName: "Center", field: "centerName"},
-            {headerName: "Exam", field: "examinationComment"},
+            {headerName: "Study", field: "studyName",
+                route: item => '/study/details/' + item.studyId
+            },
+            {headerName: "Subject", field: "subjectName",
+                route: item => '/subject/details/' + item.subjectId
+            },
+            {headerName: "Center", field: "centerName",
+                route: item => '/center/details/' + item.centerId
+            },
+            {headerName: "Exam", field: "examinationComment",
+                route: item => '/examination/details/' + item.examinationId
+            },
             {headerName: "Exam Date", field:"examinationDate", type: "date", cellRenderer: (params: any) => {
                 return dateRenderer(params.data.examinationDate);
               }},
@@ -421,10 +428,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
               action: item => {
                 window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + item.examinationId, '_blank');
               }
-            },
-            {headerName: "", type: "button", awesome: "fa-regular fa-eye", action: item => {
-                this.router.navigate(['/dataset/details/' + item.id]);
-            }}
+            }
         ];
         return columnDefs;
     }
@@ -454,12 +458,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         customActionDefs.push(
             {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
             {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
-            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
+            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
             {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
             {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
-            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true }
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoSelected: true },
+            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
         );
         return customActionDefs;
     }
@@ -473,12 +478,13 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 this.selectionTable.refresh();
             }, disabledIfNoResult: true},
             {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
-            {title: "Download as Nifti", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
+            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
             {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
             {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
-            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true }
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoResult: true },
+            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
         );
         return customActionDefs;
     }
@@ -493,8 +499,8 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         this.selectedDatasetIds = selection;
     }
 
-    onRowClick(solrRequest: any) {
-        this.router.navigate(['/dataset/details/' + solrRequest.datasetId]);
+    rowClick(item): string {
+        return '/dataset/details/' + item.datasetId;
     }
 
     getSelectedPage(pageable: Pageable): Promise<Page<any>> {
@@ -508,9 +514,27 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     getFacetFieldPage(pageable: FacetPageable, facetName: string): Promise<FacetResultPage> {
         return this.solrService.getFacet(facetName, pageable, this.solrRequest);
     }
-    initExecutionMode(){
-        this.processingService.setDatasets(this.selectedDatasetIds);
-        this.router.navigate(['/processing']);
+
+    initExecutionMode() {
+        let noAdminStudies: Set<string> = new Set();
+        this.datasetAcquisitionService.getAllForDatasets([...this.selectedDatasetIds]).then(acquisitions => {
+            acquisitions.forEach(acq => {
+                if (!this.hasAdminRight(acq.examination?.study?.id)) {
+                    noAdminStudies.add(acq.examination?.study?.name);
+                }
+            });
+            if(noAdminStudies.size > 0){
+                this.confirmDialogService.error('Invalid selection', 'You don\'t have the right to run pipelines on studies you don\'t administrate. '
+                    + 'Remove datasets that belongs to the following study(ies) from your selection : ' + [...noAdminStudies].join(', '));
+            }else{
+                this.processingService.setDatasets(this.selectedDatasetIds);
+                this.router.navigate(['/processing']);
+            }
+        });
+    }
+
+    copyIds() {
+        this.clipboard.copy(Array.from(this.selectedDatasetIds || []).toString());
     }
 
 }

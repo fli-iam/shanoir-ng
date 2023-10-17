@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -31,17 +31,17 @@ import { ExaminationService } from '../../../examinations/shared/examination.ser
 
 @Component({
     selector: 'animal-examination-list',
-    templateUrl: 'animal-examination-list.component.html', 
+    templateUrl: 'animal-examination-list.component.html',
     providers: [ExaminationService]
 })
 export class AnimalExaminationListComponent extends EntityListComponent<Examination>{
     @ViewChild('examTable', { static: false }) table: TableComponent;
-    
+
     constructor(
-        private examinationService:ExaminationService, 
+        private examinationService:ExaminationService,
         private examAnestheticsService: ExaminationAnestheticService,
     	private extradataService: ExtraDataService)
-    	
+
     {
             super('preclinical-examination');
             this.manageDelete();
@@ -50,7 +50,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     getService(): EntityService<Examination> {
         return this.examinationService;
     }
-    
+
     getPage(pageable: Pageable): Promise<Page<Examination>> {
         return this.examinationService.getPage(pageable, true);
     }
@@ -63,26 +63,26 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
             return null;
         };
         let colDef: ColumnDefinition[] = [
-            { headerName: "Examination id", field: "id" },
-            {headerName: "Subject", field: "subjectId", cellRenderer: (params: any) => (params.data.subject) ? params.data.subject.name : ""},
+            { headerName: "Id", field: "id" },
+            {
+                headerName: "Subject", field: "subject.name", cellRenderer: (params: any) => (params.data.subject) ? params.data.subject.name : "",
+                route: (examination: Examination) => examination.subject ? '/preclinical-subject/details/' + examination.subject.id : null
+            },
             {
                 headerName: "Examination date", field: "examinationDate", type: "date", cellRenderer: function (params: any) {
                     return dateRenderer(params.data.examinationDate);
                 }, width: "100px"
             },
             {
-                headerName: "Research study", field: "studyId", type: "link",
-                action: (examination: Examination) => this.router.navigate(['/study/details/' + examination.study.id]),
-                cellRenderer: (params: any) => (params.data.study) ? params.data.study.name : ""
+                headerName: "Study", field: "study.name",
+                route: (examination: Examination) => examination.study ? '/study/details/' + examination.study.id : null
             },
-            { headerName: "Examination executive", field: "" },
             {
-                headerName: "Center", field: "centerId", type: "link",
-                action: (examination: Examination) => this.router.navigate(['/center/details/' + examination.center.id]),
-                cellRenderer: (params: any) => (params.data.center) ? params.data.center.name : ""
+                headerName: "Center", field: "center.name",
+                route: (examination: Examination) => examination.center ? '/center/details/' + examination.center.id : null
             }
         ];
-        return colDef;       
+        return colDef;
     }
 
     getCustomActionsDefs(): any[] {
@@ -106,7 +106,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
                             this.onDelete.next({entity: selectedExamination, error: new ShanoirError(reason)});
                             if (reason.error.code != 422) throw Error(reason);
                         }
-                    });                    
+                    });
                 }
             })
 
@@ -118,7 +118,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
             return examination;
         });
     }
-    
+
     private manageDelete() {
         this.subscribtions.push(
             this.onDelete.subscribe(response => {
@@ -126,16 +126,16 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
             })
         );
     }
-    
+
     getOptions() {
         return {
             new: false,
-            view: true, 
-            edit: false, 
+            view: true,
+            edit: false,
             delete: this.keycloakService.isUserAdminOrExpert()
         };
     }
-    
+
     deleteExamination(examinationId: number) {
         // Delete examination and refresh page
         this.examAnestheticsService.getExaminationAnesthetics(examinationId)
@@ -153,7 +153,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
             	}
             }
         });
-       
+
     }
 
 

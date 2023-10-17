@@ -14,7 +14,7 @@
 import { Component } from '@angular/core';
 
 import { SolrService } from '../../solr/solr.service';
-import { slideDown } from '../animations/animations';
+import { disapearUp, slideDown } from '../animations/animations';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { ConsoleService } from '../console/console.service';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -30,7 +30,7 @@ import { UserService } from '../../users/shared/user.service';
     selector: 'side-menu',
     templateUrl: 'side-menu.component.html',
     styleUrls: ['side-menu.component.css', environment.production ? 'prod.css' : 'dev.css'],
-    animations: [ slideDown ]
+    animations: [ slideDown, disapearUp ]
 })
 
 export class SideMenuComponent {
@@ -62,7 +62,11 @@ export class SideMenuComponent {
         else this.state = new SideMenuState();
 
         this.userService.accessRequets.subscribe(nb => {
-            this.accessRequestsToValidate = nb;
+            if (nb) {
+                this.accessRequestsToValidate = nb;
+            } else {
+                this.accessRequestsToValidate = 0;
+            }
         });
     }
 
@@ -106,4 +110,5 @@ export class SideMenuState {
     public uploadOpened: boolean = false;
     public adminOpened: boolean = false;
     public notifOpened: boolean = false;
+    public jobsOpened: boolean = true;
 }

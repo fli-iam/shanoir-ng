@@ -14,16 +14,15 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.shared.exception.CheckedIllegalClassException;
 import org.shanoir.ng.studycard.model.field.DatasetMetadataField;
 import org.shanoir.ng.studycard.model.field.MetadataFieldInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * Condition valid for the given DatasetAcquisition if every of it's Datasets metadata fulfill the condition
@@ -49,7 +48,12 @@ public class DatasetMetadataCondOnDataset extends StudyCardMetadataCondition<Dat
         if (dataset == null) throw new IllegalArgumentException("dataset can not be null");
         DatasetMetadataField field = this.getShanoirField();
         if (field == null) throw new IllegalArgumentException("field can not be null");
-        String valueFromDb = field.get(dataset);
+        String valueFromDb;
+            try {
+                valueFromDb = field.get(dataset);
+            } catch (CheckedIllegalClassException e) {
+                valueFromDb = null;
+            }
         if (valueFromDb != null) {
             // get all possible values, that can fulfill the condition
             for (String value : this.getValues()) {

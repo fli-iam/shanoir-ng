@@ -1,7 +1,8 @@
 .info { margin-top: 40px; }
 .form { margin: 0 0 5px; display: inline-block; vertical-align: middle; }
-.form li { margin: 5px 0; height: 19px; }
-select-box { width: 200px; }
+.form li { height: 20px; margin: 6px 0; }
+.form li > * { vertical-align: text-bottom; }
+select-box:not(.read-only) { width: 200px; }
 .form .value { color: var(--color-a); font-weight: bold; }
 .form ul { width: auto; }
 .sc-box { white-space: nowrap; overflow: hidden; border: 1px solid var(--grey); border-radius: 2px; padding: 4px 15px; margin: -4px 0; background-color: beige; }
@@ -18,5 +19,5 @@ div.warning { color: orangered; }
 .button-div { margin: 20px 0 40px; }
 .done, .error { font-size: 35px; font-weight: bold; }
 .done { color: darkgreen; }
-.done { color: var(--color-error); }
-checkbox { vertical-align: bottom; }
+.error { color: var(--color-error); }
+input[type="checkbox"] { padding: 0; margin: 0 0 0 5px; vertical-align: text-bottom; }

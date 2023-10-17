@@ -14,14 +14,14 @@
 
 package org.shanoir.ng.solr.model;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Map;
-
 import org.shanoir.ng.shared.paging.FacetPageable;
 import org.shanoir.ng.utils.Range;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author yyao
@@ -30,21 +30,29 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class ShanoirSolrQuery {
 	
 	private Collection<String> studyName;
-	
+
+	private Collection<Long> studyId;
+
 	private Collection<String> subjectName;
+
+	private Collection<String> subjectType;
+
+	private Collection<Long> subjectId;
 
 	private Collection<Long> examinationId;
 
 	private Collection<String> examinationComment;
+
+	private Collection<String> acquisitionEquipmentName;
 	
 	private	Collection<String> datasetName;
 	
 	private	Collection<String> centerName;
+
+	private Collection<Long> centerId;
 	
 	private	Collection<String> tags;
-	
-	private Collection<Long> studyId;
-	
+
 	private LocalDate datasetStartDate;
 	
 	private LocalDate datasetEndDate;
@@ -93,6 +101,14 @@ public class ShanoirSolrQuery {
 		this.subjectName = subjectName;
 	}
 
+	public Collection<String> getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(Collection<String> subjectType) {
+		this.subjectType = subjectType;
+	}
+
 	public Collection<Long> getExaminationId() {
 		return examinationId;
 	}
@@ -113,6 +129,14 @@ public class ShanoirSolrQuery {
 	 */
 	public void setExaminationComment(Collection<String> examinationComment) {
 		this.examinationComment = examinationComment;
+	}
+
+	public Collection<String> getAcquisitionEquipmentName() {
+		return acquisitionEquipmentName;
+	}
+
+	public void setAcquisitionEquipmentName(Collection<String> acquisitionEquipmentName) {
+		this.acquisitionEquipmentName = acquisitionEquipmentName;
 	}
 
 	/**
@@ -276,4 +300,21 @@ public class ShanoirSolrQuery {
 	public Range<LocalDate> getDatasetDateRange() {
 		return new Range<LocalDate>(getDatasetStartDate(), getDatasetEndDate());
 	}
+
+	public Collection<Long> getSubjectId() {
+		return subjectId;
+	}
+
+	public void setSubjectId(Collection<Long> subjectId) {
+		this.subjectId = subjectId;
+	}
+
+	public Collection<Long> getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Collection<Long> centerId) {
+		this.centerId = centerId;
+	}
+
 }

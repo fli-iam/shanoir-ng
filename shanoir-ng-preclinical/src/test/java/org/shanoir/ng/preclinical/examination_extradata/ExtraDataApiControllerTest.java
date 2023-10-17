@@ -18,14 +18,13 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.File;
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 import org.shanoir.ng.ShanoirPreclinicalApplication;
 import org.shanoir.ng.preclinical.extra_data.ExtraDataApiController;
@@ -49,7 +48,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -62,7 +60,7 @@ import com.google.gson.GsonBuilder;
  * @author sloury
  *
  */
-@RunWith(SpringRunner.class)
+
 @WebMvcTest(controllers = ExtraDataApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ContextConfiguration(classes = ShanoirPreclinicalApplication.class)
@@ -84,8 +82,7 @@ public class ExtraDataApiControllerTest {
 	private static final String REQUEST_PATH_WITH_ID = REQUEST_PATH_EXTRADATA + "/1";
 	private static final String REQUEST_PATH_PHYSIO_WITH_ID = REQUEST_PATH_PHYSIOLOGICALDATA + "/1";
 	private static final String REQUEST_PATH_BLOODGAS_WITH_ID = REQUEST_PATH_BLOODGASDATA + "/1";
-	private static final String REQUEST_PATH_UPLOAD = REQUEST_PATH_EXAMINATION + REQUEST_EXTRADATA + REQUEST_UPLOAD
-			+ "/1";
+	private static final String REQUEST_PATH_UPLOAD = REQUEST_PATH_EXAMINATION + REQUEST_EXTRADATA + REQUEST_UPLOAD + "/1";
 
 	private Gson gson;
 
@@ -113,23 +110,25 @@ public class ExtraDataApiControllerTest {
 	@MockBean
 	private ExtraDataEditableByManager editableOnlyValidator;
 
-	@ClassRule
-	public static TemporaryFolder tempFolder = new TemporaryFolder();
-	
-	public static String tempFolderPath;
-	@BeforeClass
+	@TempDir
+	public static File tempFolder;
+
+	@BeforeAll
 	public static void beforeClass() {
-		tempFolderPath = tempFolder.getRoot().getAbsolutePath() + "/tmp/";
-	    System.setProperty("preclinical.uploadExtradataFolder", tempFolderPath);
+		System.setProperty("preclinical.uploadExtradataFolder",  tempFolder.getAbsolutePath() + "/tmp/");
 	}
 
-	@Before
+	@BeforeEach
 	public void setup() throws ShanoirException {
-		gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+
+	    gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").create();
+
+		ExaminationExtraData extraData = new ExaminationExtraData();
+		extraData.setId(1L);
 
 		doNothing().when(extraDataServiceMock).deleteById(1L);
-		given(extraDataServiceMock.findAllByExaminationId(1L)).willReturn(Arrays.asList(new ExaminationExtraData()));
-		given(extraDataServiceMock.findById(1L)).willReturn(new ExaminationExtraData());
+		given(extraDataServiceMock.findAllByExaminationId(1L)).willReturn(Arrays.asList(extraData));
+		given(extraDataServiceMock.findById(1L)).willReturn(extraData);
 		given(extraDataServiceMock.save(Mockito.mock(ExaminationExtraData.class)))
 				.willReturn(new ExaminationExtraData());
 		
@@ -170,9 +169,9 @@ public class ExtraDataApiControllerTest {
 	@Test
 	@WithMockUser
 	public void uploadExtraDataTest() throws Exception {
-		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", "text/plain",
+		MockMultipartFile firstFile = new MockMultipartFile("files", "filename.txt", MediaType.MULTIPART_FORM_DATA_VALUE,
 				"some xml".getBytes());
-		mvc.perform(MockMvcRequestBuilders.fileUpload(REQUEST_PATH_UPLOAD).file(firstFile)).andExpect(status().isOk());
+		mvc.perform(MockMvcRequestBuilders.multipart(REQUEST_PATH_UPLOAD).file(firstFile)).andExpect(status().isOk());
 	}
 
 	@Test

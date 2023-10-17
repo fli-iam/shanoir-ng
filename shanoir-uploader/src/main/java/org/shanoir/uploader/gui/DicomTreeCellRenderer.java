@@ -9,10 +9,10 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.Serie;
 import org.shanoir.uploader.dicom.query.Media;
-import org.shanoir.uploader.dicom.query.Patient;
-import org.shanoir.uploader.dicom.query.Study;
+import org.shanoir.uploader.dicom.query.PatientTreeNode;
+import org.shanoir.uploader.dicom.query.SerieTreeNode;
+import org.shanoir.uploader.dicom.query.StudyTreeNode;
 
 /**
  * This class is the tree cell renderer of the DICOM tree.
@@ -73,11 +73,11 @@ public class DicomTreeCellRenderer extends DefaultTreeCellRenderer {
         setToolTipText(treeNode.getDisplayString());
         if(value instanceof Media) {
         	setIcon(mediaIcon);
-        } else if(value instanceof Patient) {
+        } else if(value instanceof PatientTreeNode) {
         	setIcon(patientIcon);
-        } else if(value instanceof Study) {
+        } else if(value instanceof StudyTreeNode) {
         	setIcon(studyIcon);
-        } else if(value instanceof Serie) {
+        } else if(value instanceof SerieTreeNode) {
         	setIcon(serieIcon);
         }
         return this;

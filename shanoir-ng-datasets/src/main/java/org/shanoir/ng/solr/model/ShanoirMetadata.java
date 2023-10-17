@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -19,17 +19,12 @@
  */
 package org.shanoir.ng.solr.model;
 
-import java.time.LocalDate;
-
-import javax.persistence.ColumnResult;
-import javax.persistence.ConstructorResult;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.SqlResultSetMapping;
-
+import jakarta.persistence.*;
 import org.shanoir.ng.dataset.modality.MrDatasetNature;
 import org.shanoir.ng.dataset.model.DatasetModalityType;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+
+import java.time.LocalDate;
 
 /**
  * @author yyao
@@ -37,64 +32,73 @@ import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
  */
 @Entity
 @SqlResultSetMapping(name = "SolrResult", classes = {@ConstructorResult(targetClass = ShanoirMetadata.class,
-	columns = {@ColumnResult(name="datasetId", type = Long.class), @ColumnResult(name="datasetName", type = String.class),
-			@ColumnResult(name="datasetType", type = Integer.class), @ColumnResult(name="datasetNature", type = Integer.class),
-			@ColumnResult(name="datasetCreationDate", type = LocalDate.class), @ColumnResult(name="examinationId", type = Long.class),
-			@ColumnResult(name="examinationComment", type = String.class),
-			@ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="subjectName", type = String.class),
-			@ColumnResult(name="subjectId", type = Long.class),
-			@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
-			@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="sliceThickness", type = Double.class),
-			@ColumnResult(name="pixelBandwidth", type = Double.class), @ColumnResult(name="magneticFieldStrength", type = Double.class)
-	})
+		columns = {@ColumnResult(name="datasetId", type = Long.class), @ColumnResult(name="datasetName", type = String.class),
+				@ColumnResult(name="datasetType", type = Integer.class), @ColumnResult(name="datasetNature", type = Integer.class),
+				@ColumnResult(name="datasetCreationDate", type = LocalDate.class),
+				@ColumnResult(name="examinationId", type = Long.class), @ColumnResult(name="examinationComment", type = String.class),
+				@ColumnResult(name="examinationDate", type = LocalDate.class), @ColumnResult(name="acquisitionEquipmentName", type = String.class),
+				@ColumnResult(name="subjectName", type = String.class), @ColumnResult(name="subjectType", type = Integer.class),
+				@ColumnResult(name="subjectId", type = Long.class),
+				@ColumnResult(name="studyName", type = String.class), @ColumnResult(name="studyId", type = Long.class),
+				@ColumnResult(name="centerName", type = String.class), @ColumnResult(name="centerId", type = Long.class),
+				@ColumnResult(name="sliceThickness", type = Double.class), @ColumnResult(name="pixelBandwidth", type = Double.class),
+				@ColumnResult(name="magneticFieldStrength", type = Double.class)
+		})
 })
+
 public class ShanoirMetadata {
-	
+
 	@Id
 	private	Long datasetId;
-	
+
 	private	String datasetName;
-	
+
 	// DatasetModalityType: MR, CT, PET etc..
 	private	Integer datasetType;
-	
+
 	// T1, T2, Diff, etc..
 	private Integer datasetNature;
-	
+
 	@LocalDateAnnotations
 	private LocalDate datasetCreationDate;
 
 	private Long examinationId;
-	
+
 	private String examinationComment;
-	
+
 	@LocalDateAnnotations
 	private LocalDate examinationDate;
-	
+
 	private String subjectName;
-	
+
+	private Integer subjectType;
+
+	private String acquisitionEquipmentName;
+
 	private String studyName;
-	
+
 	private Long studyId;
-	
+
 	private String centerName;
-	
+
+	private Long centerId;
+
 	private Double sliceThickness;
-	
+
 	private Double pixelBandwidth;
-	
+
 	private Double magneticFieldStrength;
-	
+
 	private Long subjectId;
-	
+
 	public ShanoirMetadata () {
-		
+
 	}
-	
+
 	public ShanoirMetadata (Long datasetId, String datasetName, Integer datasetType, Integer datasetNature,
-			LocalDate datasetCreationDate, Long examinationId, String examinationComment, LocalDate examinationDate,
-			String subjectName, Long subjectId, String studyName, Long studyId, String centerName, Double sliceThickness,
-			Double pixelBandwidth, Double magneticFieldStrength) {
+							LocalDate datasetCreationDate, Long examinationId, String examinationComment, LocalDate examinationDate, String acquisitionEquipmentName,
+							String subjectName, Integer subjectType, Long subjectId, String studyName, Long studyId, String centerName, Long centerId, Double sliceThickness,
+							Double pixelBandwidth, Double magneticFieldStrength) {
 		this.datasetId = datasetId;
 		this.datasetName = datasetName;
 		this.datasetType = datasetType;
@@ -103,16 +107,19 @@ public class ShanoirMetadata {
 		this.examinationId = examinationId;
 		this.examinationComment = examinationComment;
 		this.examinationDate = examinationDate;
+		this.acquisitionEquipmentName = acquisitionEquipmentName;
 		this.subjectName = subjectName;
+		this.subjectType = subjectType;
 		this.subjectId = subjectId;
 		this.studyName = studyName;
 		this.studyId = studyId;
 		this.centerName = centerName;
+		this.centerId = centerId;
 		this.sliceThickness = sliceThickness;
 		this.pixelBandwidth = pixelBandwidth;
 		this.magneticFieldStrength = magneticFieldStrength;
-	}	
-	
+	}
+
 	/**
 	 * @return the datasetId
 	 */
@@ -235,6 +242,14 @@ public class ShanoirMetadata {
 		this.examinationDate = examinationDate;
 	}
 
+	public String getAcquisitionEquipmentName() {
+		return acquisitionEquipmentName;
+	}
+
+	public void setAcquisitionEquipmentName(String acquisitionEquipmentName) {
+		this.acquisitionEquipmentName = acquisitionEquipmentName;
+	}
+
 	/**
 	 * @return the subjectName
 	 */
@@ -247,6 +262,14 @@ public class ShanoirMetadata {
 	 */
 	public void setSubjectName(String subjectName) {
 		this.subjectName = subjectName;
+	}
+
+	public Integer getSubjectType() {
+		return subjectType;
+	}
+
+	public void setSubjectType(Integer subjectType) {
+		this.subjectType = subjectType;
 	}
 
 	/**
@@ -322,5 +345,12 @@ public class ShanoirMetadata {
 	public void setSubjectId(Long subjectId) {
 		this.subjectId = subjectId;
 	}
-	
+
+	public Long getCenterId() {
+		return centerId;
+	}
+
+	public void setCenterId(Long centerId) {
+		this.centerId = centerId;
+	}
 }

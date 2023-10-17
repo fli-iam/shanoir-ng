@@ -14,10 +14,13 @@
 
 package org.shanoir.ng.datasetacquisition.repository;
 
-import java.util.List;
-
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
+
+import java.util.List;
 
 /**
  * Repository for dataset acquisition.
@@ -25,15 +28,17 @@ import org.springframework.data.repository.PagingAndSortingRepository;
  * @author msimon
  *
  */
-public interface DatasetAcquisitionRepository extends PagingAndSortingRepository<DatasetAcquisition, Long>, DatasetAcquisitionRepositoryCustom  {
+public interface DatasetAcquisitionRepository extends PagingAndSortingRepository<DatasetAcquisition, Long>, CrudRepository<DatasetAcquisition, Long>, DatasetAcquisitionRepositoryCustom  {
 
 	List<DatasetAcquisition> findByStudyCardId(Long studyCardId);
+
+	Page<DatasetAcquisition> findByStudyCardId(Long studyCardId, Pageable pageable);
 	
 	List<DatasetAcquisition> findByExaminationId(Long id);
 	
 	List<DatasetAcquisition> findDistinctByDatasetsIdIn(Long[] datasetIds);
-	
 
+    boolean existsByStudyCard_Id(Long studyCardId);
 }
 
 

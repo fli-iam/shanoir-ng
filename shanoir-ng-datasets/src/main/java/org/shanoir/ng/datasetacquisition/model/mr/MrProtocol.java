@@ -14,18 +14,12 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 import org.shanoir.ng.shared.model.DiffusionGradient;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
 
 /**
  * MR protocol.
@@ -189,7 +183,7 @@ public class MrProtocol extends AbstractEntity {
 
 	/**
 	* (0018,0087) Magnetic Field Strength
-	* The Magnetic field strength.
+	* The Magnetic field strength in Teslas.
 	*/
 	private Double magneticFieldStrength;
 

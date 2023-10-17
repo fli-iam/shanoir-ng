@@ -1,7 +1,7 @@
 package org.shanoir.uploader.nominativeData;
 
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlType;
 
 import org.shanoir.uploader.upload.UploadState;
 

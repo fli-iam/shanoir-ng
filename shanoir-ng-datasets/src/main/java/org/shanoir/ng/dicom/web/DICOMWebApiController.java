@@ -1,10 +1,10 @@
 package org.shanoir.ng.dicom.web;
 
-import java.util.Iterator;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.solr.common.StringUtils;
 import org.shanoir.ng.dicom.web.service.DICOMWebService;
 import org.shanoir.ng.examination.model.Examination;
@@ -20,10 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Iterator;
+import java.util.Map;
 
 @Controller
 public class DICOMWebApiController implements DICOMWebApi {

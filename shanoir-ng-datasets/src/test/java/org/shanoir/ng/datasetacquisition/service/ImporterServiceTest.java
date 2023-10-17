@@ -1,13 +1,30 @@
 package org.shanoir.ng.datasetacquisition.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.dcm4che3.data.Attributes;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.*;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
+import org.shanoir.ng.dicom.DicomProcessing;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
+import org.shanoir.ng.examination.service.ExaminationService;
+import org.shanoir.ng.importer.dto.*;
+import org.shanoir.ng.importer.service.DatasetAcquisitionContext;
+import org.shanoir.ng.importer.service.DicomPersisterService;
+import org.shanoir.ng.importer.service.ImporterService;
+import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
+import org.shanoir.ng.study.rights.StudyUserRightsRepository;
+import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.studycard.service.QualityCardService;
+import org.shanoir.ng.utils.Utils;
+import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -16,49 +33,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.powermock.api.mockito.PowerMockito;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.EegDatasetDTO;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.model.DatasetMetadata;
-import org.shanoir.ng.dataset.model.DatasetModalityType;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.eeg.model.Channel;
-import org.shanoir.ng.eeg.model.Channel.ChannelType;
-import org.shanoir.ng.eeg.model.Event;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.examination.repository.ExaminationRepository;
-import org.shanoir.ng.examination.service.ExaminationService;
-import org.shanoir.ng.importer.dto.Dataset;
-import org.shanoir.ng.importer.dto.DatasetFile;
-import org.shanoir.ng.importer.dto.EegImportJob;
-import org.shanoir.ng.importer.dto.ExpressionFormat;
-import org.shanoir.ng.importer.dto.ImportJob;
-import org.shanoir.ng.importer.dto.Patient;
-import org.shanoir.ng.importer.dto.Serie;
-import org.shanoir.ng.importer.dto.Study;
-import org.shanoir.ng.importer.service.DatasetAcquisitionContext;
-import org.shanoir.ng.importer.service.DicomPersisterService;
-import org.shanoir.ng.importer.service.ImporterService;
-import org.shanoir.ng.shared.event.ShanoirEvent;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.study.rights.StudyUserRightsRepository;
-import org.shanoir.ng.utils.usermock.WithMockKeycloakUser;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class ImporterServiceTest {
@@ -83,14 +64,23 @@ public class ImporterServiceTest {
 	private DicomPersisterService dicomPersisterService;
 
 	@Mock
+	private DicomProcessing dicomProcessing;
+
+	@Mock
 	private ShanoirEventService taskService;
 	
 	@Mock
 	StudyUserRightsRepository studyUserRightRepo;
 
+	@Mock
+	QualityCardService qualityCardService;
+
+	@Mock
+	private DatasetAcquisitionRepository datasetAcquisitionRepository;
+
 	private Examination exam;
 
-	@Before
+	@BeforeEach
 	public void setUp() throws IOException {
 		exam = new Examination();
 		exam.setExaminationDate(LocalDate.now());
@@ -142,27 +132,31 @@ public class ImporterServiceTest {
 		Examination examination = new Examination();
 		examination.setId(2L);
 		examination.setExaminationDate(LocalDate.now());
+		examination.setDatasetAcquisitions(new ArrayList<>());
 		when(examinationRepository.findById(importJob.getExaminationId())).thenReturn(Optional.of(examination));
 		DatasetAcquisition datasetAcq = new MrDatasetAcquisition();
-		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob)).thenReturn(datasetAcq);
+		when(datasetAcquisitionContext.generateDatasetAcquisitionForSerie(serie, 0, importJob, new Attributes())).thenReturn(datasetAcq);
 		when(studyUserRightRepo.findByStudyId(importJob.getStudyId())).thenReturn(Collections.emptyList());
-		
+		when(dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced())).thenReturn(new Attributes());
+		when(qualityCardService.findByStudy(examination.getStudyId())).thenReturn(Utils.toList(new QualityCard())); // TODO perform quality card tests
+
 		// WHEN we treat this importjob
 		service.createAllDatasetAcquisition(importJob, 1L);
 		
 		ArgumentCaptor<ShanoirEvent> argument = ArgumentCaptor.forClass(ShanoirEvent.class);
-		Mockito.verify(taskService, Mockito.times(3)).publishEvent(argument.capture());
+		Mockito.verify(taskService, Mockito.times(4)).publishEvent(argument.capture());
 		
 		List<ShanoirEvent> values = argument.getAllValues();
 		ShanoirEvent task = values.get(0);
 		assertTrue(task.getStatus() == 1);
 		// NOTE: This test is important as we use the message to send an mail to study admin further.
 		// PLEASE do not change sucess message OR change it accordingly in emailServiceImpl.
-		assertEquals("studyName(1): Successfully created datasets for subject subjectName in examination 2", task.getMessage());
+		assertEquals("[studyName (n°1)] Successfully created datasets for subject [subjectName] in examination [2]", task.getMessage());
 		
 		// THEN datasets are created
 		// Check what we save at the end
-		verify(datasetAcquisitionService).create(datasetAcq);
+		verify(datasetAcquisitionService).createAll(any());
+		//verify(datasetAcquisitionService).create(datasetAcq);
 		verify(dicomPersisterService).persistAllForSerie(any());
 
 		assertNotNull(datasetAcq);

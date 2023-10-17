@@ -14,9 +14,9 @@
 
 package org.shanoir.ng.studycard.model.rule;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
 import org.dcm4che3.data.Attributes;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
@@ -27,8 +27,6 @@ import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnAcq;
 import org.shanoir.ng.studycard.model.condition.AcqMetadataCondOnDatasets;
 import org.shanoir.ng.studycard.model.condition.StudyCardCondition;
 import org.shanoir.ng.studycard.model.condition.StudyCardDICOMCondition;
-
-import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * A rule that applies to a {@link DatasetAcquisition}

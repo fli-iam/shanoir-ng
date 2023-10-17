@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,6 +28,7 @@ import { ManufacturerModelService } from '../shared/manufacturer-model.service';
 import { Center } from '../../centers/shared/center.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ManufacturerModelPipe } from '../shared/manufacturer-model.pipe';
+import {StudyCardService} from "../../study-cards/shared/study-card.service";
 
 @Component({
     selector: 'acquisition-equipment-detail',
@@ -38,18 +39,21 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     public manufModels: ManufacturerModel[];
     public centers: IdName[];
+    public centersFromStudyCard;
     public datasetModalityTypeStr: string;
     private nonEditableCenter: boolean = false;
     private lastSubmittedManufAndSerial: ManufacturerAndSerial;
 
+
     get acqEquip(): AcquisitionEquipment { return this.entity; }
     set acqEquip(acqEquip: AcquisitionEquipment) { this.entity = acqEquip; }
-    
+
     constructor(
-            private route: ActivatedRoute, 
-            private acqEquipService: AcquisitionEquipmentService, 
+            private route: ActivatedRoute,
+            private acqEquipService: AcquisitionEquipmentService,
             private manufModelService: ManufacturerModelService,
             private centerService: CenterService,
+            private studyCardService: StudyCardService,
             public manufacturerModelPipe: ManufacturerModelPipe) {
 
         super(route, 'acquisition-equipment');
@@ -78,11 +82,18 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     async initCreate(): Promise<void> {
         this.entity = new AcquisitionEquipment();
-        this.centerService.getCentersNames().then(centers => this.centers = centers);
+        this.prefill();
+        if (this.centersFromStudyCard == null) {
+            this.centerService.getCentersNames().then(centers => this.centers = centers);
+        }
+        else {
+            this.centers = this.centersFromStudyCard;
+        }
         this.getManufModels();
     }
 
     private prefill() {
+        this.centersFromStudyCard = this.breadcrumbsService.currentStep.getPrefilledValue('sc_center');
         this.nonEditableCenter = this.breadcrumbsService.currentStep.isPrefilled('center');
         if (this.nonEditableCenter) {
             this.acqEquip.center = this.breadcrumbsService.currentStep.getPrefilledValue('center');
@@ -101,11 +112,10 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     }
 
     buildForm(): UntypedFormGroup {
-        this.prefill();
         let form: UntypedFormGroup = this.formBuilder.group({
             'serialNumber': [this.acqEquip.serialNumber, [this.manufAndSerialUnicityValidator, this.noSpacesStartAndEndValidator]],
             'manufacturerModel': [this.acqEquip.manufacturerModel, [Validators.required]],
-            'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required], 
+            'center': [{value: this.acqEquip.center, disabled: this.nonEditableCenter}, Validators.required],
         });
         this.registerManufAndSerialUnicityValidator(form);
         return form;
@@ -143,7 +153,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     private manufAndSerialUnicityValidator = (control: AbstractControl): ValidationErrors | null => {
         if (this.saveError && this.saveError.hasFieldError('manufacturerModel - serialNumber', 'unique')
                 && this.acqEquip.manufacturerModel.id == this.lastSubmittedManufAndSerial.manuf.id
-                && this.acqEquip.serialNumber == this.lastSubmittedManufAndSerial.serial) {       
+                && this.acqEquip.serialNumber == this.lastSubmittedManufAndSerial.serial) {
             return {unique: true};
         }
         return null;

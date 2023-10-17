@@ -14,12 +14,8 @@
 
 package org.shanoir.ng.examination;
 
-import java.util.Arrays;
-import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.shanoir.ng.examination.dto.ExaminationDTO;
 import org.shanoir.ng.examination.dto.SubjectExaminationDTO;
 import org.shanoir.ng.examination.dto.mapper.ExaminationMapper;
@@ -29,7 +25,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Examination mapper test.
@@ -37,7 +35,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  * @author msimon
  * 
  */
-@RunWith(SpringRunner.class)
+
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class ExaminationMapperTest {
@@ -51,25 +49,25 @@ public class ExaminationMapperTest {
 	public void examinationsToSubjectExaminationDTOsTest() {
 		final List<SubjectExaminationDTO> examinationDTOs = examinationMapper
 				.examinationsToSubjectExaminationDTOs(Arrays.asList(createExamination()));
-		Assert.assertNotNull(examinationDTOs);
-		Assert.assertTrue(examinationDTOs.size() == 1);
-		Assert.assertTrue(EXAMINATION_ID.equals(examinationDTOs.get(0).getId()));
+		Assertions.assertNotNull(examinationDTOs);
+		Assertions.assertTrue(examinationDTOs.size() == 1);
+		Assertions.assertTrue(EXAMINATION_ID.equals(examinationDTOs.get(0).getId()));
 	}
 
 	@Test
 	public void examinationToExaminationDTOTest() {
 		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 		final ExaminationDTO examinationDTO = examinationMapper.examinationToExaminationDTO(createExamination());
-		Assert.assertNotNull(examinationDTO);
-		Assert.assertTrue(EXAMINATION_ID.equals(examinationDTO.getId()));
+		Assertions.assertNotNull(examinationDTO);
+		Assertions.assertTrue(EXAMINATION_ID.equals(examinationDTO.getId()));
 	}
 
 	@Test
 	public void examinationToSubjectExaminationDTOTest() {
 		final SubjectExaminationDTO examinationDTO = examinationMapper
 				.examinationToSubjectExaminationDTO(createExamination());
-		Assert.assertNotNull(examinationDTO);
-		Assert.assertTrue(EXAMINATION_ID.equals(examinationDTO.getId()));
+		Assertions.assertNotNull(examinationDTO);
+		Assertions.assertTrue(EXAMINATION_ID.equals(examinationDTO.getId()));
 	}
 
 	private Examination createExamination() {

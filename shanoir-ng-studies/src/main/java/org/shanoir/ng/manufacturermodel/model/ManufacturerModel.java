@@ -14,14 +14,7 @@
 
 package org.shanoir.ng.manufacturermodel.model;
 
-import javax.persistence.ColumnResult;
-import javax.persistence.ConstructorResult;
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.PostLoad;
-import javax.persistence.SqlResultSetMapping;
-import javax.validation.constraints.NotNull;
-
+import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.validator.constraints.Length;
 import org.shanoir.ng.shared.core.model.IdName;
@@ -29,6 +22,8 @@ import org.shanoir.ng.shared.hateoas.HalEntity;
 import org.shanoir.ng.shared.hateoas.Links;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Manufacturer model.
