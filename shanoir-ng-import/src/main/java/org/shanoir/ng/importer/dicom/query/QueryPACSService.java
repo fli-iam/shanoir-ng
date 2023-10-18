@@ -56,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.weasis.core.api.util.FileUtil;
 import org.weasis.dicom.op.CFind;
 import org.weasis.dicom.op.CMove;
 import org.weasis.dicom.param.AdvancedParams;
@@ -64,6 +65,7 @@ import org.weasis.dicom.param.DicomParam;
 import org.weasis.dicom.param.DicomProgress;
 import org.weasis.dicom.param.DicomState;
 import org.weasis.dicom.param.ProgressListener;
+import org.weasis.dicom.util.ServiceUtil;
 
 import jakarta.annotation.PostConstruct;
 
@@ -481,7 +483,10 @@ public class QueryPACSService {
 			for (int i = 0; i < keys.length; i++) {
 				LOG.info("Tag: {}, Value: {}", keys[i].getTagName(), Arrays.toString(keys[i].getValues()));
 			}
-			this.association.cfind(cuid, Priority.NORMAL, attributes, null, rspHandler);
+			association.cfind(cuid, Priority.NORMAL, attributes, null, rspHandler);
+	        if (association.isReadyForDataTransfer()) {
+	            association.waitForOutstandingRSP();
+	        }
 		} catch (IOException | InterruptedException e) {
 			LOG.error("Error in c-find query: ", e);
 		}
