@@ -42,6 +42,7 @@ import org.dcm4che3.net.Status;
 import org.dcm4che3.net.pdu.AAssociateRQ;
 import org.dcm4che3.net.pdu.PresentationContext;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
+import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
 import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
 import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
@@ -55,6 +56,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.weasis.dicom.op.CFind;
 import org.weasis.dicom.op.CMove;
 import org.weasis.dicom.param.AdvancedParams;
 import org.weasis.dicom.param.DicomNode;
@@ -456,10 +458,6 @@ public class QueryPACSService {
 		} else if (level.equals(QueryRetrieveLevel.IMAGE)) {
 			cuid = UID.StudyRootQueryRetrieveInformationModelFind;
 		}
-		Attributes attributes = new Attributes();
-		for (DicomParam p : keys) {
-			addAttributes(attributes, p);
-		}
 		DicomState state = new DicomState(new DicomProgress());
 		DimseRSPHandler rspHandler = new DimseRSPHandler(this.association.nextMessageID()) {
 			@Override
@@ -467,12 +465,18 @@ public class QueryPACSService {
 				super.onDimseRSP(as, cmd, data);
 				int status = cmd.getInt(Tag.Status, -1);
 				if (Status.isPending(status)) {
+			        state.addDicomRSP(data);
 				} else {
 					state.setStatus(status);
 				}
 			}
 		};
 		try {
+			Attributes attributes = new Attributes();
+			attributes.setString(Tag.QueryRetrieveLevel, VR.CS, level.name());
+			for (DicomParam p : keys) {
+				addAttributes(attributes, p);
+			}
 			LOG.info("Calling PACS, C-FIND with level: {}", level);
 			for (int i = 0; i < keys.length; i++) {
 				LOG.info("Tag: {}, Value: {}", keys[i].getTagName(), Arrays.toString(keys[i].getValues()));
@@ -483,7 +487,7 @@ public class QueryPACSService {
 		}
 		return state.getDicomRSP();
 	}
-
+	
     public void addAttributes(Attributes attrs, DicomParam param) {
         int tag = param.getTag();
         String[] ss = param.getValues();
