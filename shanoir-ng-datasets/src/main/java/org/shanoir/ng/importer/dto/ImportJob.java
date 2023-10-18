@@ -225,15 +225,11 @@ public class ImportJob implements Serializable {
     }
 
     public Serie getFirstSerie() {
-        if ( getPatients() == null
+        if ( getPatients() == null || getPatients().size() == 0
                 || getPatients().get(0) == null
-                || getPatients().get(0).getStudies() == null
+                || getPatients().get(0).getStudies() == null || getPatients().get(0).getStudies().size() == 0
                 || getPatients().get(0).getStudies().get(0) == null
-                || getPatients().get(0).getStudies().get(0).getSeries() == null) {
-            return null;
-        } else if (getPatients().size() == 0
-                || getPatients().get(0).getStudies().size() == 0
-                || getPatients().get(0).getStudies().get(0).getSeries().size() == 0) {
+                || getPatients().get(0).getStudies().get(0).getSeries() == null || getPatients().get(0).getStudies().get(0).getSeries().size() == 0) {
             return null;
         } else {
             return getPatients().get(0).getStudies().get(0).getSeries().get(0);
