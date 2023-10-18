@@ -26,7 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -56,6 +59,8 @@ import org.shanoir.ng.study.service.StudyUserService;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -102,6 +107,7 @@ public class StudyApiController implements StudyApi {
 
 	@Autowired
 	private RelatedDatasetService relatedDatasetService;
+
 
 	private static final Logger LOG = LoggerFactory.getLogger(StudyApiController.class);
 
@@ -214,7 +220,7 @@ public class StudyApiController implements StudyApi {
 	}
 
 	@Override
-	public ResponseEntity<StudyDTO> copyDatasetsToStudy(
+	public ResponseEntity<String> copyDatasetsToStudy(
 			@Parameter(name = "Dataset ids to copy", required = true)
 			@RequestParam(value = "datasetIds", required = true) String datasetIds,
 			@Parameter(name = "Study id to copy in", required = true)
@@ -225,11 +231,10 @@ public class StudyApiController implements StudyApi {
 		System.out.println("datasetId : " + datasetIds);
 		System.out.println("studyId : " + studyId);
 		System.out.println("centerIds : " + centerIds);
-		for (String dataset : datasetIds.split(",")) {
-			relatedDatasetService.copyDatasetToStudy(dataset, studyId, centerIds);
-		}
+		String res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
 
-		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+
+		return new ResponseEntity<>(res, HttpStatus.OK);
 	}
 
 	@Override

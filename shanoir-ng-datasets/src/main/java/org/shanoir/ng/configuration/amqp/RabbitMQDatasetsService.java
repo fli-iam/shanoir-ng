@@ -55,6 +55,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -408,12 +409,28 @@ public class RabbitMQDatasetsService {
 		datasetService.getVolumeByFormatByStudyId(studyIds).forEach((id, volumeByFormat) -> {
 			studyStorageVolumes.put(id, new StudyStorageVolumeDTO(volumeByFormat, examinationService.getExtraDataSizeByStudyId(id)));
 		});
-		
+
 		try {
 			return objectMapper.writeValueAsString(studyStorageVolumes);
 		} catch (JsonProcessingException e) {
 			LOG.error("Error while serializing HashMap<Long, StudyVolumeStorageDTO>.", e);
 			throw new AmqpRejectAndDontRequeueException(e);
 		}
+	}
+
+	@RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY)
+	@RabbitHandler
+	@Transactional
+	public void copyDatasetsToStudy(final String data) {
+		System.out.println("data received : " + data);
+		int index = data.indexOf(";");
+		String[] datasetIds = data.substring(0, index).split(",");
+		String studyId = data.substring(index + 1, data.length());
+
+		for (String datasetId : datasetIds) {
+			System.out.println("datasetId : " + datasetId);
+		}
+		System.out.println("studyId : " + studyId);
+
 	}
 }

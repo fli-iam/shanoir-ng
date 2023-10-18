@@ -145,7 +145,7 @@ public interface StudyApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@RequestMapping(value = "/copyDatasets", produces = { "application/json" }, method = RequestMethod.POST)
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
-	ResponseEntity<StudyDTO> copyDatasetsToStudy(
+	ResponseEntity<String> copyDatasetsToStudy(
 			@Parameter(name = "Dataset ids to copy", required = true)
 			@RequestParam(value = "datasetIds", required = true) String datasetIds,
 			@Parameter(name = "Study id to copy in", required = true)
@@ -153,7 +153,6 @@ public interface StudyApi {
 			@Parameter(name = "center id of datasets", required = true)
 			@RequestParam(value = "centerIds", required = true) String centerIds);
 
-	//  and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_IMPORT')
 
 	@Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")
 	@ApiResponses(value = {

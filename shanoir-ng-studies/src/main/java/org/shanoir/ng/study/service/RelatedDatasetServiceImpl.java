@@ -14,18 +14,29 @@
 
 package org.shanoir.ng.study.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
 import org.shanoir.ng.center.model.Center;
 import org.shanoir.ng.center.repository.CenterRepository;
+import org.shanoir.ng.manufacturermodel.service.ManufacturerModelServiceImpl;
 import org.shanoir.ng.messaging.StudyUserUpdateBroadcastService;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
+import org.shanoir.ng.study.repository.StudyRepository;
 import org.shanoir.ng.study.repository.StudyUserRepository;
+import org.shanoir.ng.study.security.StudySecurityService;
 import org.shanoir.ng.studycenter.StudyCenter;
+import org.shanoir.ng.tag.model.Tag;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,62 +53,80 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 
 	@Autowired
 	private StudyUserRepository studyUserRepository;
-
-	@Autowired
-	private StudyUserService studyUserService;
 	@Autowired
 	private StudyService studyService;
 	@Autowired
-	private StudyUserUpdateBroadcastService studyUserUpdateBroadcastService;
-
-	@Autowired
 	private CenterRepository centerRepository;
 	@Autowired
-	private ObjectMapper mapper;
+	private StudyRepository studyRepository;
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+	@Autowired
+	private ObjectMapper objectMapper;
+	private static final Logger LOG = LoggerFactory.getLogger(RelatedDatasetServiceImpl.class);
 
-	public void copyDatasetToStudy(String datasetId, String id, String centerIds) {
-		System.out.println("copyToStudy : " + datasetId + " / " + id + " / " + centerIds);
-		Long studyId = Long.valueOf(id);
-		// List<StudyUserRight> rights = studyUserService.getRightsForStudy(studyId);
+	public String addCenterAndCopyDatasetToStudy(String datasetIds, String id, String centerIds) {
+		String result = "";
+		result = addCenterToStudy(id, centerIds);
 
+		try {
+			copyDatasetToStudy(datasetIds, id);
+		} catch (MicroServiceCommunicationException e) {
+			throw new RuntimeException(e);
+		}
+		return result;
+	}
+
+	private String addCenterToStudy(String id, String centerIds) {
 		Long userId = KeycloakUtil.getTokenUserId();
+		Long studyId = Long.valueOf(id);
+
+		Study study = studyService.findById(studyId);
 		StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
 		List<StudyUserRight> rights = studyUser.getStudyUserRights();
 
 		if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
-			System.out.println("study " + id + " has ADMIN or IMPORT right");
 
 			for (String centerId : centerIds.split(",")) {
-				System.out.println("centerId : " + centerId);
 				if (!centerRepository.findByStudy(studyId).contains(centerId)) {
-					System.out.println("study " + studyId + " does not have center " + centerId + ". Let's add it");
 
-					Study study = studyService.findById(studyId);
 					List<StudyCenter> studyCenterList = study.getStudyCenterList();
 					Center center = centerRepository.findById(Long.valueOf(centerId)).orElse(null);
-					if (center != null && !studyCenterList.contains(center)) {
-						StudyCenter centerToAdd =	 new StudyCenter();
+					List<Center> centersOfStudy = centerRepository.findByStudy(studyId);
+
+					if (center != null && !centersOfStudy.contains(center)) {
+						LOG.info("Add center " + center.getName() + " to study " + study.getName() + ".");
+						System.out.println("add center " + center.getName() + " to study " + study.getName());
+						StudyCenter centerToAdd = new StudyCenter();
 						centerToAdd.setStudy(study);
 						centerToAdd.setCenter(center);
+						centerToAdd.setSubjectNamePrefix(null);
 						studyCenterList.add(centerToAdd);
 						study.setMonoCenter(false);
 						study.setStudyCenterList(studyCenterList);
-						try {
-							studyService.update(study);
-						} catch (EntityNotFoundException e) {
-							throw new RuntimeException(e);
-						} catch (MicroServiceCommunicationException e) {
-							throw new RuntimeException(e);
-						}
-						System.out.println("Center " + center.getName() + " added to study " + study.getName());
+						studyRepository.save(study);
+					} else {
+						LOG.info("Center " + center.getName() + " already exists in study " + study.getName() + ".");
+						// TODO if center already exist in study, return message to be displayed in modal
 					}
-
-				} else {
-					System.out.println("study " + studyId + " already contains center " + centerId);
 				}
 			}
+			return "Center added to study";
 		} else {
+			LOG.error("Missing IMPORT or ADMIN rights on destination study " + study.getName());
+			return "Missing IMPORT or ADMIN rights on destination study " + study.getName();
 			// TODO if we don't have the rights on this study, return message to be displayed in modal
+		}
+	}
+
+	private boolean copyDatasetToStudy(String datasetIds, String studyId) throws MicroServiceCommunicationException {
+		System.out.println("copyDatasetToStudy datasetsIds : " + datasetIds + " / studyId : " + studyId);
+		try {
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY, datasetIds + ";" + studyId);
+			return true;
+		} catch (AmqpException e) {
+			throw new MicroServiceCommunicationException(
+					"Error while communicating with datasets MS to copy to study.", e);
 		}
 	}
 }

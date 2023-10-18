@@ -26,6 +26,6 @@ import org.springframework.stereotype.Service;
 public interface RelatedDatasetService {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	void copyDatasetToStudy(String datasetId, String studyId, String centerIds);
+	String addCenterAndCopyDatasetToStudy(String datasetIds, String studyId, String centerIds);
 
 }

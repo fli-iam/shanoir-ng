@@ -79,10 +79,11 @@ export class DatasetCopyDialogComponent {
                 console.log("formData studies : " + formData.get('studyId'));
                 console.log("formData centerIds : " + formData.get('centerIds'));
                 // console.log("formData subjectIds : " + formData.get('subjectIds'));
-                return this.http.post<void>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData)
+                return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
                     .toPromise()
                     .then(res => {
                         console.log("res : " + res);
+                        this.statusMessage += "... \n" + res;
                     });
             }
         });
