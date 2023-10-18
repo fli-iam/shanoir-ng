@@ -15,6 +15,7 @@
 package org.shanoir.ng.study.service;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,6 +33,7 @@ import org.shanoir.ng.shared.security.rights.StudyUserRight;
 import org.shanoir.ng.study.dto.StudyDTO;
 import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dto.mapper.StudyMapper;
+import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
@@ -58,7 +60,10 @@ import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -458,6 +463,12 @@ public class StudyServiceImpl implements StudyService {
 		for (StudyUser su : studyDb.getStudyUserList()) {
 			existing.put(su.getId(), su);
 		}
+		
+		boolean addNewDua = CollectionUtils.isEmpty(studyDb.getDataUserAgreementPaths()) && !CollectionUtils.isEmpty(study.getDataUserAgreementPaths());
+		boolean deleteDua = !CollectionUtils.isEmpty(studyDb.getDataUserAgreementPaths()) && CollectionUtils.isEmpty(study.getDataUserAgreementPaths());
+		boolean updateDua = !CollectionUtils.isEmpty(studyDb.getDataUserAgreementPaths()) 
+						 && !CollectionUtils.isEmpty(study.getDataUserAgreementPaths())
+						 && !study.getDataUserAgreementPaths().get(0).equals(studyDb.getDataUserAgreementPaths().get(0));
 
 		Map<Long, StudyUser> replacing = new HashMap<>();
 		for (StudyUser su : study.getStudyUserList()) {
@@ -465,24 +476,27 @@ public class StudyServiceImpl implements StudyService {
 				toBeCreated.add(su);
 			} else {
 				replacing.put(su.getId(), su);
-				if (study.getDataUserAgreementPaths() != null && !study.getDataUserAgreementPaths().isEmpty()) {
-					// new DUA added to study
-					if (studyDb.getDataUserAgreementPaths() == null || studyDb.getDataUserAgreementPaths().isEmpty()) {
-						su.setConfirmed(false);
-						dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
-					}
+				if (addNewDua || updateDua) {
+					// new / updated DUA added to study
+					su.setConfirmed(false);
+					// Remove current unfinished signing
+					dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
+					// Create a new dataset user agreement
+					DataUserAgreement duaSigning = dataUserAgreementService.createDataUserAgreementForUserInStudy(studyDb, su.getUserId());
 					// The user that creates a study is confirmed (he's the one uploading the DUA, he doesn't have to sign it)
 					if (KeycloakUtil.getTokenUserId().equals(su.getUserId())) {
 						su.setConfirmed(true);
+						duaSigning.setTimestampOfAccepted(new Date());
+						dataUserAgreementService.update(duaSigning);
 					}
-				} else {
+					this.archiveDuaFile(studyDb);
+				} else if (deleteDua){
 					// existing DUA removed from study
-					if (studyDb.getDataUserAgreementPaths() != null && !studyDb.getDataUserAgreementPaths().isEmpty()) {
-						su.setConfirmed(true); // without DUA all StudyUser are confirmed, set back to true, if false
-						// before
-						dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb,
-								su.getUserId());
-					}
+					this.archiveDuaFile(studyDb);
+
+					su.setConfirmed(true);
+					// without DUA all StudyUser are confirmed, set back to true, if false before
+					dataUserAgreementService.deleteIncompleteDataUserAgreementForUserInStudy(studyDb, su.getUserId());
 				}
 			}
 		}
@@ -556,9 +570,19 @@ public class StudyServiceImpl implements StudyService {
 
 		// Use updated study "study" to decide, to send email to which user
 		sendStudyUserReport(study, created);
-
 	}
 
+	private void archiveDuaFile(Study study) {
+		if (CollectionUtils.isEmpty(study.getDataUserAgreementPaths())) {
+			return;
+		}
+		// Archive old DUA -> Rename it with deletion date
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyymmddHHMM");
+		File deletedFile = new File(this.getStudyFilePath(study.getId(), study.getDataUserAgreementPaths().get(0)));
+		File archiveFile = new File(this.getStudyFilePath(study.getId(), "archive_" + formatter.format(new Date()) + "_" + study.getDataUserAgreementPaths().get(0)));
+		deletedFile.renameTo(archiveFile);
+	}
+	
 	private void sendStudyUserReport(Study study, List<StudyUser> created) {
 		// Get all recipients
 		List<Long> recipients = new ArrayList<Long>();
