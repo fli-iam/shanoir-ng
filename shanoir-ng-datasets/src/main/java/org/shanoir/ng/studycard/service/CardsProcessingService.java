@@ -153,7 +153,7 @@ public class CardsProcessingService {
                 }
             } catch (PacsException e) {
                 long ts = new Date().getTime();
-                LOG.warn("Examination" + examination.getId() + " metadata could not be retreived from the Shanoir pacs (ts:" + ts + ")");
+                LOG.warn("Examination" + examination.getId() + " metadata could not be retreived from the Shanoir pacs (ts:" + ts + "). Cause : " + e);
                 QualityCardResultEntry resultEntry = initResult(examination);
                 resultEntry.setTagSet(QualityTag.ERROR);
                 resultEntry.setMessage("Examination " + examination.getId() + " could not be checked because its metadata could not be retreived from the Shanoir pacs (ts:" + ts + ")");

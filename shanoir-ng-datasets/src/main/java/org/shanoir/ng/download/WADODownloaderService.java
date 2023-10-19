@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,8 +28,10 @@ import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -37,17 +40,25 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonValue;
 import javax.json.stream.JsonParser;
+import javax.json.stream.JsonParser.Event;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
+import org.dcm4che3.data.Tag;
 import org.dcm4che3.json.JSONReader;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
 import org.shanoir.ng.dataset.service.DatasetUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.studycard.dto.DicomTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -351,9 +362,16 @@ public class WADODownloaderService {
 				&& examination.getDatasetAcquisitions().get(0) != null && examination.getDatasetAcquisitions().get(0).getDatasets() != null
 				&& !examination.getDatasetAcquisitions().get(0).getDatasets().isEmpty() 
 				&& examination.getDatasetAcquisitions().get(0).getDatasets().get(0) != null) {
+			return getFirstDatasetUrl(examination.getDatasetAcquisitions().get(0).getDatasets().get(0));
+		}
+		return null;
+	}
+
+	private String getFirstDatasetUrl(Dataset dataset) {
+		if (dataset != null) {
 			List<URL> urls = new ArrayList<>();
 			try {
-				DatasetUtils.getDatasetFilePathURLs(examination.getDatasetAcquisitions().get(0).getDatasets().get(0), urls, DatasetExpressionFormat.DICOM);
+				DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
 				if  (!urls.isEmpty()) {
 					return urls.get(0).toString();
 				}
@@ -363,81 +381,84 @@ public class WADODownloaderService {
 		}
 		return null;
 	}
+
+	private Attributes getDicomAttributesForDatasetFromStudyAttributes(Dataset dataset, List<Attributes> studyAttributes) throws PacsException {
+		if (studyAttributes != null) {
+			for (Attributes oneStudyAttributes : studyAttributes) {
+				System.out.println(oneStudyAttributes);
+				String imageInstanceUID = oneStudyAttributes.getString(Tag.SOPInstanceUID);
+				if (imageInstanceUID == null) throw new PacsException("no instance UID in this object");
+				String datasetFirstInstanceUID = extractInstanceUID(dataset);
+				if (imageInstanceUID.equals(datasetFirstInstanceUID)) return oneStudyAttributes;
+			}
+		}
+		return null;
+	}
 	
 	public ExaminationAttributes getDicomAttributesForExamination(Examination examination) throws PacsException {
 		long ts = new Date().getTime();
+		ExaminationAttributes examAttributes = new ExaminationAttributes();
 		List<Dataset> datasets = new ArrayList<>();
-		Set<String> studyURLs = ConcurrentHashMap.newKeySet();
+		Map<String, List<Attributes>> studiesAttributes = new HashMap<>(); // <StudyURL, Attributes>
 		if (examination.getDatasetAcquisitions() != null) {
 			for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
 				if (acquisition.getDatasets() != null) {
 					for (Dataset dataset : acquisition.getDatasets()) {
 						datasets.add(dataset);
-						studyURLs.add(extractDicomStudyURL(dataset));
-
+						String studyURL = extractDicomStudyURL(dataset);
+						if (!studiesAttributes.containsKey(studyURL)) {
+							System.out.println("################################################ // " + studyURL);
+							studiesAttributes.put(studyURL, downloadDicomAttributesFromStudyURL(studyURL, examination.getId()));
+						}
+						List<Attributes> studyAttributes = studiesAttributes.get(studyURL);
+						examAttributes.addDatasetAttributes(
+							dataset.getDatasetAcquisition().getId(), 
+							dataset.getId(), 
+							getDicomAttributesForDatasetFromStudyAttributes(dataset, studyAttributes)
+						);
 					}
 				}
 			}
 		}
-		Attributes dicomAttributes = new Attributes();
-		try {
-		studyURLs.parallelStream().forEach(
-			studyURL -> {
-				try {
-					dicomAttributes.addAll(downloadDicomAttributesFromStudyURL(studyURL));
-				} catch (PacsException e) {
-					throw new RuntimeException("pacs exception while parallel stream", e);
-				}
-			}
-			);
-		} catch (RuntimeException e) {
-			throw new PacsException("could not get dicom attributes from pacs", e);
-		}
-
-		ExaminationAttributes examAttributes = new ExaminationAttributes(examination, dicomAttributes);
-
-
-		// DatasetAcquisition acquisition = getFirstIfExist(examination.getDatasetAcquisitions());
-		// if (acquisition == null) return null;
-		// Dataset ds = getFirstIfExist(acquisition.getDatasets());
-		// if (ds == null) return null;
-		// Attributes result = getDicomAttributesForDataset(ds);
-
-
-
-
-
-
-		// try {
-		// 	datasets.parallelStream().forEach(
-		// 		dataset -> {
-		// 			try {
-		// 				examAttributes.addDatasetAttributes(dataset.getId(), dataset.getDatasetAcquisition().getId(), getDicomAttributesForDataset(dataset));
-		// 			} catch (PacsException e) {
-		// 				throw new RuntimeException("pacs exception while parallel stream", e);
-		// 			}
-		// 		}
-		// 	);
-		// } catch (RuntimeException e) {
-		// 	throw new PacsException("could not get dicom attributes from pacs", e);
-		// }
-
-
-		LOG.error("get DICOM attributes for examination " + examination.getId() + " : " + (new Date().getTime() - ts) + " ms");
+		LOG.debug("get DICOM attributes for examination " + examination.getId() + " : " + (new Date().getTime() - ts) + " ms");
 		return examAttributes;
 	}
 
-	private Attributes downloadDicomAttributesFromStudyURL(String studyURL) throws PacsException {
+	private List<Attributes> downloadDicomAttributesFromStudyURL(String studyURL, long id) throws PacsException {
+		if (studyURL.contains(WADO_REQUEST_STUDY_WADO_URI)) studyURL = wadoURItoWadoRS(studyURL);
 		String jsonMetadataStr;
 		try {
 			jsonMetadataStr = downloadDicomMetadataForURL(studyURL);
 		} catch (RestClientException | IOException | MessagingException e) {
-			throw new PacsException("Could not find dicom attributes for url: " + studyURL);
+			throw new PacsException("Could not find dicom attributes for url: " + studyURL, e);
 		}
 		JsonParser parser = Json.createParser(new StringReader(jsonMetadataStr));
-		Attributes dicomAttributes = new JSONReader(parser).readDataset(null);
-		if (dicomAttributes != null) {
-			return dicomAttributes;
+
+		Event lastEvent = parser.next();
+		if (lastEvent == Event.START_ARRAY) {
+			JsonArray array = parser.getArray();
+			int c = 0;
+			for (JsonValue value : array) {
+				//System.out.println("####################################################### " + value);
+				c++;
+			}
+			System.out.println("####################################################### nb objects : " + c + " for exam " + id);
+		} else throw new PacsException("metadata json bad format, START_ARRAY expect but got " + lastEvent);
+
+
+
+		
+		JSONReader reader = new JSONReader(parser);
+		List<Attributes> attributes = new ArrayList<>();
+
+		int c = 0;
+		//System.out.println("####################################################### next : " + parser.next());
+		// while(parser.next() == Event.START_OBJECT || parser.next() == Event.START_ARRAY) {
+		// 	attributes.add(reader.readDataset(null));
+		// 	c++;
+    	// }
+		if (attributes != null && !attributes.isEmpty()) {
+			return attributes;
 		} else {
 			throw new PacsException("Could not find dicom attributes for url: " + studyURL);
 		}
@@ -512,6 +533,15 @@ public class WADODownloaderService {
 		return instanceUID;
 	}
 
+	private String extractInstanceUID(Dataset dataset) {
+		String url = getFirstDatasetUrl(dataset);
+		if (url == null) {
+			return null;
+		} else {
+			return extractInstanceUID(url, null);
+		}
+	}
+
 	private String extractStudyUID(String url) {
 		if (url == null || !url.contains("studyUID=")) return null;
 		else return url.split("studyUID=")[1].split("&")[0];
@@ -528,10 +558,8 @@ public class WADODownloaderService {
 		try {
 			DatasetUtils.getDatasetFilePathURLs(dataset, urls, DatasetExpressionFormat.DICOM);
 		} catch (MalformedURLException e) {
-			System.out.println("################### !!!!!! BITE");
 			return null;
 		}
-		System.out.println("################### !!!!!!!!!!!!!!!!!!!!!!!!!!!!! " + (urls.isEmpty() ? null : extractDicomStudyURL(urls.get(0).toString())));
 		return urls.isEmpty() ? null : extractDicomStudyURL(urls.get(0).toString());
 	}
 

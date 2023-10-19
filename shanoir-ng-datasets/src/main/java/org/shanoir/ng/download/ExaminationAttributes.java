@@ -32,15 +32,12 @@ public class ExaminationAttributes {
     public ExaminationAttributes() {}
 
 	public ExaminationAttributes(Examination examination, Attributes dicomAttributes) {
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ start ");
         if (examination != null && examination.getDatasetAcquisitions() != null) {
             for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
                 if (acquisition.getDatasets() != null) {
                     for (Dataset dataset : acquisition.getDatasets()) {
                         if (dicomAttributes.getProperties() != null) {
                             for (String key : dicomAttributes.getProperties().keySet()) {
-                                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + key);
-                                System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ - " + dicomAttributes.getProperties().get(key));
                             }
                         }
 

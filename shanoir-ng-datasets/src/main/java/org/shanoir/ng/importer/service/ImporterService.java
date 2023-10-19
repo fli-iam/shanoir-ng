@@ -233,7 +233,7 @@ public class ImporterService {
                     // apply study card if needed
                     if (studyCard != null) { 
                         importJob.setStudyCardName(studyCard.getName());
-                        studyCard.apply(acquisition, dicomProcessing.getDicomAcquisitionAttributes(serie, serie.getIsEnhanced()));
+                        studyCard.apply(acquisition, dicomAttributes);
                     }
                     
                     // add acq to collection
