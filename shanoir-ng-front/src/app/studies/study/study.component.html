@@ -421,7 +421,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					(delete) = "delete()"
 					(cancel)="goToView()"
 					(back)="goBack()">
-				<button  *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadAll()">Download<i class="fas fa-download"></i></button>
+				<button  *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadAll()">Download study<i class="fas fa-download"></i></button>
+				<button  *ngIf="mode == 'view' && hasDownloadRights()" class="right-icon dl-button" type="button" (click)="downloadSelected()" [disabled]="!selectedDatasetIds">Download selected<i class="fas fa-download"></i></button>
 				<button class="right-icon dl-button" type="button" (click)="goToProcessing()" [disabled]="mode != 'view' || !selectedDatasetIds || selectedDatasetIds.length <= 0">Apply processing on selection<i class="fas fa-rocket"></i></button>
 			</form-footer>
 		</form>
