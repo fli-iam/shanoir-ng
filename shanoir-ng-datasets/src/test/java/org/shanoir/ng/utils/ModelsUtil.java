@@ -171,6 +171,7 @@ public final class ModelsUtil {
 		final DatasetMetadata metadata = new DatasetMetadata();
 		metadata.setCardinalityOfRelatedSubjects(CardinalityOfRelatedSubjects.SINGLE_SUBJECT_DATASET);
 		metadata.setName(DATASET_NAME);
+		metadata.setId(1L);
 		return metadata;
 	}
 
