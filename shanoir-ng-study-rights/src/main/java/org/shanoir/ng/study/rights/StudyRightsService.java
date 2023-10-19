@@ -45,7 +45,6 @@ public class StudyRightsService {
 			throw new IllegalStateException("UserId should not be null. Cannot check rights on the study " + studyId);
 		}
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
-		System.err.println("coucou" + founded + founded.getStudyUserRights());
 		return
 				founded != null
 				&& founded.getStudyUserRights() != null
@@ -60,8 +59,6 @@ public class StudyRightsService {
 		}
 		StudyUser founded = repo.findByUserIdAndStudyId(userId, studyId);
 		
-		System.err.println("coucou" + founded);
-
 		return
 				founded != null
 				&& 
