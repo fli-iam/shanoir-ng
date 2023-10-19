@@ -34,8 +34,8 @@ export class DownloadSetupComponent implements OnInit {
     formatOptions: Option<Format>[] = [
         new Option<Format>('nii', 'Nifti'),
         new Option<Format>('dcm', 'Dicom'),
-        new Option<Format>('eeg', 'EEG'),
-        new Option<Format>('BIDS', 'BIDS'),
+        // new Option<Format>('eeg', 'EEG'),
+        // new Option<Format>('BIDS', 'BIDS'),
     ];
         
     constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
