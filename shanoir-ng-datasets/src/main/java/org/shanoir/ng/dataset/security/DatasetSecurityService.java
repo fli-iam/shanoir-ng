@@ -527,7 +527,6 @@ public class DatasetSecurityService {
     }
 
     public boolean hasRightOnStudyCenter(Long centerId, Long studyId, String rightStr) {
-    	System.err.println("coucou" + centerId + studyId + rightStr);
     	return commService.hasRightOnStudy(studyId, rightStr) && commService.hasRightOnCenter(studyId, centerId);
     }
 
