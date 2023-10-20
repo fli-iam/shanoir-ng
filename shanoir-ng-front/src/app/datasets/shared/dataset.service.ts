@@ -157,7 +157,7 @@ export class DatasetService extends EntityService<Dataset> {
         ).toPromise();
     }
 
-    downloadFromId(datasetId: number, format: string, converterId: number = null): Promise<void> {
+    downloadFromId(datasetId: number, format: string, converterId: number = null, state?: TaskState): Promise<void> {
         if (!datasetId) throw Error('Cannot download a dataset without an id');
         return this.downloadToBlob(datasetId, format, converterId).then(
             response => {

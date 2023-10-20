@@ -31,6 +31,8 @@ import {LoadingBarComponent} from "../../shared/components/loading-bar/loading-b
 import {StudyUserRight} from "../../studies/shared/study-user-right.enum";
 import {StudyRightsService} from "../../studies/shared/study-rights.service";
 import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
 
 
 @Component({
@@ -57,7 +59,8 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             private studyCardService: StudyCardService,
             private acqEqService: AcquisitionEquipmentService,
             private studyRightsService: StudyRightsService,
-            public acqEqPipe: AcquisitionEquipmentPipe) {
+            public acqEqPipe: AcquisitionEquipmentPipe,
+            private downloadService: MassDownloadService) {
         super(route, 'dataset-acquisition');
     }
 
@@ -128,11 +131,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
         });
     }
 
-    download(format: string) {
-        this.datasetService.downloadDatasetsByAcquisition(this.id, format, this.downloadState);
-    }
-
-
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert(); // TODO
     }
@@ -140,5 +138,14 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     onNodeInit(node: DatasetAcquisitionNode) {
         node.open = true;
         this.breadcrumbsService.currentStep.data.datasetAcquisitionNode = node;
+    }
+
+    downloadAll() {
+        let options: DownloadSetupOptions = new DownloadSetupOptions();
+        options.hasBids = this.hasBids;
+        options.hasNii = this.hasDicom;
+        options.hasDicom = this.hasDicom;
+        options.hasEeg = this.hasEEG; 
+        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, options, this.downloadState);
     }
 }

@@ -157,10 +157,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				(cancel)="goToView()"
 				(back)="goBack()"
 			>
-            <button *ngIf="mode == 'view' && hasDownloadRight && !noDatasets && hasEEG" [disabled]="downloadState?.isActive() || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('eeg')">Download EEG<i class="fas fa-download"></i></button>
-            <button *ngIf="mode=='view' && hasDownloadRight && hasBids" [disabled]="downloadState?.isActive() || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('BIDS')">Download BIDS dataset file<i class="fas fa-download"></i></button>
-            <button *ngIf="mode == 'view' && hasDownloadRight && hasDicom" [disabled]="downloadState?.isActive() || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('dcm')">Download DICOM<i class="fas fa-download"></i></button>
-            <button *ngIf="mode == 'view' && hasDownloadRight && hasDicom" [disabled]="downloadState?.isActive() || noDatasets" type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="download('nii')">Download NIfTI<i class="fas fa-download"></i></button>
+			<button  *ngIf="mode == 'view' && hasDownloadRight && !noDatasets" class="right-icon dl-button" type="button" (click)="downloadAll()" [disabled]="downloadState?.isActive()">Download<i class="fas fa-download"></i></button>
             </form-footer>
 		</div>
 	</form>

@@ -644,7 +644,6 @@ export class SelectBoxComponent implements ControlValueAccessor, OnDestroy, OnCh
 
 export class Option<T> {
 
-    disabled: boolean = false;
     compatible: boolean = undefined;
     backgroundColor: string;
       
@@ -653,7 +652,8 @@ export class Option<T> {
         public label: string,
         public section?: string,
         public color?: string,
-        public awesome?: string) {}
+        public awesome?: string,
+        public disabled: boolean = false) {}
 
     clone(): Option<T> {
         let option: Option<T> = new Option(this.value, this.label, this.section);

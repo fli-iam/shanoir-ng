@@ -20,7 +20,7 @@ import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import { DownloadSetupComponent } from './download-setup/download-setup.component';
+import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
 import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
 import { Queue } from './queue.model';
 import { take } from 'rxjs/operators';
@@ -97,24 +97,42 @@ export class MassDownloadService {
         });
     }
 
-    downloadAllByExaminationId(examinationId: number, format?: Format): Promise<void> {
+    downloadAllByExaminationId(examinationId: number, format?: Format, options?: DownloadSetupOptions, downloadState?: TaskState): Promise<void> {
         const datasetsPromise: Promise<Dataset[]> = this.datasetService.getByExaminationId(examinationId);
-        return this.openModal(format).then(ret => {
+        return this.openModal(format, options).then(ret => {
             if (ret != 'cancel') {
                 return datasetsPromise.then(datasets => {
-                    this._downloadDatasets(datasets, ret.format, ret.nbQueues);
+                    this._downloadDatasets(datasets, ret.format, ret.nbQueues, downloadState);
                 })
             } else return Promise.resolve();
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
                 return datasetsPromise.then(datasets => {
-                    return this.openAltModal().then(ret => {
+                    return this.openAltModal(format, options).then(ret => {
                         if (ret != 'cancel') {
-                            return this._downloadAlt('datasetIds', datasets.map(ds => ds.id), ret);
+                            return this._downloadAlt('datasetIds', datasets.map(ds => ds.id), ret, downloadState);
                         } else return Promise.resolve();
                     });
                 });
             } else throw error;
+        });
+    }
+
+    // zip only
+    downloadAllByAcquisitionId(acquisitionId: number, options?: DownloadSetupOptions, downloadState?: TaskState) {
+        return this.openAltModal(null, options, false).then(ret => {
+            if (ret != 'cancel') {
+                this.datasetService.downloadDatasetsByAcquisition(acquisitionId, ret, downloadState);
+            } else return Promise.resolve();
+        });
+    }
+
+    // zip only
+    downloadDataset(datasetId: number, options: DownloadSetupOptions, downloadState?: TaskState) {
+        return this.openAltModal(null, options, false).then(ret => {
+            if (ret != 'cancel') {
+                this.datasetService.downloadFromId(datasetId, ret, null, downloadState);
+            } else return Promise.resolve();
         });
     }
 
@@ -172,13 +190,17 @@ export class MassDownloadService {
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
 
-    private _downloadAlt(inputDef: 'studyId' | 'datasetIds', input: number | number[], format: Format): any {
+    private _downloadAlt(inputDef: 'studyId' | 'datasetIds', input: number | number[], format: Format, downloadState?: TaskState): any {
         if (!inputDef || !input || (inputDef == 'datasetIds' && !(input as [])?.length)) throw new Error('bad arguments : ' + inputDef + ', ' + input);
         let task: Task;
         if (inputDef == 'studyId') {
             task = this.createStudyTask(input as number);
         } else if (inputDef == 'datasetIds') {
             task = this.createTask((input as number[]).length);
+        }
+        if (downloadState) {
+            downloadState.status = task.status;
+            downloadState.progress = 0;
         }
         return this.downloadQueue.waitForTurn().then(releaseQueue => {
             try {
@@ -205,6 +227,7 @@ export class MassDownloadService {
                 const flowSubscription: Subscription = downloadObs.subscribe(state => {
                     task.lastUpdate = new Date();
                     task.progress = state?.progress;
+                    downloadState.progress = task.progress;
                     task.status = state?.status;
                     this.notificationService.pushLocalTask(task);
                 }, errorFunction);
@@ -220,6 +243,7 @@ export class MassDownloadService {
                     task.lastUpdate = new Date();
                     task.status = 1;
                     task.progress = 1;
+                    downloadState.progress = task.progress;
                     this.notificationService.pushLocalTask(task);
                     endPromise.resolve();
                 }, errorFunction);
@@ -236,10 +260,11 @@ export class MassDownloadService {
         });
     }
 
-    private _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4): Promise<void> {
+    private _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4, downloadState?: TaskState): Promise<void> {
         if (datasets.length == 0) return;
         return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
             let task: Task = this.createTask(datasets.length);
+            if (downloadState) downloadState.status = task.status; 
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
                     task.status = 2;
@@ -465,20 +490,23 @@ export class MassDownloadService {
         return task;
     }
 
-    private openModal(format?: Format): Promise<{format: Format, nbQueues: number} | 'cancel'> {
+    private openModal(format?: Format, options?: DownloadSetupOptions): Promise<{format: Format, nbQueues: number} | 'cancel'> {
         // @ts-ignore
         if (window.showDirectoryPicker) { // test compatibility
             let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
             modalRef.instance.format = format;
+            modalRef.instance.options = options;
             return this.waitForEnd(modalRef);
         } else {
             return Promise.reject(this.BROWSER_COMPAT_ERROR_MSG);
         }
     }
 
-    private openAltModal(format?: Format): Promise<Format | 'cancel'> {
+    private openAltModal(format?: Format, options?: DownloadSetupOptions, compatibilityMsg: boolean = true): Promise<Format | 'cancel'> {
         let modalRef: ComponentRef<DownloadSetupAltComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupAltComponent);
         modalRef.instance.format = format;
+        modalRef.instance.compatibilityMessage = compatibilityMsg;
+        modalRef.instance.options = options;
         return this.waitForEnd(modalRef);
     }
 

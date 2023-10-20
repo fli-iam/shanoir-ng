@@ -30,12 +30,13 @@ export class DownloadSetupComponent implements OnInit {
     @Output() close: EventEmitter<void> = new EventEmitter();
     form: UntypedFormGroup;
     @Input() format: Format; 
+    @Input() options: DownloadSetupOptions = new DownloadSetupOptions();
     @ViewChild('window') window: ElementRef;
     formatOptions: Option<Format>[] = [
-        new Option<Format>('nii', 'Nifti'),
-        new Option<Format>('dcm', 'Dicom'),
-        // new Option<Format>('eeg', 'EEG'),
-        // new Option<Format>('BIDS', 'BIDS'),
+        new Option<Format>('dcm', 'Dicom', null, null, null, !this.options.hasDicom),
+        new Option<Format>('nii', 'Nifti', null, null, null, !this.options.hasNii),
+        new Option<Format>('eeg', 'EEG', null, null, null, !this.options.hasEeg),
+        new Option<Format>('BIDS', 'BIDS', null, null, null, !this.options.hasBids),
     ];
         
     constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
@@ -73,4 +74,11 @@ export class DownloadSetupComponent implements OnInit {
             this.cancel();
         }
     }
+}
+
+export class DownloadSetupOptions {
+    hasDicom?: boolean = true;
+    hasNii?: boolean = true;
+    hasEeg?: boolean = false;
+    hasBids?: boolean = false;
 }

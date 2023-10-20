@@ -1,7 +1,7 @@
 <div class="cell">
     <form #window class="window" [formGroup]="form" *ngIf="form">
         <h2 class="header">Download Datasets</h2>
-        <div class="left-icon msg">
+        <div class="left-icon msg" *ngIf="compatibilityMessage">
             <i class="fa-solid fa-circle-exclamation"></i>
             <b>Limited functionalities with current browser : </b>
             Shanoir provides a way to download unlimited quantities of datasets to your computer<!-- with convenient options to organize the directories structure-->. Unfortunately your browser does not allow this advanced download functionality.
@@ -20,7 +20,7 @@
         </fieldset>
         <div class="footer">
             <button type="button" type="button" (click)="downloadNow()" class="alt left-icon" [disabled]="form.dirty && !form.valid">
-                <i class="fas fa-download"></i>Download now
+                <i class="fas fa-download"></i>Download zip
             </button>
             <button type="button" (click)="cancel()">Cancel</button>
         </div>
