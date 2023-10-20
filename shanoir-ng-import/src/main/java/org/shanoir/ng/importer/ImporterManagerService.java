@@ -148,7 +148,7 @@ public class ImporterManagerService {
 
 			for (Iterator<Patient> patientsIt = patients.iterator(); patientsIt.hasNext();) {
 				Patient patient = patientsIt.next();
-				// DICOM file coming from ShUp are already pseudonymized
+				// DICOM files coming from ShUp are already pseudonymized
 				if (!importJob.isFromShanoirUploader()) {
 					pseudonymize(importJob, event, importJobDir, patient);
 				}
