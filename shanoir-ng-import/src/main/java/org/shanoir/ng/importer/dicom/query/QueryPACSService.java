@@ -112,7 +112,6 @@ public class QueryPACSService {
 		this.called = new DicomNode(calledName, calledHost, calledPort);
 		LOG.info("Query: DicomNodes initialized via CDI: calling ({}, {}, {}) and called ({}, {}, {})",
 				callingName, callingHost, callingPort, calledName, calledHost, calledPort);
-		initAssociation(calling, called);
 	}
 	
 	/**
@@ -129,10 +128,9 @@ public class QueryPACSService {
 		this.maxPatientsFromPACS = 10;
 		LOG.info("Query: DicomNodes initialized via method call (ShUp): calling ({}, {}, {}) and called ({}, {}, {})",
 				calling.getAet(), calling.getHostname(), calling.getPort(), called.getAet(), called.getHostname(), called.getPort());
-		initAssociation(calling, called);
 	}
 	
-	private void initAssociation(DicomNode calling, DicomNode called) {
+	private void connectAssociation(DicomNode calling, DicomNode called) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         try {
@@ -160,10 +158,11 @@ public class QueryPACSService {
             LOG.info("initAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
         } catch (IOException | InterruptedException | IncompatibleConnectionException | GeneralSecurityException e) {
 			LOG.error(e.getMessage(), e);
-		}
+        }
 	}
 	
 	public ImportJob queryCFIND(DicomQuery dicomQuery) throws ShanoirImportException {
+		connectAssociation(calling, called);
 		ImportJob importJob = new ImportJob();
 		/**
 		 * In case of any patient specific search field is filled, work on patient level. Highest priority.
@@ -191,7 +190,19 @@ public class QueryPACSService {
 		} else {
 			throw new ShanoirImportException("DicomQuery: missing parameters.");
 		}
+		releaseAssociation();
 		return importJob;
+	}
+
+	private void releaseAssociation() {
+		try {
+			this.association.release();
+		} catch (IOException e) {
+			LOG.error(e.getMessage(), e);
+		}
+		ExecutorService executorService = (ExecutorService) this.association.getDevice().getExecutor();
+		executorService.shutdown();
+		this.association.getDevice().getScheduledExecutor().shutdown();
 	}
 
 	public void queryCMOVE(Serie serie) {
@@ -214,6 +225,7 @@ public class QueryPACSService {
 	}
 	
 	public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
+		connectAssociation(calling, called);
 		LOG.info("DICOM ECHO: Starting with configuration {}, {}, {} <- {}", calledAET, hostName, port, callingAET);
         try {
         	this.association.cecho();
@@ -224,6 +236,7 @@ public class QueryPACSService {
 			LOG.error(e.getMessage(), e);
 			return false;
 		}
+        releaseAssociation();
         return true;
 	}
 
@@ -483,7 +496,7 @@ public class QueryPACSService {
 		return state.getDicomRSP();
 	}
 	
-    public void addAttributes(Attributes attrs, DicomParam param) {
+    private void addAttributes(Attributes attrs, DicomParam param) {
         int tag = param.getTag();
         String[] ss = param.getValues();
         VR vr = ElementDictionary.vrOf(tag, attrs.getPrivateCreator(tag));
