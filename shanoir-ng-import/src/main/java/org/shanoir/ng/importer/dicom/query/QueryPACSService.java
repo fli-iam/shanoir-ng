@@ -155,7 +155,7 @@ public class QueryPACSService {
             aarq.addPresentationContext(new PresentationContext(3,
             		UID.StudyRootQueryRetrieveInformationModelFind, UID.ImplicitVRLittleEndian));
             this.association = callingAE.connect(calledConn, aarq);
-            LOG.info("initAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
+            LOG.info("connectAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
         } catch (IOException | InterruptedException | IncompatibleConnectionException | GeneralSecurityException e) {
 			LOG.error(e.getMessage(), e);
         }
@@ -203,6 +203,7 @@ public class QueryPACSService {
 		ExecutorService executorService = (ExecutorService) this.association.getDevice().getExecutor();
 		executorService.shutdown();
 		this.association.getDevice().getScheduledExecutor().shutdown();
+		LOG.info("releaseAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
 	}
 
 	public void queryCMOVE(Serie serie) {
