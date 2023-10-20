@@ -311,8 +311,8 @@ public class ImporterManagerService {
 
 	/**
 	 * Using Java HashSet here to avoid duplicate files for Pseudonymization.
-	 * For performance reasons already init with 5000 buckets, assuming,
-	 * that we will normally never have more than 5000 files to process.
+	 * For performance reasons already init with 10000 buckets, assuming,
+	 * that we will normally never have more than 10000 files to process.
 	 * Maybe to be evaluated later with more bigger imports.
 	 * 
 	 * @param importJob
@@ -322,14 +322,16 @@ public class ImporterManagerService {
 	 * @throws FileNotFoundException
 	 */
 	private ArrayList<File> getDicomFilesForPatient(final ImportJob importJob, final Patient patient, final String workFolderPath) throws FileNotFoundException {
-		Set<File> pathsSet = new HashSet<>(5000);
+		Set<File> pathsSet = new HashSet<>(10000);
 		List<Study> studies = patient.getStudies();
 		for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 			Study study = studiesIt.next();
 			List<Serie> series = study.getSeries();
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = seriesIt.next();
-				handleSerie(workFolderPath, pathsSet, serie);
+				if (!serie.isErroneous() && serie.getSelected() && !serie.isIgnored()) {
+					handleSerie(workFolderPath, pathsSet, serie);
+				}
 			}
 		}
 		return new ArrayList<>(pathsSet);

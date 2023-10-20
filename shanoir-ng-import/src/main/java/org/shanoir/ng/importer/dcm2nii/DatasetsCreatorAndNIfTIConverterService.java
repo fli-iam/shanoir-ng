@@ -149,36 +149,35 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			Study study = studiesIt.next();
 			List<Serie> series = study.getSelectedSeries();
 			float progress = 0;
-
 			int nbSeries = series.size();
 			int cpt = 1;
-
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = seriesIt.next();
-
-				progress = progress + (0.5f / series.size());
-				importJob.getShanoirEvent().setProgress(progress);
-				importJob.getShanoirEvent().setMessage("Converting to NIfTI for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")...");
-				shanoirEventService.publishEvent(importJob.getShanoirEvent());
-
-				File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
-				boolean serieIdentifiedForNotSeparating;
-				try {
-					serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
-					// if the serie is not one of the series, that should not be separated, please separate the series,
-					// otherwise just do not separate the series and keep all images for one nii conversion
-					serie.setDatasets(new ArrayList<Dataset>());
-					constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
-					// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
-					if (serie.getIsSpectroscopy() != null && !serie.getIsSpectroscopy()) {
-						constructNifti(serieIDFolderFile, serie, converterId);
+				// do not convert an erroneous serie
+				if (!serie.isErroneous() && !serie.isIgnored()) {
+					progress = progress + (0.5f / series.size());
+					importJob.getShanoirEvent().setProgress(progress);
+					importJob.getShanoirEvent().setMessage("Converting to NIfTI for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")...");
+					shanoirEventService.publishEvent(importJob.getShanoirEvent());
+					File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
+					boolean serieIdentifiedForNotSeparating;
+					try {
+						serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
+						// if the serie is not one of the series, that should not be separated, please separate the series,
+						// otherwise just do not separate the series and keep all images for one nii conversion
+						serie.setDatasets(new ArrayList<Dataset>());
+						constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
+						// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
+						if (serie.getIsSpectroscopy() != null && !serie.getIsSpectroscopy()) {
+							constructNifti(serieIDFolderFile, serie, converterId);
+						}
+					} catch (NoSuchFieldException | SecurityException e) {
+						LOG.error(e.getMessage());
 					}
-				} catch (NoSuchFieldException | SecurityException e) {
-					LOG.error(e.getMessage());
+					// as images/non-images are migrated to datasets, clear the list now
+					serie.getImages().clear();
+					serie.getNonImages().clear();
 				}
-				// as images/non-images are migrated to datasets, clear the list now
-				serie.getImages().clear();
-				serie.getNonImages().clear();
 				cpt++;
 			}
 		}
