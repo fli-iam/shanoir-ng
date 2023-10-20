@@ -42,7 +42,6 @@ import org.dcm4che3.net.Status;
 import org.dcm4che3.net.pdu.AAssociateRQ;
 import org.dcm4che3.net.pdu.PresentationContext;
 import org.dcm4che3.net.service.QueryRetrieveLevel;
-import org.dcm4che3.tool.findscu.FindSCU.InformationModel;
 import org.shanoir.ng.importer.dicom.DicomSerieAndInstanceAnalyzer;
 import org.shanoir.ng.importer.dicom.InstanceNumberSorter;
 import org.shanoir.ng.importer.dicom.SeriesNumberSorter;
@@ -56,8 +55,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.weasis.core.api.util.FileUtil;
-import org.weasis.dicom.op.CFind;
 import org.weasis.dicom.op.CMove;
 import org.weasis.dicom.param.AdvancedParams;
 import org.weasis.dicom.param.DicomNode;
@@ -65,7 +62,6 @@ import org.weasis.dicom.param.DicomParam;
 import org.weasis.dicom.param.DicomProgress;
 import org.weasis.dicom.param.DicomState;
 import org.weasis.dicom.param.ProgressListener;
-import org.weasis.dicom.util.ServiceUtil;
 
 import jakarta.annotation.PostConstruct;
 
@@ -162,13 +158,7 @@ public class QueryPACSService {
             		UID.StudyRootQueryRetrieveInformationModelFind, UID.ImplicitVRLittleEndian));
             this.association = callingAE.connect(calledConn, aarq);
             LOG.info("initAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
-        } catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (InterruptedException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (IncompatibleConnectionException e) {
-			LOG.error(e.getMessage(), e);
-		} catch (GeneralSecurityException e) {
+        } catch (IOException | InterruptedException | IncompatibleConnectionException | GeneralSecurityException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}
