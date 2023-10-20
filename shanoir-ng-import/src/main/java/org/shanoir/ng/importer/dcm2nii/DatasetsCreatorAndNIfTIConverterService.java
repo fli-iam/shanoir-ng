@@ -36,13 +36,10 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.transaction.Transactional;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.shanoir.ng.importer.model.Dataset;
 import org.shanoir.ng.importer.model.DatasetFile;
 import org.shanoir.ng.importer.model.DiffusionGradient;
@@ -68,6 +65,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 
 /**
  * The NIfTIConverter does the actual conversion of dcm to nii files.
