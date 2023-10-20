@@ -157,7 +157,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
 				Instance instance = instancesIt.next();
 				File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
-				processOneDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
+				processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath);
 			}
 			serie.setNonImages(nonImages);
 			serie.setNonImagesNumber(nonImages.size());
@@ -221,7 +221,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processOneDicomFileForAllInstances(File dicomFile, List<Image> images, String folderFileAbsolutePath) throws Exception {
+	private void processDicomFilePerInstanceAndCreateImage(File dicomFile, List<Image> images, String folderFileAbsolutePath) throws Exception {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
 			Attributes attributes = dIS.readDataset();
 			// Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
