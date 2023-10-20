@@ -142,6 +142,9 @@ public class ImporterManagerService {
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
+			// we do the clean series here: at this point we are sure for all imports, that the ImagesCreatorAndDicomFileAnalyzer
+			// has been run and correctly classified everything. So no need to check afterwards for erroneous series.
+			cleanSeries(importJob);
 						
 			event.setProgress(0.25F);
 			eventService.publishEvent(event);
@@ -168,6 +171,33 @@ public class ImporterManagerService {
 		}
 	}
 
+	/**
+	 * cleanSeries is important here for import-from-zip file: when the ImagesCreatorAndDicomFileAnalyzer
+	 * has declared some series as e.g. erroneous, we have to remove them from the import. For import-from
+	 * pacs or from-sh-up it is different, as the ImagesCreatorAndDicomFileAnalyzer is called afterwards.
+	 * Same here for multi-exam-imports: it calls uploadDicomZipFile method, where series could be classed
+	 * as erroneous and when startImportJob is called, we want them to be removed from the import.
+	 * 
+	 * @param importJob
+	 */
+	private void cleanSeries(final ImportJob importJob) {
+		for (Iterator<Patient> patientIt = importJob.getPatients().iterator(); patientIt.hasNext();) {
+			Patient patient = patientIt.next();
+			List<Study> studies = patient.getStudies();
+			for (Iterator<Study> studyIt = studies.iterator(); studyIt.hasNext();) {
+				Study study = studyIt.next();
+				List<Serie> series = study.getSeries();
+				for (Iterator<Serie> serieIt = series.iterator(); serieIt.hasNext();) {
+					Serie serie = serieIt.next();
+					if (serie.isIgnored() || serie.isErroneous() || !serie.getSelected()) {
+						LOG.info("Serie {} cleaned from import (ignored, erroneous, not selected).", serie.getSeriesDescription());
+						serieIt.remove();
+					}
+				}
+			}
+		}
+	}
+	
 	private void pseudonymize(final ImportJob importJob, ShanoirEvent event, final File importJobDir, Patient patient)
 			throws FileNotFoundException, ShanoirException {
 		if (importJob.getAnonymisationProfileToUse() == null || !importJob.getAnonymisationProfileToUse().isEmpty()) {
@@ -207,7 +237,6 @@ public class ImporterManagerService {
 	 */
 	private void sendMail(ImportJob job, EmailBase email) {
 		List<Long> recipients = new ArrayList<>();
-
 		// Get all recpients
 		List<StudyUser> users = (List<StudyUser>) studyUserRightRepo.findByStudyId(job.getStudyId());
 		for (StudyUser user : users) {
@@ -220,7 +249,6 @@ public class ImporterManagerService {
 			return;
 		}
 		email.setRecipients(recipients);
-
 		try {
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORT_DATASET_FAILED_MAIL_QUEUE, objectMapper.writeValueAsString(email));
 		} catch (AmqpException | JsonProcessingException e) {
@@ -327,9 +355,7 @@ public class ImporterManagerService {
 			List<Serie> series = study.getSeries();
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = seriesIt.next();
-				if (!serie.isErroneous() && serie.getSelected() && !serie.isIgnored()) {
-					handleSerie(workFolderPath, pathsSet, serie);
-				}
+				handleSerie(workFolderPath, pathsSet, serie);
 			}
 		}
 		return new ArrayList<>(pathsSet);

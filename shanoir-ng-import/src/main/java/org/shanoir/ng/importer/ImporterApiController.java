@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -262,7 +261,6 @@ public class ImporterApiController implements ImporterApi {
 		final File importJobDir = new File(userImportDir, tempDirId);
 		if (importJobDir.exists()) {
 			importJob.setWorkFolder(importJobDir.getAbsolutePath());
-			cleanSeries(importJob);
 			LOG.info("Starting import job for user {} (userId: {}) with import job folder: {}", KeycloakUtil.getTokenUserName(), userId, importJob.getWorkFolder());
 			importerManagerService.manageImportJob(importJob);
 			return new ResponseEntity<>(HttpStatus.OK);
@@ -270,33 +268,6 @@ public class ImporterApiController implements ImporterApi {
 			LOG.error("Missing importJobDir.");
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Missing importJobDir.", null));
-		}
-	}
-
-	/**
-	 * cleanSeries is important here for import-from-zip file: when the ImagesCreatorAndDicomFileAnalyzer
-	 * has declared some series as e.g. erroneous, we have to remove them from the import. For import-from
-	 * pacs or from-sh-up it is different, as the ImagesCreatorAndDicomFileAnalyzer is called afterwards.
-	 * Same here for multi-exam-imports: it calls uploadDicomZipFile method, where series could be classed
-	 * as erroneous and when startImportJob is called, we want them to be removed from the import.
-	 * 
-	 * @param importJob
-	 */
-	private void cleanSeries(final ImportJob importJob) {
-		for (Iterator<Patient> patientIt = importJob.getPatients().iterator(); patientIt.hasNext();) {
-			Patient patient = patientIt.next();
-			List<Study> studies = patient.getStudies();
-			for (Iterator<Study> studyIt = studies.iterator(); studyIt.hasNext();) {
-				Study study = studyIt.next();
-				List<Serie> series = study.getSeries();
-				for (Iterator<Serie> serieIt = series.iterator(); serieIt.hasNext();) {
-					Serie serie = serieIt.next();
-					if (serie.isIgnored() || serie.isErroneous() || !serie.getSelected()) {
-						LOG.info("Serie {} cleaned from import (ignored, erroneous, not selected).", serie.getSeriesDescription());
-						serieIt.remove();
-					}
-				}
-			}
 		}
 	}
 
