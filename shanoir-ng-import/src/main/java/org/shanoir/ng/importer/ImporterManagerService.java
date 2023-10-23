@@ -122,6 +122,10 @@ public class ImporterManagerService {
 			if (!userImportDir.exists()) {
 				userImportDir.mkdirs(); // create if not yet existing, e.g. in case of PACS import
 			}
+			// 1. call to cleanSeries: remove ignored series, that have been detected to be ignored by the
+			// uploadDicomZipFile (DicomDirToModelService) or the QueryPACSService (either from ShUp or the
+			// web-gui-pacs import), see usage of DicomSerieAndInstanceAnalyzer and e.g. missing instances
+			cleanSeries(importJob);
 			List<Patient> patients = importJob.getPatients();
 			// In PACS import the dicom files are still in the PACS, we have to download them first
 			// and then analyze them: what gives us a list of images for each serie.
@@ -142,8 +146,10 @@ public class ImporterManagerService {
 			} else {
 				throw new ShanoirException("Unsupported type of import.");
 			}
-			// we do the clean series here: at this point we are sure for all imports, that the ImagesCreatorAndDicomFileAnalyzer
+			// 2. call to cleanSeries: at this point we are sure for all imports, that the ImagesCreatorAndDicomFileAnalyzer
 			// has been run and correctly classified everything. So no need to check afterwards for erroneous series.
+			// So two possibilities to remove series: 1. call, via the info from the dicomdir or the info from the pacs
+			// 2. call, via analysis of dicom files itself and their content
 			cleanSeries(importJob);
 						
 			event.setProgress(0.25F);
@@ -172,9 +178,10 @@ public class ImporterManagerService {
 	}
 
 	/**
-	 * cleanSeries is important here for import-from-zip file: when the ImagesCreatorAndDicomFileAnalyzer
+	 * As the DicomSerieAndInstanceAnalyzer can declare a serie as ignored as well, we clean twice.
+	 * cleanSeries is important for import-from-zip file: when the ImagesCreatorAndDicomFileAnalyzer
 	 * has declared some series as e.g. erroneous, we have to remove them from the import. For import-from
-	 * pacs or from-sh-up it is different, as the ImagesCreatorAndDicomFileAnalyzer is called afterwards.
+	 * pacs or from-sh-up it is different, as the ImagesCreatorAndDicomFileAnalyzer is called afterwards (startImportJob).
 	 * Same here for multi-exam-imports: it calls uploadDicomZipFile method, where series could be classed
 	 * as erroneous and when startImportJob is called, we want them to be removed from the import.
 	 * 
@@ -189,8 +196,8 @@ public class ImporterManagerService {
 				List<Serie> series = study.getSeries();
 				for (Iterator<Serie> serieIt = series.iterator(); serieIt.hasNext();) {
 					Serie serie = serieIt.next();
-					if (serie.isIgnored() || serie.isErroneous() || !serie.getSelected()) {
-						LOG.info("Serie {} cleaned from import (ignored, erroneous, not selected).", serie.getSeriesDescription());
+					if (!serie.getSelected() || serie.isIgnored() || serie.isErroneous()) {
+						LOG.info("Serie {} cleaned from import (not selected, ignored, erroneous).", serie.getSeriesDescription());
 						serieIt.remove();
 					}
 				}

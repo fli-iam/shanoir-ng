@@ -205,6 +205,8 @@ public class ImportUtils {
 		for (SerieTreeNode serieTreeNode : serieTreeNodes) {
 			Serie serie = new Serie();
 			serie.setSelected(serieTreeNode.isSelected());
+			serie.setIgnored(serieTreeNode.getSerie().isIgnored());
+			serie.setErroneous(serieTreeNode.getSerie().isErroneous());
 			serie.setSeriesInstanceUID(serieTreeNode.getId());
 			serie.setSeriesNumber(serieTreeNode.getSeriesNumber());
 			serie.setModality(serieTreeNode.getModality());
