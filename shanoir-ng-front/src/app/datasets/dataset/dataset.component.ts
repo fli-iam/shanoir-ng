@@ -99,6 +99,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     initEdit(): Promise<void> {
         return this.fetchDataset().then(dataset => {
             this.dataset = dataset;
+            this.dataset.creationDate = new Date(this.dataset.creationDate);
         });
     }
 
