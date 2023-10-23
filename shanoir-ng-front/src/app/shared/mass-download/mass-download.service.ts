@@ -27,6 +27,7 @@ import { take } from 'rxjs/operators';
 import { SuperPromise } from 'src/app/utils/super-promise';
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { ConsoleService } from '../console/console.service';
+import { formatDate } from '@angular/common';
 
 declare var JSZip: any;
 
@@ -198,10 +199,10 @@ export class MassDownloadService {
         } else if (inputDef == 'datasetIds') {
             task = this.createTask((input as number[]).length);
         }
-        if (downloadState) {
-            downloadState.status = task.status;
-            downloadState.progress = 0;
-        }
+        downloadState = new TaskState();
+        downloadState.status = task.status;
+        downloadState.progress = 0;
+
         return this.downloadQueue.waitForTurn().then(releaseQueue => {
             try {
                 task.status = 2;
@@ -227,7 +228,9 @@ export class MassDownloadService {
                 const flowSubscription: Subscription = downloadObs.subscribe(state => {
                     task.lastUpdate = new Date();
                     task.progress = state?.progress;
-                    downloadState.progress = task.progress;
+                    if (downloadState) {
+                        downloadState.progress = task?.progress;
+                    }
                     task.status = state?.status;
                     this.notificationService.pushLocalTask(task);
                 }, errorFunction);
@@ -386,7 +389,11 @@ export class MassDownloadService {
     }
 
     private buildDatasetPath(dataset: Dataset): string {
-        return dataset.datasetAcquisition?.examination?.subject?.name
+        let currentDate = new Date();
+        return  "Datasets-"
+                + formatDate(currentDate, "yyyyMMddHHmmss", "en-US")
+                + '/'
+                + dataset.datasetAcquisition?.examination?.subject?.name
                 + '_' + dataset.datasetAcquisition?.examination?.subject?.id
                 + '/'
                 + dataset.datasetAcquisition?.examination?.comment

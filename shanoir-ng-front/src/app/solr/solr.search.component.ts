@@ -75,6 +75,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     loaded: boolean = false;
     firstPageLoaded: boolean = false;
     viewChecked: boolean = false;
+    canDownload: boolean = true;
     solrRequest: SolrRequest = new SolrRequest();
     private facetPageable: Map<string, FacetPageable>;
 
@@ -485,12 +486,25 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         return customActionDefs;
     }
     downloadSelected() {
-        if (this.selectedDatasetIds) {
+        if (this.selectedDatasetIds && this.canDownload) {
             this.downloadService.downloadByIds([...this.selectedDatasetIds]);
+        } else {
+            this.consoleService.log('error', "Could not download data, please check your right on the studies for these datasets.")
         }
     }
 
-    onSelectionChange (selection: any) {
+    onSelectionChange (selection: Set<any>) {
+
+        let downloadable = true;
+        selection.forEach((datasetid) => {
+            let selected: any = this.table.page.content.find((element: any) => element.id == datasetid);
+            let studyId = selected.studyId;
+            if (!this.hasDownloadRight(studyId)) {
+            downloadable = false;
+            }
+        });
+        this.canDownload = downloadable;
+
         this.selectedDatasetIds = selection;
     }
 
