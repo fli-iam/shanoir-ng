@@ -178,12 +178,12 @@ public class ImporterManagerService {
 	}
 
 	/**
-	 * cleanSeries is important here for import-from-zip file: when the ImagesCreatorAndDicomFileAnalyzer
+	 * As the DicomSerieAndInstanceAnalyzer can declare a serie as ignored as well, we clean twice.
+	 * cleanSeries is important for import-from-zip file: when the ImagesCreatorAndDicomFileAnalyzer
 	 * has declared some series as e.g. erroneous, we have to remove them from the import. For import-from
-	 * pacs or from-sh-up it is different, as the ImagesCreatorAndDicomFileAnalyzer is called afterwards.
+	 * pacs or from-sh-up it is different, as the ImagesCreatorAndDicomFileAnalyzer is called afterwards (startImportJob).
 	 * Same here for multi-exam-imports: it calls uploadDicomZipFile method, where series could be classed
 	 * as erroneous and when startImportJob is called, we want them to be removed from the import.
-	 * As the DicomSerieAndInstanceAnalyzer can declare a serie as ignored as well, we clean twice.
 	 * 
 	 * @param importJob
 	 */
