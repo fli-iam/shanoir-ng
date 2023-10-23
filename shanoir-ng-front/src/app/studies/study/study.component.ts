@@ -345,10 +345,6 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     private getAllSubjects(): void {
-        let ids = new Set<number>();
-        this.study.subjectStudyList.forEach(subStud => {
-            ids.add(subStud.subject.id);
-        });
         this.subjectService
             .getAllSubjectsNames()
             .then(subjects => {

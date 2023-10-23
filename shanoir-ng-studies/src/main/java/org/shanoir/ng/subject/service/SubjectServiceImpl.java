@@ -138,7 +138,7 @@ public class SubjectServiceImpl implements SubjectService {
 			List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			subjects = subjectRepository.findBySubjectStudyListStudyIdIn(studyIds);
 		}
-		return getIdNamesFromSubject(subjects);
+		return getIdNamesFromSubjects(subjects);
 	}
 
 	@Override
@@ -151,17 +151,20 @@ public class SubjectServiceImpl implements SubjectService {
 			List<Long> studyIds = studyUserRepository.findDistinctStudyIdByUserId(userId, StudyUserRight.CAN_SEE_ALL.getId());
 			subjects = subjectRepository.findBySubjectStudyListStudyIdInAndIdIn(studyIds, subjectIds);
 		}
-		return getIdNamesFromSubject(subjects);
+		return getIdNamesFromSubjects(subjects);
 	}
 
 
-	private List<IdName> getIdNamesFromSubject(Iterable<Subject> subjects) {
-		List<IdName> names = new ArrayList<IdName>();
-		if (subjects != null) {
-			for (Subject subject : subjects) {
-				IdName name = new IdName(subject.getId(), subject.getName());
-				names.add(name);
-			}
+	private List<IdName> getIdNamesFromSubjects(Iterable<Subject> subjects) {
+
+		if (subjects == null) {
+			return new ArrayList<>();
+		}
+
+		List<IdName> names = new ArrayList<>();
+		for (Subject subject : subjects) {
+			IdName name = new IdName(subject.getId(), subject.getName());
+			names.add(name);
 		}
 		return names;
 	}
