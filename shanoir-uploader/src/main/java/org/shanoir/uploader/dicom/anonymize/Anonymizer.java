@@ -7,35 +7,39 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 import org.shanoir.anonymization.anonymization.AnonymizationService;
 import org.shanoir.anonymization.anonymization.AnonymizationServiceImpl;
+import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 
 public class Anonymizer {
 
 	private static Logger logger = Logger.getLogger(Anonymizer.class);
 
-	public boolean anonymize(final File uploadFolder,
+	public boolean pseudonymize(final File uploadFolder,
 			final String profile, final String subjectName)
 			throws IOException {
-		ArrayList<File> dicomFiles = getListOfDicomFiles(uploadFolder);
+		ArrayList<File> dicomFiles = new ArrayList<File>();
+		getListOfDicomFiles(uploadFolder, dicomFiles);
 		try {
 			AnonymizationService anonymizationService = new AnonymizationServiceImpl();
 			anonymizationService.anonymizeForShanoir(dicomFiles, profile, subjectName, subjectName);
+			logger.info("--> " + dicomFiles.size() + " DICOM files successfully pseudonymized.");
 		} catch (Exception e) {
-			logger.error("anonymization service: ", e);
+			logger.error("pseudonymization service: ", e);
 			return false;
 		}
 		return true;
 	}
 
-	private ArrayList<File> getListOfDicomFiles(final File uploadFolder)
-			throws IOException {
-		ArrayList<File> dicomFileList = new ArrayList<File>();
-		File[] listOfFiles = uploadFolder.listFiles();
+	private void getListOfDicomFiles(final File folder, ArrayList<File> dicomFiles) throws IOException {
+		File[] listOfFiles = folder.listFiles();
 		for (File file : listOfFiles) {
-			if (file.isFile() && !file.getName().endsWith(".xml")) {
-				dicomFileList.add(file);
+			if (file.isFile() && file.getName().endsWith(DcmRcvManager.DICOM_FILE_SUFFIX)) {
+				dicomFiles.add(file);
+			} else {
+				if (file.isDirectory()) {
+					getListOfDicomFiles(file, dicomFiles);
+				}
 			}
 		}
-		return dicomFileList;
 	}
 
 }

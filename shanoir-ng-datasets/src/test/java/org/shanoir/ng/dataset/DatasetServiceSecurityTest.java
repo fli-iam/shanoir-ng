@@ -215,7 +215,10 @@ public class DatasetServiceSecurityTest {
 			assertAccessDenied(service::update, mockDataset(1L, 1L, 1L, 1L, 1L));
 		} else if ("ROLE_EXPERT".equals(role)) {
 			assertAccessAuthorized(service::update, mockDataset(1L, 1L, 1L, 1L, 1L));
-			assertAccessDenied(service::update, mockDataset(1L, 1L, 1L, 2L, 1L));
+			Dataset ds = mockDataset(100L, 1L, 1L, 2L, 1L);
+			given(datasetRepository.findById(ds.getId())).willReturn(Optional.of(ds));
+			
+			assertAccessDenied(service::update, ds);
 		}
 		assertAccessDenied(service::update, mockDataset(2L, 2L, 2L, 2L, 2L));
 		assertAccessDenied(service::update, mockDataset(3L, 3L, 3L, 3L, 1L));

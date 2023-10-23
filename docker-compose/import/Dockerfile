@@ -46,7 +46,7 @@ RUN apt-get update -qq \
     locales \
     locales-all \
     xvfb \
-    python
+    python3
 
 # Compile DCM2NIIX from source
 ENV DCMCOMMIT_VERSION=v1.0.20210317

@@ -60,13 +60,12 @@ public class ImportFinishRunnable implements Runnable {
 		boolean anonymizationSuccess = false;
 		try {
 			String anonymizationProfile = ShUpConfig.profileProperties.getProperty(ANONYMIZATION_PROFILE);
-			anonymizationSuccess = anonymizer.anonymize(uploadFolder, anonymizationProfile, subjectName);
+			anonymizationSuccess = anonymizer.pseudonymize(uploadFolder, anonymizationProfile, subjectName);
 		} catch (IOException e) {
 			logger.error(uploadFolder.getName() + ": " + e.getMessage(), e);
 		}
 
 		if (anonymizationSuccess) {
-			logger.info(uploadFolder.getName() + ": DICOM files successfully anonymized.");
 			/**
 			 * Write import-job.json to disk
 			 */

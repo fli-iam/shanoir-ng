@@ -20,9 +20,10 @@ import { EntityService } from '../../shared/components/entity/entity.abstract.se
 import { Page, Pageable } from '../../shared/components/table/pageable.model';
 import * as AppUtils from '../../utils/app.utils';
 import { ServiceLocator } from '../../utils/locator.service';
-import { DatasetDTO, DatasetDTOService } from "./dataset.dto";
 import { Dataset } from './dataset.model';
+import { MrDataset } from '../dataset/mr/dataset.mr.model';
 import { DatasetUtils } from './dataset.utils';
+import {DatasetDTO, MrDatasetDTO, DatasetDTOService} from "./dataset.dto";
 
 export type Format = 'eeg' | 'nii' | 'BIDS' | 'dcm';
 
@@ -215,7 +216,13 @@ export class DatasetService extends EntityService<Dataset> {
     }
 
     public stringify(entity: Dataset) {
-        let dto = new DatasetDTO(entity);
+        let dto;
+        if (entity instanceof MrDataset) {
+            dto = new MrDatasetDTO(entity);
+            dto.updatedMrMetadata = entity.updatedMrMetadata;
+        } else {
+            dto = new DatasetDTO(entity);
+        }
         return JSON.stringify(dto, (key, value) => {
             return this.customReplacer(key, value, dto);
         });
