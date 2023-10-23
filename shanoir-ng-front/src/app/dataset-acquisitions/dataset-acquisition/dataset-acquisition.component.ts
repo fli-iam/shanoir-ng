@@ -25,11 +25,14 @@ import { DatasetAcquisitionService } from '../shared/dataset-acquisition.service
 import { MrDatasetAcquisition } from '../modality/mr/mr-dataset-acquisition.model';
 import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/acquisition-equipment.pipe';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import {DatasetAcquisitionNode, ExaminationNode} from '../../tree/tree.model';
+import {DatasetAcquisitionNode} from '../../tree/tree.model';
 import {DatasetService} from "../../datasets/shared/dataset.service";
 import {LoadingBarComponent} from "../../shared/components/loading-bar/loading-bar.component";
 import {StudyUserRight} from "../../studies/shared/study-user-right.enum";
 import {StudyRightsService} from "../../studies/shared/study-rights.service";
+import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
 
 
 @Component({
@@ -39,8 +42,6 @@ import {StudyRightsService} from "../../studies/shared/study-rights.service";
 })
 export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisition> {
 
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
-
     public studyCards: StudyCard[];
     public acquisitionEquipments: AcquisitionEquipment[];
     acquisitionNode: DatasetAcquisition | DatasetAcquisitionNode;
@@ -49,6 +50,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     hasEEG: boolean = false;
     hasDicom: boolean = false;
     hasBids: boolean = false;
+    protected downloadState: TaskState = new TaskState();
 
     constructor(
             private route: ActivatedRoute,
@@ -57,7 +59,8 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
             private studyCardService: StudyCardService,
             private acqEqService: AcquisitionEquipmentService,
             private studyRightsService: StudyRightsService,
-            public acqEqPipe: AcquisitionEquipmentPipe) {
+            public acqEqPipe: AcquisitionEquipmentPipe,
+            private downloadService: MassDownloadService) {
         super(route, 'dataset-acquisition');
     }
 
@@ -128,11 +131,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
         });
     }
 
-    download(format: string) {
-        this.datasetService.downloadDatasetsByAcquisition(this.id, format, this.progressBar);
-    }
-
-
     public async hasEditRight(): Promise<boolean> {
         return this.keycloakService.isUserAdminOrExpert(); // TODO
     }
@@ -140,5 +138,14 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     onNodeInit(node: DatasetAcquisitionNode) {
         node.open = true;
         this.breadcrumbsService.currentStep.data.datasetAcquisitionNode = node;
+    }
+
+    downloadAll() {
+        let options: DownloadSetupOptions = new DownloadSetupOptions();
+        options.hasBids = this.hasBids;
+        options.hasNii = this.hasDicom;
+        options.hasDicom = this.hasDicom;
+        options.hasEeg = this.hasEEG; 
+        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, options, this.downloadState);
     }
 }

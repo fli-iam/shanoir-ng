@@ -26,7 +26,7 @@ export class CarminDatasetProcessingsComponent extends EntityListComponent<Carmi
   }
 
   ngAfterViewInit(): void {
-    this.subscribtions.push(
+    this.subscriptions.push(
       this.carminDatasetProcessingService.getAllCarminDatasetProcessings().subscribe(caminDatasetProcessings => {
         if (caminDatasetProcessings == null) {
           this.caminDatasetProcessings = [];

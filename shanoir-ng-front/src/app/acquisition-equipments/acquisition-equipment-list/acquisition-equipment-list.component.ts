@@ -16,7 +16,6 @@ import { Component, ViewChild, ViewContainerRef } from '@angular/core';
 import { Step } from '../../breadcrumbs/breadcrumbs.service';
 
 import { BrowserPaginEntityListComponent } from '../../shared/components/entity/entity-list.browser.component.abstract';
-import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { DatasetModalityType } from '../../enum/dataset-modality-type.enum';
@@ -38,8 +37,6 @@ export class AcquisitionEquipmentListComponent extends BrowserPaginEntityListCom
 
     private createAcqEquip = false;
     private selectedAcqEquip : AcquisitionEquipment = new AcquisitionEquipment();
-
-    @ViewChild('coilModal') coilModal: ModalComponent;
 
 
     constructor(

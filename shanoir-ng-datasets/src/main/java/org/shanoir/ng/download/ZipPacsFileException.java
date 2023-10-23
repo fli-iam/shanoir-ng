@@ -12,9 +12,15 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Injectable, EventEmitter } from '@angular/core';
+package org.shanoir.ng.download;
 
-@Injectable()
-export class ModalService {
-  public objectPassedByModal = new EventEmitter();
+public class ZipPacsFileException extends Exception {
+
+    ZipPacsFileException(Throwable cause) {
+        super(cause);
+    }
+
+    ZipPacsFileException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

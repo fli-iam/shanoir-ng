@@ -13,7 +13,7 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ContentChildren, EventEmitter, forwardRef, Input, Output, QueryList } from '@angular/core';
+import { Component, ContentChildren, EventEmitter, forwardRef, HostListener, Input, Output, QueryList } from '@angular/core';
 import { menuAnimDur, menuSlideRight } from '../../../../shared/animations/animations';
 
 @Component({
@@ -59,6 +59,11 @@ export class MenuItemComponent {
             this.overflow = true;
             this.init = true;
         }, 100);
+    }
+
+    @HostListener('click', []) 
+    onClick() {
+        if (!this.hasChildren) this.cascadingClose();
     }
 
     public open() {
@@ -113,6 +118,6 @@ export class MenuItemComponent {
     }
 
     public cascadingClose() {
-        if (this.parent) this.parent.cascadingClose();
+        this.parent?.cascadingClose();
     }
 }

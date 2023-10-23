@@ -31,6 +31,7 @@ import {
 } from '../../tree/tree.model';
 import {Subject} from '../shared/subject.model';
 import {SubjectService} from "../shared/subject.service";
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 
 
 @Component({
@@ -55,7 +56,8 @@ export class SubjectNodeComponent implements OnChanges {
         private examinationService: ExaminationService,
         private subjectService: SubjectService,
         private router: Router,
-        private examPipe: ExaminationPipe) {
+        private examPipe: ExaminationPipe,
+        private downloadService: MassDownloadService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -161,5 +163,11 @@ export class SubjectNodeComponent implements OnChanges {
 
     onExaminationDelete(index: number) {
         (this.node.examinations as ExaminationNode[]).splice(index, 1) ;
+    }
+
+    download() {
+        this.loading = true;
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.studyId, this.node.id)
+            .finally(() => this.loading = false);
     }
 }
