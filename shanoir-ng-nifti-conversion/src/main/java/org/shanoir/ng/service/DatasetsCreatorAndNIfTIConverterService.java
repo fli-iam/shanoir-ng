@@ -677,8 +677,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		}
 		return false;
 	}
-<<<<<<< HEAD:shanoir-ng-nifti-conversion/src/main/java/org/shanoir/ng/service/DatasetsCreatorAndNIfTIConverterService.java
-=======
+
 
 	/**
 	 * Converts some data
@@ -716,6 +715,4 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		
 		return true;
 	}
-
->>>>>>> develop:shanoir-ng-import/src/main/java/org/shanoir/ng/importer/dcm2nii/DatasetsCreatorAndNIfTIConverterService.java
 }
