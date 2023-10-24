@@ -161,7 +161,7 @@ public class BidsImporterApiController implements BidsImporterApi {
 
 			// STEP 3: Examination level, check if there are session, otherwise create examinations
 			Map<String, LocalDate> examDates = checkDatesFromSessionFile(subjectFile);
-			// Filter scans.tsv and sessions.tsv files
+			// Filter out scans.tsv and sessions.tsv files
 			File[] examFiles = subjectFile.listFiles(new FilenameFilter() {
 				@Override
 				public boolean accept(File arg0, String name) {
@@ -173,8 +173,8 @@ public class BidsImporterApiController implements BidsImporterApi {
 			boolean examCreated = false;
 			for (File sessionFile : examFiles) {
 				FileTime creationTime = (FileTime) Files.getAttribute(Paths.get(sessionFile.getAbsolutePath()), "creationTime");
-				ExaminationDTO examination = null;
-				Long examId = null;
+				ExaminationDTO examination;
+				Long examId;
 
 				// STEP 3.1 There is a session level
 				if (sessionFile.getName().startsWith("ses-")) {
@@ -201,7 +201,6 @@ public class BidsImporterApiController implements BidsImporterApi {
 					}
 					eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_EXAMINATION_EVENT, examId.toString(), KeycloakUtil.getTokenUserId(), "centerId:" + centerId + ";subjectId:" + examination.getSubject().getId(), ShanoirEvent.SUCCESS, examination.getStudyId()));
 
-					LOG.debug("We found a session " + sessionFile.getName());
 					importJob.setExaminationId(examId);
 
 					// STEP 4: Finish import from every bids data folder
@@ -212,12 +211,12 @@ public class BidsImporterApiController implements BidsImporterApi {
 					// STEP 3.2 No session level
 					if (!examCreated) {
 						// Try to find acqusition_time in _scans.tsv file
-						LocalDate examDate = checkDateFromScansFile(subjectFile);
+						LocalDate examDate = checkDateFromScansFile(sessionFile);
 						if (examDate == null) {
 							// Set exam date by default using file creation date
 							examDate = LocalDate.ofInstant(creationTime.toInstant(), ZoneOffset.UTC);
 						}
-						examination = ImportUtils.createExam(studyId, centerId, subjectId, null, examDate, subjectName);
+						examination = ImportUtils.createExam(studyId, centerId, subjectId, "", examDate, subjectName);
 						examId = (Long) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.EXAMINATION_CREATION_QUEUE, objectMapper.writeValueAsString(examination));
 
 						if (examId == null) {

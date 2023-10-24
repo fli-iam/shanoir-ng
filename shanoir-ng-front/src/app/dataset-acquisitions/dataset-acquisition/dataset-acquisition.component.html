@@ -61,7 +61,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                         <span class="right-col" [ngSwitch]="mode">
                             <ng-template [ngSwitchCase]="'view'">
                                 <a [routerLink]="['/examination/details/', datasetAcquisition.examination?.id]">
-                                    {{datasetAcquisition.examination?.comment}}
+                                    {{datasetAcquisition?.examination?.comment ? datasetAcquisition?.examination?.comment : datasetAcquisition?.examination?.examinationDate  | date: 'dd/MM/yyyy'}}
                                 </a>
                             </ng-template>
                         </span>
