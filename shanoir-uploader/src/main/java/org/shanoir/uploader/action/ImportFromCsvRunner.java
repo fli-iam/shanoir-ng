@@ -1,8 +1,12 @@
 package org.shanoir.uploader.action;
 
 import java.io.File;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +27,8 @@ import org.shanoir.ng.exchange.imports.subject.IdentifierCalculator;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Patient;
+import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.importer.model.Study;
 import org.shanoir.uploader.ShUpOnloadConfig;
 import org.shanoir.uploader.dicom.IDicomServerClient;
 import org.shanoir.uploader.dicom.query.PatientTreeNode;
@@ -30,11 +36,14 @@ import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.ImportFromCSVWindow;
 import org.shanoir.uploader.model.CsvImport;
-import org.shanoir.uploader.model.Subject;
 import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
+import org.shanoir.uploader.model.rest.ImagedObjectCategory;
+import org.shanoir.uploader.model.rest.Sex;
 import org.shanoir.uploader.model.rest.StudyCard;
+import org.shanoir.uploader.model.rest.Subject;
+import org.shanoir.uploader.model.rest.SubjectType;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJob;
 import org.shanoir.uploader.nominativeData.NominativeDataUploadJobManager;
 import org.shanoir.uploader.service.rest.ShanoirUploaderServiceClient;
@@ -42,7 +51,6 @@ import org.shanoir.uploader.upload.UploadJob;
 import org.shanoir.uploader.upload.UploadJobManager;
 import org.shanoir.uploader.upload.UploadState;
 import org.shanoir.uploader.utils.ImportUtils;
-import org.shanoir.uploader.utils.Util;
 
 public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
@@ -162,6 +170,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		// 1. Request PACS to check the presence of data
 		logger.info("1 Request PACS");
 		List<Patient> patients = null;
+		
 		try {
 			if (!StringUtils.isEmpty(csvImport.getIpp())) {
 				patients = dicomServerClient.queryDicomServer("", csvImport.getIpp(), "", "", null, null);
@@ -182,27 +191,28 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		// 2. Select series
 		logger.info("2 Select series");
 
-		Set<SerieTreeNode> selectedSeries = new HashSet<>();
-		PatientTreeNode pat = null;
-		StudyTreeNode stud = null;
+		Set<Serie> selectedSeries = new HashSet<>();
+
+		Patient pat = null;
+		Study stud = null;
 		if (patients == null || patients.isEmpty()) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
 		}
-		boolean foundPatient = false;
 		String serialNumber = null;
 		String modelName = null;
 		
-		Map<StudyTreeNode, Set<SerieTreeNode>> selectedSeriesByStudy = new HashMap<>();
-		StudyTreeNode selectedStudy = null;
+		Map<Study, Set<Serie>> selectedSeriesByStudy = new HashMap<>();
 
-		Date minDate;
-		Date selectedStudyDate = new Date();
+		Study selectedStudy = null;
+
+		LocalDate minDate;
+		LocalDate selectedStudyDate = LocalDate.now();
 		if (!StringUtils.isBlank(csvImport.getMinDateFilter())) {
 			
 			String[] acceptedFormats = {"yyyy","yyyy-MM-dd","yyyy-MM-dd-HH"};
 			try {
-				minDate = DateUtils.parseDate(csvImport.getMinDateFilter(), acceptedFormats);
+				minDate = LocalDate.from(DateUtils.parseDate(csvImport.getMinDateFilter(), acceptedFormats).toInstant());
 				selectedStudyDate = minDate;
 			} catch (Exception e) {
 				csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.date.format"));
@@ -211,63 +221,51 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		} else {
 			Calendar cal = Calendar.getInstance();
 			cal.set(1000, 0, 1, 0, 0, 0);
-			minDate = cal.getTime();
+			minDate = LocalDate.from(cal.toInstant());
 		}
 
-//		for (Patient patient : patients) {
-//			if (foundPatient) {
-//				// Get only one patient => Once we've selected a serie with interesting data, do not iterate more
-//				break;
-//			}
-//			List<Study> studies = patient.getStudies();
-//			Date currentDate = new Date();
-//			for (Study study : studies) {
-//				// get study date time
-//				String[] acceptedFormats = {
-//						"yyyyMMddHHmmSS.FFFFFF",
-//						"yyyyMMddHHmmSS.FFFFF",
-//						"yyyyMMddHHmmSS.FFFF",
-//						"yyyyMMddHHmmSS.FFF",
-//						"yyyyMMddHHmmSS.FF",
-//						"yyyyMMddHHmmSS.F",
-//						"yyyyMMddHHmmSS",
-//						"yyyyMMddHHmmS",
-//						"yyyyMMddHHmm",
-//						"yyyyMMddHHm",
-//						"yyyyMMddHH"};
-//				Date studyDate = new Date();
-//				try {
-//					studyDate = DateUtils.parseDate(study.getStudyDate(), acceptedFormats);
-//				} catch (ParseException e) {
-//					logger.error("could not consider this study:", e);
-//					// Could not get date => skip the study
-//					continue;
-//				}
-//				if (studyDate.after(currentDate) || studyDate.before(minDate)) {
-//					// We take the first valid date, if we are after on valid date, don't check the data
-//					continue;
-//				}
-//				if (!searchField(study.getDisplayString(), csvImport.getStudyFilter())) {
-//					continue;
-//				}
-//				stud = study;
-//				selectedSeriesByStudy.put(stud, new HashSet<>());
-//				Collection<DicomTreeNode> series = study.getTreeNodes().values();
-//				for (Iterator<DicomTreeNode> seriesIt = series.iterator(); seriesIt.hasNext();) {
-//					// Filter on serie
-//					SerieTreeNode serie = (SerieTreeNode) seriesIt.next();
-//					if (searchField(serie.getDescription(), csvImport.getAcquisitionFilter())) {
-//						selectedSeriesByStudy.get(stud).add(serie);
-//						selectedStudy = stud;
-//						serialNumber = serie.getMriInformation().getDeviceSerialNumber();
-//						modelName = serie.getMriInformation().getManufacturersModelName();
-//						foundPatient = true;
-//						currentDate = studyDate;
-//						selectedStudyDate = studyDate;
-//					}
-//				}
-//			}
-//		}
+		boolean foundPatient = false;
+
+		
+		for (Patient patient : patients) {
+			if (foundPatient) {
+				// Get only one patient => Once we've selected a serie with interesting data, do not iterate more
+				break;
+			}
+
+			List<Study> studies = patient.getStudies();
+			LocalDate currentDate = LocalDate.now();
+			for (Study study : studies) {
+				LocalDate studyDate = study.getStudyDate();
+				if (studyDate.isAfter(currentDate) || studyDate.isAfter(minDate)) {
+					// We take the first valid date, if we are after on valid date, don't check the data
+					continue;
+				}
+				
+				if (!searchField(study.getStudyDescription(), csvImport.getStudyFilter())) {
+					continue;
+				}
+				stud = study;
+				pat = patient;
+				selectedSeriesByStudy.put(stud, new HashSet<>());
+				Collection<Serie> series = study.getSelectedSeries();
+				for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
+					// Filter on serie
+					Serie serie = seriesIt.next();
+					if (searchField(serie.getSeriesDescription(), csvImport.getAcquisitionFilter())) {
+						selectedSeriesByStudy.get(stud).add(serie);
+						selectedStudy = stud;
+						// TOOD: get these
+						serialNumber = serie.getEquipment().getDeviceSerialNumber();
+						modelName = serie.getEquipment().getManufacturerModelName();
+						foundPatient = true;
+						currentDate = studyDate;
+						selectedStudyDate = studyDate;
+					}
+				}
+			}
+		}
+
 		if (selectedStudy == null) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
@@ -311,26 +309,37 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		String subjectIdentifier = "";
 
 		try {
-			dicomData = new DicomDataTransferObject(null, pat, stud);
+			
+			PatientTreeNode patNode = new PatientTreeNode(pat);
+			StudyTreeNode stNode = new StudyTreeNode(stud);
+			
+			for (Serie serie: selectedSeries) {
+				SerieTreeNode serieNode = new SerieTreeNode(serie);
+				stNode.addTreeNode(serie.getSeriesInstanceUID(), serieNode);
+			}
+			patNode.addTreeNode(pat.getPatientID(), stNode);
+			
+			
+			dicomData = new DicomDataTransferObject(null, patNode, stNode);
 
 			// Calculate identifier
 
 			// #1609 we encounter problems when using same subject data accross multiple studies.
 			// We add study id in front of identifier to correct this
-			subjectIdentifier = stud.getId() +  this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
+			subjectIdentifier = stNode.getId() +  this.identifierCalculator.calculateIdentifier(dicomData.getFirstName(), dicomData.getLastName(), dicomData.getBirthDate());
 
 			dicomData.setSubjectIdentifier(subjectIdentifier);
 
 			// Change birth date to first day of year
-//			final String dicomBirthDate = pat.getDescriptionMap().get("birthDate");
-//			if (!StringUtils.isEmpty(dicomBirthDate)) {
-//				Date dicomBirthDateAsDate = Util.convertStringDicomDateToDate(dicomBirthDate);
-//				Calendar cal = Calendar.getInstance();
-//				cal.setTime(dicomBirthDateAsDate);
-//				cal.set(Calendar.MONTH, Calendar.JANUARY);
-//				cal.set(Calendar.DAY_OF_MONTH, 1);
-//				dicomData.setBirthDate(cal.getTime());
-//			}
+			final LocalDate dicomBirthDate = patNode.getPatient().getPatientBirthDate();
+			if (dicomBirthDate != null) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(Date.from(dicomBirthDate.atStartOfDay().toInstant(ZoneOffset.UTC)));
+				cal.set(Calendar.MONTH, Calendar.JANUARY);
+				cal.set(Calendar.DAY_OF_MONTH, 1);
+				dicomData.setBirthDate(cal.getTime());
+			}
+
 		} catch (Exception e) {
 			csvImport.setErrorMessage(resourceBundle.getString("shanoir.uploader.import.csv.error.missing.data"));
 			return false;
@@ -338,14 +347,24 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 
 		File uploadFolder = ImportUtils.createUploadFolder(dicomServerClient.getWorkFolder(), dicomData);
 		List<String> allFileNames = null;
+		
+		// Convert selectedSeries to TreeNodes
+		// Construct media architecture
+		Set<SerieTreeNode> selectedSeriesNodes = new HashSet<>();
+
+		for (Serie serie : selectedSeries) {
+			SerieTreeNode serieTreeNode = new SerieTreeNode(serie);
+			selectedSeriesNodes.add(serieTreeNode);
+		}
+		
 		try {
-			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeries, uploadFolder, this.dicomFileAnalyzer, this.dicomServerClient, null);
+			allFileNames = ImportUtils.downloadOrCopyFilesIntoUploadFolder(true, selectedSeriesNodes, uploadFolder, this.dicomFileAnalyzer, this.dicomServerClient, null);
 			/**
 			 * 5. Fill MRI information into serie from first DICOM file of each serie
 			 * This has already been done for CD/DVD import, but not yet here for PACS
 			 */
 			logger.info("5 Fill MRI info");
-			for (Iterator<SerieTreeNode> iterator = selectedSeries.iterator(); iterator.hasNext();) {
+			for (Iterator<SerieTreeNode> iterator = selectedSeriesNodes.iterator(); iterator.hasNext();) {
 				SerieTreeNode serie = iterator.next();
 				dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serie.getSerie(), null, true);
 			}
@@ -361,7 +380,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		logger.info("6 Write upload job");
 
 		UploadJob uploadJob = new UploadJob();
-		ImportUtils.initUploadJob(selectedSeries, dicomData, uploadJob);
+		ImportUtils.initUploadJob(selectedSeriesNodes, dicomData, uploadJob);
 
 		if (allFileNames == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
@@ -377,7 +396,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		logger.info("7 Write upload job nominative");
 
 		NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
-		ImportUtils.initDataUploadJob(selectedSeries, dicomData, dataJob);
+		ImportUtils.initDataUploadJob(selectedSeriesNodes, dicomData, dataJob);
 
 		NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
 				uploadFolder.getAbsolutePath());
@@ -392,7 +411,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Subject subjectFound = null;
 		String subjectStudyIdentifier = null;
 		try {
-//			subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subjectIdentifier);
+			subjectFound = shanoirUploaderServiceClientNG.findSubjectBySubjectIdentifier(subjectIdentifier);
 			if (!subjectFound.getName().equals(csvImport.getCommonName())) {
 				// If the name does not match, change the subjectStudyIdentifier for this study
 				subjectStudyIdentifier = csvImport.getCommonName();
@@ -400,33 +419,34 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		} catch (Exception e) {
 			//Do nothing, if it fails, we'll just create a new subject
 		}
+		
 		Subject subject;
 		if (subjectFound != null) {
 			logger.info("8 Subject exists, just use it");
 			subject = subjectFound;
-//			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
-//			subject = shanoirUploaderServiceClientNG.createSubjectStudy(subject);
+			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
+			subject = shanoirUploaderServiceClientNG.createSubjectStudy(subject);
 		} else {
 			logger.info("8 Creating a new subject");
 	
-			subject = new Subject();
+			subject = new org.shanoir.uploader.model.rest.Subject();
 			subject.setName(csvImport.getCommonName());
-//			if (!StringUtils.isEmpty(pat.getDescriptionMap().get("sex"))) {
-//				subject.setSex(Sex.valueOf(pat.getDescriptionMap().get("sex")));
-//			} else {
-//				// Force feminine (girl power ?)
-//				subject.setSex(Sex.F);
-//			}
+			if (!StringUtils.isEmpty(pat.getPatientSex())) {
+				subject.setSex(Sex.valueOf(pat.getPatientSex()));
+			} else {
+				// Force feminine (girl power ?)
+				subject.setSex(Sex.F);
+			}
 			subject.setIdentifier(subjectIdentifier);
 	
-//			subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
-//	
-//			subject.setBirthDate(dicomData.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-//	
-//			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
-//	
-//			// Get center ID from study card
-//			subject = shanoirUploaderServiceClientNG.createSubject(subject, true, centerId);
+			subject.setImagedObjectCategory(ImagedObjectCategory.LIVING_HUMAN_BEING);
+	
+			subject.setBirthDate(dicomData.getBirthDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+	
+			ImportUtils.addSubjectStudy(study2, subject, SubjectType.PATIENT, true, subjectStudyIdentifier);
+	
+			// Get center ID from study card
+			subject = shanoirUploaderServiceClientNG.createSubject(subject, true, centerId);
 		}
 		if (subject == null) {
 			uploadJob.setUploadState(UploadState.ERROR);
@@ -440,7 +460,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		Examination examDTO = new Examination();
 		examDTO.setCenterId(centerId);
 		examDTO.setComment(csvImport.getComment());
-		examDTO.setExaminationDate(selectedStudyDate);
+		examDTO.setExaminationDate(Date.from(selectedStudyDate.atStartOfDay().toInstant(ZoneOffset.UTC)));
 		examDTO.setPreclinical(false);
 		examDTO.setStudyId(Long.valueOf(csvImport.getStudyId()));
 		examDTO.setSubjectId(subject.getId());

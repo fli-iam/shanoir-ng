@@ -136,6 +136,17 @@ public class RabbitMQStudiesService {
 		return null;
 	}
 
+	@RabbitListener(queues = RabbitMQConfiguration.STUDY_ANONYMISATION_PROFILE_QUEUE)
+	@Transactional
+	public String getStudyAnonymisationProfile(final long studyId) {
+		SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
+		Study study = this.studyRepo.findById(studyId).get();
+		if (study != null) {
+			return study.getProfile().getProfileName();
+		}
+		return null;
+	}
+
 	/**
 	 * Receives a json object, concerning a study subscription
 	 * @param commandArrStr the studyUser as a json string.

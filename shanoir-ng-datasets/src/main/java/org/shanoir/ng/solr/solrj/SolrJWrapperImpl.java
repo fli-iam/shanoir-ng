@@ -166,6 +166,7 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 	public Page<ShanoirSolrDocument> findByDatasetIdIn(Collection<Long> datasetIds, Pageable pageable) throws RestServiceException {
 		final SolrQuery query = new SolrQuery();
 		filterByDatasetIds(datasetIds, query);
+		addSortingAndPaging(query, pageable);
 		QueryResponse response = querySolrServer(query);
 		return buildShanoirSolrPage(response, pageable, null);
 	}
@@ -202,8 +203,26 @@ public class SolrJWrapperImpl implements SolrJWrapper {
 		final SolrQuery query = new SolrQuery();
 		filterByDatasetIds(datasetIds, query);
 		addFilterQueryForCenterStudy(query, studiesCenter);
+		addSortingAndPaging(query, pageable);
 		QueryResponse response = querySolrServer(query);
 		return buildShanoirSolrPage(response, pageable, null);
+	}
+
+	private void addSortingAndPaging(SolrQuery query, Pageable pageable) {
+		/* add sorting */
+		if (pageable.getSort() != null) {
+			for (Sort.Order order : pageable.getSort()) {
+				query.addSort(order.getProperty(), order.getDirection().equals(Direction.ASC) ? ORDER.asc : ORDER.desc);				
+			}
+		}
+		/* add paging */
+		query.setRows(pageable.getPageSize());
+		query.setStart(pageable.getPageNumber() * pageable.getPageSize());
+
+		/* results with all the columns */
+		for (String fieldStr : DOCUMENT_FACET_LIST) {			
+			query.addField(fieldStr);
+		}
 	}
 
 	private void addFilterQuery(SolrQuery query, String fieldName, Collection<String> values) {

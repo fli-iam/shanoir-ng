@@ -17,10 +17,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<table class="layout">
 			<tr><td colspan="2">
 				<span class="right-col" [ngSwitch]="mode">
-					<ng-template [ngSwitchCase]="'view'"> 
+					<ng-template [ngSwitchCase]="'view'">
 						<div class="header command-zone" i18n="View therapy|Title">View therapy details</div>
 					</ng-template>
-					<ng-template ngSwitchDefault> 
+					<ng-template ngSwitchDefault>
 						<div *ngIf="!createSTMode" class="header command-zone" i18n="Edit therapy|Title">Edit therapy</div>
 						<div *ngIf="createSTMode"  class="header command-zone" i18n="Create therapy|Title">Add therapy</div>
 					</ng-template>
@@ -33,7 +33,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li class="required">
 							<label i18n="Edit subjectTherapy|Therapy label">Therapy</label>
 							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
+								<ng-template [ngSwitchCase]="'view'">
 										{{subjectTherapy?.therapy?.name}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -52,18 +52,18 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							<li class="required">
 								<label i18n="Edit subjectTherapy|Dose label">Dose</label>
 								<span class="right-col" [ngSwitch]="mode">
-									<ng-template [ngSwitchCase]="'view'"> 
+									<ng-template [ngSwitchCase]="'view'">
 											{{subjectTherapy?.dose}}
 									</ng-template>
 									<ng-template ngSwitchDefault>
-										<input type="text" id="dose" formControlName="dose" [(ngModel)]="subjectTherapy.dose"/>
+										<input type="number" id="dose" formControlName="dose" [(ngModel)]="subjectTherapy.dose"/>
 									</ng-template>
 								</span>
 							</li>
 							<li class="required">
 								<label i18n="Edit subjectTherapy|DoseUnit label">Dose Unit</label>
 								<span class="right-col" [ngSwitch]="mode">
-									<ng-template [ngSwitchCase]="'view'"> 
+									<ng-template [ngSwitchCase]="'view'">
 											{{subjectTherapy?.dose_unit?.value}}
 									</ng-template>
 									<ng-template ngSwitchDefault>
@@ -71,23 +71,23 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 											<option *ngFor="let unit of units" [ngValue]="unit">{{unit.value}}</option>
 										</select>
 									</ng-template>
-								</span>								
+								</span>
 							</li>
                             <li class="required">
                                 <label i18n="Edit subjectTherapy|Molecule label">Molecule</label>
                                 <span class="right-col" [ngSwitch]="mode">
-                                    <ng-template [ngSwitchCase]="'view'"> 
+                                    <ng-template [ngSwitchCase]="'view'">
                                             {{subjectTherapy?.molecule}}
                                     </ng-template>
                                     <ng-template ngSwitchDefault>
                                         <input type="text" id="molecule" formControlName="molecule" [(ngModel)]="subjectTherapy.molecule"/>
                                     </ng-template>
-                                </span>                             
+                                </span>
                             </li>
 							<li class="required">
 								<label i18n="Edit subjectTherapy|Frequency label">Frequency</label>
 								<span class="right-col" [ngSwitch]="mode">
-									<ng-template [ngSwitchCase]="'view'"> 
+									<ng-template [ngSwitchCase]="'view'">
 											{{enumUtils.getEnumValue(frequencies,subjectTherapy.frequency)}}
 									</ng-template>
 									<ng-template ngSwitchDefault>
@@ -101,7 +101,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						<li>
 							<label i18n="Edit subjectTherapy|startDate label">Start date</label>
 							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
+								<ng-template [ngSwitchCase]="'view'">
 										{{subjectTherapy?.startDate}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -111,9 +111,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 							</span>
 						</li>
 						<li>
-							<label i18n="Edit subjectTherapy|endDate label">End date</label> 
+							<label i18n="Edit subjectTherapy|endDate label">End date</label>
 							<span class="right-col" [ngSwitch]="mode">
-								<ng-template [ngSwitchCase]="'view'"> 
+								<ng-template [ngSwitchCase]="'view'">
 										{{subjectTherapy?.startDate}}
 								</ng-template>
 								<ng-template ngSwitchDefault>
@@ -124,16 +124,16 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						</li>
 					</ol>
 					</fieldset>
-				</td>				
+				</td>
 			</tr>
-			
+
 		</table>
 
 		<div class="footer command-zone">
-			<button type="button" i18n="Edit subjectTherapy|CancelButton label" class="Button right-icon" (click)="cancelTherapy()">Cancel<i class="fas fa-angle-left"></i></button>
+			<button type="button" i18n="Edit subjectTherapy|CancelButton label" class="Button right-icon" (click)="cancelTherapy()">Cancel</button>
 			<button type="button" *ngIf="canUpdateTherapy()" (click)="updateTherapy()" i18n="Edit subjectTherapy|SaveButton label" class="Button right-icon" [disabled]="!form.valid">Update<i class="far fa-save"></i></button>
 			<button type="button" *ngIf="canAddTherapy()" i18n="Edit subjectTherapy|CreateButton label" (click)="addTherapy()" class="Button right-icon" [disabled]="!form.valid">Create<i class="far fa-save"></i></button>
-				
+
 		</div>
     </form>
 </div>

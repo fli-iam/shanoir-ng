@@ -49,7 +49,9 @@ public class InitialStartupState implements State {
 	private static final String SU_V6_0_3 = ".su_v6.0.3";
 
 	private static final String SU_V6_0_4 = ".su_v6.0.4";
-	
+
+	private static final String SU_V7_0_1 = ".su_v7.0.1";
+
 	public void load(StartupStateContext context) throws Exception {
 		initShanoirUploaderFolder();
 		initLogging();
@@ -60,8 +62,8 @@ public class InitialStartupState implements State {
 		logger.info(System.getProperty("java.vendor.url"));
 		logger.info(System.getProperty("java.version"));
         InetAddress inetAddress = InetAddress.getLocalHost();
-        logger.info("IP Address:- " + inetAddress.getHostAddress());
-        logger.info("Host Name:- " + inetAddress.getHostName());
+        logger.info("IP Address: " + inetAddress.getHostAddress());
+        logger.info("Host Name: " + inetAddress.getHostName());
 		 // Disable http request to check for quartz upload
 		System.setProperty("org.quartz.scheduler.skipUpdateCheck", "true");
 		System.setProperty("jdk.http.auth.tunneling.disabledSchemes", "");
@@ -70,6 +72,7 @@ public class InitialStartupState implements State {
 		initLanguage();
 		copyPseudonymus();
 		initProfiles();
+		initProfile();
 		initStartupDialog(context);
 		context.setState(new ProxyConfigurationState());
 		context.nextState();
@@ -78,7 +81,8 @@ public class InitialStartupState implements State {
 	private void doMigration() throws IOException {
 		// as properties, that exist already are not replaced/changed, start with the last version before,
 		// as considered as more important
-		// overwrite with properties from ShanoirUploader v6.0.4 or v6.0.3, if existing
+		// overwrite with properties from ShanoirUploader v7.0.1, v6.0.4 or v6.0.3, if existing
+		migrateFromVersion(SU_V7_0_1);
 		migrateFromVersion(SU_V6_0_4);
 		migrateFromVersion(SU_V6_0_3);
 		// migrate properties from ShanoirUploader v5.2
@@ -91,11 +95,11 @@ public class InitialStartupState implements State {
 		final File shanoirUploaderFolderForVersion = new File(shanoirUploaderFolderPathForVersion);
 		boolean shanoirUploaderFolderExistsForVersion = shanoirUploaderFolderForVersion.exists();
 		if (shanoirUploaderFolderExistsForVersion) {
-			logger.info("Start migrating properties from version " + version + " (.su == v5.2) of ShUp.");
+			logger.info("Start migrating properties from version " + version + " of ShUp.");
 			copyPropertiesFile(shanoirUploaderFolderForVersion, ShUpConfig.shanoirUploaderFolder, ShUpConfig.LANGUAGE_PROPERTIES);
 			copyPropertiesFile(shanoirUploaderFolderForVersion, ShUpConfig.shanoirUploaderFolder, ShUpConfig.PROXY_PROPERTIES);
 			copyPropertiesFile(shanoirUploaderFolderForVersion, ShUpConfig.shanoirUploaderFolder, ShUpConfig.DICOM_SERVER_PROPERTIES);
-			logger.info("Finished migrating properties from version " + version + " (.su == v5.2) of ShUp: language, proxy, dicom_server.");
+			logger.info("Finished migrating properties from version " + version + " of ShUp: language, proxy, dicom_server.");
 		}
 	}
 
@@ -297,4 +301,10 @@ public class InitialStartupState implements State {
 		}
 	}
 
+	private void initProfile() throws FileNotFoundException, IOException {
+		String profile = ShUpConfig.basicProperties.getProperty(ShUpConfig.PROFILE);
+		if (profile != null && !profile.isEmpty()) {
+			ShUpConfig.profileSelected = profile;
+		}
+	}
 }

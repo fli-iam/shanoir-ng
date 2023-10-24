@@ -30,7 +30,8 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 [editMode]="mode != 'view'"
                 [columnDefs]="columnDefs"
                 [browserSearch]="false"
-                [rowRoute]="rowClick.bind(this)">
+                [rowRoute]="rowClick.bind(this)"
+                (rowEdit)="onChange()">
         </shanoir-table>
     </li>
 </ol>

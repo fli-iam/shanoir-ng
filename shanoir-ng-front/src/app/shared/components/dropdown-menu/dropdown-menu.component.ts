@@ -129,7 +129,10 @@ export class DropdownMenuComponent implements OnChanges, OnDestroy {
     }
 
     public cascadingClose() {
-        if (this.parent != undefined)
+        if (this.parent == undefined) {
+            this.close();
+        } else {
             this.parent.cascadingClose();
+        }
     }
 }

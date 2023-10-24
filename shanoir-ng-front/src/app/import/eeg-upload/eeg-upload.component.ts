@@ -21,6 +21,7 @@ import { ImportDataService } from '../shared/import.data-service';
 import { ImportService } from '../shared/import.service';
 import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { EegImportJob } from '../shared/eeg-data.model';
+import { TaskState } from 'src/app/async-tasks/task.model';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -36,7 +37,7 @@ export class EegUploadComponent {
     protected extensionError: boolean;
     private modality: string;
     public errorMessage: string;
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
+    uploadState: TaskState = new TaskState();
 
     constructor(
             private importService: ImportService, 
@@ -72,9 +73,9 @@ export class EegUploadComponent {
             .subscribe(
                 event => {
                 if (event.type === HttpEventType.Sent) {
-                    this.progressBar.progress = -1;
+                    this.uploadState.progress = 0;
                 } else if (event.type === HttpEventType.UploadProgress) {
-                    this.progressBar.progress = (event.loaded / (event.total + 0.05));
+                    this.uploadState.progress = (event.loaded / (event.total + 0.05));
                 } else if (event instanceof HttpResponse) {
                     this.importDataService.eegImportJob =  event.body;
                     this.errorMessage = "";
@@ -82,11 +83,11 @@ export class EegUploadComponent {
                         .then((importJobAnalysed: EegImportJob) => {
                             this.importDataService.eegImportJob = importJobAnalysed;
                             this.setArchiveStatus('uploaded');
-                            this.progressBar.progress = 1;
+                            this.uploadState.progress = 1;
                             this.errorMessage = "";
                         }).catch(error => {
                             this.setArchiveStatus('error');
-                            this.progressBar.progress = 0;
+                            this.uploadState.progress = 0;
                             if (error && error.error && error.error.message) {
                                 this.errorMessage = error.error.message;
                             }
@@ -94,23 +95,11 @@ export class EegUploadComponent {
                 }
             }, error => {
                 this.setArchiveStatus('error');
-                this.progressBar.progress = 0;
+                this.uploadState.progress = 0;
                 if (error && error.error && error.error.message) {
                     this.errorMessage = error.error.message;
                 }
             })
-    }
-
-    progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
-       switch (event.type) {
-            case HttpEventType.Sent:
-              progressBar.progress = -1;
-              break;
-            case HttpEventType.UploadProgress:
-              break;
-            case HttpEventType.Response:
-                progressBar.progress = 0;
-        }
     }
 
     private setArchiveStatus(status: Status) {

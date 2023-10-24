@@ -14,33 +14,11 @@
 
 package org.shanoir.ng.download;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.mail.BodyPart;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMultipart;
-import jakarta.mail.util.ByteArrayDataSource;
-import org.dcm4che3.data.Attributes;
-import org.dcm4che3.json.JSONReader;
-import org.json.JSONException;
-import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
-import org.shanoir.ng.dataset.service.DatasetUtils;
-import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.examination.model.Examination;
-import org.shanoir.ng.shared.exception.PacsException;
-import org.shanoir.ng.shared.model.Study;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
-
-import javax.json.Json;
-import javax.json.stream.JsonParser;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -55,6 +33,40 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import javax.json.Json;
+import javax.json.stream.JsonParser;
+
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.json.JSONReader;
+import org.json.JSONException;
+import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
+import org.shanoir.ng.dataset.service.DatasetUtils;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.model.Study;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
+
+import jakarta.annotation.PostConstruct;
+import jakarta.mail.BodyPart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 
 /**
  * This class is used to download files on using WADO URLs:
@@ -134,91 +146,101 @@ public class WADODownloaderService {
 	 * @param subjectName
 	 * @param dataset 
 	 * @param datasetFilePath 
+	 * @param response
 	 * @throws IOException
 	 * @throws MessagingException
 	 * @return
+	 * @throws RestServiceException
 	 *
 	 */
-	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath) throws IOException, MessagingException {
+	public List<String> downloadDicomFilesForURLsAsZip(final List<URL> urls, final ZipOutputStream zipOutputStream, String subjectName, Dataset dataset, String datasetFilePath, List<SerieError> serieErrors) throws IOException, MessagingException, RestServiceException {
 		int i = 0;
 		List<String> files = new ArrayList<>();
-		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
+		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
 			String url = ((URL) iterator.next()).toString();
-			String instanceUID = null;
+			String instanceUID;
 			// handle and check at first for WADO-RS URLs by "/instances/"
 			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
 			if (indexInstanceUID > 0) {
 				instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
-
-				String serieDescription = dataset.getUpdatedMetadata().getName();
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-				String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
-				String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
-
-				// Replace all forbidden characters.
-				name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-
-				// add folder logic if necessary
-				if (datasetFilePath != null) {
-					name = datasetFilePath + File.separator + name;
-				}
-
-				byte[] responseBody = downloadFileFromPACS(url);
-
-				ZipEntry entry = new ZipEntry(name + DCM);
-				entry.setSize(responseBody.length);
-				zipOutputStream.putNextEntry(entry);
-				zipOutputStream.write(responseBody);
-				zipOutputStream.closeEntry();
-				files.add(name+DCM);
 			} else {
 				// handle and check secondly for WADO-URI URLs by "objectUID="
 				// instanceUID == objectUID
 				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
 				if (indexInstanceUID <= 0) {
-					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
+					LOG.error("URL for download is neither in WADO-RS nor in WADO-URI format. URL : " + url + " - Dataset id : " + dataset.getId());
+					String errorDetails = "URL for download is neither in WADO-RS nor in WADO-URI format";
+					writeErrorFileInZip(zipOutputStream, subjectName, indexInstanceUID, errorDetails);
 				}
-				instanceUID = extractInstanceUID(url, instanceUID);
-
-				String serieDescription = dataset.getUpdatedMetadata().getName();
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
-				String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
-				String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
-
-				// Replace all forbidden characters.
-				name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-
-				// add folder logic if necessary
-				if (datasetFilePath != null) {
-					name = datasetFilePath + File.separator + name;
-				}
-
-				byte[] responseBody = null;
-				try {
-					responseBody = downloadFileFromPACS(url);
-					ZipEntry entry = new ZipEntry(name + DCM);
-					entry.setSize(responseBody.length);
-					zipOutputStream.putNextEntry(entry);
-					zipOutputStream.write(responseBody);
-					zipOutputStream.closeEntry();
-					files.add(name+DCM);
-				} catch (Exception e) {
-					String error = "An error occured during the download of this .DCM file, please contact a shanoir administrator if necessary.";
-					byte[] strToBytes = error.getBytes();
-
-					ZipEntry entry = new ZipEntry(ERROR + i + "_" + name + TXT);
-					entry.setSize(responseBody.length);
-					zipOutputStream.putNextEntry(entry);
-					zipOutputStream.write(strToBytes);
-					zipOutputStream.closeEntry();
-
-					// LOG the error
-					LOG.error("A dicom file could not be downloaded from the pacs:", e);
-					continue;
-				}
+				instanceUID = extractInstanceUID(url);
+			}
+			// Build name
+			String name = buildFileName(subjectName, dataset, datasetFilePath, instanceUID);
+			// Download and zip
+			try {
+				String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
+				if (zipedFile != null) files.add(zipedFile);
+			} catch (ZipPacsFileException e) {
+				writeErrorFileInZip(zipOutputStream, name, i, e.getMessage());
+				if (serieErrors != null) serieErrors.add(new SerieError(i, url, e.getMessage()));
 			}
 		}
 		return files;
+	}
+
+	private String buildFileName(String subjectName, Dataset dataset, String datasetFilePath, String instanceUID ) {
+		String serieDescription = dataset.getUpdatedMetadata().getName();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
+		String examDate = dataset.getDatasetAcquisition().getExamination().getExaminationDate().format(formatter);
+		String name = subjectName + "_" + examDate + "_" + serieDescription + "_" + instanceUID;
+		// Replace all forbidden characters.
+		name = name.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+		// add folder logic if necessary
+		if (datasetFilePath != null) {
+			name = datasetFilePath + File.separator + name;
+		}
+		return name;
+	}
+
+	private void writeErrorFileInZip(ZipOutputStream zipOutputStream, String name, int i, String details) throws IOException {
+		String error = "An error occured during the download of this .DCM file, please contact a shanoir administrator if necessary.";
+		if (details != null) error += " (" + details + ")";
+		byte[] strToBytes = error.getBytes();
+		ZipEntry entry = new ZipEntry(ERROR + i + "_" + name + TXT);
+		entry.setSize(strToBytes.length);
+		zipOutputStream.putNextEntry(entry);
+		zipOutputStream.write(strToBytes);
+		zipOutputStream.closeEntry();
+	}
+
+	/**
+	 * Downloads and writes the file specified by url into zipOutputStream, using name + .DCM as filename.
+	 * If the downloading fails, a text file is added instead and null is returned.
+	 * @param url
+	 * @param zipOutputStream
+	 * @param name the filename without extension
+	 * @param i the position of the file into the dataset
+	 * @return the added file name, null if failed
+	 * @throws ZipPacsFileException
+	 * @throws IOException when couldn't write into the stream
+	 */
+	private String downloadAndWriteFileInZip(String url, ZipOutputStream zipOutputStream, String name) throws ZipPacsFileException {
+		byte[] responseBody = null;
+		try {
+			responseBody = downloadFileFromPACS(url);
+			ZipEntry entry = new ZipEntry(name + DCM);
+			entry.setSize(responseBody.length);
+			zipOutputStream.putNextEntry(entry);
+			zipOutputStream.write(responseBody);
+			zipOutputStream.closeEntry();
+			return name + DCM;
+		} catch (IOException e) {
+			//LOG.error("A dicom file could not be downloaded from the pacs:", e);
+			throw new ZipPacsFileException(e);
+		} catch (HttpClientErrorException e) {
+			//LOG.error("A dicom file could not be downloaded from the pacs:", e);
+			throw new ZipPacsFileException("received " + e.getStatusCode() + " from PACS", e);
+		}
 	}
 
 	/**
@@ -230,12 +252,13 @@ public class WADODownloaderService {
 	 * @param workFolder
 	 * @param subjectName
 	 * @param dataset 
+	 * @param serieErrors
 	 * @throws IOException
 	 * @throws MessagingException
 	 * @return
 	 *
 	 */
-	public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset) throws IOException, MessagingException {
+	public List<File> downloadDicomFilesForURLs(final List<URL> urls, final File workFolder, String subjectName, Dataset dataset, List<SerieError> serieErrors) throws IOException, MessagingException {
 		int i = 0;
 		List<File> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext();) {
@@ -252,7 +275,7 @@ public class WADODownloaderService {
 				// instanceUID == objectUID
 				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
 				if (indexInstanceUID > 0) {
-					instanceUID = extractInstanceUID(url, instanceUID);
+					instanceUID = extractInstanceUID(url);
 
 					String serieDescription = dataset.getUpdatedMetadata().getName();
 					DateTimeFormatter formatter = DateTimeFormatter.ofPattern("YYYYMMdd");
@@ -268,6 +291,7 @@ public class WADODownloaderService {
 					try {
 						responseBody = downloadFileFromPACS(url);
 					} catch (Exception e) {
+						
 						// Just insert an error log into the file for missing dicoms.
 						File errorFile = new File(workFolder.getPath() + File.separator + ERROR + i + "_" + name + TXT);
 						i++;
@@ -279,6 +303,8 @@ public class WADODownloaderService {
 
 						// LOG the error
 						LOG.error("A dicom file could not be downloaded from the pacs:", e);
+						
+						if (serieErrors != null) serieErrors.add(new SerieError(i, url, e.getMessage()));
 						continue;
 					}
 					try (ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
@@ -286,7 +312,7 @@ public class WADODownloaderService {
 						files.add(extractedDicomFile);
 					}
 				} else {
-					throw new IOException("URL for download is neither in WADO-RS nor in WADO-URI format. Please verify database contents.");
+					if (serieErrors != null) serieErrors.add(new SerieError(i, url, "URL for download is neither in WADO-RS nor in WADO-URI format"));
 				}
 			}
 		}
@@ -406,7 +432,7 @@ public class WADODownloaderService {
 	 * @param instanceUID
 	 * @return
 	 */
-	private String extractInstanceUID(String url, String instanceUID) {
+	private String extractInstanceUID(String url) {
 		Pattern p = null;
 		if (url.indexOf(CONTENT_TYPE) != -1) {
 			p = Pattern.compile("objectUID=(\\S+)&contentType");
@@ -415,9 +441,10 @@ public class WADODownloaderService {
 		}
 		Matcher m = p.matcher(url);
 		if (m.find()) {
-			instanceUID = m.group(1);
+			return m.group(1);
+		} else {
+			return null;
 		}
-		return instanceUID;
 	}
 
 	/**
@@ -428,7 +455,7 @@ public class WADODownloaderService {
 	 * @return
 	 * @throws IOException
 	 */
-	private byte[] downloadFileFromPACS(final String url) throws IOException {
+	private byte[] downloadFileFromPACS(final String url) throws IOException, HttpClientErrorException {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add(HttpHeaders.ACCEPT, CONTENT_TYPE_MULTIPART + "; type=" + CONTENT_TYPE_DICOM + ";");
 		HttpEntity<String> entity = new HttpEntity<>(headers);

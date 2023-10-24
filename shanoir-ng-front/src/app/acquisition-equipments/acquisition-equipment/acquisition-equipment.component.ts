@@ -133,7 +133,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
     openNewManufModel() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer-model/create']).then(success => {
-            this.subscribtions.push(
+            this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     (currentStep.entity as AcquisitionEquipment).manufacturerModel = entity as ManufacturerModel;
                 })
@@ -143,7 +143,7 @@ export class AcquisitionEquipmentComponent extends EntityComponent<AcquisitionEq
 
     private registerManufAndSerialUnicityValidator(form: UntypedFormGroup) {
         this.onSubmitValidatedFields.push('serialNumber');
-        this.subscribtions.push(
+        this.subscriptions.push(
             form.get('manufacturerModel').valueChanges.subscribe(value => {
                 form.get('serialNumber').updateValueAndValidity();
             })

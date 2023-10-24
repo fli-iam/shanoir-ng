@@ -15,7 +15,6 @@ import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListe
 import { fromEvent, Subscription } from 'rxjs';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { GlobalService } from '../../services/global.service';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
 import * as shajs from 'sha.js';
@@ -48,6 +47,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() editMode: boolean = false;
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
+    @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
@@ -61,7 +61,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     isError: boolean = false;
     filter: Filter = new Filter(null, null);
     firstLoading: boolean = true;
-    @ViewChild('settingsDialog') settingsDialog: ModalComponent;
     currentDrag: {columns: any; leftOrigin: number, totalWidth: number, leftColIndex: number};
     private subscriptions: Subscription[] = [];
     private hash: string;
@@ -71,6 +70,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     expended: boolean[] = [];
     subRowOpen: any = {};
     path: string;
+    settingsOpened: boolean = false;
 
     constructor(
             private elementRef: ElementRef,
@@ -252,7 +252,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         } else if (result.text) {
             return result;
         } else {
-            return "" + result;
+            return result;
         }
     }
 
@@ -325,6 +325,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         let getPage: Page<any> | Promise<Page<any>> =  this.getPage(this.getPageable(), forceRefresh)
         if (getPage instanceof Promise) {
             return getPage.then(page => {
+                    this.pageLoaded.emit(page);
                 return this.computePage(page);
             }).catch(reason => {
                 setTimeout(() => {
@@ -334,7 +335,10 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
                 throw reason;
             });
         } else if (getPage instanceof Page) {
-            return Promise.resolve(this.computePage(getPage));
+            return Promise.resolve(this.computePage(getPage)).then(page => {
+                this.pageLoaded.emit(page);
+                return page;
+            });
         }
     }
 
