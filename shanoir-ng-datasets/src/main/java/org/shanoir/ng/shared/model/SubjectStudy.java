@@ -1,10 +1,21 @@
+/**
+ * Shanoir NG - Import, manage and share neuroimaging data
+ * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
+ * Contact us on https://project.inria.fr/shanoir/
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
+ */
+
 package org.shanoir.ng.shared.model;
 
-import java.util.List;
-
-import org.shanoir.ng.shared.quality.QualityTag;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.shanoir.ng.shared.subjectstudy.SubjectType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,6 +27,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.validation.constraints.NotNull;
+import org.shanoir.ng.shared.quality.QualityTag;
+
+import java.util.List;
 
 @Entity
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "study_id", "subject_id" }, name = "study_subject_idx") })
@@ -39,11 +53,13 @@ public class SubjectStudy {
 	
 	/** Tags associated to the subject. */
     @ManyToMany
-    @JoinTable( name = "subject_study_tag",
-                joinColumns = @JoinColumn( name = "subject_study_id" ))
+    @JoinTable( name = "subject_study_tag", joinColumns = @JoinColumn( name = "subject_study_id" ))
 	private List<Tag> tags;
     
     private Integer qualityTag;
+
+	/** Subject type. */
+	private Integer subjectType;
 
     
 	/**
@@ -112,4 +128,22 @@ public class SubjectStudy {
         this.qualityTag = tag != null ? tag.getId() : null;
     }
 
+	/**
+	 * @return the subjectType
+	 */
+	public SubjectType getSubjectType() {
+		return SubjectType.getType(subjectType);
+	}
+
+	/**
+	 * @param subjectType
+	 *            the subjectType to set
+	 */
+	public void setSubjectType(SubjectType subjectType) {
+		if (subjectType == null) {
+			this.subjectType = null;
+		} else {
+			this.subjectType = subjectType.getId();
+		}
+	}
 }

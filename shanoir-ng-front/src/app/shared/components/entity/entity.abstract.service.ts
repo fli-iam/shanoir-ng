@@ -11,21 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {HttpClient} from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 
-import {Page} from '../table/pageable.model';
-import {Entity, EntityRoutes} from './entity.abstract';
-import {ConfirmDialogService} from "../confirm-dialog/confirm-dialog.service";
-import {ConsoleService} from "../../console/console.service";
-import {Router} from "@angular/router";
-import {Location} from "@angular/common";
-import {UntypedFormBuilder} from "@angular/forms";
-import {KeycloakService} from "../../keycloak/keycloak.service";
-import {ServiceLocator} from "../../../utils/locator.service";
-import {ShanoirError} from "../../models/error.model";
+import { Injectable, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { ServiceLocator } from "../../../utils/locator.service";
+import { ConsoleService } from "../../console/console.service";
+import { ShanoirError } from "../../models/error.model";
+import { ConfirmDialogService } from "../confirm-dialog/confirm-dialog.service";
+import { Page } from '../table/pageable.model';
+import { Entity } from './entity.abstract';
 
-
-export abstract class EntityService<T extends Entity> {
+@Injectable()
+export abstract class EntityService<T extends Entity> implements OnDestroy {
 
     abstract API_URL: string;
 
@@ -34,10 +32,16 @@ export abstract class EntityService<T extends Entity> {
     protected confirmDialogService = ServiceLocator.injector.get(ConfirmDialogService);
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
 
+    protected subscriptions: Subscription[] = [];
+
     // protected http: HttpClient = ServiceLocator.injector.get(HttpClient);
 
     constructor(
         protected http: HttpClient) {
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions?.forEach(s => s.unsubscribe());
     }
 
     getAll(): Promise<T[]> {
@@ -95,6 +99,7 @@ export abstract class EntityService<T extends Entity> {
                             this.consoleService.log('warn', warn);
                             return false;
                         }
+
                         throw Error(reason);
                     });
                 }
@@ -102,11 +107,10 @@ export abstract class EntityService<T extends Entity> {
             })
     }
 
-    get(id: number, withStorageVolume = false): Promise<T> {
-        return this.http.get<any>(this.API_URL + '/' + id
-            + (withStorageVolume ? '?withStorageVolume=true' : ''))
+    get(id: number, mode: 'eager' | 'lazy' = 'eager'): Promise<T> {
+        return this.http.get<any>(this.API_URL + '/' + id)
             .toPromise()
-            .then(this.mapEntity);
+            .then(entity => this.mapEntity(entity, null, mode));
     }
 
     create(entity: T): Promise<T> {
@@ -120,7 +124,7 @@ export abstract class EntityService<T extends Entity> {
             .toPromise();
     }
 
-    protected mapEntity = (entity: any, quickResult?: T): Promise<T> => {
+    protected mapEntity = (entity: any, quickResult?: T, mode: 'eager' | 'lazy' = 'eager'): Promise<T> => {
         return Promise.resolve(this.toRealObject(entity));
     }
 

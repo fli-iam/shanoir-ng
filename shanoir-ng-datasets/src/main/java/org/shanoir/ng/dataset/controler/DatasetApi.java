@@ -14,13 +14,16 @@
 
 package org.shanoir.ng.dataset.controler;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.shanoir.ng.dataset.dto.DatasetAndProcessingsDTOInterface;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
-import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.importer.dto.ProcessedDatasetImportJob;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
@@ -32,24 +35,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.mail.MessagingException;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.List;
 
 @Tag(name = "dataset")
 @RequestMapping("/datasets")
@@ -115,6 +105,17 @@ public interface DatasetApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<Page<DatasetDTO>> findDatasets(Pageable pageable) throws RestServiceException;
+
+	@Operation(summary = "", description = "Returns a dataset list")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasets"),
+			@ApiResponse(responseCode = "204", description = "no user found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/examination/{examinationId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
+	ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
+
 	
 	@Operation(summary = "", description = "Returns a dataset list")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasets"),
@@ -192,6 +193,7 @@ public interface DatasetApi {
     		@Valid @RequestParam(value = "format", required = false, defaultValue="dcm") String format, 
     		HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException, EntityNotFoundException;
 
+
     @Operation(summary = "getDicomMetadataByDatasetId", description = "If exists, returns the dataset dicom metadata corresponding to the given id")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "dicom metadata"),
@@ -263,6 +265,22 @@ public interface DatasetApi {
 			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
 			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
 
+	@Operation(summary = "massiveDownloadDatasetsByAcquisitionId", description = "If exists, returns a zip file of the datasets corresponding to the given acquisition ID")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "zip file"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "404", description = "no dataset found"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/massiveDownloadByAcquisition")
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_DOWNLOAD'))")
+	void massiveDownloadByAcquisitionId(
+			@Parameter(name = "id of the acquisition", required=true) @Valid
+			@RequestParam(value = "acquisitionId", required = true) Long acquisitionId,
+			@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.") @Valid
+			@RequestParam(value = "format", required = false, defaultValue="dcm") String format, HttpServletResponse response) throws RestServiceException, EntityNotFoundException, IOException;
+
+
 	@Operation(summary = "downloadStatistics", description = "Download statistics from the entire database")
 	@ApiResponses(value = {
 		@ApiResponse(responseCode = "200", description = "exported statistics"),
@@ -290,7 +308,7 @@ public interface DatasetApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@PostMapping(value = "/allById", produces = { "application/json" })
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @datasetSecurityService.hasRightOnEveryDataset(#datasetIds, 'CAN_SEE_ALL'))")
-	ResponseEntity<List<DatasetDTO>> findDatasetsByIds(
+	ResponseEntity<List<DatasetAndProcessingsDTOInterface>> findDatasetsByIds(
 			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds);
 
 }

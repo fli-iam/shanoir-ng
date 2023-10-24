@@ -34,6 +34,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
 
     API_URL = AppUtils.BACKEND_API_BIDS_URL;
     @Input() studyId: number;
+    @Input() studyName: string;
     public list: BidsElement[];
     public json: JSON;
     public tsv: string[][];
@@ -75,6 +76,19 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
                 this.list = [element];
                 this.load = "loaded";
             });
+        }
+    }
+
+    refresh() {
+        this.removeContent();
+        this.load = null;
+        if (!this.load) {
+            this.load ="loading";
+            this.studyService.refreshBidsStructure(this.studyId, this.studyName).then(element => {
+                this.sort(element);
+                this.list = [element];
+                this.load = "loaded";
+            })
         }
     }
 
@@ -139,7 +153,7 @@ export class BidsTreeComponent implements OnDestroy, OnInit {
         const endpoint = this.API_URL + "/exportBIDS/studyId/" + this.studyId;
         let params = new HttpParams().set("filePath", item.path);
         
-        this.http.get(endpoint, { observe: 'response', responseType: 'blob', params: params }).subscribe(response => {
+        this.http.get(endpoint, { observe: 'response', responseType: 'blob', params: params }).toPromise().then(response => {
             if (response.status == 200) {
                 this.downloadIntoBrowser(response);
             }

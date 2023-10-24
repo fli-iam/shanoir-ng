@@ -43,6 +43,7 @@ public class DicomServerClient implements IDicomServerClient {
 	private File workFolder;
 	
 	public DicomServerClient(final Properties dicomServerProperties, final File workFolder) {
+		logger.info("New DicomServerClient created with properties: " + dicomServerProperties.toString());
 		config.initWithPropertiesFile(dicomServerProperties);
 		this.workFolder = workFolder;
 		// Initialize connection configuration parameters here: to be used for all queries
@@ -127,17 +128,25 @@ public class DicomServerClient implements IDicomServerClient {
 							}
 						}
 					};
-					File[] newFileNames = uploadFolder.listFiles(oldFileNamesAndDICOMFilter);
-					logger.debug("newFileNames: " + newFileNames.length);
-					for (int i = 0; i < newFileNames.length; i++) {
-						fileNamesForSerie.add(newFileNames[i].getName());
+					File serieFolder = new File (uploadFolder.getAbsolutePath() + File.separator + seriesInstanceUID);
+					if (serieFolder.exists()) {
+						File[] newFileNames = serieFolder.listFiles(oldFileNamesAndDICOMFilter);
+						logger.debug("newFileNames: " + newFileNames.length);
+						for (int i = 0; i < newFileNames.length; i++) {
+							fileNamesForSerie.add(newFileNames[i].getName());
+						}
+						serieTreeNode.setFileNames(fileNamesForSerie);
+						retrievedDicomFiles.addAll(fileNamesForSerie);
+						oldFileNames.addAll(fileNamesForSerie);
+						logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+								+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
+								+ " was successful.\n\n");
+					} else {
+						logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
+						+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
+						+ " has failed.\n\n");
+						return null;
 					}
-					serieTreeNode.setFileNames(fileNamesForSerie);
-					retrievedDicomFiles.addAll(fileNamesForSerie);
-					oldFileNames.addAll(fileNamesForSerie);
-					logger.info(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
-							+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()
-							+ " was successful.\n\n");
 				} else {
 					logger.error(uploadFolder.getName() + ":\n\n Download of " + fileNamesForSerie.size()
 							+ " DICOM files for serie " + seriesInstanceUID + ": " + serieTreeNode.getDisplayString()

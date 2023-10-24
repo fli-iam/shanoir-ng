@@ -106,6 +106,8 @@ public class RabbitMQConfiguration {
 
 	/** Queue to retrieve the center ID from an acquisition equipement ID. */
 	public static final String ACQUISITION_EQUIPEMENT_CENTER_QUEUE = "acquisition-equipement-center-queue";
+	/** Queue to retrieve the center ID from an acquisition equipement ID. */
+	public static final String ACQUISITION_EQUIPEMENT_UPDATE_QUEUE = "acquisition-equipement-update-queue";
 	
 	/** Queue to create exam for import bids. */
 	public static final String EXAMINATION_CREATION_QUEUE = "examination-creation-queue";
@@ -164,6 +166,9 @@ public class RabbitMQConfiguration {
 	/** Queue used to import eeg data */
 	public static final String IMPORT_EEG_QUEUE = "import-eeg-queue";
 
+	/** Queue used to get anonymisation profile of a study. */
+	public static final String STUDY_ANONYMISATION_PROFILE_QUEUE = "study-anonymisation-profile-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -176,10 +181,6 @@ public class RabbitMQConfiguration {
 	private static final String DELETE_CENTER_QUEUE_NAME_OUT = "delete_center_queue_from_ng";
 
 	private static final String DELETE_COIL_QUEUE_NAME_OUT = "delete_coil_queue_from_ng";
-	
-	private static final String MANUFACTURER_MODEL_QUEUE_NAME_OUT = "manufacturer_model_queue_from_ng";
-
-	private static final String MANUFACTURER_QUEUE_NAME_OUT = "manufacturer_queue_from_ng";
 
 	private static final String STUDY_QUEUE_NAME_IN = "study_queue_to_ng";
 
@@ -293,7 +294,7 @@ public class RabbitMQConfiguration {
 	public static Queue studyNameUpdateQueue() {
 		return new Queue(STUDY_NAME_UPDATE_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue subjectNameUpdateQueue() {
 		return new Queue(SUBJECT_NAME_UPDATE_QUEUE, true);
@@ -313,10 +314,14 @@ public class RabbitMQConfiguration {
 	public static Queue findStudyCardQueue() {
 		return new Queue(FIND_STUDY_CARD_QUEUE, true);
 	}
-	
+
 	@Bean
 	public static Queue acquisitionEquipementCenterQueue() {
 		return new Queue(ACQUISITION_EQUIPEMENT_CENTER_QUEUE, true);
+	}
+	@Bean
+	public static Queue acquisitionEquipementUpdateQueue() {
+		return new Queue(ACQUISITION_EQUIPEMENT_UPDATE_QUEUE, true);
 	}
 	
 	@Bean
@@ -417,4 +422,10 @@ public class RabbitMQConfiguration {
 	public static Queue importEEGQueue() {
 		return new Queue(IMPORT_EEG_QUEUE, true);
 	}
+	
+	@Bean
+	public static Queue studyAnonymisationProfileQueue() {
+		return new Queue(STUDY_ANONYMISATION_PROFILE_QUEUE, true);
+	}
+
 }

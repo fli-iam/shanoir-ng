@@ -14,17 +14,6 @@
 
 package org.shanoir.ng.dataset;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -55,6 +44,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 /**
  * User security service test.
@@ -219,7 +215,10 @@ public class DatasetServiceSecurityTest {
 			assertAccessDenied(service::update, mockDataset(1L, 1L, 1L, 1L, 1L));
 		} else if ("ROLE_EXPERT".equals(role)) {
 			assertAccessAuthorized(service::update, mockDataset(1L, 1L, 1L, 1L, 1L));
-			assertAccessDenied(service::update, mockDataset(1L, 1L, 1L, 2L, 1L));
+			Dataset ds = mockDataset(100L, 1L, 1L, 2L, 1L);
+			given(datasetRepository.findById(ds.getId())).willReturn(Optional.of(ds));
+			
+			assertAccessDenied(service::update, ds);
 		}
 		assertAccessDenied(service::update, mockDataset(2L, 2L, 2L, 2L, 2L));
 		assertAccessDenied(service::update, mockDataset(3L, 3L, 3L, 3L, 1L));

@@ -14,18 +14,11 @@
 
 package org.shanoir.ng.datasetacquisition.model.mr;
 
+import jakarta.persistence.*;
+import org.shanoir.ng.shared.core.model.AbstractEntity;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-
-import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**
  * MR protocol.
@@ -53,7 +46,7 @@ public class MrProtocolMetadata extends AbstractEntity {
 
 	/**
 	 * (0018,1049) Contrast/Bolus Ingredient Concentration. The unit of measure
-	 * of injected volume must be in ml.
+	 * of injected volume must be in mg/ml.
 	 */
 	private Double contrastAgentConcentration;
 

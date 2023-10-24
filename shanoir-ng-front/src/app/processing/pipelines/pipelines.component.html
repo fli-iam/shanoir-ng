@@ -20,7 +20,7 @@
     <ul>
       <li *ngFor="let parameter of selectedPipeline.parameters" class="parameter">
         <p><strong>{{parameter.name}}</strong> : {{parameter.description}}</p>
-        <p>Optional : {{parameter.isOptional ? 'Yes' : 'No' }}</p>
+        <p>{{parameter.isOptional ? 'Optional' : 'Mandatory' }}</p>
       </li>
     </ul>
     <hr>

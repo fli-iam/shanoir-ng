@@ -14,10 +14,6 @@
 
 package org.shanoir.ng.configuration.security;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.shanoir.ng.dicom.web.StowRSMultipartRelatedRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,6 +35,10 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Spring security configuration.

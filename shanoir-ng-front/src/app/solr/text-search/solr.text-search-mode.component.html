@@ -21,15 +21,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </span>
     </div>
     <div class="info-txt" *ngIf="showInfo" @slideDown>
-        <b>Query syntax example : </b> 
+        <b>Query syntax example : </b>
         <code>(subjectName:(CT* OR demo*) AND studyName:etude test) OR datasetName:*flair*</code>
         <br/><span class="italic">(all datasets that are in the study "etude test" with subject name that either starts with "CT" or starts with "demo". In addition any dataset that name contains "flair".)</span>
         <p>Case is insentitive for values.</p>
         <p>You can exclude terms with - . Exemple :
         <code>(*:* -datasetName:*localizer* AND -datasetName:*scout*)</code>
         <br/><span class="italic">(all existing datasets except those which names contains "localizer" or "scout")</span>
-        <p>The present field names are : 
-            <code>centerName, datasetCreationDate, studyName, subjectName, datasetId, datasetName, datasetNature, datasetType, examinationComment, examinationDate, tags, magneticFieldStrength, pixelBandwidth, sliceThickness, studyId, </code>
+        <p>The present field names are :
+            <code>centerName, datasetCreationDate, studyName, subjectName, subjectType, acquisitionEquipmentName, datasetId, datasetName, datasetNature, datasetType, examinationComment, examinationDate, tags, magneticFieldStrength, pixelBandwidth, sliceThickness, studyId, </code>
         </p>
         <p>For further information, see the <a href="https://solr.apache.org/guide/8_1/the-standard-query-parser.html#specifying-terms-for-the-standard-query-parser" target="_blank">Solr official documentation</a>.</p>
     </div>

@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -20,6 +20,7 @@ import { ColumnDefinition } from '../../../shared/components/table/column.defini
 import { BrowserPaging } from '../../../shared/components/table/browser-paging.model';
 import { FilterablePageable, Page } from '../../../shared/components/table/pageable.model';
 import{ Channel }from '../eeg/dataset.eeg.model';
+import {UnitOfMeasure} from "../../../enum/unitofmeasure.enum";
 
 @Component({
     selector: 'eeg-dataset-details',
@@ -69,5 +70,9 @@ export class EegDatasetComponent implements OnInit  {
                 resolve(this.browserPaging.getPage(pageable));
             });
         });
+    }
+
+    getUnit(key: string) {
+        return UnitOfMeasure.getLabelByKey(key);
     }
 }

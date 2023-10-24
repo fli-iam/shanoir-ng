@@ -31,7 +31,7 @@ import { FilterablePageable, Page } from '../../shared/components/table/pageable
 import { TableComponent } from '../../shared/components/table/table.component';
 import { ColumnDefinition } from '../../shared/components/table/column.definition.type';
 import { CarminDatasetProcessingService } from 'src/app/carmin/shared/carmin-dataset-processing.service';
-import { CarminDatasetProcessing } from 'src/app/carmin/models/CarminDatasetProcessing';
+import { CarminDatasetProcessing } from 'src/app/carmin/models/carmin-dataset-processing.model';
 import { SuperPromise } from '../../utils/super-promise';
 import {CarminClientService} from "../../carmin/shared/carmin-client.service";
 import {HttpResponse} from "@angular/common/http";
@@ -223,7 +223,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             'outputDatasetList': [{value: this.datasetProcessing.outputDatasets, disabled: !this.subject}],
             'comment': [this.datasetProcessing.comment]
         });
-        this.subscribtions.push(
+        this.subscriptions.push(
             formGroup.get('study').valueChanges.subscribe(studyVal => {
                 if (!!this.prefilledSubject || !studyVal) formGroup.get('subject').disable();
                 else formGroup.get('subject').enable();

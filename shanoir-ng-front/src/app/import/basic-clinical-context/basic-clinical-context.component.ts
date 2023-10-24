@@ -11,19 +11,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, OnDestroy } from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 
-import { AcquisitionEquipment } from '../../acquisition-equipments/shared/acquisition-equipment.model';
-import { Step } from '../../breadcrumbs/breadcrumbs.service';
-import { Center } from '../../centers/shared/center.model';
-import { Examination } from '../../examinations/shared/examination.model';
-import { preventInitialChildAnimations, slideDown } from '../../shared/animations/animations';
-import { IdName } from '../../shared/models/id-name.model';
-import { ImagedObjectCategory } from '../../subjects/shared/imaged-object-category.enum';
-import { SubjectStudy } from '../../subjects/shared/subject-study.model';
-import { SimpleSubject, Subject } from '../../subjects/shared/subject.model';
-import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
-import { EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
+import {AcquisitionEquipment} from '../../acquisition-equipments/shared/acquisition-equipment.model';
+import {Step} from '../../breadcrumbs/breadcrumbs.service';
+import {Center} from '../../centers/shared/center.model';
+import {Examination} from '../../examinations/shared/examination.model';
+import {preventInitialChildAnimations, slideDown} from '../../shared/animations/animations';
+import {IdName} from '../../shared/models/id-name.model';
+import {ImagedObjectCategory} from '../../subjects/shared/imaged-object-category.enum';
+import {SubjectStudy} from '../../subjects/shared/subject-study.model';
+import {SimpleSubject, Subject} from '../../subjects/shared/subject.model';
+import {AbstractClinicalContextComponent} from '../clinical-context/clinical-context.abstract.component';
+import {EquipmentDicom, ImportJob, PatientDicom, SerieDicom, StudyDicom} from '../shared/dicom-data.model';
+import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
 
 @Component({
@@ -70,7 +71,8 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         filteredPatient.studies = this.patient.studies.map(study => {
             study.series = study.series.filter(serie => serie.selected);
             return study;
-        });
+        }).filter(study => study.series?.length > 0);
+
         importJob.patients.push(filteredPatient);
         importJob.workFolder = this.importDataService.patientList.workFolder;
         importJob.fromDicomZip = true;
@@ -140,6 +142,7 @@ export class BasicClinicalContextComponent extends AbstractClinicalContextCompon
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
         newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
 

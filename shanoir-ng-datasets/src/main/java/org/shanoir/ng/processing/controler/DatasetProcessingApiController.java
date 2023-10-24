@@ -14,15 +14,13 @@
 
 package org.shanoir.ng.processing.controler;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.dto.mapper.DatasetMapper;
-import org.shanoir.ng.dataset.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.processing.dto.DatasetProcessingDTO;
+import org.shanoir.ng.processing.dto.mapper.DatasetProcessingMapper;
 import org.shanoir.ng.processing.model.DatasetProcessing;
 import org.shanoir.ng.processing.service.DatasetProcessingService;
 import org.shanoir.ng.shared.error.FieldErrorMap;
@@ -39,8 +37,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 public class DatasetProcessingApiController implements DatasetProcessingApi {

@@ -59,7 +59,6 @@ a:hover, a:active { color: inherit; }
 .admin-tag { color: orange; }
     .admin-tag i { margin-right: 4px; }
 .admin-tag-sep { color: var(--color-b-light2); }
-.warning { position: absolute; right: 0; bottom: 7px; font-size: 20px; color: orange; }
 .instance { height: 0px; overflow: visible; text-align: center; min-width: 300px; font-size: 14px; font-weight: bold; }
     .instance-frame { padding: 4px 10px 0; position: relative; z-index: 1; }
     .instance-frame::after { content: ""; position: absolute; left: -15px; right: 15px; top: 0; bottom: 0; 
@@ -69,13 +68,12 @@ a:hover, a:active { color: inherit; }
     .instance-frame, .instance-frame::after, .instance-frame::before { background-color: var(--instance-color); border-radius: 2px; }
     .instance-name::after { content: var(--instance-name); }
 
-progress-bar { background-color: var(--color-b-light); height: 14px; border: 1px solid var(--color-b-light2); vertical-align: -2px; margin-left: 12px; width: 160px; font-size: 10px; }
+progress-bar { background-color: var(--color-b-light); height: 14px; border: 1px solid var(--color-b-light2); vertical-align: -2px; width: 160px; font-size: 10px; }
 progress-bar >>> .text, progress-bar >>> .left-text { line-height: 14px; }
 .sub-menu progress-bar { width: 100px; height: 12px; font-size: 10px; }
-.sub-menu progress-bar >>> .inner { }
 .sub-menu progress-bar >>> .text, .sub-menu progress-bar >>> .left-text { line-height: 13px; }
 
-.jobs { }
+.jobs i { margin-right: 6px; width: auto !important; }
 
 .notif { font-size: 10px; color: #00ff44; vertical-align: 1px; margin-left: 8px; font-weight: bold; }
 .notif i { margin-right: 5px; width: auto !important; }

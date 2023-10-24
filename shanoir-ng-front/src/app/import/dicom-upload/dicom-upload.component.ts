@@ -29,6 +29,7 @@ import { StudyCard } from '../../study-cards/shared/study-card.model';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { Option } from '../../shared/select/select.component';
 import { ImportJob } from '../shared/dicom-data.model';
+import { TaskState } from 'src/app/async-tasks/task.model';
 
 type Status = 'none' | 'uploading' | 'uploaded' | 'error';
 
@@ -39,6 +40,7 @@ type Status = 'none' | 'uploading' | 'uploaded' | 'error';
     animations: [slideDown]
 })
 export class DicomUploadComponent implements OnDestroy {
+
     subscriptions: Subscription[] = [];
     archiveStatus: Status = 'none';
     extensionError: boolean;
@@ -52,7 +54,7 @@ export class DicomUploadComponent implements OnDestroy {
     studyOptions: Option<Study>[] = [];
     studycardOptions: Option<StudyCard>[] = [];
     otherErrorMessage: string;
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
+    uploadState: TaskState = new TaskState();
 
     constructor(
             private importService: ImportService,
@@ -101,19 +103,19 @@ export class DicomUploadComponent implements OnDestroy {
                 .subscribe(
                     event => {
                     if (event.type === HttpEventType.Sent) {
-                        this.progressBar.progress = -1;
+                        this.uploadState.progress = 0;
                     } else if (event.type === HttpEventType.UploadProgress) {
-                        this.progressBar.progress = (event.loaded / (event.total + 0.05));
+                        this.uploadState.progress = (event.loaded / (event.total + 0.05));
                     } else if (event instanceof HttpResponse) {
                         let patientDicomList =  event.body;
                         this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
                         this.importDataService.patientList = patientDicomList;
                         this.setArchiveStatus('uploaded');
-                        this.progressBar.progress = 1;
+                        this.uploadState.progress = 1;
                     }
                 }, error => {
                     this.setArchiveStatus('error');
-                    this.progressBar.progress = 0;
+                    this.uploadState.progress = 0;
                     if (error && error.error && error.error.message) {
                         this.dicomDirMissingError = error.error.message.indexOf("DICOMDIR is missing") != -1
                     }
@@ -127,6 +129,7 @@ export class DicomUploadComponent implements OnDestroy {
             job.studyId = this.study.id;
             job.studyName = this.study.name;
             job.studyCardId = this.studyCard.id;
+            job.acquisitionEquipmentId = this.studyCard.acquisitionEquipment.id;
             job.centerId = this.studyCard.acquisitionEquipment.center.id;
             job.anonymisationProfileToUse = this.study.profile.profileName;
 
@@ -135,9 +138,9 @@ export class DicomUploadComponent implements OnDestroy {
                 .subscribe(
                     event => {
                     if (event.type === HttpEventType.Sent) {
-                        this.progressBar.progress = -1;
+                        this.uploadState.progress = -1;
                     } else if (event.type === HttpEventType.UploadProgress) {
-                        this.progressBar.progress = (event.loaded / event.total);
+                        this.uploadState.progress = (event.loaded / event.total);
                     } else if (event instanceof HttpResponse) {
                         let patientDicomList =  event.body;
                         this.modality = patientDicomList.patients[0]?.studies[0]?.series[0]?.modality?.toString();
@@ -148,7 +151,7 @@ export class DicomUploadComponent implements OnDestroy {
                     }
                 }, error => {
                     this.setArchiveStatus('error');
-                    this.progressBar.progress = 0;
+                    this.uploadState.progress = 0;
                     if (error?.error?.message) {
                         if (error.error.message.indexOf("DICOMDIR is missing") != -1) {
                             this.dicomDirMissingError = true;
@@ -169,18 +172,6 @@ export class DicomUploadComponent implements OnDestroy {
 
     get valid(): boolean {
         return this.archiveStatus == 'uploaded';
-    }
-
-    progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
-       switch (event.type) {
-            case HttpEventType.Sent:
-              progressBar.progress = -1;
-              break;
-            case HttpEventType.UploadProgress:
-              break;
-            case HttpEventType.Response:
-                progressBar.progress = 0;
-        }
     }
 
     onSelectStudy() {

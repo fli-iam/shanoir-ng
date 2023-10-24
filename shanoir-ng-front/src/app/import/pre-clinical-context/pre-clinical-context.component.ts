@@ -27,6 +27,7 @@ import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subj
 import { ServiceLocator } from '../../utils/locator.service';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { ImportJob, PatientDicom, SerieDicom, StudyDicom } from '../shared/dicom-data.model';
+import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
 
 @Component({
@@ -63,7 +64,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
     getNextUrl(): string {
         return '/imports/bruker';
     }
-    
+
     importData(timestamp: number): Promise<any> {
         let context = this.importDataService.contextData;
         let contextImportJob = this.importDataService.archiveUploaded;
@@ -158,6 +159,7 @@ export class PreClinicalContextComponent extends AbstractClinicalContextComponen
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.getFirstSelectedSerie()?.seriesDate ? new Date(this.getFirstSelectedSerie()?.seriesDate) : null;
         newExam.comment = this.getFirstSelectedStudy().studyDescription;
+        newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
 

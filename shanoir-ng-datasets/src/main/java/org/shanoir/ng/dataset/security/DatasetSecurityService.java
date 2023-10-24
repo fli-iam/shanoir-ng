@@ -14,16 +14,6 @@
 
 package org.shanoir.ng.dataset.security;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.shanoir.ng.dataset.dto.DatasetDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -52,6 +42,10 @@ import org.shanoir.ng.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class DatasetSecurityService {
@@ -559,19 +553,15 @@ public class DatasetSecurityService {
     	if (dataset.getId() == null) {
 			throw new IllegalArgumentException("Dataset id cannot be null here.");
 		}
-    	if (dataset.getStudyId() == null) {
-			return false;
-		}
+    	if (dataset.getDatasetProcessing() != null) {
+    		//Forbid processed dataset update for the moment
+    		return false;
+    	}
     	Dataset dbDataset = datasetRepository.findById(dataset.getId()).orElse(null);
     	if (dbDataset == null) {
 			throw new EntityNotFoundException("Cannot find dataset with id " + dataset.getId());
 		}
-    	if (dataset.getStudyId() == dbDataset.getStudyId()) { // study hasn't changed
-    		return this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
-    	} else { // study has changed : check user has right on both studies
-    		return this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr) 
-    				&& this.hasRightOnStudyCenter(dbDataset.getDatasetAcquisition().getExamination().getCenterId(), dbDataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
-    	}
+    	return this.hasRightOnStudyCenter(dbDataset.getDatasetAcquisition().getExamination().getCenterId(), dbDataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
     }
 
     /**

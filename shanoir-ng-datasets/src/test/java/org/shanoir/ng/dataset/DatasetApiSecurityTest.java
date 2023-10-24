@@ -15,17 +15,6 @@
 
 package org.shanoir.ng.dataset;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
-import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -62,6 +51,13 @@ import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
+
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessAuthorized;
+import static org.shanoir.ng.utils.assertion.AssertUtils.assertAccessDenied;
 
 /**
  * DatasetAPI security test.
@@ -180,7 +176,11 @@ public class DatasetApiSecurityTest {
 			assertAccessDenied(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
 		} else if ("ROLE_EXPERT".equals(role)) {
 			assertAccessAuthorized(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
-			assertAccessDenied(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 2L, 1L), mockBindingResult);
+			
+			Dataset ds = mockDataset(100L, 1L, 1L, 2L, 1L);
+			given(datasetRepository.findById(ds.getId())).willReturn(Optional.of(ds));
+			
+			assertAccessDenied(api::updateDataset, 1L, ds, mockBindingResult);
 		}
 		assertAccessDenied(api::updateDataset, 1L, mockDataset(2L, 2L, 2L, 2L, 2L), mockBindingResult);
 		assertAccessDenied(api::updateDataset, 1L, mockDataset(3L, 3L, 3L, 3L, 1L), mockBindingResult);

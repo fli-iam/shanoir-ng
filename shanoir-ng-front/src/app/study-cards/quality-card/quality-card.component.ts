@@ -83,7 +83,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         this.isAdminOrExpert = keycloakService.isUserAdminOrExpert();
         coilService.getAll().then(coils => this.allCoils = coils);
 
-        this.subscribtions.push(this.activatedRoute.params.subscribe(
+        this.subscriptions.push(this.activatedRoute.params.subscribe(
             params => {
                 this.forceStudyId = +params['studyId'];
             }

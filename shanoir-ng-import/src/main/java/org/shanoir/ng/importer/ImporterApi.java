@@ -52,7 +52,7 @@ public interface ImporterApi {
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "", produces = { "application/json" })
+	@GetMapping(value = {"", "/"}, produces = { "application/json" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<String> createTempDir() throws RestServiceException;
     
@@ -63,7 +63,7 @@ public interface ImporterApi {
 			@ApiResponse(responseCode = "401", description = "unauthorized"),
 			@ApiResponse(responseCode = "403", description = "forbidden"),
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
-    @PostMapping(value = "{tempDirId}", consumes = { "multipart/form-data" })
+    @PostMapping(value = "/{tempDirId}", consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
     ResponseEntity<Void> uploadFile(
     		@Parameter(name = "tempDirId", required = true) @PathVariable("tempDirId") String tempDirId,
@@ -83,12 +83,11 @@ public interface ImporterApi {
     
     @Operation(summary = "Upload multiple examinations DICOM .zip file", description = "Upload DICOM .zip file")
     @ApiResponses(value = {
-
         @ApiResponse(responseCode = "200", description = "success returns file path"),
         @ApiResponse(responseCode = "400", description = "Invalid input / Bad Request"),
         @ApiResponse(responseCode = "409", description = "Already exists - conflict"),
         @ApiResponse(responseCode = "200", description = "Unexpected Error") })
-    @PostMapping(value = "/upload_multiple_dicom/study/{studyId}/studyName/{studyName}/studyCard/{studyCardId}/center/{centerId}/",
+    @PostMapping(value = "/upload_multiple_dicom/study/{studyId}/studyName/{studyName}/studyCard/{studyCardId}/center/{centerId}/equipment/{equipmentId}/",
         produces = { "application/json" },
         consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and @importSecurityService.hasRightOnOneStudy('CAN_IMPORT'))")
@@ -96,7 +95,8 @@ public interface ImporterApi {
     		@Parameter(name = "studyId", required = true) @PathVariable("studyId") Long studyId,
     		@Parameter(name = "studyName", required = true) @PathVariable("studyName") String studyName,
     		@Parameter(name = "studyCardId", required = true) @PathVariable("studyCardId") Long studyCardId,
-    		@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId) throws RestServiceException;
+    		@Parameter(name = "centerId", required = true) @PathVariable("centerId") Long centerId,
+    		@Parameter(name = "equipmentId", required = true) @PathVariable("equipmentId") Long equipmentId) throws RestServiceException;
 
     @Operation(summary = "Upload one EEG file", description = "Upload channel and metadata from EEG file")
     @ApiResponses(value = {

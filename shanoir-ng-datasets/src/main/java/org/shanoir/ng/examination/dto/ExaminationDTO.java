@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.examination.model.InstrumentBasedAssessment;
+import org.shanoir.ng.examination.model.UnitOfMeasure;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectDTO;
@@ -48,6 +49,8 @@ public class ExaminationDTO {
 	private SubjectDTO subject;
 
 	private Double subjectWeight;
+
+	private UnitOfMeasure weightUnitOfMeasure;
 	
 	private boolean preclinical;
 
@@ -180,5 +183,13 @@ public class ExaminationDTO {
 
 	public void setSubjectId(Long subjectId) {
 		this.subject = new SubjectDTO(subjectId, "");
+	}
+
+	public UnitOfMeasure getWeightUnitOfMeasure() {
+		return weightUnitOfMeasure;
+	}
+
+	public void setWeightUnitOfMeasure(UnitOfMeasure weightUnitOfMeasure) {
+		this.weightUnitOfMeasure = weightUnitOfMeasure;
 	}
 }

@@ -1,4 +1,3 @@
-
 /**
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
@@ -16,12 +15,12 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 
+import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
+import { environment } from '../../../environments/environment';
 import { BreadcrumbsService } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
-import { DatasetAcquisitionService } from '../../dataset-acquisitions/shared/dataset-acquisition.service';
-import { DatasetService } from '../../datasets/shared/dataset.service';
+import { UnitOfMeasure } from "../../enum/unitofmeasure.enum";
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
-import { ModalComponent } from '../../shared/components/modal/modal.component';
 import { DatepickerComponent } from '../../shared/date-picker/date-picker.component';
 import { IdName } from '../../shared/models/id-name.model';
 import { ImagesUrlUtil } from '../../shared/utils/images-url.util';
@@ -29,12 +28,13 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { StudyService } from '../../studies/shared/study.service';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
-import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { ExaminationNode } from '../../tree/tree.model';
 import { Examination } from '../shared/examination.model';
 import { ExaminationService } from '../shared/examination.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
-import { environment } from '../../../environments/environment';
+import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { Format } from 'src/app/datasets/shared/dataset.service';
+import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
 
 @Component({
     selector: 'examination',
@@ -43,9 +43,7 @@ import { environment } from '../../../environments/environment';
 
 export class ExaminationComponent extends EntityComponent<Examination> {
 
-    @ViewChild('instAssessmentModal') instAssessmentModal: ModalComponent;
     @ViewChild('input') private fileInput: ElementRef;
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
     public centers: IdName[];
     public studies: IdName[];
@@ -60,6 +58,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     hasDownloadRight: boolean = false;
     pattern: string = '[^:|<>&\/]+';
     examNode: Examination | ExaminationNode;
+    downloadState: TaskState = new TaskState();
 
     datasetIds: Promise<number[]> = new Promise((resolve, reject) => {});
     datasetIdsLoaded: boolean = false;
@@ -67,6 +66,8 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 	hasEEG: boolean = false;
 	hasDicom: boolean = false;
     hasBids: boolean = false;
+    unit = UnitOfMeasure;
+    defaultUnit = this.unit.KG;
 
 
     constructor(
@@ -74,9 +75,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             private examinationService: ExaminationService,
             private centerService: CenterService,
             private studyService: StudyService,
-            private datasetService: DatasetService,
             private studyRightsService: StudyRightsService,
-            public breadcrumbsService: BreadcrumbsService) {
+            public breadcrumbsService: BreadcrumbsService,
+            private downloadService: MassDownloadService) {
 
         super(route, 'examination');
         this.inImport = this.breadcrumbsService.isImporting();
@@ -108,16 +109,19 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     initView(): Promise<void> {
         return this.examinationService.get(this.id).then((examination: Examination) => {
             this.examination = examination;
+            if(!this.examination.weightUnitOfMeasure){
+                this.examination.weightUnitOfMeasure = this.defaultUnit;
+            }
             if (this.keycloakService.isUserAdmin()) {
                 this.hasAdministrateRight = true;
-        this.hasDownloadRight = true;
-        this.hasImportRight = true;
-        return;
-    } else {
-        return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
-            this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
-            this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
-            this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
+                this.hasDownloadRight = true;
+                this.hasImportRight = true;
+                return;
+            } else {
+                return this.studyRightsService.getMyRightsForStudy(examination.study.id).then(rights => {
+                    this.hasImportRight = rights.includes(StudyUserRight.CAN_IMPORT);
+                    this.hasAdministrateRight = rights.includes(StudyUserRight.CAN_ADMINISTRATE);
+                    this.hasDownloadRight = rights.includes(StudyUserRight.CAN_DOWNLOAD);
                 });
             }
         });
@@ -128,6 +132,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.getStudies();
         return this.examinationService.get(this.id).then((examination: Examination) => {
             this.examination = examination
+            if(!this.examination.weightUnitOfMeasure){
+                this.examination.weightUnitOfMeasure = this.defaultUnit;
+            }
         }).then(exam => this.getSubjects());
     }
 
@@ -135,6 +142,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         this.getCenters();
         this.getStudies();
         this.examination = new Examination();
+        this.examination.weightUnitOfMeasure = this.defaultUnit;
         return Promise.resolve();
     }
 
@@ -146,15 +154,25 @@ export class ExaminationComponent extends EntityComponent<Examination> {
             'examinationDate': [this.examination.examinationDate, [Validators.required, DatepickerComponent.validator]],
             'comment': [this.examination.comment, Validators.pattern(this.pattern)],
             'note': [this.examination.note],
-            'subjectWeight': [this.examination.subjectWeight]
+            'subjectWeight': [this.examination.subjectWeight],
+            'weightUnitOfMeasure': [this.examination.weightUnitOfMeasure]
         });
     }
 
-    download(format: string) {
-          this.datasetService.downloadDatasetsByExamination(this.id, format, this.progressBar);
+    download(format: Format) {
+        this.downloadService.downloadAllByExaminationId(this.examination?.id, format);
     }
 
-    openViewer() {
+    downloadAll() {
+        let options: DownloadSetupOptions = new DownloadSetupOptions();
+        options.hasBids = this.hasBids;
+        options.hasDicom = this.hasDicom;
+        options.hasNii = this.hasDicom;
+        options.hasEeg = this.hasEEG; 
+        this.downloadService.downloadAllByExaminationId(this.examination?.id, null, options, this.downloadState);
+    }
+
+    openViewer() {  
 	    window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 
@@ -281,5 +299,9 @@ export class ExaminationComponent extends EntityComponent<Examination> {
                 this.noDatasets = datasetIds.length == 0;
             }
         }
+    }
+
+    getUnit(key: string) {
+        return UnitOfMeasure.getLabelByKey(key);
     }
 }

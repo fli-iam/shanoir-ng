@@ -31,7 +31,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import jakarta.transaction.Transactional;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -59,6 +58,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 
 /**
  * The NIfTIConverter does the actual conversion of dcm to nii files. To use the
@@ -124,40 +125,35 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			Study study = studiesIt.next();
 			List<Serie> series = study.getSelectedSeries();
 			float progress = 0;
-
 			int nbSeries = series.size();
 			int cpt = 1;
-
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = seriesIt.next();
-
-				progress = progress + (0.5f / series.size());
-				importJob.getShanoirEvent().setProgress(progress);
-				importJob.getShanoirEvent().setMessage("Converting to NIfTI for serie ["
-						+ (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName())
-						+ "] (" + cpt + "/" + nbSeries + ")...");
-				shanoirEventService.publishEvent(importJob.getShanoirEvent());
-
-				File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
-				boolean serieIdentifiedForNotSeparating;
-				try {
-					serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
-					// if the serie is not one of the series, that should not be separated, please
-					// separate the series,
-					// otherwise just do not separate the series and keep all images for one nii
-					// conversion
-					serie.setDatasets(new ArrayList<Dataset>());
-					constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
-					// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
-					if (serie.getIsSpectroscopy() != null && !serie.getIsSpectroscopy()) {
-						constructNifti(serieIDFolderFile, serie, converterId);
+				// do not convert an erroneous serie
+				if (!serie.isErroneous() && !serie.isIgnored()) {
+					progress = progress + (0.5f / series.size());
+					importJob.getShanoirEvent().setProgress(progress);
+					importJob.getShanoirEvent().setMessage("Converting to NIfTI for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")...");
+					shanoirEventService.publishEvent(importJob.getShanoirEvent());
+					File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
+					boolean serieIdentifiedForNotSeparating;
+					try {
+						serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
+						// if the serie is not one of the series, that should not be separated, please separate the series,
+						// otherwise just do not separate the series and keep all images for one nii conversion
+						serie.setDatasets(new ArrayList<Dataset>());
+						constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
+						// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
+						if (serie.getIsSpectroscopy() != null && !serie.getIsSpectroscopy()) {
+							constructNifti(serieIDFolderFile, serie, converterId);
+						}
+					} catch (NoSuchFieldException | SecurityException e) {
+						LOG.error(e.getMessage());
 					}
-				} catch (NoSuchFieldException | SecurityException e) {
-					LOG.error(e.getMessage());
+					// as images/non-images are migrated to datasets, clear the list now
+					serie.getImages().clear();
+					serie.getNonImages().clear();
 				}
-				// as images/non-images are migrated to datasets, clear the list now
-				serie.getImages().clear();
-				serie.getNonImages().clear();
 				cpt++;
 			}
 		}
@@ -173,16 +169,18 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 * @param boolean   is convert to clidcm
 	 *
 	 */
-	public void convertToNiftiExec(Integer converterId, String inputFolder, String outputFolder, boolean is4D) {
-		NiftiConverter converter = NiftiConverter.getType(converterId);
+	private void convertToNiftiExec(NIfTIConverter converter, String inputFolder, String outputFolder, boolean is4D, boolean reconversion) {
+		if (converter == null) {
+			return;
+		}
+		String converterPath = convertersPath + converter.getName();
 
-		String converterPath = convertersPath + converter.name();
-		// Mcverter
-		if (converter.isMcverter()) {
+	    switch (converter.getNIfTIConverterType()) {
+		case MCVERTER:
 			is4D = true;
 			conversionLogs += shanoirExec.mcverterExec(inputFolder, converterPath, outputFolder, is4D);
-			// Clidcm
-		} else if (converter.isClidcm()) {
+			break;
+		case CLIDCM:
 			try {
 				conversionLogs += shanoirExec.clidcmExec(inputFolder, converterPath, outputFolder);
 			} catch (Exception e) {
@@ -195,15 +193,20 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			 * dcm2nii .
 			 */
 			createBvecAndBval(outputFolder);
-			// Dicom2Nifti
-		} else if (converter.isDicom2Nifti()) {
+			break;
+		case DICOM2NIFTI:
 			conversionLogs += shanoirExec.dicom2niftiExec(inputFolder, converterPath, outputFolder);
-			// dcm2nii
-		} else if (converter.isDicomifier()) {
+			break;
+		case DICOMIFIER:
 			conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder);
-		} else {
+			break;
+		case MRICONVERTER:
+			conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, reconversion);
+			break;
+		default:
 			is4D = true;
 			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converterPath, outputFolder, is4D);
+			break;
 		}
 	}
 
@@ -324,7 +327,8 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		} else {
 			conversionLogs = "";
 		}
-		convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D);
+		NIfTIConverter converter = findById(converterId);
+		convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D, false);
 		LOG.debug("conversionLogs : {}", conversionLogs);
 		return converter;
 	}
@@ -673,4 +677,45 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		}
 		return false;
 	}
+<<<<<<< HEAD:shanoir-ng-nifti-conversion/src/main/java/org/shanoir/ng/service/DatasetsCreatorAndNIfTIConverterService.java
+=======
+
+	/**
+	 * Converts some data
+	 * @param message the string containing the converter ID + the workfolder where the dicom are
+	 * @return true if the conversion is a success, false otherwise
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE)
+	@RabbitHandler
+	@Transactional
+	public boolean convertData(String message) {
+		String[] messageSplit = message.split(";");
+		Long converterId = Long.valueOf(messageSplit[0]);
+		String workFolder = messageSplit[1];
+
+		NIfTIConverter converter = niftiConverterRepository.findById(converterId).orElse(null);
+		
+		if (converter == null) {
+			return false;
+		}
+
+		String workFolderResult = workFolder + File.separator + "result";
+		File result = new File(workFolderResult);
+
+		result.mkdirs();
+
+		this.convertToNiftiExec(converter, workFolder, workFolderResult, false, true);
+		
+		if (converter.isDicomifier()) {
+			Dataset dataset = new Dataset();
+			dataset.setName("name");
+			niftiFileSortingDicom2Nifti(Collections.emptyList(), result, dataset);
+		} else {
+			niftiFileSorting(Collections.emptyList(), result, new File("serieId"));
+		}
+		
+		return true;
+	}
+
+>>>>>>> develop:shanoir-ng-import/src/main/java/org/shanoir/ng/importer/dcm2nii/DatasetsCreatorAndNIfTIConverterService.java
 }

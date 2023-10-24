@@ -44,9 +44,12 @@ import { AccessRequestService } from 'src/app/users/access-request/access-reques
 import { Profile } from "../../shared/models/profile.model";
 import { AccessRequest } from 'src/app/users/access-request/access-request.model';
 import { ProcessingService } from 'src/app/processing/processing.service';
-import {DatasetService} from "../../datasets/shared/dataset.service";
-import {DatasetExpressionFormat} from "../../enum/dataset-expression-format.enum";
-import {KeyValue} from "@angular/common";
+import { DatasetService } from "../../datasets/shared/dataset.service";
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
+import { KeyValue } from "@angular/common";
+import { StudyStorageVolumeDTO } from '../shared/study.dto';
+import { TaskState } from 'src/app/async-tasks/task.model';
 
 @Component({
     selector: 'study-detail',
@@ -57,11 +60,12 @@ import {KeyValue} from "@angular/common";
 
 export class StudyComponent extends EntityComponent<Study> {
 
-    @ViewChild('DUAprogressBar') DUAprogressBar: LoadingBarComponent;
-    @ViewChild('PFprogressBar') PFprogressBar: LoadingBarComponent;
     @ViewChild('memberTable', { static: false }) table: TableComponent;
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
+
+    protected pfDownloadState: TaskState = new TaskState();
+    protected duaDownloadState: TaskState = new TaskState();
 
     subjects: IdName[];
     selectedCenter: IdName;
@@ -100,7 +104,8 @@ export class StudyComponent extends EntityComponent<Study> {
             private studyRightsService: StudyRightsService,
             private studyCardService: StudyCardService,
             private accessRequestService: AccessRequestService,
-            private processingService: ProcessingService) {
+            private processingService: ProcessingService,
+            private downloadService: MassDownloadService) {
 
         super(route, 'study');
         this.activeTab = 'general';
@@ -118,12 +123,14 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initView(): Promise<void> {
+
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, true).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id, null, true).then(study => {
 
           this.study = study;
+          this.setLabeledSizes(this.study);
 
           if (study.profile == null) {
                 let pro = new Profile();
@@ -159,7 +166,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, true).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id, null, true).then(study => {
             this.study = study;
 
             if (this.study.profile == null) {
@@ -247,32 +254,27 @@ export class StudyComponent extends EntityComponent<Study> {
         return formGroup;
     }
 
-    private getLabeledSizes(id: number): Promise<Map<String, number>> {
-        let waitUploads: Promise<void> = this.studyService.fileUploadings.has(id)
-            ? this.studyService.fileUploadings.get(id)
+    private setLabeledSizes(study: Study): Promise<void> {
+        let waitUploads: Promise<void> = this.studyService.fileUploads.has(study.id)
+            ? this.studyService.fileUploads.get(study.id)
             : Promise.resolve();
 
         this.uploading = true;
         return waitUploads.then(() => {
-            return this.studyService.getStudyDetailedStorageVolume(id).then(dto => {
-
+            return this.studyService.getStudyDetailedStorageVolume(study.id).then(dto => {
                 let datasetSizes = dto;
+                study.totalSize = datasetSizes.total
                 let sizesByLabel = new Map<String, number>()
-
-                for(let sizeByFormat of datasetSizes.volumeByFormat){
+                for (let sizeByFormat of datasetSizes.volumeByFormat) {
                     if(sizeByFormat.size > 0){
                         sizesByLabel.set(DatasetExpressionFormat.getLabel(sizeByFormat.format), sizeByFormat.size);
                     }
                 }
-
-                if(datasetSizes.extraDataSize > 0){
+                if (datasetSizes.extraDataSize > 0){
                     sizesByLabel.set("Other files (DUA, protocol...)", datasetSizes.extraDataSize);
                 }
-
                 let total = datasetSizes.total;
-                sizesByLabel.set("Total", total);
-
-                return sizesByLabel;
+                study.detailedSizes = sizesByLabel;
             });
         }).finally(() => {
             this.uploading = false;
@@ -488,7 +490,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public downloadFile(file) {
-        this.studyService.downloadFile(file, this.study.id, 'protocol-file', this.PFprogressBar);
+        this.studyService.downloadProtocolFile(file, this.study.id, this.pfDownloadState);
     }
 
     public attachNewFile(event: any) {
@@ -512,7 +514,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public downloadDataUserAgreement() {
-        this.studyService.downloadFile(this.study.dataUserAgreementPaths[0], this.study.id, 'dua', this.DUAprogressBar);
+        this.studyService.downloadDuaFile(this.study.dataUserAgreementPaths[0], this.study.id, this.duaDownloadState);
     }
 
     public attachDataUserAgreement(event: any) {
@@ -650,6 +652,14 @@ export class StudyComponent extends EntityComponent<Study> {
         }, 1000);
     }
 
+    downloadAll() {
+        this.downloadService.downloadAllByStudyId(this.study.id);
+    }
+
+    downloadSelected() {
+        this.downloadService.downloadByIds(this.selectedDatasetIds);
+    }
+    
     storageVolumePrettyPrint(size: number) {
         return this.studyService.storageVolumePrettyPrint(size);
     }

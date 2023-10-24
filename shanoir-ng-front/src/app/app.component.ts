@@ -14,7 +14,6 @@
 
 import { Component, ElementRef, ViewContainerRef, HostBinding, HostListener, ViewChild } from '@angular/core';
 
-import { ModalService } from './shared/components/modals/modal.service';
 import { KeycloakService } from './shared/keycloak/keycloak.service';
 import { GlobalService } from './shared/services/global.service';
 import { ServiceLocator } from './utils/locator.service';
@@ -26,6 +25,8 @@ import { Router } from '@angular/router';
 import { StudyService } from './studies/shared/study.service';
 import { ConsoleComponent } from './shared/console/console.component';
 import { UserService } from './users/shared/user.service';
+import { UserComponent } from './users/user/user.component';
+import { DatasetListComponent } from './datasets/dataset-list/dataset-list.component';
 
 
 @Component({
@@ -42,7 +43,6 @@ export class AppComponent {
 
     constructor(
             public viewContainerRef: ViewContainerRef,
-            private modalService: ModalService,
             private globalService: GlobalService,
             private windowService: WindowService,
             private element: ElementRef,
@@ -52,7 +52,6 @@ export class AppComponent {
             private studyService: StudyService,
             private userService: UserService) {
         
-        this.modalService.rootViewCRef = this.viewContainerRef;
         ServiceLocator.rootViewContainerRef = this.viewContainerRef;
     }
 
@@ -62,7 +61,7 @@ export class AppComponent {
         if(this.keycloakSessionService.isAuthenticated()) {
             this.userService.getAccessRequestsForAdmin();
             this.duaAlert();
-        }        
+        }
     }
 
     @HostListener('window:resize', ['$event'])

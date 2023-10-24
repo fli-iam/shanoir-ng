@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -32,6 +32,7 @@ import { Subject } from '../../subjects/shared/subject.model';
 import { AbstractClinicalContextComponent } from '../clinical-context/clinical-context.abstract.component';
 import { EegImportJob } from '../shared/eeg-data.model';
 import { EegContextData } from '../shared/import.data-service';
+import {UnitOfMeasure} from "../../enum/unitofmeasure.enum";
 
 
 @Component({
@@ -42,18 +43,18 @@ import { EegContextData } from '../shared/import.data-service';
 })
 
 export class EegClinicalContextComponent extends AbstractClinicalContextComponent implements OnInit {
-    
+
     @ViewChild('eventsTable', { static: false }) table: TableComponent;
-    
+
     columnDefs: ColumnDefinition[];
-    hasPosition: boolean;    
+    hasPosition: boolean;
     coordSystemOptions: Option<CoordSystems>[];
     coordsystem : string;
     firstDate: Date;
     useStudyCard: boolean = false;
-    
+
     private browserPaging: BrowserPaging<EventContext>;
-    
+
     postConstructor() {
         this.coordSystemOptions = CoordSystems.options;
         // Check for position to know if we have to display systemCoord or not
@@ -63,18 +64,18 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
                 this.hasPosition = true;
             }
         }
-        this.findEegDate();        
+        this.findEegDate();
     }
 
     protected exitCondition(): boolean {
         return !this.importDataService?.eegImportJob?.datasets;
     }
-    
+
     ngOnInit(): void {
         super.ngOnInit();
         this.initEventsTable();
     }
-    
+
     private initEventsTable(): void {
         if (!this.importDataService.eegImportJob) return;
         this.columnDefs = [
@@ -92,7 +93,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         this.browserPaging.setItems(this.getEventContexts());
     }
 
-    private getEventContexts(): EventContext[] {   
+    private getEventContexts(): EventContext[] {
         let context = [];
         let contextDict = {};
         for (let dataset of this.importDataService.eegImportJob.datasets) {
@@ -110,7 +111,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
                     cont.description = event.description;
                     cont.dataset_name = dataset.name;
                     contextDict[dataset.name][event.description] = cont;
-                    context.push(cont);         
+                    context.push(cont);
                 }
             }
         }
@@ -136,7 +137,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
             && !!context.center
             && !!context.acquisitionEquipment
             && !!context.subject
-            && !!context.subject?.subjectStudy?.subjectType 
+            && !!context.subject?.subjectStudy?.subjectType
             && !!context.examination
             && (!!context.coordinatesSystem || !this.hasPosition)
         );
@@ -207,13 +208,14 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
         newExam.subject.id = this.subject.id;
         newExam.subject.name = this.subject.name;
         newExam.examinationDate = this.firstDate;
+        newExam.weightUnitOfMeasure = UnitOfMeasure.KG;
         return newExam;
     }
 
     protected fillCreateAcqEqStep(step: Step) {
         step.entity = this.getPrefilledAcqEqt();
-    }    
-    
+    }
+
     private getPrefilledAcqEqt(): AcquisitionEquipment {
         let acqEpt = new AcquisitionEquipment();
         acqEpt.center = this.center;
@@ -228,7 +230,7 @@ export class EegClinicalContextComponent extends AbstractClinicalContextComponen
                 return true;
             } else return false;
         });
-    }    
+    }
 }
 
 export class EventContext {

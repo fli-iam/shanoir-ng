@@ -44,7 +44,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     public windowService: WindowService;
     public onDelete: Subject<{entity: Entity, error?: ShanoirError}> =  new Subject();
     public onAdd: Subject<any> =  new Subject<any>();
-    protected subscribtions: Subscription[] = [];
+    protected subscriptions: Subscription[] = [];
     private selectedId:  number;
 
     private edit: boolean = false;
@@ -209,7 +209,7 @@ export abstract class EntityListComponent<T extends Entity> implements OnDestroy
     };
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscribtions) {
+        for(let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

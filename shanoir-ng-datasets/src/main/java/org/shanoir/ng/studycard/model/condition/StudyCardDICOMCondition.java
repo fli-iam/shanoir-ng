@@ -14,14 +14,9 @@
 
 package org.shanoir.ng.studycard.model.condition;
 
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-
 import org.apache.commons.lang3.StringUtils;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Keyword;
@@ -31,7 +26,10 @@ import org.shanoir.ng.studycard.model.DicomTagType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Entity
 @DiscriminatorValue("StudyCardDICOMCondition")

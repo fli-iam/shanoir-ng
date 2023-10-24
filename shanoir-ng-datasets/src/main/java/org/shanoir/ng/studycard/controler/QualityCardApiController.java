@@ -14,14 +14,9 @@
 
 package org.shanoir.ng.studycard.controler;
 
-import java.util.List;
-
+import io.swagger.v3.oas.annotations.Parameter;
 import org.shanoir.ng.shared.error.FieldErrorMap;
-import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.shared.exception.ErrorDetails;
-import org.shanoir.ng.shared.exception.ErrorModel;
-import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
-import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.*;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
@@ -37,7 +32,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
-import io.swagger.v3.oas.annotations.Parameter;
+import java.util.List;
 
 @Controller
 public class QualityCardApiController implements QualityCardApi {

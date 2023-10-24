@@ -16,7 +16,6 @@ package org.shanoir.ng.examination.model;
 
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
-
 import org.shanoir.ng.shared.core.model.AbstractEntity;
 
 /**

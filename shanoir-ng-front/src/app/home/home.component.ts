@@ -13,19 +13,19 @@
  */
 
 import { Component, ViewChild } from '@angular/core';
-import { Task } from '../async-tasks/task.model';
+import { Task, TaskState } from '../async-tasks/task.model';
 import { TaskService } from '../async-tasks/task.service';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
 import { DataUserAgreement } from '../dua/shared/dua.model';
+import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
 import { ImagesUrlUtil } from '../shared/utils/images-url.util';
 import { Study } from '../studies/shared/study.model';
 import { StudyService } from '../studies/shared/study.service';
+import { AccessRequest } from '../users/access-request/access-request.model';
 import { User } from '../users/shared/user.model';
 import { UserService } from '../users/shared/user.service';
-import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
-import { AccessRequest } from '../users/access-request/access-request.model';
 
 @Component({
     selector: 'home',
@@ -34,8 +34,6 @@ import { AccessRequest } from '../users/access-request/access-request.model';
 })
 
 export class HomeComponent {
-
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
     shanoirBigLogoUrl: string = ImagesUrlUtil.SHANOIR_BLACK_LOGO_PATH;
 
@@ -51,6 +49,8 @@ export class HomeComponent {
     nbAccountRequests: number;
     nbExtensionRequests: number;
     accessRequests: AccessRequest[] = [];
+    protected downloadState: TaskState = new TaskState();
+
 
     constructor(
             private breadcrumbsService: BreadcrumbsService,
@@ -114,7 +114,7 @@ export class HomeComponent {
     }
 
     downloadFile(filePath: string, studyId: number) {
-        this.studyService.downloadFile(filePath, studyId, 'protocol-file', this.progressBar);
+        this.studyService.downloadProtocolFile(filePath, studyId, this.downloadState);
     }
 
     isAuthenticated(): boolean {

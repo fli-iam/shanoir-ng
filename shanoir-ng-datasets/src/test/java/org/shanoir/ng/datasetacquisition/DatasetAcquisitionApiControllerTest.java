@@ -1,7 +1,7 @@
 package org.shanoir.ng.datasetacquisition;
 
-import java.util.Collections;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -24,8 +24,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import java.util.Collections;
 
 
 @WebMvcTest(controllers = DatasetAcquisitionApiController.class)

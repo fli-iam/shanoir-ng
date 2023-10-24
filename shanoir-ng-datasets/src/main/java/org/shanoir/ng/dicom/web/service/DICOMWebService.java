@@ -1,21 +1,10 @@
 package org.shanoir.ng.dicom.web.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import jakarta.annotation.PostConstruct;
 import org.apache.hc.client5.http.classic.methods.HttpDelete;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.entity.mime.ContentBody;
-import org.apache.hc.client5.http.entity.mime.InputStreamBody;
-import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
-import org.apache.hc.client5.http.entity.mime.MultipartPart;
-import org.apache.hc.client5.http.entity.mime.MultipartPartBuilder;
+import org.apache.hc.client5.http.entity.mime.*;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
@@ -34,7 +23,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
+import java.io.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class handles all calls to the shanoir backup pacs using DICOMWeb.
@@ -80,6 +71,9 @@ public class DICOMWebService {
 	
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
+	
+	@Value("${dcm4chee-arc.dicom.web.rs.upload}")
+	private String dicomWebRSUpload;
 	
 	@Value("${dcm4chee-arc.dicom.web.http.client.max.total}")
 	private int dicomWebHttpClientMaxTotal;
@@ -255,16 +249,17 @@ public class DICOMWebService {
 	}
 
 	private void sendMultipartRequest(HttpEntity entity) throws ShanoirException {
-		HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRS);
+		HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRSUpload);
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
 		httpPost.setEntity(entity);
 		try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
 			int code = response.getCode();
-			if (code != HttpStatus.OK.value()) {
+			if (code != HttpStatus.OK.value() && code != HttpStatus.ACCEPTED.value()) {
 				LOG.error("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
+				LOG.error("Associated message: " +  EntityUtils.toString(response.getEntity()));
 				throw new ShanoirException("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
 		}

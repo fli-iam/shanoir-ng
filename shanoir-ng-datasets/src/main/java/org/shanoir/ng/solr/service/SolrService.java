@@ -19,9 +19,6 @@
  */
 package org.shanoir.ng.solr.service;
 
-import java.io.IOException;
-import java.util.List;
-
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.solr.model.ShanoirSolrDocument;
@@ -30,6 +27,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.solr.core.query.result.SolrResultPage;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.io.IOException;
+import java.util.List;
 
 /**
  * @author yyao
