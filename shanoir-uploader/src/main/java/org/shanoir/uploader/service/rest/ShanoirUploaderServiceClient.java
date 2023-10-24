@@ -32,6 +32,7 @@ import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
+import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
 import org.shanoir.uploader.model.rest.Subject;
@@ -65,6 +66,10 @@ public class ShanoirUploaderServiceClient {
 	private static final String SERVICE_CENTERS_CREATE = "service.centers.create";
 
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS = "service.acquisition.equipments";
+	
+	private static final String SERVICE_MANUFACTURER_MODELS = "service.manufacturer.models";
+	
+	private static final String SERVICE_MANUFACTURERS = "service.manufacturers";
 	
 	private static final String SERVICE_SUBJECTS_FIND_BY_IDENTIFIER = "service.subjects.find.by.identifier";
 
@@ -103,6 +108,10 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLCentersCreate;
 
 	private String serviceURLAcquisitionEquipments;
+	
+	private String serviceURLManufacturerModels;
+	
+	private String serviceURLManufacturers;
 	
 	private String serviceURLSubjectsCreate;
 
@@ -155,6 +164,10 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_CENTERS_CREATE);
 		this.serviceURLAcquisitionEquipments = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
+		this.serviceURLManufacturerModels = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_MANUFACTURER_MODELS);
+		this.serviceURLManufacturers = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_MANUFACTURERS);
 		this.serviceURLSubjectsFindByIdentifier = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_SUBJECTS_FIND_BY_IDENTIFIER);
 		this.serviceURLDatasets = this.serverURL + ShUpConfig.endpointProperties.getProperty(SERVICE_DATASETS);
@@ -348,9 +361,6 @@ public class ShanoirUploaderServiceClient {
 			try (CloseableHttpResponse response = httpService.get(this.serviceURLExaminationsBySubjectId + subjectId)) {
 				int code = response.getCode();
 				if (code == HttpStatus.SC_OK) {
-	//				ResponseHandler<String> handler = new BasicResponseHandler();
-	//				String body = handler.handleResponse(response);
-	//				logger.info(body);
 					List<Examination> examinations = Util.getMappedList(response, Examination.class);
 					return examinations;
 				} else {
@@ -585,6 +595,48 @@ public class ShanoirUploaderServiceClient {
 					return centerCreated;
 				} else {
 					logger.error("Error in createCenter: with center " + center.getName()
+						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		} catch (IOException ioE) {
+			logger.error(ioE.getMessage(), ioE);			
+		}
+		return null;
+	}
+
+	public AcquisitionEquipment createEquipment(final AcquisitionEquipment equipment) {
+		try {
+			String json = Util.objectWriter.writeValueAsString(equipment);
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLAcquisitionEquipments, json, false)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					AcquisitionEquipment equipmentCreated = Util.getMappedObject(response, AcquisitionEquipment.class);
+					return equipmentCreated;
+				} else {
+					logger.error("Error in createEquipment: with equipment " + equipment.getSerialNumber()
+						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		} catch (IOException ioE) {
+			logger.error(ioE.getMessage(), ioE);			
+		}
+		return null;
+	}
+	
+	public ManufacturerModel createManufacturerModel(final ManufacturerModel manufacturerModel) {
+		try {
+			String json = Util.objectWriter.writeValueAsString(manufacturerModel);
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLManufacturerModels, json, false)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					ManufacturerModel manufacturerModelCreated = Util.getMappedObject(response, ManufacturerModel.class);
+					return manufacturerModelCreated;
+				} else {
+					logger.error("Error in createManufacturerModel: with manufacturerModel " + manufacturerModel.getName()
 						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
 			}
