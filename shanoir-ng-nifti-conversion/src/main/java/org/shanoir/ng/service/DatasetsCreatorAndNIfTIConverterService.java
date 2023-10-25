@@ -45,6 +45,7 @@ import org.shanoir.ng.model.NiftiConverter;
 import org.shanoir.ng.model.Patient;
 import org.shanoir.ng.model.Serie;
 import org.shanoir.ng.model.Study;
+import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
@@ -54,6 +55,8 @@ import org.shanoir.ng.utils.SerieToDatasetsSeparator;
 import org.shanoir.ng.utils.ShanoirExec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -169,13 +172,15 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 * @param boolean   is convert to clidcm
 	 *
 	 */
-	private void convertToNiftiExec(NIfTIConverter converter, String inputFolder, String outputFolder, boolean is4D, boolean reconversion) {
-		if (converter == null) {
+	public void convertToNiftiExec(Long converterId, String inputFolder, String outputFolder, boolean is4D, boolean reconversion) {
+		if (converterId == null) {
 			return;
 		}
-		String converterPath = convertersPath + converter.getName();
 
-	    switch (converter.getNIfTIConverterType()) {
+		NiftiConverter converter = NiftiConverter.getType(Math.toIntExact(converterId));
+		String converterPath = convertersPath + converter.name();
+
+	    switch (converter) {
 		case MCVERTER:
 			is4D = true;
 			conversionLogs += shanoirExec.mcverterExec(inputFolder, converterPath, outputFolder, is4D);
@@ -327,8 +332,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		} else {
 			conversionLogs = "";
 		}
-		NIfTIConverter converter = findById(converterId);
-		convertToNiftiExec(converter, directory.getPath(), directory.getPath(), isConvertAs4D, false);
+		convertToNiftiExec(Long.valueOf(converter), directory.getPath(), directory.getPath(), isConvertAs4D, false);
 		LOG.debug("conversionLogs : {}", conversionLogs);
 		return converter;
 	}
@@ -676,43 +680,5 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			}
 		}
 		return false;
-	}
-
-
-	/**
-	 * Converts some data
-	 * @param message the string containing the converter ID + the workfolder where the dicom are
-	 * @return true if the conversion is a success, false otherwise
-	 */
-	@RabbitListener(queues = RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE)
-	@RabbitHandler
-	@Transactional
-	public boolean convertData(String message) {
-		String[] messageSplit = message.split(";");
-		Long converterId = Long.valueOf(messageSplit[0]);
-		String workFolder = messageSplit[1];
-
-		NIfTIConverter converter = niftiConverterRepository.findById(converterId).orElse(null);
-		
-		if (converter == null) {
-			return false;
-		}
-
-		String workFolderResult = workFolder + File.separator + "result";
-		File result = new File(workFolderResult);
-
-		result.mkdirs();
-
-		this.convertToNiftiExec(converter, workFolder, workFolderResult, false, true);
-		
-		if (converter.isDicomifier()) {
-			Dataset dataset = new Dataset();
-			dataset.setName("name");
-			niftiFileSortingDicom2Nifti(Collections.emptyList(), result, dataset);
-		} else {
-			niftiFileSorting(Collections.emptyList(), result, new File("serieId"));
-		}
-		
-		return true;
 	}
 }

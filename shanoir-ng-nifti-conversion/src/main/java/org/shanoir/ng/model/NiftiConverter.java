@@ -10,7 +10,9 @@ public enum NiftiConverter {
 	
 	DICOM2NIFTI(4),
 
-	DICOMIFIER(5);
+	DICOMIFIER(5),
+
+	MRICONVERTER(6);
 	
 	private int id;
 

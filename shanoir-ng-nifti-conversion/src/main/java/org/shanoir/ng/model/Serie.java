@@ -35,6 +35,12 @@ public class Serie {
 	@JsonProperty("selected")
 	private boolean selected;
 
+	@JsonProperty("ignored")
+	private boolean ignored;
+
+	@JsonProperty("erroneous")
+	private boolean erroneous;
+
 	@JsonProperty("seriesInstanceUID")
 	private String seriesInstanceUID;
 
@@ -306,4 +312,19 @@ public class Serie {
 		this.sequenceName = sequenceName;
 	}
 
+	public boolean isIgnored() {
+		return ignored;
+	}
+
+	public void setIgnored(boolean ignored) {
+		this.ignored = ignored;
+	}
+
+	public boolean isErroneous() {
+		return erroneous;
+	}
+
+	public void setErroneous(boolean erroneous) {
+		this.erroneous = erroneous;
+	}
 }

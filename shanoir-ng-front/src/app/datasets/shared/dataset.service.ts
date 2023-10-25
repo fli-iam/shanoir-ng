@@ -29,7 +29,7 @@ export type Format = 'eeg' | 'nii' | 'BIDS' | 'dcm';
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
-    
+
     API_URL = AppUtils.BACKEND_API_DATASET_URL;
 
     httpOptions = {

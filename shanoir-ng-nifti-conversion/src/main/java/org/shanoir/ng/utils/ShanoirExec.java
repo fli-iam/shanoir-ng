@@ -600,6 +600,38 @@ public class ShanoirExec {
 	}
 
 	/**
+	 * This method converts a dicom using MRIConvert
+	 * @param inputFolder the nput folder
+	 * @param outputFolder the output folder
+	 * @return the olg to display.
+	 */
+	public String mriConverter(String inputFolder, String outputFolder, boolean reconversion) {
+		//TODO: complete
+		/*
+		String logs = "mriConverter: ";
+		String execString = "";
+
+		// We force the dataset0 folder here as MRIConverter does not search recursively in the files..
+		if (!reconversion && !inputFolder.contains("dataset")) {
+			inputFolder = inputFolder.concat("/dataset0");
+		}
+		LOG.error(inputFolder);
+		LOG.error(outputFolder);
+
+		// java -classpath MRIManager.jar DicomToNifti Subject4/ /tmp/ "PatientName-SerialNumber-Protocol" "[ExportOptions] 00000"
+		execString += "xvfb-run java -classpath " + mriConverterPath + " DicomToNifti "	+ inputFolder + " "	+ outputFolder
+				+ " PatientName-SerialNumber-SequenceName [ExportOptions]00000";
+
+		logs.concat(execString);
+
+		final String result = exec(execString.split(" "));
+
+		return logs.concat("\n Result: " + result);
+		 */
+		return null;
+	}
+
+	/**
 	 * Replace the file separators to make it work under windows or unix system.
 	 *
 	 * @param firstImagePath

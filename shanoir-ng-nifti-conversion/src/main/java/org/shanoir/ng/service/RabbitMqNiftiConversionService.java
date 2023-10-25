@@ -43,7 +43,7 @@ public class RabbitMqNiftiConversionService {
 
 		result.mkdirs();
 
-		converterService.convertToNiftiExec(converterId, workFolder, workFolderResult, false);
+		converterService.convertToNiftiExec(Long.valueOf(converterId), workFolder, workFolderResult, false, true);
 		
 		if (converter.isDicomifier()) {
 			Dataset dataset = new Dataset();

@@ -328,6 +328,7 @@ public class DatasetDownloaderServiceImpl {
 					} else if (NII.equals(format)) {						
 						// Check if we want a specific converter -> nifti reconversion
 						if (converterId != null) {
+							File userDir = DatasetFileUtils.getUserImportDir("/tmp");
 							String tmpFilePath = userDir + File.separator + dataset.getId() + "_" + format;
 							File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
 
@@ -336,7 +337,7 @@ public class DatasetDownloaderServiceImpl {
 							// Create temporary workfolder with dicom files, to be able to convert them
 							workFolder.mkdirs();
 
-							downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset);
+							downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, null);
 
 							// Convert them, sending to import microservice
 							boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());

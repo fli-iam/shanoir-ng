@@ -442,7 +442,7 @@ public class DatasetApiController implements DatasetApi {
 					new ErrorModel(HttpStatus.FORBIDDEN.value(), "This acquisition has " + size + " datasets. You can't download more than " + DATASET_LIMIT + " datasets."));
 		}
 
-		datasetDownloaderService.massiveDownload(format, datasets, response, true);
+		datasetDownloaderService.massiveDownload(format, datasets, response, true, null);
     }
 
     /**
