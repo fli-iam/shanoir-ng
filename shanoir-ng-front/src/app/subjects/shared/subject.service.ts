@@ -24,6 +24,8 @@ import { SubjectDTO, SubjectDTOService } from './subject.dto';
 import { SubjectStudyDTO } from './subject-study.dto';
 import { Page, Pageable } from 'src/app/shared/components/table/pageable.model';
 import {BACKEND_API_SUBJECT_URL} from "../../utils/app.utils";
+import {Dataset} from "../../datasets/shared/dataset.model";
+import {DatasetDTO} from "../../datasets/shared/dataset.dto";
 
 @Injectable()
 export class SubjectService extends EntityService<Subject> {
@@ -36,8 +38,15 @@ export class SubjectService extends EntityService<Subject> {
 
     getEntityInstance() { return new Subject(); }
 
-    getSubjectsNames(): Promise<IdName[]> {
+    getAllSubjectsNames(): Promise<IdName[]> {
         return this.http.get<IdName[]>(AppUtils.BACKEND_API_SUBJECT_NAMES_URL)
+            .toPromise();
+    }
+
+    getSubjectsNames(subjectIds: Set<number>): Promise<IdName[]> {
+        const formData: FormData = new FormData();
+        formData.set('subjectIds', Array.from(subjectIds).join(","));
+        return this.http.post<IdName[]>(AppUtils.BACKEND_API_SUBJECT_NAMES_URL, formData)
         .toPromise();
     }
 

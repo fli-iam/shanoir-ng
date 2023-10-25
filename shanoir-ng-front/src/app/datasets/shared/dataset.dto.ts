@@ -79,8 +79,12 @@ export class DatasetDTOService {
      */
     public toEntityList(dtos: DatasetDTO[], result?: Dataset[], mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset[]>{
         if (!result) result = [];
+        let subjectIds = new Set<number>;
         if (dtos) {
             for (let dto of dtos ? dtos : []) {
+                if (dto.subjectId) {
+                    subjectIds.add(dto.subjectId);
+                }
                 let entity = DatasetUtils.getDatasetInstance(dto.type);
                 DatasetDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
@@ -94,7 +98,7 @@ export class DatasetDTOService {
                             entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
                     }
                 }),
-                this.subjectService.getSubjectsNames().then(subjects => {
+                this.subjectService.getSubjectsNames(subjectIds).then(subjects => {
                     for (let entity of result) {
                         if (entity.subject)
                             entity.subject.name = subjects.find(subject => subject.id == entity.subject.id)?.name;
