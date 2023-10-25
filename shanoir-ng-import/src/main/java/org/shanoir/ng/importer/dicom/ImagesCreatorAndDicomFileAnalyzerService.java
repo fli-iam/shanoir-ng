@@ -205,7 +205,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			return instanceFile;
 		} else {
 			throw new FileNotFoundException(
-					"instanceFilePath in DicomDir: missing file: " + instanceFilePath);
+					"instanceFilePath: missing file: " + instanceFilePath);
 		}
 	}
 	

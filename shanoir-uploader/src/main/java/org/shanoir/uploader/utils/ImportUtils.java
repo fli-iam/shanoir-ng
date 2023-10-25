@@ -294,6 +294,7 @@ public class ImportUtils {
 			for (Instance instance : serie.getInstances()) {
 				File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir, false);
 				String dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_") + DcmRcvManager.DICOM_FILE_SUFFIX;
+				dicomFileName = dicomFileName.replace(":", ""); // clean Windows file system root here to avoid destFile with two colons in the path
 				File destFile = new File(uploadFolder.getAbsolutePath() + File.separator + dicomFileName);
 				FileUtil.copyFile(sourceFile, destFile);
 				newFileNamesOfSerie.add(dicomFileName);	
