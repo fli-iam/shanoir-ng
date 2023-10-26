@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.ImportJob;
@@ -294,7 +295,12 @@ public class ImportUtils {
 			for (Instance instance : serie.getInstances()) {
 				File sourceFile = dicomFileAnalyzer.getFileFromInstance(instance, serie, filePathDicomDir, false);
 				String dicomFileName = sourceFile.getAbsolutePath().replace(File.separator, "_") + DcmRcvManager.DICOM_FILE_SUFFIX;
-				dicomFileName = dicomFileName.replace(":", ""); // clean Windows file system root here to avoid destFile with two colons in the path
+				// clean Windows file system root here to avoid destFile-path
+				// with two colons in the path, what is forbidden under Windows
+				// and leads therefore to copy failures, that block exports
+				if (SystemUtils.IS_OS_WINDOWS) {
+					dicomFileName = dicomFileName.replace(":", "");
+				}
 				File destFile = new File(uploadFolder.getAbsolutePath() + File.separator + dicomFileName);
 				FileUtil.copyFile(sourceFile, destFile);
 				newFileNamesOfSerie.add(dicomFileName);	

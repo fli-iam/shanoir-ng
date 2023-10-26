@@ -24,7 +24,7 @@ import org.shanoir.uploader.dicom.query.StudyTreeNode;
 import org.shanoir.uploader.gui.MainWindow;
 
 /**
- * This class implements the logic when a node is selected in a DicomTree
+ * This class implements the logic when a node is selected in a DicomTree.
  * 
  * @author yyao
  *
@@ -192,6 +192,7 @@ public class SelectionActionListener implements TreeSelectionListener {
 		Collection<DicomTreeNode> series = study.getTreeNodes().values();
 		for (Iterator seriesIt = series.iterator(); seriesIt.hasNext();) {
 			SerieTreeNode serie = (SerieTreeNode) seriesIt.next();
+			serie.setSelected(true);
 			selectedSeries.add(serie);
 		}
 	}

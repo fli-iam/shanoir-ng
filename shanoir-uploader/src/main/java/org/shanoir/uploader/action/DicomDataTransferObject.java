@@ -25,16 +25,6 @@ public class DicomDataTransferObject {
 
 	private static Logger logger = Logger.getLogger(DicomDataTransferObject.class);
 	
-	private static final String DATE = "date";
-
-	private static final String ID = "id";
-
-	private static final String SEX = "sex";
-
-	private static final String NAME = "name";
-
-	private static final String BIRTH_DATE = "birthDate";
-	
 	private Date birthDate;
 	
 	private String sex;

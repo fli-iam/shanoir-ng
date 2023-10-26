@@ -1,6 +1,5 @@
 package org.shanoir.uploader.dicom.query;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -8,7 +7,6 @@ import java.util.List;
 import javax.swing.tree.TreeNode;
 
 import org.shanoir.ng.importer.model.EquipmentDicom;
-import org.shanoir.ng.importer.model.Instance;
 import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.uploader.dicom.DicomTreeNode;
