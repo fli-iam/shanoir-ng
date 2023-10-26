@@ -130,7 +130,7 @@ public class QueryPACSService {
 				calling.getAet(), calling.getHostname(), calling.getPort(), called.getAet(), called.getHostname(), called.getPort());
 	}
 	
-	private void connectAssociation(DicomNode calling, DicomNode called) {
+	private void connectAssociation(DicomNode calling, DicomNode called) throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
         try {
@@ -158,10 +158,11 @@ public class QueryPACSService {
             LOG.info("connectAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
         } catch (IOException | InterruptedException | IncompatibleConnectionException | GeneralSecurityException e) {
 			LOG.error(e.getMessage(), e);
+			throw e;
         }
 	}
 	
-	public ImportJob queryCFIND(DicomQuery dicomQuery) throws ShanoirImportException {
+	public ImportJob queryCFIND(DicomQuery dicomQuery) throws Exception {
 		connectAssociation(calling, called);
 		ImportJob importJob = new ImportJob();
 		/**
@@ -231,10 +232,7 @@ public class QueryPACSService {
     		connectAssociation(calling, called);
         	this.association.cecho();
             releaseAssociation();
-        } catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			return false;
-		} catch (InterruptedException e) {
+        } catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			return false;
 		}
