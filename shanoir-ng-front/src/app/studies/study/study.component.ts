@@ -273,7 +273,6 @@ export class StudyComponent extends EntityComponent<Study> {
                 if (datasetSizes.extraDataSize > 0){
                     sizesByLabel.set("Other files (DUA, protocol...)", datasetSizes.extraDataSize);
                 }
-                let total = datasetSizes.total;
                 study.detailedSizes = sizesByLabel;
             });
         }).finally(() => {
