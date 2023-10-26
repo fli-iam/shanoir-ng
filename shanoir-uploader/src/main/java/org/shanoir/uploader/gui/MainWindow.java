@@ -144,7 +144,7 @@ public class MainWindow extends JFrame {
 		this.dicomFileAnalyzer = new ImagesCreatorAndDicomFileAnalyzerService();
 		this.shanoirUploaderFolder=shanoirUploaderFolder;
 		this.resourceBundle=resourceBundle;
-		String JFRAME_TITLE = "ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION + " Release: 2023-10-24";
+		String JFRAME_TITLE = "ShanoirUploader " + ShUpConfig.SHANOIR_UPLOADER_VERSION + " Release: 2023-10-26";
 		try {
 			for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 				if ("Nimbus".equals(info.getName())) {
