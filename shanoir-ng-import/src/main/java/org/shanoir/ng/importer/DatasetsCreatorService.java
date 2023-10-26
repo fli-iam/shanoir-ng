@@ -1,92 +1,47 @@
 package org.shanoir.ng.importer;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import jakarta.transaction.Transactional;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
-import org.shanoir.ng.importer.model.Dataset;
-import org.shanoir.ng.importer.model.DatasetFile;
-import org.shanoir.ng.importer.model.DiffusionGradient;
-import org.shanoir.ng.importer.model.EchoTime;
-import org.shanoir.ng.importer.model.ExpressionFormat;
-import org.shanoir.ng.importer.model.Image;
-import org.shanoir.ng.importer.model.ImportJob;
-import org.shanoir.ng.importer.model.Patient;
-import org.shanoir.ng.importer.model.Serie;
-import org.shanoir.ng.importer.model.Study;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.shanoir.ng.importer.model.*;
 import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
-import org.shanoir.ng.utils.DiffusionUtil;
 import org.shanoir.ng.utils.ImportUtils;
-import org.shanoir.ng.utils.ShanoirExec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.Map.Entry;
+
 /**
  * The NIfTIConverter does the actual conversion of dcm to nii files.
  * To use the converter the dcm files have to be put in separate folders.
- * 
+ *
  * 1) all images for one serie are moved into /SERIES/{seriesID} and
  * 2) all images are concerning the acquisitionNumber, echoNumbers and the
  * imageOrientationPatient informations moved into /dataset{index} folders.
- * 
+ *
  * Inside each dataset folder the nii conversion is called.
- * 
+ *
  * @author mkain
  *
  */
 @Service
-public class DatasetsCreatorAndNIfTIConverterService {
-
-	private static final String BVAL = ".bval";
-
-	private static final String BVEC = ".bvec";
+public class DatasetsCreatorService {
 
 	private static final String DATASET_STR = "dataset";
 
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetsCreatorAndNIfTIConverterService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DatasetsCreatorService.class);
 
 	private static final String DOUBLE_EQUAL = "==";
 
 	private static final String SEMI_COLON = ";";
 
 	private static final String SERIES = "SERIES";
-
-	@Autowired
-	private ShanoirExec shanoirExec;
 
 	@Autowired
 	private ShanoirEventService shanoirEventService;
@@ -100,12 +55,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	@Value("${shanoir.conversion.converters.path}")
 	private String convertersPath;
 
-	/** Logs of the conversion. */
-	private String conversionLogs;
-
-	/** Output files mapped by series UID. */
-	private HashMap<String, List<String>> outputFiles = new HashMap<>();
-
 	Random rand = new Random();
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
@@ -116,24 +65,13 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		} else {
 			throw new ShanoirException("Error while creating series folder: folder already exists.");
 		}
-		conversionLogs = "";
 		List<Study> studies = patient.getStudies();
 		for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
 			Study study = studiesIt.next();
 			List<Serie> series = study.getSelectedSeries();
-			float progress = 0;
-
-			int nbSeries = series.size();
-			int cpt = 1;
 
 			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
 				Serie serie = seriesIt.next();
-
-				progress = progress + (0.5f / series.size());
-				importJob.getShanoirEvent().setProgress(progress);
-				importJob.getShanoirEvent().setMessage("Converting to NIfTI for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")...");
-				shanoirEventService.publishEvent(importJob.getShanoirEvent());
-
 				File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
 				boolean serieIdentifiedForNotSeparating;
 				try {
@@ -148,7 +86,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 				// as images/non-images are migrated to datasets, clear the list now
 				serie.getImages().clear();
 				serie.getNonImages().clear();
-				cpt++;
 			}
 		}
 	}
@@ -157,7 +94,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	/**
 	 * This method receives a serie object and a String from the properties
 	 * and checks if the tag exists with a specific value.
-	 * @throws SecurityException
 	 * @throws NoSuchFieldException
 	 */
 	private boolean checkSerieForPropertiesString(final Serie serie, final String propertiesString) throws NoSuchFieldException {
@@ -315,7 +251,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 	/**
 	 * This method moves the files into serie specific folders.
-	 * 
 	 * @param serieIDFolder
 	 * @param images
 	 * @throws RestServiceException
@@ -341,23 +276,11 @@ public class DatasetsCreatorAndNIfTIConverterService {
 		}
 	}
 
-	public static int[] convertIntegers(List<Integer> integers) {
-		int[] ret = new int[integers.size()];
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = integers.get(i).intValue();
-		}
-		return ret;
-	}
-
 	/**
 	 * Make a diff to know which files from destinationFolder are not in the
 	 * given list of files.
-	 *
-	 * @param existingFiles
-	 *            the existing files
-	 * @param destinationFolder
-	 *            the destination folder
-	 *
+	 * @param existingFiles the existing files
+	 * @param destinationFolder the destination folder
 	 * @return the list< file>
 	 */
 	private List<File> diff(final List<File> existingFiles, final String destinationFolder) {

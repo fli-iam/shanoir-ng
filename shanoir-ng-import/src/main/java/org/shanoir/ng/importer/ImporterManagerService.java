@@ -99,7 +99,7 @@ public class ImporterManagerService {
 	private ShanoirEventService eventService;
 	
 	@Autowired
-	private DatasetsCreatorAndNIfTIConverterService datasetsCreatorAndNIfTIConverter;
+	private DatasetsCreatorService datasetsCreatorAndNIfTIConverter;
 	
 	@Autowired
 	StudyUserRightsRepository studyUserRightRepo;

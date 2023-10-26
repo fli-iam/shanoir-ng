@@ -3,17 +3,17 @@
         <h2 class="header">Download Datasets</h2>
         <fieldset class="body">
             <ol>
-                <!-- <li>
-                    <label>Number of parallel downloading queues</label>
-                    <span class="right-col">
-                        <input type="number" formControlName="nbQueues" min="1" max="1024">
-                    </span>
-                </li> -->
                 <li>
                     <label>Dataset files format</label>
                     <span class="right-col">
                         <select-box formControlName="format" [options]="formatOptions"></select-box>
                     </span>
+                </li>
+                <li *ngIf="format == 'nii'">
+                <label>Dataset files format</label>
+                <span class="right-col">
+                    <select-box formControlName="converter" [options]="niftiConverters"></select-box>
+                </span>
                 </li>
             </ol>
         </fieldset>

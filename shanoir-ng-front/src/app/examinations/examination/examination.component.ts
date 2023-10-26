@@ -165,14 +165,11 @@ export class ExaminationComponent extends EntityComponent<Examination> {
 
     downloadAll() {
         let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasBids = this.hasBids;
         options.hasDicom = this.hasDicom;
-        options.hasNii = this.hasDicom;
-        options.hasEeg = this.hasEEG; 
         this.downloadService.downloadAllByExaminationId(this.examination?.id, null, options, this.downloadState);
     }
 
-    openViewer() {  
+    openViewer() {
 	    window.open(environment.viewerUrl + '/viewer/1.4.9.12.34.1.8527.' + this.entity.id, '_blank');
     }
 

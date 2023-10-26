@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -125,7 +125,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     convertNiftiToggle() {
         this.toggleMenu();
     }
-    
+
     convertNifti(id: number) {
         this.downloadState.status = TaskStatus.IN_PROGRESS;
         this.datasetService.download(this.dataset, 'nii', id).then(() => this.downloadState.status = TaskStatus.IN_PROGRESS);
@@ -133,10 +133,10 @@ export class DatasetComponent extends EntityComponent<Dataset> {
 
     downloadAll() {
         let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasBids = this.dataset.type == 'BIDS';
+        //options.hasBids = this.dataset.type == 'BIDS';
         options.hasDicom = this.dataset.type != 'Eeg' && this.dataset.type != 'BIDS' && !this.dataset.datasetProcessing;
-        options.hasNii = !this.isMRS && this.dataset.type != 'Eeg' && this.dataset.type != 'BIDS' && this.dataset.type != 'Measurement' && !this.dataset.datasetProcessing;
-        options.hasEeg = this.dataset.type == 'Eeg' && !this.dataset.datasetProcessing;
+        //options.hasNii = !this.isMRS && this.dataset.type != 'Eeg' && this.dataset.type != 'BIDS' && this.dataset.type != 'Measurement' && !this.dataset.datasetProcessing;
+        //options.hasEeg = this.dataset.type == 'Eeg' && !this.dataset.datasetProcessing;
         this.downloadService.downloadDataset(this.dataset?.id, options, this.downloadState);
     }
 

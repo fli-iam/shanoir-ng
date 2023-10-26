@@ -142,10 +142,10 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     downloadAll() {
         let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasBids = this.hasBids;
-        options.hasNii = this.hasDicom;
+        //options.hasBids = this.hasBids;
+        //options.hasNii = this.hasDicom;
         options.hasDicom = this.hasDicom;
-        options.hasEeg = this.hasEEG; 
+        //options.hasEeg = this.hasEEG;
         this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, options, this.downloadState);
     }
 }
