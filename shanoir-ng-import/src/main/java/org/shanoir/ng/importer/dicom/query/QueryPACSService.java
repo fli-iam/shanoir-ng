@@ -226,10 +226,11 @@ public class QueryPACSService {
 	}
 	
 	public boolean queryECHO(String calledAET, String hostName, int port, String callingAET) {
-		connectAssociation(calling, called);
 		LOG.info("DICOM ECHO: Starting with configuration {}, {}, {} <- {}", calledAET, hostName, port, callingAET);
         try {
+    		connectAssociation(calling, called);
         	this.association.cecho();
+            releaseAssociation();
         } catch (IOException e) {
 			LOG.error(e.getMessage(), e);
 			return false;
@@ -237,7 +238,6 @@ public class QueryPACSService {
 			LOG.error(e.getMessage(), e);
 			return false;
 		}
-        releaseAssociation();
         return true;
 	}
 
