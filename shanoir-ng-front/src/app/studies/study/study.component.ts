@@ -127,7 +127,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, null, true).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id, null).then(study => {
 
           this.study = study;
           this.setLabeledSizes(this.study);
@@ -166,7 +166,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, null, true).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id, null).then(study => {
             this.study = study;
 
             if (this.study.profile == null) {
@@ -659,7 +659,7 @@ export class StudyComponent extends EntityComponent<Study> {
     downloadSelected() {
         this.downloadService.downloadByIds(this.selectedDatasetIds);
     }
-    
+
     storageVolumePrettyPrint(size: number) {
         return this.studyService.storageVolumePrettyPrint(size);
     }
