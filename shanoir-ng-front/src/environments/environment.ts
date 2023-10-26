@@ -5,7 +5,7 @@
 export const environment = {
   production: false,
   viewerUrl: window["env"]["viewerUrl"] || "https://viewer",
-  vipUrl: window["env"]["vipUrl"] || "https://vip.creatis.insa-lyon.fr"
+  vipUrl: window["env"]["vipUrl"] || "http://134.158.151.215/"
 };
 
 /*
