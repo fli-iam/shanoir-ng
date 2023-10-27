@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +61,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -72,6 +74,8 @@ import jakarta.validation.Valid;
 
 @Controller
 public class StudyApiController implements StudyApi {
+
+	private static final String PDF_EXTENSION = ".pdf";
 
 	@Value("${studies-data}")
 	private String dataDir;
@@ -116,6 +120,11 @@ public class StudyApiController implements StudyApi {
 			if (study.getExaminations() != null && !study.getExaminations().isEmpty()) {
 				// Error => should not be able to do this see #793
 				return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+			}
+			
+			List<DataUserAgreement> duas = dataUserAgreementService.findDUAByStudyId(studyId);
+			if (!CollectionUtils.isEmpty(duas)) {
+				this.dataUserAgreementService.deleteAll(duas);
 			}
 
 			// Delete all linked files and DUA
@@ -197,6 +206,7 @@ public class StudyApiController implements StudyApi {
 
 		Study createdStudy;
 		try {
+			addCurrentUserAsStudyUserIfEmptyStudyUsers(study);
 			createdStudy = studyService.create(study);
 			eventService.publishEvent(new ShanoirEvent(ShanoirEventType.CREATE_STUDY_EVENT,
 					createdStudy.getId().toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS));
@@ -205,6 +215,19 @@ public class StudyApiController implements StudyApi {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Microservice communication error", e));
 		}
 		return new ResponseEntity<>(studyMapper.studyToStudyDTO(createdStudy), HttpStatus.OK);
+	}
+
+	private void addCurrentUserAsStudyUserIfEmptyStudyUsers(final Study study) {
+		if (study.getStudyUserList() == null) {
+			List<StudyUser> studyUserList = new ArrayList<StudyUser>();
+			StudyUser studyUser = new StudyUser();
+			studyUser.setStudy(study);
+			studyUser.setUserId(KeycloakUtil.getTokenUserId());
+			studyUser.setUserName(KeycloakUtil.getTokenUserName());
+			studyUser.setStudyUserRights(Arrays.asList(StudyUserRight.CAN_SEE_ALL, StudyUserRight.CAN_DOWNLOAD, StudyUserRight.CAN_IMPORT, StudyUserRight.CAN_ADMINISTRATE));
+			studyUserList.add(studyUser);
+			study.setStudyUserList(studyUserList);
+		}
 	}
 
 	@Override
@@ -370,24 +393,22 @@ public class StudyApiController implements StudyApi {
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "dua to upload", required = true) @Valid @RequestBody MultipartFile file) throws RestServiceException {
 		try {
-			if (!file.getOriginalFilename().endsWith(".pdf")  || file.getSize() > 50000000) {
+			if (!file.getOriginalFilename().endsWith(PDF_EXTENSION)  || file.getSize() > 50000000) {
 				LOG.error("Could not upload the file: {}", file.getOriginalFilename());
-				// Clean up: delete from study in case of same file existed before and upload not allowed
+				// Clean up: delete from study in case upload not allowed
 				Study study = studyService.findById(studyId);
-				if (study.getDataUserAgreementPaths() != null) {
+				if (!CollectionUtils.isEmpty(study.getDataUserAgreementPaths())) {
 					study.getDataUserAgreementPaths().remove(file.getName());
 				}
 				studyService.update(study);
 				return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
 			}
-			String parentDir = dataDir + "/study-" + studyId;
-			Path path = Paths.get( parentDir);
-			Files.createDirectories(path);
-			LOG.info("path: {}", path.getFileName());
-			Path newFilePath = Paths.get(parentDir + "/" + file.getOriginalFilename());
-			Files.createFile(newFilePath);
-			LOG.info("newFilePath: {}", newFilePath.getFileName());
-			file.transferTo(newFilePath);
+			String duaFilePath = this.studyService.getStudyFilePath(studyId, file.getOriginalFilename());
+
+			Path duaPath = Paths.get(duaFilePath);
+			Files.createDirectories(duaPath.getParent());
+			Files.createFile(duaPath);
+			file.transferTo(duaPath);
 		} catch (Exception e) {
 			LOG.error("Error while loading files on study: {}. File not uploaded. {}", studyId, e);
 		}
@@ -411,23 +432,6 @@ public class StudyApiController implements StudyApi {
 			org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
 			response.flushBuffer();
 		}
-	}
-
-	@Override
-	public ResponseEntity<Void> deleteDataUserAgreement (
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId) throws IOException {
-		Study study = studyService.findById(studyId);
-
-		if (study.getDataUserAgreementPaths() == null || study.getDataUserAgreementPaths().isEmpty()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		String filePath = studyService.getStudyFilePath(studyId, study.getDataUserAgreementPaths().get(0));
-		File fileToDelete = new File(filePath);
-		if (!fileToDelete.exists()) {
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		}
-		Files.delete(Paths.get(filePath));
-		return new ResponseEntity<>(HttpStatus.OK);
 	}
 
 	@Override

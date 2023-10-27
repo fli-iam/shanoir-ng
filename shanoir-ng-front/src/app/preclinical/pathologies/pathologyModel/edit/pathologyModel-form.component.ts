@@ -96,7 +96,7 @@ export class PathologyModelFormComponent extends EntityComponent<PathologyModel>
     }
 
     manageSaveEntity(): void {
-        this.subscribtions.push(
+        this.subscriptions.push(
             this.onSave.subscribe(response => {
                 if (this.fileToUpload){
                     //Then upload specifications file

@@ -19,6 +19,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Date;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
@@ -68,8 +73,15 @@ public class ExecutionResultApiController implements ExecutionResultApi {
 
     @Override
     public ResponseEntity<Path> uploadPath(
-            @Parameter(name = "") @Valid @RequestBody UploadData body)
-            throws RestServiceException {
+            @Parameter(name = "") @Valid @RequestBody String body)
+            throws RestServiceException, JsonProcessingException {
+
+        JsonFactory jsonFactory = JsonFactory.builder()
+                .streamReadConstraints(StreamReadConstraints.builder().maxStringLength(Integer.MAX_VALUE).build())
+                        .build();
+
+        ObjectMapper objectMapper = JsonMapper.builder(jsonFactory).build();
+        UploadData received = objectMapper.readValue(body, UploadData.class);
 
         String importPath = getImportPathFromRequest(httpServletRequest);
 
@@ -84,7 +96,7 @@ public class ExecutionResultApiController implements ExecutionResultApi {
                 resultDir.mkdirs();
             }
 
-            byte[] bytes = Base64.decodeBase64(body.getBase64Content());
+            byte[] bytes = Base64.decodeBase64(received.getBase64Content());
             FileUtils.writeByteArrayToFile(resultFile, bytes);
 
             path.setPlatformPath(resultDir.getAbsolutePath());

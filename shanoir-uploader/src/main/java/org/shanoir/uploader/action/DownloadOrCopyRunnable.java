@@ -66,12 +66,12 @@ public class DownloadOrCopyRunnable implements Runnable {
 		
 			/**
 			 * 2. Fill MRI information into serie from first DICOM file of each serie
-			 * This has already been done for CD/DVD import, but not yet here for PACS
+			 * This has already been done for CD/DVD import, but not yet here for PACS.
 			 */
 			if (this.isFromPACS) {
 				for (Iterator iterator = selectedSeries.iterator(); iterator.hasNext();) {
 					SerieTreeNode serieTreeNode = (SerieTreeNode) iterator.next();
-					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(filePathDicomDir, serieTreeNode.getSerie(), null, isFromPACS);
+					dicomFileAnalyzer.getAdditionalMetaDataFromFirstInstanceOfSerie(uploadFolder.getAbsolutePath(), serieTreeNode.getSerie(), null, isFromPACS);
 				}
 			}
 		} catch (FileNotFoundException e) {

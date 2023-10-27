@@ -71,6 +71,8 @@ public interface SubjectRepository extends CrudRepository<Subject, Long>, Subjec
 	 */
 	Iterable<Subject> findBySubjectStudyListStudyIdIn(Iterable<Long> studyIds);
 
+	Iterable<Subject> findBySubjectStudyListStudyIdInAndIdIn(Iterable<Long> studyIds, Iterable<Long> ids);
+
     List<Subject> findByPreclinical(boolean preclinical);
 
 

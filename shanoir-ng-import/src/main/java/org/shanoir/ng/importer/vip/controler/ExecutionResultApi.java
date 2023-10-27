@@ -15,7 +15,7 @@
 package org.shanoir.ng.importer.vip.controler;
 
 import org.shanoir.ng.importer.vip.model.Path;
-import org.shanoir.ng.importer.vip.model.UploadData;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,12 +41,16 @@ public interface ExecutionResultApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
 	ResponseEntity<Void> deletePath();
 
-	@Operation(summary = "Upload data to a path", description = "A request without content creates a directory (an error should be returned if the path already exists). A request with a specific content type (\"application/carmin+json\") allows to upload data encoded in base64. The base64 content (part of a json payload) can either be an encoded file, are an encoded zip archive that will create a directory. All other content (with any content type) will be considered as a raw file and will override the existing path content. If the parent directory of the file/directory to create does not exist, an error must be returned.")
+	@Operation(summary = "Upload data to a path", description = "A request without content creates a directory (an error should be returned if the path already exists). " +
+			"A request with a specific content type (\"application/carmin+json\") allows to upload data encoded in base64. " +
+			"The base64 content (part of a json payload) can either be an encoded file, or an encoded zip archive that will create a directory. " +
+			"All other content (with any content type) will be considered as a raw file and will override the existing path content. " +
+			"If the parent directory of the file/directory to create does not exist, an error must be returned.")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "The upload is successful and finished."),
 			@ApiResponse(responseCode = "500", description = "A functional or internal error occured processing the request") })
 	@RequestMapping(value = "/**", produces = { "application/json" }, consumes = { "application/carmin+json",
 			"application/octet-stream" }, method = RequestMethod.PUT)
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER'))")
-	ResponseEntity<Path> uploadPath(@Valid @RequestBody UploadData body) throws RestServiceException;
+	ResponseEntity<Path> uploadPath(@Valid @RequestBody String body) throws RestServiceException, JsonProcessingException;
 
 }

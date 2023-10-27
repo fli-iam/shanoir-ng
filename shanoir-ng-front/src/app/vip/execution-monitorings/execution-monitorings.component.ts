@@ -26,7 +26,7 @@ export class ExecutionMonitoringsComponent extends EntityListComponent<Execution
   }
 
   ngAfterViewInit(): void {
-    this.subscribtions.push(
+    this.subscriptions.push(
       this.executionMonitoringService.getAllExecutionMonitorings().subscribe(executionMonitorings => {
         if (executionMonitorings == null) {
           this.executionMonitorings = [];

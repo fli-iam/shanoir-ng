@@ -51,8 +51,12 @@ public class ShanoirUploaderServiceClient {
 	private static Logger logger = Logger.getLogger(ShanoirUploaderServiceClient.class);
 	
 	private static final String SHANOIR_SERVER_URL = "shanoir.server.url";
+	
+	private static final String SERVICE_STUDIES_CREATE = "service.studies.create";
 
 	private static final String SERVICE_STUDIES_NAMES_CENTERS = "service.studies.names.centers";
+	
+	private static final String SERVICE_STUDYCARDS_CREATE = "service.studycards.create";
 
 	private static final String SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS = "service.studycards.find.by.study.ids";
 
@@ -86,8 +90,12 @@ public class ShanoirUploaderServiceClient {
 	
 	private String serverURL;
 
+	private String serviceURLStudiesCreate;
+	
 	private String serviceURLStudiesNamesAndCenters;
 	
+	private String serviceURLStudyCardsCreate;
+
 	private String serviceURLStudyCardsByStudyIds;
 
 	private String serviceURLStudyCardsApplyOnStudy;
@@ -96,13 +104,13 @@ public class ShanoirUploaderServiceClient {
 
 	private String serviceURLAcquisitionEquipments;
 	
+	private String serviceURLSubjectsCreate;
+
 	private String serviceURLSubjectsFindByIdentifier;
 	
 	private String serviceURLDatasets;
 	
 	private String serviceURLDatasetsDicomWebStudies;
-	
-	private String serviceURLSubjectsCreate;
 	
 	private String serviceURLExaminationsCreate;
 	
@@ -133,8 +141,12 @@ public class ShanoirUploaderServiceClient {
 
 		this.serverURL = ShUpConfig.profileProperties.getProperty(SHANOIR_SERVER_URL);
 
+		this.serviceURLStudiesCreate = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_CREATE);
 		this.serviceURLStudiesNamesAndCenters = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDIES_NAMES_CENTERS);
+		this.serviceURLStudyCardsCreate = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_CREATE);
 		this.serviceURLStudyCardsByStudyIds = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_STUDYCARDS_FIND_BY_STUDY_IDS);
 		this.serviceURLStudyCardsApplyOnStudy = this.serverURL
@@ -521,6 +533,48 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 	
+	public Study createStudy(final Study study) {
+		try {
+			String json = Util.objectWriter.writeValueAsString(study);
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLStudiesCreate, json, false)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					Study studyCreated = Util.getMappedObject(response, Study.class);
+					return studyCreated;
+				} else {
+					logger.error("Error in createStudy: with study " + study.getName()
+						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		} catch (IOException ioE) {
+			logger.error(ioE.getMessage(), ioE);			
+		}
+		return null;
+	}
+
+	public Center createStudyCard(final StudyCard studyCard) {
+		try {
+			String json = Util.objectWriter.writeValueAsString(studyCard);
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLStudyCardsCreate, json, false)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					Center centerCreated = Util.getMappedObject(response, Center.class);
+					return centerCreated;
+				} else {
+					logger.error("Error in createStudy: with study " + studyCard.getName()
+						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
+		} catch (IOException ioE) {
+			logger.error(ioE.getMessage(), ioE);			
+		}
+		return null;
+	}
+
 	public Center createCenter(final Center center) {
 		try {
 			String json = Util.objectWriter.writeValueAsString(center);

@@ -16,7 +16,7 @@ import {Router} from '@angular/router';
 import {DatasetAcquisitionService} from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
 import {Dataset} from '../../datasets/shared/dataset.model';
-import {DatasetService} from '../../datasets/shared/dataset.service';
+import {DatasetService, Format} from '../../datasets/shared/dataset.service';
 import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
 import {ConsoleService} from '../../shared/console/console.service';
 
@@ -26,6 +26,8 @@ import {ExaminationPipe} from '../shared/examination.pipe';
 import {ExaminationService} from '../shared/examination.service';
 import {LoadingBarComponent} from '../../shared/components/loading-bar/loading-bar.component';
 import {environment} from '../../../environments/environment';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import { TaskState } from 'src/app/async-tasks/task.model';
 
 @Component({
     selector: 'examination-node',
@@ -38,8 +40,8 @@ export class ExaminationNodeComponent implements OnChanges {
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     @Output() nodeInit: EventEmitter<ExaminationNode> = new EventEmitter();
     @Output() onExaminationDelete: EventEmitter<void> = new EventEmitter();
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
 
+    protected downloadState: TaskState = new TaskState();
     node: ExaminationNode;
     loading: boolean = false;
     menuOpened: boolean = false;
@@ -57,6 +59,7 @@ export class ExaminationNodeComponent implements OnChanges {
         private datasetAcquisitionService: DatasetAcquisitionService,
         private examPipe: ExaminationPipe,
         private datasetService: DatasetService,
+        private downloadService: MassDownloadService,
         private consoleService: ConsoleService) {
     }
 
@@ -90,7 +93,7 @@ export class ExaminationNodeComponent implements OnChanges {
     }
 
     downloadFile(file) {
-        this.examinationService.downloadFile(file, this.node.id, this.progressBar);
+        this.examinationService.downloadFile(file, this.node.id, this.downloadState);
     }
 
     firstOpen() {
@@ -137,7 +140,7 @@ export class ExaminationNodeComponent implements OnChanges {
         this.datasetIds = datasetIds;
     }
 
-    download(format: string) {
+    download(format: Format) {
         if (this.downloading) {
             return;
         }
@@ -155,7 +158,7 @@ export class ExaminationNodeComponent implements OnChanges {
             datasetIdsReady = Promise.resolve();
         }
         datasetIdsReady.then(() => {
-            this.datasetService.downloadDatasets(this.datasetIds, format, this.progressBar);
+            this.downloadService.downloadByIds(this.datasetIds, format);
             this.downloading = false;
         });
     }
@@ -198,7 +201,6 @@ export class ExaminationNodeComponent implements OnChanges {
             });
         })
     }
-
 
     onAcquisitionDelete(index: number) {
         (this.node.datasetAcquisitions as DatasetAcquisitionNode[]).splice(index, 1) ;

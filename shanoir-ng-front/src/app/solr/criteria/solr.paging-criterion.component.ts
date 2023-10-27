@@ -193,8 +193,7 @@ export class SolrPagingCriterionComponent implements ControlValueAccessor, OnCha
     writeValue(selectedFacetValues: string[]): void {
         this.loadedPromise.then(() => {
             this.selectedFacets = [];
-            if (!selectedFacetValues) selectedFacetValues = [];
-            selectedFacetValues.forEach(val => {
+            selectedFacetValues?.forEach(val => {
                 let displayed: FacetField = this.displayedFacets.find(fac => fac.value == val);
                 if (displayed) {
                     this.selectedFacets.push(displayed);

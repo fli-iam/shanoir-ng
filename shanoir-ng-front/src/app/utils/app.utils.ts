@@ -13,12 +13,11 @@
  */
 
 import { Pipe, PipeTransform } from '@angular/core';
-
-import { MrDataset } from '../datasets/dataset/mr/dataset.mr.model';
-import { EegDataset } from '../datasets/dataset/eeg/dataset.eeg.model';
-import { Dataset } from '../datasets/shared/dataset.model';
-import { process } from '../process';
 import { environment } from '../../environments/environment';
+import { HttpClient, HttpEvent, HttpEventType, HttpParams, HttpResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { TaskState, TaskStatus } from '../async-tasks/task.model';
+import { ServiceLocator } from './locator.service';
 
 
 // Base urls
@@ -78,7 +77,7 @@ export const BACKEND_API_STUDY_CHALLENGES_URL: string = BACKEND_API_STUDIES_MS_U
 export const BACKEND_API_SUBJECT_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjects';
 export const BACKEND_API_SUBJECT_NAMES_URL: string = BACKEND_API_SUBJECT_URL + '/names';
 export const BACKEND_API_SUBJECT_FILTER_URL: string = BACKEND_API_SUBJECT_URL + '/filter';
-export const BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER : string = BACKEND_API_SUBJECT_URL + '/findByIdentifier';
+export const BACKEND_API_SUBJECT_FIND_BY_IDENTIFIER: string = BACKEND_API_SUBJECT_URL + '/findByIdentifier';
 
 // Subject Study http api
 export const BACKEND_API_SUBJECT_STUDY_URL: string = BACKEND_API_STUDIES_MS_URL + '/subjectStudy';
@@ -168,15 +167,14 @@ export function hasUniqueError(error: any, fieldName: string): boolean {
     return hasUniqueError;
 }
 
-export function browserDownloadFile(blob: Blob, filename: string){
+export function browserDownloadFile(blob: Blob, filename: string) {
     if (window.navigator.msSaveBlob) {
         // IE 10+
         window.navigator.msSaveBlob(blob, filename);
     } else {
         var link = document.createElement('a');
         // Browsers that support HTML5 download attribute
-        if (link.download !== undefined)
-        {
+        if (link.download !== undefined) {
             var url = URL.createObjectURL(blob);
             link.setAttribute('href', url);
             link.setAttribute('download', filename);
@@ -186,6 +184,80 @@ export function browserDownloadFile(blob: Blob, filename: string){
             document.body.removeChild(link);
         }
     }
+}
+
+export function browserDownloadFileFromResponse(response: HttpResponse<any>) {
+    browserDownloadFile(response.body, getFilename(response));
+}
+
+export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
+    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    return http.get(
+        url,
+        {
+            reportProgress: true,
+            responseType: 'blob',
+            params: params
+        }
+    )
+    .map(response => {
+        return response;
+    })
+    .toPromise();
+}
+
+export function downloadWithStatusGET(url: string, params?: HttpParams, state ?: TaskState): Observable<TaskState> {
+    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    let obs: Observable<HttpEvent<Blob>> = http.get(
+        url,
+        {
+            reportProgress: true,
+            observe: 'events',
+            responseType: 'blob',
+            params: params
+        }
+    );
+    obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
+    return obs.map(event => {
+        state = extractProgression(event);
+        return state;
+    });
+}
+
+export function downloadWithStatusPOST(url: string, formData: FormData, state ?: TaskState): Observable<TaskState> {
+    const http: HttpClient = ServiceLocator.injector.get(HttpClient);
+    let obs: Observable<HttpEvent<Blob>> = http.post(
+        url,
+        formData,
+        {
+            reportProgress: true,
+            observe: 'events',
+            responseType: 'blob'
+        }
+    );
+    obs.toPromise().then(response => browserDownloadFileFromResponse(response as HttpResponse<Blob>));
+    return obs.map(event => {
+        state = extractProgression(event);
+        return state;
+    });
+}
+
+export function extractProgression(event: HttpEvent<any>): TaskState {
+    switch (event.type) {
+        case HttpEventType.Sent:
+        case HttpEventType.ResponseHeader:
+            return new TaskState(TaskStatus.QUEUED, 0);
+        case HttpEventType.DownloadProgress:
+            return new TaskState(TaskStatus.IN_PROGRESS, event.loaded);
+        case HttpEventType.Response:
+            return new TaskState(TaskStatus.DONE);
+    }
+}
+
+export function getFilename(response: HttpResponse<any>): string {
+    const prefix = 'attachment;filename=';
+    let contentDispHeader: string = response.headers.get('Content-Disposition');
+    return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
 }
 
 export function pad(n, width, z?): string {
@@ -213,21 +285,21 @@ export function findLastIndex<T>(array: Array<T>, predicate: (value: T, index: n
 }
 
 
-@Pipe({name: 'times'})
+@Pipe({ name: 'times' })
 export class TimesPipe implements PipeTransform {
-  transform(value: number): any {
-    const iterable = {};
-    iterable[Symbol.iterator] = function* () {
-      let n = 0;
-      while (n < value) {
-        yield ++n;
-      }
-    };
-    return iterable;
-  }
+    transform(value: number): any {
+        const iterable = {};
+        iterable[Symbol.iterator] = function* () {
+            let n = 0;
+            while (n < value) {
+                yield ++n;
+            }
+        };
+        return iterable;
+    }
 }
 
-@Pipe({name: 'getValues'})
+@Pipe({ name: 'getValues' })
 export class GetValuesPipe implements PipeTransform {
     transform(map: Map<any, any>): any[] {
         let ret = [];
@@ -264,7 +336,7 @@ export function camelToSpaces(str: string): string {
         // insert a space before all caps
         .replace(/([A-Z])/g, ' $1')
         // uppercase the first character
-        .replace(/^./, function(str){ return str.toUpperCase(); });
+        .replace(/^./, function (str) { return str.toUpperCase(); });
 }
 
 export function isFunction(obj) {
@@ -273,46 +345,46 @@ export function isFunction(obj) {
 
 function deepEquals(x, y) {
     if (x === y) {
-      return true; // if both x and y are null or undefined and exactly the same
+        return true; // if both x and y are null or undefined and exactly the same
     } else if (!(x instanceof Object) || !(y instanceof Object)) {
-      return false; // if they are not strictly equal, they both need to be Objects
+        return false; // if they are not strictly equal, they both need to be Objects
     } else if (x.constructor !== y.constructor) {
-      // they must have the exact same prototype chain, the closest we can do is
-      // test their constructor.
-      return false;
+        // they must have the exact same prototype chain, the closest we can do is
+        // test their constructor.
+        return false;
     } else {
-      for (const p in x) {
-        if (!x.hasOwnProperty(p)) {
-          continue; // other properties were tested using x.constructor === y.constructor
+        for (const p in x) {
+            if (!x.hasOwnProperty(p)) {
+                continue; // other properties were tested using x.constructor === y.constructor
+            }
+            if (!y.hasOwnProperty(p)) {
+                return false; // allows to compare x[ p ] and y[ p ] when set to undefined
+            }
+            if (x[p] === y[p]) {
+                continue; // if they have the same strict value or identity then they are equal
+            }
+            if (typeof (x[p]) !== 'object') {
+                return false; // Numbers, Strings, Functions, Booleans must be strictly equal
+            }
+            if (!deepEquals(x[p], y[p])) {
+                return false;
+            }
         }
-        if (!y.hasOwnProperty(p)) {
-          return false; // allows to compare x[ p ] and y[ p ] when set to undefined
+        for (const p in y) {
+            if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) {
+                return false;
+            }
         }
-        if (x[p] === y[p]) {
-          continue; // if they have the same strict value or identity then they are equal
-        }
-        if (typeof (x[p]) !== 'object') {
-          return false; // Numbers, Strings, Functions, Booleans must be strictly equal
-        }
-        if (!deepEquals(x[p], y[p])) {
-          return false;
-        }
-      }
-      for (const p in y) {
-        if (y.hasOwnProperty(p) && !x.hasOwnProperty(p)) {
-          return false;
-        }
-      }
-      return true;
+        return true;
     }
 };
 
 export function objectsEqual(value1, value2) {
-        if (value1 == value2) return true;
-        else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
-        else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
-        else return deepEquals(value1, value2);
-    }
+    if (value1 == value2) return true;
+    else if (value1 && value2 && value1.id && value2.id) return value1.id == value2.id;
+    else if (value1 && value2 && value1.equals && value2.equals && typeof value1.equals == 'function' && typeof value2.equals == 'function') return value1.equals(value2);
+    else return deepEquals(value1, value2);
+}
 
 export function arraysEqual(array1: any[], array2: any[]) {
     return array1?.length === array2?.length && array1?.every((value, index) => array2 && objectsEqual(value, array2[index]));

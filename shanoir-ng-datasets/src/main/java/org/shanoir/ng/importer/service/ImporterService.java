@@ -221,7 +221,7 @@ public class ImporterService {
                     try {
                         dicomAttributes = dicomProcessing.getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), serie.getIsEnhanced());
                     } catch (IOException e) {
-                        throw new ShanoirException("Unable to retrieve dicom attributes in file " + serie.getFirstDatasetFileForCurrentSerie().getPath(), e);
+                        throw new ShanoirException("Unable to retrieve dicom attributes in serie: " + serie.getSeriesDescription(), e);
                     }
                     
                     // Generate acquisition object with all sub objects : datasets, protocols, expressions, ...

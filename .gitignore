@@ -26,9 +26,7 @@ docker-compose/boutiques/boutiques
 shanoir-ng-preclinical/null*
 shanoir-uploader/src/main/resources/key
 shanoir-uploader/src/main/resources/profile.OFSEP/key
-shanoir-uploader/src/main/resources/profile.OFSEP-qualif/key
-shanoir-uploader/src/main/resources/profile.OFSEP-NG-qualif/key
-shanoir-uploader/src/main/resources/profile.OFSEP-NG/key
+shanoir-uploader/src/main/resources/profile.OFSEP-Qualif/key
 shanoir-uploader/src/main/resources/pseudonymus
 shanoir-uploader/src/test/resources/acr_phantom_t1/
 shanoir-ng-tests/tests/geckodriver.log
