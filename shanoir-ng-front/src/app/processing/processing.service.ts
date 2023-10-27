@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Pipeline } from '../carmin/models/pipeline';
+import { Pipeline } from '../vip/models/pipeline';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +15,7 @@ export class ProcessingService {
   public selectedDatasets: Observable<Set<number>>;
   public selectedPipeline: Observable<Pipeline>;
 
-  constructor() { 
+  constructor() {
     this.selectedDatasetsSubject = new BehaviorSubject<Set<number>>(new Set());
     this.selectedPipelineSubject = new BehaviorSubject<Pipeline>(null);
 
