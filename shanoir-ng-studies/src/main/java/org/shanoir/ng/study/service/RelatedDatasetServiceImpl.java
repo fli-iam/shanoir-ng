@@ -73,12 +73,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 	@Autowired
 	private StudyRepository studyRepository;
 	@Autowired
-	private SubjectStudyRepository subjectStudyRepository;
-
-	@Autowired
-	private SubjectStudyService subjectStudyService;
-
-	@Autowired
 	private SubjectRepository subjectRepository;
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
@@ -91,9 +85,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		for (String subjectId : subjectIds.split(",")) {
 			Subject subject = subjectRepository.findById(Long.valueOf(subjectId)).orElse(null);
 
-			System.out.println("subject : " + subjectId + " / " + subject.getName());
 			List<SubjectStudy> subjectStudyList = study.getSubjectStudyList();
-			System.out.println("subjectStudyList size " + subjectStudyList.size());
 
 			for (SubjectStudy subjectStudy : subjectStudyList) {
 				if (subjectStudy.getSubject().equals(subject)) {
@@ -105,25 +97,21 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 			}
 
 			if(toAdd) {
-				System.out.println("create new subjectStudy");
 				SubjectStudy ssToAdd = new SubjectStudy();
 				ssToAdd.setStudy(study);
-				//ssToAdd.setSubjectType(subject.getSubjectType());
 				ssToAdd.setSubject(subject);
+				//ssToAdd.setSubjectType(subject.getSubjectType());
 				//ssToAdd.setPhysicallyInvolved(subject.isPhysicallyInvolved());
 
-				System.out.println("ssToAdd : studyName = " + ssToAdd.getStudy().getName() + " / id = " + ssToAdd.getId() + " / subjectName = " + ssToAdd.getSubject().getName());
-				System.out.println("before add subjectStudy to subjectStudyList : " + subjectStudyList.size());
 				subjectStudyList.add(ssToAdd);
 				study.setSubjectStudyList(subjectStudyList);
-				System.out.println("after add subjectStudy to subjectStudyList : " + subjectStudyList.size());
 				// subjectStudyRepository.save(ssToAdd);
 				studyRepository.save(study);
 			}
 		}
 	}
 
-	public String addCenterAndCopyDatasetToStudy(String datasetSubjectIds, String id, String centerIds) {
+	public String addCenterAndCopyDatasetToStudy(String datasetIds, String id, String centerIds) {
 		String result = "";
 		Long userId = KeycloakUtil.getTokenUserId();
 		Long studyId = Long.valueOf(id);
@@ -139,7 +127,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 				result = addCenterToStudy(study, centerIds);
 
 				try {
-					copyDatasetToStudy(datasetSubjectIds, id);
+					copyDatasetToStudy(datasetIds, id);
 					result = "Copy worked !";
 				} catch (MicroServiceCommunicationException e) {
 					throw new RuntimeException(e);
@@ -179,10 +167,10 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		return "Center added to study";
 	}
 
-	private boolean copyDatasetToStudy(String datasetSubjectIds, String studyId) throws MicroServiceCommunicationException {
-		System.out.println("copyDatasetToStudy datasetSubjectIds : " + datasetSubjectIds + " / studyId : " + studyId);
+	private boolean copyDatasetToStudy(String datasetIds, String studyId) throws MicroServiceCommunicationException {
+		System.out.println("copyDatasetToStudy datasetIds : " + datasetIds + " / studyId : " + studyId);
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY, datasetSubjectIds + ";" + studyId);
+			rabbitTemplate.convertAndSend(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY, datasetIds + ";" + studyId);
 			return true;
 		} catch (AmqpException e) {
 			throw new MicroServiceCommunicationException(

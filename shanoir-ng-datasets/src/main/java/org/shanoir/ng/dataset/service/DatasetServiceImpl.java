@@ -101,8 +101,6 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private StudyService studyService;
 	@Autowired
-	private DatasetRepository datasetRepository;
-	@Autowired
 	private DatasetAcquisitionRepository datasetAcquisitionRepository;
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
@@ -330,7 +328,7 @@ public class DatasetServiceImpl implements DatasetService {
 	}
 
 	@Override
-	public void moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Map<String, String> datasetSubjectMap) {
+	public void moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
 		System.out.println("moveDataset : " + ds.getId() + " for study " + studyId);
 		DatasetAcquisition newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
 		List<DatasetExpression> dsExList = ds.getDatasetExpressions();
@@ -406,7 +404,8 @@ public class DatasetServiceImpl implements DatasetService {
 		}
 
 		ds.setDatasetAcquisition(newAcq);
-		ds.setSubjectId(Long.valueOf(datasetSubjectMap.get(String.valueOf(ds.getId()))));
+		ds.setSubjectId(ds.getSubjectId());
+		// ds.setSubjectId(Long.valueOf(datasetSubjectMap.get(String.valueOf(ds.getId()))));
 		ds.setId(null);
 		entityManager.detach(ds);
 

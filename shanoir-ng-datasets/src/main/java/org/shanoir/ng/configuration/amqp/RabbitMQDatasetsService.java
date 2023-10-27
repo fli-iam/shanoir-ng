@@ -439,31 +439,25 @@ public class RabbitMQDatasetsService {
 	@RabbitHandler
 	@Transactional
 	public void copyDatasetsToStudy(final String data) {
-		// data = datasetId/subjectId, dsId/subId, ... ; studyId
-		// ex = 100/10,101/10,102/12,103/12,104/15;54
+		// data = datasetId,dsId,...;studyId
+		// ex = 100,101,102,103,104;54
 		Map<Long, Examination> examMap = new HashMap<>();
 		Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
-		Map<String, String> datasetSubjectMap = new HashMap<>();
-		List<Long> datasetIds = new ArrayList<>();
-		List<Long> subjectIds = new ArrayList<>();
+		List<Long> datasetIds;
 		try {
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 			int index = data.indexOf(";");
-			makeMapDatasetSubjectIds(data.substring(0, index), datasetSubjectMap, datasetIds, subjectIds);
+			// makeMapDatasetSubjectIds(data.substring(0, index), datasetSubjectMap, datasetIds, subjectIds);
+			datasetIds = convertStringToLong(data.substring(0, index).split(","));
 
 			Long studyId = Long.valueOf(data.substring(index + 1, data.length()));
 			List<Dataset> datasetList = datasetService.findByIdIn(datasetIds);
 
 			for (Dataset dataset : datasetList) {
-				System.out.println("dataset : " + dataset.getId());
 				LOG.info("Dataset copy started for dataset " + dataset.getId() + " and study " + studyId);
 				List<Dataset> datasetStudyList = datasetService.findByStudyId(studyId);
-				for (Dataset dstudy : datasetStudyList) {
-					System.out.println("dstudy : " + dstudy.getId());
-				}
-				System.out.println("datasetService.findByStudyId(studyId) : " + datasetService.findByStudyId(studyId));
 				if (!datasetStudyList.contains(dataset)) {
-					datasetService.moveDataset(dataset, studyId, examMap, acqMap, datasetSubjectMap);
+					datasetService.moveDataset(dataset, studyId, examMap, acqMap);
 				}
 			}
 		} catch (Exception e) {
