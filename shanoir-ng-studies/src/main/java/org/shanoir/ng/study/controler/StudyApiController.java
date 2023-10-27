@@ -226,13 +226,19 @@ public class StudyApiController implements StudyApi {
 			@Parameter(name = "Study id to copy in", required = true)
 			@RequestParam(value = "studyId", required = true) String studyId,
 			@Parameter(name = "center id of datasets", required = true)
-			@RequestParam(value = "centerIds", required = true) String centerIds) {
+			@RequestParam(value = "centerIds", required = true) String centerIds,
+			@Parameter(name = "subject id of datasets", required = true)
+			@RequestParam(value = "subjectIds", required = true) String subjectIds,
+			@Parameter(name = "datasetId and related subjectId", required = true)
+			@RequestParam(value = "datasetSubjectIds", required = true) String datasetSubjectIds) {
 
 		System.out.println("datasetId : " + datasetIds);
 		System.out.println("studyId : " + studyId);
 		System.out.println("centerIds : " + centerIds);
-		String res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
-
+		System.out.println("subjectIds : " + subjectIds);
+		System.out.println("datasetSubjectIds : " + datasetSubjectIds);
+		relatedDatasetService.addSubjectStudyToNewStudy(subjectIds, studyId);
+		String res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetSubjectIds, studyId, centerIds);
 
 		return new ResponseEntity<>(res, HttpStatus.OK);
 	}

@@ -17,6 +17,8 @@ package org.shanoir.ng.dataset.service;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.data.domain.Page;
@@ -145,5 +147,8 @@ public interface DatasetService {
 	
 	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
 	void deleteDatasetFromPacs(Dataset dataset) throws ShanoirException;
+
+	@PreAuthorize("hasRole('ADMIN') or (hasRole('EXPERT') and @datasetSecurityService.hasRightOnDataset(#dataset.getId(), 'CAN_ADMINISTRATE'))")
+	void moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap, Map<String, String> datasetSubjectMap) throws Exception;
 
 }

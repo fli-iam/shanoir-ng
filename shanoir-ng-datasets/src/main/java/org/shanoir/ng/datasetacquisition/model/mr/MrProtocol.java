@@ -61,7 +61,7 @@ public class MrProtocol extends AbstractEntity {
 	 * (0018,9089) VR=FD, VM=3 Diffusion Gradient Orientation. Ordered by rank
 	 * of arrival.
 	 */
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "mrProtocol", cascade = CascadeType.ALL)
 	private List<DiffusionGradient> diffusionGradients;
 
 	/**

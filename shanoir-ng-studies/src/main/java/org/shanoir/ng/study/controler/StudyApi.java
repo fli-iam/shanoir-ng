@@ -151,7 +151,11 @@ public interface StudyApi {
 			@Parameter(name = "Study id to copy in", required = true)
 			@RequestParam(value = "studyId", required = true) String studyId,
 			@Parameter(name = "center id of datasets", required = true)
-			@RequestParam(value = "centerIds", required = true) String centerIds);
+			@RequestParam(value = "centerIds", required = true) String centerIds,
+			@Parameter(name = "subject id of datasets", required = true)
+			@RequestParam(value = "subjectIds", required = true) String subjectIds,
+			@Parameter(name = "datasetId and related subjectId", required = true)
+			@RequestParam(value = "datasetSubjectIds", required = true) String datasetSubjectIds);
 
 
 	@Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")

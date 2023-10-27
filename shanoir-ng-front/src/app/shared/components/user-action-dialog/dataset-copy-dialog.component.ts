@@ -27,6 +27,7 @@ import {ConsoleService} from "../../console/console.service";
 import {DatasetService} from "../../../datasets/shared/dataset.service";
 import {StudyService} from "../../../studies/shared/study.service";
 import {SolrDocument} from "../../../solr/solr.document.model";
+import {ShanoirError} from "../../models/error.model";
 
 @Component({
     selector: 'user-action-dialog',
@@ -42,10 +43,12 @@ export class DatasetCopyDialogComponent {
     statusMessage: string;
     ownRef: any;
     hasRight: boolean = false;
+    isDatasetInStudy: boolean = false;
     canCopy: boolean;
     centerIds: string[]=[];
     subjectIds: string[]=[];
     lines: SolrDocument[];
+    datasetSubjectIds: string[]=[];
     protected consoleService = ServiceLocator.injector.get(ConsoleService);
     constructor(private http: HttpClient,
                 private studyRightsService: StudyRightsService,
@@ -61,31 +64,49 @@ export class DatasetCopyDialogComponent {
             if (!this.subjectIds.includes(line.subjectId)) {
                 this.subjectIds.push(line.subjectId);
             }
+            if (!this.datasetSubjectIds.includes(line.datasetId + "/" + line.subjectId)) {
+                this.datasetSubjectIds.push(line.datasetId + "/" + line.subjectId);
+            }
         }
     }
     public copy() {
         this.checkRightsOnSelectedStudies(this.selectedStudy.id).then( () => {
+            this.isDatasetInStudy = this.checkDatasetBelongToStudy(this.lines, this.selectedStudy.id);
+
             if (!this.hasRight) {
                 this.statusMessage = 'Missing rights for study ' + this.selectedStudy.name + ' please make sure you have CAN_IMPORT or CAN_ADMIN right.';
-            }
-            else {
+            } else if (this.isDatasetInStudy) {
+                this.statusMessage = 'Selected dataset(s) already belong to selected study.';
+            } else {
                 this.statusMessage = "Start copy";
                 const formData: FormData = new FormData();
                 formData.set('datasetIds', Array.from(this.datasetsIds).join(","));
                 formData.set('studyId', this.selectedStudy.id.toString());
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
-                // formData.set('subjectIds', Array.from(this.subjectIds).join(","));
+                formData.set('datasetSubjectIds', Array.from(this.datasetSubjectIds).join(","));
+                formData.set('subjectIds', Array.from(this.subjectIds).join(","));
                 console.log("formData datasets : " + formData.get('datasetIds'));
                 console.log("formData studies : " + formData.get('studyId'));
                 console.log("formData centerIds : " + formData.get('centerIds'));
-                // console.log("formData subjectIds : " + formData.get('subjectIds'));
+                console.log("formData subjectIds : " + formData.get('subjectIds'));
+                console.log("formData datasetSubjectIds : " + formData.get('datasetSubjectIds'));
                 return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
                     .toPromise()
                     .then(res => {
                         console.log("res : " + res);
-                        this.statusMessage += "... \n" + res;
+                        this.statusMessage += `... \n` + res;
+                    }).catch(reason => {
+                        if (reason.status == 403) {
+                            this.statusMessage = "Vous devez être administrateur ou expert.";
+                        } else throw Error(reason);
                     });
             }
+        });
+    }
+
+    public checkDatasetBelongToStudy(lines: SolrDocument[], studyId: number) {
+        return lines.some((line) => {
+            return (studyId == Number(line.studyId));
         });
     }
 
