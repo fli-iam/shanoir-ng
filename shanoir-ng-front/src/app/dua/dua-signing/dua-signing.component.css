@@ -1,4 +1,4 @@
-.embed-pdf { width: 100%; height: 500px; margin-bottom: 10px; }
+.embed-pdf { width: 100%; height: 500px; margin-bottom: 10px; border: none; }
 checkbox { vertical-align: bottom; margin-right: 5px; }
 .refuse { background-color: var(--color-error); }
 .accept { background-color: green; width: 100%; /*width: calc(100% - 65px); */}

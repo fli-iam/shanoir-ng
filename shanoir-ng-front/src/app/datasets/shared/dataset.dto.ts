@@ -43,15 +43,13 @@ export class DatasetDTOService {
      * Warning : DO NOT USE THIS IN A LOOP, use toEntityList instead
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntity(dto: DatasetDTO, result?: Dataset): Promise<Dataset> {
+    public toEntity(dto: DatasetDTO, result?: Dataset, mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset> {   
         if(!this.datasetProcessingService) {
             this.datasetProcessingService = this.injector.get<DatasetProcessingService>(DatasetProcessingService);
         }
         if (!result) result = DatasetUtils.getDatasetInstance(dto.type);
         DatasetDTOService.mapSyncFields(dto, result);
         let promises: Promise<any>[] = [];
-        if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
-        if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject));
         if (dto.processings) {
             for(let p of dto.processings) {
                 promises.push(this.datasetProcessingService.get(p.id).then(
@@ -64,50 +62,55 @@ export class DatasetDTOService {
                 processing => result.datasetProcessing = processing
             ));
         }
-        return Promise.all(promises).then(([]) => {
-            return result;
-        });
+        if (mode == 'eager') {
+            if (dto.studyId) promises.push(this.studyService.get(dto.studyId).then(study => result.study = study));
+            if (dto.subjectId) promises.push(this.subjectService.get(dto.subjectId).then(subject => result.subject = subject));
+            return Promise.all(promises).then(([]) => {
+                return result;
+            });
+        } else if (mode == 'lazy') {
+            return Promise.resolve(result);
+        }
     }
 
     /**
      * Convert from a DTO list to an Entity list
      * @param result can be used to get an immediate temporary result without waiting async data
      */
-    public toEntityList(dtos: DatasetDTO[], result?: Dataset[]): Promise<Dataset[]>{
+    public toEntityList(dtos: DatasetDTO[], result?: Dataset[], mode: 'eager' | 'lazy' = 'eager'): Promise<Dataset[]>{
         if (!result) result = [];
+        let subjectIds = new Set<number>;
         if (dtos) {
             for (let dto of dtos ? dtos : []) {
+                if (dto.subjectId) {
+                    subjectIds.add(dto.subjectId);
+                }
                 let entity = DatasetUtils.getDatasetInstance(dto.type);
                 DatasetDTOService.mapSyncFields(dto, entity);
                 result.push(entity);
             }
         }
-        let promises = [
-            this.studyService.getStudiesNames().then(studies => {
-                for (let entity of result) {
-                    if (entity.study)
-                        entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
-                }
-            }),
-            this.subjectService.getSubjectsNames().then(subjects => {
-                for (let entity of result) {
-                    if (entity.subject)
-                        entity.subject.name = subjects.find(subject => subject.id == entity.subject.id)?.name;
-                }
+        if (mode == 'eager') {
+            let promises = [
+                this.studyService.getStudiesNames().then(studies => {
+                    for (let entity of result) {
+                        if (entity.study)
+                            entity.study.name = studies.find(study => study.id == entity.study.id)?.name;
+                    }
+                }),
+                this.subjectService.getSubjectsNames(subjectIds).then(subjects => {
+                    for (let entity of result) {
+                        if (entity.subject)
+                            entity.subject.name = subjects.find(subject => subject.id == entity.subject.id)?.name;
+                    }
+                })
+            ];
+            return Promise.all(promises).then(() => {
+                return result;
             })
-        ];
-        // for (let entity of result) {
-        //     let processingIds = entity.processings.map(p=> p.id);
-        //     entity.processings = [];
-        //     for (let processingId of processingIds) {
-        //         promises.push(this.datasetProcessingService.get(processingId).then(
-        //             p => entity.processings.push(p) as any
-        //         ));
-        //     }
-        // }
-        return Promise.all(promises).then(() => {
-            return result;
-        })
+        } else if (mode == 'lazy') {
+            return Promise.resolve(result);
+        }
     }
 
     static mapSyncFields(dto: DatasetDTO, entity: Dataset): Dataset {

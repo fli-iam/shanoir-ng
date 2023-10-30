@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/app",
-    "types": []
+    "types": ["@types/wicg-file-system-access"]
   },
   "files": [
     "src/main.ts",

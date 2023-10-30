@@ -24,9 +24,11 @@ import { Component, HostBinding, Input } from '@angular/core';
 export class LoadingBarComponent {
 
     @Input() progress: number = 0;
+    @HostBinding('class.warning') @Input() warning: boolean = false;
     @Input() text: string = "";
     @Input() unknownDownload: boolean = false;
     @Input() width: number = 200;
+    Math = Math;
 
     @HostBinding('style.width') get pixelWidth() {
         return this.width + 'px';
@@ -37,17 +39,17 @@ export class LoadingBarComponent {
     }
 
     @HostBinding('class.done') get isDone() {
-        return this.progress == 1;
+        return this.progress == 1 && !this.warning;
     }
 
     getProgressText(): string {
         if (this.progress == -1) {
             return this.text ? this.text : 'ERROR';
         }
-        else if (this.unknownDownload) {
+        else if (this.unknownDownload || this.progress > 1) {
             return this.getSizeStr(this.progress);
         }
-        else return Math.floor(this.progress * 100) + "%";
+        else return Math.ceil(this.progress * 100) + "%";
     }
 
     getSizeStr(size: number): string {
@@ -60,7 +62,7 @@ export class LoadingBarComponent {
         }
 
         const exponent: number = Math.floor(Math.log(size) / Math.log(base));
-        let value: number = parseFloat((size / Math.pow(base, exponent)).toFixed(2));
+        let value: number = Math.round(parseFloat((size / Math.pow(base, exponent)).toFixed(2)));
         let unit: string = units[exponent];
 
         return value + " " + unit;

@@ -93,7 +93,18 @@ public interface SubjectApi {
 			@ApiResponse(responseCode = "500", description = "unexpected error") })
 	@GetMapping(value = "/names", produces = { "application/json" })
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	ResponseEntity<List<IdName>> findSubjectsNames();
+	ResponseEntity<List<IdName>> findAllSubjectsNames();
+
+	@Operation(summary = "", description = "Returns id and name for the given subject ids")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "found subjects"),
+			@ApiResponse(responseCode = "204", description = "no subject found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@PostMapping(value = "/names", produces = { "application/json" })
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	ResponseEntity<List<IdName>> findSubjectsNames(@RequestParam(value = "subjectIds", required = true) List<Long> subjectIds);
 
 	@Operation(summary = "", description = "If exists, returns the subject corresponding to the given id")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found bubject"),

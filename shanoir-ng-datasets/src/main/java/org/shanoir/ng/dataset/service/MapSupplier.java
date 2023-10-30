@@ -12,16 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Component, ViewContainerRef } from '@angular/core';
+package org.shanoir.ng.dataset.service;
 
-@Component({
-    selector: 'app-modals',
-    template: `<div><ng-content></ng-content></div>`,
-    styleUrls: ['modals.component.css'],
-})
-export class ModalsComponent {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Supplier;
 
-    constructor(public vcRef: ViewContainerRef) {
-        
-    }
+public class MapSupplier implements Supplier<Map<String, String>> {
+
+	Map<String, String> map = new HashMap<>();
+
+	@Override
+	public Map<String, String> get() {
+		return map;
+	}
+
+	public String put(String key, String value) {
+		return map.put(key, value);
+	}
 }

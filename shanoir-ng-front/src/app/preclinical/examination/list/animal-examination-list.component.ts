@@ -120,7 +120,7 @@ export class AnimalExaminationListComponent extends EntityListComponent<Examinat
     }
 
     private manageDelete() {
-        this.subscribtions.push(
+        this.subscriptions.push(
             this.onDelete.subscribe(response => {
                 this.deleteExamination(response.entity.id)
             })

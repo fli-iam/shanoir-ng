@@ -141,7 +141,7 @@ export class CoilComponent extends EntityComponent<Coil> {
     openNewCenter() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/center/create']).then(success => {
-            this.subscribtions.push(
+            this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     (currentStep.entity as Coil).center = entity as Center;
                 })
@@ -153,7 +153,7 @@ export class CoilComponent extends EntityComponent<Coil> {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/acquisition-equipment/create']).then(success => {
             this.breadcrumbsService.currentStep.addPrefilled('center', this.coil.center);
-            this.subscribtions.push(
+            this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     let currentCoil: Coil = currentStep.entity as Coil;
                     currentCoil.center = this.centers.find(c => c.id == (entity as AcquisitionEquipment).center?.id);

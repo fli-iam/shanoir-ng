@@ -67,15 +67,9 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		<li>
 			<label i18n="Dataset detail|Dataset study@@datasetDetailStudy">Study</label>
 			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">
 				<a [routerLink]="['/study/details/', dataset.study?.id]">
 					{{dataset.study?.name}}
 				</a>
-				</ng-template>
-				<ng-template ngSwitchDefault>
-					<select-box [(ngModel)]="dataset.study" formControlName="study" [optionArr]="studies">
-					</select-box>
-				</ng-template>
 			</span>
 		</li>
 		<li>
@@ -99,41 +93,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</ng-template>
 			</span>
 		</li>
-		<!-- <li>
-			<label i18n="Dataset detail|Dataset acquisition@@datasetDetailAcquisition">Acquisition</label>
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{dataset.acquisitionId}}</ng-template>
-				<ng-template ngSwitchDefault>
-					<select [(ngModel)]="dataset.acquisitionId" [ngModelOptions]="{standalone: true}" >
-						<option *ngFor="" [value]="">{{}}</option>
-					</select>
-				</ng-template>
-			</span>
-		</li> -->
-		<!-- <li>
-			<label i18n="Dataset detail|Dataset processing@@datasetDetailProcessing">Processing</label>
-			<span class="right-col">
-				<ng-template *ngIf="mode == 'view'">{{dataset.processing}}</ng-template>
-			</span>
-		</li> -->
-		<!-- <li>
-			<label i18n="Dataset detail|Dataset referenced for superimposition@@datasetDetailReferencedForSuperimposition">Can be superimposed with</label>
-			<span class="right-col">
-				<ng-template *ngIf="mode=='view'">{{dataset.referencedDatasetForSuperimposition}}</ng-template>
-			</span>
-		</li> -->
-
-		<!-- <li>
-			<label i18n="Dataset detail|Dataset group fo subject@@datasetDetailGroupOfSubject">Group of subjects</label>
-			<span class="right-col" [ngSwitch]="mode">
-				<ng-template [ngSwitchCase]="'view'">{{dataset.groupOfSubjectId}}</ng-template>
-				<ng-template ngSwitchDefault>
-					<select [(ngModel)]="dataset.groupOfSubjectId" [ngModelOptions]="{standalone: true}" >
-						<option *ngFor="" [value]="">{{}}</option>
-					</select>
-				</ng-template>
-			</span>
-		</li> -->
 	</ol>
 </fieldset>
 

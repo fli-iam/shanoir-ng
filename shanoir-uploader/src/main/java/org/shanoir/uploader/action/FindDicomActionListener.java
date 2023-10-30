@@ -246,7 +246,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 		for (Iterator iterator = patients.iterator(); iterator.hasNext();) {
 			Patient patient = (Patient) iterator.next();
 			final PatientTreeNode patientTreeNode = media.initChildTreeNode(patient);
-			logger.info("Patient info read from DICOMDIR: " + patient.toString());
+			logger.info("Patient info read: " + patient.toString());
 			// add patients
 			media.addTreeNode(patient.getPatientID(), patientTreeNode);
 			List<Study> studies = patient.getStudies();

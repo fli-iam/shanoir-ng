@@ -12,8 +12,6 @@ import org.weasis.dicom.tool.DicomListener;
 
 /**
  * The DcmRcvHelper handles the download of DICOM files.
- * It's a local service / server which is started, when
- * the ShanoirUploader is started.
  * 
  * @author mkain
  *
@@ -26,7 +24,7 @@ public class DcmRcvManager {
 	 * In the brackets '{ggggeeee}' the dicom attribute value is used to be replaced.
 	 * We store in a folder with the SeriesInstanceUID and the file name of the SOPInstanceUID.
 	 */
-	private static final String STORAGE_PATTERN = "{00080018}";
+	private static final String STORAGE_PATTERN = "{0020000E}" + File.separator + "{00080018}";
 	
 	public static final String DICOM_FILE_SUFFIX = ".dcm";
 	
@@ -53,6 +51,11 @@ public class DcmRcvManager {
 		this.lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, null, null);
 	}
 	
+	/**
+	 * Called from a synchronized method only, so should not be a problem for multiple usages.
+	 * 
+	 * @param folderPath
+	 */
 	public void startSCPServer(final String folderPath) {
 		try {
 			if(this.listener != null)

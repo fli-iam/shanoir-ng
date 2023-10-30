@@ -12,22 +12,44 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { Injectable, ElementRef } from '@angular/core';
+import { Injectable, ElementRef, OnDestroy } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
-import { fromEvent } from 'rxjs';
+import { Subject, Subscription, fromEvent } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { LocationStrategy } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Injectable()
-export class GlobalService {
+export class GlobalService implements OnDestroy {
     
     public onGlobalClick: Observable<Event>;
-
     public onGlobalMouseUp: Observable<Event>;
+    private _onNavigate: Subject<any> = new Subject();
+    private subscription: Subscription;
     
-    constructor() { }
+    constructor(locationStrategy: LocationStrategy, router: Router) {
+        locationStrategy.onPopState((event: PopStateEvent) => {
+            this._onNavigate.next(event);
+        });
+        this.subscription = router.events.subscribe(event => {
+            this._onNavigate.next(event);
+        })
+    }
 
+    ngOnDestroy(): void {
+        this.subscription?.unsubscribe();
+    }
+    
     registerGlobalClick(rootElement: ElementRef) {
         this.onGlobalClick = fromEvent(rootElement.nativeElement, 'click');
         this.onGlobalMouseUp = fromEvent(rootElement.nativeElement, 'mouseup');
     }
     
+    onClickOutside(elementRef: ElementRef<any>) {
+        return this.onGlobalClick.pipe(filter(clickEvent => !elementRef.nativeElement.contains(clickEvent.target)));
+    }
+
+    get onNavigate(): Observable<any> {
+        return this._onNavigate.asObservable();
+    }
 }
