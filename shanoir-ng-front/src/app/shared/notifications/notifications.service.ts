@@ -99,7 +99,7 @@ export class NotificationsService {
         let tmpTasksInProgress = [];
         let tmpTasksInWait = [];
         for (let task of this.allTasks) {
-            if ((task.status == 2 || task.status == 4 || task.status == 5) && task.lastUpdate) {
+            if (task.eventType.startsWith("downloadDataset") && (task.status == 2 || task.status == 4 || task.status == 5) && task.lastUpdate) {
                 if (Date.now() - new Date(task.lastUpdate).getTime() > this.TIMEOUT) {
                     task.status = -1;
                     task.message = 'timeout';
