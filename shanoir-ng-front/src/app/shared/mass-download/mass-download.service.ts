@@ -155,7 +155,9 @@ export class MassDownloadService {
         if (parentHandle) {
             directoryHandlePromise = Promise.resolve(parentHandle);
         } else {
-            directoryHandlePromise = this.getFolderHandle();
+            directoryHandlePromise = this.getFolderHandle()
+                // add a subdirectory
+                .then(handle => this.makeRootSubdirectory(handle, datasetIds.length));
         }
         return directoryHandlePromise.then(parentFolderHandle => { // ask the user's parent directory
             if (!task) task = this.createTask(datasetIds.length);
@@ -189,6 +191,11 @@ export class MassDownloadService {
                 }
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
+    }
+    
+    makeRootSubdirectory(handle: FileSystemDirectoryHandle, nbDatasets: number): Promise<FileSystemDirectoryHandle> {
+        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-YYYY_HH\'h\'mm', 'en-US'); 
+        return handle.getDirectoryHandle(dirName, { create: true })
     }
 
     private _downloadAlt(inputDef: 'studyId' | 'datasetIds', input: number | number[], format: Format, downloadState?: TaskState): any {
@@ -265,7 +272,11 @@ export class MassDownloadService {
 
     private _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4, downloadState?: TaskState): Promise<void> {
         if (datasets.length == 0) return;
-        return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
+        return this.getFolderHandle()
+        // add a subdirectory
+            .then(handle => this.makeRootSubdirectory(handle, datasets.length))
+            .then(parentFolderHandle => { // ask the user's parent directory
+
             let task: Task = this.createTask(datasets.length);
             if (downloadState) downloadState.status = task.status; 
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
@@ -389,11 +400,7 @@ export class MassDownloadService {
     }
 
     private buildDatasetPath(dataset: Dataset): string {
-        let currentDate = new Date();
-        return  "Datasets-"
-                + formatDate(currentDate, "yyyyMMddHHmmss", "en-US")
-                + '/'
-                + dataset.datasetAcquisition?.examination?.subject?.name
+        return dataset.datasetAcquisition?.examination?.subject?.name
                 + '_' + dataset.datasetAcquisition?.examination?.subject?.id
                 + '/'
                 + dataset.datasetAcquisition?.examination?.comment
