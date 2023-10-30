@@ -206,12 +206,22 @@ export class NotificationsService {
         this.readLocalTasks();
         let tmpTasks: Task[] = this.localTasks.filter(lt => !this.newLocalTasksQueue.find(nlt => lt.id == nlt.id));
         tmpTasks = tmpTasks.concat(this.newLocalTasksQueue);
-        let tmpTasksStr: string = '[' + tmpTasks.map(t => t.stringify()).join(',') + ']';
+        let tmpTasksStr: string = this.serializeTasks(tmpTasks); // also checks the size limit
         localStorage.setItem(this.storageKey, tmpTasksStr);
         this.newLocalTasksQueue = [];
         this.localTasks = tmpTasks;
         this.updateStatusVars();
         this.emitTasks();
+    }
+    
+    private serializeTasks(tasks: Task[]): string {
+        let tasksToStore: Task[] = [].concat(tasks);
+        let str: string = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
+        while (str.length > 5200000) {
+            tasksToStore.shift();
+            str = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
+        }
+        return str;
     }
 
     totalProgress(): number {
