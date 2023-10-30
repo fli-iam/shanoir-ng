@@ -31,10 +31,14 @@ public class CenterAndEquipmentTest extends AbstractTest {
 		Center createdCenter = shUpClient.createCenter(center);
 		Assertions.assertNotNull(createdCenter);
 		Manufacturer manufacturer = new Manufacturer();
-		manufacturer.setName("SIEMENS");
+		manufacturer.setName("Manufacturer-" + UUID.randomUUID().toString());
+		Manufacturer createdManufacturer = shUpClient.createManufacturer(manufacturer);
+		Assertions.assertNotNull(createdManufacturer);
 		ManufacturerModel manufacturerModel = new ManufacturerModel();
 		manufacturerModel.setName("Manufacturer-Model-" + UUID.randomUUID().toString());
-		manufacturerModel.setManufacturer(manufacturer);
+		manufacturerModel.setManufacturer(createdManufacturer);
+		manufacturerModel.setDatasetModalityType("0"); // 0 == MR
+		manufacturerModel.setMagneticField(3.0);
 		ManufacturerModel createdManufacturerModel = shUpClient.createManufacturerModel(manufacturerModel);
 		Assertions.assertNotNull(createdManufacturerModel);
 		AcquisitionEquipment equipment = new AcquisitionEquipment();

@@ -44,11 +44,16 @@ public abstract class AbstractTest {
 		shUpClient = new ShanoirUploaderServiceClient();
 		String user = testProperties.getProperty(USER_NAME);
 		String password = testProperties.getProperty(USER_PASSWORD);
-		String token = shUpClient.loginWithKeycloakForToken(user, password);
-		if (token != null) {
-			ShUpOnloadConfig.setTokenString(token);
-		} else {
-			logger.error("ERROR: login not successful.");
+		String token;
+		try {
+			token = shUpClient.loginWithKeycloakForToken(user, password);
+			if (token != null) {
+				ShUpOnloadConfig.setTokenString(token);
+			} else {
+				logger.error("ERROR: login not successful.");
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage(), e);
 		}
 	}
 

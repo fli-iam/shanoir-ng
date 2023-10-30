@@ -22,7 +22,6 @@ import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.apache.log4j.Logger;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.uploader.ShUpConfig;
@@ -32,6 +31,7 @@ import org.shanoir.uploader.model.rest.AcquisitionEquipment;
 import org.shanoir.uploader.model.rest.Center;
 import org.shanoir.uploader.model.rest.Examination;
 import org.shanoir.uploader.model.rest.IdList;
+import org.shanoir.uploader.model.rest.Manufacturer;
 import org.shanoir.uploader.model.rest.ManufacturerModel;
 import org.shanoir.uploader.model.rest.Study;
 import org.shanoir.uploader.model.rest.StudyCard;
@@ -202,7 +202,7 @@ public class ShanoirUploaderServiceClient {
 	 * @return
 	 * @throws IOException
 	 */
-	public static int testProxy(String testURL) throws IOException {
+	public static int testProxy(String testURL) throws Exception {
 		int code = 0;
 		long startTime = System.currentTimeMillis();
 		HttpService httpService = new HttpService(testURL);
@@ -218,7 +218,7 @@ public class ShanoirUploaderServiceClient {
 		}
 	}
 	
- 	public String loginWithKeycloakForToken(String username, String password) throws JSONException {
+ 	public String loginWithKeycloakForToken(String username, String password) throws Exception {
 		String keycloakURL = this.serverURL + "/auth/realms/shanoir-ng/protocol/openid-connect/token";
 		try {
 			final StringBuilder postBody = new StringBuilder();
@@ -291,7 +291,7 @@ public class ShanoirUploaderServiceClient {
 		executor.scheduleAtFixedRate(task, 0, 240, TimeUnit.SECONDS);
 	}
 	
-	public List<Study> findStudiesNamesAndCenters() throws IOException {
+	public List<Study> findStudiesNamesAndCenters() throws Exception {
 		long startTime = System.currentTimeMillis();
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLStudiesNamesAndCenters)) {
 			long stopTime = System.currentTimeMillis();
@@ -308,7 +308,7 @@ public class ShanoirUploaderServiceClient {
 		}
 	}
 
-	public List<StudyCard> findStudyCardsByStudyIds(IdList studyIds) throws IOException {
+	public List<StudyCard> findStudyCardsByStudyIds(IdList studyIds) throws Exception {
 		try {
 			String json = Util.objectWriter.writeValueAsString(studyIds);
 			long startTime = System.currentTimeMillis();
@@ -330,7 +330,7 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
-	public Subject findSubjectBySubjectIdentifier(String subjectIdentifier) throws IOException {
+	public Subject findSubjectBySubjectIdentifier(String subjectIdentifier) throws Exception {
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLSubjectsFindByIdentifier + URLEncoder.encode(subjectIdentifier, "UTF-8"))) {
 			int code = response.getCode();
 			if (code == HttpStatus.SC_OK) {
@@ -343,7 +343,7 @@ public class ShanoirUploaderServiceClient {
 		}
 	}
 	
-	public String createTempDir() throws IOException {
+	public String createTempDir() throws Exception {
 		try (CloseableHttpResponse response = httpService.get(this.serviceURLImporterCreateTempDir)) {
 			int code = response.getCode();
 			if (code == HttpStatus.SC_OK) {
@@ -356,7 +356,7 @@ public class ShanoirUploaderServiceClient {
 		}
 	}
 		
-	public List<Examination> findExaminationsBySubjectId(Long subjectId) throws IOException {
+	public List<Examination> findExaminationsBySubjectId(Long subjectId) throws Exception {
 		if (subjectId != null) {
 			try (CloseableHttpResponse response = httpService.get(this.serviceURLExaminationsBySubjectId + subjectId)) {
 				int code = response.getCode();
@@ -396,7 +396,7 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
-	public List<Long> findDatasetIdsBySubjectId(Long subjectId) throws IOException {
+	public List<Long> findDatasetIdsBySubjectId(Long subjectId) throws Exception {
 		if (subjectId != null) {
 			try (CloseableHttpResponse response = httpService.get(this.serviceURLDatasets + "subject/" + subjectId)) {
 				int code = response.getCode();
@@ -411,7 +411,7 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 
-	public List<Long> findDatasetIdsBySubjectIdStudyId(Long subjectId, Long studyId) throws IOException {
+	public List<Long> findDatasetIdsBySubjectIdStudyId(Long subjectId, Long studyId) throws Exception {
 		if (subjectId != null) {
 			try (CloseableHttpResponse response = httpService
 					.get(this.serviceURLDatasets + "subject/" + subjectId + "/study/" + studyId)) {
@@ -558,7 +558,7 @@ public class ShanoirUploaderServiceClient {
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
-		} catch (IOException ioE) {
+		} catch (Exception ioE) {
 			logger.error(ioE.getMessage(), ioE);			
 		}
 		return null;
@@ -579,7 +579,7 @@ public class ShanoirUploaderServiceClient {
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
-		} catch (IOException ioE) {
+		} catch (Exception ioE) {
 			logger.error(ioE.getMessage(), ioE);			
 		}
 		return null;
@@ -594,14 +594,14 @@ public class ShanoirUploaderServiceClient {
 					Center centerCreated = Util.getMappedObject(response, Center.class);
 					return centerCreated;
 				} else {
-					logger.error("Error in createCenter: with center " + center.getName()
-						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+					logger.error("Error in createCenter: with center " + center.getName() + " (status code: " + code
+							+ ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
-		} catch (IOException ioE) {
-			logger.error(ioE.getMessage(), ioE);			
 		}
 		return null;
 	}
@@ -621,8 +621,29 @@ public class ShanoirUploaderServiceClient {
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
-		} catch (IOException ioE) {
+		} catch (Exception ioE) {
 			logger.error(ioE.getMessage(), ioE);			
+		}
+		return null;
+	}
+
+	public Manufacturer createManufacturer(final Manufacturer manufacturer) {
+		try {
+			String json = Util.objectWriter.writeValueAsString(manufacturer);
+			try (CloseableHttpResponse response = httpService.post(this.serviceURLManufacturers, json, false)) {
+				int code = response.getCode();
+				if (code == HttpStatus.SC_OK) {
+					Manufacturer manufacturerCreated = Util.getMappedObject(response, Manufacturer.class);
+					return manufacturerCreated;
+				} else {
+					logger.error("Error in createManufacturer: with manufacturer " + manufacturer.getName()
+						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);			
+			}
+		} catch (JsonProcessingException e) {
+			logger.error(e.getMessage(), e);
 		}
 		return null;
 	}
@@ -639,11 +660,11 @@ public class ShanoirUploaderServiceClient {
 					logger.error("Error in createManufacturerModel: with manufacturerModel " + manufacturerModel.getName()
 						+ " (status code: " + code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
 				}
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);			
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
-		} catch (IOException ioE) {
-			logger.error(ioE.getMessage(), ioE);			
 		}
 		return null;
 	}
@@ -681,7 +702,7 @@ public class ShanoirUploaderServiceClient {
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
-		} catch (IOException ioE) {
+		} catch (Exception ioE) {
 			logger.error(ioE.getMessage(), ioE);			
 		}
 		return null;
@@ -709,7 +730,7 @@ public class ShanoirUploaderServiceClient {
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
-		} catch (IOException ioE) {
+		} catch (Exception ioE) {
 			logger.error(ioE.getMessage(), ioE);			
 		}
 		return null;
@@ -737,7 +758,7 @@ public class ShanoirUploaderServiceClient {
 			}
 		} catch (JsonProcessingException e) {
 			logger.error(e.getMessage(), e);
-		} catch (IOException ioE) {
+		} catch (Exception ioE) {
 			logger.error(ioE.getMessage(), ioE);
 		}
 		return null;
