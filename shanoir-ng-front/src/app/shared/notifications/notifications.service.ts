@@ -42,7 +42,7 @@ export class NotificationsService {
     readonly readInterval: number = 1000;
     readonly persistenceTime: number = 1800000;
     private freshTimeouts: SuperTimeout[] = [];
-    private readonly TIMEOUT: number = 30000;
+    private readonly TIMEOUT: number = 300000;
 
 
     constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
