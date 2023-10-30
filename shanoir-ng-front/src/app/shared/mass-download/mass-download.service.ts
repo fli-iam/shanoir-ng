@@ -2,17 +2,17 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
-import { HttpResponse } from '@angular/common/http';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import { ComponentRef, Injectable } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs-compat';
 import { Task, TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
@@ -28,6 +28,8 @@ import { SuperPromise } from 'src/app/utils/super-promise';
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { ConsoleService } from '../console/console.service';
 import { formatDate } from '@angular/common';
+import {DatasetDTO} from "../../datasets/shared/dataset.dto";
+import * as AppUtils from "../../utils/app.utils";
 
 declare var JSZip: any;
 
@@ -157,6 +159,8 @@ export class MassDownloadService {
         } else {
             directoryHandlePromise = this.getFolderHandle();
         }
+        let path :string = "Datasets-" + formatDate(new Date(), "yyyyMMddHHmmss", "en-US") + '/';
+
         return directoryHandlePromise.then(parentFolderHandle => { // ask the user's parent directory
             if (!task) task = this.createTask(datasetIds.length);
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
@@ -170,7 +174,7 @@ export class MassDownloadService {
                     let promises: Promise<void>[] = [];
                     for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
-                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task)
+                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, path)
                         );
                     }
                     return Promise.all(promises).then(() => {
@@ -267,7 +271,9 @@ export class MassDownloadService {
         if (datasets.length == 0) return;
         return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
             let task: Task = this.createTask(datasets.length);
-            if (downloadState) downloadState.status = task.status; 
+            if (downloadState) downloadState.status = task.status;
+            let path :string = "Datasets-" + formatDate(new Date(), "yyyyMMddHHmmss", "en-US") + '/';
+
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
                     task.status = 2;
@@ -279,7 +285,7 @@ export class MassDownloadService {
                     let j = 0;
                     for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
-                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, datasets)
+                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, path, datasets)
                         );
                     }
                     return Promise.all(promises).then(() => {
@@ -324,24 +330,24 @@ export class MassDownloadService {
         this.notificationService.pushLocalTask(task);
     }
 
-    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, datasets?: Dataset[]): Promise<void> {
+    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, path: string, datasets?: Dataset[]): Promise<void> {
         if (!id) return Promise.resolve();
-        return this.saveDataset(id, format, userFolderHandle, report, task, datasets?.find(ds => ds.id == id)).then(() => {
+        return this.saveDataset(id, format, userFolderHandle, report, task, path, datasets?.find(ds => ds.id == id)).then(() => {
             if (remainingIds.length > 0) {
-                return this.recursiveSave(remainingIds.shift(), format, userFolderHandle, remainingIds, report, task, datasets);
+                return this.recursiveSave(remainingIds.shift(), format, userFolderHandle, remainingIds, report, task, path, datasets);
             } else {
                 return Promise.resolve();
             }
         });
     }
 
-    private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, dataset?: Dataset): Promise<void> {
+    private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, rootPath: string, dataset?: Dataset): Promise<void> {
         const metadataPromise: Promise<Dataset> = (dataset?.id == id && dataset.datasetAcquisition?.examination?.subject) ? Promise.resolve(dataset) : this.datasetService.get(id, 'lazy');
         const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format);
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
-            const path: string = this.buildDatasetPath(dataset) + filename;
+            const path: string = this.buildDatasetPath(dataset, rootPath) + filename;
 
             // Check ERRORS file in zip
             var zip = new JSZip();
@@ -388,11 +394,8 @@ export class MassDownloadService {
         });
     }
 
-    private buildDatasetPath(dataset: Dataset): string {
-        let currentDate = new Date();
-        return  "Datasets-"
-                + formatDate(currentDate, "yyyyMMddHHmmss", "en-US")
-                + '/'
+    private buildDatasetPath(dataset: Dataset, rootPath: string): string {
+        return  rootPath + "/"
                 + dataset.datasetAcquisition?.examination?.subject?.name
                 + '_' + dataset.datasetAcquisition?.examination?.subject?.id
                 + '/'
@@ -421,7 +424,7 @@ export class MassDownloadService {
         } else { // if no dir to create
             userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                 this.writeFile(fileHandler, content);
-            }); 
+            });
         }
     }
 
@@ -520,7 +523,7 @@ export class MassDownloadService {
     private waitForEnd(modalRef: ComponentRef<any>): Promise<any | 'cancel'> {
         let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
         let result: Observable<any> = Observable.race([
-            modalRef.instance.go, 
+            modalRef.instance.go,
             modalRef.instance.close.map(() => 'cancel')
         ]);
         result.pipe(take(1)).subscribe(ret => {
