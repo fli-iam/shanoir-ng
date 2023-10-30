@@ -27,6 +27,7 @@ import { DatasetModalityType } from '../../../enum/dataset-modality-type.enum';
 import { DatasetProcessingType } from '../../../enum/dataset-processing-type.enum';
 import { ProcessedDatasetType } from '../../../enum/processed-dataset-type.enum';
 import { DatasetType } from '../../shared/dataset-type.model';
+import {CardinalityOfRelatedSubjects} from "../../../enum/cardinality-of-related-subjects.enum";
 
 @Component({
     selector: 'common-dataset-details',
@@ -43,6 +44,10 @@ export class CommonDatasetComponent implements OnChanges {
     exploredEntityOptions: Option<ExploredEntity>[];
     datasetTypes: Option<DatasetType>[];
     processedDatasetTypeOptions: Option<ProcessedDatasetType>[];
+    CardinalityOfRelatedSubjects = CardinalityOfRelatedSubjects;
+    ExploredEntity = ExploredEntity;
+    ProcessedDatasetType = ProcessedDatasetType;
+
 
     constructor(
             private studyService: StudyService,
