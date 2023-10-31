@@ -12,22 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { formatDate } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
 import { ComponentRef, Injectable } from '@angular/core';
-import { Observable, Subject, Subscription } from 'rxjs-compat';
-import { Task, TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { Observable, Subscription } from 'rxjs-compat';
+import { take } from 'rxjs/operators';
+import { Task, TaskState } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
-import { NotificationsService } from '../notifications/notifications.service';
-import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
-import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
-import { Queue } from './queue.model';
-import { take } from 'rxjs/operators';
 import { SuperPromise } from 'src/app/utils/super-promise';
-import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
+import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
 import { ConsoleService } from '../console/console.service';
-import { formatDate } from '@angular/common';
+import { NotificationsService } from '../notifications/notifications.service';
+import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
+import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
+import { Queue } from './queue.model';
 
 declare var JSZip: any;
 
@@ -355,7 +355,7 @@ export class MassDownloadService {
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
 
             // Check ERRORS file in zip
-            var zip = new JSZip();
+            var zip: any = new JSZip();
             const unzipPromise: Promise<any> = zip.loadAsync(httpResponse.body).then(dataFiles => {
                 if (dataFiles.files['ERRORS.json']) {
                     return dataFiles.files['ERRORS.json'].async('string').then(content => {
@@ -381,7 +381,9 @@ export class MassDownloadService {
                 return unzipPromise.then(data => {
                     for(let [name, file] of Object.entries(data.files)) {
                         const path: string = this.buildAcquisitionPath(dataset) + filename.replace('.zip', '') + '/' + name;
-                        this.writeMyFile(path, file, userFolderHandle);
+                        (file as {async: (string) => Promise<Blob>}).async('blob').then(blob => {
+                            this.writeMyFile(path, blob, userFolderHandle);
+                        });
                     }
                 });
             } else {
