@@ -323,7 +323,8 @@ public class ImportUtils {
 				}
 				File destFile = new File(uploadFolder.getAbsolutePath() + File.separator + dicomFileName);
 				FileUtil.copyFile(sourceFile, destFile);
-				newFileNamesOfSerie.add(dicomFileName);	
+				newFileNamesOfSerie.add(dicomFileName);
+				instance.setReferencedFileID(new String[]{dicomFileName});
 			}
 			serieTreeNode.setFileNames(newFileNamesOfSerie);
 			allFileNames.addAll(newFileNamesOfSerie);
