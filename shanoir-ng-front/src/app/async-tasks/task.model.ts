@@ -20,6 +20,7 @@ export enum TaskStatus {
     ERROR = -1,
     DONE = 1,
     IN_PROGRESS = 2,
+    DONE_BUT_WARNING = 3,
     QUEUED = 4,
     IN_PROGRESS_BUT_WARNING = 5
 }

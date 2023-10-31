@@ -322,15 +322,15 @@ export class MassDownloadService {
         report.duration = Date.now() - start;
         task.report = JSON.stringify(report, null, 4);
         if (report.nbError > 0) {
-            task.status = -1;
+            task.status = 3;
             const tab: string = '- ';
-            task.message = 'download failed in ' + report.duration + 'ms.\n'
+            task.message = (report.nbSuccess > 0 ? 'download partially succeed in ' : 'download failed in ') + report.duration + 'ms.\n'
                 + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
                 + tab + report.nbError + ' datasets are (at least partially) in error and files could be missing.\n';
             JSON.stringify(report);
         } else {
             task.status = task.status == -1 ? -1 : 1;
-            task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' files saved in the selected directory';
+            task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' datasets saved in the selected directory';
         }
 
         this.notificationService.pushLocalTask(task);
