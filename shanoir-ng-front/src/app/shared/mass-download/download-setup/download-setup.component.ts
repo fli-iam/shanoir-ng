@@ -26,7 +26,7 @@ import { Option } from '../../select/select.component';
 
 export class DownloadSetupComponent implements OnInit {
 
-    @Output() go: EventEmitter<{format: Format, nbQueues: number}> = new EventEmitter();
+    @Output() go: EventEmitter<{format: Format, nbQueues: number, unzip: boolean}> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
     form: UntypedFormGroup;
     @Input() format: Format; 
@@ -53,6 +53,7 @@ export class DownloadSetupComponent implements OnInit {
         let formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
             'nbQueues': [4, [Validators.required, Validators.min(1), Validators.max(1024)]],
+            'unzip': [false, []],
         });
         return formGroup;
     }
@@ -60,7 +61,8 @@ export class DownloadSetupComponent implements OnInit {
     downloadNow() {
         this.go.emit({
             format: this.form.get('format').value, 
-            nbQueues: this.form.get('nbQueues').value
+            nbQueues: this.form.get('nbQueues').value,
+            unzip: this.form.get('unzip').value
         });
     }
     
