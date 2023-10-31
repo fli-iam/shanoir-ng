@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.DicomDirGeneratorService;
 import org.shanoir.ng.importer.dicom.DicomDirToModelService;
-import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.ng.importer.model.Study;
@@ -56,22 +55,20 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 	private String filePathDicomDir;
 	
 	private DicomDirGeneratorService dicomDirGeneratorService = new DicomDirGeneratorService();
-	
-	private ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer;
 
 	public FindDicomActionListener(final MainWindow mainWindow,
 			final JFileChooser fileChooser,
-			final IDicomServerClient dicomServerClient,
-			final ImagesCreatorAndDicomFileAnalyzerService dicomFileAnalyzer) {
+			final IDicomServerClient dicomServerClient) {
 		this.mainWindow = mainWindow;
 		this.fileChooser = fileChooser;
 		this.dicomServerClient = dicomServerClient;
-		this.dicomFileAnalyzer = dicomFileAnalyzer;
 	}
 
 	/**
 	 * This method contains all the logic which is performed when the open file
-	 * from CD/DVD menu or the query button is clicked.
+	 * from CD/DVD menu or the query button is clicked. The answer from the PACS
+	 * and the content of the DICOMDIR are moved into the Media object for display
+	 * in the GUI and the JTree.
 	 */
 	public void actionPerformed(ActionEvent event) {
 		mainWindow.isDicomObjectSelected = false;
@@ -105,8 +102,8 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 						final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
 						List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
 						fillMediaWithPatients(media, patients);
-						filePathDicomDir = selectedRootDir.toString();
-						dicomFileAnalyzer.createImagesAndAnalyzeDicomFiles(patients, selectedRootDir.getAbsolutePath(), false, null);
+						// no need to use ImagesCreatorAndFileAnalyzer here, 1) not send to server,
+						// as not part of upload-job 2) done by the server for all ShUp imports anyway
 						// clean up in case of dicomdir generated
 						if (dicomDirGenerated) {
 							dicomDirFile.delete();

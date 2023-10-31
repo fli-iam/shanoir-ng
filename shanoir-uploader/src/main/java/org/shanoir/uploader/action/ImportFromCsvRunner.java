@@ -396,7 +396,7 @@ public class ImportFromCsvRunner extends SwingWorker<Void, Integer> {
 		logger.info("7 Write upload job nominative");
 
 		NominativeDataUploadJob dataJob = new NominativeDataUploadJob();
-		ImportUtils.initDataUploadJob(selectedSeriesNodes, dicomData, dataJob);
+		ImportUtils.initDataUploadJob(uploadJob, dicomData, dataJob);
 
 		NominativeDataUploadJobManager uploadDataJobManager = new NominativeDataUploadJobManager(
 				uploadFolder.getAbsolutePath());

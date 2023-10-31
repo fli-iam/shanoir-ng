@@ -358,7 +358,11 @@ public class ShanoirUploaderServiceClient {
 		
 	public List<Examination> findExaminationsBySubjectId(Long subjectId) throws Exception {
 		if (subjectId != null) {
+			long startTime = System.currentTimeMillis();
 			try (CloseableHttpResponse response = httpService.get(this.serviceURLExaminationsBySubjectId + subjectId)) {
+				long stopTime = System.currentTimeMillis();
+			    long elapsedTime = stopTime - startTime;
+			    logger.info("findExaminationsBySubjectId: " + elapsedTime + "ms");
 				int code = response.getCode();
 				if (code == HttpStatus.SC_OK) {
 					List<Examination> examinations = Util.getMappedList(response, Examination.class);

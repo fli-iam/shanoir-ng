@@ -184,7 +184,7 @@ public class MainWindow extends JFrame {
 
 		ImageIcon searchIcon = new ImageIcon(getClass().getClassLoader().getResource("images/search.png"));
 		JMenuItem mntmOpenDicomFromCD = new JMenuItem(resourceBundle.getString("shanoir.uploader.fileMenu.openCD"), searchIcon);
-		fAL = new FindDicomActionListener(this, fileChooser, dicomServerClient, dicomFileAnalyzer);
+		fAL = new FindDicomActionListener(this, fileChooser, dicomServerClient);
 		mntmOpenDicomFromCD.addActionListener(fAL);
 		mnFile.add(mntmOpenDicomFromCD);
 

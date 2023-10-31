@@ -14,13 +14,16 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.log4j.Logger;
 import org.shanoir.ng.importer.dicom.ImagesCreatorAndDicomFileAnalyzerService;
+import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.ImportJob;
 import org.shanoir.ng.importer.model.Instance;
+import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Patient;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.uploader.ShUpConfig;
 import org.shanoir.uploader.action.DicomDataTransferObject;
 import org.shanoir.uploader.dicom.IDicomServerClient;
+import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 import org.shanoir.uploader.dicom.retrieve.DcmRcvManager;
 import org.shanoir.uploader.model.rest.IdName;
@@ -133,6 +136,24 @@ public class ImportUtils {
 		 * Serie level
 		 */
 		uploadJob.setSeries(selectedSeries);
+
+		Serie firstSerie = selectedSeries.iterator().next().getSerie();
+		MRI mriInformation = new MRI();
+		InstitutionDicom institutionDicom = firstSerie.getInstitution();
+		if(institutionDicom != null) {
+			mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
+			mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
+		}
+		EquipmentDicom equipmentDicom = firstSerie.getEquipment();
+		if(equipmentDicom != null) {
+			mriInformation.setManufacturer(equipmentDicom.getManufacturer());
+			mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
+			mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
+			mriInformation.setStationName(equipmentDicom.getStationName());
+			mriInformation.setMagneticFieldStrength(equipmentDicom.getMagneticFieldStrength());
+		}
+		uploadJob.setMriInformation(mriInformation);
+		logger.info(mriInformation.toString());
 	}
 
 	/**
@@ -234,15 +255,14 @@ public class ImportUtils {
 	 * Initializes UploadStatusServiceJob object
 	 * 
 	 */
-	public static void initDataUploadJob(final Set<org.shanoir.uploader.dicom.query.SerieTreeNode> selectedSeries,
+	public static void initDataUploadJob(final UploadJob uploadJob,
 			final DicomDataTransferObject dicomData, NominativeDataUploadJob dataUploadJob) {
 		dataUploadJob.setPatientName(dicomData.getFirstName() + " " + dicomData.getLastName());
 		dataUploadJob.setPatientPseudonymusHash(dicomData.getSubjectIdentifier());
 		dataUploadJob.setStudyDate(ShUpConfig.formatter.format(dicomData.getStudyDate()));
 		dataUploadJob.setIPP(dicomData.getIPP());
-		SerieTreeNode firstSerie = selectedSeries.iterator().next();
-		dataUploadJob.setMriSerialNumber(firstSerie.getMriInformation().getManufacturer()
-				+ "(" + firstSerie.getMriInformation().getDeviceSerialNumber() + ")");
+		dataUploadJob.setMriSerialNumber(uploadJob.getMriInformation().getManufacturer()
+				+ "(" + uploadJob.getMriInformation().getDeviceSerialNumber() + ")");
 		dataUploadJob.setUploadPercentage("");
 		dataUploadJob.setUploadState(UploadState.READY);
 	}
