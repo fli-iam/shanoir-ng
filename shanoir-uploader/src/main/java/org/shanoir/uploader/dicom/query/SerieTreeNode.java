@@ -10,7 +10,6 @@ import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Serie;
 import org.shanoir.uploader.dicom.DicomTreeNode;
-import org.shanoir.uploader.dicom.MRI;
 
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -33,7 +32,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * @author mkain
  * 
  */
-@XmlType(propOrder={"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames", "mriInformation"})
+@XmlType(propOrder={"id", "modality", "protocol", "description", "seriesDate", "seriesNumber", "imagesCount", "selected", "fileNames"})
 public class SerieTreeNode implements DicomTreeNode {
 
 	private StudyTreeNode parent;
