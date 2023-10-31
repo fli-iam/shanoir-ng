@@ -93,9 +93,9 @@ public class DatasetServiceImpl implements DatasetService {
 		if (datasetDb == null) {
 			throw new EntityNotFoundException(Dataset.class, id);
 		}
-		repository.deleteById(id);
 		solrService.deleteFromIndex(id);
 		this.deleteDatasetFromPacs(datasetDb);
+		repository.deleteById(id);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 	}
 
