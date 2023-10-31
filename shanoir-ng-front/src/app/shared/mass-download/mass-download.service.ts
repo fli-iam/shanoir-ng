@@ -364,30 +364,40 @@ export class MassDownloadService {
                         report.list[id].error = errorsJson;
                         report.list[id].errorTime = Date.now();
                         task.lastUpdate = new Date();
-                        task.message = 'saving dataset n°' + id + ' failed';
                         task.status = 5;
                     });
                 } else {
                     report.list[id].status = 'SUCCESS';
                     delete report.list[id].error;
                     delete report.list[id].errorTime;
-                    task.lastUpdate = new Date();
-                    task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
                 }
                 return dataFiles;
             });
 
             if (unzip) {
                 return unzipPromise.then(data => {
-                    for(let [name, file] of Object.entries(data.files)) {
-                        const path: string = this.buildAcquisitionPath(dataset) + filename.replace('.zip', '') + '/' + name;
-                        (file as {async: (string) => Promise<Blob>}).async('blob').then(blob => {
-                            this.writeMyFile(path, blob, userFolderHandle);
-                        });
+                    if (data) {
+                        return Promise.all(
+                            Object.entries(data.files)?.map(([name, file]) => {
+                                task.message = 'unzipping file ' + name + ' from dataset n°' + id;
+                                this.notificationService.pushLocalTask(task);
+                                const path: string = this.buildAcquisitionPath(dataset) + filename.replace('.zip', '') + '/' + name;
+                                let type: string;
+                                if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
+                                else type = 'blob';
+                                return (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
+                                    task.message = 'saving file ' + name + ' from dataset n°' + id;
+                                    this.notificationService.pushLocalTask(task);
+                                    return this.writeMyFile(path, blob, userFolderHandle);
+                                });
+                            })
+                        );
                     }
                 });
             } else {
                 const path: string = this.buildAcquisitionPath(dataset) + filename;
+                task.message = 'saving dataset n°' + id;
+                this.notificationService.pushLocalTask(task);
                 return Promise.all([unzipPromise, this.writeMyFile(path, blob, userFolderHandle)]).then(() => null);
             }
         }).catch(reason => {
@@ -399,8 +409,11 @@ export class MassDownloadService {
             task.status = 5;
         }).finally(() => {
             if (report.list[id].status == 'SUCCESS') {
+                task.lastUpdate = new Date();
+                task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
                 report.nbSuccess++;
             } else if (report.list[id].status == 'ERROR') {
+                task.message = 'saving dataset n°' + id + ' failed';
                 report.nbError++;
             }
             task.report = JSON.stringify(report, null, 4);

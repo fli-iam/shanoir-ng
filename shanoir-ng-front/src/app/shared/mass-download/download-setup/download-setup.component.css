@@ -6,3 +6,5 @@
 .body { width: 100%; text-align: left; margin-top: 20px; }
 .footer { margin-top: 20px; }
 input[type="number"] { width: 52px; }
+.warning { margin-left: 10px; color: var(--color-error); vertical-align: inherit; }
+.warning i { margin-right: 2px; }
