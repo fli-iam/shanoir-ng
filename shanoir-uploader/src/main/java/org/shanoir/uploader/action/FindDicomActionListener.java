@@ -102,8 +102,7 @@ public class FindDicomActionListener extends JPanel implements ActionListener {
 						final DicomDirToModelService dicomDirReader = new DicomDirToModelService();
 						List<Patient> patients = dicomDirReader.readDicomDirToPatients(dicomDirFile);
 						fillMediaWithPatients(media, patients);
-						// no need to use ImagesCreatorAndFileAnalyzer here, 1) not send to server,
-						// as not part of upload-job 2) done by the server for all ShUp imports anyway
+						filePathDicomDir = selectedRootDir.toString();
 						// clean up in case of dicomdir generated
 						if (dicomDirGenerated) {
 							dicomDirFile.delete();
