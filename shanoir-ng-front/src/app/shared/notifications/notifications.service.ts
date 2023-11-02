@@ -73,12 +73,12 @@ export class NotificationsService {
         this.readLocalStorageConnection = setInterval(() => {
             try {
                 if ((Date.now() - this.lastLocalStorageRead) >= (this.readInterval - 100)) {
-                    this.readLocalTasks()
+                    this.readLocalTasks();
                     this.updateStatusVars();
                     this.emitTasks();
                 }
             } catch (e) {
-                clearInterval(this.lastLocalStorageRead);
+                clearInterval(this.readLocalStorageConnection);
                 this.lastLocalStorageRead = null;
                 throw e;
             }
@@ -106,13 +106,13 @@ export class NotificationsService {
                 }
             }
             if (task.status == -1 && task.lastUpdate) {
-                let freshError: boolean = !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval + 1000);
+                let freshError: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && t.status == -1) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
                 if (freshError) {
                     this.freshTimeouts[task.id]?.triggerNow();
                     this.pushToFreshError(task);
                 }
-            } else if (task.status == 1) {
-                let freshDone: boolean = !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval + 1000);
+            } else if (task.status == 1 || task.status == 3) {
+                let freshDone: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && (t.status == 1 || t.status == 3)) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
                 if (freshDone) {
                     this.freshTimeouts[task.id]?.triggerNow();
                     this.pushToFreshCompleted(task);
