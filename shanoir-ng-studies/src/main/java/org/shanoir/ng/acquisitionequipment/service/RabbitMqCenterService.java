@@ -85,7 +85,7 @@ public class RabbitMqCenterService {
 	public Long getEquipmentFromCode(String message) {
 		try {
 			List<AcquisitionEquipment> equipList = acquisitionEquipmentService.findBySerialNumber(message);
-			if (equipList == null && equipList.isEmpty()) {
+			if (equipList == null || equipList.isEmpty()) {
 				return null;
 			}
 			return equipList.get(0).getId();
