@@ -180,7 +180,7 @@ public class BidsImporterService {
 		
 		Map<String, BidsDataset> datasetsByName = new HashMap<>();
 		
-		Map<String, Integer> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_CODE_QUEUE, "all"), Map.class);
+		Map<String, Integer> equipments = objectMapper.readValue((String) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.ACQUISITION_EQUIPMENT_CODE_QUEUE, "all"), Map.class);
 		Long equipmentId = 0L;
 
 		for (File importedFile : filesToImport) {

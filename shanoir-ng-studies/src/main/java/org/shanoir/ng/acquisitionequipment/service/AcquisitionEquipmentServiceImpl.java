@@ -17,23 +17,22 @@ package org.shanoir.ng.acquisitionequipment.service;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
-import org.shanoir.ng.center.model.Center;
-import org.shanoir.ng.center.service.CenterServiceImpl;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
-import org.shanoir.ng.utils.Utils;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
+import org.shanoir.ng.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Acquisition equipment service implementation.
@@ -54,6 +53,7 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	private ObjectMapper objectMapper;
 
 	private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentServiceImpl.class);
+	
 	@Override
 	public Optional<AcquisitionEquipment> findById(final Long id) {
 		return repository.findById(id);
@@ -78,6 +78,10 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		return this.repository.findByCenterStudyCenterListStudyId(studyId);
 	}
 
+	public List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber) {
+		return this.repository.findBySerialNumber(serialNumber);
+	}
+	
 	public AcquisitionEquipment create(AcquisitionEquipment entity) {
 		AcquisitionEquipment newDbAcEq = repository.save(entity);
 		String datasetAcEqName = newDbAcEq.getManufacturerModel().getManufacturer().getName().trim() + " " + newDbAcEq.getManufacturerModel().getName().trim();

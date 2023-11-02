@@ -61,6 +61,18 @@ public interface AcquisitionEquipmentApi {
 	ResponseEntity<AcquisitionEquipmentDTO> findAcquisitionEquipmentById(
 			@Parameter(name = "id of the acquisition equipment", required = true) @PathVariable("acquisitionEquipmentId") Long acquisitionEquipmentId);
 
+	@Operation(summary = "", description = "If exists, returns the acquisition equipments corresponding to the given serial number")
+	@ApiResponses(value = {
+			@ApiResponse(responseCode = "200", description = "found acquisition equipment"),
+			@ApiResponse(responseCode = "204", description = "no acquisition equipment found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@RequestMapping(value = "/bySerialNumber/{serialNumber}", produces = { "application/json" }, method = RequestMethod.GET)
+	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
+	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsBySerialNumber(
+			@Parameter(name = "serial number of the acquisition equipment", required = true) @PathVariable("serialNumber") String serialNumber);
+
 	@Operation(summary = "", description = "Returns all the acquisition equipments for a center")
 	@ApiResponses(value = {
 			@ApiResponse(responseCode = "200", description = "found acquisition equipments"),
@@ -82,7 +94,6 @@ public interface AcquisitionEquipmentApi {
 	@RequestMapping(value = "/byStudy/{studyId}", produces = { "application/json" }, method = RequestMethod.GET)
 	@PreAuthorize("hasAnyRole('USER', 'ADMIN', 'EXPERT')")
 	ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsByStudy(@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId);
-	
 	
 	@Operation(summary = "", description = "Returns all the acquisition equipments")
 	@ApiResponses(value = {

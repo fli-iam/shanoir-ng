@@ -179,4 +179,18 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 			}
 		}
 	}
+
+	@Override
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsBySerialNumber(
+			@Parameter(name = "serial number of the acquisition equipment", required = true) @PathVariable("serialNumber") final String serialNumber) {
+		List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAll();
+		// Remove "unknown" equipment
+		equipments = equipments.stream().filter(equipment -> equipment.getId() != 0).collect(Collectors.toList());
+		if (equipments.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<>(
+				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
+	}
+
 }

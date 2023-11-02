@@ -67,6 +67,8 @@ public class ShanoirUploaderServiceClient {
 
 	private static final String SERVICE_ACQUISITION_EQUIPMENTS = "service.acquisition.equipments";
 	
+	private static final String SERVICE_ACQUISITION_EQUIPMENTS_BY_SERIAL_NUMBER = "service.acquisition.equipments.by.serial.number";
+
 	private static final String SERVICE_MANUFACTURER_MODELS = "service.manufacturer.models";
 	
 	private static final String SERVICE_MANUFACTURERS = "service.manufacturers";
@@ -108,6 +110,8 @@ public class ShanoirUploaderServiceClient {
 	private String serviceURLCentersCreate;
 
 	private String serviceURLAcquisitionEquipments;
+	
+	private String serviceURLAcquisitionEquipmentsBySerialNumber;
 	
 	private String serviceURLManufacturerModels;
 	
@@ -164,6 +168,8 @@ public class ShanoirUploaderServiceClient {
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_CENTERS_CREATE);
 		this.serviceURLAcquisitionEquipments = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS);
+		this.serviceURLAcquisitionEquipmentsBySerialNumber = this.serverURL
+				+ ShUpConfig.endpointProperties.getProperty(SERVICE_ACQUISITION_EQUIPMENTS_BY_SERIAL_NUMBER);
 		this.serviceURLManufacturerModels = this.serverURL
 				+ ShUpConfig.endpointProperties.getProperty(SERVICE_MANUFACTURER_MODELS);
 		this.serviceURLManufacturers = this.serverURL

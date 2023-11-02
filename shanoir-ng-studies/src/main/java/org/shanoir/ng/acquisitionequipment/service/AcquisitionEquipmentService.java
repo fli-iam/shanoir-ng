@@ -80,4 +80,6 @@ public interface AcquisitionEquipmentService {
 	
 	List<AcquisitionEquipment> findAllByStudyId(Long studyId);
 	
+	List<AcquisitionEquipment> findAllBySerialNumber(String serialNumber);
+	
 }
