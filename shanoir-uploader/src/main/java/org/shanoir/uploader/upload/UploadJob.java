@@ -3,8 +3,6 @@ package org.shanoir.uploader.upload;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.shanoir.ng.importer.model.EquipmentDicom;
-import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.uploader.dicom.MRI;
 import org.shanoir.uploader.dicom.query.SerieTreeNode;
 

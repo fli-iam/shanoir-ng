@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

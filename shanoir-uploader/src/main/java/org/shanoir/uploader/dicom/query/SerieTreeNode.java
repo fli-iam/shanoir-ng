@@ -6,9 +6,9 @@ import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
-import org.shanoir.ng.importer.model.EquipmentDicom;
 import org.shanoir.ng.importer.model.InstitutionDicom;
 import org.shanoir.ng.importer.model.Serie;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.uploader.dicom.DicomTreeNode;
 
 import jakarta.xml.bind.annotation.XmlElement;

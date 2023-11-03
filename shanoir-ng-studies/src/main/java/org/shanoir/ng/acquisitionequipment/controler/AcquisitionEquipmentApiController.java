@@ -23,6 +23,7 @@ import org.shanoir.ng.acquisitionequipment.dto.AcquisitionEquipmentDTO;
 import org.shanoir.ng.acquisitionequipment.dto.mapper.AcquisitionEquipmentMapper;
 import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.service.AcquisitionEquipmentService;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.error.FieldError;
 import org.shanoir.ng.shared.error.FieldErrorMap;
 import org.shanoir.ng.shared.event.ShanoirEvent;
@@ -191,6 +192,13 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 		}
 		return new ResponseEntity<>(
 				acquisitionEquipmentMapper.acquisitionEquipmentsToAcquisitionEquipmentDTOs(equipments), HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
+			@Parameter(name = "equipment dicom to find or create equipment", required = true) @RequestBody final EquipmentDicom equipmentDicom,
+			final BindingResult result) {
+		return null;
 	}
 
 }

@@ -21,6 +21,7 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.shanoir.ng.shared.dateTime.DateTimeUtils;
 import org.shanoir.ng.shared.dateTime.LocalDateAnnotations;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
