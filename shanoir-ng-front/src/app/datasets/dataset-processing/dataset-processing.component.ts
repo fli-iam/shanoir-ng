@@ -223,7 +223,7 @@ export class DatasetProcessingComponent extends EntityComponent<DatasetProcessin
             'outputDatasetList': [{value: this.datasetProcessing.outputDatasets, disabled: !this.subject}],
             'comment': [this.datasetProcessing.comment]
         });
-        this.subscribtions.push(
+        this.subscriptions.push(
             formGroup.get('study').valueChanges.subscribe(studyVal => {
                 if (!!this.prefilledSubject || !studyVal) formGroup.get('subject').disable();
                 else formGroup.get('subject').enable();

@@ -53,7 +53,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     @Output() close: EventEmitter<any> = new EventEmitter();
     footerState: FooterState;
     protected onSave: Subject<any> = new Subject<any>();
-    protected subscribtions: Subscription[] = [];
+    protected subscriptions: Subscription[] = [];
     form: UntypedFormGroup;
     protected saveError: ShanoirError;
     protected onSubmitValidatedFields: string[] = [];
@@ -105,7 +105,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
 
     ngOnInit(): void {
         //if (!this.id) this.id = +this.activatedRoute.snapshot.params['id'];
-        this.subscribtions.push(this.activatedRoute.params.subscribe(
+        this.subscriptions.push(this.activatedRoute.params.subscribe(
             params => {
                 const id = +params['id'];
                 this.id = id;
@@ -134,7 +134,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
             }
         ));
         // load called tab
-        this.subscribtions.push(
+        this.subscriptions.push(
             this.activatedRoute.fragment.subscribe(fragment => {
                 if (fragment) {
                     this.activeTab = fragment;
@@ -152,7 +152,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     private manageFormSubscriptions() {
         this.form = this.buildForm();
         if (this.form) {
-            this.subscribtions.push(
+            this.subscriptions.push(
                 this.form.statusChanges.subscribe(status => {
                     this.footerState.valid = status == 'VALID' && (this.form.dirty || this.mode == 'create');
                     this.footerState.dirty = this.form.dirty;
@@ -384,7 +384,7 @@ export abstract class EntityComponent<T extends Entity> implements OnInit, OnDes
     }
 
     ngOnDestroy() {
-        for (let subscribtion of this.subscribtions) {
+        for (let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

@@ -13,6 +13,7 @@
  */
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { NotificationsService } from '../../shared/notifications/notifications.service';
 import { Task } from '../task.model';
 
@@ -25,17 +26,21 @@ import { Task } from '../task.model';
 export class TaskStatusComponent implements OnDestroy, OnChanges {
 
     importTs: number;
-    protected subscribtions: Subscription[] = [];
+    protected subscriptions: Subscription[] = [];
     @Input() task: Task;
+    // @ts-ignore
+    browserCompatible: boolean = window.showDirectoryPicker;
+    loading: boolean = false;
 
     constructor(
-        private notificationsService: NotificationsService
+        private notificationsService: NotificationsService,
+        private downloadService: MassDownloadService
     ) { }
 
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.task && this.task) {
-            this.subscribtions.push(
+            this.subscriptions.push(
                 this.notificationsService.getNotifications().subscribe(tasks => {
                     this.task = tasks.find(task => task.id == this.task.id);
                 })
@@ -44,9 +49,14 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     }
 
     ngOnDestroy() {
-        for (let subscribtion of this.subscribtions) {
-            subscribtion.unsubscribe();
+        for (let subscription of this.subscriptions) {
+            subscription.unsubscribe();
         }
+    }
+
+    retry() {
+        this.loading = true;
+        this.downloadService.retry(this.task).finally(() => this.loading = false);
     }
 
 }

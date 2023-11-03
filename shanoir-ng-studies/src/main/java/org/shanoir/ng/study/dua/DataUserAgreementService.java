@@ -73,11 +73,11 @@ public class DataUserAgreementService {
 		}
 	}
 	
-	public void createDataUserAgreementForUserInStudy(Study study, Long userId) {
+	public DataUserAgreement createDataUserAgreementForUserInStudy(Study study, Long userId) {
 		DataUserAgreement dataUserAgreement = new DataUserAgreement();
 		dataUserAgreement.setStudy(study);
 		dataUserAgreement.setUserId(userId);
-		repository.save(dataUserAgreement);
+		return repository.save(dataUserAgreement);
 	}
 	
 	public void deleteIncompleteDataUserAgreementForUserInStudy(Study study, Long userId) {
@@ -87,7 +87,20 @@ public class DataUserAgreementService {
 		}
 	}
 
+	public List<DataUserAgreement> findDUAByStudyId(Long studyId) {
+		return repository.findByStudyId(studyId);
+	}
+
 	public DataUserAgreement findDUAByUserIdAndStudyId(Long userId, Long studyId) {
 		return repository.findByUserIdAndStudy_IdAndTimestampOfAcceptedIsNull(userId, studyId);
 	}
+
+	public void deleteAll(Iterable<DataUserAgreement> duas) {
+		this.repository.deleteAll(duas);
+	}
+
+	public void update(DataUserAgreement dua) {
+		this.repository.save(dua);
+	}
+
 }

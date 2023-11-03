@@ -94,7 +94,7 @@ public class UploadServiceJob implements Job {
 			final File uploadJobFile, CurrentNominativeDataController currentNominativeDataController) {
 		NominativeDataUploadJobManager nominativeDataUploadJobManager = null;
 		final List<File> filesToTransfer = new ArrayList<File>();
-		final Collection<File> files = Util.listFiles(folder, null, false);
+		final Collection<File> files = Util.listFiles(folder, null, true);
 		for (Iterator<File> filesIt = files.iterator(); filesIt.hasNext();) {
 			final File file = (File) filesIt.next();
 			// do not transfer nominativeDataUploadJob as only for display in ShUp
