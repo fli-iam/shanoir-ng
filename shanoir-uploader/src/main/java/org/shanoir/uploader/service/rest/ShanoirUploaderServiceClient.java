@@ -460,7 +460,7 @@ public class ShanoirUploaderServiceClient {
 	
 	public List<AcquisitionEquipment> findAcquisitionEquipmentsBySerialNumber(String serialNumber) throws Exception {
 		long startTime = System.currentTimeMillis();
-		try (CloseableHttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentsBySerialNumber)) {
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentsBySerialNumber + serialNumber)) {
 			long stopTime = System.currentTimeMillis();
 			long elapsedTime = stopTime - startTime;
 			logger.info("findAcquisitionEquipmentsBySerialNumber: " + elapsedTime + "ms");
