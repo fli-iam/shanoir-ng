@@ -84,4 +84,11 @@ public class EquipmentDicom {
 			&& StringUtils.isNotEmpty(this.deviceSerialNumber);
 	}
 
+	@Override
+	public String toString() {
+		return "EquipmentDicom [manufacturer=" + manufacturer + ", manufacturerModelName=" + manufacturerModelName
+				+ ", deviceSerialNumber=" + deviceSerialNumber + ", stationName=" + stationName
+				+ ", magneticFieldStrength=" + magneticFieldStrength + "]";
+	}
+
 }

@@ -36,8 +36,20 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </encoder>
     </appender>
 
+    <appender name="EQUIPMENT_FILE_LOG" class="ch.qos.logback.core.FileAppender">
+        <file>/var/log/shanoir-ng-logs/shanoir-equipments.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
     <logger name="org.shanoir.ng.shared.event" level="INFO" additivity="false">
         <appender-ref ref="EVENT_FILE_LOG" />
+    </logger>    
+    
+    <logger name="org.shanoir.ng.acquisitionequipment.controler" level="INFO" additivity="false">
+        <appender-ref ref="EQUIPMENT_FILE_LOG" />
     </logger>
     
     <root level="INFO">

@@ -34,6 +34,8 @@ import org.shanoir.ng.shared.exception.ErrorDetails;
 import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.utils.KeycloakUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -48,6 +50,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 @Controller
 public class AcquisitionEquipmentApiController implements AcquisitionEquipmentApi {
 
+	private static final Logger LOG = LoggerFactory.getLogger(AcquisitionEquipmentApiController.class);
+
 	@Autowired
 	private AcquisitionEquipmentMapper acquisitionEquipmentMapper;
 	
@@ -55,7 +59,7 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 	private AcquisitionEquipmentService acquisitionEquipmentService;
 
 	@Autowired
-	ShanoirEventService eventService;
+	private ShanoirEventService eventService;
 
 	@Override
 	public ResponseEntity<Void> deleteAcquisitionEquipment(
@@ -196,9 +200,32 @@ public class AcquisitionEquipmentApiController implements AcquisitionEquipmentAp
 
 	@Override
 	public ResponseEntity<List<AcquisitionEquipmentDTO>> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(
-			@Parameter(name = "equipment dicom to find or create equipment", required = true) @RequestBody final EquipmentDicom equipmentDicom,
+			@Parameter(name = "equipment dicom to find or create an equipment", required = true) @RequestBody final EquipmentDicom equipmentDicom,
 			final BindingResult result) {
+		LOG.info("findAcquisitionEquipmentsOrCreateOneByEquipmentDicom called with: " + equipmentDicom.toString()); // trace all info from dicoms
+		if (equipmentDicom.isComplete()) {
+			String dicomSerialNumber = equipmentDicom.getDeviceSerialNumber();
+			List<AcquisitionEquipment> equipments = acquisitionEquipmentService.findAllBySerialNumber(dicomSerialNumber);
+			if (equipments == null || equipments.isEmpty()) {
+				dicomSerialNumber = removeLeadingZeroes(dicomSerialNumber.trim());
+				equipments = acquisitionEquipmentService.findAllBySerialNumber(dicomSerialNumber);
+				// nothing found with device serial number from dicom
+				if (equipments == null || equipments.isEmpty()) {
+					
+				}
+			} else {
+				
+			}
+		}
 		return null;
+	}
+	
+	private String removeLeadingZeroes(String s) {
+	    StringBuilder sb = new StringBuilder(s);
+	    while (sb.length() > 0 && sb.charAt(0) == '0') {
+	        sb.deleteCharAt(0);
+	    }
+	    return sb.toString();
 	}
 
 }
