@@ -356,6 +356,11 @@ public class RabbitMQConfiguration {
 	}
 
 	@Bean
+	public static Queue equipmentFromCodeQueue() {
+		return new Queue(EQUIPMENT_FROM_CODE_QUEUE, true);
+	}
+
+	@Bean
 	public static Queue deleteUserQueue() {
 		return new Queue(DELETE_USER_QUEUE, true);
 	}
