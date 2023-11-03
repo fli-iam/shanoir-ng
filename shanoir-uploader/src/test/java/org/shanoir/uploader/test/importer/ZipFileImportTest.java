@@ -60,8 +60,7 @@ public class ZipFileImportTest extends AbstractTest {
 		studyCenter.setCenter(center);
 		studyCenterList.add(studyCenter);
 		study.setStudyCenterList(studyCenterList);
-		shUpClient.createStudy(study);
-		return study;
+		return shUpClient.createStudy(study);
 	}
 
 	private void createSubjectStudy(org.shanoir.uploader.model.rest.Study study, Subject subject) {
