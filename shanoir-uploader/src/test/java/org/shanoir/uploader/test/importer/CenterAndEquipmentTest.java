@@ -26,7 +26,7 @@ public class CenterAndEquipmentTest extends AbstractTest {
 	}
 	
 	@Test
-	public void createEquipmentAndFindIt() throws Exception {
+	public void createEquipmentAndFindBySerialNumber() throws Exception {
 		Center center = new Center();
 		center.setName("Center-Name-" + UUID.randomUUID().toString());
 		Center createdCenter = shUpClient.createCenter(center);
