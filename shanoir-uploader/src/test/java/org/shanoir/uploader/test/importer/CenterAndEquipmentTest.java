@@ -1,5 +1,6 @@
 package org.shanoir.uploader.test.importer;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.log4j.Logger;
@@ -25,7 +26,7 @@ public class CenterAndEquipmentTest extends AbstractTest {
 	}
 	
 	@Test
-	public void createEquipment() throws Exception {
+	public void createEquipmentAndFindIt() throws Exception {
 		Center center = new Center();
 		center.setName("Center-Name-" + UUID.randomUUID().toString());
 		Center createdCenter = shUpClient.createCenter(center);
@@ -42,11 +43,14 @@ public class CenterAndEquipmentTest extends AbstractTest {
 		ManufacturerModel createdManufacturerModel = shUpClient.createManufacturerModel(manufacturerModel);
 		Assertions.assertNotNull(createdManufacturerModel);
 		AcquisitionEquipment equipment = new AcquisitionEquipment();
-		equipment.setSerialNumber("Serial-Number-" + UUID.randomUUID().toString());
+		String serialNumberRandom = UUID.randomUUID().toString();
+		equipment.setSerialNumber("Serial-Number-" + serialNumberRandom);
 		equipment.setCenter(new IdName(createdCenter.getId(), createdCenter.getName()));
 		equipment.setManufacturerModel(createdManufacturerModel);
 		AcquisitionEquipment createdEquipment = shUpClient.createEquipment(equipment);
 		Assertions.assertNotNull(createdEquipment);
+		List<AcquisitionEquipment> equipments = shUpClient.findAcquisitionEquipmentsBySerialNumber(serialNumberRandom);
+		Assertions.assertNotNull(equipments);
 	}
-
+	
 }

@@ -458,6 +458,25 @@ public class ShanoirUploaderServiceClient {
 		return null;
 	}
 	
+	public List<AcquisitionEquipment> findAcquisitionEquipmentsBySerialNumber(String serialNumber) throws Exception {
+		long startTime = System.currentTimeMillis();
+		try (CloseableHttpResponse response = httpService.get(this.serviceURLAcquisitionEquipmentsBySerialNumber)) {
+			long stopTime = System.currentTimeMillis();
+			long elapsedTime = stopTime - startTime;
+			logger.info("findAcquisitionEquipmentsBySerialNumber: " + elapsedTime + "ms");
+			int code = response.getCode();
+			if (code == HttpStatus.SC_OK) {
+				List<AcquisitionEquipment> acquisitionEquipments = Util.getMappedList(response,
+						AcquisitionEquipment.class);
+				return acquisitionEquipments;
+			} else {
+				logger.error("Could not find acquisition equipments by serial number (status code: " + code + ", message: "
+						+ apiResponseMessages.getOrDefault(code, "unknown status code") + ")");
+			}
+		}
+		return null;
+	}
+	
 	public void uploadFile(String tempDirId, File file) throws Exception {
 		try (CloseableHttpResponse response = httpService.postFile(this.serviceURLImporterCreateTempDir, tempDirId,
 				file)) {
@@ -467,7 +486,7 @@ public class ShanoirUploaderServiceClient {
 				logger.error("Error in uploadFile: with tempDirId " + tempDirId + " with file (path: "
 						+ file.getAbsolutePath() + ", size in bytes: " + Files.size(file.toPath()) + "), status code: "
 						+ code + ", message: " + apiResponseMessages.getOrDefault(code, "unknown status code"));
-				throw new Exception("Error in uploadFile");
+				throw new Exception("Error in uploadFile.");
 			}
 		}
 	}
