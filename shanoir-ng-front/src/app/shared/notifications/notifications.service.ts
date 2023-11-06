@@ -42,7 +42,7 @@ export class NotificationsService {
     readonly readInterval: number = 1000;
     readonly persistenceTime: number = 1800000;
     private freshTimeouts: SuperTimeout[] = [];
-    private readonly TIMEOUT: number = 30000;
+    private readonly TIMEOUT: number = 300000;
 
 
     constructor(private taskService: TaskService, private keycloakService: KeycloakService) {
@@ -73,12 +73,12 @@ export class NotificationsService {
         this.readLocalStorageConnection = setInterval(() => {
             try {
                 if ((Date.now() - this.lastLocalStorageRead) >= (this.readInterval - 100)) {
-                    this.readLocalTasks()
+                    this.readLocalTasks();
                     this.updateStatusVars();
                     this.emitTasks();
                 }
             } catch (e) {
-                clearInterval(this.lastLocalStorageRead);
+                clearInterval(this.readLocalStorageConnection);
                 this.lastLocalStorageRead = null;
                 throw e;
             }
@@ -99,20 +99,20 @@ export class NotificationsService {
         let tmpTasksInProgress = [];
         let tmpTasksInWait = [];
         for (let task of this.allTasks) {
-            if ((task.status == 2 || task.status == 4 || task.status == 5) && task.lastUpdate) {
+            if (task.eventType.startsWith("downloadDataset") && (task.status == 2 || task.status == 4 || task.status == 5) && task.lastUpdate) {
                 if (Date.now() - new Date(task.lastUpdate).getTime() > this.TIMEOUT) {
                     task.status = -1;
                     task.message = 'timeout';
                 }
             }
             if (task.status == -1 && task.lastUpdate) {
-                let freshError: boolean = !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval + 1000);
+                let freshError: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && t.status == -1) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
                 if (freshError) {
                     this.freshTimeouts[task.id]?.triggerNow();
                     this.pushToFreshError(task);
                 }
-            } else if (task.status == 1) {
-                let freshDone: boolean = !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval + 1000);
+            } else if (task.status == 1 || task.status == 3) {
+                let freshDone: boolean = !this.freshCompletedTasks?.find(t => t.id == task.id && (t.status == 1 || t.status == 3)) && !!this.tasksInProgress.find(tip => task.id == tip.id) || (Date.now() - new Date(task.lastUpdate).getTime()) <= (this.readInterval);
                 if (freshDone) {
                     this.freshTimeouts[task.id]?.triggerNow();
                     this.pushToFreshCompleted(task);
@@ -206,12 +206,22 @@ export class NotificationsService {
         this.readLocalTasks();
         let tmpTasks: Task[] = this.localTasks.filter(lt => !this.newLocalTasksQueue.find(nlt => lt.id == nlt.id));
         tmpTasks = tmpTasks.concat(this.newLocalTasksQueue);
-        let tmpTasksStr: string = '[' + tmpTasks.map(t => t.stringify()).join(',') + ']';
+        let tmpTasksStr: string = this.serializeTasks(tmpTasks); // also checks the size limit
         localStorage.setItem(this.storageKey, tmpTasksStr);
         this.newLocalTasksQueue = [];
         this.localTasks = tmpTasks;
         this.updateStatusVars();
         this.emitTasks();
+    }
+    
+    private serializeTasks(tasks: Task[]): string {
+        let tasksToStore: Task[] = [].concat(tasks);
+        let str: string = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
+        while (str.length > 5200000) {
+            tasksToStore.shift();
+            str = '[' + tasksToStore.map(t => t.stringify()).join(',') + ']';
+        }
+        return str;
     }
 
     totalProgress(): number {

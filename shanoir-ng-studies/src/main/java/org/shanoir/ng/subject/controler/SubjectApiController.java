@@ -113,8 +113,17 @@ public class SubjectApiController implements SubjectApi {
 	}
 
 	@Override
-	public ResponseEntity<List<IdName>> findSubjectsNames() {
-		final List<IdName> subjectsNames = subjectService.findNames();
+	public ResponseEntity<List<IdName>> findAllSubjectsNames() {
+		final List<IdName> subjectsNames = subjectService.findAllNames();
+		if (subjectsNames.isEmpty()) {
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		}
+		return new ResponseEntity<>(subjectsNames, HttpStatus.OK);
+	}
+
+	@Override
+	public ResponseEntity<List<IdName>> findSubjectsNames(List<Long> subjectIds) {
+		final List<IdName> subjectsNames = subjectService.findNames(subjectIds);
 		if (subjectsNames.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}

@@ -68,6 +68,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectedDatasetIds: Set<number> = new Set();
     syntaxError: boolean = false;
     dateOpen: boolean = false;
+    datasetStudymap: Map<number, number> = new Map();
 
     tab: 'results' | 'selected' = 'results';
     role: 'admin' | 'expert' | 'user';
@@ -498,9 +499,15 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         let downloadable = true;
         selection.forEach((datasetid) => {
             let selected: any = this.table.page.content.find((element: any) => element.id == datasetid);
-            let studyId = selected.studyId;
+            let studyId
+            if (selected) {
+                studyId = selected.studyId;
+                this.datasetStudymap.set(datasetid, studyId);
+            } else {
+                studyId = this.datasetStudymap.get(datasetid);
+            }
             if (!this.hasDownloadRight(studyId)) {
-            downloadable = false;
+                downloadable = false;
             }
         });
         this.canDownload = downloadable;

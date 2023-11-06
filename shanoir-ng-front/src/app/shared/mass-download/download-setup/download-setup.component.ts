@@ -26,7 +26,7 @@ import { Option } from '../../select/select.component';
 
 export class DownloadSetupComponent implements OnInit {
 
-    @Output() go: EventEmitter<{format: Format, converter: number, nbQueues: number}> = new EventEmitter();
+    @Output() go: EventEmitter<{format: Format, converter: number, nbQueues: number, unzip: boolean}> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
     form: UntypedFormGroup;
     @Input() format: Format;
@@ -60,6 +60,7 @@ export class DownloadSetupComponent implements OnInit {
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
             'converter': [{value: this.converter}],
             'nbQueues': [4, [Validators.required, Validators.min(1), Validators.max(1024)]],
+            'unzip': [false, []],
         });
         return formGroup;
     }
@@ -68,7 +69,8 @@ export class DownloadSetupComponent implements OnInit {
         this.go.emit({
             format: this.form.get('format').value,
             converter: this.form.get('converter').value,
-            nbQueues: this.form.get('nbQueues').value
+            nbQueues: this.form.get('nbQueues').value,
+            unzip: this.form.get('unzip').value
         });
     }
 

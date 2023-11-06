@@ -127,7 +127,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.studyRightsService.getMyRightsForStudy(this.id).then(rights => {
             this.hasDownloadRight = this.keycloakService.isUserAdmin() || rights.includes(StudyUserRight.CAN_DOWNLOAD);
         })
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, null, true).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id, null).then(study => {
 
           this.study = study;
           this.setLabeledSizes(this.study);
@@ -166,7 +166,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     initEdit(): Promise<void> {
-        let studyPromise: Promise<Study> = this.studyService.get(this.id, null, true).then(study => {
+        let studyPromise: Promise<Study> = this.studyService.get(this.id, null).then(study => {
             this.study = study;
 
             if (this.study.profile == null) {
@@ -179,7 +179,7 @@ export class StudyComponent extends EntityComponent<Study> {
 
             return study;
         });
-        this.getSubjects();
+        this.getAllSubjects();
 
         this.protocolFiles = [];
 
@@ -211,7 +211,7 @@ export class StudyComponent extends EntityComponent<Study> {
         this.selectedCenter = null;
         this.protocolFiles = [];
         this.dataUserAgreement = null;
-        this.getSubjects();
+        this.getAllSubjects();
 
         this.fetchUsers().then(users => {
             // Add the connected user by default
@@ -273,7 +273,6 @@ export class StudyComponent extends EntityComponent<Study> {
                 if (datasetSizes.extraDataSize > 0){
                     sizesByLabel.set("Other files (DUA, protocol...)", datasetSizes.extraDataSize);
                 }
-                let total = datasetSizes.total;
                 study.detailedSizes = sizesByLabel;
             });
         }).finally(() => {
@@ -346,14 +345,14 @@ export class StudyComponent extends EntityComponent<Study> {
         });
     }
 
-    private getSubjects(): void {
+    private getAllSubjects(): void {
         this.subjectService
-            .getSubjectsNames()
+            .getAllSubjectsNames()
             .then(subjects => {
                 this.subjects = subjects?.sort(function(a:Subject, b:Subject){
                     return a.name.localeCompare(b.name);
                 });
-        });
+            });
     }
 
     /** Center section management  **/
@@ -659,7 +658,7 @@ export class StudyComponent extends EntityComponent<Study> {
     downloadSelected() {
         this.downloadService.downloadByIds(this.selectedDatasetIds);
     }
-    
+
     storageVolumePrettyPrint(size: number) {
         return this.studyService.storageVolumePrettyPrint(size);
     }
