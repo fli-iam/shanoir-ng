@@ -48,7 +48,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <appender-ref ref="EVENT_FILE_LOG" />
     </logger>    
     
-    <logger name="org.shanoir.ng.acquisitionequipment.controler" level="INFO" additivity="false">
+    <logger name="org.shanoir.ng.acquisitionequipment.service" level="INFO" additivity="false">
         <appender-ref ref="EQUIPMENT_FILE_LOG" />
     </logger>
     
