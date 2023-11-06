@@ -21,6 +21,7 @@ import org.shanoir.ng.acquisitionequipment.model.AcquisitionEquipment;
 import org.shanoir.ng.acquisitionequipment.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
+import org.shanoir.ng.shared.dicom.EquipmentDicom;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.utils.Utils;
@@ -115,6 +116,26 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		final Optional<AcquisitionEquipment> entity = repository.findById(id);
 		entity.orElseThrow(() -> new EntityNotFoundException("Cannot find entity with id = " + id));
 		repository.deleteById(id);
+	}
+
+	@Override
+	public List<AcquisitionEquipment> findAcquisitionEquipmentsOrCreateOneByEquipmentDicom(EquipmentDicom equipmentDicom) {
+		LOG.info("findAcquisitionEquipmentsOrCreateOneByEquipmentDicom called with: " + equipmentDicom.toString()); // trace all info from dicoms
+		if (equipmentDicom.isComplete()) {
+			String dicomSerialNumber = equipmentDicom.getDeviceSerialNumber();
+			List<AcquisitionEquipment> equipments = findAllBySerialNumber(dicomSerialNumber);
+			if (equipments == null || equipments.isEmpty()) {
+				dicomSerialNumber = Utils.removeLeadingZeroes(dicomSerialNumber.trim());
+				equipments = findAllBySerialNumber(dicomSerialNumber);
+				// nothing found with device serial number from dicom
+				if (equipments == null || equipments.isEmpty()) {
+					
+				}
+			} else {
+				
+			}
+		}
+		return null;
 	}
 
 }
