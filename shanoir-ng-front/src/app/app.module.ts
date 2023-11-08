@@ -246,11 +246,11 @@ import { MultiSelectComponent } from './shared/multi-select/multi-select.compone
 import { MultiSelectTableComponent } from './shared/multi-select-table/multi-select-table.component';
 import { ProcessingComponent } from './processing/processing.component';
 import { PipelinesComponent } from './processing/pipelines/pipelines.component';
-import { CarminClientService } from './carmin/shared/carmin-client.service';
+import { VipClientService } from './vip/shared/vip-client.service';
 import { PipelineComponent } from './processing/pipelines/pipeline/pipeline.component';
 import { ExecutionComponent } from './processing/execution/execution.component';
-import { CarminDatasetProcessingService } from './carmin/shared/carmin-dataset-processing.service';
-import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { ExecutionMonitoringService } from './vip/shared/execution-monitoring.service';
+import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
 import { QualityControlComponent } from './quality-control/quality-control.component';
 import { QualityCardService } from './study-cards/shared/quality-card.service';
 import { QualityCardDTOService } from './study-cards/shared/quality-card.dto';
@@ -443,7 +443,7 @@ import { DownloadSetupAltComponent } from './shared/mass-download/download-setup
         PipelinesComponent,
         PipelineComponent,
         ExecutionComponent,
-        CarminDatasetProcessingsComponent,
+        ExecutionMonitoringsComponent,
         WelcomeComponent,
         AccessRequestListComponent,
         QualityControlComponent,
@@ -463,8 +463,8 @@ import { DownloadSetupAltComponent } from './shared/mass-download/download-setup
         CenterService,
         ConfirmDialogService,
         ExaminationService,
-        CarminClientService,
-        CarminDatasetProcessingService,
+        VipClientService,
+        ExecutionMonitoringService,
         {
             provide: ErrorHandler,
             useClass: HandleErrorService

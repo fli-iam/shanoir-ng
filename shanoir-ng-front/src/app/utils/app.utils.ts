@@ -147,10 +147,10 @@ export const BACKEND_API_NIFTI_CONVERTER_URL: string = BACKEND_API_IMPORT_MS_URL
 // Preclinical http api
 export const BACKEND_API_PRECLINICAL_MS_URL: string = BACKEND_API_URL + '/preclinical';
 
-// carmin
-export const CARMIN_BASE_URL: string = environment.vipUrl + "/rest";
+// vip
+export const VIP_BASE_URL : string = environment.vipUrl + "/rest";
 
-export const BACKEND_API_CARMIN_DATASET_PROCESSING_URL: string = BACKEND_API_DATASET_MS_URL + '/carminDatasetProcessing';
+export const BACKEND_API_VIP_EXEC_MONITORING_URL: string = BACKEND_API_DATASET_MS_URL + '/executionMonitoring';
 
 export function hasUniqueError(error: any, fieldName: string): boolean {
     let hasUniqueError = false;
@@ -193,7 +193,7 @@ export function browserDownloadFileFromResponse(response: HttpResponse<any>) {
 export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
     const http: HttpClient = ServiceLocator.injector.get(HttpClient);
     return http.get(
-        url, 
+        url,
         {
             reportProgress: true,
             responseType: 'blob',
@@ -205,11 +205,11 @@ export function downloadBlob(url: string, params?: HttpParams): Promise<Blob> {
     })
     .toPromise();
 }
-  
+
 export function downloadWithStatusGET(url: string, params?: HttpParams, state ?: TaskState): Observable<TaskState> {
     const http: HttpClient = ServiceLocator.injector.get(HttpClient);
     let obs: Observable<HttpEvent<Blob>> = http.get(
-        url, 
+        url,
         {
             reportProgress: true,
             observe: 'events',
@@ -227,8 +227,8 @@ export function downloadWithStatusGET(url: string, params?: HttpParams, state ?:
 export function downloadWithStatusPOST(url: string, formData: FormData, state ?: TaskState): Observable<TaskState> {
     const http: HttpClient = ServiceLocator.injector.get(HttpClient);
     let obs: Observable<HttpEvent<Blob>> = http.post(
-        url, 
-        formData, 
+        url,
+        formData,
         {
             reportProgress: true,
             observe: 'events',

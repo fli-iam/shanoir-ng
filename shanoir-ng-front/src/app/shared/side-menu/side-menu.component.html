@@ -88,9 +88,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </a>
         </li>
     </div>
-    <!-- <li routerLink="/carmin-dataset-processings" routerLinkActive="active">
-        <i class="fas fa-solid fa-microchip"></i>VIP dataset processings
-    </li> -->
     <li routerLink="/solr-search" routerLinkActive="active"><i class="fas fa-sun"></i>Dataset search (Solr)</li>
     <li (click)="state.dataOpened = !state.dataOpened; saveState();"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="state.dataOpened" class="sub-menu" [@slideDown]="state.dataOpened">
@@ -116,7 +113,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/preclinical-examination/list" routerLinkActive="active"><i class="fas fa-stethoscope"></i>Preclinical examinations</li>
         <li routerLink="/preclinical-pathology-model/list" routerLinkActive="active"><i class="fas fa-virus"></i>Pathology models</li>
         <li routerLink="/preclinical-therapy/list" routerLinkActive="active"><i class="fas fa-pills"></i>Therapies</li>
-        <li routerLink="/preclinical-anesthetic/list" routerLinkActive="active"><i class="fas fa-moon"></i>Anesthetics</li>        
+        <li routerLink="/preclinical-anesthetic/list" routerLinkActive="active"><i class="fas fa-moon"></i>Anesthetics</li>
     </div>
 
     <li (click)="state.uploadOpened = !state.uploadOpened; saveState();"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
