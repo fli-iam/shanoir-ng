@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { Pipeline } from '../carmin/models/pipeline';
+import { Pipeline } from '../vip/models/pipeline';
 
 @Injectable({
     providedIn: 'root'
