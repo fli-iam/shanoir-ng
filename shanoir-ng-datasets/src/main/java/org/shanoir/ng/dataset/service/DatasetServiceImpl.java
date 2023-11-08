@@ -19,6 +19,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.assertj.core.util.Arrays;
+import org.shanoir.ng.configuration.amqp.RabbitMQDatasetsService;
 import org.shanoir.ng.dataset.dto.VolumeByFormatDTO;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.modality.MrDataset;
@@ -29,6 +31,7 @@ import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
+import org.shanoir.ng.datasetacquisition.model.mr.MrScanningSequence;
 import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetfile.DatasetFile;
@@ -51,6 +54,9 @@ import org.shanoir.ng.study.rights.StudyUser;
 import org.shanoir.ng.study.rights.StudyUserRightsRepository;
 import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -78,9 +84,6 @@ import java.util.stream.Collectors;
 @Service
 public class DatasetServiceImpl implements DatasetService {
 
-	@PersistenceContext
-	private EntityManager entityManager;
-
 	@Autowired
 	private DatasetRepository repository;
 
@@ -96,12 +99,6 @@ public class DatasetServiceImpl implements DatasetService {
 	@Autowired
 	private DICOMWebService dicomWebService;
 
-	@Autowired
-	private ExaminationService examinationService;
-	@Autowired
-	private StudyService studyService;
-	@Autowired
-	private DatasetAcquisitionRepository datasetAcquisitionRepository;
 	@Value("${dcm4chee-arc.dicom.web}")
 	private boolean dicomWeb;
 
@@ -326,185 +323,4 @@ public class DatasetServiceImpl implements DatasetService {
 	public List<Object[]> queryStatistics(String studyNameInRegExp, String studyNameOutRegExp, String subjectNameInRegExp, String subjectNameOutRegExp) throws Exception {
 		return repository.queryStatistics(studyNameInRegExp, studyNameOutRegExp, subjectNameInRegExp, subjectNameOutRegExp);
 	}
-
-	@Override
-	public void moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
-		System.out.println("moveDataset : " + ds.getId() + " for study " + studyId);
-		DatasetAcquisition newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
-		List<DatasetExpression> dsExList = ds.getDatasetExpressions();
-
-		if ("Mr".equals(ds.getType())) {
-			MrDataset mrDs = (MrDataset) ds;
-			if (!CollectionUtils.isEmpty(mrDs.getFlipAngle())) {
-				for (FlipAngle element : mrDs.getFlipAngle()) {
-					element.setId(null);
-					element.setMrDataset(mrDs);
-				}
-			}
-			if (mrDs.getDatasetProcessing() != null) {
-				mrDs.getDatasetProcessing().setId(null);
-			}
-			if (mrDs.getOriginMrMetadata() != null) {
-				mrDs.getOriginMrMetadata().setId(null);
-			}
-			if (mrDs.getUpdatedMrMetadata() != null) {
-				mrDs.getUpdatedMrMetadata().setId(null);
-			}
-			if (!CollectionUtils.isEmpty(mrDs.getDiffusionGradients())) {
-				for (DiffusionGradient element : mrDs.getDiffusionGradients()) {
-					entityManager.detach(element);
-					element.setId(null);
-					element.setMrDataset(mrDs);
-				}
-			}
-			if (!CollectionUtils.isEmpty(mrDs.getEchoTime())) {
-				for (EchoTime element : mrDs.getEchoTime()) {
-					element.setId(null);
-					element.setMrDataset(mrDs);
-				}
-			}
-			if (!CollectionUtils.isEmpty(mrDs.getInversionTime())) {
-				for (InversionTime element : mrDs.getInversionTime()) {
-					element.setId(null);
-					element.setMrDataset(mrDs);
-				}
-			}
-			if (!CollectionUtils.isEmpty(mrDs.getRepetitionTime())) {
-				for (RepetitionTime element : mrDs.getRepetitionTime()) {
-					element.setId(null);
-					element.setMrDataset(mrDs);
-				}
-			}
-		} else if ("Eeg".equals(ds.getType())) {
-			EegDataset eegDs = (EegDataset) ds;
-			if (!CollectionUtils.isEmpty(eegDs.getChannels())) {
-				for (Channel ch : eegDs.getChannels()) {
-					ch.setId(null);
-					ch.setDataset(eegDs);
-				}
-			}
-			if (!CollectionUtils.isEmpty(eegDs.getEvents())) {
-				for (Event ev : eegDs.getEvents()) {
-					ev.setId(null);
-					ev.setDataset(eegDs);
-				}
-			}
-		}
-		if (ds.getOriginMetadata() != null) {
-			ds.getOriginMetadata().setId(null);
-		}
-		if (ds.getUpdatedMetadata() != null) {
-			ds.getUpdatedMetadata().setId(null);
-		}
-		ds.getDatasetProcessing();
-		ds.getReferencedDatasetForSuperimposition();
-
-		for (DatasetExpression dsEx : dsExList) {
-			this.moveDatasetExpression(dsEx, ds);
-		}
-
-		ds.setDatasetAcquisition(newAcq);
-		ds.setSubjectId(ds.getSubjectId());
-		// ds.setSubjectId(Long.valueOf(datasetSubjectMap.get(String.valueOf(ds.getId()))));
-		ds.setId(null);
-		entityManager.detach(ds);
-
-		List<Dataset> newDatasetList;
-		if (newAcq.getDatasets() != null)
-			newDatasetList = newAcq.getDatasets();
-		else newDatasetList = new ArrayList<>();
-		newDatasetList.add(ds);
-		newAcq.setDatasets(newDatasetList);
-
-		datasetAcquisitionRepository.save(newAcq);
-		// datasetRepository.save(ds);
-	}
-
-	public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
-		if (acqMap.get(acq.getId()) != null)
-			return acqMap.get(acq.getId());
-
-		Long oldAcqId = acq.getId();
-		acq.setDatasets(null);
-
-		switch (acq.getType()) {
-			case "Mr":
-				MrDatasetAcquisition mrAcq = (MrDatasetAcquisition) acq;
-				if (mrAcq.getMrProtocol() != null) {
-					mrAcq.getMrProtocol().setId(null);
-
-					if (mrAcq.getMrProtocol().getDiffusionGradients() != null) {
-						for (DiffusionGradient element : mrAcq.getMrProtocol().getDiffusionGradients()) {
-							element.setId(null);
-							element.setMrProtocol(mrAcq.getMrProtocol());
-						}
-					}
-
-					if (mrAcq.getMrProtocol().getOriginMetadata() != null) {
-						mrAcq.getMrProtocol().getOriginMetadata().setId(null);
-					}
-					if (mrAcq.getMrProtocol().getUpdatedMetadata() != null) {
-						mrAcq.getMrProtocol().getUpdatedMetadata().setId(null);
-					}
-				}
-				mrAcq.setId(null);
-				break;
-			case "Ct":
-				CtDatasetAcquisition ctAcq = (CtDatasetAcquisition) acq;
-				if (ctAcq.getCtProtocol() != null) {
-					ctAcq.getCtProtocol().setId(null);
-				}
-				ctAcq.setId(null);
-				break;
-			case "Pet":
-				PetDatasetAcquisition petAcq = (PetDatasetAcquisition) acq;
-				if (petAcq.getPetProtocol() != null) {
-					petAcq.getPetProtocol().setId(null);
-				}
-				petAcq.setId(null);
-				break;
-			default:
-				// Do nothing for others, no specific objets to migrate
-				break;
-		}
-
-		acq.setId(null);
-		Examination exam = moveExamination(acq.getExamination(), studyId, examMap);
-		acq.setExamination(exam);
-		entityManager.detach(acq);
-		DatasetAcquisition newAcquisition = datasetAcquisitionRepository.save(acq);
-
-		acqMap.put(oldAcqId, newAcquisition);
-		return newAcquisition;
-	}
-
-	public Examination moveExamination(Examination examination, Long studyId, Map<Long, Examination> examMap) {
-		if (examMap.get(examination.getId()) != null)
-			return examMap.get(examination.getId());
-
-		Long oldExamId = examination.getId();
-		examination.setDatasetAcquisitions(null);
-		examination.setStudy(studyService.findById(studyId));
-		examination.setId(null);
-		entityManager.detach(examination);
-		Examination newExamination = examinationService.save(examination);
-		examMap.put(oldExamId, newExamination);
-		return newExamination;
-	}
-
-	public void moveDatasetExpression(DatasetExpression expression, Dataset dataset) {
-		for (DatasetFile file : expression.getDatasetFiles())
-			this.moveFile(file, expression);
-
-		expression.setDataset(dataset);
-		expression.setId(null);
-		entityManager.detach(expression);
-	}
-
-	public void moveFile(DatasetFile file, DatasetExpression expression) {
-		file.setDatasetExpression(expression);
-		file.setId(null);
-		entityManager.detach(file);
-	}
-
 }

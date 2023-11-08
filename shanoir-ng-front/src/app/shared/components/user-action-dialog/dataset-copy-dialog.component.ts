@@ -74,7 +74,7 @@ export class DatasetCopyDialogComponent {
             this.isDatasetInStudy = this.checkDatasetBelongToStudy(this.lines, this.selectedStudy.id);
 
             if (!this.hasRight) {
-                this.statusMessage = 'Missing rights for study ' + this.selectedStudy.name + ' please make sure you have CAN_IMPORT or CAN_ADMIN right.';
+                this.statusMessage = 'Missing rights for study ' + this.selectedStudy.name + ' please make sure you have ADMIN right.';
             } else if (this.isDatasetInStudy) {
                 this.statusMessage = 'Selected dataset(s) already belong to selected study.';
             } else {
@@ -94,10 +94,10 @@ export class DatasetCopyDialogComponent {
                     .toPromise()
                     .then(res => {
                         console.log("res : " + res);
-                        this.statusMessage += `... \n` + res;
+                        this.statusMessage = res;
                     }).catch(reason => {
                         if (reason.status == 403) {
-                            this.statusMessage = "Vous devez être administrateur ou expert.";
+                            this.statusMessage = "You must be admin or expert.";
                         } else throw Error(reason);
                     });
             }
@@ -121,7 +121,7 @@ export class DatasetCopyDialogComponent {
             return Promise.resolve(true);
         } else {
             return this.studyRightsService.getMyRightsForStudy(studyId).then(rights => {
-                return (rights.includes(StudyUserRight.CAN_IMPORT) || rights.includes(StudyUserRight.CAN_ADMINISTRATE));
+                return (rights.includes(StudyUserRight.CAN_ADMINISTRATE));
             });
         }
     }

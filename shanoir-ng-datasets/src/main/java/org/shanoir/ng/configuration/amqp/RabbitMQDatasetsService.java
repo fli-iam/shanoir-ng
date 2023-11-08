@@ -25,6 +25,7 @@ import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
+import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
@@ -83,6 +84,8 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private DatasetService datasetService;
+	@Autowired
+	private DatasetCopyService datasetCopyService;
 
 	@Autowired
 	private RabbitMqStudyUserService listener;
@@ -451,15 +454,32 @@ public class RabbitMQDatasetsService {
 			datasetIds = convertStringToLong(data.substring(0, index).split(","));
 
 			Long studyId = Long.valueOf(data.substring(index + 1, data.length()));
-			List<Dataset> datasetList = datasetService.findByIdIn(datasetIds);
+			List<Dataset> datasetStudyList = datasetService.findByStudyId(studyId);
+			// List<Dataset> datasetList = datasetService.findByIdIn(datasetIds);
 
-			for (Dataset dataset : datasetList) {
-				LOG.info("Dataset copy started for dataset " + dataset.getId() + " and study " + studyId);
-				List<Dataset> datasetStudyList = datasetService.findByStudyId(studyId);
+			System.out.println("datasetIds : " + datasetIds);
+			for (Long datasetId : datasetIds) {
+				System.out.println("");
+				System.out.println("datasetId : " + datasetId);
+				Dataset dataset = datasetService.findById(datasetId);
+				System.out.println("dataset.name : " + dataset.getName());
+				// LOG.info("Dataset copy started for dataset " + dataset.getId() + " and study " + studyId);
+				System.out.println("dataset to add : ");
+				System.out.println("     dataset.id : " + dataset.getId() + " / dataset.name : " + dataset.getName());
+				System.out.println("     dataset.acq.id : " + dataset.getDatasetAcquisition().getId() + " / dataset.acq.exam.id : " + dataset.getDatasetAcquisition().getExamination().getId());
+				System.out.println("datasets from study " + studyId + " : ");
+				for (Dataset d : datasetStudyList) {
+					System.out.println("     d.id : " + d.getId() + " / d.name : " + d.getName());
+				}
+
 				if (!datasetStudyList.contains(dataset)) {
-					datasetService.moveDataset(dataset, studyId, examMap, acqMap);
+					System.out.println("does not contain ==> add");
+					datasetCopyService.moveDataset(dataset, studyId, examMap, acqMap);
+				} else {
+					System.out.println("already contains ==> do not add");
 				}
 			}
+			System.out.println("=== Copy datasets terminé ===");
 		} catch (Exception e) {
 			LOG.error("Something went wrong during the copy. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
