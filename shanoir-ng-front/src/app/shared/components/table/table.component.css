@@ -61,12 +61,12 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 		td span.button i { color: var(--color-b); }
 	td.loading,
 	td.empty { padding: 20px 20px; text-align: center; }
-	.cell-container:not(.select) { overflow: hidden; text-overflow: ellipsis; position: absolute; top: 0; right: 0; bottom: 0; left: 0; padding: 1px 5px; }
+    .cell-container:not(.select):not(.wrap) { overflow: hidden; text-overflow: ellipsis; position: absolute; top: 0; right: 0; bottom: 0; left: 0; padding: 1px 5px; }
 	.cell-container a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.cell-container.multiselect a, .cell-container.wrap a { white-space: initial; width: auto; height: 100%; }
 	/*.cell-container:empty:after { content: '.'; visibility: hidden; }*/
   .cell-new-tab { line-height:21px; height: inherit; display: block; text-decoration: none; color: black; width: auto; }
-  .default-data-parent { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cell-container:not(.wrap) .default-data-parent { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .loader { float: right; border-left: none !important; }
 	.loader img { margin-left: 5px; vertical-align: -1; height: 10px; }

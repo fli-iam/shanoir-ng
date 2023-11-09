@@ -72,7 +72,7 @@ export class MetadataComponent extends EntityListComponent<DicomMetadata> implem
                 met.keyword = tags.find(tag => tag.code == met.id)?.label;
                 met.value = entry[1]['Value']?.toString()
                 if (met.value == '[object Object]') {
-                    met.value = JSON.stringify(entry[1]['Value'], null, 2,);
+                    met.value = JSON.stringify(entry[1]['Value'], null, 2);
                 }
                 if(met.value){
                     this.metadata.push(met);
@@ -83,8 +83,8 @@ export class MetadataComponent extends EntityListComponent<DicomMetadata> implem
     getColumnDefs(): ColumnDefinition[] {
         let columnDefs: ColumnDefinition[] = [
             { headerName: 'Tag', field: 'tag', width: '100px'},
-            { headerName: "Keyword", field: 'keyword', width: '200px'},
-            { headerName: "Value", field: 'value', wrap: true }
+            { headerName: 'Keyword', field: 'keyword', width: '200px'},
+            { headerName: 'Value', field: 'value', wrap: true }
         ];
         return columnDefs;
     }
