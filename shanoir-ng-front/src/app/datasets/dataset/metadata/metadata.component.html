@@ -13,14 +13,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
 <h2>Dicom metadata</h2>
-<table *ngIf="metadataArr">
-	<tr *ngFor="let tag of metadataArr">
-		<td>{{tag[0]}}</td>
-		<td>{{tag[1].tagLabel}}</td>
-		<td>{{tag[1].Value}}</td>
-	</tr>
-</table>
-<div class="no-metadata" *ngIf="metadataArr?.length == 0">
-	No metadata to display
-</div>
+<shanoir-table #table
+               [getPage]="getPage.bind(this)"
+               [columnDefs]="columnDefs"
+               [customActionDefs]="customActionDefs"
+               [browserSearch]="true"
+               [collapseControls]="true"
+>
+</shanoir-table>
+
 <button class="Button left-icon" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>
