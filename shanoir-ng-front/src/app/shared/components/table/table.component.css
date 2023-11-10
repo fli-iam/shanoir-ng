@@ -65,8 +65,9 @@ td { padding: 0 5px; border: none; white-space: nowrap; text-overflow: ellipsis;
 	.cell-container a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.cell-container.multiselect a, .cell-container.wrap a { white-space: initial; width: auto; height: 100%; }
 	/*.cell-container:empty:after { content: '.'; visibility: hidden; }*/
-  .cell-new-tab { line-height:21px; height: inherit; display: block; text-decoration: none; color: black; width: auto; }
-  .cell-container:not(.wrap) .default-data-parent { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cell-new-tab { line-height:21px; height: inherit; display: block; text-decoration: none; color: black; width: auto;}
+ .cell-container.wrap .default-data-parent { white-space: break-spaces; }
+ .cell-container:not(.wrap) .default-data-parent { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .loader { float: right; border-left: none !important; }
 	.loader img { margin-left: 5px; vertical-align: -1; height: 10px; }
