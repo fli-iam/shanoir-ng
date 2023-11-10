@@ -92,7 +92,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 * @see org.shanoir.dicom.model.DicomTreeNode#getDisplayString()
 	 */
 	public String getDisplayString() {
-		return study.getStudyDescription();
+		return  "[" + study.getStudyDate() + "] " + study.getStudyDescription();
 	}
 	
 	public LocalDate getStudyDate() {
