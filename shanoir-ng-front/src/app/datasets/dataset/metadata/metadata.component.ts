@@ -19,7 +19,6 @@ import {BreadcrumbsService} from '../../../breadcrumbs/breadcrumbs.service';
 import {Location} from '@angular/common';
 import {Page, Pageable} from "../../../shared/components/table/pageable.model";
 import {TableComponent} from "../../../shared/components/table/table.component";
-import {EntityService} from "../../../shared/components/entity/entity.abstract.service";
 import {ColumnDefinition} from "../../../shared/components/table/column.definition.type";
 import {DicomMetadata} from "./dicom-metadata.model";
 import {BrowserPaging} from "../../../shared/components/table/browser-paging.model";
@@ -60,16 +59,21 @@ export class MetadataComponent {
             }
             let metadata = Object.entries(data[0]);
             metadata.forEach(entry => {
+
                 let met = new DicomMetadata();
-                let code = parseInt(entry[0], 16);
+
                 let group = entry[0].toString().substring(0,4);
                 let element = entry[0].toString().substring(4);
                 met.tag = group + ',' + element;
+
+                let code = parseInt(entry[0], 16);
                 met.keyword = tags.find(tag => tag.code == code)?.label;
+
                 met.value = entry[1]['Value']?.toString()
                 if (met.value == '[object Object]') {
                     met.value = JSON.stringify(entry[1]['Value'], null, 3);
                 }
+
                 if(met.value){
                     this.metadata.push(met);
                 }
