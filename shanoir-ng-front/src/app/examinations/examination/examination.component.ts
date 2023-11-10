@@ -159,10 +159,6 @@ export class ExaminationComponent extends EntityComponent<Examination> {
         });
     }
 
-    download(format: Format) {
-        this.downloadService.downloadAllByExaminationId(this.examination?.id, format);
-    }
-
     downloadAll() {
         let options: DownloadSetupOptions = new DownloadSetupOptions();
         options.hasDicom = this.hasDicom;

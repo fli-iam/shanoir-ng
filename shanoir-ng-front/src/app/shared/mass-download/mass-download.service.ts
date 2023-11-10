@@ -2,12 +2,12 @@
  * Shanoir NG - Import, manage and share neuroimaging data
  * Copyright (C) 2009-2019 Inria - https://www.inria.fr/
  * Contact us on https://project.inria.fr/shanoir/
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
@@ -28,6 +28,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
 import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
 import { Queue } from './queue.model';
+import {NiftiConverter} from "../../niftiConverters/nifti.converter.model";
 
 declare var JSZip: any;
 
@@ -49,6 +50,7 @@ export type Report = {
     format: Format;
     nbQueues: number;
     unzip: boolean;
+    converter: number;
 };
 
 @Injectable()
@@ -65,14 +67,14 @@ export class MassDownloadService {
         private dialogService: ConfirmDialogService) {
     }
 
-    downloadByIds(datasetIds: number[], format?: Format): Promise<void> {
-        return this.openModal(format).then(ret => {
+    downloadByIds(datasetIds: number[]): Promise<void> {
+        return this.openModal().then(ret => {
             if (ret != 'cancel') {
-                return this._downloadByIds(datasetIds, ret.format, ret.nbQueues, ret.unzip);
+                return this._downloadByIds(datasetIds, ret.format, ret.nbQueues, ret.converter, ret.unzip);
             } else return Promise.resolve();
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
-                return this.openAltModal(format).then(ret => {
+                return this.openAltModal().then(ret => {
                     if (ret != 'cancel') {
                         return this._downloadAlt('datasetIds', datasetIds, ret);
                     } else return Promise.resolve();
@@ -85,7 +87,7 @@ export class MassDownloadService {
         return this.openModal().then(ret => {
             if (ret != 'cancel') {
                 return this.datasetService.getByStudyId(studyId).then(datasets => {
-                    this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.unzip);
+                    this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.converter, ret.unzip);
                 })
             } else return Promise.resolve();
         }).catch(error => {
@@ -104,7 +106,7 @@ export class MassDownloadService {
         return this.openModal(format, options).then(ret => {
             if (ret != 'cancel') {
                 return datasetsPromise.then(datasets => {
-                    this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.unzip, downloadState);
+                    this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.converter ,ret.unzip, downloadState);
                 })
             } else return Promise.resolve();
         }).catch(error => {
@@ -142,7 +144,7 @@ export class MassDownloadService {
         return this.openModal().then(ret => {
             if (ret != 'cancel') {
                 return this.datasetService.getByStudyIdAndSubjectId(studyId, subjectId).then(datasets => {
-                    return this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.unzip).then(r => {
+                    return this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.converter,  ret.unzip).then(r => {
                         return r;
                     });
                 })
@@ -150,7 +152,10 @@ export class MassDownloadService {
         });
     }
 
-    private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4, unzip: boolean= false, task?: Task, report?: Report, parentHandle?: FileSystemDirectoryHandle): Promise<void> {
+    /**
+     * This method is used only to download datasets after something has failed.
+     */
+    private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4, converter: number, unzip: boolean= false, task?: Task, report?: Report, parentHandle?: FileSystemDirectoryHandle): Promise<void> {
         if (datasetIds.length == 0) return;
         let directoryHandlePromise: Promise<FileSystemDirectoryHandle>;
         if (parentHandle) {
@@ -169,11 +174,11 @@ export class MassDownloadService {
                     this.notificationService.pushLocalTask(task);
                     const start: number = Date.now();
                     let ids = [...datasetIds]; // copy array
-                    if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, format, nbQueues, unzip);
+                    if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, format, nbQueues, unzip, converter);
                     let promises: Promise<void>[] = [];
                     for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
-                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, unzip)
+                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, unzip, null, converter)
                         );
                     }
                     return Promise.all(promises).then(() => {
@@ -193,9 +198,9 @@ export class MassDownloadService {
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
     }
-    
+
     makeRootSubdirectory(handle: FileSystemDirectoryHandle, nbDatasets: number): Promise<FileSystemDirectoryHandle> {
-        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-YYYY_HH\'h\'mm', 'en-US'); 
+        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-YYYY_HH\'h\'mm', 'en-US');
         return handle.getDirectoryHandle(dirName, { create: true })
     }
 
@@ -271,7 +276,7 @@ export class MassDownloadService {
         });
     }
 
-    private _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4, unzip: boolean = false, downloadState?: TaskState): Promise<void> {
+    private _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4, converter: number, unzip: boolean = false, downloadState?: TaskState): Promise<void> {
         if (datasets.length == 0) return;
         return this.getFolderHandle()
         // add a subdirectory
@@ -279,19 +284,19 @@ export class MassDownloadService {
             .then(parentFolderHandle => { // ask the user's parent directory
 
             let task: Task = this.createTask(datasets.length);
-            if (downloadState) downloadState.status = task.status; 
+            if (downloadState) downloadState.status = task.status;
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
                 try {
                     task.status = 2;
                     task.lastUpdate = new Date();
                     const start: number = Date.now();
                     let ids = [...datasets.map(ds => ds.id)];
-                    let report: Report = this.initReport(datasets.map(ds => ds.id), task.id, parentFolderHandle.name, format, nbQueues, unzip);
+                    let report: Report = this.initReport(datasets.map(ds => ds.id), task.id, parentFolderHandle.name, format, nbQueues, unzip, converter);
                     let promises: Promise<void>[] = [];
                     let j = 0;
                     for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
-                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, unzip, datasets)
+                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, unzip, datasets, converter)
                         );
                     }
                     return Promise.all(promises).then(() => {
@@ -314,7 +319,7 @@ export class MassDownloadService {
     private _downloadFromReport(report: Report, task: Task, parentHandle: FileSystemDirectoryHandle) {
         if (!report) throw new Error('report can\'t be null !');
         const noSuccessIds: number[] = Object.keys(report.list).filter(key => report.list[key].status != 'SUCCESS').map(key => parseInt(key));
-        this._downloadByIds(noSuccessIds, report.format, report.nbQueues, report.unzip, task, report, parentHandle);
+        this._downloadByIds(noSuccessIds, report.format, report.nbQueues, report.converter, report.unzip, task, report, parentHandle);
     }
 
     private handleEnd(task: Task, report: Report, start: number) {
@@ -336,20 +341,20 @@ export class MassDownloadService {
         this.notificationService.pushLocalTask(task);
     }
 
-    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, unzip: boolean = false, datasets?: Dataset[]): Promise<void> {
+    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, unzip: boolean = false, datasets?: Dataset[], converter?: number): Promise<void> {
         if (!id) return Promise.resolve();
-        return this.saveDataset(id, format, userFolderHandle, report, task, unzip, datasets?.find(ds => ds.id == id)).then(() => {
+        return this.saveDataset(id, format, userFolderHandle, report, task, unzip, datasets?.find(ds => ds.id == id), converter).then(() => {
             if (remainingIds.length > 0) {
-                return this.recursiveSave(remainingIds.shift(), format, userFolderHandle, remainingIds, report, task, unzip, datasets);
+                return this.recursiveSave(remainingIds.shift(), format, userFolderHandle, remainingIds, report, task, unzip, datasets, converter);
             } else {
                 return Promise.resolve();
             }
         });
     }
 
-    private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, unzip: boolean = false, dataset?: Dataset): Promise<void> {
+    private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, unzip: boolean = false, dataset?: Dataset, converter ? : number): Promise<void> {
         const metadataPromise: Promise<Dataset> = (dataset?.id == id && dataset.datasetAcquisition?.examination?.subject) ? Promise.resolve(dataset) : this.datasetService.get(id, 'lazy');
-        const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format);
+        const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format, converter);
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
@@ -453,7 +458,7 @@ export class MassDownloadService {
         } else { // if no dir to create
             userFolderHandle.getFileHandle(filename, { create: true }).then(fileHandler => {
                 this.writeFile(fileHandler, content);
-            }); 
+            });
         }
     }
 
@@ -492,7 +497,7 @@ export class MassDownloadService {
         return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace('/', '_');
     }
 
-    private initReport(datasetIds: number[], taskId: number, folderName: string, format: Format, nbQueues: number, unzip: boolean): Report {
+    private initReport(datasetIds: number[], taskId: number, folderName: string, format: Format, nbQueues: number, unzip: boolean, converter: number): Report {
         let report: Report = {
             taskId: taskId,
             folderName: folderName,
@@ -503,7 +508,8 @@ export class MassDownloadService {
             nbSuccess: 0,
             format : format,
             nbQueues: nbQueues,
-            unzip: unzip
+            unzip: unzip,
+            converter: converter
         };
         datasetIds.forEach(id => report.list[id] = { status: 'QUEUED' });
         return report;
@@ -530,7 +536,7 @@ export class MassDownloadService {
         return task;
     }
 
-    private openModal(format?: Format, options?: DownloadSetupOptions): Promise<{format: Format, nbQueues: number, unzip: boolean} | 'cancel'> {
+    private openModal(format?: Format, options?: DownloadSetupOptions): Promise<{format: Format, nbQueues: number, converter: number, unzip: boolean} | 'cancel'> {
         // @ts-ignore
         if (window.showDirectoryPicker) { // test compatibility
             let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
@@ -553,7 +559,7 @@ export class MassDownloadService {
     private waitForEnd(modalRef: ComponentRef<any>): Promise<any | 'cancel'> {
         let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
         let result: Observable<any> = Observable.race([
-            modalRef.instance.go, 
+            modalRef.instance.go,
             modalRef.instance.close.map(() => 'cancel')
         ]);
         result.pipe(take(1)).subscribe(ret => {

@@ -24,6 +24,8 @@ public class DicomSerieAndInstanceAnalyzer {
 
 	private static final String RTPLAN = "RTPLAN";
 
+	private static final String OT = "OT";
+
 	private static final String RTDOSE = "RTDOSE";
 
 	private static final String RTSTRUCT = "RTSTRUCT";
@@ -69,11 +71,8 @@ public class DicomSerieAndInstanceAnalyzer {
 	 */
 	public static boolean checkSerieIsIgnored(Attributes attributes) {
 		String modality = attributes.getString(Tag.Modality);
-		if (AcquisitionModality.codeOf(modality) != null || RTSTRUCT.equals(modality) || RTDOSE.equals(modality) || RTPLAN.equals(modality)) {
-			return false;
-		}
-		return true;
-	}
+        return AcquisitionModality.codeOf(modality) == null && !RTSTRUCT.equals(modality) && !RTDOSE.equals(modality) && !RTPLAN.equals(modality);
+    }
 
 	public static void checkSerieIsSpectroscopy(Serie serie) {
 		final String sopClassUID = serie.getSopClassUID();

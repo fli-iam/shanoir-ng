@@ -32,6 +32,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.common.util.Hash;
 import org.joda.time.DateTime;
+import org.shanoir.ng.dataset.modality.BidsDataset;
 import org.shanoir.ng.dataset.modality.EegDataset;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.model.DatasetExpressionFormat;
@@ -310,6 +311,11 @@ public class DatasetDownloaderServiceImpl {
 						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset,
 								subjectName, false, datasetFilePath);
 						datasetFiles.addAll(files);
+					}  else if (dataset instanceof BidsDataset) {
+						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS, null);
+						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset,
+								subjectName, true, datasetFilePath);
+						datasetFiles.addAll(files);
 					} else if (DCM.equals(format)) {
 						if (dataset.getDatasetProcessing() != null) {
 							// Do not load dicom for processed dataset
@@ -325,14 +331,17 @@ public class DatasetDownloaderServiceImpl {
 							filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(datasetFiles);
 						}
 
-					} else if (NII.equals(format)) {						
+					} else if (NII.equals(format)) {
+						LOG.error("hey: " +converterId);
 						// Check if we want a specific converter -> nifti reconversion
 						if (converterId != null) {
 							File userDir = DatasetFileUtils.getUserImportDir("/tmp");
 							String tmpFilePath = userDir + File.separator + dataset.getId() + "_" + format;
 							File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
 
-							DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM);
+							DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, null);
+
+							LOG.error("hey: " + pathURLs);
 
 							// Create temporary workfolder with dicom files, to be able to convert them
 							workFolder.mkdirs();
@@ -346,8 +355,11 @@ public class DatasetDownloaderServiceImpl {
 										new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 							} 
 							workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
+							LOG.error(workFolder.getAbsolutePath());
 							List<String> files = new ArrayList<>();
 							for (File res : workFolder.listFiles()) {
+								LOG.error(res.getAbsolutePath());
+
 								if (!res.isDirectory()) {
 									// Then send workFolder to zipOutputFile
 									FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
@@ -369,11 +381,6 @@ public class DatasetDownloaderServiceImpl {
 						
 						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
 						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
-						datasetFiles.addAll(files);
-					} else if (BIDS.equals(format)) {
-						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS, null);
-						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset,
-								subjectName, true, datasetFilePath);
 						datasetFiles.addAll(files);
 					} else {
 						throw new RestServiceException(

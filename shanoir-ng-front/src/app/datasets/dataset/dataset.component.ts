@@ -135,8 +135,6 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         let options: DownloadSetupOptions = new DownloadSetupOptions();
         //options.hasBids = this.dataset.type == 'BIDS';
         options.hasDicom = this.dataset.type != 'Eeg' && this.dataset.type != 'BIDS' && !this.dataset.datasetProcessing;
-        //options.hasNii = !this.isMRS && this.dataset.type != 'Eeg' && this.dataset.type != 'BIDS' && this.dataset.type != 'Measurement' && !this.dataset.datasetProcessing;
-        //options.hasEeg = this.dataset.type == 'Eeg' && !this.dataset.datasetProcessing;
         this.downloadService.downloadDataset(this.dataset?.id, options, this.downloadState);
     }
 

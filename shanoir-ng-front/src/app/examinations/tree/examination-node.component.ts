@@ -28,6 +28,7 @@ import {LoadingBarComponent} from '../../shared/components/loading-bar/loading-b
 import {environment} from '../../../environments/environment';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { TaskState } from 'src/app/async-tasks/task.model';
+import {DownloadSetupOptions} from "../../shared/mass-download/download-setup/download-setup.component";
 
 @Component({
     selector: 'examination-node',
@@ -54,12 +55,10 @@ export class ExaminationNodeComponent implements OnChanges {
     detailsPath: string = '/examination/details/';
 
     constructor(
-        private router: Router,
         private examinationService: ExaminationService,
         private datasetAcquisitionService: DatasetAcquisitionService,
         private examPipe: ExaminationPipe,
-        private datasetService: DatasetService,
-        private downloadService: MassDownloadService,
+        private massDownloadService : MassDownloadService,
         private consoleService: ConsoleService) {
     }
 
@@ -145,22 +144,12 @@ export class ExaminationNodeComponent implements OnChanges {
             return;
         }
         this.downloading = true;
-        if (this.datasetIds && this.datasetIds.length == 0) return;
-        let datasetIdsReady: Promise<void>;
-        if (this.node.datasetAcquisitions == 'UNLOADED') {
-            datasetIdsReady = this.loadDatasetAcquisitions();
-            if (!this.datasetIds || this.datasetIds.length == 0) {
-                this.consoleService.log('warn', 'Sorry, no dataset for examination n°' + this.node?.id);
-                this.downloading = false;
-                return;
-            }
-        } else {
-            datasetIdsReady = Promise.resolve();
-        }
-        datasetIdsReady.then(() => {
-            this.downloadService.downloadByIds(this.datasetIds, format);
-            this.downloading = false;
-        });
+
+        let options: DownloadSetupOptions = new DownloadSetupOptions();
+        options.hasDicom = this.hasDicom;
+        this.massDownloadService.downloadAllByExaminationId(this.node.id, null, options, this.downloadState);
+
+        this.downloading = false;
     }
 
     mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {

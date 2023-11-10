@@ -9,8 +9,8 @@
                         <select-box formControlName="format" [options]="formatOptions"></select-box>
                     </span>
                 </li>
-                <li *ngIf="format == 'nii'">
-                <label>Dataset files format</label>
+                <li *ngIf="form.get('format').value == 'nii'">
+                <label>Nifti converter</label>
                 <span class="right-col">
                     <select-box formControlName="converter" [options]="niftiConverters"></select-box>
                 </span>
