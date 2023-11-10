@@ -180,6 +180,7 @@ public class DicomServerClient implements IDicomServerClient {
 		if (state != null && state.getStatus() == Status.Success) {
 			return true;
 		} else {
+			logger.error("C_MOVE error: status: " + state.getStatus() + ", message: " + state.getMessage() + ", error comment:" + state.getProgress().getErrorComment());
 			return false;
 		}
 	}
