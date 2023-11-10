@@ -1,7 +1,4 @@
-import {Entity} from "../../../shared/components/entity/entity.abstract";
-
-export class DicomMetadata extends Entity {
-    id: number;
+export class DicomMetadata {
     tag: string;
     keyword: string;
     value: string;

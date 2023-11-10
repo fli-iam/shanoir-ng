@@ -12,14 +12,15 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
+
 <h2>Dicom metadata</h2>
 <shanoir-table #table
                [getPage]="getPage.bind(this)"
                [columnDefs]="columnDefs"
-               [customActionDefs]="customActionDefs"
                [browserSearch]="true"
                [collapseControls]="true"
 >
 </shanoir-table>
 
-<button class="Button left-icon" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>
+<button class="Button left-icon back" (click)="goBack()"><i class="fas fa-angle-left"></i>Back</button>
+

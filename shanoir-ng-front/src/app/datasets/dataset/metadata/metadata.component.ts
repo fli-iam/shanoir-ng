@@ -11,27 +11,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {AfterViewInit, Component, Input, OnDestroy, ViewChild} from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { DatasetService } from '../../shared/dataset.service';
-import { DicomService } from '../../../study-cards/shared/dicom.service'
-import {BreadcrumbsService, Step} from '../../../breadcrumbs/breadcrumbs.service';
-import { Location } from '@angular/common';
-import {FilterablePageable, Page, Pageable} from "../../../shared/components/table/pageable.model";
-import {
-    BrowserPaginEntityListComponent
-} from "../../../shared/components/entity/entity-list.browser.component.abstract";
-import {Center} from "../../../centers/shared/center.model";
+import {Component, ViewChild} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {DatasetService} from '../../shared/dataset.service';
+import {DicomService} from '../../../study-cards/shared/dicom.service'
+import {BreadcrumbsService} from '../../../breadcrumbs/breadcrumbs.service';
+import {Location} from '@angular/common';
+import {Page, Pageable} from "../../../shared/components/table/pageable.model";
 import {TableComponent} from "../../../shared/components/table/table.component";
-import {CenterService} from "../../../centers/shared/center.service";
 import {EntityService} from "../../../shared/components/entity/entity.abstract.service";
 import {ColumnDefinition} from "../../../shared/components/table/column.definition.type";
-import {AcquisitionEquipment} from "../../../acquisition-equipments/shared/acquisition-equipment.model";
-import {ShanoirError} from "../../../shared/models/error.model";
 import {DicomMetadata} from "./dicom-metadata.model";
-import {Task} from "../../../async-tasks/task.model";
 import {BrowserPaging} from "../../../shared/components/table/browser-paging.model";
-import {EntityListComponent} from "../../../shared/components/entity/entity-list.component.abstract";
 
 
 @Component({
@@ -40,9 +31,10 @@ import {EntityListComponent} from "../../../shared/components/entity/entity-list
     styleUrls: ['metadata.component.css']
 })
 
-export class MetadataComponent extends EntityListComponent<DicomMetadata> implements AfterViewInit, OnDestroy {
+export class MetadataComponent {
 
     metadata: DicomMetadata[] = [];
+    columnDefs: ColumnDefinition[];
 
     @ViewChild('table', { static: false }) table: TableComponent;
 
@@ -50,10 +42,14 @@ export class MetadataComponent extends EntityListComponent<DicomMetadata> implem
         private datasetService: DatasetService,
         private activatedRoute: ActivatedRoute,
         private dicomService: DicomService,
-        breadcrumbsService: BreadcrumbsService,
+        private breadcrumbsService: BreadcrumbsService,
         private location: Location) {
-            super('dicom-metadata');
             breadcrumbsService.nameStep('Dicom metadata');
+            this.columnDefs = this.getColumnDefs();
+            this.loadMetadata().then(() => {
+                this.table.maxResults = this.metadata.length
+                this.table.refresh();
+        })
     }
 
     private loadMetadata() {
@@ -65,11 +61,11 @@ export class MetadataComponent extends EntityListComponent<DicomMetadata> implem
             let metadata = Object.entries(data[0]);
             metadata.forEach(entry => {
                 let met = new DicomMetadata();
-                met.id = parseInt(entry[0], 16);
+                let code = parseInt(entry[0], 16);
                 let group = entry[0].toString().substring(0,4);
                 let element = entry[0].toString().substring(4);
                 met.tag = group + ',' + element;
-                met.keyword = tags.find(tag => tag.code == met.id)?.label;
+                met.keyword = tags.find(tag => tag.code == code)?.label;
                 met.value = entry[1]['Value']?.toString()
                 if (met.value == '[object Object]') {
                     met.value = JSON.stringify(entry[1]['Value'], null, 3);
@@ -81,39 +77,19 @@ export class MetadataComponent extends EntityListComponent<DicomMetadata> implem
         });
     }
     getColumnDefs(): ColumnDefinition[] {
-        let columnDefs: ColumnDefinition[] = [
-            { headerName: 'Tag', field: 'tag', width: '100px'},
-            { headerName: 'Keyword', field: 'keyword', width: '200px'},
-            { headerName: 'Value', field: 'value', wrap: true }
+        return [
+            {headerName: 'Tag', field: 'tag', width: '100px'},
+            {headerName: 'Keyword', field: 'keyword', width: '200px'},
+            {headerName: 'Value', field: 'value', wrap: true}
         ];
-        return columnDefs;
-    }
-
-    getOptions() {
-        return {'new': false, 'edit': false, 'view': false, 'delete': false, 'reload': true, id: false};
     }
 
     getPage = (pageable: Pageable): Promise<Page<DicomMetadata>> => {
         return Promise.resolve(new BrowserPaging(this.metadata, this.columnDefs).getPage(pageable));
     }
 
-    getCustomActionsDefs(): any[] {
-        return [];
-    }
-
 
     goBack() {
         this.location.back();
-    }
-
-    getService(): EntityService<DicomMetadata> {
-        return undefined;
-    }
-
-    ngAfterViewInit(): void {
-        this.loadMetadata().then(() => {
-            this.table.maxResults = this.metadata.length
-            this.table.refresh();
-        })
     }
 }
