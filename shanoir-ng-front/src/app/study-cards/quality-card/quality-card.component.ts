@@ -264,20 +264,20 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         return Promise.resolve(this.report.getPage(pageable));
     }
 
-    downloadReport() {
-        if (!this.report) return;
+    static downloadReport(report: any, name?: string) {
+        if (!report) return;
         let csvStr: string = '';
-        csvStr += this.report.columnDefs.map(col => col.headerName).join(',');
-        for (let entry of this.report.items) {
-            csvStr += '\n' + this.report.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
+        csvStr += report.columnDefs.map(col => col.headerName).join(',');
+        for (let entry of report.items) {
+            csvStr += '\n' + report.columnDefs.map(col => '"' + TableComponent.getCellValue(entry, col) + '"').join(',');
         }
         const csvBlob = new Blob([csvStr], {
             type: 'text/csv'
         });
-        AppUtils.browserDownloadFile(csvBlob, this.getReportFileName());
+        AppUtils.browserDownloadFile(csvBlob, 'qcReport_' + (name ? name + '_' : '') + Date.now().toLocaleString('fr-FR'));
     }
 
-    private getReportFileName(): string {
-        return 'qcReport_' + this.qualityCard.name + '_' + Date.now().toLocaleString('fr-FR');
+    protected downloadReport() {
+        QualityCardComponent.downloadReport(this.report, this.qualityCard?.name);
     }
 }

@@ -43,6 +43,9 @@ public class ShanoirEvent {
 	@JdbcTypeCode(Types.LONGVARCHAR)
 	protected String message;
 
+	@JdbcTypeCode(Types.LONGVARCHAR)
+	protected String report;
+
 	/** Creation date, automatically generated **/
 	@CreationTimestamp
 	@Column(updatable=false)
@@ -133,6 +136,20 @@ public class ShanoirEvent {
 	 */
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	/**
+	 * @return the report
+	 */
+	public String getReport() {
+		return report;
+	}
+
+	/**
+	 * @param message the report to set
+	 */
+	public void setReport(String report) {
+		this.report = report;
 	}
 
 	/**

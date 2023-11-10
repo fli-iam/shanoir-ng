@@ -1,1 +1,1 @@
-alter table events add column report text;
+alter table events add column report longtext;

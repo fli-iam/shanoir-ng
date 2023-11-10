@@ -15,6 +15,12 @@ import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/
 import { Subscription } from 'rxjs';
 import { NotificationsService } from '../../shared/notifications/notifications.service';
 import { Task } from '../task.model';
+import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
+import { FilterablePageable, Page } from 'src/app/shared/components/table/pageable.model';
+import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
+import { browserDownloadFile } from 'src/app/utils/app.utils';
+import { TableComponent } from 'src/app/shared/components/table/table.component';
+import { QualityCardComponent } from 'src/app/study-cards/quality-card/quality-card.component';
 
 
 @Component({
@@ -27,19 +33,31 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     importTs: number;
     protected subscribtions: Subscription[] = [];
     @Input() task: Task;
+    private tableRefresh: () => void;
 
-    constructor(
-        private notificationsService: NotificationsService
-    ) { }
+    reportColumns: ColumnDefinition[] = [
+        {headerName: 'Subject Name', field: 'subjectName', width: '20%'},
+        {headerName: 'Examination Comment', field: 'examinationComment', width: '25%'},
+        {headerName: 'Examination Date', field: 'examinationDate', type: 'date', width: '100px'},
+        {headerName: 'Details', field: 'message', wrap: true}
+    ];
+    report: BrowserPaging<any>;
+    reportActions: any = [{title: "Download as csv", awesome: "fa-solid fa-download", action: () => this.downloadReport()}];
 
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes.task && this.task) {
-            this.subscribtions.push(
-                this.notificationsService.getNotifications().subscribe(tasks => {
-                    this.task = tasks.find(task => task.id == this.task.id);
-                })
-            );
+            this.report = null;
+            if (this.task) {
+                let reportArray: [];
+                try {
+                    reportArray = JSON.parse(this.task.report);
+                } catch (e) {}
+                if (reportArray && Array.isArray(reportArray)) {
+                    this.report = new BrowserPaging(reportArray, this.reportColumns);
+                    if (this.tableRefresh) this.tableRefresh();
+                }
+            }
         } 
     }
 
@@ -49,4 +67,15 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
         }
     }
 
+    getPage(pageable: FilterablePageable): Promise<Page<any>> {
+        return Promise.resolve(this.report.getPage(pageable));
+    }
+
+    downloadReport() {
+        QualityCardComponent.downloadReport(this.report);
+    }
+
+    registerTableRefresh(refresh: () => void) {
+        this.tableRefresh = refresh;
+    }
 }

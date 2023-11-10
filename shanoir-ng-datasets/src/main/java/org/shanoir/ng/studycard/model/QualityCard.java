@@ -113,6 +113,21 @@ public class QualityCard extends HalEntity implements Card {
         return result;
     }
 
+	/**
+    * Application during import, when dicoms are present in tmp directory.
+    * @param examination
+    * @param studyCard
+    */
+    public QualityCardResult apply(Examination examination) {
+        QualityCardResult result = new QualityCardResult();
+        if (this.getRules() != null) {
+            for (QualityExaminationRule rule : this.getRules()) {
+                rule.apply(examination, result);
+            }
+        }
+        return result;
+    }
+
     public boolean isToCheckAtImport() {
         return toCheckAtImport;
     }

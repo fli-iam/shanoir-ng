@@ -496,7 +496,6 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
 
     onSelectionChange (selection: any) {
-        console.log(selection?.size)
         this.selectedDatasetIds = selection;
     }
 

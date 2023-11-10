@@ -52,6 +52,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
+    @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
     page: Page<Object>;
     isLoading: boolean = false;
     maxResultsField: number;
@@ -111,6 +112,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             this.checkCompactMode();
         }));
         this.checkCompactMode();
+        this.registerRefresh.emit(this.refresh.bind(this));
     }
 
     private computeItemVars() {

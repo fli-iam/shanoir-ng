@@ -13,12 +13,11 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 
+import { HttpClient } from '@angular/common/http';
 import { EntityService } from '../shared/components/entity/entity.abstract.service';
 import * as AppUtils from '../utils/app.utils';
 import { Task } from './task.model';
-import { HttpClient } from '@angular/common/http';
 
 @Injectable()
 export class TaskService extends EntityService<Task> {

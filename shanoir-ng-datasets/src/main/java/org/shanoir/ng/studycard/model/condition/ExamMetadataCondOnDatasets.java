@@ -83,14 +83,14 @@ public class ExamMetadataCondOnDatasets extends StudyCardMetadataConditionWithCa
         boolean complies = cardinalityComplies(nbOk, total);
         if (!complies) {
             if (getCardinality() == -1) {
-                errorMsg.append("condition [" + toString() + "] failed because only " + nbOk + " out of all (" + total + ") acquisitions complied");
+                errorMsg.append("\ncondition [" + toString() + "] failed because only " + nbOk + " out of all (" + total + ") acquisitions complied");
             } else if (getCardinality() == 0) {
-                errorMsg.append("condition [" + toString() + "] failed because " + nbOk + " acquisitions complied where 0 was required");
+                errorMsg.append("\ncondition [" + toString() + "] failed because " + nbOk + " acquisitions complied where 0 was required");
             } else {
-                errorMsg.append("condition [" + toString() + "] failed because only " + nbOk + " out of " + total + " acquisitions complied");
+                errorMsg.append("\ncondition [" + toString() + "] failed because only " + nbOk + " out of " + total + " acquisitions complied");
             }
         } else {
-            errorMsg.append("condition [" + toString() + "] succeed");
+            errorMsg.append("\ncondition [" + toString() + "] succeed");
         }
         return complies;
     }

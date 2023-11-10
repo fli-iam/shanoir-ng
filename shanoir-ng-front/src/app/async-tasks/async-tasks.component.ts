@@ -65,17 +65,6 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
         return Promise.resolve(new BrowserPaging(this.tasks, this.columnDefs).getPage(pageable));
     }
 
-
-    // getPage(pageable: FilterablePageable, forceRefresh: boolean = false): Promise<Page<Task>> {
-    //     return this.entitiesPromise.then(() => {
-    //         if (forceRefresh) {
-    //             return this.loadEntities().then(() => this.browserPaging.getPage(pageable));
-    //         } else {
-    //             return this.browserPaging.getPage(pageable);
-    //         }
-    //     });
-    // }
-
     getColumnDefs(): ColumnDefinition[] {
         return [
             { 

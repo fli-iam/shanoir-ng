@@ -53,6 +53,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <label>Last update</label>
                 <span class="right-col">{{task.lastUpdate | date: 'dd/MM/yyyy HH:mm:ss'}}</span>
             </li>
+            <li class="message-li" *ngIf="task.report && task._eventType != 'checkQuality.event'">
+                <label>Report</label>
+                <span class="right-col">
+                    <div class="message">
+                        <pre><code>{{task?.report}}</code></pre>
+                    </div>
+                </span>
+            </li>
+        </ol>
+        <ol *ngIf="task._eventType == 'checkQuality.event'">
+            <legend>Report</legend>
+            <li>
+                <shanoir-table #table class="report"
+                    [getPage]="getPage.bind(this)"
+                    [columnDefs]="reportColumns"
+                    [customActionDefs]="reportActions"
+                    [browserSearch]="false"
+                    [collapseControls]="true"
+                    (registerRefresh)="registerTableRefresh($event)"
+                ></shanoir-table>
+            </li>
         </ol>
     </fieldset>
 </form>

@@ -21,8 +21,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.shanoir.ng.dataset.model.Dataset;
+import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
+import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.examination.model.Examination;
 
 public class ExaminationAttributes {
@@ -30,24 +33,6 @@ public class ExaminationAttributes {
 	private ConcurrentMap<Long, AcquisitionAttributes> acquisitionMap = new ConcurrentHashMap<>();
 
     public ExaminationAttributes() {}
-
-	public ExaminationAttributes(Examination examination, Attributes dicomAttributes) {
-        if (examination != null && examination.getDatasetAcquisitions() != null) {
-            for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
-                if (acquisition.getDatasets() != null) {
-                    for (Dataset dataset : acquisition.getDatasets()) {
-                        if (dicomAttributes.getProperties() != null) {
-                            for (String key : dicomAttributes.getProperties().keySet()) {
-                            }
-                        }
-
-                        // Attributes datasetAttributes;
-                        addDatasetAttributes(acquisition.getId(), dataset.getId(), dicomAttributes);
-                    }
-                }
-            }
-        }
-    }
 
     public AcquisitionAttributes getAcquisitionAttributes(long id) {
 		return acquisitionMap.get(id);
@@ -75,6 +60,33 @@ public class ExaminationAttributes {
         }
         acquisitionMap.get(acquisitionId).addDatasetAttributes(datasetId, attributes);
 	}
+
+    public void addDatasetAttributes(Examination examination, Attributes singleImageAttributes) {
+        //String serieUID = singleImageAttributes.getString(Tag.SeriesInstanceUID);
+        String sopUID = singleImageAttributes.getString(Tag.SOPInstanceUID);
+        if (sopUID != null && examination != null && examination.getDatasetAcquisitions() != null) {
+            for (DatasetAcquisition acquisition : examination.getDatasetAcquisitions()) {
+                if (acquisition.getDatasets() != null) {
+                    for (Dataset dataset : acquisition.getDatasets()) {
+                        if (dataset.getDatasetExpressions() != null) {
+                            for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+                                if (expression.getDatasetFiles() != null) {
+                                    for (DatasetFile file : expression.getDatasetFiles()) {
+                                        if (file.getPath() != null) {
+                                            String datasetSopUID =  WADODownloaderService.extractInstanceUID(file.getPath());
+                                            if (sopUID.equals(datasetSopUID)) {
+                                                this.addDatasetAttributes(acquisition.getId(), dataset.getId(), singleImageAttributes);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public String toString() {

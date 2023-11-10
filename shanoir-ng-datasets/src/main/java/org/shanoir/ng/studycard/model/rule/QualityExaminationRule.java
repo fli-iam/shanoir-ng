@@ -70,6 +70,10 @@ public class QualityExaminationRule extends AbstractEntity {
 	public void setConditions(List<StudyCardCondition> conditions) {
 		this.conditions = conditions;
 	}
+
+    public void apply(Examination examination, QualityCardResult result) {
+        apply(examination, null, result);	        
+    }
 	
 	public void apply(Examination examination, ExaminationAttributes examinationDicomAttributes, QualityCardResult result) {
 	    ExaminationData examData = convert(examination);
@@ -131,7 +135,11 @@ public class QualityExaminationRule extends AbstractEntity {
             StringBuffer msg = new StringBuffer();
             boolean fulfilled = true;
             if (condition instanceof StudyCardDICOMConditionOnDatasets) {
-                fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
+                if (dicomAttributes != null) {
+                    fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(dicomAttributes, msg);
+                } else {
+                    fulfilled = ((StudyCardDICOMConditionOnDatasets) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
+                }
             } else if (condition instanceof ExamMetadataCondOnAcq) {
                 fulfilled = ((ExamMetadataCondOnAcq) condition).fulfilled(examination.getDatasetAcquisitions(), msg);
             } else if (condition instanceof ExamMetadataCondOnDatasets) {

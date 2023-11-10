@@ -21,7 +21,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
 import org.shanoir.ng.download.AcquisitionAttributes;
-import org.shanoir.ng.download.ExaminationAttributes;
 import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -102,7 +101,7 @@ public class CardsProcessingService {
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
         long startTs = new Date().getTime();
         Examination examination = examinationService.findById(examinationId);
-         LOG.debug("Quality check for examination " + examination.getId() + " : getting exam from db tool " + (new Date().getTime() - startTs) + "ms");
+        LOG.debug("Quality check for examination " + examination.getId() + " : getting exam from db tool " + (new Date().getTime() - startTs) + "ms");
         return applyQualityCardOnExamination(qualityCard, examination, updateTags);
 	}
 
@@ -113,7 +112,7 @@ public class CardsProcessingService {
 	 * @throws MicroServiceCommunicationException 
 	 */
 	public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Examination examination, boolean updateTags) throws MicroServiceCommunicationException {
-	    long startTs = new Date().getTime();
+        long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
 		if (examination == null ) throw new IllegalArgumentException("examination can't be null");
         LOG.debug("Quality check for examination " + examination.getId() + " started");
@@ -127,31 +126,18 @@ public class CardsProcessingService {
                     subjectStudyService.update(subjectsStudies);
                 } catch (EntityNotFoundException e) {} // too bad
             }
-            // For now, just take the first DICOM instance
-            // Later, use DICOM json to have a hierarchical structure of DICOM metata (study -> serie -> instance) 
             try {
-                ExaminationAttributes examinationDicomAttributes;
-                if (qualityCard.hasDicomConditions()) { // don't query pacs if not needed
-                    long dicomStartTs = new Date().getTime();
-                    examinationDicomAttributes = downloader.getDicomAttributesForExamination(examination);
-                    LOG.debug("Getting DICOM data for examination " + examination.getId() + " took " + (new Date().getTime() - dicomStartTs)  + "ms");
-                } else {
-                    LOG.debug("No need to get DICOM data for examination " + examination.getId());
-                    examinationDicomAttributes = null;
-                }
                 List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
-                // today study cards are only used for MR modality
-                // acquisitions = acquisitions.stream().filter(a -> a instanceof MrDatasetAcquisition).collect(Collectors.toList());
                 if (CollectionUtils.isNotEmpty(acquisitions)) {
                     LOG.debug(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
                     LOG.debug(qualityCard.getRules().size() + " rules found for study card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
                     long rulesStartTs = new Date().getTime();
                     for (QualityExaminationRule rule : qualityCard.getRules()) {
-                        rule.apply(examination, examinationDicomAttributes, result);
+                        rule.apply(examination, result);
                     }
                     LOG.debug("Quality check for examination " + examination.getId() + " : rules application took " + (new Date().getTime() - rulesStartTs) + "ms");
                 }
-            } catch (PacsException e) {
+            } catch (Exception e) {
                 long ts = new Date().getTime();
                 LOG.warn("Examination" + examination.getId() + " metadata could not be retreived from the Shanoir pacs (ts:" + ts + "). Cause : " + e);
                 QualityCardResultEntry resultEntry = initResult(examination);
@@ -164,11 +150,11 @@ public class CardsProcessingService {
 			    try {
 			        subjectStudyService.update(result.getUpdatedSubjectStudies());
 			    } catch (EntityNotFoundException e) {
-			        throw new IllegalStateException("Could not update subject-studies", e);
+                    throw new IllegalStateException("Could not update subject-studies", e);
 			    }	    
 			}
             LOG.info("Quality check for examination " + examination.getId() + " finished in " + (new Date().getTime() - startTs) + " ms");
-			return result;
+            return result;
 		} else {
 			throw new RestClientException("Study card used with emtpy rules.");
 		}
@@ -191,13 +177,15 @@ public class CardsProcessingService {
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
 		    QualityCardResult result = new QualityCardResult();
             Float i = 0f;
-			for (Examination examination : study.getExaminations()) {
+            for (Examination examination : study.getExaminations()) {
                 event.setStatus(2);
                 event.setProgress(i / study.getExaminations().size());
+                event.setMessage("checking quality for examination " + examination.getComment());
+                event.setReport(result.toString());
                 eventService.publishEvent(event);
                 result.merge(applyQualityCardOnExamination(qualityCard, examination, updateTags));
                 i++;
-			};
+            };
             event.setProgress(1f);
             event.setStatus(1);
             event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - start) + " ms.");
