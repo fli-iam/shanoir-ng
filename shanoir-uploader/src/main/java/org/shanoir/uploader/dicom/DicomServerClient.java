@@ -104,9 +104,10 @@ public class DicomServerClient implements IDicomServerClient {
 		for (SerieTreeNode serieTreeNode : selectedSeries) {
 			List<String> fileNamesForSerie = new ArrayList<String>();
 			final String seriesInstanceUID = serieTreeNode.getId();
+			final String studyInstanceUID = serieTreeNode.getParent().getId();
 			try {
 				// move files from server directly into uploadFolder
-				boolean noError = getFilesFromServer(seriesInstanceUID, serieTreeNode.getDescription());
+				boolean noError = getFilesFromServer(studyInstanceUID, seriesInstanceUID, serieTreeNode.getDescription());
 				if(noError) {
 					// create file name filter for old files and only use .dcm files (ignore /tmp folder)
 					final FilenameFilter oldFileNamesAndDICOMFilter = new FilenameFilter() {
@@ -159,19 +160,12 @@ public class DicomServerClient implements IDicomServerClient {
 		}
 		return retrievedDicomFiles;
 	}
-	
-	/**
-	 * DICOM query for receiving all image files (C-MOVE) for one serie.
-	 * @param dcmqr
-	 * @param dQH
-	 * @param seriesInstanceUID
-	 * @return
-	 */
-	private boolean getFilesFromServer(final String seriesInstanceUID, final String seriesDescription) throws Exception {
+
+	private boolean getFilesFromServer(final String studyInstanceUID, final String seriesInstanceUID, final String seriesDescription) throws Exception {
 		final DicomState state;
 		try {
 			logger.info("\n C_MOVE, serie (" + seriesDescription + ") command: launching c-move with args: " + seriesDescription + ", " + seriesInstanceUID + "\n");
-			state = queryPACSService.queryCMOVE(seriesInstanceUID);
+			state = queryPACSService.queryCMOVE(studyInstanceUID, seriesInstanceUID);
 			logger.debug("\n Dicom Query list:\n " + state.toString() + "\n");
 		} catch (final Exception e) {
 			logger.error(e.getMessage(), e);
@@ -180,7 +174,7 @@ public class DicomServerClient implements IDicomServerClient {
 		if (state != null && state.getStatus() == Status.Success) {
 			return true;
 		} else {
-			logger.error("C_MOVE error: status: " + state.getStatus() + ", message: " + state.getMessage() + ", error comment:" + state.getProgress().getErrorComment());
+			logger.error("C_MOVE error: status: " + state.getStatus() + ", message: " + state.getMessage() + ", error comment: " + state.getProgress().getErrorComment());
 			return false;
 		}
 	}

@@ -37,7 +37,6 @@ import org.dcm4che3.net.Device;
 import org.dcm4che3.net.DimseRSPHandler;
 import org.dcm4che3.net.IncompatibleConnectionException;
 import org.dcm4che3.net.Priority;
-import org.dcm4che3.net.QueryOption;
 import org.dcm4che3.net.Status;
 import org.dcm4che3.net.pdu.AAssociateRQ;
 import org.dcm4che3.net.pdu.PresentationContext;
@@ -207,11 +206,7 @@ public class QueryPACSService {
 		LOG.info("releaseAssociation finished between calling {} and called {}", calling.getAet(), called.getAet());
 	}
 
-	public void queryCMOVE(Serie serie) {
-		queryCMOVE(serie.getSeriesInstanceUID());
-	}
-
-	public DicomState queryCMOVE(String seriesInstanceUID) {
+	public DicomState queryCMOVE(String studyInstanceUID, String seriesInstanceUID) {
 		DicomProgress progress = new DicomProgress();
 		progress.addProgressListener(new ProgressListener() {
 			@Override
@@ -219,10 +214,11 @@ public class QueryPACSService {
 				LOG.debug("Remaining operations:{}", progress.getNumberOfRemainingSuboperations());
 			}
 		});
-		DicomParam[] params = { new DicomParam(Tag.QueryRetrieveLevel, "SERIES"),
-				new DicomParam(Tag.SeriesInstanceUID, seriesInstanceUID) };
+		DicomParam[] params = {
+			new DicomParam(Tag.QueryRetrieveLevel, "SERIES"),
+			new DicomParam(Tag.StudyInstanceUID, studyInstanceUID),
+			new DicomParam(Tag.SeriesInstanceUID, seriesInstanceUID) };
 		AdvancedParams options = new AdvancedParams();
-		options.getQueryOptions().add(QueryOption.RELATIONAL); // Required for QueryRetrieveLevel other than study
 		return CMove.process(options, calling, called, calledNameSCP, progress, params);
 	}
 	

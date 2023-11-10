@@ -195,6 +195,7 @@ public class StudyTreeNode implements DicomTreeNode {
 	 */
 	public SerieTreeNode initChildTreeNode(final Serie serie) {
 		final SerieTreeNode serieTreeNode = new SerieTreeNode(serie);
+		serieTreeNode.setParent(this);
 		return serieTreeNode;
 	}
 
