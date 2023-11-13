@@ -35,6 +35,9 @@ import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.exception.ShanoirException;
+import org.shanoir.ng.shared.model.SubjectStudy;
+import org.shanoir.ng.shared.quality.QualityTag;
+import org.shanoir.ng.shared.service.SubjectStudyService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.QualityException;
@@ -104,6 +107,9 @@ public class ImporterService {
     private DatasetAcquisitionService datasetAcquisitionService;
 
     @Autowired
+	private SubjectStudyService subjectStudyService;
+
+    @Autowired
     private DicomProcessing dicomProcessing;
 
     private static final String SUBJECT_PREFIX = "sub-";
@@ -135,11 +141,21 @@ public class ImporterService {
                 generatedAcquisitions = generateAcquisitions(examination, importJob, event);
                 examination.getDatasetAcquisitions().addAll(generatedAcquisitions); // change to set() ?
                 // Quality check
+                SubjectStudy subjectStudy = examination.getSubject().getSubjectStudyList().stream()
+                    .filter(ss -> ss.getStudy().getId().equals(examination.getStudy().getId()))
+                    .findFirst().orElse(null);
+                QualityTag tagSave = subjectStudy != null ? subjectStudy.getQualityTag() : null;
                 QualityCardResult qualityResult = checkQuality(examination, importJob);                				
                 // Has quality check passed ?
                 if (qualityResult.hasError()) {
                     throw new QualityException(examination, qualityResult);
                 } else { // Then do the import
+                    if (qualityResult.hasWarning() || qualityResult.hasFailedValid()) {
+                        event.setReport(qualityResult.toString());
+                    }
+                    // add tag to subject-study
+                    subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
+
                 	generatedAcquisitions = new HashSet<DatasetAcquisition>(datasetAcquisitionService.createAll(generatedAcquisitions));
                     try {
                         persistPatientInPacs(importJob.getPatients(), event);
@@ -148,6 +164,9 @@ public class ImporterService {
                         for (DatasetAcquisition acquisition : generatedAcquisitions) {
                             datasetAcquisitionService.deleteById(acquisition.getId());
                         }
+                        // revert quality tag
+                        subjectStudy.setQualityTag(tagSave);
+                        subjectStudyService.update(qualityResult.getUpdatedSubjectStudies());
                         throw new ShanoirException("Error while saving data in pacs, the import is canceled and acquisitions were not saved");
                     }
                 }
@@ -192,7 +211,8 @@ public class ImporterService {
         } catch (QualityException e) {
             String msg = e.buildErrorMessage();
             event.setStatus(ShanoirEvent.ERROR);
-            event.setMessage(msg);
+            event.setMessage("Quality checks didn't pass at import, import aborted");
+            event.setReport(msg);
             event.setProgress(-1f);
             eventService.publishEvent(event);
             LOG.warn(msg, e);	
@@ -266,7 +286,6 @@ public class ImporterService {
         QualityCardResult qualityResult = new QualityCardResult();
         for (QualityCard qualityCard : qualityCards) {
             if (qualityCard.isToCheckAtImport()) {
-
                 qualityResult.merge(qualityCard.apply(examination, dicomAttributes));                       
             }
         }

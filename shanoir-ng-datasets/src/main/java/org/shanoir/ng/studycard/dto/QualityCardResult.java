@@ -95,6 +95,24 @@ public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
         }
         return false;
     }
+
+    public boolean hasWarning() {
+        for (QualityCardResultEntry entry : this) {
+            if (QualityTag.WARNING.equals(entry.getTagSet())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean hasFailedValid() {
+        for (QualityCardResultEntry entry : this) {
+            if (entry.isFaildValid()) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     @Override
     public String toString() {

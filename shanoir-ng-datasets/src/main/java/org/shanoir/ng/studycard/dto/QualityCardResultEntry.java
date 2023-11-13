@@ -35,6 +35,8 @@ public class QualityCardResultEntry {
 	
 	private QualityTag tagSet;
 
+	private boolean faildValid = false; // if tag VALID was to put but conditions failed
+
 	public String getSubjectName() {
 		return subjectName;
 	}
@@ -74,4 +76,12 @@ public class QualityCardResultEntry {
     public void setTagSet(QualityTag tagSet) {
         this.tagSet = tagSet;
     }
+
+	public boolean isFaildValid() {
+		return faildValid;
+	}
+
+	public void setFaildValid(boolean faildValid) {
+		this.faildValid = faildValid;
+	}
 }

@@ -32,11 +32,9 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.PacsException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.SubjectStudy;
-import org.shanoir.ng.shared.quality.QualityTag;
 import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.shared.service.SubjectStudyService;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
-import org.shanoir.ng.studycard.dto.QualityCardResultEntry;
 import org.shanoir.ng.studycard.model.QualityCard;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
@@ -106,7 +104,7 @@ public class CardsProcessingService {
 	}
 
     /**
-	 * Study cards for quality control: apply on entire study.
+	 * Study cards for quality control: apply on entire exam.
 	 * 
 	 * @param studyCard
 	 * @throws MicroServiceCommunicationException 
@@ -126,26 +124,16 @@ public class CardsProcessingService {
                     subjectStudyService.update(subjectsStudies);
                 } catch (EntityNotFoundException e) {} // too bad
             }
-            try {
-                List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
-                if (CollectionUtils.isNotEmpty(acquisitions)) {
-                    LOG.debug(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
-                    LOG.debug(qualityCard.getRules().size() + " rules found for study card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
-                    long rulesStartTs = new Date().getTime();
-                    for (QualityExaminationRule rule : qualityCard.getRules()) {
-                        rule.apply(examination, result);
-                    }
-                    LOG.debug("Quality check for examination " + examination.getId() + " : rules application took " + (new Date().getTime() - rulesStartTs) + "ms");
+            List<DatasetAcquisition> acquisitions = examination.getDatasetAcquisitions();
+            if (CollectionUtils.isNotEmpty(acquisitions)) {
+                LOG.debug(acquisitions.size() + " acquisitions found for examination with id: " + examination.getId());
+                LOG.debug(qualityCard.getRules().size() + " rules found for study card with id: " + qualityCard.getId() + " and name: " + qualityCard.getName());
+                long rulesStartTs = new Date().getTime();
+                for (QualityExaminationRule rule : qualityCard.getRules()) {
+                    rule.apply(examination, result);
                 }
-            } catch (Exception e) {
-                long ts = new Date().getTime();
-                LOG.warn("Examination" + examination.getId() + " metadata could not be retreived from the Shanoir pacs (ts:" + ts + "). Cause : " + e);
-                QualityCardResultEntry resultEntry = initResult(examination);
-                resultEntry.setTagSet(QualityTag.ERROR);
-                resultEntry.setMessage("Examination " + examination.getId() + " could not be checked because its metadata could not be retreived from the Shanoir pacs (ts:" + ts + ")");
-                result.add(resultEntry);
+                LOG.debug("Quality check for examination " + examination.getId() + " : rules application took " + (new Date().getTime() - rulesStartTs) + "ms");
             }
-			//result.removeUnchanged(study);
 			if (updateTags) {
 			    try {
 			        subjectStudyService.update(result.getUpdatedSubjectStudies());
@@ -207,14 +195,5 @@ public class CardsProcessingService {
                 subjectStudy.setQualityTag(null);
             }
         }
-    }
-
-    private QualityCardResultEntry initResult(Examination examination) {
-        QualityCardResultEntry result = new QualityCardResultEntry();
-        result.setSubjectName(examination.getSubject().getName());
-        result.setExaminationDate(examination.getExaminationDate());
-        result.setExaminationComment(examination.getComment());
-        return result;
-    }
-	
+    }	
 }
