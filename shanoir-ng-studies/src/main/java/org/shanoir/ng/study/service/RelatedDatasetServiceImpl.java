@@ -79,6 +79,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 	private static final Logger LOG = LoggerFactory.getLogger(RelatedDatasetServiceImpl.class);
 
 	@Transactional
+	@Override
 	public void addSubjectStudyToNewStudy(String subjectIds, String id) {
 		Study study = studyService.findById(Long.valueOf(id));
 		Boolean toAdd = true;
@@ -111,6 +112,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		}
 	}
 
+	@Override
 	public String addCenterAndCopyDatasetToStudy(String datasetIds, String id, String centerIds) {
 		String result = "";
 		Long userId = KeycloakUtil.getTokenUserId();
