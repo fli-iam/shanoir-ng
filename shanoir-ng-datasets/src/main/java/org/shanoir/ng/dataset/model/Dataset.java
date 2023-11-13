@@ -130,6 +130,8 @@ public abstract class Dataset extends AbstractEntity {
 	@OneToOne(cascade = CascadeType.ALL)
 	private DatasetMetadata updatedMetadata;
 
+	private Long sourceId;
+
 	/**
 	 * @return the creationDate
 	 */
@@ -390,6 +392,14 @@ public abstract class Dataset extends AbstractEntity {
 
 	public void setDownloadable(boolean downloadable) {
 		this.downloadable = downloadable;
+	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
 	}
 
 }

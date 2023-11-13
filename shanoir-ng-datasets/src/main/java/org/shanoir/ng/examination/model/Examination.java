@@ -126,7 +126,9 @@ public class Examination extends HalEntity {
     @Column(nullable=false)
     @ColumnDefault("false")
     private boolean preclinical;
-        
+
+    private Long sourceId;
+
     /**
      * Init HATEOAS links
      */
@@ -385,4 +387,11 @@ public class Examination extends HalEntity {
         this.preclinical = preclinical;
     }
 
+    public Long getSourceId() {
+        return sourceId;
+    }
+
+    public void setSourceId(Long sourceId) {
+        this.sourceId = sourceId;
+    }
 }

@@ -96,6 +96,8 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@LocalDateAnnotations
 	private LocalDate creationDate;
 
+	private Long sourceId;
+
 	/**
 	 * @return the acquisitionEquipmentId
 	 */
@@ -224,4 +226,11 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	@Transient
 	public abstract String getType();
 
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(Long sourceId) {
+		this.sourceId = sourceId;
+	}
 }

@@ -20,22 +20,12 @@ import jakarta.persistence.EntityManager;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
-import org.shanoir.ng.dataset.modality.EegDataset;
-import org.shanoir.ng.dataset.modality.MrDataset;
 import org.shanoir.ng.dataset.model.Dataset;
-import org.shanoir.ng.dataset.model.DatasetExpression;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
 import org.shanoir.ng.dataset.service.DatasetCopyService;
 import org.shanoir.ng.dataset.service.DatasetService;
 import org.shanoir.ng.datasetacquisition.model.DatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.ct.CtDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.mr.MrDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.model.pet.PetDatasetAcquisition;
-import org.shanoir.ng.datasetacquisition.repository.DatasetAcquisitionRepository;
 import org.shanoir.ng.datasetacquisition.service.DatasetAcquisitionService;
-import org.shanoir.ng.datasetfile.DatasetFile;
-import org.shanoir.ng.eeg.model.Channel;
-import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
 import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
@@ -48,12 +38,10 @@ import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
 import org.shanoir.ng.shared.repository.CenterRepository;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectRepository;
-import org.shanoir.ng.shared.service.StudyService;
 import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
-import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,6 +86,9 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private CenterRepository centerRepository;
+
+	@Autowired
+	private DatasetRepository datasetRepository;
 
 	@Autowired
 	private AcquisitionEquipmentRepository acquisitionEquipmentRepository;
@@ -441,51 +432,93 @@ public class RabbitMQDatasetsService {
 	@RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY)
 	@RabbitHandler
 	@Transactional
-	public void copyDatasetsToStudy(final String data) {
-		// data = datasetId,dsId,...;studyId
-		// ex = 100,101,102,103,104;54
+	public String copyDatasetsToStudy(final String data) {
+		// data = datasetId/examId,dsId/examId,...;studyId
 		Map<Long, Examination> examMap = new HashMap<>();
 		Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
-		List<Long> datasetIds;
+//		Map<Long, Long> datasetExamId = new HashMap<>();
+		List<Long> datasetParentIds;
+		Boolean copy = false;
+		String res = "";
 		try {
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 			int index = data.indexOf(";");
-			// makeMapDatasetSubjectIds(data.substring(0, index), datasetSubjectMap, datasetIds, subjectIds);
-			datasetIds = convertStringToLong(data.substring(0, index).split(","));
-
 			Long studyId = Long.valueOf(data.substring(index + 1, data.length()));
-			List<Dataset> datasetStudyList = datasetService.findByStudyId(studyId);
+//			datasetParentIds = extractData(data.substring(0, index));
+
+//			for (Map.Entry<Long, Long> d : datasetExamId.entrySet()) {
+//				System.out.println("     map.key : " + d.getKey() + " / map.value : " + d.getValue());
+//			}
+
+			// makeMapDatasetSubjectIds(data.substring(0, index), datasetSubjectMap, datasetIds, subjectIds);
+			datasetParentIds = convertStringToLong(data.substring(0, index).split(","));
+
+			// List<Dataset> datasetStudyList = datasetService.findByStudyId(studyId);
 			// List<Dataset> datasetList = datasetService.findByIdIn(datasetIds);
 
-			System.out.println("datasetIds : " + datasetIds);
-			for (Long datasetId : datasetIds) {
+			System.out.println("datasetParentIds : " + datasetParentIds);
+			for (Long datasetParentId : datasetParentIds) {
+				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
 				System.out.println("");
-				System.out.println("datasetId : " + datasetId);
-				Dataset dataset = datasetService.findById(datasetId);
-				System.out.println("dataset.name : " + dataset.getName());
-				// LOG.info("Dataset copy started for dataset " + dataset.getId() + " and study " + studyId);
+				System.out.println("datasetParentId : " + datasetParentId);
+				Dataset datasetParent = datasetService.findById(datasetParentId);
+				System.out.println("datasetParent.name : " + datasetParent.getName());
 				System.out.println("dataset to add : ");
-				System.out.println("     dataset.id : " + dataset.getId() + " / dataset.name : " + dataset.getName());
-				System.out.println("     dataset.acq.id : " + dataset.getDatasetAcquisition().getId() + " / dataset.acq.exam.id : " + dataset.getDatasetAcquisition().getExamination().getId());
-				System.out.println("datasets from study " + studyId + " : ");
-				for (Dataset d : datasetStudyList) {
-					System.out.println("     d.id : " + d.getId() + " / d.name : " + d.getName());
+				System.out.println("     datasetParent.id : " + datasetParent.getId() + " / datasetParent.name : " + datasetParent.getName());
+				System.out.println("     datasetParent.acq.id : " + datasetParent.getDatasetAcquisition().getId() + " / datasetParent.acq.exam.id : " + datasetParent.getDatasetAcquisition().getExamination().getId());
+				System.out.println("dsCopiedList : ");
+				for (Dataset d : dsCopiedList) {
+					System.out.println("     d.id : " + d.getId() + " / d.name : " + d.getName() + " / d.parent : " + d.getSourceId() + " / d.study : " + d.getStudyId());
 				}
 
-				if (!datasetStudyList.contains(dataset)) {
-					System.out.println("does not contain ==> add");
-					datasetCopyService.moveDataset(dataset, studyId, examMap, acqMap);
+				if (datasetParent.getSourceId() != null) {
+					copy = false;
+					res = "Selected dataset is a copy, please pick the original dataset.";
+					LOG.warn("Selected dataset is a copy, please pick the original dataset.");
+				} else if (dsCopiedList.isEmpty()) {
+					copy = true;
+					System.out.println("does not contain ==> add : copy = " + copy);
 				} else {
-					System.out.println("already contains ==> do not add");
+					for (Dataset d : dsCopiedList) {
+						System.out.println("d.parentId : " + d.getSourceId() + " / datasetId : " + datasetParentId + " / d.studyId : " + d.getStudyId() + " / studyId : " + studyId);
+						if (d.getSourceId().equals(datasetParentId) && d.getStudyId() == studyId) {
+							res = "Dataset already copied in this study, copy aborted.";
+							LOG.warn("Dataset already copied in this study, copy aborted.");
+							System.out.println("copy = " + copy);
+							copy = false;
+							break;
+						} else {
+							copy = true;
+						}
+					}
+				}
+				if (copy) {
+					datasetCopyService.moveDataset(datasetParent, studyId, examMap, acqMap);
+					res = "Copy worked !";
 				}
 			}
 			System.out.println("=== Copy datasets terminé ===");
+			return res;
 		} catch (Exception e) {
 			LOG.error("Something went wrong during the copy. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
 		}
 	}
 
+	public List<Long> extractData(String data) {
+		List<Long> datasetIds = new ArrayList<>();
+		for (String dsEx : data.split(",")) {
+			int i = dsEx.indexOf("/");
+			Long datasetId = Long.valueOf(dsEx.substring(0, i));
+			Long examId = Long.valueOf(dsEx.substring(i + 1, dsEx.length()));
+			System.out.println("datasetId : " + datasetId + " / examId : " + examId);
+//			datasetExamId.put(datasetId, examId);
+			datasetIds.add(datasetId);
+		}
+		// lowest id should be treated first
+		datasetIds.sort(null);
+		return datasetIds;
+	}
 
 	public Map<String, String> makeMapDatasetSubjectIds(String datasetAndSubjectIds, Map<String, String> datasetSubjectMap, List<Long> datasetIds, List<Long> subjectIds) {
 		String[] datasetSubjectList = datasetAndSubjectIds.split(",");

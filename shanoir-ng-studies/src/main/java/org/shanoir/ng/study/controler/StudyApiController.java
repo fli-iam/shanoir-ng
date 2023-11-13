@@ -234,7 +234,6 @@ public class StudyApiController implements StudyApi {
 		System.out.println("studyId : " + studyId);
 		System.out.println("centerIds : " + centerIds);
 		System.out.println("subjectIds : " + subjectIds);
-//		System.out.println("datasetSubjectIds : " + datasetSubjectIds);
 		relatedDatasetService.addSubjectStudyToNewStudy(subjectIds, studyId);
 		String res = relatedDatasetService.addCenterAndCopyDatasetToStudy(datasetIds, studyId, centerIds);
 

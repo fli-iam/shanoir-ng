@@ -46,79 +46,33 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private DatasetRepository datasetRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(DatasetCopyServiceImpl.class);
+
     @Override
     public void moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
         try {
             System.out.println("moveDataset : " + ds.getId() + " for study " + studyId);
+            Long oldDsId = ds.getId();
             System.out.println("moveDataset acq : " + ds.getDatasetAcquisition().getId());
-            DatasetAcquisition newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
-            List<DatasetExpression> dsExList = ds.getDatasetExpressions();
 
-            if ("Mr".equals(ds.getType())) {
-                MrDataset mrDs = (MrDataset) ds;
-                if (!CollectionUtils.isEmpty(mrDs.getFlipAngle())) {
-                    for (FlipAngle element : mrDs.getFlipAngle()) {
-                        element.setId(null);
-                        element.setMrDataset(mrDs);
+            List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
+            DatasetAcquisition newAcq = null;
+            if (!dsAcqList.isEmpty()) {
+                for (DatasetAcquisition dsAcq : dsAcqList) {
+                    System.out.println("dsAcq from parent acqId: " + dsAcq.getId() + " / acq.parentId: " + dsAcq.getSourceId() + " / acq.examId : " + dsAcq.getExamination().getId());
+                    if (dsAcq.getExamination().getStudyId() == studyId) {
+                        newAcq = dsAcq;
+                        break;
                     }
                 }
-                if (mrDs.getDatasetProcessing() != null) {
-                    mrDs.getDatasetProcessing().setId(null);
+                if (newAcq == null) {
+                    newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
                 }
-                if (mrDs.getOriginMrMetadata() != null) {
-                    mrDs.getOriginMrMetadata().setId(null);
-                }
-                if (mrDs.getUpdatedMrMetadata() != null) {
-                    mrDs.getUpdatedMrMetadata().setId(null);
-                }
-                if (!CollectionUtils.isEmpty(mrDs.getDiffusionGradients())) {
-                    for (DiffusionGradient element : mrDs.getDiffusionGradients()) {
-                        entityManager.detach(element);
-                        element.setId(null);
-                        element.setMrDataset(mrDs);
-                    }
-                }
-                if (!CollectionUtils.isEmpty(mrDs.getEchoTime())) {
-                    for (EchoTime element : mrDs.getEchoTime()) {
-                        element.setId(null);
-                        element.setMrDataset(mrDs);
-                    }
-                }
-                if (!CollectionUtils.isEmpty(mrDs.getInversionTime())) {
-                    for (InversionTime element : mrDs.getInversionTime()) {
-                        element.setId(null);
-                        element.setMrDataset(mrDs);
-                    }
-                }
-                if (!CollectionUtils.isEmpty(mrDs.getRepetitionTime())) {
-                    for (RepetitionTime element : mrDs.getRepetitionTime()) {
-                        element.setId(null);
-                        element.setMrDataset(mrDs);
-                    }
-                }
-            } else if ("Eeg".equals(ds.getType())) {
-                EegDataset eegDs = (EegDataset) ds;
-                if (!CollectionUtils.isEmpty(eegDs.getChannels())) {
-                    for (Channel ch : eegDs.getChannels()) {
-                        ch.setId(null);
-                        ch.setDataset(eegDs);
-                    }
-                }
-                if (!CollectionUtils.isEmpty(eegDs.getEvents())) {
-                    for (Event ev : eegDs.getEvents()) {
-                        ev.setId(null);
-                        ev.setDataset(eegDs);
-                    }
-                }
+            } else {
+                newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
             }
-            if (ds.getOriginMetadata() != null) {
-                ds.getOriginMetadata().setId(null);
-            }
-            if (ds.getUpdatedMetadata() != null) {
-                ds.getUpdatedMetadata().setId(null);
-            }
-            ds.getDatasetProcessing();
-            ds.getReferencedDatasetForSuperimposition();
+
+            List<DatasetExpression> dsExList = ds.getDatasetExpressions();
+            datasetCleanup(ds);
 
             for (DatasetExpression dsEx : dsExList) {
                 this.moveDatasetExpression(dsEx, ds);
@@ -129,8 +83,9 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             entityManager.detach(ds);
             Dataset newDs = datasetRepository.save(ds);
             newDs.setDatasetAcquisition(newAcq);
-
+            newDs.setSourceId(oldDsId);
             entityManager.flush();
+
             System.out.println("--> end of moveDataset ds: " + ds.getId() + " / acq : " + ds.getDatasetAcquisition().getId());
             System.out.println("--> end of moveDataset newDs: " + newDs.getId() + " / acq : " + newDs.getDatasetAcquisition().getId());
         } catch (Exception e) {
@@ -147,6 +102,122 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             return acqMap.get(oldAcqId);
 
         acq.setDatasets(null);
+        acquisitionCleanup(acq);
+
+        acq.setId(null);
+        Examination newExam = moveExamination(acq.getExamination(), studyId, examMap);
+        entityManager.detach(acq);
+        DatasetAcquisition newAcquisition = datasetAcquisitionRepository.save(acq);
+        newAcquisition.setExamination(newExam);
+        newAcquisition.setSourceId(oldAcqId);
+        System.out.println("  - newAcquisition id : " + newAcquisition.getId());
+        System.out.println("  - newAcquisition.exam id : " + newAcquisition.getExamination().getId());
+        acqMap.put(oldAcqId, newAcquisition);
+        return newAcquisition;
+    }
+
+    public Examination moveExamination(Examination examination, Long studyId, Map<Long, Examination> examMap) {
+        Long oldExamId = examination.getId();
+        System.out.println("Examination map size : " + examMap.size());
+        System.out.println("oldExamId : " + oldExamId);
+        if (examMap.get(oldExamId) != null)
+            return examMap.get(oldExamId);
+
+        examination.setDatasetAcquisitions(null);
+        examination.setExtraDataFilePathList(null);
+        examination.setInstrumentBasedAssessmentList(null);
+        examination.setStudy(studyService.findById(studyId));
+        examination.setId(null);
+        entityManager.detach(examination);
+        Examination newExamination = examinationService.save(examination);
+        newExamination.setSourceId(oldExamId);
+        System.out.println("   - newExamination id : " + newExamination.getId());
+        examMap.put(oldExamId, newExamination);
+        return newExamination;
+    }
+
+    public void moveDatasetExpression(DatasetExpression expression, Dataset dataset) {
+        for (DatasetFile file : expression.getDatasetFiles())
+            this.moveFile(file, expression);
+
+        expression.setDataset(dataset);
+        expression.setId(null);
+        entityManager.detach(expression);
+    }
+
+    public void moveFile(DatasetFile file, DatasetExpression expression) {
+        file.setDatasetExpression(expression);
+        file.setId(null);
+        entityManager.detach(file);
+    }
+
+    private void datasetCleanup(Dataset ds) {
+        if ("Mr".equals(ds.getType())) {
+            MrDataset mrDs = (MrDataset) ds;
+            if (!CollectionUtils.isEmpty(mrDs.getFlipAngle())) {
+                for (FlipAngle element : mrDs.getFlipAngle()) {
+                    element.setId(null);
+                    element.setMrDataset(mrDs);
+                }
+            }
+            if (mrDs.getDatasetProcessing() != null) {
+                mrDs.getDatasetProcessing().setId(null);
+            }
+            if (mrDs.getOriginMrMetadata() != null) {
+                mrDs.getOriginMrMetadata().setId(null);
+            }
+            if (mrDs.getUpdatedMrMetadata() != null) {
+                mrDs.getUpdatedMrMetadata().setId(null);
+            }
+            if (!CollectionUtils.isEmpty(mrDs.getDiffusionGradients())) {
+                for (DiffusionGradient element : mrDs.getDiffusionGradients()) {
+                    entityManager.detach(element);
+                    element.setId(null);
+                    element.setMrDataset(mrDs);
+                }
+            }
+            if (!CollectionUtils.isEmpty(mrDs.getEchoTime())) {
+                for (EchoTime element : mrDs.getEchoTime()) {
+                    element.setId(null);
+                    element.setMrDataset(mrDs);
+                }
+            }
+            if (!CollectionUtils.isEmpty(mrDs.getInversionTime())) {
+                for (InversionTime element : mrDs.getInversionTime()) {
+                    element.setId(null);
+                    element.setMrDataset(mrDs);
+                }
+            }
+            if (!CollectionUtils.isEmpty(mrDs.getRepetitionTime())) {
+                for (RepetitionTime element : mrDs.getRepetitionTime()) {
+                    element.setId(null);
+                    element.setMrDataset(mrDs);
+                }
+            }
+        } else if ("Eeg".equals(ds.getType())) {
+            EegDataset eegDs = (EegDataset) ds;
+            if (!CollectionUtils.isEmpty(eegDs.getChannels())) {
+                for (Channel ch : eegDs.getChannels()) {
+                    ch.setId(null);
+                    ch.setDataset(eegDs);
+                }
+            }
+            if (!CollectionUtils.isEmpty(eegDs.getEvents())) {
+                for (Event ev : eegDs.getEvents()) {
+                    ev.setId(null);
+                    ev.setDataset(eegDs);
+                }
+            }
+        }
+        if (ds.getOriginMetadata() != null) {
+            ds.getOriginMetadata().setId(null);
+        }
+        if (ds.getUpdatedMetadata() != null) {
+            ds.getUpdatedMetadata().setId(null);
+        }
+    }
+
+    private void acquisitionCleanup(DatasetAcquisition acq) {
         switch (acq.getType()) {
             case "Mr":
                 MrDatasetAcquisition mrAcq = (MrDatasetAcquisition) acq;
@@ -187,51 +258,5 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 // Do nothing for others, no specific objets to migrate
                 break;
         }
-
-        acq.setId(null);
-        Examination newExam = moveExamination(acq.getExamination(), studyId, examMap);
-        entityManager.detach(acq);
-        DatasetAcquisition newAcquisition = datasetAcquisitionRepository.save(acq);
-        newAcquisition.setExamination(newExam);
-        System.out.println("  - newAcquisition id : " + newAcquisition.getId());
-        System.out.println("  - newAcquisition.exam id : " + newAcquisition.getExamination().getId());
-        acqMap.put(oldAcqId, newAcquisition);
-        return newAcquisition;
     }
-
-    public Examination moveExamination(Examination examination, Long studyId, Map<Long, Examination> examMap) {
-        Long oldExamId = examination.getId();
-        System.out.println("Examination map size : " + examMap.size());
-        System.out.println("oldExamId : " + oldExamId);
-        if (examMap.get(oldExamId) != null)
-            return examMap.get(oldExamId);
-
-        examination.setDatasetAcquisitions(null);
-        examination.setExtraDataFilePathList(null);
-        examination.setInstrumentBasedAssessmentList(null);
-        examination.setStudy(studyService.findById(studyId));
-        examination.setId(null);
-        entityManager.detach(examination);
-        Examination newExamination = examinationService.save(examination);
-        System.out.println("   - newExamination id : " + newExamination.getId());
-        examMap.put(oldExamId, newExamination);
-        return newExamination;
-    }
-
-    public void moveDatasetExpression(DatasetExpression expression, Dataset dataset) {
-        for (DatasetFile file : expression.getDatasetFiles())
-            this.moveFile(file, expression);
-
-        expression.setDataset(dataset);
-        expression.setId(null);
-        entityManager.detach(expression);
-    }
-
-    public void moveFile(DatasetFile file, DatasetExpression expression) {
-        file.setDatasetExpression(expression);
-        file.setId(null);
-        entityManager.detach(file);
-    }
-
-
 }

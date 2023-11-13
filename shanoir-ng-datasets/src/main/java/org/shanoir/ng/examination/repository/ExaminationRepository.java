@@ -43,7 +43,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	/**
 	 * Get a list of examinations for a list of subjects.
 	 * 
-	 * @param subjectIds
+	 * @param subjectId
 	 * @return list of examinations.
 	 */
 	List<Examination> findBySubjectIdIn(List<Long> subjectId);
@@ -69,7 +69,7 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	/**
 	 * Get a list of examinations for a study.
 	 * 
-	 * @param subjectId
+	 * @param studyId
 	 * @return
 	 * @author yyao
 	 *            subject id.
@@ -92,5 +92,22 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 * @return
 	 */
 	Page<Examination> findAllBySubjectName(String patientName, Pageable pageable);
+
+	/**
+	 * Get the parent examination
+	 *
+	 * @param sourceId
+	 * @return
+	 */
+	List<Examination> findBySourceId(Long sourceId);
+
+	/**
+	 * Get the parent examination for a specific study
+	 *
+	 * @param sourceId
+	 * @param studyId
+	 * @return
+	 */
+	List<Examination> findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
 
 }

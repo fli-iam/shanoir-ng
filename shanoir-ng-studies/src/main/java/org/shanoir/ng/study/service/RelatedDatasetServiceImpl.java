@@ -127,8 +127,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 				result = addCenterToStudy(study, centerIds);
 
 				try {
-					copyDatasetToStudy(datasetIds, id);
-					result = "Copy worked !";
+					result = copyDatasetToStudy(datasetIds, id);
 				} catch (MicroServiceCommunicationException e) {
 					throw new RuntimeException(e);
 				}
@@ -167,11 +166,11 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		return "Center added to study";
 	}
 
-	private boolean copyDatasetToStudy(String datasetIds, String studyId) throws MicroServiceCommunicationException {
+	private String copyDatasetToStudy(String datasetIds, String studyId) throws MicroServiceCommunicationException {
 		System.out.println("copyDatasetToStudy datasetIds : " + datasetIds + " / studyId : " + studyId);
 		try {
-			rabbitTemplate.convertAndSend(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY, datasetIds + ";" + studyId);
-			return true;
+			String res = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY, datasetIds + ";" + studyId);
+			return res;
 		} catch (AmqpException e) {
 			throw new MicroServiceCommunicationException(
 					"Error while communicating with datasets MS to copy datasets to study.", e);
