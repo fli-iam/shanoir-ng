@@ -17,7 +17,7 @@ import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { DatasetService, Format } from '../datasets/shared/dataset.service';
+import { DatasetService } from '../datasets/shared/dataset.service';
 import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 
@@ -43,13 +43,13 @@ import { SolrService } from "./solr.service";
 import { Clipboard } from '@angular/cdk/clipboard';
 import {StudyService} from "../studies/shared/study.service";
 import {Study} from "../studies/shared/study.model";
-import {DatasetCopyDialogComponent} from "../shared/components/user-action-dialog/dataset-copy-dialog.component";
 import {ServiceLocator} from "../utils/locator.service";
 import { Observable } from 'rxjs-compat';
 import { SuperPromise } from 'src/app/utils/super-promise';
 import {take} from "rxjs/operators";
 import {Format} from "@angular-devkit/build-angular/src/builders/extract-i18n/schema";
 import { TaskState } from '../async-tasks/task.model';
+import {DatasetCopyDialogComponent} from "../shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -515,7 +515,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
             {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true },
             {title: "Download", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true},
-            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true,
+            {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true },
             {title: "Copy to study", awesome: "fa-solid fa-copy", action: () => this.copyToStudy(), disabledIfNoSelected: true }
         );
         return customActionDefs;

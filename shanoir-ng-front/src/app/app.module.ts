@@ -264,7 +264,7 @@ import { AccessRequestListComponent } from './users/access-request/access-reques
 import { MassDownloadService } from './shared/mass-download/mass-download.service';
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { TaskStatusComponent } from './async-tasks/status/task-status.component';
-import {DatasetCopyDialogComponent} from "./shared/components/user-action-dialog/dataset-copy-dialog.component";
+import {DatasetCopyDialogComponent} from "./shared/components/dataset-copy-dialog/dataset-copy-dialog.component";
 import { DownloadSetupComponent } from './shared/mass-download/download-setup/download-setup.component';
 import { DownloadSetupAltComponent } from './shared/mass-download/download-setup-alt/download-setup-alt.component';
 
