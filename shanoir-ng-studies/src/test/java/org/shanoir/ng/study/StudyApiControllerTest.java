@@ -72,7 +72,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 @WebMvcTest(controllers = StudyApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 @ActiveProfiles("test")
-@SpringBootTest
 public class StudyApiControllerTest {
 
 	private static final String REQUEST_PATH = "/studies";
