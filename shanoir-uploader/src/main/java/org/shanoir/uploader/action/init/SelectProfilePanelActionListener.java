@@ -30,14 +30,16 @@ public class SelectProfilePanelActionListener implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		String selectedProfile = (String) selectProfilePanel.selectProfileCB.getSelectedItem();
 		ShUpConfig.profileSelected = selectedProfile;
+		configureSelectedProfile(selectedProfile);
+		sSC.nextState();
+	}
+
+	public void configureSelectedProfile(String selectedProfile) {
 		String filePath = File.separator + ShUpConfig.PROFILE_DIR + selectedProfile;
 		ShUpConfig.profileDirectory = new File(ShUpConfig.shanoirUploaderFolder, filePath);
 		logger.info("Profile directory set to: " + ShUpConfig.profileDirectory.getAbsolutePath());
 		File profilePropertiesFile = new File(ShUpConfig.profileDirectory, ShUpConfig.PROFILE_PROPERTIES);
 		loadPropertiesFromFile(profilePropertiesFile, ShUpConfig.profileProperties);
-		
-		ShUpConfig.encryption.decryptIfEncryptedString(profilePropertiesFile,
-				ShUpConfig.profileProperties, "shanoir.server.user.password");
 		logger.info("Profile " + selectedProfile + " successfully initialized.");
 		
 		File keycloakJson = new File(ShUpConfig.profileDirectory, ShUpConfig.KEYCLOAK_JSON);
@@ -47,7 +49,7 @@ public class SelectProfilePanelActionListener implements ActionListener {
 		} else {
 			logger.error("Error: missing keycloak.json! Connection with sh-ng will not work.");
 			return;
-	}
+		}
 
 		// check if pseudonymus has been copied in case of true
 		if (Boolean.parseBoolean(ShUpConfig.profileProperties.getProperty(ShUpConfig.MODE_PSEUDONYMUS))) {
@@ -72,7 +74,6 @@ public class SelectProfilePanelActionListener implements ActionListener {
 				return;
 			}
 		}
-		sSC.nextState();
 	}
 
 	private void loadPropertiesFromFile(final File propertiesFile, final Properties properties) {

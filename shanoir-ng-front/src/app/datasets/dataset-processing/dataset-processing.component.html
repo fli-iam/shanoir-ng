@@ -16,7 +16,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 	<form *ngIf="form" [formGroup]="form" class="max-content" novalidate [class.disabled]="footerState.loading">
 		<span [ngSwitch]="mode">
 			<ng-template [ngSwitchCase]="'view'">
-				<h2 class="header command-zone"i18n="View datasetProcessing|Title@@datasetProcessingDetailViewTitle">Details on dataset processing</h2>
+				<h2 class="header command-zone"i18n="View datasetProcessing|Title@@datasetProcessingDetailViewTitle">{{isExecutionMonitoring ? 'VIP execution monitoring' : 'Details on dataset processing'}}</h2>
 			</ng-template>
 			<ng-template [ngSwitchCase]="'edit'">
 				<h2 class="header command-zone"i18n="Edit datasetProcessing|Title@@datasetProcessingDetailEditTitle">Edit dataset processing</h2>
@@ -92,33 +92,33 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				</li>
 
 			</ol>
-			<ol *ngIf="isCarminDatasetProcessingEntity">
+			<ol *ngIf="isExecutionMonitoring">
 				<legend>
-					VIP Execution details
-					<tool-tip>Initializing an execution in a VM needs to be done using CARMIN-VIP</tool-tip>
+					VIP execution details
+					<tool-tip>Initializing an execution in a VM needs to be done using VIP</tool-tip>
 				</legend>
 				<li>
 					<label class="right-col">Pipeline Identifier</label>
 					<span class="right-col">
-						{{carminDatasetProcessing.pipelineIdentifier}}
+						{{executionMonitoring.pipelineIdentifier}}
 					</span>
 				</li>
                 <li>
                     <label class="right-col">Execution name</label>
                     <span class="right-col">
-						{{carminDatasetProcessing.name}}
+						{{executionMonitoring.name}}
 					</span>
                 </li>
 				<li>
 					<label class="right-col">Workflow identifier</label>
 					<span class="right-col">
-						{{carminDatasetProcessing.identifier}}
+						{{executionMonitoring.identifier}}
 					</span>
 				</li>
 				<li>
 					<label class="right-col">Status</label>
 					<span class="right-col">
-						{{carminDatasetProcessing.status}}
+						{{executionMonitoring.status}}
 					</span>
 				</li>
 
@@ -138,7 +138,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 						[columnDefs]="inputDatasetsColumnDefs"
 						[readOnly]="mode == 'view'">
 				</multi-select-table>
-			<li *ngIf="!isCarminDatasetProcessingEntity">
+			<li *ngIf="!isExecutionMonitoring">
 				<legend>
 					Output datasets
 					<tool-tip>Datasets resulting from this dataset processing.</tool-tip>

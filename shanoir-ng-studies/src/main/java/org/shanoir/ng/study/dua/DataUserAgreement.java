@@ -72,7 +72,10 @@ public class DataUserAgreement extends AbstractEntity {
 	
 	@JsonProperty("path")
 	public String getPath() {
-		return this.study.getDataUserAgreementPaths().get(0);
+		if (this.study.getDataUserAgreementPaths() != null && !this.study.getDataUserAgreementPaths().isEmpty()) {
+			return this.study.getDataUserAgreementPaths().get(0);
+		}
+		return null;
 	}
 
 	@JsonProperty("studyName")

@@ -157,7 +157,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 			for (Iterator<Instance> instancesIt = instances.iterator(); instancesIt.hasNext();) {
 				Instance instance = instancesIt.next();
 				File instanceFile = getFileFromInstance(instance, serie, folderFileAbsolutePath, isImportFromPACS);
-				processOneDicomFileForAllInstances(instanceFile, images, folderFileAbsolutePath);
+				processDicomFilePerInstanceAndCreateImage(instanceFile, images, folderFileAbsolutePath);
 			}
 			serie.setNonImages(nonImages);
 			serie.setNonImagesNumber(nonImages.size());
@@ -221,14 +221,13 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 	 * @param nonImages
 	 * @param images
 	 */
-	private void processOneDicomFileForAllInstances(File dicomFile, List<Image> images, String folderFileAbsolutePath) throws Exception {
+	private void processDicomFilePerInstanceAndCreateImage(File dicomFile, List<Image> images, String folderFileAbsolutePath) throws Exception {
 		try (DicomInputStream dIS = new DicomInputStream(dicomFile)) { // keep try to finally close input stream
 			Attributes attributes = dIS.readDataset();
 			// Some DICOM files with a particular SOPClassUID are ignored: such as Raw Data Storage etc.
 			if (DicomSerieAndInstanceAnalyzer.checkInstanceIsIgnored(attributes)) {
 				// do nothing here as instances list will be emptied after split between images and non-images
 			} else {
-				// divide here between non-images and images, non-images at first
 				Image image = new Image();
 				/**
 				 * Attention: the path of each image is always relative: either to the temporary folder created
@@ -242,7 +241,7 @@ public class ImagesCreatorAndDicomFileAnalyzerService {
 		} catch (IOException iOE) {
 			throw iOE;
 		} catch (Exception e) {
-			LOG.error("Error while processing DICOM file: " + dicomFile.getAbsolutePath());
+			LOG.error("Error while processing DICOM file, one for entire serie: " + dicomFile.getAbsolutePath());
 			throw e;
 		}
 	}

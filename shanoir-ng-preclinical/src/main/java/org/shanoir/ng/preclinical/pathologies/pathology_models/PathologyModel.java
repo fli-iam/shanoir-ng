@@ -59,7 +59,6 @@ public class PathologyModel extends HalEntity   {
   //@JoinColumn(name = "building_id")
   @NotNull
   @JsonProperty("pathology")
-  @JsonIgnore
   private Pathology pathology;
   
   /**
@@ -173,7 +172,7 @@ public class PathologyModel extends HalEntity   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    comment: ").append(toIndentedString(comment)).append("\n");
     sb.append("    specifications file: ").append(toIndentedString(filename)).append("\n");
-    sb.append("    pathology: ").append(toIndentedString(pathology.toString())).append("\n");
+    sb.append("    pathology: ").append(toIndentedString(pathology.getName())).append("\n");
     sb.append("}");
     return sb.toString();
   }

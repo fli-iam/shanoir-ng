@@ -10,12 +10,12 @@ import {
 } from '@angular/forms';
 import {Router} from '@angular/router';
 import {BreadcrumbsService} from 'src/app/breadcrumbs/breadcrumbs.service';
-import {CarminDatasetProcessing} from 'src/app/carmin/models/carmin-dataset-processing.model';
-import {Execution} from 'src/app/carmin/models/execution';
-import {ParameterType} from 'src/app/carmin/models/parameterType';
-import {Pipeline} from 'src/app/carmin/models/pipeline';
-import {CarminClientService} from 'src/app/carmin/shared/carmin-client.service';
-import {CarminDatasetProcessingService} from 'src/app/carmin/shared/carmin-dataset-processing.service';
+import {ExecutionMonitoring} from 'src/app/vip/models/execution-monitoring.model';
+import {Execution} from 'src/app/vip/models/execution';
+import {ParameterType} from 'src/app/vip/models/parameterType';
+import {Pipeline} from 'src/app/vip/models/pipeline';
+import {VipClientService} from 'src/app/vip/shared/vip-client.service';
+import {ExecutionMonitoringService} from 'src/app/vip/shared/execution-monitoring.service';
 import {Dataset} from 'src/app/datasets/shared/dataset.model';
 import {DatasetService} from 'src/app/datasets/shared/dataset.service';
 import {DatasetProcessingType} from 'src/app/enum/dataset-processing-type.enum';
@@ -25,9 +25,9 @@ import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
 import {ProcessingService} from '../processing.service';
 import {Option} from '../../shared/select/select.component';
 import { formatDate } from '@angular/common';
-import {ParameterResourcesDto} from "../../carmin/models/parameter-resources.dto";
-import {GroupByEnum} from "../../carmin/models/groupby.enum";
-import {PipelineParameter} from "../../carmin/models/pipelineParameter";
+import {ParameterResourcesDto} from "../../vip/models/parameter-resources.dto";
+import {GroupByEnum} from "../../vip/models/groupby.enum";
+import {PipelineParameter} from "../../vip/models/pipelineParameter";
 import {ServiceLocator} from "../../utils/locator.service";
 import {ConsoleService} from "../../shared/console/console.service";
 
@@ -60,7 +60,7 @@ export class ExecutionComponent implements OnInit {
     isLoading = true;
     datasetsPromise: Promise<void>;
 
-    constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private carminClientService: CarminClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private carminDatasetProcessing: CarminDatasetProcessingService) {
+    constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private vipClientService: VipClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private executionMonitoringService: ExecutionMonitoringService) {
         this.breadcrumbsService.nameStep('2. Executions');
         this.selectedDatasets = new Set<Dataset>();
     }
@@ -200,13 +200,13 @@ export class ExecutionComponent implements OnInit {
 
         let processingInit = this.initProcessing();
 
-        this.carminDatasetProcessing.create(processingInit).then(
+        this.executionMonitoringService.create(processingInit).then(
             (processing) => {
 
                 let execution = this.initExecution(processing);
                 this.setExecutionParameters(processing, execution);
 
-                this.carminClientService.createExecution(execution).then(
+                this.vipClientService.createExecution(execution).then(
                     (execution) => {
 
                         processing.identifier = execution.identifier;
@@ -214,7 +214,7 @@ export class ExecutionComponent implements OnInit {
                         processing.startDate = execution.startDate;
                         processing.endDate = execution.endDate;
 
-                        this.carminDatasetProcessing.updateAndStart(processing).then(() => {
+                        this.executionMonitoringService.updateAndStart(processing).then(() => {
                                 this.router.navigate([`/dataset-processing/details/${processing.id}`]);
                             },
                             (error) => {
@@ -235,7 +235,7 @@ export class ExecutionComponent implements OnInit {
         )
     }
 
-    private initExecution(processing: CarminDatasetProcessing) {
+    private initExecution(processing: ExecutionMonitoring) {
         let execution = new Execution();
         execution.name = processing.name;
         execution.pipelineIdentifier = processing.pipelineIdentifier;
@@ -245,7 +245,7 @@ export class ExecutionComponent implements OnInit {
         return execution;
     }
 
-    private setExecutionParameters(processing: CarminDatasetProcessing, execution: Execution) {
+    private setExecutionParameters(processing: ExecutionMonitoring, execution: Execution) {
         processing.parametersResources.forEach(dto => {
             execution.inputValues[dto.parameter] = [];
             let extension = ".nii.gz"
@@ -271,7 +271,7 @@ export class ExecutionComponent implements OnInit {
     }
 
     private initProcessing() {
-        let processingInit = new CarminDatasetProcessing();
+        let processingInit = new ExecutionMonitoring();
         processingInit.name = this.cleanProcessingName(this.executionForm.get("execution_name").value);
         processingInit.pipelineIdentifier = this.pipeline.identifier
         processingInit.resultsLocation = this.getResultPath();

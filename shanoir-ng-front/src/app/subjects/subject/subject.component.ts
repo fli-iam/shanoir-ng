@@ -130,13 +130,13 @@ export class SubjectComponent extends EntityComponent<Subject> implements OnInit
             'personalComments': []
         });
         this.updateFormControl(subjectForm);
-        this.subscribtions.push(
+        this.subscriptions.push(
             subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
                 this.isAlreadyAnonymized = false;
                 this.updateFormControl(subjectForm);
             })
         );
-        this.subscribtions.push(
+        this.subscriptions.push(
             subjectForm.get('isAlreadyAnonymized').valueChanges.subscribe(val => {
                 this.updateFormControl(subjectForm);
             })

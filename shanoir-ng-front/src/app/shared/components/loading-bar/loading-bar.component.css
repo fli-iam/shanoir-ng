@@ -5,3 +5,7 @@
 
 :host.error .inner { background-color: var(--color-error); border-radius: 5px; }
 :host.done .inner { background-color: green; border-radius: 5px; }
+:host.warning .inner { background-color: orange; border-radius: 5px; }
+
+i { color: orange; }
+:host.warning i { color: orangered; }

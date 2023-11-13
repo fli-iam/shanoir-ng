@@ -185,7 +185,7 @@ export class AnestheticFormComponent extends EntityComponent<Anesthetic> {
 
 
     manageSaveEntity(): void {
-        this.subscribtions.push(
+        this.subscriptions.push(
             this.onSave.subscribe(response => {
                 if (this.ingredientsToDelete) {
                     for (let ingredient of this.ingredientsToDelete) {

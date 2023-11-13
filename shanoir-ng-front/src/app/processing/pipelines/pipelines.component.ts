@@ -1,8 +1,8 @@
 import {Component, Input, OnInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { BreadcrumbsService } from 'src/app/breadcrumbs/breadcrumbs.service';
-import { Pipeline } from 'src/app/carmin/models/pipeline';
-import { CarminClientService } from 'src/app/carmin/shared/carmin-client.service';
+import { Pipeline } from 'src/app/vip/models/pipeline';
+import { VipClientService } from 'src/app/vip/shared/vip-client.service';
 import { ProcessingService } from '../processing.service';
 import {Mode} from "../../shared/components/entity/entity.component.abstract";
 
@@ -17,7 +17,7 @@ export class PipelinesComponent implements OnInit {
   selectedPipeline:Pipeline;
   descriptionLoading:boolean;
 
-  constructor(private breadcrumbsService: BreadcrumbsService,private carminClientService: CarminClientService, private router: Router, private processingService:ProcessingService) {
+  constructor(private breadcrumbsService: BreadcrumbsService, private vipClientService: VipClientService, private router: Router, private processingService:ProcessingService) {
     this.pipelines = [];
     this.descriptionLoading = false;
 
@@ -26,7 +26,7 @@ export class PipelinesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.carminClientService.listPipelines().subscribe(
+    this.vipClientService.listPipelines().subscribe(
       (pipelines :Pipeline[])=>{
         this.pipelines = pipelines;
       }
@@ -35,7 +35,7 @@ export class PipelinesComponent implements OnInit {
 
   selectPipeline(pipeline:Pipeline) {
     this.descriptionLoading = true;
-    this.carminClientService.getPipeline(pipeline.identifier).subscribe(
+    this.vipClientService.getPipeline(pipeline.identifier).subscribe(
       (pipeline:Pipeline)=>{
         this.descriptionLoading = false;
         this.selectedPipeline = pipeline;
