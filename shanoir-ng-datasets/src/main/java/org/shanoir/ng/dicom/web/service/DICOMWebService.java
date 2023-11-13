@@ -72,6 +72,9 @@ public class DICOMWebService {
 	@Value("${dcm4chee-arc.dicom.web.rs}")
 	private String dicomWebRS;
 	
+	@Value("${dcm4chee-arc.dicom.web.rs.upload}")
+	private String dicomWebRSUpload;
+	
 	@Value("${dcm4chee-arc.dicom.web.http.client.max.total}")
 	private int dicomWebHttpClientMaxTotal;
 
@@ -246,16 +249,17 @@ public class DICOMWebService {
 	}
 
 	private void sendMultipartRequest(HttpEntity entity) throws ShanoirException {
-		HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRS);
+		HttpPost httpPost = new HttpPost(dcm4cheeProtocol + dcm4cheeHost + ":" + dcm4cheePort + dicomWebRSUpload);
 		httpPost.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_MULTIPART+";type="+CONTENT_TYPE_DICOM+";boundary="+BOUNDARY);
 		httpPost.setEntity(entity);
 		try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
 			int code = response.getCode();
-			if (code != HttpStatus.OK.value()) {
+			if (code != HttpStatus.OK.value() && code != HttpStatus.ACCEPTED.value()) {
 				LOG.error("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
+				LOG.error("Associated message: " +  EntityUtils.toString(response.getEntity()));
 				throw new ShanoirException("DICOMWeb: sendMultipartRequest: response code not 200, but: " + code);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw new ShanoirException(e.getMessage());
 		}
@@ -291,7 +295,7 @@ public class DICOMWebService {
 		HttpPost post = new HttpPost(rejectURL);
 		post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 		try (CloseableHttpResponse response = httpClient.execute(post)) {
-			if (response.getCode() == HttpStatus.NO_CONTENT.value()) {
+			if (HttpStatus.OK.value() == response.getCode()) {
 				LOG.info("Rejected from PACS: " + url);
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
@@ -300,8 +304,8 @@ public class DICOMWebService {
 				+ "for rejectURL: " + rejectURL);
 			}
 		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			throw new ShanoirException(e.getMessage());
+			LOG.error("Could not reject instance from PACS: for rejectURL: " + rejectURL, e);
+			throw new ShanoirException("Could not reject instance from PACS: for rejectURL: " + url, e);
 		}
 		// STEP 2: Delete from the PACS
 		HttpDelete delete = new HttpDelete(deleteUrl);

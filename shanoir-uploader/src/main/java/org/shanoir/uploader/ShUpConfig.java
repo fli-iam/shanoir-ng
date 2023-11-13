@@ -70,6 +70,8 @@ public class ShUpConfig {
 
 	public static final String RANDOM_SEED = "random.seed";
 	
+	public static final String PROFILE = "profile";
+	
 	/**
 	 * Static variables
 	 */

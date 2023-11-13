@@ -44,6 +44,8 @@ public class SerieTreeNode implements DicomTreeNode {
 	
 	private List<String> fileNames;
 	
+	private MRI mriInformation;
+	
 	// constructor for JAXB
 	public SerieTreeNode() {
 		this.serie = new Serie();
@@ -274,21 +276,27 @@ public class SerieTreeNode implements DicomTreeNode {
 
 	@XmlElement
 	public MRI getMriInformation() {
-		MRI mriInformation = new MRI();
-		InstitutionDicom institutionDicom = this.serie.getInstitution();
-		if(institutionDicom != null) {
-			mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
-			mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
+		if (this.mriInformation == null) {
+			this.mriInformation = new MRI();
+			InstitutionDicom institutionDicom = this.serie.getInstitution();
+			if(institutionDicom != null) {
+				this.mriInformation.setInstitutionName(institutionDicom.getInstitutionName());
+				this.mriInformation.setInstitutionAddress(institutionDicom.getInstitutionAddress());
+			}
+			EquipmentDicom equipmentDicom = this.serie.getEquipment();
+			if(equipmentDicom != null) {
+				this.mriInformation.setManufacturer(equipmentDicom.getManufacturer());
+				this.mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
+				this.mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
+				this.mriInformation.setStationName(equipmentDicom.getStationName());
+				this.mriInformation.setMagneticFieldStrength(equipmentDicom.getMagneticFieldStrength());
+			}
 		}
-		EquipmentDicom equipmentDicom = this.serie.getEquipment();
-		if(equipmentDicom != null) {
-			mriInformation.setManufacturer(equipmentDicom.getManufacturer());
-			mriInformation.setManufacturersModelName(equipmentDicom.getManufacturerModelName());
-			mriInformation.setDeviceSerialNumber(equipmentDicom.getDeviceSerialNumber());
-			mriInformation.setStationName(equipmentDicom.getStationName());
-			mriInformation.setMagneticFieldStrength(equipmentDicom.getMagneticFieldStrength());
-		}
-		return mriInformation;
+		return this.mriInformation;
+	}
+	
+	public void setMriInformation(MRI mriInformation) {
+		this.mriInformation = mriInformation;
 	}
 
 	@Override

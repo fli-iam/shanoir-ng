@@ -32,7 +32,6 @@ import org.shanoir.ng.study.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.study.dua.DataUserAgreement;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
-import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -321,19 +320,6 @@ public interface StudyApi {
 	void downloadDataUserAgreement(
 			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId,
 			@Parameter(name = "file to download", required = true) @PathVariable("fileName") String fileName, HttpServletResponse response) throws RestServiceException, IOException;
-
-	@Operation(summary = "", description = "Deletes the DUA of a study")
-	@ApiResponses(value = { @ApiResponse(responseCode = "204", description = "dua deleted"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "404", description = "no study found"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@RequestMapping(value = "dua-delete/{studyId}", produces = {
-			"application/json" }, method = RequestMethod.DELETE)
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT') and @studySecurityService.hasRightOnStudy(#studyId, 'CAN_ADMINISTRATE')")
-	ResponseEntity<Void> deleteDataUserAgreement(
-			@Parameter(name = "id of the study", required = true) @PathVariable("studyId") Long studyId)
-			throws IOException;
 
 	@Operation(summary = "", description = "Deletes the user of a study")
 	@ApiResponses(value = { @ApiResponse(responseCode = " 204", description = "user removed from study"),

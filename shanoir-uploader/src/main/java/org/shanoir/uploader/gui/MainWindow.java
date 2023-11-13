@@ -549,6 +549,7 @@ public class MainWindow extends JFrame {
 		gbc_queryButton.gridy = 6;
 		queryPanel.add(queryButton, gbc_queryButton);
 		queryButton.setEnabled(false);
+		frame.getRootPane().setDefaultButton(queryButton);
 		queryButton.addActionListener(fAL);
 
 		JSeparator separator = new JSeparator();

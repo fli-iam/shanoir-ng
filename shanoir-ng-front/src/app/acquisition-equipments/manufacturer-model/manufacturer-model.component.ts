@@ -130,7 +130,7 @@ export class ManufacturerModelComponent extends EntityComponent<ManufacturerMode
     openNewManuf() {
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/manufacturer/create']).then(success => {
-            this.subscribtions.push(
+            this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     (currentStep.entity as ManufacturerModel).manufacturer = entity as Manufacturer;
                 })

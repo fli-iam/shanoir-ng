@@ -62,7 +62,11 @@ export class SideMenuComponent {
         else this.state = new SideMenuState();
 
         this.userService.accessRequets.subscribe(nb => {
-            this.accessRequestsToValidate = nb;
+            if (nb) {
+                this.accessRequestsToValidate = nb;
+            } else {
+                this.accessRequestsToValidate = 0;
+            }
         });
     }
 

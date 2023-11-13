@@ -29,6 +29,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             <a [routerLink]="this.detailsPath + this.node.id" class="open-new-tab">
                 <menu-item label="Details..." awesome="fa-regular fa-eye"></menu-item>
             </a>
+            <menu-item [disabled]="loading" label="Download" awesome="fas fa-download" (click)="loading ? null : download()"></menu-item>
         </dropdown-menu>
 
         <ng-container *ngIf="node.open && node.examinations && node.examinations != $any('UNLOADED')">

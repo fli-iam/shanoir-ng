@@ -105,16 +105,6 @@ public interface DatasetApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	@PostAuthorize("hasRole('ADMIN') or @datasetSecurityService.checkDatasetDTOPage(returnObject.getBody(), 'CAN_SEE_ALL')")
 	ResponseEntity<Page<DatasetDTO>> findDatasets(Pageable pageable) throws RestServiceException;
-	
-	@Operation(summary = "", description = "Returns a dataset list")
-	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasets"),
-			@ApiResponse(responseCode = "204", description = "no user found"),
-			@ApiResponse(responseCode = "401", description = "unauthorized"),
-			@ApiResponse(responseCode = "403", description = "forbidden"),
-			@ApiResponse(responseCode = "500", description = "unexpected error") })
-	@GetMapping(value = "/acquisition/{acquisitionId}", produces = { "application/json" })
-	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
-	ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@Parameter(name = "id of the acquisition", required = true) @PathVariable("acquisitionId") Long acquisitionId);
 
 	@Operation(summary = "", description = "Returns a dataset list")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasets"),
@@ -126,6 +116,16 @@ public interface DatasetApi {
 	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnExamination(#examinationId, 'CAN_SEE_ALL'))")
 	ResponseEntity<List<DatasetDTO>> findDatasetsByExaminationId(@Parameter(name = "id of the examination", required = true) @PathVariable("examinationId") Long examinationId);
 
+	
+	@Operation(summary = "", description = "Returns a dataset list")
+	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasets"),
+			@ApiResponse(responseCode = "204", description = "no user found"),
+			@ApiResponse(responseCode = "401", description = "unauthorized"),
+			@ApiResponse(responseCode = "403", description = "forbidden"),
+			@ApiResponse(responseCode = "500", description = "unexpected error") })
+	@GetMapping(value = "/acquisition/{acquisitionId}", produces = { "application/json" })
+	@PreAuthorize("hasRole('ADMIN') or (hasAnyRole('EXPERT', 'USER') and  @datasetSecurityService.hasRightOnDatasetAcquisition(#acquisitionId, 'CAN_SEE_ALL'))")
+	ResponseEntity<List<DatasetDTO>> findDatasetsByAcquisitionId(@Parameter(name = "id of the acquisition", required = true) @PathVariable("acquisitionId") Long acquisitionId);
 
 	@Operation(summary = "", description = "Returns a dataset list")
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "found datasets"),
@@ -191,7 +191,7 @@ public interface DatasetApi {
     		@Parameter(name = "Dowloading nifti, decide the nifti converter id") Long converterId,
     		@Parameter(name = "Decide if you want to download dicom (dcm) or nifti (nii) files.")
     		@Valid @RequestParam(value = "format", required = false, defaultValue="dcm") String format, 
-    		HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
+				HttpServletResponse response) throws RestServiceException, MalformedURLException, IOException;
 
     @Operation(summary = "getDicomMetadataByDatasetId", description = "If exists, returns the dataset dicom metadata corresponding to the given id")
     @ApiResponses(value = {
