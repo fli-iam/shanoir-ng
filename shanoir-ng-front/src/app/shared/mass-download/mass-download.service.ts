@@ -12,22 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { formatDate } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
 import { ComponentRef, Injectable } from '@angular/core';
-import { Observable, Subject, Subscription } from 'rxjs-compat';
-import { Task, TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { Observable, Subscription } from 'rxjs-compat';
+import { take } from 'rxjs/operators';
+import { Task, TaskState } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
-import { NotificationsService } from '../notifications/notifications.service';
-import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
-import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
-import { Queue } from './queue.model';
-import { take } from 'rxjs/operators';
 import { SuperPromise } from 'src/app/utils/super-promise';
-import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
+import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
 import { ConsoleService } from '../console/console.service';
-import { formatDate } from '@angular/common';
+import { NotificationsService } from '../notifications/notifications.service';
+import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
+import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
+import { Queue } from './queue.model';
 
 declare var JSZip: any;
 
@@ -322,15 +322,15 @@ export class MassDownloadService {
         report.duration = Date.now() - start;
         task.report = JSON.stringify(report, null, 4);
         if (report.nbError > 0) {
-            task.status = -1;
+            task.status = 3;
             const tab: string = '- ';
-            task.message = 'download failed in ' + report.duration + 'ms.\n'
+            task.message = (report.nbSuccess > 0 ? 'download partially succeed in ' : 'download failed in ') + report.duration + 'ms.\n'
                 + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
                 + tab + report.nbError + ' datasets are (at least partially) in error and files could be missing.\n';
             JSON.stringify(report);
         } else {
             task.status = task.status == -1 ? -1 : 1;
-            task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' files saved in the selected directory';
+            task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' datasets saved in the selected directory';
         }
 
         this.notificationService.pushLocalTask(task);
@@ -355,7 +355,7 @@ export class MassDownloadService {
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
 
             // Check ERRORS file in zip
-            var zip = new JSZip();
+            var zip: any = new JSZip();
             const unzipPromise: Promise<any> = zip.loadAsync(httpResponse.body).then(dataFiles => {
                 if (dataFiles.files['ERRORS.json']) {
                     return dataFiles.files['ERRORS.json'].async('string').then(content => {
@@ -364,28 +364,40 @@ export class MassDownloadService {
                         report.list[id].error = errorsJson;
                         report.list[id].errorTime = Date.now();
                         task.lastUpdate = new Date();
-                        task.message = 'saving dataset n°' + id + ' failed';
                         task.status = 5;
                     });
                 } else {
                     report.list[id].status = 'SUCCESS';
                     delete report.list[id].error;
                     delete report.list[id].errorTime;
-                    task.lastUpdate = new Date();
-                    task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
                 }
                 return dataFiles;
             });
 
             if (unzip) {
                 return unzipPromise.then(data => {
-                    for(let [name, file] of Object.entries(data.files)) {
-                        const path: string = this.buildAcquisitionPath(dataset) + filename.replace('.zip', '') + '/' + name;
-                        this.writeMyFile(path, file, userFolderHandle);
+                    if (data) {
+                        return Promise.all(
+                            Object.entries(data.files)?.map(([name, file]) => {
+                                task.message = 'unzipping file ' + name + ' from dataset n°' + id;
+                                this.notificationService.pushLocalTask(task);
+                                const path: string = this.buildAcquisitionPath(dataset) + filename.replace('.zip', '') + '/' + name;
+                                let type: string;
+                                if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
+                                else type = 'blob';
+                                return (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
+                                    task.message = 'saving file ' + name + ' from dataset n°' + id;
+                                    this.notificationService.pushLocalTask(task);
+                                    return this.writeMyFile(path, blob, userFolderHandle);
+                                });
+                            })
+                        );
                     }
                 });
             } else {
                 const path: string = this.buildAcquisitionPath(dataset) + filename;
+                task.message = 'saving dataset n°' + id;
+                this.notificationService.pushLocalTask(task);
                 return Promise.all([unzipPromise, this.writeMyFile(path, blob, userFolderHandle)]).then(() => null);
             }
         }).catch(reason => {
@@ -397,8 +409,11 @@ export class MassDownloadService {
             task.status = 5;
         }).finally(() => {
             if (report.list[id].status == 'SUCCESS') {
+                task.lastUpdate = new Date();
+                task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
                 report.nbSuccess++;
             } else if (report.list[id].status == 'ERROR') {
+                task.message = 'saving dataset n°' + id + ' failed';
                 report.nbError++;
             }
             task.report = JSON.stringify(report, null, 4);

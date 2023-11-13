@@ -16,9 +16,13 @@
                     </span>
                 </li>
                 <li>
-                    <label>Unzip datasets</label>
+                    <label>Unzip datasets (slower)</label>
                     <span class="right-col">
                         <checkbox formControlName="unzip"></checkbox>
+                        <span class="warning" *ngIf="form.get('unzip').value">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            The unzipping will run on your computer
+                        </span>
                     </span>
                 </li>
             </ol>

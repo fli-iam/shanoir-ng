@@ -86,7 +86,7 @@ import { AccessRequestComponent } from './users/access-request/access-request.co
 import { ProcessingComponent } from './processing/processing.component';
 import { PipelinesComponent } from './processing/pipelines/pipelines.component';
 import { ExecutionComponent } from './processing/execution/execution.component';
-import { CarminDatasetProcessingsComponent } from './carmin/carmin-dataset-processings/carmin-dataset-processings.component';
+import { ExecutionMonitoringsComponent } from './vip/execution-monitorings/execution-monitorings.component';
 import { MetadataComponent } from './datasets/dataset/metadata/metadata.component';
 import { ApplyStudyCardOnComponent } from './study-cards/apply-study-card-on/apply-study-card-on.component';
 import { PreClinicalContextComponent } from './import/pre-clinical-context/pre-clinical-context.component';
@@ -127,8 +127,8 @@ let routes: Routes = [
         component: SolrSearchComponent
     },
     {
-        path: 'carmin-dataset-processings',
-        component: CarminDatasetProcessingsComponent
+        path: 'execution-monitoring',
+        component: ExecutionMonitoringsComponent
     }, {
         path: 'processing',
         component: ProcessingComponent,
@@ -205,7 +205,7 @@ let routes: Routes = [
     }, {
         path: 'task/status/:ts',
         component: TaskStatusComponent
-    }, {    
+    }, {
         path: 'task',
         component: AsyncTasksComponent
     }, {
