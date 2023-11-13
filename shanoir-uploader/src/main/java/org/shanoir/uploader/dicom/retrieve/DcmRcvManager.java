@@ -1,6 +1,8 @@
 package org.shanoir.uploader.dicom.retrieve;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import org.apache.log4j.Logger;
 import org.shanoir.uploader.dicom.query.ConfigBean;
@@ -34,7 +36,7 @@ public class DcmRcvManager {
 	
 	private DicomListener listener;
 
-	public void configure(final ConfigBean configBean) {
+	public void configure(final ConfigBean configBean) throws MalformedURLException {
 		logger.info("Configuring local DICOM server with params:"
 				+ " AET title: " + configBean.getLocalDicomServerAETCalling()
 				+ ", AET host: " + configBean.getLocalDicomServerHost()
@@ -47,8 +49,9 @@ public class DcmRcvManager {
         // Concurrent DICOM operations
         connectOptions.setMaxOpsInvoked(15);
         connectOptions.setMaxOpsPerformed(15);
-        params.setConnectOptions(connectOptions);
-		this.lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, null, null);
+		params.setConnectOptions(connectOptions);
+		URL url = getClass().getClassLoader().getResource("sop-classes.properties");
+		this.lParams = new ListenerParams(params, true, STORAGE_PATTERN + DICOM_FILE_SUFFIX, url, null);
 	}
 	
 	/**

@@ -2,6 +2,7 @@ package org.shanoir.uploader.dicom;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -41,7 +42,7 @@ public class DicomServerClient implements IDicomServerClient {
 	
 	private File workFolder;
 	
-	public DicomServerClient(final Properties dicomServerProperties, final File workFolder) {
+	public DicomServerClient(final Properties dicomServerProperties, final File workFolder) throws MalformedURLException {
 		logger.info("New DicomServerClient created with properties: " + dicomServerProperties.toString());
 		config.initWithPropertiesFile(dicomServerProperties);
 		this.workFolder = workFolder;
