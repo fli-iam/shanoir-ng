@@ -16,6 +16,7 @@ import org.shanoir.ng.datasetfile.DatasetFile;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
+import org.shanoir.ng.examination.repository.ExaminationRepository;
 import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.model.*;
 import org.shanoir.ng.shared.service.StudyService;
@@ -41,6 +42,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     private StudyService studyService;
     @Autowired
     private DatasetAcquisitionRepository datasetAcquisitionRepository;
+    @Autowired
+    private ExaminationRepository examinationRepository;
 
     @Autowired
     private DatasetRepository datasetRepository;
@@ -97,11 +100,28 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         if (acqMap.get(oldAcqId) != null)
             return acqMap.get(oldAcqId);
 
+        Examination newExam = null;
+        List<Examination> examSourceList = examinationRepository.findBySourceId(acq.getExamination().getId());
+        if (!examSourceList.isEmpty()) {
+            for (Examination exam : examSourceList) {
+                if (exam.getStudyId() == studyId) {
+                    newExam = exam;
+                    break;
+                }
+            }
+            if (newExam == null) {
+                newExam = moveExamination(acq.getExamination(), studyId, examMap);
+            }
+        } else {
+            newExam = moveExamination(acq.getExamination(), studyId, examMap);
+        }
+
+
         acq.setDatasets(null);
         acquisitionCleanup(acq);
 
         acq.setId(null);
-        Examination newExam = moveExamination(acq.getExamination(), studyId, examMap);
+//        newExam = moveExamination(acq.getExamination(), studyId, examMap);
         entityManager.detach(acq);
         DatasetAcquisition newAcquisition = datasetAcquisitionRepository.save(acq);
         newAcquisition.setExamination(newExam);
