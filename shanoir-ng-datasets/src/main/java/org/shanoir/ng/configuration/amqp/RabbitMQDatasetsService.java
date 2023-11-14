@@ -456,20 +456,20 @@ public class RabbitMQDatasetsService {
 			// List<Dataset> datasetStudyList = datasetService.findByStudyId(studyId);
 			// List<Dataset> datasetList = datasetService.findByIdIn(datasetIds);
 
-			System.out.println("datasetParentIds : " + datasetParentIds);
+//			System.out.println("datasetParentIds : " + datasetParentIds);
 			for (Long datasetParentId : datasetParentIds) {
 				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
-				System.out.println("");
-				System.out.println("datasetParentId : " + datasetParentId);
+//				System.out.println("");
+//				System.out.println("datasetParentId : " + datasetParentId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
-				System.out.println("datasetParent.name : " + datasetParent.getName());
-				System.out.println("dataset to add : ");
-				System.out.println("     datasetParent.id : " + datasetParent.getId() + " / datasetParent.name : " + datasetParent.getName());
-				System.out.println("     datasetParent.acq.id : " + datasetParent.getDatasetAcquisition().getId() + " / datasetParent.acq.exam.id : " + datasetParent.getDatasetAcquisition().getExamination().getId());
-				System.out.println("dsCopiedList : ");
-				for (Dataset d : dsCopiedList) {
-					System.out.println("     d.id : " + d.getId() + " / d.name : " + d.getName() + " / d.parent : " + d.getSourceId() + " / d.study : " + d.getStudyId());
-				}
+//				System.out.println("datasetParent.name : " + datasetParent.getName());
+//				System.out.println("dataset to add : ");
+//				System.out.println("     datasetParent.id : " + datasetParent.getId() + " / datasetParent.name : " + datasetParent.getName());
+//				System.out.println("     datasetParent.acq.id : " + datasetParent.getDatasetAcquisition().getId() + " / datasetParent.acq.exam.id : " + datasetParent.getDatasetAcquisition().getExamination().getId());
+//				System.out.println("dsCopiedList : ");
+//				for (Dataset d : dsCopiedList) {
+//					System.out.println("     d.id : " + d.getId() + " / d.name : " + d.getName() + " / d.parent : " + d.getSourceId() + " / d.study : " + d.getStudyId());
+//				}
 
 				if (datasetParent.getSourceId() != null) {
 					copy = false;
@@ -477,14 +477,14 @@ public class RabbitMQDatasetsService {
 					LOG.warn("Selected dataset is a copy, please pick the original dataset.");
 				} else if (dsCopiedList.isEmpty()) {
 					copy = true;
-					System.out.println("does not contain ==> add : copy = " + copy);
+//					System.out.println("does not contain ==> add : copy = " + copy);
 				} else {
 					for (Dataset d : dsCopiedList) {
-						System.out.println("d.parentId : " + d.getSourceId() + " / datasetId : " + datasetParentId + " / d.studyId : " + d.getStudyId() + " / studyId : " + studyId);
+//						System.out.println("d.parentId : " + d.getSourceId() + " / datasetId : " + datasetParentId + " / d.studyId : " + d.getStudyId() + " / studyId : " + studyId);
 						if (d.getSourceId().equals(datasetParentId) && d.getStudyId() == studyId) {
 							res = "Dataset already copied in this study, copy aborted.";
 							LOG.warn("Dataset already copied in this study, copy aborted.");
-							System.out.println("copy = " + copy);
+//							System.out.println("copy = " + copy);
 							copy = false;
 							break;
 						} else {
@@ -497,7 +497,7 @@ public class RabbitMQDatasetsService {
 					res = "Copy worked !";
 				}
 			}
-			System.out.println("=== Copy datasets terminé ===");
+//			System.out.println("=== Copy datasets terminé ===");
 			return res;
 		} catch (Exception e) {
 			LOG.error("Something went wrong during the copy. {}", e.getMessage());
