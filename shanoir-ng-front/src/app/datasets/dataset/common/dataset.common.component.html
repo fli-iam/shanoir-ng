@@ -141,7 +141,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 			</span>
 		</li>
 		<li>
-			<label i18n="Dataset detail|Dataset cardinality of releted subjects@@datasetCardinalityOfRelatedSubjects">Cardinality of releted subjects</label>
+			<label i18n="Dataset detail|Dataset cardinality of related subjects@@datasetCardinalityOfRelatedSubjects">Cardinality of releted subjects</label>
 			<span class="right-col" [ngSwitch]="mode">
 				<ng-template [ngSwitchCase]="'view'">{{dataset.updatedMetadata.cardinalityOfRelatedSubjects ? dataset.updatedMetadata.cardinalityOfRelatedSubjects : dataset.originMetadata.cardinalityOfRelatedSubjects}}</ng-template>
 				<ng-template ngSwitchDefault>

@@ -43,6 +43,8 @@ public class DatasetProcessingDTO {
 	
 	private Long studyId;
 
+	private Long parentId;
+
 	public Long getId() {
 		return id;
 	}
@@ -100,4 +102,11 @@ public class DatasetProcessingDTO {
 		this.studyId = studyId;
 	}
 
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
 }

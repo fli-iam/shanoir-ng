@@ -27,14 +27,17 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 		</span>
 
 		<fieldset>
-
 			<ol>
-				<legend>
-					Research study
-					<tool-tip>A research study is the global study context. Examples: Children dysphasia, Therapeutic effect of mitoxantrone in multiple sclerosis, based on MRI and clinical criteria...</tool-tip>
-				</legend>
+                <li *ngIf="mode == 'view' && datasetProcessing?.parentId">
+                    <label>Parent processing</label>
+                    <span class="right-col">
+						  <a [routerLink]="['/dataset-processing/details/', datasetProcessing.parentId]">
+                                Dataset processing n°{{ datasetProcessing.parentId }}
+                            </a>
+					</span>
+                </li>
 				<li>
-					<label>Research study</label>
+					<label>Study</label>
 					<span class="right-col" [ngSwitch]="mode">
 						<ng-template [ngSwitchCase]="'view'">
                             <a [routerLink]="['/study/details/', study?.id]">
