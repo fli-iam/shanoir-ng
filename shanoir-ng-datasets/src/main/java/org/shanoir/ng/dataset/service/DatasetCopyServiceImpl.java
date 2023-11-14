@@ -54,40 +54,44 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             Long oldDsId = ds.getId();
 //            System.out.println("moveDataset acq : " + ds.getDatasetAcquisition().getId());
 
-            List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
-            DatasetAcquisition newAcq = null;
-            if (!dsAcqList.isEmpty()) {
-                for (DatasetAcquisition dsAcq : dsAcqList) {
-//                    System.out.println("dsAcq from parent acqId: " + dsAcq.getId() + " / acq.parentId: " + dsAcq.getSourceId() + " / acq.examId : " + dsAcq.getExamination().getId());
-                    if (dsAcq.getExamination().getStudyId() == studyId) {
-                        newAcq = dsAcq;
-                        break;
+            if (ds.getDatasetAcquisition() != null && ds.getDatasetAcquisition().getId() != null) {
+                List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
+                DatasetAcquisition newAcq = null;
+                if (!dsAcqList.isEmpty()) {
+                    for (DatasetAcquisition dsAcq : dsAcqList) {
+    //                    System.out.println("dsAcq from parent acqId: " + dsAcq.getId() + " / acq.parentId: " + dsAcq.getSourceId() + " / acq.examId : " + dsAcq.getExamination().getId());
+                        if (dsAcq.getExamination().getStudyId() == studyId) {
+                            newAcq = dsAcq;
+                            break;
+                        }
                     }
-                }
-                if (newAcq == null) {
+                    if (newAcq == null) {
+                        newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
+                    }
+                } else {
                     newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
                 }
-            } else {
-                newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
+
+                List<DatasetExpression> dsExList = ds.getDatasetExpressions();
+                datasetCleanup(ds);
+
+                for (DatasetExpression dsEx : dsExList) {
+                    this.moveDatasetExpression(dsEx, ds);
+                }
+
+                ds.setSubjectId(ds.getSubjectId());
+                ds.setId(null);
+                entityManager.detach(ds);
+                Dataset newDs = datasetRepository.save(ds);
+                newDs.setDatasetAcquisition(newAcq);
+                newDs.setSourceId(oldDsId);
+                entityManager.flush();
+
+    //            System.out.println("--> end of moveDataset ds: " + ds.getId() + " / acq : " + ds.getDatasetAcquisition().getId());
+    //            System.out.println("--> end of moveDataset newDs: " + newDs.getId() + " / acq : " + newDs.getDatasetAcquisition().getId());
+            } else if (ds.getDatasetProcessing() != null) {
+                LOG.warn("Dataset selected is a processed dataset, it can't be copied.");
             }
-
-            List<DatasetExpression> dsExList = ds.getDatasetExpressions();
-            datasetCleanup(ds);
-
-            for (DatasetExpression dsEx : dsExList) {
-                this.moveDatasetExpression(dsEx, ds);
-            }
-
-            ds.setSubjectId(ds.getSubjectId());
-            ds.setId(null);
-            entityManager.detach(ds);
-            Dataset newDs = datasetRepository.save(ds);
-            newDs.setDatasetAcquisition(newAcq);
-            newDs.setSourceId(oldDsId);
-            entityManager.flush();
-
-//            System.out.println("--> end of moveDataset ds: " + ds.getId() + " / acq : " + ds.getDatasetAcquisition().getId());
-//            System.out.println("--> end of moveDataset newDs: " + newDs.getId() + " / acq : " + newDs.getDatasetAcquisition().getId());
         } catch (Exception e) {
             LOG.error("Error in the Dataset service", e);
             throw e;
