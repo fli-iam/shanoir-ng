@@ -100,12 +100,12 @@ td checkbox { transform: scale(0.8); border-color: var(--color-b-light2); }
 tr:hover .col-settings-button, .col-settings-button:hover { opacity: 0.8;}
 .col-settings-button { display: block; opacity: 0; position: absolute; left: -21px; top: 1px; bottom: 0; width: 20px; height: 25px; color: var(--color-b); cursor: pointer; font-size: 16px; }
 
-app-modal .main { background-color: var(--very-light-grey); border-radius: 2px; }
-app-modal .header, app-modal .footer { text-align: center; padding: 10px 0; }
-app-modal .header { font-size: 16px; }
-app-modal .body { margin: 15px 10px; }
-app-modal input { width: 37px; }
-app-modal table td { padding: 1 5px; }
+.modal-window .main { background-color: var(--very-light-grey); border-radius: 2px; }
+.modal-window .header, .modal-window .footer { text-align: center; padding: 10px 0; }
+.modal-window .header { font-size: 16px; }
+.modal-window .body { margin: 15px 10px; }
+.modal-window input { width: 37px; }
+.modal-window table td { padding: 1 5px; }
 
 .resizer { display: block; position: absolute; top: 0; bottom: 0; right: -5px; width: 10px; z-index: 1; }
 thead th:not(:first-child) { border-left: 1px solid grey; }

@@ -176,7 +176,11 @@ public class DatasetApiSecurityTest {
 			assertAccessDenied(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
 		} else if ("ROLE_EXPERT".equals(role)) {
 			assertAccessAuthorized(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 1L, 1L), mockBindingResult);
-			assertAccessDenied(api::updateDataset, 1L, mockDataset(1L, 1L, 1L, 2L, 1L), mockBindingResult);
+			
+			Dataset ds = mockDataset(100L, 1L, 1L, 2L, 1L);
+			given(datasetRepository.findById(ds.getId())).willReturn(Optional.of(ds));
+			
+			assertAccessDenied(api::updateDataset, 1L, ds, mockBindingResult);
 		}
 		assertAccessDenied(api::updateDataset, 1L, mockDataset(2L, 2L, 2L, 2L, 2L), mockBindingResult);
 		assertAccessDenied(api::updateDataset, 1L, mockDataset(3L, 3L, 3L, 3L, 1L), mockBindingResult);

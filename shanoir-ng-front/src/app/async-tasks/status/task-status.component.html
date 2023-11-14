@@ -14,7 +14,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 
 <form>
     <fieldset>
-        <legend>Details</legend>
+        <legend>Details {{task.status}}</legend>
         <ol>
             <li>
                 <label>Id</label>
@@ -26,7 +26,13 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </li>
             <li>
                 <label>Status</label>
-                <span class="right-col"><progress-bar [progress]="task?.progress"></progress-bar></span>
+                <span class="right-col">
+                    <progress-bar [progress]="task?.progress" [warning]="task.status == 5 || task.status == 3"></progress-bar>
+                    <button [disabled]="loading" *ngIf="task.eventType == 'downloadDataset.event' && task?.progress == -1 && browserCompatible" class="alt left-icon normal" (click)="retry()">
+                        <i class="fas fa-download"></i>
+                        Retry
+                    </button>
+                </span>
             </li>
             <li class="message-li">
                 <label>Last message</label>

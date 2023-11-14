@@ -76,7 +76,7 @@ export class StudyCardForRulesListComponent extends StudyCardListComponent imple
         let currentStep: Step = this.breadcrumbsService.currentStep;
         this.router.navigate(['/study-card/select-rule/select/' + sc.id]).then(success => {
             this.breadcrumbsService.currentStep.label = 'Import rule';
-            this.subscribtions.push(
+            this.subscriptions.push(
                 currentStep.waitFor(this.breadcrumbsService.currentStep).subscribe(entity => {
                     currentStep.notifySave(entity);
                 })

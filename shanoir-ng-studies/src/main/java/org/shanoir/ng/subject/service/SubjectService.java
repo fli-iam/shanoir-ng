@@ -55,8 +55,10 @@ public interface SubjectService {
 	 * @return a list of subjects.
 	 */
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	List<IdName> findNames();
+	List<IdName> findAllNames();
 
+	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
+	List<IdName> findNames(List<Long> subjectIds);
 	
 	/**
 	 * Get all the subjects of a study
@@ -199,4 +201,5 @@ public interface SubjectService {
 	List<Subject> findByPreclinical(boolean preclinical);
 
 	boolean existsSubjectWithName(String name);
+
 }

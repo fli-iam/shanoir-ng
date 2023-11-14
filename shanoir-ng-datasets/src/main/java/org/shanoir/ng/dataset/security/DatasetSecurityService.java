@@ -555,19 +555,15 @@ public class DatasetSecurityService {
     	if (dataset.getId() == null) {
 			throw new IllegalArgumentException("Dataset id cannot be null here.");
 		}
-    	if (dataset.getStudyId() == null) {
-			return false;
-		}
+    	if (dataset.getDatasetProcessing() != null) {
+    		//Forbid processed dataset update for the moment
+    		return false;
+    	}
     	Dataset dbDataset = datasetRepository.findById(dataset.getId()).orElse(null);
     	if (dbDataset == null) {
 			throw new EntityNotFoundException("Cannot find dataset with id " + dataset.getId());
 		}
-    	if (dataset.getStudyId() == dbDataset.getStudyId()) { // study hasn't changed
-    		return this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
-    	} else { // study has changed : check user has right on both studies
-    		return this.hasRightOnStudyCenter(dataset.getDatasetAcquisition().getExamination().getCenterId(), dataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr) 
-    				&& this.hasRightOnStudyCenter(dbDataset.getDatasetAcquisition().getExamination().getCenterId(), dbDataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
-    	}
+    	return this.hasRightOnStudyCenter(dbDataset.getDatasetAcquisition().getExamination().getCenterId(), dbDataset.getDatasetAcquisition().getExamination().getStudyId(), rightStr);
     }
 
     /**

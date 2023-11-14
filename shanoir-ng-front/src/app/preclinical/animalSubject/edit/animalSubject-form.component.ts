@@ -282,7 +282,7 @@ export class AnimalSubjectFormComponent extends EntityComponent<PreclinicalSubje
             'pathologies': [this.preclinicalSubject.pathologies],
             'subjectStudyList': []
         });
-        this.subscribtions.push(
+        this.subscriptions.push(
             subjectForm.get('imagedObjectCategory').valueChanges.subscribe(val => {
                 this.onChangeImagedObjectCategory(subjectForm);
             })

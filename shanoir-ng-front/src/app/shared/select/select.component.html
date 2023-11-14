@@ -64,7 +64,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 </span>
             </div>
             <div class="option" 
-                    (click)="onUserSelectedOption(option)" 
+                    (click)="onUserSelectedOption(option, $event)" 
                     [class.selected]="isOptionSelected(option)" 
                     [class.disabled]="option.disabled" 
                     [class.compatible]="option.compatible"

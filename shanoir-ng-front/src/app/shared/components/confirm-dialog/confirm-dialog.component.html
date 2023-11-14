@@ -20,11 +20,11 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             {{ title }} - {{mode}}
         </div>
         <div class="body">
-            <p>{{ message }}</p>
+            <p [innerHTML]="message"></p>
         </div>
         <div class="footer">
             <button type="button" *ngIf="mode != 'choose'"
-                (click)="close(true)">{{buttons && buttons.ok ? buttons.ok : 'OK'}}</button>
+                (click)="close(true)">{{buttons && buttons.yes ? buttons.yes : 'OK'}}</button>
             <button type="button" *ngIf="mode == 'choose'"
                 (click)="close('yes')">{{buttons?.yes || 'Yes'}}</button>
             <button type="button" *ngIf="mode == 'choose'"

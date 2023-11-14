@@ -11,18 +11,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import {Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { Router } from '@angular/router';
 import { DatasetProcessing } from '../../datasets/shared/dataset-processing.model';
 import { Dataset } from '../../datasets/shared/dataset.model';
 import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
+import { Subscription } from 'rxjs';
+import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { ConsoleService } from "../../shared/console/console.service";
 import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
-import {DatasetAcquisitionService} from "../shared/dataset-acquisition.service";
-import {LoadingBarComponent} from "../../shared/components/loading-bar/loading-bar.component";
-import {ConsoleService} from "../../shared/console/console.service";
+import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
 
 
 
@@ -32,9 +33,9 @@ import {ConsoleService} from "../../shared/console/console.service";
     templateUrl: 'dataset-acquisition-node.component.html'
 })
 
-export class DatasetAcquisitionNodeComponent implements OnChanges {
+export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
 
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
+    progressStatus: TaskState;
     @Input() input: DatasetAcquisitionNode | DatasetAcquisition;
     @Output() selectedChange: EventEmitter<void> = new EventEmitter();
     node: DatasetAcquisitionNode;
@@ -48,6 +49,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
     hasDicom: boolean = false;
     downloading = false;
     hasBids: boolean = false;
+    protected subscriptions: Subscription[] = [];
 
     constructor(
         private router: Router,
@@ -153,8 +155,21 @@ export class DatasetAcquisitionNodeComponent implements OnChanges {
         }
 
         datasetIdsReady.then(() => {
-            this.datasetService.downloadDatasets(this.datasetIds, format, this.progressBar);
-            this.downloading = false;
+            this.progressStatus = new TaskState(TaskStatus.IN_PROGRESS, 0);
+            this.subscriptions.push(this.datasetService.downloadDatasets(this.datasetIds, format).subscribe(status => {
+                this.progressStatus = status;
+                if (this.progressStatus?.isActive()) this.downloading = true;
+                else this.downloading = false;
+            }, error => {
+                this.progressStatus.progress = 0;
+                this.progressStatus.status = TaskStatus.ERROR;
+            }));
         });
+    }
+
+    ngOnDestroy() {
+        for (let subscribtion of this.subscriptions) {
+            subscribtion.unsubscribe();
+        }
     }
 }

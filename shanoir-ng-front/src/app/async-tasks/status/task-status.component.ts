@@ -13,14 +13,13 @@
  */
 import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { NotificationsService } from '../../shared/notifications/notifications.service';
-import { Task } from '../task.model';
+import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
 import { ColumnDefinition } from 'src/app/shared/components/table/column.definition.type';
 import { FilterablePageable, Page } from 'src/app/shared/components/table/pageable.model';
-import { BrowserPaging } from 'src/app/shared/components/table/browser-paging.model';
-import { browserDownloadFile } from 'src/app/utils/app.utils';
-import { TableComponent } from 'src/app/shared/components/table/table.component';
+import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { QualityCardComponent } from 'src/app/study-cards/quality-card/quality-card.component';
+import { NotificationsService } from '../../shared/notifications/notifications.service';
+import { Task } from '../task.model';
 
 
 @Component({
@@ -31,7 +30,7 @@ import { QualityCardComponent } from 'src/app/study-cards/quality-card/quality-c
 export class TaskStatusComponent implements OnDestroy, OnChanges {
 
     importTs: number;
-    protected subscribtions: Subscription[] = [];
+    protected subscriptions: Subscription[] = [];
     @Input() task: Task;
     private tableRefresh: () => void;
 
@@ -43,6 +42,14 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     ];
     report: BrowserPaging<any>;
     reportActions: any = [{title: "Download as csv", awesome: "fa-solid fa-download", action: () => this.downloadReport()}];
+    // @ts-ignore
+    browserCompatible: boolean = window.showDirectoryPicker;
+    loading: boolean = false;
+
+    constructor(
+        private notificationsService: NotificationsService,
+        private downloadService: MassDownloadService
+    ) { }
 
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -58,12 +65,17 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
                     if (this.tableRefresh) this.tableRefresh();
                 }
             }
+            this.subscriptions.push(
+                this.notificationsService.getNotifications().subscribe(tasks => {
+                    this.task = tasks.find(task => task.id == this.task.id);
+                })
+            );
         } 
     }
 
     ngOnDestroy() {
-        for (let subscribtion of this.subscribtions) {
-            subscribtion.unsubscribe();
+        for (let subscription of this.subscriptions) {
+            subscription.unsubscribe();
         }
     }
 
@@ -78,4 +90,10 @@ export class TaskStatusComponent implements OnDestroy, OnChanges {
     registerTableRefresh(refresh: () => void) {
         this.tableRefresh = refresh;
     }
+    
+    retry() {
+        this.loading = true;
+        this.downloadService.retry(this.task).finally(() => this.loading = false);
+    }
+
 }

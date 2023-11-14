@@ -13,6 +13,7 @@
  */
 
 import { Component } from '@angular/core';
+import { SuperPromise } from 'src/app/utils/super-promise';
 
 @Component({
     selector: 'confirm-dialog',
@@ -22,20 +23,24 @@ import { Component } from '@angular/core';
 export class ConfirmDialogComponent {
     
     title: string;
-    message: string;
-    buttons: any;
     mode: 'confirm' | 'choose' | 'info' | 'error';
-    private closeResolve: (value?: any | PromiseLike<any>) => void;
+    private _message: string;
+    buttons: {yes: string, no?: string, cancel: string};
+    private closePromise: SuperPromise<any> = new SuperPromise();
 
+    public get message(): string {
+        return this._message;
+    }
+    public set message(value: string) {
+        this._message = value?.split(' ').map(w => w.startsWith('https://') ? '<a target="_blank" href="' + w + '">' + w + '</a>' : w).join(' ');
+    }
 
-    public openConfirm(title: string, message: string, buttons?: {ok: string, cancel: string}): Promise<boolean> {
+    public openConfirm(title: string, message: string, buttons?: {yes: string, cancel: string}): Promise<boolean> {
         this.title = title;
         this.message = message;
         this.buttons = buttons;
         this.mode = 'confirm';
-        return new Promise((resolve, reject) => {
-            this.closeResolve = resolve;
-        });
+        return this.closePromise;
     }
 
     public openChoose(title: string, message: string, buttons?: {yes: string, no: string, cancel: string}): Promise<'yes' | 'no' | false> {
@@ -43,31 +48,25 @@ export class ConfirmDialogComponent {
         this.message = message;
         this.buttons = buttons;
         this.mode = 'choose';
-        return new Promise((resolve, reject) => {
-            this.closeResolve = resolve;
-        });
+        return this.closePromise;
     }
 
     public openInfo(title: string, message: string): Promise<boolean> {
         this.title = title;
         this.message = message;
         this.mode = 'info';
-        return new Promise((resolve, reject) => {
-            this.closeResolve = resolve;
-        });
+        return this.closePromise;
     }
 
     public openError(title: string, message: string): Promise<boolean> {
         this.title = title;
         this.message = message;
         this.mode = 'error';
-        return new Promise((resolve, reject) => {
-            this.closeResolve = resolve;
-        });
+        return this.closePromise;
     }
 
     public close(answer: any) {
-        this.closeResolve(answer); // forces boolean to be returned
+        this.closePromise.resolve(answer); // forces boolean to be returned
     }
 
 }

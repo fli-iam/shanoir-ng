@@ -22,7 +22,7 @@ export class ConfirmDialogService {
     constructor(private componentFactoryResolver: ComponentFactoryResolver) {
     }
 
-    public confirm(title: string, message: string, buttons?: {ok: string, cancel: string}): Promise<boolean> {
+    public confirm(title: string, message: string, buttons?: {yes: string, cancel: string}): Promise<boolean> {
         const componentFactory = this.componentFactoryResolver.resolveComponentFactory(ConfirmDialogComponent);
         const ref: ComponentRef<ConfirmDialogComponent> = ServiceLocator.rootViewContainerRef.createComponent(componentFactory);
         let dialog: ConfirmDialogComponent = ref.instance;

@@ -45,7 +45,7 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
     }
 
     ngAfterViewInit(): void {
-        this.subscribtions.push(
+        this.subscriptions.push(
             this.notificationsService.getNotifications().subscribe(tasks => {
                 this.tasks = tasks;
                 this.table.refresh();
@@ -61,7 +61,7 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
         return {'new': false, 'edit': false, 'view': false, 'delete': false, 'reload': true, id: false};
     }
 
-    getPage(pageable: Pageable): Promise<Page<Task>> {
+    getPage = (pageable: Pageable): Promise<Page<Task>> => {
         return Promise.resolve(new BrowserPaging(this.tasks, this.columnDefs).getPage(pageable));
     }
 
@@ -70,12 +70,13 @@ export class AsyncTasksComponent extends EntityListComponent<Task> implements Af
             { 
                headerName: 'Message', field: 'message', width: '100%', type:'link', route: (task: Task) => task.route
             }, { 
-               headerName: 'Progress', field: 'progress', width: '110px', type: 'progress' 
+               headerName: 'Progress', field: 'progress', width: '110px', type: 'progress', 
+               cellRenderer: params => { return {progress: params.data?.progress, status: params.data?.status}; }
             }, { 
                headerName: "Creation", field: "creationDate", width: '130px', type: 'date'
-            },{
+            }, {
                 headerName: "Last update", field: "lastUpdate", width: '130px', defaultSortCol: true, defaultAsc: false, type: 'date'
-            },
+            }
         ];
     }
 
