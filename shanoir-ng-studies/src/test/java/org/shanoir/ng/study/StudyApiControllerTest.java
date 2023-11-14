@@ -45,6 +45,7 @@ import org.shanoir.ng.study.dua.DataUserAgreementService;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.security.StudyFieldEditionSecurityManager;
 import org.shanoir.ng.study.security.StudySecurityService;
+import org.shanoir.ng.study.service.RelatedDatasetService;
 import org.shanoir.ng.study.service.StudyService;
 import org.shanoir.ng.study.service.StudyUniqueConstraintManager;
 import org.shanoir.ng.study.service.StudyUserService;
@@ -103,9 +104,12 @@ public class StudyApiControllerTest {
 
 	@MockBean(name = "studySecurityService")
 	private StudySecurityService studySecurityService;
-	
+
 	@MockBean
 	private ShanoirEventService eventService;
+
+	@MockBean
+	private RelatedDatasetService relatedDatasetService;
 
 	@TempDir
 	public static File tempFolder;
