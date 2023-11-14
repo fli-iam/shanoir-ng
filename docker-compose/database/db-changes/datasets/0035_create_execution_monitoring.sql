@@ -26,7 +26,7 @@ DELETE FROM `dataset_processing`
 WHERE dtype = 'CarminDatasetProcessing';
 
 ALTER TABLE `dataset_processing` 
-  ADD COLUMN `parent_id` bigint(20) DEFAULT NULL;
+  ADD COLUMN `parent_id` bigint(20) DEFAULT NULL;,
   DROP COLUMN `name`,
   DROP COLUMN `pipeline_identifier`, 
   DROP COLUMN `identifier`, 
