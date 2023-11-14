@@ -173,4 +173,19 @@ public class QualityCardApiController implements QualityCardApi {
         QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, false);
         return new ResponseEntity<>(results, HttpStatus.OK);
     }
+
+	@Override
+    public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
+        @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
+		@Parameter(name = "dataset number start ", required = true) @PathVariable("start") int start,
+		@Parameter(name = "dataset number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException {
+
+        final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
+        if (qualityCard == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        LOG.info("test quality card: name:" + qualityCard.getName() + ", studyId: " + qualityCard.getStudyId());
+        QualityCardResult results = cardProcessingService.applyQualityCardOnStudy(qualityCard, start, stop);
+        return new ResponseEntity<>(results, HttpStatus.OK);
+    }
 }

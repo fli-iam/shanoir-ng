@@ -16,7 +16,6 @@ import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
-import { ExaminationService } from 'src/app/examinations/shared/examination.service';
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
 import { slideDown } from '../../shared/animations/animations';
@@ -32,11 +31,12 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
-import * as AppUtils from '../../utils/app.utils';
 import { QualityCard } from '../shared/quality-card.model';
 import { QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
+import * as AppUtils from '../../utils/app.utils';
+import { ExaminationService } from 'src/app/examinations/shared/examination.service';
 
 @Component({
     selector: 'quality-card',
@@ -192,7 +192,29 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     test() {
         this.testing = true;
         this.report = null;
-        this.qualityCardService.testOnStudy(this.qualityCard.id).then(result => {
+
+        this.examinationService.findExaminationIdsByStudy(this.qualityCard.study.id).then(examIds => {
+            this.nbExaminations = examIds.length;
+            if (examIds?.length > 0) {
+                if (examIds.length > 1) {
+                    this.confirmDialogService.choose('Large Volume', 'This study contains ' + examIds.length 
+                        + ' examinations. Do you want to test the quality card only on the first 100 to reduce the computing time ?'
+                    ).then(response => {
+                        if (response == 'yes') {
+                            this.performTest(0, 99);
+                        } else if (response == 'no') {
+                            this.performTest();
+                        }
+                    });
+                } else {
+                    this.performTest();
+                }
+            }
+        });    
+    }
+
+    performTest(start?: number, stop?: number) {
+        this.qualityCardService.testOnStudy(this.qualityCard.id, start, stop).then(result => {
             this.report = new BrowserPaging(result, this.reportColumns);
             this.reportIsTest = true;
         }).finally(() => this.testing = false);

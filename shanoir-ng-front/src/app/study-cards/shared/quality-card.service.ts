@@ -62,9 +62,11 @@ export class QualityCardService extends EntityService<QualityCard> {
             .toPromise();
     }
 
-    testOnStudy(qualityCardId: number): Promise<any> {
-        return this.http.get<any[]>(this.API_URL + '/test/' + qualityCardId)
-            .toPromise();
+    testOnStudy(qualityCardId: number, start?: number, stop?: number): Promise<any> {
+        return this.http.get<any[]>(this.API_URL + '/test/' + qualityCardId 
+            + (start != null && start != undefined && stop != null && stop != undefined
+                ? '/' + start + '/' + stop : '')
+            ).toPromise();
     }
 
     testOnExamination(qualityCardId: number, examinationId: number): Promise<any> {

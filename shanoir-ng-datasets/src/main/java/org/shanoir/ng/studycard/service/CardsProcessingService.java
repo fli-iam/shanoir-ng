@@ -140,8 +140,8 @@ public class CardsProcessingService {
 	 * @param studyCard
 	 * @throws MicroServiceCommunicationException 
 	 */
-	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws MicroServiceCommunicationException {
-        long start = new Date().getTime();
+	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags, Integer start, Integer stop) throws MicroServiceCommunicationException {
+        long startTs = new Date().getTime();
         if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
         ShanoirEvent event = new ShanoirEvent(ShanoirEventType.CHECK_QUALITY_EVENT, null, KeycloakUtil.getTokenUserId(), "Quality check started on study " + qualityCard.getStudyId() , 4);
 		eventService.publishEvent(event);
@@ -151,7 +151,13 @@ public class CardsProcessingService {
 		if (CollectionUtils.isNotEmpty(qualityCard.getRules())) {	    
 		    QualityCardResult result = new QualityCardResult();
             Float i = 0f;
-            for (Examination examination : study.getExaminations()) {
+            List<Examination> examinations;
+            if (start != null && stop != null) {
+                examinations = study.getExaminations().subList(start, stop < study.getExaminations().size() ? stop : study.getExaminations().size());
+            } else {
+                examinations = study.getExaminations();
+            }
+            for (Examination examination : examinations) {
                 event.setStatus(2);
                 event.setProgress(i / study.getExaminations().size());
                 event.setMessage("checking quality for examination " + examination.getComment());
@@ -162,7 +168,7 @@ public class CardsProcessingService {
             };
             event.setProgress(1f);
             event.setStatus(1);
-            event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - start) + " ms.");
+            event.setMessage("Quality card applied on study " + study.getName() + " in " + (new Date().getTime() - startTs) + " ms.");
             event.setReport(result.toString());
             eventService.publishEvent(event);
 			return result;
@@ -175,11 +181,31 @@ public class CardsProcessingService {
 		}
 	}
 
+    /**
+	 * Study cards for quality control: apply on entire study.
+	 * 
+	 * @param studyCard
+	 * @throws MicroServiceCommunicationException 
+	 */
+	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, boolean updateTags) throws MicroServiceCommunicationException {
+        return applyQualityCardOnStudy(qualityCard, updateTags, null, null);
+	}
+
+        /**
+	 * Study cards for quality control: apply on entire study.
+	 * 
+	 * @param studyCard
+	 * @throws MicroServiceCommunicationException 
+	 */
+	public QualityCardResult applyQualityCardOnStudy(QualityCard qualityCard, Integer start, Integer stop) throws MicroServiceCommunicationException {
+        return applyQualityCardOnStudy(qualityCard, false, start, stop);
+	}
+
     private void resetSubjectStudies(List<SubjectStudy> subjectStudies) {
         if (subjectStudies != null) {
             for (SubjectStudy subjectStudy : subjectStudies) {
                 subjectStudy.setQualityTag(null);
             }
         }
-    }	
+    }
 }
