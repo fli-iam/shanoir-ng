@@ -511,7 +511,7 @@ public class RabbitMQDatasetsService {
 			int i = dsEx.indexOf("/");
 			Long datasetId = Long.valueOf(dsEx.substring(0, i));
 			Long examId = Long.valueOf(dsEx.substring(i + 1, dsEx.length()));
-			System.out.println("datasetId : " + datasetId + " / examId : " + examId);
+//			System.out.println("datasetId : " + datasetId + " / examId : " + examId);
 //			datasetExamId.put(datasetId, examId);
 			datasetIds.add(datasetId);
 		}
