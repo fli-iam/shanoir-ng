@@ -2,19 +2,33 @@ package org.shanoir.ng.model;
 
 public enum NiftiConverter {
 
-	DCM2NII(1),
+	/**
+	 * |  1  dcm2nii_2008-03-31 |                    1 |
+	 * |  2  mcverter_2.0.7     |                    2 |
+	 * |  4  dcm2nii_2014-08-04 |                    1 |
+	 * |  5  mcverter_2.1.0     |                    2 |
+	 * |  6  dcm2niix           |                    1 |
+	 * |  7  dicomifier         |                    5 |
+	 * |  8  mriconverter       |                    6 |
+	 */
 
-	MCVERTER(2),
+	DCM2NII_2008_03_31(1, "/opt/nifti-converters/dcm2nii_2008-03-31"),
 
-	CLIDCM(3),
-	
-	DICOM2NIFTI(4),
+	MCVERTER_2_0_7 (2, "/opt/nifti-converters/mcverter_2.0.7"),
 
-	DICOMIFIER(5),
+	DCM2NII_2014_08_04(4, "/opt/nifti-converters/dcm2nii_2014-08-04"),
 
-	MRICONVERTER(6);
-	
-	private int id;
+	MCVERTER_2_1_0(5, "/opt/nifti-converters/mcverter_2.1.0"),
+
+	DCM2NIIX(6, "dcm2niix"),
+
+	DICOMIFIER(7, ""),
+
+	MRICONVERTER(8, "/opt/nifti-converters/mriconverter");
+
+	private final int id;
+
+	private final String path;
 
 	/**
 	 * Constructor.
@@ -22,8 +36,9 @@ public enum NiftiConverter {
 	 * @param id
 	 *            id
 	 */
-	private NiftiConverter(final int id) {
+	private NiftiConverter(final int id, final String path) {
 		this.id = id;
+		this.path = path;
 	}
 
 	/**
@@ -52,20 +67,5 @@ public enum NiftiConverter {
 		return id;
 	}
 
-	public boolean isMcverter() {
-		return MCVERTER.equals(this);
-	}
-
-	public boolean isClidcm() {
-		return CLIDCM.equals(this);
-	}
-
-	public boolean isDicom2Nifti() {
-		return DICOM2NIFTI.equals(this);
-	}
-
-	public boolean isDicomifier() {
-		return DICOMIFIER.equals(this);
-	}
-
+	public String getPath() { return path; }
 }

@@ -17,52 +17,24 @@ package org.shanoir.ng.service;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-import jakarta.transaction.Transactional;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.shanoir.ng.model.Dataset;
-import org.shanoir.ng.model.DatasetFile;
-import org.shanoir.ng.model.EchoTime;
-import org.shanoir.ng.model.ExpressionFormat;
-import org.shanoir.ng.model.Image;
-import org.shanoir.ng.model.ImportJob;
 import org.shanoir.ng.model.NiftiConverter;
-import org.shanoir.ng.model.Patient;
-import org.shanoir.ng.model.Serie;
-import org.shanoir.ng.model.Study;
-import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
-import org.shanoir.ng.shared.event.ShanoirEventService;
-import org.shanoir.ng.shared.exception.RestServiceException;
-import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.DiffusionUtil;
-import org.shanoir.ng.utils.ImportUtils;
-import org.shanoir.ng.utils.SerieToDatasetsSeparator;
 import org.shanoir.ng.utils.ShanoirExec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.annotation.RabbitHandler;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import jakarta.transaction.Transactional;
 
 /**
  * The NIfTIConverter does the actual conversion of dcm to nii files. To use the
@@ -80,87 +52,18 @@ import jakarta.transaction.Transactional;
 @Service
 public class DatasetsCreatorAndNIfTIConverterService {
 
-	private static final String DATASET_STR = "dataset";
-
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetsCreatorAndNIfTIConverterService.class);
-
-	private static final String DOUBLE_EQUAL = "==";
-
-	private static final String SEMI_COLON = ";";
-
-	private static final String SERIES = "SERIES";
 
 	@Autowired
 	private ShanoirExec shanoirExec;
 
-	@Autowired
-	private ShanoirEventService shanoirEventService;
-
-	@Value("${shanoir.import.series.seriesProperties}")
-	private String seriesProperties;
-
-	@Value("${shanoir.conversion.converters.convertwithclidcm}")
-	private String convertWithClidcm;
-
 	@Value("${shanoir.conversion.converters.path}")
 	private String convertersPath;
-
-	/** Logs of the conversion. */
-	private String conversionLogs;
 
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<>();
 
 	Random rand = new Random();
-
-	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	public void createDatasetsAndRunConversion(Patient patient, File workFolder, Integer converterId, ImportJob importJob)
-			throws ShanoirException {
-		File seriesFolderFile = new File(workFolder.getAbsolutePath() + File.separator + SERIES);
-		if (!seriesFolderFile.exists()) {
-			seriesFolderFile.mkdirs();
-		} else {
-			throw new ShanoirException("Error while creating series folder: folder already exists.");
-		}
-		conversionLogs = "";
-		List<Study> studies = patient.getStudies();
-		for (Iterator<Study> studiesIt = studies.iterator(); studiesIt.hasNext();) {
-			Study study = studiesIt.next();
-			List<Serie> series = study.getSelectedSeries();
-			float progress = 0;
-			int nbSeries = series.size();
-			int cpt = 1;
-			for (Iterator<Serie> seriesIt = series.iterator(); seriesIt.hasNext();) {
-				Serie serie = seriesIt.next();
-				// do not convert an erroneous serie
-				if (!serie.isErroneous() && !serie.isIgnored()) {
-					progress = progress + (0.5f / series.size());
-					importJob.getShanoirEvent().setProgress(progress);
-					importJob.getShanoirEvent().setMessage("Converting to NIfTI for serie [" + (serie.getProtocolName() == null ? serie.getSeriesInstanceUID() : serie.getProtocolName()) + "] (" + cpt + "/" + nbSeries + ")...");
-					shanoirEventService.publishEvent(importJob.getShanoirEvent());
-					File serieIDFolderFile = createSerieIDFolderAndMoveFiles(workFolder, seriesFolderFile, serie);
-					boolean serieIdentifiedForNotSeparating;
-					try {
-						serieIdentifiedForNotSeparating = checkSerieForPropertiesString(serie, seriesProperties);
-						// if the serie is not one of the series, that should not be separated, please separate the series,
-						// otherwise just do not separate the series and keep all images for one nii conversion
-						serie.setDatasets(new ArrayList<Dataset>());
-						constructDicom(serieIDFolderFile, serie, serieIdentifiedForNotSeparating);
-						// we exclude MR Spectroscopy (MRS) from NIfTI conversion, see MRS on GitHub Wiki
-						if (serie.getIsSpectroscopy() != null && !serie.getIsSpectroscopy()) {
-							constructNifti(serieIDFolderFile, serie, converterId);
-						}
-					} catch (NoSuchFieldException | SecurityException e) {
-						LOG.error(e.getMessage());
-					}
-					// as images/non-images are migrated to datasets, clear the list now
-					serie.getImages().clear();
-					serie.getNonImages().clear();
-				}
-				cpt++;
-			}
-		}
-	}
 
 	/**
 	 * Execute the Nifti conversion
@@ -168,82 +71,32 @@ public class DatasetsCreatorAndNIfTIConverterService {
 	 * @param converter
 	 * @param input     folder
 	 * @param output    folder
-	 * @param boolean   is a 4D volume
-	 * @param boolean   is convert to clidcm
 	 *
 	 */
-	public void convertToNiftiExec(Long converterId, String inputFolder, String outputFolder, boolean is4D, boolean reconversion) {
+	public void convertToNiftiExec(Long converterId, String inputFolder, String outputFolder) {
 		if (converterId == null) {
 			return;
 		}
 
 		NiftiConverter converter = NiftiConverter.getType(Math.toIntExact(converterId));
-		String converterPath = convertersPath + converter.name();
+		String conversionLogs = "";
 
 	    switch (converter) {
-		case MCVERTER:
-			is4D = true;
-			conversionLogs += shanoirExec.mcverterExec(inputFolder, converterPath, outputFolder, is4D);
-			break;
-		case CLIDCM:
-			try {
-				conversionLogs += shanoirExec.clidcmExec(inputFolder, converterPath, outputFolder);
-			} catch (Exception e) {
-				LOG.debug("Error converting with clidcm outputfolder : " + outputFolder + " - is4D :" + is4D + " - ",
-						e);
-			}
-			/*
-			 * Some '.prop' files may have been created. We want to convert the mas '.bvec'
-			 * and '.bval' files because this is the type of files normally created by
-			 * dcm2nii .
-			 */
-			createBvecAndBval(outputFolder);
-			break;
-		case DICOM2NIFTI:
-			conversionLogs += shanoirExec.dicom2niftiExec(inputFolder, converterPath, outputFolder);
+			case MCVERTER_2_0_7:
+			case MCVERTER_2_1_0:
+			conversionLogs += shanoirExec.mcverterExec(inputFolder, converter.getPath(), outputFolder, true);
 			break;
 		case DICOMIFIER:
 			conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder);
 			break;
 		case MRICONVERTER:
-			conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, reconversion);
+			conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, NiftiConverter.MRICONVERTER.getPath());
 			break;
 		default:
-			is4D = true;
-			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converterPath, outputFolder, is4D);
+			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converter.getPath(), outputFolder, true);
 			break;
 		}
-	}
-
-	/**
-	 * Search for a '.prop' file. If found, then creates a '.bvec' and a '.bval'
-	 * file from the '.prop' file.
-	 *
-	 * @param path
-	 */
-	private List<File> createBvecAndBval(final String path) {
-		LOG.debug("createBvecAndBval : Begin, params : path={}", path);
-		List<File> bvecAndBval = new ArrayList<>();
-		final FilenameFilter filter = new FilenameFilter() {
-			@Override
-			public boolean accept(final File dir, final String name) {
-				return FilenameUtils.isExtension(name, new String[] { "prop", "PROP" });
-			}
-		};
-		final String[] propFiles = new File(path).list(filter);
-		if (propFiles != null && propFiles.length != 0) {
-			for (final String propFile : propFiles) {
-				LOG.debug("createBvecAndBval : '.prop' file found : {}", propFile);
-				final List<File> thisList = DiffusionUtil.propToBvecBval(new File(path, propFile), new File(path));
-				LOG.debug("createBvecAndBval : bvec and bvals created : {}", thisList);
-				bvecAndBval.addAll(thisList);
-			}
-		}
-		if (bvecAndBval.isEmpty()) {
-			conversionLogs += "There was an error creating bvec and bval. DiffusionGradientOrientation and/or B0 values may be missing in DICOM file.";
-		}
-		LOG.debug("createBvecAndBval : end");
-		return bvecAndBval;
+		LOG.error(conversionLogs);
 	}
 
 	/**
@@ -267,74 +120,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 				LOG.error("removeUnusedFiles : error while deleting {}", toBeRemovedFile);
 			}
 		}
-	}
-
-	/**
-	 * This method receives a serie object and a String from the properties and
-	 * checks if the tag exists with a specific value.
-	 * 
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 */
-	private boolean checkSerieForPropertiesString(final Serie serie, final String propertiesString)
-			throws NoSuchFieldException {
-		final String[] itemArray = propertiesString.split(SEMI_COLON);
-		for (final String item : itemArray) {
-			final String tag = item.split(DOUBLE_EQUAL)[0];
-			final String value = item.split(DOUBLE_EQUAL)[1];
-			LOG.debug("checkDicomFromProperties : tag={}, value={}", tag, value);
-			try {
-				Class<? extends Serie> aClass = serie.getClass();
-				Field field = aClass.getDeclaredField(tag);
-				field.setAccessible(true);
-				String dicomValue = (String) field.get(serie);
-				String wildcard = ImportUtils.wildcardToRegex(value);
-				if (dicomValue != null && dicomValue.matches(wildcard)) {
-					return true;
-				}
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				LOG.error(e.getMessage());
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * This method does the actual conversion on calling the converter, either on
-	 * the level of the serie folder or on the level of each dataset folder inside
-	 * the serie folder. Attention: this code does not take care of spectroscopy
-	 * aspects. There should be a separate import code for this data.
-	 * 
-	 * In Shanoir old implementation the outputFiles is never used afterwards in the
-	 * import (only for cleaning after the import has finished). In
-	 * MrDatasetAcquisitionHome in the method getDicomFiles for each dataset0,1,..
-	 * folder all files are listed, when they are in listed in the serie meta-data
-	 * they are considered as dicom, all others as nii files. It would be much
-	 * better to add this infos to the json from here and just use them after?
-	 * 
-	 * @todo the conversion progress needs to be send to the frontend to be
-	 *       displayed
-	 * 
-	 * @param serieIDFolderFile
-	 * @param serie
-	 * @param seriesCounter
-	 * @param numberOfSeries
-	 * @throws SecurityException
-	 * @throws NoSuchFieldException
-	 */
-	private Integer datasetToNiftiConversionLauncher(Dataset dataset, File directory, Serie serie,
-			Integer converter, boolean isConvertAs4D, boolean isConvertWithClidcm)
-			throws NoSuchFieldException, SecurityException {
-		// search for the existing files in the destination folder
-		
-		if (conversionLogs != null && !"".equals(conversionLogs)) {
-			conversionLogs += "\n";
-		} else {
-			conversionLogs = "";
-		}
-		convertToNiftiExec(Long.valueOf(converter), directory.getPath(), directory.getPath(), isConvertAs4D, false);
-		LOG.debug("conversionLogs : {}", conversionLogs);
-		return converter;
 	}
 
 	/**
@@ -399,252 +184,6 @@ public class DatasetsCreatorAndNIfTIConverterService {
 
 		return diff(existingFiles, directory.getPath()).stream().filter(file -> file.isFile())
 				.collect(Collectors.toList());
-	}
-
-	/**
-	 * This method generates the nifti files of a serie in proper datasets for an
-	 * entire serie. It also constructs the associated Nifti ExpressionFormat and
-	 * DatasetFiles within the Dataset object. Finally it also constructs the Bvec
-	 * and BVal values needed for Diffusion and store them in a a list of Diffusion
-	 * Gradient which is hold by the dataset itself.
-	 *
-	 * @param serieIDFolderFile
-	 * @param serie
-	 * @param serieIdentifiedForNotSeparating
-	 * @param convertedId
-	 * @throws NoSuchFieldException
-	 * 
-	 */
-	private void constructNifti(File serieIDFolderFile, final Serie serie, Integer converterId)
-			throws NoSuchFieldException {
-
-		LOG.debug("convertToNifti : create nifti files for the serie : {}", serieIDFolderFile.getAbsolutePath());
-
-		if (serie != null) {
-			NiftiConverter converter = NiftiConverter.getType(converterId);
-			boolean isConvertAs4D = false;
-			boolean isConvertWithClidcm = false;
-			try {
-				isConvertAs4D = checkSerieForPropertiesString(serie, seriesProperties);
-				isConvertWithClidcm = checkSerieForPropertiesString(serie, convertWithClidcm);
-			} catch (NoSuchFieldException | SecurityException e1) {
-				LOG.error(e1.getMessage(), e1);
-			}
-			if (serie.getDatasets().size() > 1) {
-				// Need to construct nifti files for each dataset in current serie
-				int index = 0;
-				for (Dataset dataset : serie.getDatasets()) {
-					File directory = new File(serieIDFolderFile + File.separator + DATASET_STR + index);
-					if (directory.isDirectory()) {
-						LOG.debug("convertToNifti : create nifti files for the dataset {} in directory : {}",
-								dataset.getName(), directory.getName());
-						final List<File> existingFiles = Arrays.asList(directory.listFiles());
-						try {
-							datasetToNiftiConversionLauncher(dataset, directory, serie, converterId,
-									isConvertAs4D, isConvertWithClidcm);
-						} catch (SecurityException e) {
-							LOG.error(e.getMessage());
-						}
-						List<File> niftiGeneratedFiles = converter.isDicomifier()
-								? niftiFileSortingDicom2Nifti(existingFiles, directory, dataset)
-								: niftiFileSorting(existingFiles, directory, serieIDFolderFile);
-						++index;
-					}
-				}
-			} else if (serie.getDatasets().size() == 1) {
-				// Need to construct nifti files for only one dataset in current serie
-				Dataset dataset = serie.getDatasets().get(0);
-				if (serieIDFolderFile.isDirectory()) {
-					LOG.debug("convertToNifti : create nifti files for the dataset {} in directory : {}",
-							dataset.getName(), serieIDFolderFile.getName());
-					final List<File> existingFiles = Arrays.asList(serieIDFolderFile.listFiles());
-					try {
-						datasetToNiftiConversionLauncher(dataset, serieIDFolderFile, serie, converterId,
-								isConvertAs4D, isConvertWithClidcm);
-					} catch (SecurityException e) {
-						LOG.error(e.getMessage());
-					}
-					List<File> niftiGeneratedFiles = converter.isDicomifier()
-							? niftiFileSortingDicom2Nifti(existingFiles, serieIDFolderFile, dataset)
-							: niftiFileSorting(existingFiles, serieIDFolderFile, serieIDFolderFile);
-				}
-			}
-		}
-	}
-
-	/**
-	 * This method extract the dicom files in proper dataset(s) (in a serie). It
-	 * also constructs the associated ExpressionFormat and DatasetFiles within the
-	 * Dataset object.
-	 * 
-	 * @param serieIDFolderFile
-	 * @param serie
-	 * @param serieIdentifiedForNotSeparating
-	 */
-	private void constructDicom(final File serieIDFolderFile, final Serie serie,
-			final boolean serieIdentifiedForNotSeparating) {
-		if (!serieIdentifiedForNotSeparating) {
-			final HashMap<SerieToDatasetsSeparator, Dataset> datasetMap = new HashMap<>();
-			for (Image image : serie.getImages()) {
-				final int acquisitionNumber = image.getAcquisitionNumber();
-				Set<EchoTime> echoTimes = image.getEchoTimes();
-				double[] imageOrientationPatientsDoubleArray = image.getImageOrientationPatient() == null ? null
-						: image.getImageOrientationPatient().stream().mapToDouble(i -> i).toArray();
-				SerieToDatasetsSeparator seriesToDatasetsSeparator = new SerieToDatasetsSeparator(acquisitionNumber,
-						echoTimes, imageOrientationPatientsDoubleArray);
-				boolean found = false;
-				for (SerieToDatasetsSeparator seriesToDatasetsComparatorIterate : datasetMap.keySet()) {
-					if (seriesToDatasetsComparatorIterate.equals(seriesToDatasetsSeparator)) {
-						found = true;
-						seriesToDatasetsSeparator = seriesToDatasetsComparatorIterate;
-						break;
-					}
-				}
-				// existing dataset has been found, just add the image/datasetFile
-				if (found) {
-					DatasetFile datasetFile = createDatasetFile(image);
-					datasetMap.get(seriesToDatasetsSeparator).getExpressionFormats().get(0).getDatasetFiles()
-							.add(datasetFile);
-					datasetMap.get(seriesToDatasetsSeparator).getFlipAngles().add(Double.valueOf(image.getFlipAngle()));
-					datasetMap.get(seriesToDatasetsSeparator).getRepetitionTimes().add(image.getRepetitionTime());
-					datasetMap.get(seriesToDatasetsSeparator).getInversionTimes().add(image.getInversionTime());
-					datasetMap.get(seriesToDatasetsSeparator).setEchoTimes(image.getEchoTimes());
-					// new dataset has to be created, new expression format and add
-					// image/datasetfile
-				} else {
-					Dataset dataset = new Dataset();
-					ExpressionFormat expressionFormat = new ExpressionFormat();
-					expressionFormat.setType("dcm");
-					dataset.getExpressionFormats().add(expressionFormat);
-					DatasetFile datasetFile = createDatasetFile(image);
-					dataset.getFlipAngles().add(Double.valueOf(image.getFlipAngle()));
-					dataset.getRepetitionTimes().add(image.getRepetitionTime());
-					dataset.getInversionTimes().add(image.getInversionTime());
-					dataset.setEchoTimes(image.getEchoTimes());
-					expressionFormat.getDatasetFiles().add(datasetFile);
-					datasetMap.put(seriesToDatasetsSeparator, dataset);
-					serie.getDatasets().add(dataset);
-				}
-			}
-
-			boolean success = true;
-			// create a separate folder for each group of images
-			int index = 0;
-			for (final Entry<SerieToDatasetsSeparator, Dataset> datasets : datasetMap.entrySet()) {
-				// create a folder
-				final File folder = new File(
-						serieIDFolderFile.getAbsolutePath() + File.separator + DATASET_STR + index);
-				success = folder.mkdirs();
-				if (!success) {
-					LOG.error("deleteFolder : the creation of {} failed", folder);
-				}
-				// move the files into the folder
-				for (final DatasetFile datasetFile : datasets.getValue().getExpressionFormats().get(0)
-						.getDatasetFiles()) {
-					String path = datasetFile.getPath();
-					final File oldFile = new File(path);
-					if (oldFile.exists()) {
-						final File newFile = new File(folder, oldFile.getName());
-						success = oldFile.renameTo(newFile);
-						datasetFile.setPath(newFile.getAbsolutePath());
-						datasets.getValue().setName(serie.getSeriesDescription() + index);
-						if (!success) {
-							LOG.error("deleteFolder : moving of " + oldFile + " failed");
-						}
-					}
-				}
-				index++;
-			}
-			if (!success) {
-				LOG.error("Error while constructing Dicom in constructDicom.");
-			}
-		} else {
-			Dataset dataset = new Dataset();
-			dataset.setName(serie.getSeriesDescription());
-			ExpressionFormat expressionFormat = new ExpressionFormat();
-			expressionFormat.setType("dcm");
-			dataset.getExpressionFormats().add(expressionFormat);
-			for (Image image : serie.getImages()) {
-				dataset.getFlipAngles().add(Double.valueOf(image.getFlipAngle()));
-				dataset.getRepetitionTimes().add(image.getRepetitionTime());
-				dataset.getInversionTimes().add(image.getInversionTime());
-				dataset.setEchoTimes(image.getEchoTimes());
-				DatasetFile datasetFile = createDatasetFile(image);
-				expressionFormat.getDatasetFiles().add(datasetFile);
-			}
-			serie.getDatasets().add(dataset);
-		}
-	}
-
-	/**
-	 * @param image
-	 * @return
-	 */
-	private DatasetFile createDatasetFile(Image image) {
-		DatasetFile datasetFile = new DatasetFile();
-		datasetFile.setPath(image.getPath());
-		datasetFile.setAcquisitionNumber(image.getAcquisitionNumber());
-		datasetFile.setImageOrientationPatient(image.getImageOrientationPatient());
-		return datasetFile;
-	}
-
-	/**
-	 * This method creates a folder for each serie and moves into it the files,
-	 * coming either from the PACS or from the zip upload directory.
-	 * 
-	 * @param seriesFolderFile
-	 * @param serie
-	 * @throws ShanoirException
-	 */
-	private File createSerieIDFolderAndMoveFiles(File workFolder, File seriesFolderFile, Serie serie)
-			throws ShanoirException {
-		String serieID = serie.getSeriesInstanceUID();
-		File serieIDFolderFile = new File(seriesFolderFile.getAbsolutePath() + File.separator + serieID);
-		if (!serieIDFolderFile.exists()) {
-			serieIDFolderFile.mkdirs();
-		} else {
-			throw new ShanoirException(
-					"Error while creating serie id folder: folder already exists. serieId: " + serieID);
-		}
-		List<Image> images = serie.getImages();
-		moveFiles(workFolder, serieIDFolderFile, images);
-		return serieIDFolderFile;
-	}
-
-	/**
-	 * This method moves the files into serie specific folders.
-	 * 
-	 * @param serieIDFolder
-	 * @param images
-	 * @throws RestServiceException
-	 */
-	private void moveFiles(File workFolder, File serieIDFolder, List<Image> images) throws ShanoirException {
-		for (Iterator<Image> iterator = images.iterator(); iterator.hasNext();) {
-			Image image = iterator.next();
-			// the path has been set in processDicomFile in DicomFileAnalyzer before
-			String filePath = image.getPath();
-			File oldFile = new File(workFolder.getAbsolutePath() + File.separator + filePath);
-			if (oldFile.exists()) {
-				File newFile = new File(serieIDFolder.getAbsolutePath() + File.separator + filePath);
-				newFile.getParentFile().mkdirs();
-				boolean success = oldFile.renameTo(newFile);
-				if (!success) {
-					throw new ShanoirException("Error while creating serie id folder: file to copy already exists.");
-				}
-				LOG.debug("Moving file: {} to {}", oldFile.getAbsolutePath(), newFile.getAbsolutePath());
-				image.setPath(newFile.getAbsolutePath());
-			} else {
-				throw new ShanoirException("Error while creating serie id folder: file to copy does not exist.");
-			}
-		}
-	}
-
-	public static int[] convertIntegers(List<Integer> integers) {
-		int[] ret = new int[integers.size()];
-		for (int i = 0; i < ret.length; i++) {
-			ret[i] = integers.get(i).intValue();
-		}
-		return ret;
 	}
 
 	/**

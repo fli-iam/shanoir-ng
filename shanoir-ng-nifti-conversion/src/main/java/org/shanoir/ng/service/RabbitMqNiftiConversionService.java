@@ -8,6 +8,8 @@ import jakarta.transaction.Transactional;
 import org.shanoir.ng.model.Dataset;
 import org.shanoir.ng.model.NiftiConverter;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitHandler;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +25,9 @@ public class RabbitMqNiftiConversionService {
 	
 	@Autowired
 	DatasetsCreatorAndNIfTIConverterService converterService;
-	
+
+	private static final Logger LOG = LoggerFactory.getLogger(RabbitMqNiftiConversionService.class);
+
 	/**
 	 * Converts some data
 	 * @param message the string containing the converter ID + the workfolder where the dicom are
@@ -32,27 +36,33 @@ public class RabbitMqNiftiConversionService {
 	@RabbitListener(queues = RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE)
 	@RabbitHandler
 	public boolean convertData(String message) {
-		String[] messageSplit = message.split(";");
-		Integer converterId = Integer.valueOf(messageSplit[0]);
-		String workFolder = messageSplit[1];
+		try {
+			String[] messageSplit = message.split(";");
+			int converterId = Integer.parseInt(messageSplit[0]);
+			LOG.error("Starting conversion with converter: " + converterId);
 
-		NiftiConverter converter = NiftiConverter.getType(converterId);		
-		
-		String workFolderResult = workFolder + File.separator + "result";
-		File result = new File(workFolderResult);
+			String workFolder = messageSplit[1];
 
-		result.mkdirs();
+			NiftiConverter converter = NiftiConverter.getType(converterId);
 
-		converterService.convertToNiftiExec(Long.valueOf(converterId), workFolder, workFolderResult, false, true);
-		
-		if (converter.isDicomifier()) {
-			Dataset dataset = new Dataset();
-			dataset.setName("name");
-			converterService.niftiFileSortingDicom2Nifti(Collections.emptyList(), result, dataset);
-		} else {
-			converterService.niftiFileSorting(Collections.emptyList(), result, new File("serieId"));
+			String workFolderResult = workFolder + File.separator + "result";
+			File result = new File(workFolderResult);
+
+			result.mkdirs();
+
+			converterService.convertToNiftiExec(Long.valueOf(converterId), workFolder, workFolderResult);
+
+			if (NiftiConverter.DICOMIFIER.equals(converter)) {
+				Dataset dataset = new Dataset();
+				dataset.setName("name");
+				converterService.niftiFileSortingDicom2Nifti(Collections.emptyList(), result, dataset);
+			} else {
+				converterService.niftiFileSorting(Collections.emptyList(), result, new File("serieId"));
+			}
+		} catch (Exception e) {
+			LOG.error("Could not convert data to nifti", e);
+			return false;
 		}
-		
 		return true;
 	}
 }

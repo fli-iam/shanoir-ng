@@ -81,36 +81,10 @@ RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-
 RUN mkdir -m 1777 /.dcm2nii_2008-03-31
 RUN mkdir -m 1777 /.dcm2nii_2014-08-04
 
-# install dicom tool clidcm
-RUN mkdir -p /opt/clidcm/libx64
-RUN install -m 644 external/clidcm/bin/linux/libx64/* /opt/clidcm/libx64/
-RUN chmod 755 /opt/clidcm/libx64/clidcm
-RUN cp -n           external/clidcm/bin/linux/libx64/lib*.so.* /usr/lib/x86_64-linux-gnu/
-
-
-RUN echo "#!/bin/sh" >/opt/nifti-converters/clidcm
-RUN echo "LD_LIBRARY_PATH=/opt/clidcm/libx64/ exec /opt/clidcm/libx64/clidcm \"\$@\"" >/opt/nifti-converters/clidcm
-
-RUN chmod 0755 /opt/nifti-converters/clidcm
-
-# clidcm uses /usr/share/dcmtk/dicom.dic but this file is now provided by libdcmtk2
-RUN ln -s libdcmtk2 /usr/share/dcmtk
-#RUN test -f /usr/share/dcmtk/dicom.dic
-
-# install dicom tool dcmdjpeg
-RUN install -m 755 external/dcmtk/dcmdjpeg/linux/bin/dcmdjpeg /usr/local/bin/
-RUN install -m 644 external/dcmtk/dcmdjpeg/linux/lib/dicom.dic /usr/local/lib/
-
-# install dicom tool dcm2pnm
-RUN install -m 755 external/dcmtk/dcm2pnm/linux/dcm2pnm /usr/local/bin/
-
-# install animaConvertImage to convert Analyze format into nifti
-RUN install -m 755 external/anima/animaConvertImage /usr/local/bin/
-
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
 # Also install dicomifier
-# RUN /opt/nifti-converters/dicomifier/dicomifier.ws/run.py
+RUN /opt/nifti-converters/dicomifier/dicomifier.ws/run.py
 
 ADD nifti-conversion.jar nifti-conversion.jar
 COPY entrypoint entrypoint_common oneshot /bin/

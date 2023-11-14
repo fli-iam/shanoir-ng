@@ -14,22 +14,44 @@
 
 package org.shanoir.ng.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 
 @Component
 public class ShanoirExec {
-	
+
+	/** Dicomifier error. */
+	private static final String ERROR_DICOM2NIFTI_REQUEST = "Error on dicom2nifti microservice request";
+
 	/**
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirExec.class);
-	
+
+	@Value("${ms.url.dicom2nifti}")
+	private String dicomifierMsUrl;
+
+	@Value("${shanoir.conversion.converters.mriconverter}")
+	private String mriConverterPath;
+
+	@Autowired
+	RestTemplate restTemplate;
+
 	/**
 	 * Exec the clidcm command to convert Dicom files to Nifti files.
 	 *
@@ -298,8 +320,7 @@ public class ShanoirExec {
 	/**
 	 * Execute the command to get mcverter exe.
 	 *
-	 * @param mcverterpath
-	 *            the path to mcverter command
+	 * @param mcverterPath the path to mcverter command
 	 * Getting the version of mcverter causes an exit code = 1 even though there is no error
 	 * when exec "mcverter -V" so we get rid of this error in this particular case
 	 * by checking if the cmd is for the version
@@ -400,80 +421,6 @@ public class ShanoirExec {
 		return result;
 	}
 
-
-	/**
-	 * Exec the dicom2nifti command to convert Dicom files to Nifti files.
-	 *
-	 * @param inputFolder
-	 *            the input folder
-	 * @param dicom2niftiPath
-	 *            the dicom2nifti path
-	 * @param outputFolder
-	 *            the output folder
-	 *
-	 * @return the string
-	 */
-	public String dicom2niftiExec(String inputFolder, final String dicom2niftiPath, final String outputFolder) {
-		LOG.debug("dicom2niftiExec : Begin");
-
-		LOG.debug("dicom2niftiExec : {}", dicom2niftiPath);
-
-		String[] cmd = null;
-		//Usage: dicom2nifti [OPTIONS] input output
-		cmd = new String[3];
-		cmd[0] = "bash";
-		cmd[1] = "-c";
-		//Then as we use wildcard *, the rest must be done as one command
-		StringBuilder cmdLine = new StringBuilder(dicom2niftiPath);
-		if(LOG.isDebugEnabled()){
-			// verbose
-			cmdLine.append(" -v");
-			cmdLine.append(" debug");
-		}else{
-			cmdLine.append(" -v");
-			cmdLine.append(" warning");
-		}
-		cmdLine.append(" --dtype single ");
-
-		cmdLine.append(inputFolder);
-		cmdLine.append(" ");
-		cmdLine.append(outputFolder);
-		cmd[2] = cmdLine.toString();
-
-		LOG.debug("CMD DICOM2NIFTI {}", Arrays.asList(cmd));
-
-		final String result = exec(cmd);
-
-		LOG.debug("dicom2niftiExec : End");
-		return result;
-	}
-	/**
-	 * Execute the dcmdjpeg binary to uncompress dicom images.
-	 *
-	 * @param dcmdjpegPath
-	 *            the dcmdjpeg path
-	 * @param inputFile
-	 *            the input file
-	 * @param outputFile
-	 *            the output file
-	 *
-	 * @return the string
-	 */
-	public String dcmdjpeg(final String dcmdjpegPath, final String inputFile, final String outputFile) {
-		LOG.debug("dcmdjpeg : Begin");
-		LOG.debug("dcmdjpeg : {}", dcmdjpegPath);
-
-		String[] cmd = new String[3];
-		cmd[0] = dcmdjpegPath;
-		cmd[1] = inputFile;
-		cmd[2] = outputFile;
-
-		final String result = exec(cmd);
-
-		LOG.debug("dcmdjpeg : End");
-		return result;
-	}
-	
 	/**
 	 * Execute the command line given in argument.
 	 *
@@ -570,9 +517,6 @@ public class ShanoirExec {
 	 * @return Informations about the conversion
 	 */
 	public String dicomifier(String inputFolder, String outputFolder) {
-		//TODO: to be completed.
-		return null;
-		/*
 		String requestJson = "{\"source\":\"" + inputFolder
 				+ "\", \"destination\":\"" + outputFolder
 				+ "\", \"zip\": true }";
@@ -596,7 +540,6 @@ public class ShanoirExec {
 			return ERROR_DICOM2NIFTI_REQUEST;
 		}
 		return "Dicomifier: converting dicom to nifti, success.";
-		*/
 	}
 
 	/**
@@ -605,18 +548,15 @@ public class ShanoirExec {
 	 * @param outputFolder the output folder
 	 * @return the olg to display.
 	 */
-	public String mriConverter(String inputFolder, String outputFolder, boolean reconversion) {
-		//TODO: complete
-		/*
+	public String mriConverter(String inputFolder, String outputFolder, String mriConverterPath) {
+
 		String logs = "mriConverter: ";
 		String execString = "";
 
 		// We force the dataset0 folder here as MRIConverter does not search recursively in the files..
-		if (!reconversion && !inputFolder.contains("dataset")) {
+		if (!inputFolder.contains("dataset")) {
 			inputFolder = inputFolder.concat("/dataset0");
 		}
-		LOG.error(inputFolder);
-		LOG.error(outputFolder);
 
 		// java -classpath MRIManager.jar DicomToNifti Subject4/ /tmp/ "PatientName-SerialNumber-Protocol" "[ExportOptions] 00000"
 		execString += "xvfb-run java -classpath " + mriConverterPath + " DicomToNifti "	+ inputFolder + " "	+ outputFolder
@@ -627,8 +567,6 @@ public class ShanoirExec {
 		final String result = exec(execString.split(" "));
 
 		return logs.concat("\n Result: " + result);
-		 */
-		return null;
 	}
 
 	/**

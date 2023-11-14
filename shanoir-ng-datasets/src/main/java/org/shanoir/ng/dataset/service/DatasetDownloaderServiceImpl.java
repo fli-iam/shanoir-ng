@@ -332,7 +332,6 @@ public class DatasetDownloaderServiceImpl {
 						}
 
 					} else if (NII.equals(format)) {
-						LOG.error("hey: " +converterId);
 						// Check if we want a specific converter -> nifti reconversion
 						if (converterId != null) {
 							File userDir = DatasetFileUtils.getUserImportDir("/tmp");
@@ -340,8 +339,6 @@ public class DatasetDownloaderServiceImpl {
 							File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
 
 							DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, null);
-
-							LOG.error("hey: " + pathURLs);
 
 							// Create temporary workfolder with dicom files, to be able to convert them
 							workFolder.mkdirs();
@@ -378,10 +375,6 @@ public class DatasetDownloaderServiceImpl {
 							List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
 							datasetFiles.addAll(files);
 						}
-						
-						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE);
-						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false, datasetFilePath);
-						datasetFiles.addAll(files);
 					} else {
 						throw new RestServiceException(
 								new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
