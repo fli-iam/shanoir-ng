@@ -50,16 +50,12 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     @Override
     public void moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
         try {
-//            System.out.println("moveDataset : " + ds.getId() + " for study " + studyId);
             Long oldDsId = ds.getId();
-//            System.out.println("moveDataset acq : " + ds.getDatasetAcquisition().getId());
-
             if (ds.getDatasetAcquisition() != null && ds.getDatasetAcquisition().getId() != null) {
                 List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
                 DatasetAcquisition newAcq = null;
                 if (!dsAcqList.isEmpty()) {
                     for (DatasetAcquisition dsAcq : dsAcqList) {
-    //                    System.out.println("dsAcq from parent acqId: " + dsAcq.getId() + " / acq.parentId: " + dsAcq.getSourceId() + " / acq.examId : " + dsAcq.getExamination().getId());
                         if (dsAcq.getExamination().getStudyId() == studyId) {
                             newAcq = dsAcq;
                             break;
@@ -87,8 +83,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 newDs.setSourceId(oldDsId);
                 entityManager.flush();
 
-    //            System.out.println("--> end of moveDataset ds: " + ds.getId() + " / acq : " + ds.getDatasetAcquisition().getId());
-    //            System.out.println("--> end of moveDataset newDs: " + newDs.getId() + " / acq : " + newDs.getDatasetAcquisition().getId());
             } else if (ds.getDatasetProcessing() != null) {
                 LOG.warn("Dataset selected is a processed dataset, it can't be copied.");
             }
@@ -100,8 +94,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 
     public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
         Long oldAcqId = acq.getId();
-//        System.out.println("Acquisition map size: " + acqMap.size());
-//        System.out.println("oldAcqId: " + oldAcqId);
         if (acqMap.get(oldAcqId) != null)
             return acqMap.get(oldAcqId);
 
@@ -114,16 +106,12 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         DatasetAcquisition newAcquisition = datasetAcquisitionRepository.save(acq);
         newAcquisition.setExamination(newExam);
         newAcquisition.setSourceId(oldAcqId);
-//        System.out.println("  - newAcquisition id : " + newAcquisition.getId());
-//        System.out.println("  - newAcquisition.exam id : " + newAcquisition.getExamination().getId());
         acqMap.put(oldAcqId, newAcquisition);
         return newAcquisition;
     }
 
     public Examination moveExamination(Examination examination, Long studyId, Map<Long, Examination> examMap) {
         Long oldExamId = examination.getId();
-//        System.out.println("Examination map size : " + examMap.size());
-//        System.out.println("oldExamId : " + oldExamId);
         if (examMap.get(oldExamId) != null)
             return examMap.get(oldExamId);
 
@@ -135,7 +123,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         entityManager.detach(examination);
         Examination newExamination = examinationService.save(examination);
         newExamination.setSourceId(oldExamId);
-//        System.out.println("   - newExamination id : " + newExamination.getId());
         examMap.put(oldExamId, newExamination);
         return newExamination;
     }

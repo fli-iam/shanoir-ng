@@ -68,9 +68,6 @@ export class DatasetCopyDialogComponent {
             if (!this.datasetSubjectIds.includes(line.datasetId + "/" + line.subjectId)) {
                 this.datasetSubjectIds.push(line.datasetId + "/" + line.subjectId);
             }
-            if (!this.datasetExamIds.includes(line.datasetId + "/" + line.examinationId)) {
-                this.datasetExamIds.push(line.datasetId + "/" + line.examinationId);
-            }
         }
     }
     public copy() {
@@ -82,20 +79,13 @@ export class DatasetCopyDialogComponent {
             } else if (this.isDatasetInStudy) {
                 this.statusMessage = 'Selected dataset(s) already belong to selected study.';
             } else {
-                this.statusMessage = "Start copy";
+                this.statusMessage = "Start copy...";
                 const formData: FormData = new FormData();
                 formData.set('datasetIds', Array.from(this.datasetsIds).join(","));
                 formData.set('studyId', this.selectedStudy.id.toString());
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
                 formData.set('datasetSubjectIds', Array.from(this.datasetSubjectIds).join(","));
                 formData.set('subjectIds', Array.from(this.subjectIds).join(","));
-                // formData.set('datasetExamIds', Array.from(this.datasetExamIds).join(","));
-                console.log("formData datasets : " + formData.get('datasetIds'));
-                console.log("formData studies : " + formData.get('studyId'));
-                console.log("formData centerIds : " + formData.get('centerIds'));
-                console.log("formData subjectIds : " + formData.get('subjectIds'));
-                console.log("formData datasetSubjectIds : " + formData.get('datasetSubjectIds'));
-                // console.log("formData datasetExamIds : " + formData.get('datasetExamIds'));
                 return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
                     .toPromise()
                     .then(res => {

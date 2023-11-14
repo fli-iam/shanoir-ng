@@ -433,10 +433,8 @@ public class RabbitMQDatasetsService {
 	@RabbitHandler
 	@Transactional
 	public String copyDatasetsToStudy(final String data) {
-		// data = datasetId/examId,dsId/examId,...;studyId
 		Map<Long, Examination> examMap = new HashMap<>();
 		Map<Long, DatasetAcquisition> acqMap = new HashMap<>();
-//		Map<Long, Long> datasetExamId = new HashMap<>();
 		List<Long> datasetParentIds;
 		Boolean copy = false;
 		String res = "";
@@ -444,32 +442,11 @@ public class RabbitMQDatasetsService {
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 			int index = data.indexOf(";");
 			Long studyId = Long.valueOf(data.substring(index + 1, data.length()));
-//			datasetParentIds = extractData(data.substring(0, index));
-
-//			for (Map.Entry<Long, Long> d : datasetExamId.entrySet()) {
-//				System.out.println("     map.key : " + d.getKey() + " / map.value : " + d.getValue());
-//			}
-
-			// makeMapDatasetSubjectIds(data.substring(0, index), datasetSubjectMap, datasetIds, subjectIds);
 			datasetParentIds = convertStringToLong(data.substring(0, index).split(","));
 
-			// List<Dataset> datasetStudyList = datasetService.findByStudyId(studyId);
-			// List<Dataset> datasetList = datasetService.findByIdIn(datasetIds);
-
-//			System.out.println("datasetParentIds : " + datasetParentIds);
 			for (Long datasetParentId : datasetParentIds) {
 				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
-//				System.out.println("");
-//				System.out.println("datasetParentId : " + datasetParentId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
-//				System.out.println("datasetParent.name : " + datasetParent.getName());
-//				System.out.println("dataset to add : ");
-//				System.out.println("     datasetParent.id : " + datasetParent.getId() + " / datasetParent.name : " + datasetParent.getName());
-//				System.out.println("     datasetParent.acq.id : " + datasetParent.getDatasetAcquisition().getId() + " / datasetParent.acq.exam.id : " + datasetParent.getDatasetAcquisition().getExamination().getId());
-//				System.out.println("dsCopiedList : ");
-//				for (Dataset d : dsCopiedList) {
-//					System.out.println("     d.id : " + d.getId() + " / d.name : " + d.getName() + " / d.parent : " + d.getSourceId() + " / d.study : " + d.getStudyId());
-//				}
 
 				if (datasetParent.getSourceId() != null) {
 					copy = false;
@@ -477,14 +454,11 @@ public class RabbitMQDatasetsService {
 					LOG.warn("Selected dataset is a copy, please pick the original dataset.");
 				} else if (dsCopiedList.isEmpty()) {
 					copy = true;
-//					System.out.println("does not contain ==> add : copy = " + copy);
 				} else {
 					for (Dataset d : dsCopiedList) {
-//						System.out.println("d.parentId : " + d.getSourceId() + " / datasetId : " + datasetParentId + " / d.studyId : " + d.getStudyId() + " / studyId : " + studyId);
 						if (d.getSourceId().equals(datasetParentId) && d.getStudyId() == studyId) {
 							res = "Dataset already copied in this study, copy aborted.";
 							LOG.warn("Dataset already copied in this study, copy aborted.");
-//							System.out.println("copy = " + copy);
 							copy = false;
 							break;
 						} else {
@@ -497,42 +471,11 @@ public class RabbitMQDatasetsService {
 					res = "Copy worked !";
 				}
 			}
-//			System.out.println("=== Copy datasets terminé ===");
 			return res;
 		} catch (Exception e) {
 			LOG.error("Something went wrong during the copy. {}", e.getMessage());
 			throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
 		}
-	}
-
-	public List<Long> extractData(String data) {
-		List<Long> datasetIds = new ArrayList<>();
-		for (String dsEx : data.split(",")) {
-			int i = dsEx.indexOf("/");
-			Long datasetId = Long.valueOf(dsEx.substring(0, i));
-			Long examId = Long.valueOf(dsEx.substring(i + 1, dsEx.length()));
-//			System.out.println("datasetId : " + datasetId + " / examId : " + examId);
-//			datasetExamId.put(datasetId, examId);
-			datasetIds.add(datasetId);
-		}
-		// lowest id should be treated first
-		datasetIds.sort(null);
-		return datasetIds;
-	}
-
-	public Map<String, String> makeMapDatasetSubjectIds(String datasetAndSubjectIds, Map<String, String> datasetSubjectMap, List<Long> datasetIds, List<Long> subjectIds) {
-		String[] datasetSubjectList = datasetAndSubjectIds.split(",");
-
-		for (String datasetSubject : datasetSubjectList) {
-			String datasetId = datasetSubject.split("/")[0];
-			String subjectId = datasetSubject.split("/")[1];
-
-			datasetIds.add(Long.valueOf(datasetId));
-			subjectIds.add(Long.valueOf(subjectId));
-
-			datasetSubjectMap.put(datasetId, subjectId);
-		}
-		return datasetSubjectMap;
 	}
 
 	private List<Long> convertStringToLong(String[] str) {

@@ -33,6 +33,7 @@ i { font-size: 30px; vertical-align: bottom; margin-right: 5px; }
 
 .list {
     max-height: 300px;
+    min-height: 250px;
     overflow: auto;
     flex: 50%;
     border: solid;

@@ -97,16 +97,13 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 				}
 			}
 
-			if(toAdd) {
+			if (toAdd) {
 				SubjectStudy ssToAdd = new SubjectStudy();
 				ssToAdd.setStudy(study);
 				ssToAdd.setSubject(subject);
-				//ssToAdd.setSubjectType(subject.getSubjectType());
-				//ssToAdd.setPhysicallyInvolved(subject.isPhysicallyInvolved());
 
 				subjectStudyList.add(ssToAdd);
 				study.setSubjectStudyList(subjectStudyList);
-				// subjectStudyRepository.save(ssToAdd);
 				studyRepository.save(study);
 			}
 		}
@@ -169,7 +166,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 	}
 
 	private String copyDatasetToStudy(String datasetIds, String studyId) throws MicroServiceCommunicationException {
-		System.out.println("copyDatasetToStudy datasetIds : " + datasetIds + " / studyId : " + studyId);
 		try {
 			String res = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY, datasetIds + ";" + studyId);
 			return res;
