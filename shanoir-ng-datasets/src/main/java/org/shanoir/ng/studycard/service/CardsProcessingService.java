@@ -88,20 +88,6 @@ public class CardsProcessingService {
             datasetAcquisitionService.update(acquisitions);
         }
     }	
-	
-    /**
-	 * Study cards for quality control: apply on entire study.
-	 * 
-	 * @param studyCard
-	 * @throws MicroServiceCommunicationException 
-	 */
-	public QualityCardResult applyQualityCardOnExamination(QualityCard qualityCard, Long examinationId, boolean updateTags) throws MicroServiceCommunicationException {
-        if (qualityCard == null) throw new IllegalArgumentException("qualityCard can't be null");
-        long startTs = new Date().getTime();
-        Examination examination = examinationService.findById(examinationId);
-        LOG.debug("Quality check for examination " + examination.getId() + " : getting exam from db tool " + (new Date().getTime() - startTs) + "ms");
-        return applyQualityCardOnExamination(qualityCard, examination, updateTags);
-	}
 
     /**
 	 * Study cards for quality control: apply on entire exam.

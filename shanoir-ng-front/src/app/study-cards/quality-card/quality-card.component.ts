@@ -16,6 +16,7 @@ import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 
+import { ExaminationService } from 'src/app/examinations/shared/examination.service';
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
 import { slideDown } from '../../shared/animations/animations';
@@ -31,12 +32,11 @@ import { StudyRightsService } from '../../studies/shared/study-rights.service';
 import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
+import * as AppUtils from '../../utils/app.utils';
 import { QualityCard } from '../shared/quality-card.model';
 import { QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
-import * as AppUtils from '../../utils/app.utils';
-import { ExaminationService } from 'src/app/examinations/shared/examination.service';
 
 @Component({
     selector: 'quality-card',
@@ -196,68 +196,6 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             this.report = new BrowserPaging(result, this.reportColumns);
             this.reportIsTest = true;
         }).finally(() => this.testing = false);
-    }
-
-    testTest() {
-        if (!this.qualityCard?.study?.id) return;
-        this.examinationService.findExaminationIdsByStudy(this.qualityCard.study.id).then(examIds => {
-            this.nbExaminations = examIds.length;
-            if (examIds?.length > 0) {
-                if (examIds.length > 500) {
-                    this.confirmDialogService.choose('Large Volume', 'This study contains ' + examIds.length 
-                        + ' examinations. Do you want to test the quality card only on the first 100 to reduce the computing time ?'
-                    ).then(response => {
-                        if (response == 'yes') {
-                            this.performTest(examIds.slice(0, 99));
-                        } else if (response == 'no') {
-                            this.performTest(examIds);
-                        }
-                    });
-                } else {
-                    this.performTest(examIds);
-                }
-            }
-        });    
-    }
-
-    performTest(examIds: number[]): Promise<void> {
-        //examIds = [examIds?.[0]];
-        this.progress = 0;
-        this.report = null;
-        const nbQueues: number = 16;
-
-        let cumulatedResult: any[] = [];
-        let promises: Promise<void>[] = [];
-        for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
-            promises.push(
-                this.recursiveTest(examIds.shift(), examIds)
-                    .then(result => {
-                        cumulatedResult = cumulatedResult.concat(result);
-                    })
-            );
-        }
-        this.testing = true;
-        return Promise.all(promises).then(() => {
-            this.report = new BrowserPaging(cumulatedResult, this.reportColumns);
-            this.reportIsTest = true;
-        }).finally(() => {
-            this.testing = false;
-            this.progress = 1;
-        });
-    }
-
-    private recursiveTest(examId: number, remainingIds: number[]): Promise<any[]> {
-        if (!examId) return Promise.resolve([]);
-
-        return this.qualityCardService.testOnExamination(this.qualityCard.id, examId).then(result => {
-            if (remainingIds.length > 0) {
-                return this.recursiveTest(remainingIds.shift(), remainingIds).then(cumulatedResult => cumulatedResult.concat(result));
-            } else {
-                return Promise.resolve(result);
-            }
-        }).finally(() => {
-            this.progress += 1 / this.nbExaminations;
-        });
     }
 
     getPage(pageable: FilterablePageable): Promise<Page<any>> {

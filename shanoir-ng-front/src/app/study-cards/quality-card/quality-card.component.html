@@ -129,16 +129,6 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 				<button 
 						*ngIf="mode == 'view' && isStudyAdmin"
 						type="button"
-						class="right-icon apply test" 
-						(click)="testTest()"
-						[disabled]="applying || testing">
-					Test (test)
-                    <i *ngIf="!testing" class="fa-solid fa-play"></i>
-                    <i *ngIf="testing" class="fa fa-cog fa-spin"></i> 
-                </button>
-				<button 
-						*ngIf="mode == 'view' && isStudyAdmin"
-						type="button"
 						class="alt right-icon apply" 
 						(click)="apply()" 
 						[disabled]="applying || testing">
