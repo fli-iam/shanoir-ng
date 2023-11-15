@@ -43,19 +43,8 @@ public class DatasetsCreatorService {
 
 	private static final String SERIES = "SERIES";
 
-	@Autowired
-	private ShanoirEventService shanoirEventService;
-	
 	@Value("${shanoir.import.series.seriesProperties}")
 	private String seriesProperties;
-
-	@Value("${shanoir.conversion.converters.convertwithclidcm}")
-	private String convertWithClidcm;
-	
-	@Value("${shanoir.conversion.converters.path}")
-	private String convertersPath;
-
-	Random rand = new Random();
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
 	public void createDatasetsAndRunConversion(Patient patient, File workFolder, ImportJob importJob) throws ShanoirException {
@@ -274,39 +263,6 @@ public class DatasetsCreatorService {
 				throw new ShanoirException("Error while creating serie id folder: file to copy does not exist.");
 			}
 		}
-	}
-
-	/**
-	 * Make a diff to know which files from destinationFolder are not in the
-	 * given list of files.
-	 * @param existingFiles the existing files
-	 * @param destinationFolder the destination folder
-	 * @return the list< file>
-	 */
-	private List<File> diff(final List<File> existingFiles, final String destinationFolder) {
-		final List<File> resultList = new ArrayList<>();
-		final List<File> outputFilesToDiff = Arrays.asList(new File(destinationFolder).listFiles());
-		for (final File file : outputFilesToDiff) {
-			if (!existingFiles.contains(file)) {
-				resultList.add(file);
-			}
-		}
-		return resultList;
-	}
-
-	/**
-	 * Check if the newly created nifti files list contains a .prop file
-	 * If it is the case, then there has been a problem during conversion
-	 * and should be considered as failed.
-	 * 
-	 */
-	private boolean containsPropFile(List<File> niftiFiles){
-		for(File current : niftiFiles){
-			if(current.getPath().contains(".prop")) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 }
