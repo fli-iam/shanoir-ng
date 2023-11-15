@@ -59,9 +59,11 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             LOG.warn("ds.getDatasetAcquisition().getId() : " + ds.getDatasetAcquisition().getId());
             if (ds.getDatasetAcquisition() != null && ds.getDatasetAcquisition().getId() != null) {
                 List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
+                LOG.warn("dsAcqList size : " + dsAcqList.size());
                 DatasetAcquisition newAcq = null;
                 if (!dsAcqList.isEmpty()) {
                     for (DatasetAcquisition dsAcq : dsAcqList) {
+                        LOG.warn("dsAcq.getExamination().getStudyId = " + dsAcq.getExamination().getStudyId());
                         if (dsAcq.getExamination().getStudyId() == studyId) {
                             newAcq = dsAcq;
                             LOG.warn("newAcq = dsAcq");
