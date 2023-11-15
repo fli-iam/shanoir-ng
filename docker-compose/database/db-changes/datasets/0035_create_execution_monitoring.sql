@@ -27,6 +27,7 @@ WHERE dtype = 'CarminDatasetProcessing';
 
 ALTER TABLE `dataset_processing` 
   ADD COLUMN `parent_id` bigint(20) DEFAULT NULL,
+  ADD CONSTRAINT `FKsvnjfuhqge7y2j9dnucv5e01i` FOREIGN KEY (`parent_id`) REFERENCES `dataset_processing` (`id`),
   DROP COLUMN `name`,
   DROP COLUMN `pipeline_identifier`, 
   DROP COLUMN `identifier`, 

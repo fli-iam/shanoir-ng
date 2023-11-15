@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.processing.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import org.shanoir.ng.dataset.model.Dataset;
@@ -65,7 +66,9 @@ public class DatasetProcessing extends AbstractEntity {
 	private Long studyId;
 
 	/** Parent dataset processing id (e.g. VIP execution) **/
-	private Long parentId;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "parent_id")
+	private DatasetProcessing parent;
 
 	/**
 	 * @return the comment
@@ -165,11 +168,11 @@ public class DatasetProcessing extends AbstractEntity {
 		this.studyId = studyId;
 	}
 
-	public Long getParentId() {
-		return parentId;
+	public DatasetProcessing getParent() {
+		return parent;
 	}
 
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
+	public void setParent(DatasetProcessing parent) {
+		this.parent = parent;
 	}
 }

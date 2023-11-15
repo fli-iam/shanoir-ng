@@ -224,7 +224,7 @@ public class DefaultHandler extends ResultHandler {
 
 	private DatasetProcessing createProcessing(ExecutionMonitoring execution, List<Dataset> inputDatasets) {
 		DatasetProcessing processing = new DatasetProcessing();
-		processing.setParentId(execution.getId());
+		processing.setParent(execution);
 		processing.setComment(execution.getPipelineIdentifier());
 		processing.setInputDatasets(inputDatasets);
 		processing.setProcessingDate(execution.getProcessingDate());
