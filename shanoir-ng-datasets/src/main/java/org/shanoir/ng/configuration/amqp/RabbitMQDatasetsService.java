@@ -456,7 +456,7 @@ public class RabbitMQDatasetsService {
 					copy = true;
 				} else {
 					for (Dataset d : dsCopiedList) {
-						if (d.getSourceId().equals(datasetParentId) && d.getStudyId() == studyId) {
+						if (d.getSourceId().equals(datasetParentId) && d.getStudyId().equals(studyId)) {
 							res = "Dataset already copied in this study, copy aborted.";
 							LOG.warn("Dataset already copied in this study, copy aborted.");
 							copy = false;
