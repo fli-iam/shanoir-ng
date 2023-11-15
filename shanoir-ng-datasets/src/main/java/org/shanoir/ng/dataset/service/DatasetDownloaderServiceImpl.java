@@ -67,21 +67,12 @@ public class DatasetDownloaderServiceImpl {
 
 	private static final String FAILURES_TXT = "failures.txt";
 
-	private static final String EEG = "eeg";
-
 	private static final String NII = "nii";
-
-	private static final String BIDS = "BIDS";
 
 	private static final String DCM = "dcm";
 
-	private static final String ZIP = ".zip";
-
-	private static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
-
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetDownloaderServiceImpl.class);
 
-	private static final String JSON_ERROR_FILENAME = "ERRORS.json";
 
 	@Autowired
 	DatasetService datasetService;
@@ -104,152 +95,8 @@ public class DatasetDownloaderServiceImpl {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-	public void downloadDatasetById(Long datasetId, Long converterId, String format, HttpServletResponse response, boolean withManifest)
-			throws RestServiceException, IOException {
-
-		final Dataset dataset = datasetService.findById(datasetId);
-		if (dataset == null) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.NOT_FOUND.value(), "Dataset with id not found.", null));
-		}
-		
-		if (!dataset.isDownloadable()) {
-			throw new RestServiceException(
-					new ErrorModel(HttpStatus.UNAUTHORIZED.value(), "Dataset cannot be downloaded for security reasons.", null));
-		}
-
-		Map<Long, List<String>> filesByAcquisitionId = new HashMap<>();
-
-		String subjectName = getSubjectName(dataset);
-
-		String datasetName = subjectName + "_" + dataset.getId() + "_" + dataset.getName();
-		if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
-			datasetName += "_" + dataset.getUpdatedMetadata().getComment();
-		}
-		// Replace all forbidden characters.
-		datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
-
-		String tmpDir = System.getProperty(JAVA_IO_TMPDIR);
-		File userDir = DatasetFileUtils.getUserImportDir(tmpDir);
-
-		String tmpFilePath = userDir + File.separator + datasetName + "_" + format;
-
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-		File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
-
-		String zipFileName = datasetName + "_" + format + ZIP;
-
-		response.setContentType("application/zip");
-		response.setHeader("Content-Disposition", "attachment;filename=" + zipFileName);
-
-		List<SerieError> serieErrors = new ArrayList<>();
-		ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
-		try {
-			List<URL> pathURLs = new ArrayList<>();
-			switch (format) {
-				case DCM:
-					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, serieErrors);
-					List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream, subjectName, dataset, null, serieErrors);
-					if(withManifest){
-						filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
-						filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(files);
-					}
-					break;
-				case NII:
-					// Check if we want a specific converter -> nifti reconversion
-					if (converterId != null) {
-						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, serieErrors);
-						// Create temporary workfolder with dicom files, to be able to convert them
-						workFolder.mkdirs();
-
-						downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, serieErrors);
-
-						// Convert them, sending to import microservice
-						boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(
-								RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE,
-								converterId + ";" + workFolder.getAbsolutePath());
-						if (!result) {
-							throw new RestServiceException(
-									new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-						}
-						workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
-
-						for (File res : workFolder.listFiles()) {
-							if (!res.isDirectory()) {
-								// Then send workFolder to zipOutputFile
-								FileSystemResource fileSystemResource = new FileSystemResource(res.getAbsolutePath());
-								ZipEntry zipEntry = new ZipEntry(res.getName());
-								zipEntry.setSize(fileSystemResource.contentLength());
-								zipEntry.setTime(System.currentTimeMillis());
-								zipOutputStream.putNextEntry(zipEntry);
-								StreamUtils.copy(fileSystemResource.getInputStream(), zipOutputStream);
-								zipOutputStream.closeEntry();
-							}
-						}
-					} else {
-						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs,
-								DatasetExpressionFormat.NIFTI_SINGLE_FILE, serieErrors);
-						DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false,
-								null);
-					}
-					break;
-				case EEG:
-					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG, serieErrors);
-					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, false,
-							null);
-					break;
-				case BIDS:
-					DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS, serieErrors);
-					DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset, subjectName, true, null);
-					break;
-				default:
-					throw new RestServiceException(
-							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-			}
-
-			// Check folder emptiness
-			if (pathURLs.isEmpty()) {
-				// Folder is empty => return an error
-				LOG.error("No files could be found for the dataset(s).");
-				throw new RestServiceException(
-						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "No files could be found for this dataset(s)."));
-			}
-
-			if(!filesByAcquisitionId.isEmpty()){
-				DatasetFileUtils.writeManifestForExport(zipOutputStream, filesByAcquisitionId);
-			}
-
-			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.DOWNLOAD_DATASET_EVENT, dataset.getId().toString(), KeycloakUtil.getTokenUserId(), dataset.getId().toString() + "." + format, ShanoirEvent.SUCCESS);
-			eventService.publishEvent(event);
-			if (!serieErrors.isEmpty()) {
-				DatasetError error = new DatasetError(datasetId, null);
-				error.setSerieErrors(serieErrors);
-				writeErrorFileInZip(error, zipOutputStream);
-			}
-		} catch (Exception e) {
-			LOG.error("Error while retrieveing dataset data.", e);
-			DatasetError error = new DatasetError(datasetId, e.getMessage());
-			error.setSerieErrors(serieErrors);
-			writeErrorFileInZip(error, zipOutputStream);
-			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-							"No files could be found for this dataset(s)."));
-		} finally {
-			zipOutputStream.close();
-			FileUtils.deleteQuietly(workFolder);
-		}
-	}
-
-	private void writeErrorFileInZip(DatasetError error, ZipOutputStream zipOutputStream) throws IOException {
-		ZipEntry zipEntry = new ZipEntry(JSON_ERROR_FILENAME);
-		zipEntry.setTime(System.currentTimeMillis());
-		zipOutputStream.putNextEntry(zipEntry);
-		zipOutputStream.write(objectMapper.writeValueAsString(error).getBytes());
-		zipOutputStream.closeEntry();
-	}
-
 	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId) throws EntityNotFoundException, RestServiceException, IOException {
-		// STEP 3: Get the data
+		// Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 
 		boolean isEmpty = true;
@@ -261,8 +108,25 @@ public class DatasetDownloaderServiceImpl {
 		response.setContentType("application/zip");
 		// Add timestamp to get a difference
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-		response.setHeader("Content-Disposition",
-				"attachment;filename=" + "Datasets" + formatter.format(new DateTime().toDate()));
+
+		if (datasets != null && datasets.size() == 1) {
+			Dataset dataset = datasets.get(0);
+			// Only one dataset -> the logic for one dataset is used
+			String subjectName = getSubjectName(dataset);
+
+			String datasetName = subjectName + "_" + dataset.getId() + "_" + dataset.getName();
+			if (dataset.getUpdatedMetadata() != null && dataset.getUpdatedMetadata().getComment() != null) {
+				datasetName += "_" + dataset.getUpdatedMetadata().getComment();
+			}
+			// Replace all forbidden characters.
+			datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
+
+			response.setHeader("Content-Disposition",
+					"attachment;filename=" + "Dataset_" +  datasetName + "_" + formatter.format(new DateTime().toDate()));
+		} else {
+			response.setHeader("Content-Disposition",
+					"attachment;filename=" + "Datasets" + formatter.format(new DateTime().toDate()));
+		}
 
 		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 			
@@ -273,13 +137,7 @@ public class DatasetDownloaderServiceImpl {
 				try {
 					List<String> datasetFiles = new ArrayList<>();
 
-					// Ignore non adapted datasets
-					if (EEG.equals(format) && !(dataset instanceof EegDataset)) {
-						continue;
-					}
-					if (!EEG.equals(format) && (dataset instanceof EegDataset)) {
-						continue;
-					}
+
 					// Create a new folder organized by subject / examination
 					String subjectName = getSubjectName(dataset);
 					if (subjectName.contains(File.separator)) {
@@ -287,32 +145,24 @@ public class DatasetDownloaderServiceImpl {
 					}
 					String studyName = studyRepository.findById(dataset.getStudyId()).orElse(null).getName();
 
-					Examination exam;
-					if (dataset.getDatasetAcquisition() == null && dataset.getDatasetProcessing() != null) {
-						exam = dataset.getDatasetProcessing().getInputDatasets().get(0).getDatasetAcquisition()
-								.getExamination();
-					} else {
-						exam = dataset.getDatasetAcquisition().getExamination();
-					}
-
-					String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId();
-					if (exam.getComment() != null) {
-						datasetFilePath += "-" + exam.getComment();
-					}
-					datasetFilePath = datasetFilePath.replaceAll("[^a-zA-Z0-9_\\-]", "_");
-					if (datasetFilePath.length() > 255) {
-						datasetFilePath = datasetFilePath.substring(0, 254);
-					}
+					String datasetFilePath = getDatasetFilepath(dataset, studyName, subjectName);
 
 					List<URL> pathURLs = new ArrayList<>();
-
 					if (dataset instanceof EegDataset) {
+						// DOWNLOAD EEG
 						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.EEG, null);
 						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset,
 								subjectName, false, datasetFilePath);
 						datasetFiles.addAll(files);
 					}  else if (dataset instanceof BidsDataset) {
+						// DOWNLOAD BIDS
 						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.BIDS, null);
+						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset,
+								subjectName, true, datasetFilePath);
+						datasetFiles.addAll(files);
+					} else if (!dataset.getProcessings().isEmpty()) {
+						// This SHOULD NOT BE A NIFTI SINGLE FILE!
+						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, null);
 						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset,
 								subjectName, true, datasetFilePath);
 						datasetFiles.addAll(files);
@@ -350,7 +200,7 @@ public class DatasetDownloaderServiceImpl {
 							if (!result) {
 								throw new RestServiceException(
 										new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
-							} 
+							}
 							workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
 							LOG.error(workFolder.getAbsolutePath());
 							List<String> files = new ArrayList<>();
@@ -439,6 +289,26 @@ public class DatasetDownloaderServiceImpl {
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"Unexpected error while downloading dataset files"));
 		}
+	}
+
+	private String getDatasetFilepath(Dataset dataset, String studyName, String subjectName) {
+		Examination exam;
+		if (dataset.getDatasetAcquisition() == null && dataset.getDatasetProcessing() != null) {
+			exam = dataset.getDatasetProcessing().getInputDatasets().get(0).getDatasetAcquisition()
+					.getExamination();
+		} else {
+			exam = dataset.getDatasetAcquisition().getExamination();
+		}
+
+		String datasetFilePath = studyName + "_" + subjectName + "_Exam-" + exam.getId();
+		if (exam.getComment() != null) {
+			datasetFilePath += "-" + exam.getComment();
+		}
+		datasetFilePath = datasetFilePath.replaceAll("[^a-zA-Z0-9_\\-]", "_");
+		if (datasetFilePath.length() > 255) {
+			datasetFilePath = datasetFilePath.substring(0, 254);
+		}
+		return datasetFilePath;
 	}
 
 	private String getSubjectName(Dataset dataset) {

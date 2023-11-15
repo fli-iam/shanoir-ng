@@ -169,6 +169,9 @@ public class RabbitMQConfiguration {
 	/** Queue used to get anonymisation profile of a study. */
 	public static final String STUDY_ANONYMISATION_PROFILE_QUEUE = "study-anonymisation-profile-queue";
 
+	/** Queue used to make bruker to dicom conversion. */
+	public static final String BRUKER_CONVERSION_QUEUE = "bruker-conversion-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -426,6 +429,11 @@ public class RabbitMQConfiguration {
 	@Bean
 	public static Queue studyAnonymisationProfileQueue() {
 		return new Queue(STUDY_ANONYMISATION_PROFILE_QUEUE, true);
+	}
+
+	@Bean
+	public static Queue brukerConversionQueue() {
+		return new Queue(BRUKER_CONVERSION_QUEUE, true);
 	}
 
 }

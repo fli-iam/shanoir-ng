@@ -23,7 +23,6 @@ import { Step } from '../../breadcrumbs/breadcrumbs.service';
 import { CenterService } from '../../centers/shared/center.service';
 import { Coil } from '../../coils/shared/coil.model';
 import { CoilService } from '../../coils/shared/coil.service';
-import { NiftiConverter } from '../../niftiConverters/nifti.converter.model';
 import { slideDown } from '../../shared/animations/animations';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';

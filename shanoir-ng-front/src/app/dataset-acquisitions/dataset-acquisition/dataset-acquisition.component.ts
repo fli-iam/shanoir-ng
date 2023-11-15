@@ -47,9 +47,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     acquisitionNode: DatasetAcquisition | DatasetAcquisitionNode;
     hasDownloadRight: boolean = false;
     noDatasets: boolean = false;
-    hasEEG: boolean = false;
     hasDicom: boolean = false;
-    hasBids: boolean = false;
     protected downloadState: TaskState = new TaskState();
 
     constructor(
@@ -81,11 +79,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
                 dsAcq.datasets = datasets;
                 this.datasetAcquisition.datasets.forEach(ds => {
                     this.noDatasets = false;
-                    if (ds.type == 'Eeg') {
-                        this.hasEEG = true;
-                    } else if (ds.type == 'BIDS') {
-                        this.hasBids = true;
-                    } else {
+                    if (ds.type != 'Eeg' && ds.type != 'BIDS') {
                         this.hasDicom = true;
                     }
                 });
@@ -142,10 +136,7 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
 
     downloadAll() {
         let options: DownloadSetupOptions = new DownloadSetupOptions();
-        //options.hasBids = this.hasBids;
-        //options.hasNii = this.hasDicom;
         options.hasDicom = this.hasDicom;
-        //options.hasEeg = this.hasEEG;
-        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, options, this.downloadState);
+        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, null,  options, this.downloadState);
     }
 }

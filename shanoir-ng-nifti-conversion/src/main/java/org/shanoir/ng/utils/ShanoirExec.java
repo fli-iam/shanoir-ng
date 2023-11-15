@@ -14,6 +14,7 @@
 
 package org.shanoir.ng.utils;
 
+import org.shanoir.ng.service.NIfTIConverterService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,87 +36,13 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class ShanoirExec {
 
-	/** Dicomifier error. */
-	private static final String ERROR_DICOM2NIFTI_REQUEST = "Error on dicom2nifti microservice request";
-
 	/**
 	 * Logger
 	 */
 	private static final Logger LOG = LoggerFactory.getLogger(ShanoirExec.class);
 
-	@Value("${ms.url.dicom2nifti}")
-	private String dicomifierMsUrl;
-
-	@Value("${shanoir.conversion.converters.mriconverter}")
-	private String mriConverterPath;
-
 	@Autowired
 	RestTemplate restTemplate;
-
-	/**
-	 * Exec the clidcm command to convert Dicom files to Nifti files.
-	 *
-	 * @param inputFolder
-	 *            the input folder
-	 * @param clidcmPath
-	 *            the clidcm path
-	 * @param outputFolder
-	 *            the output folder
-	 *
-	 * @return the string
-	 */
-	public String clidcmExec(final String inputFolder, final String clidcmPath, final String outputFolder) {
-		LOG.debug("clidcmExec : Begin");
-		LOG.debug("clidcmExec : {}", clidcmPath);
-
-		String[] cmd = new String[4];
-		cmd[0] = clidcmPath;
-
-		cmd[1] = convertFilePath(inputFolder);
-		cmd[2] = "--dir";
-		cmd[3] = convertFilePath(outputFolder);
-
-		Map<String, String> systemEnv = System.getenv();
-		int size = systemEnv.size();
-		if (!systemEnv.containsKey("VISTAL_FMT")) {
-			size = size + 2;
-		}
-		
-		String[] envp = new String[size];
-		int i = 0;
-		for (final Entry<String, String> entry : systemEnv.entrySet()) {
-			envp[i] = entry.getKey() + "=" + entry.getValue();
-			i++;
-		}
-		
-		if (!systemEnv.containsKey("VISTAL_FMT")) {
-			envp[i] = "VISTAL_FMT=NII";
-			envp[i + 1] = "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:";
-		}
-
-		final String result = exec(cmd, envp);
-
-		LOG.debug("clidcmExec : End");
-		return result;
-	}
-	
-
-	/**
-	 * Exec the dcm2nii command to convert Dicom files to Nifti files.
-	 *
-	 * @param inputFolder
-	 *            the input folder
-	 * @param dcm2niiPath
-	 *            the dcm2nii path
-	 * @param outputFolder
-	 *            the output folder
-	 *
-	 * @return the string
-	 */
-	public String dcm2niiExec(final String inputFolder, final String dcm2niiPath, final String outputFolder) {
-		return dcm2niiExec(inputFolder, dcm2niiPath, outputFolder,false);
-	}
-
 
 	/**
 	 * Exec the dcm2nii command to convert Dicom files to Nifti files.
@@ -318,110 +245,6 @@ public class ShanoirExec {
 	}
 
 	/**
-	 * Execute the command to get mcverter exe.
-	 *
-	 * @param mcverterPath the path to mcverter command
-	 * Getting the version of mcverter causes an exit code = 1 even though there is no error
-	 * when exec "mcverter -V" so we get rid of this error in this particular case
-	 * by checking if the cmd is for the version
-	 *
-	 * @return string containing the version
-	 */
-	public String mcverterVersionExec(final String mcverterPath) {
-		LOG.debug("mcverterVersionExec : Begin");
-
-		String[] cmd = new String[2];
-		cmd[0] = mcverterPath;
-		// output folder
-		cmd[1] = "-V";
-
-		StringBuilder executingCommand = new StringBuilder("");
-		for (final String item : cmd) {
-			executingCommand.append(item).append(" ");
-		}
-		LOG.debug("exec : Executing {}", executingCommand);
-
-		StreamGobbler errorGobbler = null;
-		StreamGobbler outputGobbler = null;
-		String result = null;
-		try {
-			Runtime rt = Runtime.getRuntime();
-
-			final Process proc = rt.exec(cmd, null);
-
-			// any error message?
-			errorGobbler = new StreamGobbler(proc.getErrorStream(), "ERROR");
-
-			// any output?
-			outputGobbler = new StreamGobbler(proc.getInputStream(), "DEBUG");
-
-			// kick them off
-			errorGobbler.start();
-			outputGobbler.start();
-
-			// any error???
-			final int exitVal = proc.waitFor();
-
-			/*Getting the version of mcverter causes an exit code = 1 even though there is no error
-			when exec "mcverter -V" so we get rid of this error in this particular case
-			by checking if the cmd is for the version*/
-
-			if (exitVal != 0 && exitVal != 1) {
-				LOG.error("The exit value is {}, an error has probably occured", exitVal);
-			}
-
-			proc.getInputStream().close();
-			proc.getErrorStream().close();
-			LOG.debug("exec : ExitValue: {}", exitVal);
-		} catch (final Exception exc) {
-			LOG.error("exec : {}", exc.getMessage());
-			if (errorGobbler != null && outputGobbler != null) {
-				result = errorGobbler.getStringDisplay();
-				if (result != null && !"".equals(result)) {
-					result += "\n\n";
-				}
-				result += outputGobbler.getStringDisplay();
-				return result;
-			}
-		}
-		if (errorGobbler != null) {
-			result = errorGobbler.getStringDisplay();
-			if (result != null && !"".equals(result)) {
-				result += "\n\n";
-			}
-		}
-		if (outputGobbler != null) {
-			result += outputGobbler.getStringDisplay();
-		}
-
-		LOG.debug("mcverterVersionExec = {}", result);
-		LOG.debug("mcverterVersionExec : End");
-		return result;
-
-	}
-
-	/**
-	 * Exec the dcm2nii command to get the version of the software
-	 * It returns a full String from which we take the first line :
-	 * Chris Rorden's dcm2nii :: 4AUGUST2014 (Debian) 32bit BSD License
-	 * And extract the version : 4AUGUST2014 (Debian) 32bit BSD License
-	 *
-	 * @param dcm2niiPath
-	 *
-	 * @return the version
-	 */
-	public String dcm2niiVersionExec(final String dcm2niiPath) {
-		LOG.debug("dcm2niiVersionExec : Begin");
-		LOG.debug("dcm2niiVersionExec : {}", dcm2niiPath);
-		String[] cmd = new String[1];
-		cmd[0] = dcm2niiPath;
-		final String result = exec(cmd);
-		LOG.debug("dcm2niiVersionExec : {}", result);
-		LOG.debug("dcm2niiVersionExec : End");
-		return result;
-	}
-
-	/**
 	 * Execute the command line given in argument.
 	 *
 	 * @param cmd
@@ -514,32 +337,21 @@ public class ShanoirExec {
 	 * Execute dicomifier conversion DICOM => NIFTI
 	 * @param inputFolder the input folder where the DICOM are
 	 * @param outputFolder the output folder where to set the nifti
-	 * @return Informations about the conversion
+	 * @return dicomifierPath converter's path
 	 */
-	public String dicomifier(String inputFolder, String outputFolder) {
-		String requestJson = "{\"source\":\"" + inputFolder
-				+ "\", \"destination\":\"" + outputFolder
-				+ "\", \"zip\": true }";
-		
-		HttpHeaders headers = new HttpHeaders();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-
-		// HttpEntity represents the request
-		HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
-
-		// Post to dicomifier to start conversion
-		ResponseEntity<String> response = null;
-		try {
-			response = restTemplate.exchange(dicomifierMsUrl, HttpMethod.POST, entity, String.class);
-		} catch (Exception e) {
-			LOG.error(ERROR_DICOM2NIFTI_REQUEST, e);
-			return ERROR_DICOM2NIFTI_REQUEST;
+	public String dicomifier(String inputFolder, String outputFolder, String dicomifierPath, String method) {
+		String dicomdir = "";
+		if (NIfTIConverterService.BRUKER_TO_DICOM_METHOD.equals(method)) {
+			dicomdir = "--dicomdir";
 		}
+		String logs = "dicomifier: ";
+		String execString = dicomifierPath + " " + method + " source " + inputFolder + " destination " + outputFolder + " " + dicomdir;
+		logs.concat(execString);
+		final String result = exec(execString.split(" "));
 
-		if (!HttpStatus.OK.equals(response.getStatusCode()) && !HttpStatus.NO_CONTENT.equals(response.getStatusCode())) {
-			return ERROR_DICOM2NIFTI_REQUEST;
-		}
-		return "Dicomifier: converting dicom to nifti, success.";
+		//LOG.error("Converting from " + inputFolder + " to " + outputFolder + ". Using: " + execString + " result: " + result);
+
+		return logs.concat("\n Result: " + result);
 	}
 
 	/**
@@ -553,11 +365,6 @@ public class ShanoirExec {
 		String logs = "mriConverter: ";
 		String execString = "";
 
-		// We force the dataset0 folder here as MRIConverter does not search recursively in the files..
-		if (!inputFolder.contains("dataset")) {
-			inputFolder = inputFolder.concat("/dataset0");
-		}
-
 		// java -classpath MRIManager.jar DicomToNifti Subject4/ /tmp/ "PatientName-SerialNumber-Protocol" "[ExportOptions] 00000"
 		execString += "xvfb-run java -classpath " + mriConverterPath + " DicomToNifti "	+ inputFolder + " "	+ outputFolder
 				+ " PatientName-SerialNumber-SequenceName [ExportOptions]00000";
@@ -565,6 +372,8 @@ public class ShanoirExec {
 		logs.concat(execString);
 
 		final String result = exec(execString.split(" "));
+
+		LOG.error("Converting from " + inputFolder + " to " + outputFolder + ". Using: " + execString + " result: " + result);
 
 		return logs.concat("\n Result: " + result);
 	}

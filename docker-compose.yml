@@ -231,8 +231,6 @@ services:
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
-    ports:
-     - "5000:5000"
   #
   # Solr microservice for Shanoir-NG search
   #

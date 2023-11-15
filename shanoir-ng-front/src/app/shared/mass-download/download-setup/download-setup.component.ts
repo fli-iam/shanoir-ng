@@ -37,14 +37,17 @@ export class DownloadSetupComponent implements OnInit {
         new Option<Format>('dcm', 'Dicom', null, null, null, false),
         new Option<Format>('nii', 'Nifti', null, null, null, false),
     ];
+
     niftiConverters: Option<number>[] = [
-        new Option<number>(1, 'DCM2NII', null, null, null, false),
-        new Option<number>(2, 'MCVERTER', null, null, null, false),
-        new Option<number>(3, 'CLIDCM', null, null, null, false),
-        new Option<number>(4, 'DICOM2NIFTI', null, null, null, false),
-        new Option<number>(5, 'DICOMIFIER', null, null, null, false),
-        new Option<number>(6, 'MRICONVERTER', null, null, null, false),
+        new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
+        new Option<number>(2, 'MCVERTER_2_0_7', null, null, null, false),
+        new Option<number>(4, 'DCM2NII_2014_08_04', null, null, null, false),
+        new Option<number>(5, 'MCVERTER_2_1_0', null, null, null, false),
+        new Option<number>(6, 'DCM2NIIX', null, null, null, false),
+        new Option<number>(7, 'DICOMIFIER', null, null, null, false),
+        new Option<number>(8, 'MRICONVERTER', null, null, null, false),
     ];
+
     constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
         globalService.onNavigate.subscribe(() => {
             this.cancel();
@@ -68,7 +71,7 @@ export class DownloadSetupComponent implements OnInit {
     downloadNow() {
         this.go.emit({
             format: this.form.get('format').value,
-            converter: this.form.get('converter').value,
+            converter: (this.form.get('format').value == 'nii') ? this.form.get('converter').value : null,
             nbQueues: this.form.get('nbQueues').value,
             unzip: this.form.get('unzip').value
         });

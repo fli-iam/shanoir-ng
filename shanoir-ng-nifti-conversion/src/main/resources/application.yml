@@ -43,9 +43,6 @@ logging:
   level:
     org.springframework.web: ERROR
     org.shanoir: INFO
-# Shanoir configurations
-ms.url:
-  dicom2nifti: http://localhost:5000/dicom2nifti
 shanoir:
   database: yatuntruc
   conversion:
@@ -55,6 +52,8 @@ shanoir:
       convertwithclidcm: seriesDescription==*Diff*;seriesDescription==*DIFF*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*; 
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then output niftii file will be reconstructed as 4D volumes
     # In a dicom file. Format "tag==value;" If it is not needed to separate image files into separated folders for a dicom serie.
+      mriconverter: "/opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar"
+
   import:
     series:
       # this long name has been kept, as Elise and Isabelle know it like this; to find it for further adaptions in later time
@@ -95,3 +94,4 @@ shanoir:
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then use clidcm instead of dcmnii to convert from dicom to nifti
       convertwithclidcm: seriesDescription==*Diff*;seriesDescription==*DIFF*;seriesDescription==*diff*;seriesDescription==*DTI*;seriesDescription==*DWI*;seriesDescription==*PERF*;seriesDescription==*Perf*;seriesDescription==*perf*; 
         # Format "tag==value;". If in the serie, the dicom value equals the "value" for the "tag", then output niftii file will be reconstructed as 4D volumes
+      mriconverter: "/opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar"

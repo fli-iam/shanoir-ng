@@ -24,6 +24,8 @@ import { ConsoleService } from "../../shared/console/console.service";
 import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
+import {DownloadSetupOptions} from "../../shared/mass-download/download-setup/download-setup.component";
+import {MassDownloadService} from "../../shared/mass-download/mass-download.service";
 
 
 
@@ -50,12 +52,14 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
     downloading = false;
     hasBids: boolean = false;
     protected subscriptions: Subscription[] = [];
+    protected downloadState: TaskState = new TaskState();
 
     constructor(
         private router: Router,
         private datasetService: DatasetService,
         private datasetAcquisitionService: DatasetAcquisitionService,
-        private consoleService: ConsoleService) {
+        private consoleService: ConsoleService,
+        private massDownloadService: MassDownloadService) {
     }
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -138,7 +142,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         (this.node.datasets as DatasetNode[]).splice(index, 1) ;
     }
 
-    download(format: string) {
+    download() {
         if (this.downloading) {
             return;
         }
@@ -155,15 +159,9 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         }
 
         datasetIdsReady.then(() => {
-            this.progressStatus = new TaskState(TaskStatus.IN_PROGRESS, 0);
-            this.subscriptions.push(this.datasetService.downloadDatasets(this.datasetIds, format).subscribe(status => {
-                this.progressStatus = status;
-                if (this.progressStatus?.isActive()) this.downloading = true;
-                else this.downloading = false;
-            }, error => {
-                this.progressStatus.progress = 0;
-                this.progressStatus.status = TaskStatus.ERROR;
-            }));
+            let options: DownloadSetupOptions = new DownloadSetupOptions();
+            options.hasDicom = this.hasDicom;
+            this.massDownloadService.downloadAllByAcquisitionId(this.node.id, null, options, this.downloadState);
         });
     }
 

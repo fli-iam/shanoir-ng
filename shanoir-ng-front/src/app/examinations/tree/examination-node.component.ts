@@ -48,10 +48,8 @@ export class ExaminationNodeComponent implements OnChanges {
     menuOpened: boolean = false;
     @Input() hasBox: boolean = false;
     datasetIds: number[];
-    hasEEG: boolean = false;
     hasDicom: boolean = false;
     downloading = false;
-    hasBids: boolean = false;
     detailsPath: string = '/examination/details/';
 
     constructor(
@@ -126,11 +124,7 @@ export class ExaminationNodeComponent implements OnChanges {
             } else {
                 dsAcq.datasets.forEach(ds => {
                     datasetIds.push(ds.id);
-                    if (ds.type === 'Eeg') {
-                        this.hasEEG = true;
-                    } else if (ds.type === 'BIDS') {
-                        this.hasBids = true;
-                    } else {
+                    if (ds.type != 'Eeg' && ds.type != 'BIDS') {
                         this.hasDicom = true;
                     }
                 });
@@ -139,7 +133,7 @@ export class ExaminationNodeComponent implements OnChanges {
         this.datasetIds = datasetIds;
     }
 
-    download(format: Format) {
+    download() {
         if (this.downloading) {
             return;
         }

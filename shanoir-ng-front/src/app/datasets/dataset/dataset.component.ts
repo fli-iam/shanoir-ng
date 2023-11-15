@@ -15,7 +15,6 @@
 import { Component } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { NiftiConverter } from 'src/app/niftiConverters/nifti.converter.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
@@ -42,9 +41,6 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     private hasAdministrateRight: boolean = false;
     public downloadState: TaskState = new TaskState();
     public papayaLoaded: boolean = false;
-    public converters: NiftiConverter;
-    public converterId: number;
-    public menuOpened = false;
     isMRS: boolean = false; // MR Spectroscopy
 
     constructor(
@@ -118,22 +114,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         }
     }
 
-    toggleMenu() {
-        this.menuOpened = !this.menuOpened;
-    }
-
-    convertNiftiToggle() {
-        this.toggleMenu();
-    }
-
-    convertNifti(id: number) {
-        this.downloadState.status = TaskStatus.IN_PROGRESS;
-        this.datasetService.download(this.dataset, 'nii', id).then(() => this.downloadState.status = TaskStatus.IN_PROGRESS);
-    }
-
     downloadAll() {
         let options: DownloadSetupOptions = new DownloadSetupOptions();
-        //options.hasBids = this.dataset.type == 'BIDS';
         options.hasDicom = this.dataset.type != 'Eeg' && this.dataset.type != 'BIDS' && !this.dataset.datasetProcessing;
         this.downloadService.downloadDataset(this.dataset?.id, options, this.downloadState);
     }

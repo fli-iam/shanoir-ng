@@ -15,7 +15,6 @@
 package org.shanoir.ng.service;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -23,17 +22,14 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.shanoir.ng.model.Dataset;
 import org.shanoir.ng.model.NiftiConverter;
-import org.shanoir.ng.utils.DiffusionUtil;
 import org.shanoir.ng.utils.ShanoirExec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 /**
@@ -50,20 +46,23 @@ import org.springframework.stereotype.Service;
  *
  */
 @Service
-public class DatasetsCreatorAndNIfTIConverterService {
+public class NIfTIConverterService {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DatasetsCreatorAndNIfTIConverterService.class);
+	private static final Logger LOG = LoggerFactory.getLogger(NIfTIConverterService.class);
+	public static final String DICOM_TO_NIFTI_METHOD = "to-nifti";
+	public static final String BRUKER_TO_DICOM_METHOD = "to-dicom";
 
 	@Autowired
 	private ShanoirExec shanoirExec;
-
-	@Value("${shanoir.conversion.converters.path}")
-	private String convertersPath;
 
 	/** Output files mapped by series UID. */
 	private HashMap<String, List<String>> outputFiles = new HashMap<>();
 
 	Random rand = new Random();
+
+	public void brukerToDicomExec(String inputFolder, String outputFolder) {
+		shanoirExec.dicomifier(inputFolder, outputFolder,  NiftiConverter.DICOMIFIER.getPath(), BRUKER_TO_DICOM_METHOD);
+	}
 
 	/**
 	 * Execute the Nifti conversion
@@ -87,7 +86,7 @@ public class DatasetsCreatorAndNIfTIConverterService {
 			conversionLogs += shanoirExec.mcverterExec(inputFolder, converter.getPath(), outputFolder, true);
 			break;
 		case DICOMIFIER:
-			conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder);
+			conversionLogs += shanoirExec.dicomifier(inputFolder, outputFolder, NiftiConverter.DICOMIFIER.getPath(), DICOM_TO_NIFTI_METHOD);
 			break;
 		case MRICONVERTER:
 			conversionLogs += shanoirExec.mriConverter(inputFolder, outputFolder, NiftiConverter.MRICONVERTER.getPath());

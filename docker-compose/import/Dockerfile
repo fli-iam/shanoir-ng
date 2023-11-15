@@ -44,75 +44,7 @@ RUN apt-get update -qq \
     libtiff6 \
     libglib2.0-0:i386 \
     locales \
-    locales-all \
-    xvfb \
-    python3
-
-# Compile DCM2NIIX from source
-ENV DCMCOMMIT_VERSION=v1.0.20210317
-ENV DCMCOMMIT=1.0.20210317
-ENV LC_ALL fr_FR.UTF-8
-ENV LANG fr_FR.UTF-8
-ENV LANGUAGE fr_FR.UTF-8
-
-WORKDIR /usr/local/
-RUN curl -#L  https://github.com/rordenlab/dcm2niix/archive/refs/tags/$DCMCOMMIT_VERSION.zip | bsdtar -xf- -C .
-WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}
-RUN mkdir build
-WORKDIR /usr/local/dcm2niix-${DCMCOMMIT}/build
-RUN cmake ..
-RUN make install
-
-WORKDIR /
-
-RUN mkdir -p /opt/nifti-converters
-
-# Copy converters files
-RUN mkdir external
-COPY external ./external
-RUN install -m 0755 external/dcm2nii/linux/31MARCH2008/dcm2nii /opt/nifti-converters/dcm2nii_2008-03-31
-RUN install -m 0755 external/dcm2nii/linux/dcm2nii /opt/nifti-converters/dcm2nii_2014-08-04
-
-RUN install -m 0755 external/mcverter/linux/mcverter_* /opt/nifti-converters/
-RUN cp -n           external/mcverter/linux/lib/lib*.so.* /usr/lib/x86_64-linux-gnu/
-
-WORKDIR /opt/nifti-converters
-RUN mkdir mriconverter
-RUN curl -#L  https://github.com/populse/mri_conv/archive/refs/heads/master.zip | bsdtar -xf- -C mriconverter --strip-components 1
-
-RUN chmod 777 /opt/nifti-converters/mriconverter
-RUN chmod 777 /opt/nifti-converters/mriconverter/MRIFileManager/MRIManager.jar
-
-WORKDIR /
-
-RUN mkdir -m 1777 /.dcm2nii_2008-03-31
-RUN mkdir -m 1777 /.dcm2nii_2014-08-04
-
-# install dicom tool clidcm
-RUN mkdir -p /opt/clidcm/libx64
-RUN install -m 644 external/clidcm/bin/linux/libx64/* /opt/clidcm/libx64/
-RUN chmod 755 /opt/clidcm/libx64/clidcm
-RUN cp -n           external/clidcm/bin/linux/libx64/lib*.so.* /usr/lib/x86_64-linux-gnu/
-
-
-RUN echo "#!/bin/sh" >/opt/nifti-converters/clidcm
-RUN echo "LD_LIBRARY_PATH=/opt/clidcm/libx64/ exec /opt/clidcm/libx64/clidcm \"\$@\"" >/opt/nifti-converters/clidcm
-
-RUN chmod 0755 /opt/nifti-converters/clidcm
-
-# clidcm uses /usr/share/dcmtk/dicom.dic but this file is now provided by libdcmtk2
-RUN ln -s libdcmtk2 /usr/share/dcmtk
-#RUN test -f /usr/share/dcmtk/dicom.dic
-
-# install dicom tool dcmdjpeg
-RUN install -m 755 external/dcmtk/dcmdjpeg/linux/bin/dcmdjpeg /usr/local/bin/
-RUN install -m 644 external/dcmtk/dcmdjpeg/linux/lib/dicom.dic /usr/local/lib/
-
-# install dicom tool dcm2pnm
-RUN install -m 755 external/dcmtk/dcm2pnm/linux/dcm2pnm /usr/local/bin/
-
-# install animaConvertImage to convert Analyze format into nifti
-RUN install -m 755 external/anima/animaConvertImage /usr/local/bin/
+    locales-all
 
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
