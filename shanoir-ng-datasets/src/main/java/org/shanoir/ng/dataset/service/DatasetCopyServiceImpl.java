@@ -63,8 +63,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 DatasetAcquisition newAcq = null;
                 if (!dsAcqList.isEmpty()) {
                     for (DatasetAcquisition dsAcq : dsAcqList) {
-                        LOG.warn("dsAcq.getExamination().getStudyId = " + dsAcq.getExamination().getStudyId());
-                        if (dsAcq.getExamination().getStudyId() == studyId) {
+                        LOG.warn("dsAcq.getExamination().getStudyId = " + dsAcq.getExamination().getStudyId() + " / studyId = " + studyId);
+                        if (dsAcq.getExamination().getStudyId().equals(studyId)) {
                             newAcq = dsAcq;
                             LOG.warn("newAcq = dsAcq");
                             break;
@@ -116,8 +116,8 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         LOG.warn("examSourceList size : " + examSourceList.size());
         if (!examSourceList.isEmpty()) {
             for (Examination exam : examSourceList) {
-                LOG.warn("exam.getStudyId() = " + exam.getStudyId());
-                if (exam.getStudyId() == studyId) {
+                LOG.warn("exam.getStudyId() = " + exam.getStudyId() + " / studyId = " + studyId);
+                if (exam.getStudyId().equals(studyId)) {
                     newExam = exam;
                     LOG.warn("newExam = exam");
                     break;
