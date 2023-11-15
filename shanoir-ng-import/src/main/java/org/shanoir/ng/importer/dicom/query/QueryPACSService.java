@@ -219,6 +219,7 @@ public class QueryPACSService {
 			new DicomParam(Tag.StudyInstanceUID, studyInstanceUID),
 			new DicomParam(Tag.SeriesInstanceUID, seriesInstanceUID) };
 		AdvancedParams options = new AdvancedParams();
+		options.setTsuidOrder(AdvancedParams.IVR_LE_ONLY);
 		return CMove.process(options, calling, called, calledNameSCP, progress, params);
 	}
 	
