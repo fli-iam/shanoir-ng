@@ -101,22 +101,27 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             return acqMap.get(oldAcqId);
 
         Examination newExam = null;
+        LOG.warn("acq.getExamination.id : " + acq.getExamination().getId());
         List<Examination> examSourceList = examinationRepository.findBySourceId(acq.getExamination().getId());
+        LOG.warn("examSourceList size : " + examSourceList.size());
         if (!examSourceList.isEmpty()) {
             for (Examination exam : examSourceList) {
                 if (exam.getStudyId() == studyId) {
                     newExam = exam;
+                    LOG.warn("newExam = exam");
                     break;
                 }
             }
             if (newExam == null) {
+                LOG.warn("newExam == null");
                 newExam = moveExamination(acq.getExamination(), studyId, examMap);
             }
         } else {
+            LOG.warn("examSourceList empty");
             newExam = moveExamination(acq.getExamination(), studyId, examMap);
         }
 
-
+        LOG.warn("newExam id : " + newExam.getId());
         acq.setDatasets(null);
         acquisitionCleanup(acq);
 
