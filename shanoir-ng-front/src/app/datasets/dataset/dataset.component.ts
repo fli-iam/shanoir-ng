@@ -164,4 +164,8 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     seeDicomMetadata() {
         this.router.navigate(['/dataset/details/dicom/' + this.dataset.id]);
     }
+
+    goToList(): void {
+        this.router.navigate(['/solr-search']);
+    }
 }
