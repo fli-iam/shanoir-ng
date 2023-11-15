@@ -62,8 +62,11 @@ export class DatasetCopyDialogComponent {
             if (!this.centerIds.includes(line.centerId)) {
                 this.centerIds.push(line.centerId);
             }
-            if (!this.subjectIds.includes(line.subjectId)) {
+            if (!this.subjectIds.includes(line.subjectId) && line.subjectId != null) {
                 this.subjectIds.push(line.subjectId);
+            } else if (line.subjectId == null) {
+                this.statusMessage = "Be careful, some of the selected datasets have a null subject.";
+                this.canCopy = false;
             }
             if (!this.datasetSubjectIds.includes(line.datasetId + "/" + line.subjectId)) {
                 this.datasetSubjectIds.push(line.datasetId + "/" + line.subjectId);
@@ -79,7 +82,7 @@ export class DatasetCopyDialogComponent {
             } else if (this.isDatasetInStudy) {
                 this.statusMessage = 'Selected dataset(s) already belong to selected study.';
             } else {
-                this.statusMessage = "Start copy...";
+                this.statusMessage = "Copy started...";
                 const formData: FormData = new FormData();
                 formData.set('datasetIds', Array.from(this.datasetsIds).join(","));
                 formData.set('studyId', this.selectedStudy.id.toString());
@@ -89,7 +92,6 @@ export class DatasetCopyDialogComponent {
                 return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
                     .toPromise()
                     .then(res => {
-                        console.log("res : " + res);
                         this.statusMessage = res;
                     }).catch(reason => {
                         if (reason.status == 403) {

@@ -118,12 +118,13 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		Study study = studyService.findById(studyId);
 		StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
 		if (studyUser == null) {
+			LOG.error("You must be part of both studies to copy datasets.");
 			return "You must be part of both studies to copy datasets.";
 		} else {
 			List<StudyUserRight> rights = studyUser.getStudyUserRights();
 
 			if (rights.contains(StudyUserRight.CAN_ADMINISTRATE) || rights.contains(StudyUserRight.CAN_IMPORT)) {
-				result = addCenterToStudy(study, centerIds);
+				addCenterToStudy(study, centerIds);
 
 				try {
 					result = copyDatasetToStudy(datasetIds, id);
@@ -138,7 +139,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		}
 	}
 
-	private String addCenterToStudy(Study study, String centerIds) {
+	private void addCenterToStudy(Study study, String centerIds) {
 		Long studyId = study.getId();
 		for (String centerId : centerIds.split(",")) {
 			if (!centerRepository.findByStudy(studyId).contains(centerId)) {
@@ -148,7 +149,6 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 				List<Center> centersOfStudy = centerRepository.findByStudy(studyId);
 
 				if (center != null && !centersOfStudy.contains(center)) {
-					LOG.info("Add center " + center.getName() + " to study " + study.getName() + ".");
 					StudyCenter centerToAdd = new StudyCenter();
 					centerToAdd.setStudy(study);
 					centerToAdd.setCenter(center);
@@ -157,18 +157,14 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 					study.setMonoCenter(false);
 					study.setStudyCenterList(studyCenterList);
 					studyRepository.save(study);
-				} else {
-					LOG.info("Center " + center.getName() + " already exists in study " + study.getName() + ".");
 				}
 			}
 		}
-		return "Center added to study";
 	}
 
 	private String copyDatasetToStudy(String datasetIds, String studyId) throws MicroServiceCommunicationException {
 		try {
-			String res = (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY, datasetIds + ";" + studyId);
-			return res;
+			return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY, datasetIds + ";" + studyId);
 		} catch (AmqpException e) {
 			throw new MicroServiceCommunicationException(
 					"Error while communicating with datasets MS to copy datasets to study.", e);
