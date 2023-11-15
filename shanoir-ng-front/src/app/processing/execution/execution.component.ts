@@ -58,11 +58,13 @@ export class ExecutionComponent implements OnInit {
     exportFormat="nii";
     groupBy = "dataset";
     isLoading = true;
+    isSubmitted = true;
     datasetsPromise: Promise<void>;
 
     constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private vipClientService: VipClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private executionMonitoringService: ExecutionMonitoringService) {
         this.breadcrumbsService.nameStep('2. Executions');
         this.selectedDatasets = new Set<Dataset>();
+        this.isSubmitted = false;
     }
 
     ngOnInit(): void {
@@ -197,6 +199,8 @@ export class ExecutionComponent implements OnInit {
     }
 
     async onSubmitExecutionForm() {
+
+        this.isSubmitted = true;
 
         let processingInit = this.initProcessing();
 
