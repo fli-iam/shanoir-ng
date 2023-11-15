@@ -53,6 +53,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     @Override
     public void moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
         try {
+            LOG.warn("moveDataset for ds.id = " + ds.getId());
             Long oldDsId = ds.getId();
             if (ds.getDatasetAcquisition() != null && ds.getDatasetAcquisition().getId() != null) {
                 List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
@@ -96,26 +97,15 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     }
 
     public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
+        LOG.warn("moveAcquisition for acq.id = " + acq.getId());
         Long oldAcqId = acq.getId();
         if (acqMap.get(oldAcqId) != null)
             return acqMap.get(oldAcqId);
 
-        Examination newExam = null;
-        List<Examination> examSourceList = examinationRepository.findBySourceId(acq.getExamination().getId());
-        if (!examSourceList.isEmpty()) {
-            for (Examination exam : examSourceList) {
-                if (exam.getStudyId().equals(studyId)) {
-                    newExam = exam;
-                    break;
-                }
-            }
-            if (newExam == null) {
-                newExam = moveExamination(acq.getExamination(), studyId, examMap);
-            }
-        } else {
+        Examination newExam = examinationRepository.findBySourceIdAndStudy_Id(acq.getExamination().getId(), studyId);
+        if (newExam == null) {
             newExam = moveExamination(acq.getExamination(), studyId, examMap);
         }
-
         acq.setDatasets(null);
         acquisitionCleanup(acq);
 
@@ -129,6 +119,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     }
 
     public Examination moveExamination(Examination examination, Long studyId, Map<Long, Examination> examMap) {
+        LOG.warn("moveExamination for acq.id = " + examination.getId());
         Long oldExamId = examination.getId();
         if (examMap.get(oldExamId) != null)
             return examMap.get(oldExamId);

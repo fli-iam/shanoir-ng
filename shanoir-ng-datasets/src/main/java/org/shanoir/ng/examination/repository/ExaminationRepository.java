@@ -108,6 +108,6 @@ public interface ExaminationRepository extends PagingAndSortingRepository<Examin
 	 * @param studyId
 	 * @return
 	 */
-	List<Examination> findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
+	Examination findBySourceIdAndStudy_Id(Long sourceId, Long studyId);
 
 }
