@@ -53,7 +53,10 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     @Override
     public void moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
         try {
+            LOG.warn("studyId acq " + studyId);
             Long oldDsId = ds.getId();
+            LOG.warn("oldDsId : " + oldDsId);
+            LOG.warn("ds.getDatasetAcquisition().getId() : " + ds.getDatasetAcquisition().getId());
             if (ds.getDatasetAcquisition() != null && ds.getDatasetAcquisition().getId() != null) {
                 List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
                 DatasetAcquisition newAcq = null;
@@ -61,13 +64,16 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                     for (DatasetAcquisition dsAcq : dsAcqList) {
                         if (dsAcq.getExamination().getStudyId() == studyId) {
                             newAcq = dsAcq;
+                            LOG.warn("newAcq = dsAcq");
                             break;
                         }
                     }
                     if (newAcq == null) {
+                        LOG.warn("newAcq == null");
                         newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
                     }
                 } else {
+                    LOG.warn("dsAcqList empty");
                     newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
                 }
 
@@ -101,11 +107,14 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             return acqMap.get(oldAcqId);
 
         Examination newExam = null;
+        LOG.warn("oldAcqId : " + oldAcqId);
         LOG.warn("acq.getExamination.id : " + acq.getExamination().getId());
+        LOG.warn("studyId exam " + studyId);
         List<Examination> examSourceList = examinationRepository.findBySourceId(acq.getExamination().getId());
         LOG.warn("examSourceList size : " + examSourceList.size());
         if (!examSourceList.isEmpty()) {
             for (Examination exam : examSourceList) {
+                LOG.warn("exam.getStudyId() = " + exam.getStudyId());
                 if (exam.getStudyId() == studyId) {
                     newExam = exam;
                     LOG.warn("newExam = exam");
