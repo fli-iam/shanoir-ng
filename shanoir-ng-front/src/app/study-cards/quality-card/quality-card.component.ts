@@ -11,7 +11,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { Component, ViewChild } from '@angular/core';
+import { Component, ComponentRef, ViewChild } from '@angular/core';
 import { FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
@@ -32,11 +32,16 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Study } from '../../studies/shared/study.model';
 import { StudyService } from '../../studies/shared/study.service';
 import { QualityCard } from '../shared/quality-card.model';
-import { QualityCardService } from '../shared/quality-card.service';
+import { Interval, QualityCardService } from '../shared/quality-card.service';
 import { StudyCardRule } from '../shared/study-card.model';
 import { StudyCardRulesComponent } from '../study-card-rules/study-card-rules.component';
 import * as AppUtils from '../../utils/app.utils';
 import { ExaminationService } from 'src/app/examinations/shared/examination.service';
+import { ServiceLocator } from 'src/app/utils/locator.service';
+import { TestQualityCardOptionsComponent } from '../test-quality-card-options/test-quality-card-options.component';
+import { SuperPromise } from 'src/app/utils/super-promise';
+import { Observable } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 @Component({
     selector: 'quality-card',
@@ -197,20 +202,42 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
             this.nbExaminations = examIds.length;
             if (examIds?.length > 0) {
                 if (examIds.length > 1) {
-                    this.confirmDialogService.choose('Large Volume', 'This study contains ' + examIds.length 
-                        + ' examinations. Do you want to test the quality card only on the first 100 to reduce the computing time ?'
-                    ).then(response => {
-                        if (response == 'yes') {
-                            this.performTest(0, 99);
-                        } else if (response == 'no') {
+                    this.openSetTestInterval(this.nbExaminations).then(response => {
+                        if (!response) {
                             this.performTest();
+                        } else if (response instanceof Interval) {
+                            this.performTest((response as Interval).from, (response as Interval).to);
                         }
+                    }).finally(() => {
+                        this.testing = false;
                     });
                 } else {
                     this.performTest();
                 }
             }
         });    
+    }
+
+    openSetTestInterval(nbExaminations: number): Promise<Interval | 'cancel'> {
+        let modalRef: ComponentRef<TestQualityCardOptionsComponent> = ServiceLocator.rootViewContainerRef.createComponent(TestQualityCardOptionsComponent);
+        modalRef.instance.nbExaminations = nbExaminations;
+        return this.waitForEnd(modalRef);
+    }
+
+    private waitForEnd(modalRef: ComponentRef<any>): Promise<Interval | 'cancel'> {
+        let resPromise: SuperPromise<any | 'cancel'> = new SuperPromise();
+        let result: Observable<any> = Observable.race([
+            modalRef.instance.test, 
+            modalRef.instance.close.map(() => 'cancel')
+        ]);
+        result.pipe(take(1)).subscribe(ret => {
+            modalRef.destroy();
+            resPromise.resolve(ret);
+        }, error => {
+            modalRef.destroy();
+            resPromise.reject(error);
+        });
+        return resPromise;
     }
 
     performTest(start?: number, stop?: number) {
