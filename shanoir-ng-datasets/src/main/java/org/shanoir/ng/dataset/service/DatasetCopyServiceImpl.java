@@ -61,23 +61,26 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                     newAcq = acqMap.get(ds.getDatasetAcquisition().getId());
                     LOG.warn("    acq found by map with id: " + ds.getDatasetAcquisition().getId());
                 } else {
-                    List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
-                    if (!dsAcqList.isEmpty()) {
-                        for (DatasetAcquisition dsAcq : dsAcqList) {
-                            if (dsAcq.getExamination().getStudyId().equals(studyId)) {
-                                newAcq = dsAcq;
-                                LOG.warn("    acq found by request with id: " + ds.getDatasetAcquisition().getId());
-                                acqMap.put(dsAcq.getId(), newAcq);
-                                break;
-                            }
-                        }
+                    newAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(ds.getDatasetAcquisition().getId(), studyId);
+                    LOG.warn("    acq found by request with id: " + ds.getDatasetAcquisition().getId() + " and studyId = " + studyId);
+//                    List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
+//                    if (!dsAcqList.isEmpty()) {
+//                        for (DatasetAcquisition dsAcq : dsAcqList) {
+//                            if (dsAcq.getExamination().getStudyId().equals(studyId)) {
+//                                newAcq = dsAcq;
+//                                LOG.warn("    acq found by request with id: " + ds.getDatasetAcquisition().getId());
+//                                acqMap.put(dsAcq.getId(), newAcq);
+//                                break;
+//                            }
+//                        }
                         if (newAcq == null) {
                             newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
                             LOG.warn("    acq found by creation");
                         }
-                    } else {
-                        newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
-                    }
+ //                   }
+//                else {
+//                        newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
+//                    }
                 }
 
                 List<DatasetExpression> dsExList = ds.getDatasetExpressions();

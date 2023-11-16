@@ -445,8 +445,11 @@ public class RabbitMQDatasetsService {
 			datasetParentIds = convertStringToLong(data.substring(0, index).split(","));
 
 			for (Long datasetParentId : datasetParentIds) {
+				LOG.warn("=== new dataset ===");
+				LOG.warn("start requests");
 				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
+				LOG.warn("end requests");
 
 				if (datasetParent.getSourceId() != null) {
 					copy = false;
