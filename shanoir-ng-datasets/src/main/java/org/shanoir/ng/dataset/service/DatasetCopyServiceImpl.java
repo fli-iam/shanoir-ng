@@ -55,9 +55,9 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         try {
             LOG.warn("moveDataset for ds.id = " + ds.getId());
             Long oldDsId = ds.getId();
-            Long oldAcqId = ds.getDatasetAcquisition().getId();
             DatasetAcquisition newAcq = null;
-            if (ds.getDatasetAcquisition() != null && oldAcqId != null) {
+            if (ds.getDatasetAcquisition() != null &&  ds.getDatasetAcquisition().getId() != null) {
+                Long oldAcqId = ds.getDatasetAcquisition().getId();
                 if (acqMap.get(ds.getDatasetAcquisition().getId()) != null) {
                     newAcq = acqMap.get(ds.getDatasetAcquisition().getId());
                     LOG.warn("    acq found by map with id: " + oldAcqId);
