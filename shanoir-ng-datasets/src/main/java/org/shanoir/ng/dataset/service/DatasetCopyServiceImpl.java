@@ -59,18 +59,21 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 DatasetAcquisition newAcq = null;
                 if (acqMap.get(ds.getDatasetAcquisition().getId()) != null) {
                     newAcq = acqMap.get(ds.getDatasetAcquisition().getId());
+                    LOG.warn("    acq found by map with id: " + ds.getDatasetAcquisition().getId());
                 } else {
                     List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
                     if (!dsAcqList.isEmpty()) {
                         for (DatasetAcquisition dsAcq : dsAcqList) {
                             if (dsAcq.getExamination().getStudyId().equals(studyId)) {
                                 newAcq = dsAcq;
+                                LOG.warn("    acq found by request with id: " + ds.getDatasetAcquisition().getId());
                                 acqMap.put(dsAcq.getId(), newAcq);
                                 break;
                             }
                         }
                         if (newAcq == null) {
                             newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
+                            LOG.warn("    acq found by creation");
                         }
                     } else {
                         newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
@@ -108,10 +111,14 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         if (acq.getExamination() != null &&  acq.getExamination().getId() != null) {
             if (examMap.get(acq.getExamination().getId()) != null) {
                 newExam = examMap.get(acq.getExamination().getId());
+                LOG.warn("    exam found by map with id : " + acq.getExamination().getId());
             } else {
                 newExam = examinationRepository.findBySourceIdAndStudy_Id(acq.getExamination().getId(), studyId);
+                examMap.put(acq.getExamination().getId(), newExam);
+                LOG.warn("    exam found by request with id : " + acq.getExamination().getId());
                 if (newExam == null) {
                     newExam = moveExamination(acq.getExamination(), studyId, examMap);
+                    LOG.warn("    exam found by creation");
                 }
             }
         }
