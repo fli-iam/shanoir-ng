@@ -56,20 +56,25 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
             LOG.warn("moveDataset for ds.id = " + ds.getId());
             Long oldDsId = ds.getId();
             if (ds.getDatasetAcquisition() != null && ds.getDatasetAcquisition().getId() != null) {
-                List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
                 DatasetAcquisition newAcq = null;
-                if (!dsAcqList.isEmpty()) {
-                    for (DatasetAcquisition dsAcq : dsAcqList) {
-                        if (dsAcq.getExamination().getStudyId().equals(studyId)) {
-                            newAcq = dsAcq;
-                            break;
+                if (acqMap.get(ds.getDatasetAcquisition().getId()) != null) {
+                    newAcq = acqMap.get(ds.getDatasetAcquisition().getId());
+                } else {
+                    List<DatasetAcquisition> dsAcqList = datasetAcquisitionRepository.findBySourceId(ds.getDatasetAcquisition().getId());
+                    if (!dsAcqList.isEmpty()) {
+                        for (DatasetAcquisition dsAcq : dsAcqList) {
+                            if (dsAcq.getExamination().getStudyId().equals(studyId)) {
+                                newAcq = dsAcq;
+                                acqMap.put(dsAcq.getId(), newAcq);
+                                break;
+                            }
                         }
-                    }
-                    if (newAcq == null) {
+                        if (newAcq == null) {
+                            newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
+                        }
+                    } else {
                         newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
                     }
-                } else {
-                    newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
                 }
 
                 List<DatasetExpression> dsExList = ds.getDatasetExpressions();
@@ -99,12 +104,16 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
         LOG.warn("moveAcquisition for acq.id = " + acq.getId());
         Long oldAcqId = acq.getId();
-        if (acqMap.get(oldAcqId) != null)
-            return acqMap.get(oldAcqId);
-
-        Examination newExam = examinationRepository.findBySourceIdAndStudy_Id(acq.getExamination().getId(), studyId);
-        if (newExam == null) {
-            newExam = moveExamination(acq.getExamination(), studyId, examMap);
+        Examination newExam = null;
+        if (acq.getExamination() != null &&  acq.getExamination().getId() != null) {
+            if (examMap.get(acq.getExamination().getId()) != null) {
+                newExam = examMap.get(acq.getExamination().getId());
+            } else {
+                newExam = examinationRepository.findBySourceIdAndStudy_Id(acq.getExamination().getId(), studyId);
+                if (newExam == null) {
+                    newExam = moveExamination(acq.getExamination(), studyId, examMap);
+                }
+            }
         }
         acq.setDatasets(null);
         acquisitionCleanup(acq);
@@ -121,8 +130,6 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     public Examination moveExamination(Examination examination, Long studyId, Map<Long, Examination> examMap) {
         LOG.warn("moveExamination for acq.id = " + examination.getId());
         Long oldExamId = examination.getId();
-        if (examMap.get(oldExamId) != null)
-            return examMap.get(oldExamId);
 
         examination.setDatasetAcquisitions(null);
         examination.setExtraDataFilePathList(null);
