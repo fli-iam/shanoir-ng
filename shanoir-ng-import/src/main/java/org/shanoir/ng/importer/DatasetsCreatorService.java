@@ -1,13 +1,11 @@
 package org.shanoir.ng.importer;
 
 import org.shanoir.ng.importer.model.*;
-import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.utils.ImportUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -18,14 +16,6 @@ import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * The NIfTIConverter does the actual conversion of dcm to nii files.
- * To use the converter the dcm files have to be put in separate folders.
- *
- * 1) all images for one serie are moved into /SERIES/{seriesID} and
- * 2) all images are concerning the acquisitionNumber, echoNumbers and the
- * imageOrientationPatient informations moved into /dataset{index} folders.
- *
- * Inside each dataset folder the nii conversion is called.
  *
  * @author mkain
  *
@@ -47,7 +37,7 @@ public class DatasetsCreatorService {
 	private String seriesProperties;
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	public void createDatasetsAndRunConversion(Patient patient, File workFolder, ImportJob importJob) throws ShanoirException {
+	public void createDatasets(Patient patient, File workFolder, ImportJob importJob) throws ShanoirException {
 		File seriesFolderFile = new File(workFolder.getAbsolutePath() + File.separator + SERIES);
 		if(!seriesFolderFile.exists()) {
 			seriesFolderFile.mkdirs();

@@ -99,7 +99,7 @@ public class ImporterManagerService {
 	private ShanoirEventService eventService;
 	
 	@Autowired
-	private DatasetsCreatorService datasetsCreatorAndNIfTIConverter;
+	private DatasetsCreatorService datasetsCreatorService;
 	
 	@Autowired
 	StudyUserRightsRepository studyUserRightRepo;
@@ -160,10 +160,8 @@ public class ImporterManagerService {
 				if (!importJob.isFromShanoirUploader()) {
 					pseudonymize(importJob, event, importJobDir, patient);
 				}
-				
-				// Do not convert anymore
-				//Long converterId = importJob.getConverterId();
-				datasetsCreatorAndNIfTIConverter.createDatasetsAndRunConversion(patient, importJobDir, importJob);
+
+				datasetsCreatorService.createDatasets(patient, importJobDir, importJob);
 			}
 			this.rabbitTemplate.convertAndSend(RabbitMQConfiguration.IMPORTER_QUEUE_DATASET, objectMapper.writeValueAsString(importJob));
 			long importJobDirSize = ImportUtils.getDirectorySize(importJobDir.toPath());
