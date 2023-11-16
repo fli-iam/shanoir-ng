@@ -119,10 +119,10 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 newExam = examinationRepository.findBySourceIdAndStudy_Id(acq.getExamination().getId(), studyId);
                 examMap.put(acq.getExamination().getId(), newExam);
                 LOG.warn("    exam found by request with id : " + acq.getExamination().getId());
-                if (newExam == null) {
-                    newExam = moveExamination(acq.getExamination(), studyId, examMap);
-                    LOG.warn("    exam found by creation");
-                }
+            }
+            if (newExam == null) {
+                newExam = moveExamination(acq.getExamination(), studyId, examMap);
+                LOG.warn("    exam found by creation");
             }
         }
         acq.setDatasets(null);
