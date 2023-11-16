@@ -72,16 +72,16 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
 //                                acqMap.put(dsAcq.getId(), newAcq);
 //                                break;
 //                            }
-//                        }
-                        if (newAcq == null) {
-                            newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
-                            LOG.warn("    acq found by creation");
-                        }
+                }
+                if (newAcq == null) {
+                    newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
+                    LOG.warn("    acq found by creation");
+                }
  //                   }
 //                else {
 //                        newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
 //                    }
-                }
+//                }
 
                 List<DatasetExpression> dsExList = ds.getDatasetExpressions();
                 datasetCleanup(ds);
