@@ -29,8 +29,8 @@ VALUES
 	(5,null,false,0,'QualityCard1',null,1);
 	
 INSERT INTO study_card_rule
-	(id, scope, study_card_id)
-VALUES (3,'DatasetAcquisition',1),(4,'DatasetAcquisition',1),(5,'DatasetAcquisition',1),(6,'DatasetAcquisition',1),(7,'Dataset',5),(8,'Dataset',5);
+	(id, scope, study_card_id, or_conditions)
+VALUES (3,'DatasetAcquisition',1,false),(4,'DatasetAcquisition',1,false),(5,'DatasetAcquisition',1,false),(6,'DatasetAcquisition',1,false),(7,'Dataset',5,false),(8,'Dataset',5,false);
 
 INSERT INTO study_card_assignment 
     (id, field, value, scope)
