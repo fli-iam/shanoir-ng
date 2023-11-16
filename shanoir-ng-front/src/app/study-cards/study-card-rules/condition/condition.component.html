@@ -12,15 +12,24 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 -->
 
-<span>if&nbsp;</span>
+<span>if,&nbsp;</span>
 <span class="view" *ngIf="mode == 'view'">
-    <span class="cardinality-type" *ngIf="condition.cardinality == -1">all of</span>
-    <span class="cardinality-type" *ngIf="condition.cardinality == 0">none of</span>
-    <span class="cardinality-type" *ngIf="condition.cardinality > 0">at least</span>
+    <span class="cardinality-type" *ngIf="condition.cardinality == -1">for every</span>
+    <span class="cardinality-type" *ngIf="condition.cardinality == 0">for no</span>
+    <span class="cardinality-type" *ngIf="condition.cardinality > 0">for at least</span>
     <span class="cardinality" *ngIf="condition.cardinality > 0">{{condition.cardinality}}</span>
+    <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
     <span class="var" *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets'" title="{{condition.dicomTag | dicomTagLabel}}">{{condition.dicomTag?.label ? condition.dicomTag.label : (condition.dicomTag?.code | dicomTagLabel)}}</span>
     <span class="var" *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets'">{{fieldLabel}}</span>
-    <span class="method">{{condition.operation}}</span>
+    <span class="method">
+        <i *ngIf="condition.operation == 'EQUALS'" class="fa-solid fa-equals"></i>
+        <i *ngIf="condition.operation == 'NOT_EQUALS'" class="fa-solid fa-not-equal"></i>
+        <i *ngIf="condition.operation == 'SMALLER_THAN'" class="fa-solid fa-less-than"></i>
+        <i *ngIf="condition.operation == 'BIGGER_THAN'" class="fa-solid fa-greater-than"></i>
+        <ng-container *ngIf="!(['EQUALS', 'NOT_EQUALS', 'SMALLER_THAN', 'BIGGER_THAN'].includes(condition.operation))">
+            {{condition.operation}}
+        </ng-container>
+    </span>
     <span class="multi-value">
         <div class="value" *ngFor="let value of condition.values; let i=index;">
             <span *ngIf="i > 0" class="or">or</span>
@@ -36,7 +45,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [clear]="false"
         placeholder="select cardinality"
         [search]="false"
-        [options]="[{label: 'none of', value: 'NONE'}, {label: 'all of', value: 'ALL'}, {label: 'at least', value: 'AT_LEAST'}]">
+        [options]="[{label: 'for no', value: 'NONE'}, {label: 'for every', value: 'ALL'}, {label: 'for at least', value: 'AT_LEAST'}]">
     </select-box>
     <input type="number"
         class="cardinality auto-width"
@@ -45,6 +54,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         [class.error]="cardinalityError"
         min="1" 
         [style.width]="(condition.cardinality ? ((condition.cardinality+'').length + 3) : '4') + 'ch'">
+    <span>dataset<ng-container *ngIf="condition.cardinality > 1">s</ng-container> in the exam, </span>
     <select-box 
         class="type auto-width"
         [ngModel]="condition.scope" 
@@ -86,7 +96,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             (focusout)="operationTouched = true"
             [clear]="false">
     </select-box>
-    <span *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets' || !(shanoirFieldOptions?.length > 0)" class="multi-value">
+    <span *ngIf="condition.scope == 'StudyCardDICOMConditionOnDatasets' || !(shanoirFieldOptions?.length > 0)" class="multi-value edit">
         <span *ngFor="let value of condition.values; let i  = index; trackBy: trackByFn" class="one-value">
             <auto-ajust-input 
                     class="value"
@@ -104,7 +114,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
             </span>
         </div>
     </span>
-    <span *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets' && (shanoirFieldOptions?.length > 0)" class="multi-value">
+    <span *ngIf="condition.scope != 'StudyCardDICOMConditionOnDatasets' && (shanoirFieldOptions?.length > 0)" class="multi-value edit">
         <select-box 
                 *ngFor="let value of condition.values; let i  = index"
                 class="value auto-width one-value" 

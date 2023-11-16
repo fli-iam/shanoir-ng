@@ -36,6 +36,7 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -57,6 +58,9 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
 	@JoinTable(name="study_card_condition_join", joinColumns = {@JoinColumn(name = "study_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
 	private List<StudyCardCondition> conditions;
 	
+	@NotNull
+	private boolean orConditions;
+	
 	public List<StudyCardAssignment<?>> getAssignments() {
 		return assignments;
 	}
@@ -72,4 +76,13 @@ public abstract class StudyCardRule<T> extends AbstractEntity {
 	public void setConditions(List<StudyCardCondition> conditions) {
 		this.conditions = conditions;
 	}
+
+		
+	public boolean isOrConditions() {
+        return orConditions;
+    }
+
+    public void setOrConditions(boolean orConditions) {
+        this.orConditions = orConditions;
+    }
 }

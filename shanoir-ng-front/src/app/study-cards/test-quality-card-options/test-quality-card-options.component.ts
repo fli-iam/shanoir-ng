@@ -54,7 +54,6 @@ export class TestQualityCardOptionsComponent implements OnInit {
             Validators.required,
             (control: AbstractControl) => Validators.min(formGroup.get('from').value)(control)
         ]);
-        console.log(this.nbExaminations);
         if (this.nbExaminations) {
             formGroup.controls.to.addValidators([Validators.max(this.nbExaminations)]);
         }

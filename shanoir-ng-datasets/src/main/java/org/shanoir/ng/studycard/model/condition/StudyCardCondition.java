@@ -53,6 +53,7 @@ public abstract class StudyCardCondition extends AbstractEntity {
 	@NotNull
 	private int operation;
 
+    @NotNull
     private int cardinality;
     
     public int getCardinality() {
@@ -65,6 +66,12 @@ public abstract class StudyCardCondition extends AbstractEntity {
 
     protected boolean cardinalityComplies(int nbOk, int nbUnknown, int total) {
         if (getCardinality() == -1) return total == nbOk || (nbOk > 0 && total == nbOk + nbUnknown); // all
+        if (getCardinality() == 0) return 0 == nbOk; // none
+        else return nbOk >= getCardinality(); // n
+    }
+
+    protected boolean cardinalityComplies(int nbOk, int total) {
+        if (getCardinality() == -1) return total == nbOk; // all
         if (getCardinality() == 0) return 0 == nbOk; // none
         else return nbOk >= getCardinality(); // n
     }

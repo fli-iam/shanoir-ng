@@ -35,6 +35,7 @@ export class StudyCardRule {
 
     assignments: StudyCardAssignment[];
     conditions: StudyCardCondition[];
+    orConditions: boolean = false;
 
     static copy(rule: StudyCardRule): StudyCardRule {
         let copy: StudyCardRule = new StudyCardRule(rule.scope);

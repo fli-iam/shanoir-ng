@@ -75,6 +75,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
     forceStudyId: number;
     nbExaminations: number;
     progress: number;
+    readonly NB_EXAM_THRESHOLD: number = 50;
 
     constructor(
             private route: ActivatedRoute,
@@ -201,7 +202,7 @@ export class QualityCardComponent extends EntityComponent<QualityCard> {
         this.examinationService.findExaminationIdsByStudy(this.qualityCard.study.id).then(examIds => {
             this.nbExaminations = examIds.length;
             if (examIds?.length > 0) {
-                if (examIds.length > 1) {
+                if (examIds.length > this.NB_EXAM_THRESHOLD) {
                     this.openSetTestInterval(this.nbExaminations).then(response => {
                         if (!response) {
                             this.performTest();

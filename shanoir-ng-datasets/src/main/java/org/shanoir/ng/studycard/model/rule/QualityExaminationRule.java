@@ -42,14 +42,18 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @GenericGenerator(name = "IdOrGenerate", strategy = "org.shanoir.ng.shared.model.UseIdOrGenerate")
 public class QualityExaminationRule extends AbstractEntity {
 
 	private Integer tag;
-	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+
+    @NotNull
+	private boolean orConditions;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	// there is a join table because a rule_id fk would lead to an ambiguity and bugs 
 	// because it could refer to a study card or quality card rule
 	@JoinTable(name="quality_card_condition_join", joinColumns = {@JoinColumn(name = "quality_card_rule_id")}, inverseJoinColumns = {@JoinColumn(name = "condition_id")})
@@ -70,6 +74,14 @@ public class QualityExaminationRule extends AbstractEntity {
 	public void setConditions(List<StudyCardCondition> conditions) {
 		this.conditions = conditions;
 	}
+    	
+	public boolean isOrConditions() {
+        return orConditions;
+    }
+
+    public void setOrConditions(boolean orConditions) {
+        this.orConditions = orConditions;
+    }
 
     public void apply(Examination examination, QualityCardResult result) {
         apply(examination, null, result);	        
@@ -153,7 +165,13 @@ public class QualityExaminationRule extends AbstractEntity {
             } else {
                 condResult.addUnfulfilledConditionsMsg(msg.toString());
             }
-            allFulfilled &= fulfilled;
+            if (isOrConditions() && fulfilled) {
+                allFulfilled = true;
+                break;
+            }
+            else {
+                allFulfilled &= fulfilled;
+            }
         }
         condResult.setFulfilled(allFulfilled);
         return condResult;

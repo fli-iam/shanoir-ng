@@ -24,6 +24,7 @@ import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.exception.RestServiceException;
 import org.shanoir.ng.studycard.dto.QualityCardResult;
 import org.shanoir.ng.studycard.model.QualityCard;
+import org.shanoir.ng.studycard.model.rule.QualityExaminationRule;
 import org.shanoir.ng.studycard.service.CardsProcessingService;
 import org.shanoir.ng.studycard.service.QualityCardService;
 import org.shanoir.ng.studycard.service.QualityCardUniqueConstraintManager;
@@ -119,6 +120,7 @@ public class QualityCardApiController implements QualityCardApi {
 			@Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
 			@Parameter(name = "quality card to update", required = true) @RequestBody QualityCard qualityCard,
 			final BindingResult result) throws RestServiceException {
+
 		validate(qualityCard, result);
 		try {
 			qualityCardService.update(qualityCard);
