@@ -29,6 +29,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.common.util.Hash;
 import org.joda.time.DateTime;
@@ -160,7 +161,7 @@ public class DatasetDownloaderServiceImpl {
 						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset,
 								subjectName, true, datasetFilePath);
 						datasetFiles.addAll(files);
-					} else if (!dataset.getProcessings().isEmpty()) {
+					} else if (!CollectionUtils.isEmpty(dataset.getProcessings())) {
 						// This SHOULD NOT BE A NIFTI SINGLE FILE!
 						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.NIFTI_SINGLE_FILE, null);
 						List<String> files = DatasetFileUtils.copyNiftiFilesForURLs(pathURLs, zipOutputStream, dataset,
