@@ -22,12 +22,12 @@ import {DatasetProcessingType} from 'src/app/enum/dataset-processing-type.enum';
 import {ColumnDefinition} from 'src/app/shared/components/table/column.definition.type';
 import {KeycloakService} from 'src/app/shared/keycloak/keycloak.service';
 import {MsgBoxService} from 'src/app/shared/msg-box/msg-box.service';
-import {ProcessingService} from '../processing.service';
+import {ExecutionDataService} from '../execution.data-service';
 import {Option} from '../../shared/select/select.component';
 import { formatDate } from '@angular/common';
-import {ParameterResourcesDto} from "../../vip/models/parameter-resources.dto";
-import {GroupByEnum} from "../../vip/models/groupby.enum";
-import {PipelineParameter} from "../../vip/models/pipelineParameter";
+import {ParameterResourcesDto} from "../models/parameter-resources.dto";
+import {GroupByEnum} from "../models/groupby.enum";
+import {PipelineParameter} from "../models/pipelineParameter";
 import {ServiceLocator} from "../../utils/locator.service";
 import {ConsoleService} from "../../shared/console/console.service";
 
@@ -61,32 +61,27 @@ export class ExecutionComponent implements OnInit {
     isSubmitted = true;
     datasetsPromise: Promise<void>;
 
-    constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ProcessingService, private vipClientService: VipClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private executionMonitoringService: ExecutionMonitoringService) {
+    constructor(private breadcrumbsService: BreadcrumbsService, private processingService: ExecutionDataService, private vipClientService: VipClientService, private router: Router, private msgService: MsgBoxService, private keycloakService: KeycloakService, private datasetService: DatasetService, private executionMonitoringService: ExecutionMonitoringService) {
         this.breadcrumbsService.nameStep('2. Executions');
         this.selectedDatasets = new Set<Dataset>();
         this.isSubmitted = false;
     }
 
     ngOnInit(): void {
-        if (!this.processingService.isAnyPipelineSelected()) {
-            this.router.navigate(["/processing/pipelines"])
+        if (!this.processingService.selectedPipeline) {
+            this.router.navigate(["/pipelines"])
         }
 
-        this.processingService.selectedPipeline.subscribe(
-            (pipeline: Pipeline) => {
-                this.pipeline = pipeline;
-                this.initExecutionForm();
-                this.processingService.selectedDatasets.subscribe(
-                    (datasets: Set<number>) => {
-                        this.datasetsPromise = this.datasetService.getByIds(datasets).then(
-                            result => {
-                                this.selectedDatasets = new Set(result);
-                                this.createColumnDefs();
-                                this.isLoading = false;
-                            });
-                    });
-            }
-        )
+        this.pipeline = this.processingService.selectedPipeline;
+        this.initExecutionForm();
+
+        this.datasetsPromise = this.datasetService.getByIds(this.processingService.selectedDatasets).then(
+            result => {
+                this.selectedDatasets = new Set(result);
+                this.createColumnDefs();
+                this.isLoading = false;
+            });
+
         this.keycloakService.getToken().then(
             (token: String) => {
                 this.token = token;
