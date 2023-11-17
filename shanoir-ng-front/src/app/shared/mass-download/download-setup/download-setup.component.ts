@@ -32,6 +32,7 @@ export class DownloadSetupComponent implements OnInit {
     @Input() format: Format;
     @Input() converter: number;
     @ViewChild('window') window: ElementRef;
+
     formatOptions: Option<Format>[] = [
         new Option<Format>('dcm', 'Dicom', null, null, null, false),
         new Option<Format>('nii', 'Nifti', null, null, null, false),

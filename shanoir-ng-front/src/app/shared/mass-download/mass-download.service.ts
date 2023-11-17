@@ -98,7 +98,11 @@ export class MassDownloadService {
 
             // Directly download if there are no dicom
             // And do not zip by default
-            return this._downloadDatasets(datasets, format, 4, null , false, downloadState);
+            if (window.showDirectoryPicker) {
+                return this._downloadDatasets(datasets, format, 4, null , false, downloadState);
+            } else {
+                return this._downloadAlt(datasets.map(ds => ds.id), format, null, downloadState);
+            }
         }
 
         // Otherwise, we have dicom, we have to choose
