@@ -26,16 +26,27 @@ import { Option } from '../../select/select.component';
 
 export class DownloadSetupAltComponent implements OnInit {
 
-    @Output() go: EventEmitter<Format> = new EventEmitter();
+    @Output() go: EventEmitter<{format: Format, converter: number}> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
     form: UntypedFormGroup;
     @ViewChild('window') window: ElementRef;
     @Input() format: Format;
+    @Input() converter: number;
     @Input() compatibilityMessage: boolean = true;
 
     formatOptions: Option<Format>[] = [
         new Option<Format>('dcm', 'Dicom', null, null, null),
         new Option<Format>('nii', 'Nifti', null, null, null),
+    ];
+
+    niftiConverters: Option<number>[] = [
+        new Option<number>(1, 'DCM2NII_2008_03_31', null, null, null, false),
+        new Option<number>(2, 'MCVERTER_2_0_7', null, null, null, false),
+        new Option<number>(4, 'DCM2NII_2014_08_04', null, null, null, false),
+        new Option<number>(5, 'MCVERTER_2_1_0', null, null, null, false),
+        new Option<number>(6, 'DCM2NIIX', null, null, null, false),
+        new Option<number>(7, 'DICOMIFIER', null, null, null, false),
+        new Option<number>(8, 'MRICONVERTER', null, null, null, false),
     ];
 
     constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
@@ -51,12 +62,16 @@ export class DownloadSetupAltComponent implements OnInit {
     private buildForm(): UntypedFormGroup {
         let formGroup = this.formBuilder.group({
             'format': [{value: this.format || 'dcm', disabled: this.format}, [Validators.required]],
+            'converter': [{value: this.converter}],
         });
         return formGroup;
     }
 
     downloadNow() {
-        this.go.emit(this.form.get('format').value);
+        this.go.emit({
+            format: this.form.get('format').value,
+            converter: (this.form.get('format').value == 'nii') ? this.form.get('converter').value : null,
+            });
     }
 
     cancel() {

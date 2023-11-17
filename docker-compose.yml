@@ -231,6 +231,10 @@ services:
       - "tmp:/tmp"
     networks:
       - shanoir_ng_network
+    depends_on:
+      - "import"
+      - "datasets"
+
   #
   # Solr microservice for Shanoir-NG search
   #
@@ -338,6 +342,7 @@ services:
       - "datasets"
       - "preclinical"
       - "rabbitmq"
+      - "nifti-conversion"
 
 volumes:
   keycloak-database-data:

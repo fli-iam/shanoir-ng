@@ -110,7 +110,7 @@ export class MassDownloadService {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
                 return this.openAltModal(format).then(ret => {
                     if (ret != 'cancel') {
-                        return this._downloadAlt(datasets.map(ds => ds.id), ret, downloadState);
+                        return this._downloadAlt(datasets.map(ds => ds.id), ret.format, ret.converter, downloadState);
                     } else return Promise.resolve();
                 });
             } else throw error;
@@ -123,7 +123,7 @@ export class MassDownloadService {
     }
 
     // This method is used to download in
-    private _downloadAlt(input: number | number[], format: Format, downloadState?: TaskState): any {
+    private _downloadAlt(input: number | number[], format: Format, converter? : number, downloadState?: TaskState): any {
         let task: Task = this.createTask((input as number[]).length);
 
         downloadState = new TaskState();
@@ -135,7 +135,7 @@ export class MassDownloadService {
                 task.status = 2;
                 task.lastUpdate = new Date();
                 const start: number = Date.now();
-                let downloadObs: Observable<TaskState> = this.datasetService.downloadDatasets(input as number[], format);
+                let downloadObs: Observable<TaskState> = this.datasetService.downloadDatasets(input as number[], format, converter);
 
                 let endPromise: SuperPromise<void> = new SuperPromise();
 
@@ -451,7 +451,7 @@ export class MassDownloadService {
         }
     }
 
-    private openAltModal(format?: Format, compatibilityMsg: boolean = true): Promise<Format | 'cancel'> {
+    private openAltModal(format?: Format, compatibilityMsg: boolean = true): Promise<{format: Format, converter: number} | 'cancel'> {
         let modalRef: ComponentRef<DownloadSetupAltComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupAltComponent);
         modalRef.instance.format = format;
         modalRef.instance.compatibilityMessage = compatibilityMsg;

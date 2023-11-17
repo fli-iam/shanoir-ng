@@ -103,7 +103,9 @@ export class DatasetService extends EntityService<Dataset> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
-        formData.set("converterId", "" + converter);
+        if (converter) {
+            formData.set("converterId", "" + converter);
+        }
         const url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload';
         return AppUtils.downloadWithStatusPOST(url, formData, state);
     }
@@ -130,45 +132,12 @@ export class DatasetService extends EntityService<Dataset> {
         ).toPromise();
     }
 
-    downloadFromId(datasetId: number, format: string, converterId: number = null, state?: TaskState): Promise<void> {
-        if (!datasetId) throw Error('Cannot download a dataset without an id');
-        return this.downloadToBlob(datasetId, format, converterId).then(
-            response => {
-                this.downloadIntoBrowser(response);
-            }
-        ).catch(error => {
-            this.errorService. handleError(error);
-        });
-    }
-
     downloadToBlob(id: number, format: string, converterId: number = null): Promise<HttpResponse<Blob>> {
         if (!id) throw Error('Cannot download a dataset without an id');
         return this.http.get(
             AppUtils.BACKEND_API_DATASET_URL + '/download/' + id + '?format=' + format + (converterId ? ('&converterId=' + converterId) : ''),
             { observe: 'response', responseType: 'blob' }
         ).toPromise();
-    }
-
-    exportBIDSBySubjectId(subjectId: number, subjectName: string, studyName: string): void {
-        if (!subjectId) throw Error('subject id is required');
-        this.http.get(AppUtils.BACKEND_API_DATASET_URL + '/exportBIDS/subjectId/' + subjectId
-            + '/subjectName/' + subjectName + '/studyName/' + studyName,
-            { observe: 'response', responseType: 'blob' }
-        ).toPromise().then(response => {this.downloadIntoBrowser(response);});
-    }
-
-    getUrls(id: number): Observable<HttpResponse<any>> {
-        if (!id) throw Error('Cannot get the urls of a dataset without an id');
-        return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id);
-    }
-
-    prepareUrl(id: number, url: string, format: string): Observable<any> {
-        if (!id) throw Error('Cannot get the urls of a dataset without an id');
-        // return this.http.get<any>(AppUtils.BACKEND_API_DATASET_URL + '/urls/' + id + '/url/?url=' + url + '&format=' + format);
-
-        let httpOptions: any = Object.assign( { responseType: 'text' }, this.httpOptions);
-
-        return this.http.post<string>(`${AppUtils.BACKEND_API_DATASET_URL}/prepare-url/${encodeURIComponent(id)}?format=${encodeURIComponent(format)}`, { url: url }, httpOptions);
     }
 
     private downloadIntoBrowser(response: HttpResponse<Blob>){
