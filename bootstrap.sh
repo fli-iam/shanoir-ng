@@ -174,7 +174,7 @@ if [ -n "$deploy" ] ; then
 	
 	# 5. Shanoir-NG microservices
 	step "start: sh-ng microservices"
-	for ms in users studies datasets import preclinical 
+	for ms in users studies datasets import preclinical nifti-conversion
 	do
 		step "init: $ms microservice"
 		docker compose run --rm -e SHANOIR_MIGRATION=init "$ms"

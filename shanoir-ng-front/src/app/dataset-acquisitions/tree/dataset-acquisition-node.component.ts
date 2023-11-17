@@ -19,12 +19,11 @@ import { DatasetService } from '../../datasets/shared/dataset.service';
 import { DatasetProcessingType } from '../../enum/dataset-processing-type.enum';
 
 import { Subscription } from 'rxjs';
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { ConsoleService } from "../../shared/console/console.service";
 import { DatasetAcquisitionNode, DatasetNode, ProcessingNode, UNLOADED } from '../../tree/tree.model';
 import { DatasetAcquisition } from '../shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from "../shared/dataset-acquisition.service";
-import {DownloadSetupOptions} from "../../shared/mass-download/download-setup/download-setup.component";
 import {MassDownloadService} from "../../shared/mass-download/mass-download.service";
 
 
@@ -159,9 +158,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         }
 
         datasetIdsReady.then(() => {
-            let options: DownloadSetupOptions = new DownloadSetupOptions();
-            options.hasDicom = this.hasDicom;
-            this.massDownloadService.downloadAllByAcquisitionId(this.node.id, null, options, this.downloadState);
+            this.massDownloadService.downloadAllByAcquisitionId(this.node.id, null, this.downloadState);
         });
     }
 

@@ -16,7 +16,6 @@ import { Component } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
-import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { DicomArchiveService } from '../../import/shared/dicom-archive.service';
 import { EntityComponent } from '../../shared/components/entity/entity.component.abstract';
@@ -25,7 +24,7 @@ import { StudyUserRight } from '../../studies/shared/study-user-right.enum';
 import { Dataset, DatasetMetadata } from '../shared/dataset.model';
 import { DatasetService } from '../shared/dataset.service';
 import { MrDataset } from './mr/dataset.mr.model';
-import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { TaskState } from 'src/app/async-tasks/task.model';
 
 
 @Component({
@@ -115,14 +114,12 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     downloadAll() {
-        let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasDicom = this.dataset.type != 'Eeg' && this.dataset.type != 'BIDS' && !this.dataset.datasetProcessing;
-        this.downloadService.downloadDataset(this.dataset?.id, options, this.downloadState);
+        this.downloadService.downloadByIds([this.dataset?.id], null,  this.downloadState);
     }
 
     public loadDicomInMemory() {
         this.papayaLoaded = true;
-        this.datasetService.downloadToBlob(this.id, 'nii').then(blobReponse => {
+        this.datasetService.downloadToBlob(this.id, 'dcm').then(blobReponse => {
             this.dicomArchiveService.clearFileInMemory();
             this.dicomArchiveService.importFromZip(blobReponse.body)
                 .then(response => {
@@ -134,12 +131,11 @@ export class DatasetComponent extends EntityComponent<Dataset> {
         });
     }
 
+
     private initPapaya(dataFiles: any): void {
         let buffs = [];
         Object.keys(dataFiles.files).forEach((key) => {
-            if (key.indexOf(".nii") != -1) {
-                buffs.push(dataFiles.files[key].async("arraybuffer"));
-            }
+            buffs.push(dataFiles.files[key].async("arraybuffer"));
         });
         let promiseOfList = Promise.all(buffs);
         promiseOfList.then((values) => {

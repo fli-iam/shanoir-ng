@@ -32,9 +32,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         </a>
         <menu-item *ngIf="node.type != 'Eeg' && node.type != 'BIDS' && !node.processed" [disabled]="loading" label="Download as DICOM" awesome="fas fa-download" (click)="download('dcm')"></menu-item>
         <menu-item *ngIf="node.type != 'Eeg' && node.type != 'BIDS' && !node.processed" [disabled]="loading" label="Download as NIfTI" awesome="fas fa-download" (click)="download('nii')"></menu-item>
-        <menu-item *ngIf="node.processed" [disabled]="loading" label="Download processed data" awesome="fas fa-download" (click)="download('nii')"></menu-item>
-        <menu-item *ngIf="node.type == 'Eeg'" [disabled]="loading" label="Download as EEG" awesome="fas fa-download" (click)="download('eeg')"></menu-item>
-        <menu-item *ngIf="node.type == 'BIDS'" [disabled]="loading" label="Download BIDS" awesome="fas fa-download" (click)="download('BIDS')"></menu-item>
+        <menu-item *ngIf="node.type == 'BIDS' || node.type == 'Eeg' || node.processed" [disabled]="loading" label="Download" awesome="fas fa-download" (click)="download()"></menu-item>
         <menu-item *ngIf="this.node.canDelete"  label="Delete" awesome="fa-regular fa-trash-can" (click)="deleteDataset()"></menu-item>
     </dropdown-menu>
 

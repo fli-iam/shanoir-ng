@@ -17,7 +17,6 @@ import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms
 import { Format } from 'src/app/datasets/shared/dataset.service';
 import { GlobalService } from '../../services/global.service';
 import { Option } from '../../select/select.component';
-import { DownloadSetupOptions } from '../download-setup/download-setup.component';
 
 @Component({
     selector: 'download-setup-alt',
@@ -34,10 +33,9 @@ export class DownloadSetupAltComponent implements OnInit {
     @Input() format: Format;
     @Input() compatibilityMessage: boolean = true;
 
-    @Input() options: DownloadSetupOptions = new DownloadSetupOptions();
     formatOptions: Option<Format>[] = [
-        new Option<Format>('dcm', 'Dicom', null, null, null, !this.options.hasDicom),
-        new Option<Format>('nii', 'Nifti', null, null, null, !this.options.hasDicom),
+        new Option<Format>('dcm', 'Dicom', null, null, null),
+        new Option<Format>('nii', 'Nifti', null, null, null),
     ];
 
     constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {

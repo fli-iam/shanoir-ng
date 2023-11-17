@@ -25,7 +25,7 @@ import { MrDataset } from '../dataset/mr/dataset.mr.model';
 import { DatasetUtils } from './dataset.utils';
 import {DatasetDTO, MrDatasetDTO, DatasetDTOService} from "./dataset.dto";
 
-export type Format = 'eeg' | 'nii' | 'BIDS' | 'dcm';
+export type Format = 'nii' | 'dcm';
 
 @Injectable()
 export class DatasetService extends EntityService<Dataset> {
@@ -76,12 +76,6 @@ export class DatasetService extends EntityService<Dataset> {
                 .then(dtos => this.datasetDTOService.toEntityList(dtos));
     }
 
-    getByStudycardId(studycardId: number): Promise<Dataset[]> {
-        return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/studycard/' + studycardId)
-            .toPromise()
-            .then(dtos => this.datasetDTOService.toEntityList(dtos));
-    }
-
     getByStudyId(studyId: number): Promise<Dataset[]> {
         return this.http.get<DatasetDTO[]>(AppUtils.BACKEND_API_DATASET_URL + '/study/' + studyId)
                 .toPromise()
@@ -105,30 +99,13 @@ export class DatasetService extends EntityService<Dataset> {
             .then(dtos => this.datasetDTOService.toEntityList(Array.from(dtos)));
     }
 
-    public downloadDatasets(ids: number[], format: string, state?: TaskState): Observable<TaskState> {
+    public downloadDatasets(ids: number[], format: string, converter ? : number, state?: TaskState): Observable<TaskState> {
         const formData: FormData = new FormData();
         formData.set('datasetIds', ids.join(","));
         formData.set("format", format);
+        formData.set("converterId", "" + converter);
         const url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownload';
         return AppUtils.downloadWithStatusPOST(url, formData, state);
-    }
-
-    public downloadDatasetsByStudy(studyId: number, format: string, state?: TaskState): Observable<TaskState>  {
-        let params = new HttpParams().set("studyId", '' + studyId).set("format", format);
-        let url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByStudy';
-        return AppUtils.downloadWithStatusGET(url, params, state);
-    }
-
-    public downloadDatasetsByExamination(examinationId: number, format: string, state?: TaskState): Observable<TaskState>  {
-        let params = new HttpParams().set("examinationId", '' + examinationId).set("format", format);
-        let url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByExamination';
-        return AppUtils.downloadWithStatusGET(url, params, state);
-    }
-
-    public downloadDatasetsByAcquisition(acquisitionId: number, format: string, state?: TaskState): Observable<TaskState> {
-        let params = new HttpParams().set("acquisitionId", '' + acquisitionId).set("format", format);
-        let url: string = AppUtils.BACKEND_API_DATASET_URL + '/massiveDownloadByAcquisition';
-        return AppUtils.downloadWithStatusGET(url, params, state);
     }
 
     downloadStatistics(studyNameInRegExp: string, studyNameOutRegExp: string, subjectNameInRegExp: string, subjectNameOutRegExp: string) {
@@ -144,11 +121,6 @@ export class DatasetService extends EntityService<Dataset> {
                 this.downloadIntoBrowser(response);
             }
         )
-    }
-
-    download(dataset: Dataset, format: Format, converterId: number = null): Promise<void> {
-        if (!dataset.id) throw Error('Cannot download a dataset without an id');
-        return this.downloadFromId(dataset.id, format, converterId);
     }
 
     downloadDicomMetadata(datasetId: number): Promise<any> {

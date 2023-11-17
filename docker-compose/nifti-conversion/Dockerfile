@@ -106,6 +106,9 @@ RUN mkdir -m 1777 /.dcm2nii_2014-08-04
 RUN git -C /opt/nifti-converters clone https://github.com/lamyj/dicomifier.git
 RUN conda install -c conda-forge dicomifier -y
 
+# install animaConvertImage to convert Analyze format into nifti
+RUN install -m 755 external/anima/animaConvertImage /usr/local/bin/
+
 RUN mkdir -pv /var/log/shanoir-ng-logs
 
 ADD nifti-conversion.jar nifti-conversion.jar

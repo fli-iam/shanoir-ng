@@ -47,6 +47,22 @@ public class RabbitMqNiftiConversionService {
 	}
 
 	/**
+	 * Converts ANIMA to NIFTI data
+	 * @param message the string containing the image path of anima file
+	 * @return true if the conversion is a success, false otherwise
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.ANIMA_CONVERSION_QUEUE)
+	@RabbitHandler
+	public boolean convertAnimaToNifti(String message) {
+		try {
+			return this.converterService.animaToNiftiExec(message);
+		} catch (Exception e) {
+			LOG.error("Could not convert data from bruker to dicom: ", e);
+			return false;
+		}
+	}
+
+	/**
 	 * Converts some data
 	 * @param message the string containing the converter ID + the workfolder where the dicom are
 	 * @return true if the conversion is a success, false otherwise

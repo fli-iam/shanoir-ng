@@ -12,11 +12,9 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 import {Component, EventEmitter, ViewChild, Input, OnChanges, Output, SimpleChanges} from '@angular/core';
-import {Router} from '@angular/router';
 import {DatasetAcquisitionService} from '../../dataset-acquisitions/shared/dataset-acquisition.service';
 import {DatasetProcessing} from '../../datasets/shared/dataset-processing.model';
 import {Dataset} from '../../datasets/shared/dataset.model';
-import {DatasetService, Format} from '../../datasets/shared/dataset.service';
 import {DatasetProcessingType} from '../../enum/dataset-processing-type.enum';
 import {ConsoleService} from '../../shared/console/console.service';
 
@@ -24,11 +22,9 @@ import {DatasetAcquisitionNode, DatasetNode, ExaminationNode, ProcessingNode} fr
 import {Examination} from '../shared/examination.model';
 import {ExaminationPipe} from '../shared/examination.pipe';
 import {ExaminationService} from '../shared/examination.service';
-import {LoadingBarComponent} from '../../shared/components/loading-bar/loading-bar.component';
 import {environment} from '../../../environments/environment';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { TaskState } from 'src/app/async-tasks/task.model';
-import {DownloadSetupOptions} from "../../shared/mass-download/download-setup/download-setup.component";
 
 @Component({
     selector: 'examination-node',
@@ -138,12 +134,9 @@ export class ExaminationNodeComponent implements OnChanges {
             return;
         }
         this.downloading = true;
+        this.massDownloadService.downloadAllByExaminationId(this.node.id, null, this.downloadState)
+            .then(() => this.downloading = false);
 
-        let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasDicom = this.hasDicom;
-        this.massDownloadService.downloadAllByExaminationId(this.node.id, null, options, this.downloadState);
-
-        this.downloading = false;
     }
 
     mapAcquisitionNode(dsAcq: any): DatasetAcquisitionNode {

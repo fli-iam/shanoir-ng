@@ -38,7 +38,6 @@ import { StudyService } from '../shared/study.service';
 import { SubjectStudy } from '../../subjects/shared/subject-study.model';
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import { StudyRightsService } from '../../studies/shared/study-rights.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { StudyCardService } from '../../study-cards/shared/study-card.service';
 import { AccessRequestService } from 'src/app/users/access-request/access-request.service';
 import { Profile } from "../../shared/models/profile.model";
@@ -48,7 +47,6 @@ import { DatasetService } from "../../datasets/shared/dataset.service";
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
 import { DatasetExpressionFormat } from "../../enum/dataset-expression-format.enum";
 import { KeyValue } from "@angular/common";
-import { StudyStorageVolumeDTO } from '../shared/study.dto';
 import { TaskState } from 'src/app/async-tasks/task.model';
 
 @Component({
@@ -64,8 +62,9 @@ export class StudyComponent extends EntityComponent<Study> {
     @ViewChild('input', { static: false }) private fileInput: ElementRef;
     @ViewChild('duaInput', { static: false }) private duaFileInput: ElementRef;
 
-    protected pfDownloadState: TaskState = new TaskState();
+    protected pdfDownloadState: TaskState = new TaskState();
     protected duaDownloadState: TaskState = new TaskState();
+    protected studyDownloadState: TaskState = new TaskState();
 
     subjects: IdName[];
     selectedCenter: IdName;
@@ -489,7 +488,7 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     public downloadFile(file) {
-        this.studyService.downloadProtocolFile(file, this.study.id, this.pfDownloadState);
+        this.studyService.downloadProtocolFile(file, this.study.id, this.pdfDownloadState);
     }
 
     public attachNewFile(event: any) {
@@ -652,11 +651,11 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     downloadAll() {
-        this.downloadService.downloadAllByStudyId(this.study.id);
+        this.downloadService.downloadAllByStudyId(this.study.id, null,  this.studyDownloadState);
     }
 
     downloadSelected() {
-        this.downloadService.downloadByIds(this.selectedDatasetIds);
+        this.downloadService.downloadByIds(this.selectedDatasetIds, null, this.studyDownloadState);
     }
 
     storageVolumePrettyPrint(size: number) {

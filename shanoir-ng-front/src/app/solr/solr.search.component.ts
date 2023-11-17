@@ -17,7 +17,7 @@ import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { DatasetService, Format } from '../datasets/shared/dataset.service';
+import { DatasetService } from '../datasets/shared/dataset.service';
 import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 
@@ -26,7 +26,6 @@ import { environment } from "../../environments/environment";
 import { DatasetAcquisition } from '../dataset-acquisitions/shared/dataset-acquisition.model';
 import { DatasetAcquisitionService } from '../dataset-acquisitions/shared/dataset-acquisition.service';
 import { ProcessingService } from '../processing/processing.service';
-import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { ColumnDefinition } from '../shared/components/table/column.definition.type';
 import { Page, Pageable } from "../shared/components/table/pageable.model";
 import { TableComponent } from "../shared/components/table/table.component";
@@ -68,6 +67,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectedDatasetIds: Set<number> = new Set();
     syntaxError: boolean = false;
     dateOpen: boolean = false;
+    public downloadState: TaskState = new TaskState();
     datasetStudymap: Map<number, number> = new Map();
 
     tab: 'results' | 'selected' = 'results';
@@ -488,7 +488,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
     downloadSelected() {
         if (this.selectedDatasetIds && this.canDownload) {
-            this.downloadService.downloadByIds([...this.selectedDatasetIds]);
+            this.downloadService.downloadByIds([...this.selectedDatasetIds], null,  this.downloadState);
         } else {
             this.consoleService.log('error', "Could not download data, please check your right on the studies for these datasets.")
         }

@@ -64,6 +64,10 @@ public class NIfTIConverterService {
 		shanoirExec.dicomifier(inputFolder, outputFolder,  NiftiConverter.DICOMIFIER.getPath(), BRUKER_TO_DICOM_METHOD);
 	}
 
+	public boolean animaToNiftiExec(String imagePathToConvert) {
+		return shanoirExec.anima(imagePathToConvert);
+	}
+
 	/**
 	 * Execute the Nifti conversion
 	 *

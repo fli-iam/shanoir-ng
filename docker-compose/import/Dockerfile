@@ -42,10 +42,7 @@ RUN apt-get update -qq \
     libxext6 \
     lib32stdc++6 \
     libtiff6 \
-    libglib2.0-0:i386 \
-    locales \
-    locales-all
-
+    libglib2.0-0:i386
 
 RUN mkdir -pv /var/log/shanoir-ng-logs
 

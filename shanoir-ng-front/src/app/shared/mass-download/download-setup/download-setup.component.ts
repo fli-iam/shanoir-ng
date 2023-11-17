@@ -31,7 +31,6 @@ export class DownloadSetupComponent implements OnInit {
     form: UntypedFormGroup;
     @Input() format: Format;
     @Input() converter: number;
-    @Input() options: DownloadSetupOptions = new DownloadSetupOptions();
     @ViewChild('window') window: ElementRef;
     formatOptions: Option<Format>[] = [
         new Option<Format>('dcm', 'Dicom', null, null, null, false),
@@ -87,8 +86,4 @@ export class DownloadSetupComponent implements OnInit {
             this.cancel();
         }
     }
-}
-
-export class DownloadSetupOptions {
-    hasDicom?: boolean = true;
 }

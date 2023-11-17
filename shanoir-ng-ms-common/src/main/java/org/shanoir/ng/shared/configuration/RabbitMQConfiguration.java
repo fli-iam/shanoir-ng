@@ -172,6 +172,9 @@ public class RabbitMQConfiguration {
 	/** Queue used to make bruker to dicom conversion. */
 	public static final String BRUKER_CONVERSION_QUEUE = "bruker-conversion-queue";
 
+	/** Queue used to make anima to nifti conversion. */
+	public static final String ANIMA_CONVERSION_QUEUE = "anima-conversion-queue";
+
 	////////// IN / OUT THINGS (to be comented to make it clearer) /////////
 	private static final String ACQ_EQPT_QUEUE_NAME_OUT = "acq_eqpt_queue_from_ng";
 	
@@ -435,5 +438,11 @@ public class RabbitMQConfiguration {
 	public static Queue brukerConversionQueue() {
 		return new Queue(BRUKER_CONVERSION_QUEUE, true);
 	}
+
+	@Bean
+	public static Queue animaConversionQueue() {
+		return new Queue(ANIMA_CONVERSION_QUEUE, true);
+	}
+
 
 }

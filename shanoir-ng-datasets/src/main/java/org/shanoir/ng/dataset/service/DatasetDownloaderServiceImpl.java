@@ -72,6 +72,8 @@ public class DatasetDownloaderServiceImpl {
 
 	private static final String DCM = "dcm";
 
+	private static final String ZIP = ".zip";
+
 	private static final Logger LOG = LoggerFactory.getLogger(DatasetDownloaderServiceImpl.class);
 
 
@@ -123,10 +125,10 @@ public class DatasetDownloaderServiceImpl {
 			datasetName = datasetName.replaceAll("[^a-zA-Z0-9\\.\\-]", "_");
 
 			response.setHeader("Content-Disposition",
-					"attachment;filename=" + "Dataset_" +  datasetName + "_" + formatter.format(new DateTime().toDate()));
+					"attachment;filename=" + "Dataset_" +  datasetName + "_" + formatter.format(new DateTime().toDate()) + ZIP);
 		} else {
 			response.setHeader("Content-Disposition",
-					"attachment;filename=" + "Datasets" + formatter.format(new DateTime().toDate()));
+					"attachment;filename=" + "Datasets" + formatter.format(new DateTime().toDate()) + ZIP);
 		}
 
 		try(ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
@@ -203,10 +205,8 @@ public class DatasetDownloaderServiceImpl {
 										new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
 							}
 							workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
-							LOG.error(workFolder.getAbsolutePath());
 							List<String> files = new ArrayList<>();
 							for (File res : workFolder.listFiles()) {
-								LOG.error(res.getAbsolutePath());
 
 								if (!res.isDirectory()) {
 									// Then send workFolder to zipOutputFile

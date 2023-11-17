@@ -24,6 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -242,6 +244,17 @@ public class ShanoirExec {
 
 		LOG.debug("mcverterExec : End");
 		return result;
+	}
+
+	public boolean anima(String fileToConvert) {
+
+		String newImageName = fileToConvert.replace(".img", ".nii.gz");
+		File imgFile = new File(fileToConvert);
+
+		String[] command = { "/bin/bash", "-c", "animaConvertImage -i " + fileToConvert + " -o " + newImageName};
+		String result = this.exec(command);
+		LOG.error(result);
+		return true;
 	}
 
 	/**

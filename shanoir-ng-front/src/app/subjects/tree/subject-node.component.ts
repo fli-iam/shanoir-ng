@@ -32,6 +32,7 @@ import {
 import {Subject} from '../shared/subject.model';
 import {SubjectService} from "../shared/subject.service";
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
+import {TaskState} from "../../async-tasks/task.model";
 
 
 @Component({
@@ -51,6 +52,7 @@ export class SubjectNodeComponent implements OnChanges {
     showDetails: boolean;
     @Input() hasBox: boolean = false;
     detailsPath: string = "";
+    public downloadState: TaskState = new TaskState();
 
     constructor(
         private examinationService: ExaminationService,
@@ -167,7 +169,7 @@ export class SubjectNodeComponent implements OnChanges {
 
     download() {
         this.loading = true;
-        this.downloadService.downloadAllByStudyIdAndSubjectId(this.studyId, this.node.id)
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.studyId, this.node.id, null,  this.downloadState)
             .finally(() => this.loading = false);
     }
 }

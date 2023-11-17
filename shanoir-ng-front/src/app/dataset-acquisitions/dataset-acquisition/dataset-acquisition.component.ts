@@ -27,13 +27,10 @@ import { AcquisitionEquipmentPipe } from '../../acquisition-equipments/shared/ac
 import { EntityService } from 'src/app/shared/components/entity/entity.abstract.service';
 import {DatasetAcquisitionNode} from '../../tree/tree.model';
 import {DatasetService} from "../../datasets/shared/dataset.service";
-import {LoadingBarComponent} from "../../shared/components/loading-bar/loading-bar.component";
 import {StudyUserRight} from "../../studies/shared/study-user-right.enum";
 import {StudyRightsService} from "../../studies/shared/study-rights.service";
 import { TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
 import { MassDownloadService } from 'src/app/shared/mass-download/mass-download.service';
-import { DownloadSetupOptions } from 'src/app/shared/mass-download/download-setup/download-setup.component';
-
 
 @Component({
     selector: 'dataset-acquisition',
@@ -135,8 +132,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     downloadAll() {
-        let options: DownloadSetupOptions = new DownloadSetupOptions();
-        options.hasDicom = this.hasDicom;
-        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, null,  options, this.downloadState);
+        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, null, this.downloadState);
     }
 }
