@@ -76,13 +76,18 @@ public class RabbitMqNiftiConversionService {
 			LOG.error("Starting conversion with converter: " + converterId);
 
 			String workFolder = messageSplit[1];
+			String workFolderResult = workFolder + File.separator + "result";
+
+			if (messageSplit.length > 2) {
+				workFolderResult = messageSplit[2];
+			}
 
 			NiftiConverter converter = NiftiConverter.getType(converterId);
 
-			String workFolderResult = workFolder + File.separator + "result";
 			File result = new File(workFolderResult);
-
-			result.mkdirs();
+			if (!result.exists()) {
+				result.mkdirs();
+			}
 
 			converterService.convertToNiftiExec(Long.valueOf(converterId), workFolder, workFolderResult);
 

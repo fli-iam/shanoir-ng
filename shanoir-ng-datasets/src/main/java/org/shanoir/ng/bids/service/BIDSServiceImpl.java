@@ -1,6 +1,7 @@
 package org.shanoir.ng.bids.service;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -8,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.joda.time.DateTime;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.controler.DatasetApiController.CoordinatesSystem;
 import org.shanoir.ng.dataset.modality.BidsDataset;
@@ -37,6 +41,7 @@ import org.shanoir.ng.datasetacquisition.model.mr.MrProtocol;
 import org.shanoir.ng.datasetacquisition.model.mr.MrProtocolSCMetadata;
 import org.shanoir.ng.datasetacquisition.model.mr.MrSequenceApplication;
 import org.shanoir.ng.datasetfile.DatasetFile;
+import org.shanoir.ng.download.WADODownloaderService;
 import org.shanoir.ng.eeg.model.Channel;
 import org.shanoir.ng.eeg.model.Event;
 import org.shanoir.ng.examination.model.Examination;
@@ -44,12 +49,15 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.event.ShanoirEvent;
 import org.shanoir.ng.shared.event.ShanoirEventType;
+import org.shanoir.ng.shared.exception.ErrorModel;
 import org.shanoir.ng.shared.exception.RestServiceException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.shanoir.ng.shared.model.Study;
 import org.shanoir.ng.shared.model.Subject;
 import org.shanoir.ng.shared.model.SubjectStudy;
 import org.shanoir.ng.shared.repository.StudyRepository;
 import org.shanoir.ng.shared.repository.SubjectStudyRepository;
+import org.shanoir.ng.utils.DatasetFileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -57,10 +65,11 @@ import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriUtils;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -143,6 +152,16 @@ public class BIDSServiceImpl implements BIDSService {
 	@Autowired
 	DatasetSecurityService datasetSecurityService;
 
+	@Autowired
+	private WADODownloaderService downloader;
+
+	@Autowired
+	private RabbitTemplate rabbitTemplate;
+
+	SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+
+	DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
 	@Override
 	/**
 	 * Receives a shanoirEvent as a json object, concerning a study update => Update BIDS folder too
@@ -212,18 +231,24 @@ public class BIDSServiceImpl implements BIDSService {
 		}
 	}
 
+	@Override
+	public File getBidsFolderpath(final Long studyId, String studyName) {
+		studyName = studyName.replaceAll("[ _] ", "");
+		String filePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
+		return new File(filePath);
+	}
+
 	/**
 	 * Returns data from the study formatted as BIDS in a .zip file.
-	 * @param study the study we want to export as BIDS
+	 * @param studyId the study ID we want to export as BIDS
+	 * @param studyName the study name
 	 * @return data from the study formatted as BIDS in a .zip file.
 	 * @throws IOException
 	 */
 	@Override
 	public File exportAsBids(final Long studyId, String studyName) throws IOException {
 		// Get folder
-		studyName = studyName.replaceAll("[ _] ", ""); 
-		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
-		File workFolder = new File(tmpFilePath);
+		File workFolder = getBidsFolderpath(studyId, studyName);
 		if (workFolder.exists()) {
 			// If the file already exists, just return it
 			return workFolder;
@@ -234,6 +259,9 @@ public class BIDSServiceImpl implements BIDSService {
 
 		// Iterate over subjects got from call to SubjectApiController.findSubjectsByStudyId() and get list of subjects
 		List<Subject> subjs = getSubjectsForStudy(studyId);
+		if (org.apache.commons.collections4.CollectionUtils.isEmpty(subjs)) {
+			return baseDir;
+		}
 
 		// Sort by ID
 		subjs.sort(Comparator.comparing(Subject::getId));
@@ -267,7 +295,6 @@ public class BIDSServiceImpl implements BIDSService {
 	/**
 	 * Create the study/BASE BIDS folder.
 	 * @param studyName the study name
-	 * @param studyId the study id
 	 * @return the base folder newly created
 	 */
 	private File createBaseBidsFolder(File workFolder, String studyName) {
@@ -305,7 +332,6 @@ public class BIDSServiceImpl implements BIDSService {
 		boolean useSessionFolder = (examinationList != null && examinationList.size() > 1) ;
 		File sessionFile = null;
 		try {
-
 			sessionFile = new File(subjDir.getAbsolutePath() + "/" + subjDir.getName() + SESSIONS_TSV);
 			if (useSessionFolder) {
 				// Generate  sub-<label>_sessions.tsv file
@@ -366,7 +392,6 @@ public class BIDSServiceImpl implements BIDSService {
 	/**
 	 * Returns data from the examination formatted as BIDS in a .zip file.
 	 * @param examination the examination we want to export as BIDS
-	 * @param subjDir examination BIDS directory where we are working.
 	 * @param studyName the study name
 	 * @param subjectName the subject name
 	 * @return data from the examination formatted as BIDS in a .zip file.
@@ -434,16 +459,73 @@ public class BIDSServiceImpl implements BIDSService {
 	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
 		File dataFolder = null;
 
+		if (dataset.getDatasetAcquisition() == null && dataset.getDatasetProcessing() != null) {
+			return;
+		}
+
 		String subjectNameUpdated = subjectName.replaceAll("[ _] ", ""); 
 		String datasetFilePrefix = workDir.getName().contains(SESSION_PREFIX) ? workDir.getParentFile().getName() + "_" + workDir.getName() : workDir.getName();
 		
 		dataFolder = createSpecificDataFolder(dataset, workDir, dataFolder, subjectNameUpdated, studyName);
 
-		// Copy dataset files in the directory AS hard link to avoid duplicating files
 		List<URL> pathURLs = new ArrayList<>();
-		getDatasetFilePathURLs(dataset, pathURLs, null);
 
-		DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+		if (!"Eeg".equals(dataset.getType()) && !"BIDS".equals(dataset.getType()) && onlyHasDicom(dataset)) {
+			// DCM2NIIX
+			Long converterId = 6L;
+			if ("CT".equals(dataset.getType())) {
+				converterId = 8L;
+			}
+			File userDir = DatasetFileUtils.getUserImportDir("/tmp");
+			String tmpFilePath = userDir + File.separator + dataset.getId() + "_DCM";
+			File workFolder = new File(tmpFilePath + "-" + formatter.format(new DateTime().toDate()));
+			try {
+				DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, null);
+
+				// Create temporary workfolder with dicom files, to be able to convert them
+				workFolder.mkdirs();
+
+				downloader.downloadDicomFilesForURLs(pathURLs, workFolder, subjectName, dataset, null);
+
+				// Convert them, sending to import microservice
+				boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath() + ";" + dataFolder.getAbsolutePath());
+
+				if (!result) {
+					throw new ShanoirException("Could not convert from dicom to nifti.");
+				}
+
+				File[] newFiles = dataFolder.listFiles(new FileFilter() {
+					@Override
+					public boolean accept(File file) {
+						return file.getName().startsWith(dataset.getId() + "_");
+					}
+				});
+
+                if (newFiles != null && newFiles.length != 0) {
+					// Add the file to the scans.tsv reference
+					File scansTsvFile = getScansFile(workDir, subjectName);
+					for (File fileResult : newFiles) {
+						String buffer = fileResult.getParentFile().getName() + File.separator + fileResult.getName() + TABULATION +
+								format.format(dataset.getDatasetAcquisition().getExamination().getExaminationDate().atStartOfDay()) + TABULATION +
+								dataset.getDatasetAcquisition().getExamination().getId() +
+								NEW_LINE;
+
+						Files.write(Paths.get(scansTsvFile.getAbsolutePath()), buffer.getBytes(), StandardOpenOption.APPEND);
+					}
+				}
+
+			} catch (Exception e) {
+				LOG.error("Could not convert from dicom to nifti", e);
+				File errorfile = new File(dataFolder.getAbsolutePath() + "/error.txt");
+				Files.createFile(errorfile.toPath());
+				Files.write(errorfile.toPath(), "Could not convert data from dicom to nifti for this dataset.".getBytes());
+			} finally {
+				FileUtils.deleteQuietly(workFolder);
+			}
+			return;
+		}
+
+		getDatasetFilePathURLs(dataset, pathURLs, null);
 
 		for (Iterator<URL> iterator = pathURLs.iterator(); iterator.hasNext();) {
 			URL url =  iterator.next();
@@ -489,6 +571,15 @@ public class BIDSServiceImpl implements BIDSService {
 				LOG.error("File could not be created: {}", srcFile.getAbsolutePath(), exception);
 			}
 		}
+	}
+
+	private boolean onlyHasDicom(Dataset dataset) {
+		for (DatasetExpression expression : dataset.getDatasetExpressions()) {
+			if (DatasetExpressionFormat.NIFTI_SINGLE_FILE.equals(expression.getDatasetExpressionFormat())) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	private File createSpecificDataFolder(Dataset dataset, File workDir, File dataFolder, String subjectName, String studyName) throws IOException {
@@ -618,8 +709,6 @@ public class BIDSServiceImpl implements BIDSService {
 	 * See https://bids-specification.readthedocs.io/en/latest/04-modality-specific-files/03-electroencephalography.html
 	 * for more informations
 	 * @param dataset the dataset we want to export in BIDS
-	 * @param workFolder the examination work folder in which we are working
-	 * @param pathURLs list of file URL
 	 * @param studyName the name of associated study
 	 * @param subjectName the subject name associated
 	 * @param sessionId the session ID / examination ID associated

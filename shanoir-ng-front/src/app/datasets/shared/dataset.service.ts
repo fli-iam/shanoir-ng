@@ -24,6 +24,7 @@ import { Dataset } from './dataset.model';
 import { MrDataset } from '../dataset/mr/dataset.mr.model';
 import { DatasetUtils } from './dataset.utils';
 import {DatasetDTO, MrDatasetDTO, DatasetDTOService} from "./dataset.dto";
+import {BidsElement} from "../../bids/model/bidsElement.model";
 
 export type Format = 'nii' | 'dcm';
 
@@ -46,6 +47,18 @@ export class DatasetService extends EntityService<Dataset> {
     deleteAll(ids: number[]) {
         return this.http.request<void>('delete', this.API_URL + '/delete', { body: JSON.stringify(ids) })
                 .toPromise();
+    }
+
+    getBidsStructure(studyId: number): Promise<BidsElement> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_STRUCTURE_URL + '/studyId/' + studyId)
+            .toPromise();
+    }
+
+    refreshBidsStructure(studyId: number, studyName: string): Promise<BidsElement> {
+        if (!studyId) throw Error('study id is required');
+        return this.http.get<BidsElement>(AppUtils.BACKEND_API_BIDS_REFRESH_URL + '/studyId/' + studyId + '/studyName/' + studyName)
+            .toPromise();
     }
 
     getEntityInstance(entity: Dataset) {

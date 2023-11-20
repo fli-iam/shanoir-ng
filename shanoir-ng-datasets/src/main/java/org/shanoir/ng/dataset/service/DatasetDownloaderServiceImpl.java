@@ -183,7 +183,6 @@ public class DatasetDownloaderServiceImpl {
 							filesByAcquisitionId.putIfAbsent(dataset.getDatasetAcquisition().getId(), new ArrayList<>());
 							filesByAcquisitionId.get(dataset.getDatasetAcquisition().getId()).addAll(datasetFiles);
 						}
-
 					} else if (NII.equals(format)) {
 						// Check if we want a specific converter -> nifti reconversion
 						if (converterId != null) {
