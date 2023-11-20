@@ -510,7 +510,7 @@ public class WADODownloaderService {
 					if (count == 1) {
 						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
 					} else {
-						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + count + DCM);
+						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
 					}
 					Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
 				} else {
