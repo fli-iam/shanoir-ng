@@ -32,6 +32,7 @@ import org.shanoir.ng.examination.service.ExaminationService;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.core.model.IdName;
 import org.shanoir.ng.shared.event.ShanoirEvent;
+import org.shanoir.ng.shared.event.ShanoirEventService;
 import org.shanoir.ng.shared.event.ShanoirEventType;
 import org.shanoir.ng.shared.model.*;
 import org.shanoir.ng.shared.repository.AcquisitionEquipmentRepository;
@@ -42,7 +43,9 @@ import org.shanoir.ng.solr.service.SolrService;
 import org.shanoir.ng.study.rights.ampq.RabbitMqStudyUserService;
 import org.shanoir.ng.studycard.model.StudyCard;
 import org.shanoir.ng.studycard.repository.StudyCardRepository;
+import org.shanoir.ng.utils.KeycloakUtil;
 import org.shanoir.ng.utils.SecurityContextUtil;
+import org.shanoir.ng.vip.monitoring.model.ExecutionStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
@@ -101,6 +104,9 @@ public class RabbitMQDatasetsService {
 
 	@Autowired
 	private ExaminationService examinationService;
+
+	@Autowired
+	ShanoirEventService eventService;
 
 	@Autowired
 	private ExaminationRepository examinationRepository;
@@ -438,13 +444,23 @@ public class RabbitMQDatasetsService {
 		List<Long> datasetParentIds;
 		Boolean copy = false;
 		String res = "";
+		int count = 1;
+
 		try {
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
 			int index = data.indexOf(";");
 			Long studyId = Long.valueOf(data.substring(index + 1, data.length()));
 			datasetParentIds = convertStringToLong(data.substring(0, index).split(","));
-
+			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.COPY_DATASET_EVENT, String.valueOf(datasetParentIds), KeycloakUtil.getTokenUserId(), "Copy of dataset " + count++ + "/" + datasetParentIds.size(), ShanoirEvent.IN_PROGRESS, Float.valueOf(count/datasetParentIds.size()));
 			for (Long datasetParentId : datasetParentIds) {
+//				event.setEventType(ShanoirEventType.COPY_DATASET_EVENT);
+//				event.setObjectId(String.valueOf(datasetParentId));
+//				event.setUserId(KeycloakUtil.getTokenUserId());
+				event.setMessage("Copy of dataset " + count++ + "/" + datasetParentIds.size());
+//				event.setStatus(ShanoirEvent.IN_PROGRESS);
+				event.setProgress(Float.valueOf(count/datasetParentIds.size()));
+				eventService.publishEvent(event);
+
 				LOG.warn("=== new dataset ===");
 				LOG.warn("start requests");
 				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
@@ -474,6 +490,12 @@ public class RabbitMQDatasetsService {
 					res = "Copy worked !";
 				}
 			}
+			LOG.warn("Copy of all datasets done");
+
+			event.setMessage("Copy of dataset over.");
+			event.setStatus(ShanoirEvent.SUCCESS);
+			event.setProgress(1.0f);
+			eventService.publishEvent(event);
 			return res;
 		} catch (Exception e) {
 			LOG.error("Something went wrong during the copy. {}", e.getMessage());
