@@ -12,22 +12,22 @@
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
 
+import { formatDate } from '@angular/common';
 import { HttpResponse } from '@angular/common/http';
 import { ComponentRef, Injectable } from '@angular/core';
-import { Observable, Subject, Subscription } from 'rxjs-compat';
-import { Task, TaskState, TaskStatus } from 'src/app/async-tasks/task.model';
+import { Observable, Subscription } from 'rxjs-compat';
+import { take } from 'rxjs/operators';
+import { Task, TaskState } from 'src/app/async-tasks/task.model';
 import { Dataset } from 'src/app/datasets/shared/dataset.model';
 import { DatasetService, Format } from 'src/app/datasets/shared/dataset.service';
 import { ServiceLocator } from 'src/app/utils/locator.service';
-import { NotificationsService } from '../notifications/notifications.service';
-import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
-import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
-import { Queue } from './queue.model';
-import { take } from 'rxjs/operators';
 import { SuperPromise } from 'src/app/utils/super-promise';
-import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
+import { ConfirmDialogService } from '../components/confirm-dialog/confirm-dialog.service';
 import { ConsoleService } from '../console/console.service';
-import { formatDate } from '@angular/common';
+import { NotificationsService } from '../notifications/notifications.service';
+import { DownloadSetupAltComponent } from './download-setup-alt/download-setup-alt.component';
+import { DownloadSetupComponent, DownloadSetupOptions } from './download-setup/download-setup.component';
+import { Queue } from './queue.model';
 
 declare var JSZip: any;
 
@@ -48,6 +48,7 @@ export type Report = {
     duration?: number;
     format: Format;
     nbQueues: number;
+    unzip: boolean;
 };
 
 @Injectable()
@@ -67,7 +68,7 @@ export class MassDownloadService {
     downloadByIds(datasetIds: number[], format?: Format): Promise<void> {
         return this.openModal(format).then(ret => {
             if (ret != 'cancel') {
-                return this._downloadByIds(datasetIds, ret.format, ret.nbQueues)
+                return this._downloadByIds(datasetIds, ret.format, ret.nbQueues, ret.unzip);
             } else return Promise.resolve();
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
@@ -84,7 +85,7 @@ export class MassDownloadService {
         return this.openModal().then(ret => {
             if (ret != 'cancel') {
                 return this.datasetService.getByStudyId(studyId).then(datasets => {
-                    this._downloadDatasets(datasets, ret.format, ret.nbQueues);
+                    this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.unzip);
                 })
             } else return Promise.resolve();
         }).catch(error => {
@@ -103,7 +104,7 @@ export class MassDownloadService {
         return this.openModal(format, options).then(ret => {
             if (ret != 'cancel') {
                 return datasetsPromise.then(datasets => {
-                    this._downloadDatasets(datasets, ret.format, ret.nbQueues, downloadState);
+                    this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.unzip, downloadState);
                 })
             } else return Promise.resolve();
         }).catch(error => {
@@ -141,7 +142,7 @@ export class MassDownloadService {
         return this.openModal().then(ret => {
             if (ret != 'cancel') {
                 return this.datasetService.getByStudyIdAndSubjectId(studyId, subjectId).then(datasets => {
-                    return this._downloadDatasets(datasets, ret.format, ret.nbQueues).then(r => {
+                    return this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.unzip).then(r => {
                         return r;
                     });
                 })
@@ -149,13 +150,15 @@ export class MassDownloadService {
         });
     }
 
-    private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4, task?: Task, report?: Report, parentHandle?: FileSystemDirectoryHandle): Promise<void> {
+    private _downloadByIds(datasetIds: number[], format: Format, nbQueues: number = 4, unzip: boolean= false, task?: Task, report?: Report, parentHandle?: FileSystemDirectoryHandle): Promise<void> {
         if (datasetIds.length == 0) return;
         let directoryHandlePromise: Promise<FileSystemDirectoryHandle>;
         if (parentHandle) {
             directoryHandlePromise = Promise.resolve(parentHandle);
         } else {
-            directoryHandlePromise = this.getFolderHandle();
+            directoryHandlePromise = this.getFolderHandle()
+                // add a subdirectory
+                .then(handle => this.makeRootSubdirectory(handle, datasetIds.length));
         }
         return directoryHandlePromise.then(parentFolderHandle => { // ask the user's parent directory
             if (!task) task = this.createTask(datasetIds.length);
@@ -166,11 +169,11 @@ export class MassDownloadService {
                     this.notificationService.pushLocalTask(task);
                     const start: number = Date.now();
                     let ids = [...datasetIds]; // copy array
-                    if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, format, nbQueues);
+                    if (!report) report = this.initReport(datasetIds, task.id, parentFolderHandle.name, format, nbQueues, unzip);
                     let promises: Promise<void>[] = [];
                     for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
-                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task)
+                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, unzip)
                         );
                     }
                     return Promise.all(promises).then(() => {
@@ -189,6 +192,11 @@ export class MassDownloadService {
                 }
             });
         }).catch(error => { /* the user clicked 'cancel' in the choose directory window */ });
+    }
+    
+    makeRootSubdirectory(handle: FileSystemDirectoryHandle, nbDatasets: number): Promise<FileSystemDirectoryHandle> {
+        const dirName: string = 'Shanoir-download_' + nbDatasets + 'ds_' + formatDate(new Date(), 'dd-MM-YYYY_HH\'h\'mm', 'en-US'); 
+        return handle.getDirectoryHandle(dirName, { create: true })
     }
 
     private _downloadAlt(inputDef: 'studyId' | 'datasetIds', input: number | number[], format: Format, downloadState?: TaskState): any {
@@ -263,9 +271,13 @@ export class MassDownloadService {
         });
     }
 
-    private _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4, downloadState?: TaskState): Promise<void> {
+    private _downloadDatasets(datasets: Dataset[], format: Format, nbQueues: number = 4, unzip: boolean = false, downloadState?: TaskState): Promise<void> {
         if (datasets.length == 0) return;
-        return this.getFolderHandle().then(parentFolderHandle => { // ask the user's parent directory
+        return this.getFolderHandle()
+        // add a subdirectory
+            .then(handle => this.makeRootSubdirectory(handle, datasets.length))
+            .then(parentFolderHandle => { // ask the user's parent directory
+
             let task: Task = this.createTask(datasets.length);
             if (downloadState) downloadState.status = task.status; 
             return this.downloadQueue.waitForTurn().then(releaseQueue => {
@@ -274,12 +286,12 @@ export class MassDownloadService {
                     task.lastUpdate = new Date();
                     const start: number = Date.now();
                     let ids = [...datasets.map(ds => ds.id)];
-                    let report: Report = this.initReport(datasets.map(ds => ds.id), task.id, parentFolderHandle.name, format, nbQueues);
+                    let report: Report = this.initReport(datasets.map(ds => ds.id), task.id, parentFolderHandle.name, format, nbQueues, unzip);
                     let promises: Promise<void>[] = [];
                     let j = 0;
                     for (let queueIndex = 0; queueIndex < nbQueues; queueIndex++) { // build the dl queues
                         promises.push(
-                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, datasets)
+                            this.recursiveSave(ids.shift(), format, parentFolderHandle, ids, report, task, unzip, datasets)
                         );
                     }
                     return Promise.all(promises).then(() => {
@@ -302,7 +314,7 @@ export class MassDownloadService {
     private _downloadFromReport(report: Report, task: Task, parentHandle: FileSystemDirectoryHandle) {
         if (!report) throw new Error('report can\'t be null !');
         const noSuccessIds: number[] = Object.keys(report.list).filter(key => report.list[key].status != 'SUCCESS').map(key => parseInt(key));
-        this._downloadByIds(noSuccessIds, report.format, report.nbQueues, task, report, parentHandle);
+        this._downloadByIds(noSuccessIds, report.format, report.nbQueues, report.unzip, task, report, parentHandle);
     }
 
     private handleEnd(task: Task, report: Report, start: number) {
@@ -310,42 +322,41 @@ export class MassDownloadService {
         report.duration = Date.now() - start;
         task.report = JSON.stringify(report, null, 4);
         if (report.nbError > 0) {
-            task.status = -1;
+            task.status = 3;
             const tab: string = '- ';
-            task.message = 'download failed in ' + report.duration + 'ms.\n'
+            task.message = (report.nbSuccess > 0 ? 'download partially succeed in ' : 'download failed in ') + report.duration + 'ms.\n'
                 + tab + report.nbSuccess + ' datasets were successfully downloaded\n'
                 + tab + report.nbError + ' datasets are (at least partially) in error and files could be missing.\n';
             JSON.stringify(report);
         } else {
             task.status = task.status == -1 ? -1 : 1;
-            task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' files saved in the selected directory';
+            task.message = 'download completed in ' + report.duration + 'ms, ' + report.nbSuccess + ' datasets saved in the selected directory';
         }
 
         this.notificationService.pushLocalTask(task);
     }
 
-    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, datasets?: Dataset[]): Promise<void> {
+    private recursiveSave(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, remainingIds: number[], report: Report, task: Task, unzip: boolean = false, datasets?: Dataset[]): Promise<void> {
         if (!id) return Promise.resolve();
-        return this.saveDataset(id, format, userFolderHandle, report, task, datasets?.find(ds => ds.id == id)).then(() => {
+        return this.saveDataset(id, format, userFolderHandle, report, task, unzip, datasets?.find(ds => ds.id == id)).then(() => {
             if (remainingIds.length > 0) {
-                return this.recursiveSave(remainingIds.shift(), format, userFolderHandle, remainingIds, report, task, datasets);
+                return this.recursiveSave(remainingIds.shift(), format, userFolderHandle, remainingIds, report, task, unzip, datasets);
             } else {
                 return Promise.resolve();
             }
         });
     }
 
-    private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, dataset?: Dataset): Promise<void> {
+    private saveDataset(id: number, format: Format, userFolderHandle: FileSystemDirectoryHandle, report: Report, task: Task, unzip: boolean = false, dataset?: Dataset): Promise<void> {
         const metadataPromise: Promise<Dataset> = (dataset?.id == id && dataset.datasetAcquisition?.examination?.subject) ? Promise.resolve(dataset) : this.datasetService.get(id, 'lazy');
         const downloadPromise: Promise<HttpResponse<Blob>> = this.datasetService.downloadToBlob(id, format);
         return Promise.all([metadataPromise, downloadPromise]).then(([dataset, httpResponse]) => {
             const blob: Blob = httpResponse.body;
             const filename: string = this.getFilename(httpResponse) || 'dataset_' + id;
-            const path: string = this.buildDatasetPath(dataset) + filename;
 
             // Check ERRORS file in zip
-            var zip = new JSZip();
-            const errorsCheckPromise: Promise<void> = zip.loadAsync(httpResponse.body).then(dataFiles => {
+            var zip: any = new JSZip();
+            const unzipPromise: Promise<any> = zip.loadAsync(httpResponse.body).then(dataFiles => {
                 if (dataFiles.files['ERRORS.json']) {
                     return dataFiles.files['ERRORS.json'].async('string').then(content => {
                         const errorsJson: any = JSON.parse(content);
@@ -353,20 +364,42 @@ export class MassDownloadService {
                         report.list[id].error = errorsJson;
                         report.list[id].errorTime = Date.now();
                         task.lastUpdate = new Date();
-                        task.message = 'saving dataset n°' + id + ' failed';
                         task.status = 5;
                     });
                 } else {
                     report.list[id].status = 'SUCCESS';
                     delete report.list[id].error;
                     delete report.list[id].errorTime;
-                    task.lastUpdate = new Date();
-                    task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
                 }
+                return dataFiles;
             });
 
-            return Promise.all([errorsCheckPromise, this.writeMyFile(path, blob, userFolderHandle)]).then(() => null);
-
+            if (unzip) {
+                return unzipPromise.then(data => {
+                    if (data) {
+                        return Promise.all(
+                            Object.entries(data.files)?.map(([name, file]) => {
+                                task.message = 'unzipping file ' + name + ' from dataset n°' + id;
+                                this.notificationService.pushLocalTask(task);
+                                const path: string = this.buildAcquisitionPath(dataset) + filename.replace('.zip', '') + '/' + name;
+                                let type: string;
+                                if (name.endsWith('.json') || name.endsWith('.txt')) type = 'string';
+                                else type = 'blob';
+                                return (file as {async: (string) => Promise<Blob>}).async(type).then(blob => {
+                                    task.message = 'saving file ' + name + ' from dataset n°' + id;
+                                    this.notificationService.pushLocalTask(task);
+                                    return this.writeMyFile(path, blob, userFolderHandle);
+                                });
+                            })
+                        );
+                    }
+                });
+            } else {
+                const path: string = this.buildAcquisitionPath(dataset) + filename;
+                task.message = 'saving dataset n°' + id;
+                this.notificationService.pushLocalTask(task);
+                return Promise.all([unzipPromise, this.writeMyFile(path, blob, userFolderHandle)]).then(() => null);
+            }
         }).catch(reason => {
             report.list[id].status = 'ERROR';
             report.list[id].error = reason;
@@ -376,8 +409,11 @@ export class MassDownloadService {
             task.status = 5;
         }).finally(() => {
             if (report.list[id].status == 'SUCCESS') {
+                task.lastUpdate = new Date();
+                task.message = '(' + report.nbSuccess + '/' + report.requestedDatasetIds.length + ') dataset n°' + id + ' successfully saved';
                 report.nbSuccess++;
             } else if (report.list[id].status == 'ERROR') {
+                task.message = 'saving dataset n°' + id + ' failed';
                 report.nbError++;
             }
             task.report = JSON.stringify(report, null, 4);
@@ -388,12 +424,8 @@ export class MassDownloadService {
         });
     }
 
-    private buildDatasetPath(dataset: Dataset): string {
-        let currentDate = new Date();
-        return  "Datasets-"
-                + formatDate(currentDate, "yyyyMMddHHmmss", "en-US")
-                + '/'
-                + dataset.datasetAcquisition?.examination?.subject?.name
+    private buildAcquisitionPath(dataset: Dataset): string {
+        return dataset.datasetAcquisition?.examination?.subject?.name
                 + '_' + dataset.datasetAcquisition?.examination?.subject?.id
                 + '/'
                 + dataset.datasetAcquisition?.examination?.comment
@@ -438,7 +470,7 @@ export class MassDownloadService {
         // Create a FileSystemWritableFileStream to write to.
         const writable: FileSystemWritableFileStream = await fileHandle.createWritable();
         // Write the contents of the file to the stream.
-        await writable.write(contents);
+        await writable.write({type: 'write', data: contents});
         // Close the file and write the contents to disk.
         await writable.close();
     }
@@ -460,7 +492,7 @@ export class MassDownloadService {
         return contentDispHeader?.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length).replace('/', '_');
     }
 
-    private initReport(datasetIds: number[], taskId: number, folderName: string, format: Format, nbQueues: number): Report {
+    private initReport(datasetIds: number[], taskId: number, folderName: string, format: Format, nbQueues: number, unzip: boolean): Report {
         let report: Report = {
             taskId: taskId,
             folderName: folderName,
@@ -470,7 +502,8 @@ export class MassDownloadService {
             nbError: 0,
             nbSuccess: 0,
             format : format,
-            nbQueues: nbQueues
+            nbQueues: nbQueues,
+            unzip: unzip
         };
         datasetIds.forEach(id => report.list[id] = { status: 'QUEUED' });
         return report;
@@ -497,7 +530,7 @@ export class MassDownloadService {
         return task;
     }
 
-    private openModal(format?: Format, options?: DownloadSetupOptions): Promise<{format: Format, nbQueues: number} | 'cancel'> {
+    private openModal(format?: Format, options?: DownloadSetupOptions): Promise<{format: Format, nbQueues: number, unzip: boolean} | 'cancel'> {
         // @ts-ignore
         if (window.showDirectoryPicker) { // test compatibility
             let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);

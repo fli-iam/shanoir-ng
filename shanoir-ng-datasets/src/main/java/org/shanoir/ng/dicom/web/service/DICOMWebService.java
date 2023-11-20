@@ -295,7 +295,7 @@ public class DICOMWebService {
 		HttpPost post = new HttpPost(rejectURL);
 		post.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON);
 		try (CloseableHttpResponse response = httpClient.execute(post)) {
-			if (response.getCode() == HttpStatus.NO_CONTENT.value()) {
+			if (HttpStatus.OK.value() == response.getCode()) {
 				LOG.info("Rejected from PACS: " + url);
 			} else {
 				LOG.error(response.getCode() + ": Could not reject instance from PACS: " + response.getReasonPhrase()
@@ -304,8 +304,8 @@ public class DICOMWebService {
 				+ "for rejectURL: " + rejectURL);
 			}
 		} catch (IOException e) {
-			LOG.error(e.getMessage(), e);
-			throw new ShanoirException(e.getMessage());
+			LOG.error("Could not reject instance from PACS: for rejectURL: " + rejectURL, e);
+			throw new ShanoirException("Could not reject instance from PACS: for rejectURL: " + url, e);
 		}
 		// STEP 2: Delete from the PACS
 		HttpDelete delete = new HttpDelete(deleteUrl);
