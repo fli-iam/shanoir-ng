@@ -53,7 +53,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
         
-      - name: [USERS] Build & push Docker image
+      - name: USERS - Build & push Docker image
         uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/users
@@ -61,7 +61,7 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}/users:latest, ${{ env.IMAGE_NAME }}/users:${{ env.TAG }}
           
-      - name: [STUDIES] Build & push Docker image
+      - name: STUDIES - Build & push Docker image
         uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/studies
@@ -69,7 +69,7 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}/studies:latest, ${{ env.IMAGE_NAME }}/studies:${{ env.TAG }}
           
-      - name: [IMPORT] Build & push Docker image
+      - name: IMPORT - Build & push Docker image
         uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/import
@@ -77,7 +77,7 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}/import:latest, ${{ env.IMAGE_NAME }}/import:${{ env.TAG }}
           
-      - name: [DATASETS] Build & push Docker image
+      - name: DATASETS  - Build & push Docker image
         uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/datasets
@@ -85,7 +85,7 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}/datasets:latest, ${{ env.IMAGE_NAME }}/datasets:${{ env.TAG }}
 
-      - name: [PRECLINICAL] Build & push Docker image
+      - name: PRECLINICAL - Build & push Docker image
         uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/preclinical
@@ -93,7 +93,7 @@ jobs:
           push: true
           tags: ${{ env.IMAGE_NAME }}/preclinical:latest, ${{ env.IMAGE_NAME }}/preclinical:${{ env.TAG }}
           
-      - name: [NGINX] Build & push Docker image
+      - name:  NGINX - Build & push Docker image
         uses: docker/build-push-action@v2
         with:
           context: ./docker-compose/nginx
