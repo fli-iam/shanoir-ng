@@ -125,6 +125,27 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
 					</span>
 				</li>
 
+                <li *ngIf="executionMonitoring.startDate">
+                    <label class="right-col">Start date</label>
+                    <span class="right-col">
+						{{ formatDate(executionMonitoring.startDate) }}
+					</span>
+                </li>
+
+                <li *ngIf="executionMonitoring.endDate">
+                    <label class="right-col">End date</label>
+                    <span class="right-col">
+						{{ formatDate(executionMonitoring.endDate) }}
+					</span>
+                </li>
+
+                <li *ngIf="getDuration()">
+                    <label class="right-col">Duration</label>
+                    <span class="right-col">
+						{{ getDuration() }}
+					</span>
+                </li>
+
                 <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="downloadStdout()">Download stdout logs<i class="fas fa-download"></i></button>
                 <button type="button" class="right-icon" i18n="Buttons|Download button label@@downloadButton" (click)="downloadStderr()">Download stderr logs<i class="fas fa-download"></i></button>
 
