@@ -107,7 +107,7 @@ public class QualityCardResult extends ArrayList<QualityCardResultEntry> {
 
     public boolean hasFailedValid() {
         for (QualityCardResultEntry entry : this) {
-            if (entry.isFaildValid()) {
+            if (entry.isFailedValid()) {
                 return true;
             }
         }

@@ -214,7 +214,7 @@ public class StudyCardDICOMConditionOnDatasets extends StudyCardCondition implem
                 }
             } else if (tagType.isTextual()) {
                 if (!this.getOperation().isTextual()) {
-                    throw new IllegalArgumentException("Study card processing : operation " + this.getOperation() + " is not compatible with dicom tag " 
+                    throw new IllegalArgumentException("Study card processing : operation " + this.getOperation() + " is not a textual operation and is not compatible with the textual dicom tag " 
                             + getDicomTagCodeAndLabel(this.getDicomTag()) + " of type " + tagType + "(condition id : " + this.getId() + ")");
                 } else {
                     String stringValue = dicomAttributes.getString(this.getDicomTag());
