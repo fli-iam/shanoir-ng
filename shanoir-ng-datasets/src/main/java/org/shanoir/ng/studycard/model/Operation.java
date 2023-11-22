@@ -60,7 +60,7 @@ public enum Operation {
 	}
 	
 	public boolean isTextual() {
-		return this.equals(CONTAINS) || this.equals(DOES_NOT_CONTAIN) || this.equals(ENDS_WITH) || this.equals(DOES_NOT_END_WITH) || this.equals(EQUALS) || this.equals(STARTS_WITH) || this.equals(DOES_NOT_START_WITH);
+		return this.equals(CONTAINS) || this.equals(DOES_NOT_CONTAIN) || this.equals(ENDS_WITH) || this.equals(DOES_NOT_END_WITH) || this.equals(EQUALS) || this.equals(NOT_EQUALS) || this.equals(STARTS_WITH) || this.equals(DOES_NOT_START_WITH);
 	}
 
 }
