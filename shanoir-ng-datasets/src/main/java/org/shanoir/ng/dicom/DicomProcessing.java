@@ -26,7 +26,7 @@ import org.shanoir.ng.importer.dto.Dataset;
 import org.shanoir.ng.importer.dto.DatasetFile;
 import org.shanoir.ng.importer.dto.Serie;
 import org.shanoir.ng.importer.dto.Study;
-import org.shanoir.ng.shared.exception.PacsException;
+import org.shanoir.ng.shared.exception.ShanoirException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,7 +47,7 @@ public class DicomProcessing {
 		}
 	}
 
-    public ExaminationAttributes getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws PacsException {
+    public ExaminationAttributes getDicomExaminationAttributes(Study study, Boolean isEnhanced) throws ShanoirException {
 		ExaminationAttributes attributes = new ExaminationAttributes();
 		if (study != null) {
 			for (Serie serie : study.getSeries()) {
@@ -57,7 +57,7 @@ public class DicomProcessing {
 		return attributes;
     }
 
-	public ExaminationAttributes getDicomExaminationAttributes(Study study) throws PacsException {
+	public ExaminationAttributes getDicomExaminationAttributes(Study study) throws ShanoirException {
 		ExaminationAttributes attributes = new ExaminationAttributes();
 		if (study != null) {
 			for (Serie serie : study.getSeries()) {
@@ -67,19 +67,19 @@ public class DicomProcessing {
 		return attributes;
     }
 
-	public AcquisitionAttributes getDicomAcquisitionAttributes(Serie serie, Boolean isEnhanced) throws PacsException {
+	public AcquisitionAttributes getDicomAcquisitionAttributes(Serie serie, Boolean isEnhanced) throws ShanoirException {
 		AcquisitionAttributes attributes = new AcquisitionAttributes();
 		for (Dataset dataset : serie.getDatasets()) {
 			try {
 				attributes.addDatasetAttributes(dataset.hashCode(), getDicomObjectAttributes(serie.getFirstDatasetFileForCurrentSerie(), isEnhanced));
 			} catch (IOException e) {
-				throw new PacsException("Could not get dicom metadata for serie " + serie.getSopClassUID(), e);
+				throw new ShanoirException("Could not read dicom metadata from file for serie " + serie.getSopClassUID(), e);
 			}
 		}
 		return attributes;
 	}
 
-	public AcquisitionAttributes getDicomAcquisitionAttributes(Serie serie) throws PacsException {
+	public AcquisitionAttributes getDicomAcquisitionAttributes(Serie serie) throws ShanoirException {
 		return getDicomAcquisitionAttributes(serie, serie.getIsEnhanced());
 	}
 

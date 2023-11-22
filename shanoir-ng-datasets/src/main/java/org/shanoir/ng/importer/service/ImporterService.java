@@ -294,16 +294,12 @@ public class ImporterService {
     }
 
     private QualityCardResult checkQuality(Examination examination, ImportJob importJob) throws ShanoirException {
-        ExaminationAttributes dicomAttributes = null;
-        try {            
-            Study firstStudy = importJob.getFirstStudy();
-            if (firstStudy == null) {
-                throw new ShanoirException("The given import job does not provide any serie. Examination : " + examination.getId());
-            }
-            dicomAttributes = dicomProcessing.getDicomExaminationAttributes(firstStudy);
-        } catch (PacsException e) {
-            throw new ShanoirException("Unable to retrieve dicom attributes for examination " + examination.getId(), e);
+        ExaminationAttributes dicomAttributes = null;          
+        Study firstStudy = importJob.getFirstStudy();
+        if (firstStudy == null) {
+            throw new ShanoirException("The given import job does not provide any serie. Examination : " + examination.getId());
         }
+        dicomAttributes = dicomProcessing.getDicomExaminationAttributes(firstStudy);
         List<QualityCard> qualityCards = qualityCardService.findByStudy(examination.getStudyId());
         QualityCardResult qualityResult = new QualityCardResult();
         for (QualityCard qualityCard : qualityCards) {
