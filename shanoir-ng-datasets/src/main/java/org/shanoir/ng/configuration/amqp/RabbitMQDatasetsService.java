@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.shanoir.ng.bids.service.BIDSService;
+import org.shanoir.ng.dataset.dto.RelatedDatasetDTO;
 import org.shanoir.ng.dataset.dto.StudyStorageVolumeDTO;
 import org.shanoir.ng.dataset.model.Dataset;
 import org.shanoir.ng.dataset.repository.DatasetRepository;
@@ -435,7 +436,14 @@ public class RabbitMQDatasetsService {
 		}
 	}
 
-	@RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY)
+	/**
+	 * Iterate through a list of dataset to copy each into a new study
+	 * @param data The list of datasets id to copy and the studyId to copy in
+	 *             ex: 112,113,114,115;58 (datasetId,dsId,dsId,dsId;studyId)
+	 *
+	 * @return
+	 */
+	@RabbitListener(queues = RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE)
 	@RabbitHandler
 	@Transactional
 	public String copyDatasetsToStudy(final String data) {
@@ -444,24 +452,32 @@ public class RabbitMQDatasetsService {
 		List<Long> datasetParentIds;
 		Boolean copy = false;
 		String res = "";
-		int count = 1;
+		int count = 0;
+		float progress = 0f;
 
 		try {
+			RelatedDatasetDTO dto = objectMapper.readValue(data, RelatedDatasetDTO.class);
+			Long userId = dto.getUserId();
 			SecurityContextUtil.initAuthenticationContext("ROLE_ADMIN");
-			int index = data.indexOf(";");
-			Long studyId = Long.valueOf(data.substring(index + 1, data.length()));
-			datasetParentIds = convertStringToLong(data.substring(0, index).split(","));
-			ShanoirEvent event = new ShanoirEvent(ShanoirEventType.COPY_DATASET_EVENT, String.valueOf(datasetParentIds), KeycloakUtil.getTokenUserId(), "Copy of dataset " + count++ + "/" + datasetParentIds.size(), ShanoirEvent.IN_PROGRESS, Float.valueOf(count/datasetParentIds.size()));
+			Long studyId = dto.getStudyId();
+			datasetParentIds = dto.getDatasetIds();
+
+			ShanoirEvent event = new ShanoirEvent(
+					ShanoirEventType.COPY_DATASET_EVENT,
+					null,
+					userId,
+					"Copy of dataset " + count++ + "/" + datasetParentIds.size() + " to study " + studyId,
+					ShanoirEvent.IN_PROGRESS,
+					Float.valueOf(count/datasetParentIds.size())
+			);
+
 			for (Long datasetParentId : datasetParentIds) {
-//				event.setEventType(ShanoirEventType.COPY_DATASET_EVENT);
-//				event.setObjectId(String.valueOf(datasetParentId));
-//				event.setUserId(KeycloakUtil.getTokenUserId());
+				progress += 1f / datasetParentIds.size();
 				event.setMessage("Copy of dataset " + count++ + "/" + datasetParentIds.size());
-//				event.setStatus(ShanoirEvent.IN_PROGRESS);
-				event.setProgress(Float.valueOf(count/datasetParentIds.size()));
+				event.setProgress(progress);
 				eventService.publishEvent(event);
 
-				LOG.warn("=== new dataset ===");
+				LOG.warn("[CopyDatasets] Start copy for dataset " + datasetParentId + " to study " + studyId);
 				LOG.warn("start requests");
 				List<Dataset> dsCopiedList = datasetRepository.findBySourceId(datasetParentId);
 				Dataset datasetParent = datasetService.findById(datasetParentId);
@@ -470,14 +486,14 @@ public class RabbitMQDatasetsService {
 				if (datasetParent.getSourceId() != null) {
 					copy = false;
 					res = "Selected dataset is a copy, please pick the original dataset.";
-					LOG.warn("Selected dataset is a copy, please pick the original dataset.");
+					LOG.warn("[CopyDatasets] Selected dataset is a copy, please pick the original dataset.");
 				} else if (dsCopiedList.isEmpty()) {
 					copy = true;
 				} else {
 					for (Dataset d : dsCopiedList) {
-						if (d.getSourceId().equals(datasetParentId) && d.getStudyId().equals(studyId)) {
+						if (d != null && d.getSourceId().equals(datasetParentId) && d.getStudyId() != null && d.getStudyId().equals(studyId)) {
 							res = "Dataset already exists in this study, copy aborted.";
-							LOG.warn("Dataset already exists in this study, copy aborted.");
+							LOG.warn("[CopyDatasets] Dataset already exists in this study, copy aborted.");
 							copy = false;
 							break;
 						} else {
@@ -490,9 +506,8 @@ public class RabbitMQDatasetsService {
 					res = "Copy worked !";
 				}
 			}
-			LOG.warn("Copy of all datasets done");
 
-			event.setMessage("Copy of dataset over.");
+			event.setMessage("Copy of datasets successful.");
 			event.setStatus(ShanoirEvent.SUCCESS);
 			event.setProgress(1.0f);
 			eventService.publishEvent(event);
@@ -503,7 +518,7 @@ public class RabbitMQDatasetsService {
 		}
 	}
 
-	private List<Long> convertStringToLong(String[] str) {
+	private List<Long> convertStringToLong(String str) {
 		return Stream.of(str)
 				.map(String::trim)
 				.map(Long::parseLong)

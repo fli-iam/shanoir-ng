@@ -43,7 +43,7 @@ export class Task extends Entity {
     private _status: TaskStatus;
     private _message: string;
     private _progress: number;
-    private _eventType: string;
+    _eventType: string;
     eventLabel: string;
     objectId: number;
     route: string;
@@ -102,7 +102,7 @@ export class Task extends Entity {
     }
 
     stringify(): string {
-        return JSON.stringify(this, this.FIELDS); 
+        return JSON.stringify(this, this.FIELDS);
     }
 
     clone(): Task {

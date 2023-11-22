@@ -294,37 +294,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                     });
                 }
                 this.firstPageLoaded = true;
-                /**
-                 * TODO:
-                 * - stocker solrResultPage dans une autre variable contentPage
-                 * - à chaque nouvelle page chargée, on met à jour contentPage
-                 * - on filtre contentPage pour ne conserver que les row correspondant a des datasets sélectionnés
-                 * - on vérifie que pour chaque row restante, on a bien les droits d'admin
-                 * - si c'est le cas, on autorise la copie
-                 */
                 this.contentPage.push(solrResultPage);
-                // for (let i of solrResultPage.content) {
-                //     console.log("solrResultPage content : " + i.datasetId + " / " + i.studyName);
-                //     console.log("is admin for id = " + i.studyId + " ? " + this.hasAdminRight(Number(i.studyId)));
-                //     if (this.selectedDatasetIds.has(Number(i.datasetId))) {
-                //         this.selectedStudies.push(i.studyId);
-                //     }
-                // }
-
-                // console.log("content.size : " + this.contentPage.length);
-                // this.contentPage.forEach( item => {
-                //     for (let i of item.content) {
-                //         console.log("content studyName : " + i.studyName);
-                //     }
-                //
-                // });
-
-                // this.contentPage.filter(x => {
-                //     if (x.content.row.data.selectedDatasetIds.includes(this.selectedDatasetIds)) {
-                //
-                //     }
-                // })
-
 
                 return solrResultPage;
             }).catch(reason => {

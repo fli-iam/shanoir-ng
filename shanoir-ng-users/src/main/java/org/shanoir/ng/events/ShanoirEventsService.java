@@ -34,15 +34,19 @@ public class ShanoirEventsService {
 	public void addEvent(ShanoirEvent event) {
 		// Call repository
 		repository.save(event);
-
+		System.out.println("event : " + event.getEventType());
 		// Push notification to UI
-		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType())) {
+		if (ShanoirEventType.IMPORT_DATASET_EVENT.equals(event.getEventType()) || ShanoirEventType.COPY_DATASET_EVENT.equals(event.getEventType())) {
 			sendSseEventsToUI(event);
 		}
 	}
 
-	public List<ShanoirEvent> getEventsByUserAndType(Long userId, String eventType) {
-		return Utils.toList(repository.findByUserIdAndEventType(userId, eventType));
+	public List<ShanoirEvent> getEventsByUserAndType(Long userId, String... eventType) {
+		List<String> list = new ArrayList<String>();
+		for (String type : eventType) {
+			list.add(type);
+		}
+		return Utils.toList(repository.findByUserIdAndEventTypeIn(userId, list));
 	}
 
 	/**
@@ -60,6 +64,7 @@ public class ShanoirEventsService {
 	 * @param notification the event to send
 	 */
 	public void sendSseEventsToUI(ShanoirEvent notification) {
+		System.out.println("send event to UI : " + notification.getMessage());
         List<SseEmitter> sseEmitterListToRemove = new ArrayList<>();
         AsyncTaskApiController.emitters.forEach((SseEmitter emitter) -> {
             try {

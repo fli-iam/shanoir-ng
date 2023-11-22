@@ -48,6 +48,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     @Output() rowClick: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() rowEdit: EventEmitter<Object> = new EventEmitter<Object>();
     @Output() pageLoaded: EventEmitter<Page<any>> = new EventEmitter();
+    @Output() registerRefresh: EventEmitter<(number?) => void> = new EventEmitter();
     @Input() disableCondition: (item: any) => boolean;
     @Input() maxResults: number = 20;
     @Input() subRowsKey: string;
@@ -110,6 +111,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
             this.checkCompactMode();
         }));
         this.checkCompactMode();
+        this.registerRefresh.emit(this.refresh.bind(this));
     }
 
     private computeItemVars() {

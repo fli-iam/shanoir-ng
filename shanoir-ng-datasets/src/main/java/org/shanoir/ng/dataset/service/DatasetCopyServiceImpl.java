@@ -53,23 +53,21 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
     @Override
     public void moveDataset(Dataset ds, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
         try {
-            LOG.warn("moveDataset for ds.id = " + ds.getId());
             Long oldDsId = ds.getId();
             DatasetAcquisition newAcq = null;
             if (ds.getDatasetAcquisition() != null &&  ds.getDatasetAcquisition().getId() != null) {
+                // Check for known DatasetAcquisition in map...
                 Long oldAcqId = ds.getDatasetAcquisition().getId();
                 if (acqMap.get(ds.getDatasetAcquisition().getId()) != null) {
                     newAcq = acqMap.get(ds.getDatasetAcquisition().getId());
-                    LOG.warn("    acq found by map with id: " + oldAcqId);
                 } else {
+                    // ... then in source ...
                     newAcq = datasetAcquisitionRepository.findBySourceIdAndExaminationStudy_Id(oldAcqId, studyId);
-                    if (newAcq == null) LOG.warn("    acq not found");
-                    else LOG.warn("    acq found by request with id: " + oldAcqId + " and studyId = " + studyId);
 
                 }
                 if (newAcq == null) {
-                    newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap, acqMap);
-                    LOG.warn("    acq found by creation");
+                    // ... creating the DatasetAcquisition in case it doesn't exist yet
+                    newAcq = moveAcquisition(ds.getDatasetAcquisition(), studyId, examMap);
                 }
 
                 List<DatasetExpression> dsExList = ds.getDatasetExpressions();
@@ -87,33 +85,28 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
                 newDs.setSourceId(oldDsId);
                 entityManager.flush();
                 acqMap.put(oldAcqId, newAcq);
-                LOG.warn("- dataset created with id = " + newDs.getId());
+                LOG.warn("[CopyDatasets] New dataset created with id = " + newDs.getId());
 
             } else if (ds.getDatasetProcessing() != null) {
-                LOG.warn("Dataset selected is a processed dataset, it can't be copied.");
+                LOG.error("[CopyDatasets] Dataset selected is a processed dataset, it can't be copied.");
             }
         } catch (Exception e) {
-            LOG.error("Error in the Dataset service", e);
+            LOG.error("[CopyDatasets] Error in the Dataset service", e);
             throw e;
         }
     }
 
-    public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Long studyId, Map<Long, Examination> examMap, Map<Long, DatasetAcquisition> acqMap) {
-        LOG.warn("moveAcquisition for acq.id = " + acq.getId());
+    public DatasetAcquisition moveAcquisition(DatasetAcquisition acq, Long studyId, Map<Long, Examination> examMap) {
         Long oldAcqId = acq.getId();
         Examination newExam = null;
         if (acq.getExamination() != null &&  acq.getExamination().getId() != null) {
             if (examMap.get(acq.getExamination().getId()) != null) {
                 newExam = examMap.get(acq.getExamination().getId());
-                LOG.warn("    exam found by map with id : " + acq.getExamination().getId());
             } else {
                 newExam = examinationRepository.findBySourceIdAndStudy_Id(acq.getExamination().getId(), studyId);
-                if (newExam == null) LOG.warn("    exam not found");
-                else  LOG.warn("    exam found by request with id : " + acq.getExamination().getId());
             }
             if (newExam == null) {
-                newExam = moveExamination(acq.getExamination(), studyId, examMap);
-                LOG.warn("    exam found by creation");
+                newExam = moveExamination(acq.getExamination(), studyId);
             }
         }
         acq.setDatasets(null);
@@ -125,12 +118,11 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         newAcquisition.setExamination(newExam);
         newAcquisition.setSourceId(oldAcqId);
         examMap.put(acq.getExamination().getId(), newExam);
-        LOG.warn("- acquisition created with id = " + newAcquisition.getId());
+        LOG.warn("[CopyDatasets] New dataset acquisition created with id = " + newAcquisition.getId());
         return newAcquisition;
     }
 
-    public Examination moveExamination(Examination examination, Long studyId, Map<Long, Examination> examMap) {
-        LOG.warn("moveExamination for acq.id = " + examination.getId());
+    public Examination moveExamination(Examination examination, Long studyId) {
         Long oldExamId = examination.getId();
 
         examination.setDatasetAcquisitions(null);
@@ -141,7 +133,7 @@ public class DatasetCopyServiceImpl implements DatasetCopyService {
         entityManager.detach(examination);
         Examination newExamination = examinationService.save(examination);
         newExamination.setSourceId(oldExamId);
-        LOG.warn("- examination created with id = " + newExamination.getId());
+        LOG.warn("[CopyDatasets] New examination created with id = " + newExamination.getId());
         return newExamination;
     }
 

@@ -146,13 +146,13 @@ public interface StudyApi {
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT')")
 	ResponseEntity<String> copyDatasetsToStudy(
 			@Parameter(name = "Dataset ids to copy", required = true)
-			@RequestParam(value = "datasetIds", required = true) String datasetIds,
+			@RequestParam(value = "datasetIds", required = true) List<Long> datasetIds,
 			@Parameter(name = "Study id to copy in", required = true)
 			@RequestParam(value = "studyId", required = true) String studyId,
 			@Parameter(name = "center id of datasets", required = true)
-			@RequestParam(value = "centerIds", required = true) String centerIds,
+			@RequestParam(value = "centerIds", required = true) List<Long> centerIds,
 			@Parameter(name = "subject id of datasets", required = true)
-			@RequestParam(value = "subjectIds", required = true) String subjectIds);
+			@RequestParam(value = "subjectIds", required = true) List<Long> subjectIds);
 
 
 	@Operation(summary = "", description = "If exists, returns the sizes of the study files detailed by format corresponding to the given id")

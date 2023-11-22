@@ -17,6 +17,8 @@ package org.shanoir.ng.study.service;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 
 /**
  * Study service.
@@ -26,9 +28,9 @@ import org.springframework.stereotype.Service;
 public interface RelatedDatasetService {
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	String addCenterAndCopyDatasetToStudy(String datasetIds, String studyId, String centerIds);
+	String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds);
 
 	@PreAuthorize("hasAnyRole('ADMIN', 'EXPERT', 'USER')")
-	void addSubjectStudyToNewStudy(String subjectIds, String studyId);
+	void addSubjectStudyToNewStudy(List<Long> subjectIds, Long studyId);
 
 }

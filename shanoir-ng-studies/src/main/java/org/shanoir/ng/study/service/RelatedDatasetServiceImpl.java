@@ -25,6 +25,7 @@ import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
 import org.shanoir.ng.shared.exception.EntityNotFoundException;
 import org.shanoir.ng.shared.exception.MicroServiceCommunicationException;
 import org.shanoir.ng.shared.security.rights.StudyUserRight;
+import org.shanoir.ng.study.dto.RelatedDatasetDTO;
 import org.shanoir.ng.study.model.Study;
 import org.shanoir.ng.study.model.StudyUser;
 import org.shanoir.ng.study.repository.StudyRepository;
@@ -56,9 +57,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Implementation of study service.
- * 
- * @author msimon
+ * Implementation of RelatedDataset service.
  *
  */
 @Component
@@ -76,16 +75,17 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 	private SubjectRepository subjectRepository;
 	@Autowired
 	private RabbitTemplate rabbitTemplate;
+	@Autowired
+	private ObjectMapper objectMapper;
 	private static final Logger LOG = LoggerFactory.getLogger(RelatedDatasetServiceImpl.class);
 
 	@Transactional
 	@Override
-	public void addSubjectStudyToNewStudy(String subjectIds, String id) {
-		Study study = studyService.findById(Long.valueOf(id));
+	public void addSubjectStudyToNewStudy(List<Long> subjectIds, Long studyId) {
+		Study study = studyService.findById(Long.valueOf(studyId));
 		Boolean toAdd = true;
-		for (String subjectId : subjectIds.split(",")) {
-			Subject subject = subjectRepository.findById(Long.valueOf(subjectId)).orElse(null);
-
+		Iterable<Subject> subjects = subjectRepository.findAllById(subjectIds);
+		for (Subject subject : subjects) {
 			List<SubjectStudy> subjectStudyList = study.getSubjectStudyList();
 
 			for (SubjectStudy subjectStudy : subjectStudyList) {
@@ -110,11 +110,9 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 	}
 
 	@Override
-	public String addCenterAndCopyDatasetToStudy(String datasetIds, String id, String centerIds) {
+	public String addCenterAndCopyDatasetToStudy(List<Long> datasetIds, Long studyId, List<Long> centerIds) {
 		String result = "";
 		Long userId = KeycloakUtil.getTokenUserId();
-		Long studyId = Long.valueOf(id);
-
 		Study study = studyService.findById(studyId);
 		StudyUser studyUser = studyUserRepository.findByUserIdAndStudy_Id(userId, studyId);
 		if (studyUser == null) {
@@ -127,7 +125,7 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 				addCenterToStudy(study, centerIds);
 
 				try {
-					result = copyDatasetToStudy(datasetIds, id);
+					result = copyDatasetToStudy(datasetIds, studyId, userId);
 				} catch (MicroServiceCommunicationException e) {
 					throw new RuntimeException(e);
 				}
@@ -139,33 +137,32 @@ public class RelatedDatasetServiceImpl implements RelatedDatasetService {
 		}
 	}
 
-	private void addCenterToStudy(Study study, String centerIds) {
-		Long studyId = study.getId();
-		for (String centerId : centerIds.split(",")) {
-			if (!centerRepository.findByStudy(studyId).contains(centerId)) {
+	private void addCenterToStudy(Study study, List<Long> centerIds) {
+		Iterable<Center> centers = centerRepository.findAllById(centerIds);
+		for (Center center : centers) {
+			List<StudyCenter> studyCenterList = study.getStudyCenterList();
 
-				List<StudyCenter> studyCenterList = study.getStudyCenterList();
-				Center center = centerRepository.findById(Long.valueOf(centerId)).orElse(null);
-				List<Center> centersOfStudy = centerRepository.findByStudy(studyId);
-
-				if (center != null && !centersOfStudy.contains(center)) {
-					StudyCenter centerToAdd = new StudyCenter();
-					centerToAdd.setStudy(study);
-					centerToAdd.setCenter(center);
-					centerToAdd.setSubjectNamePrefix(null);
-					studyCenterList.add(centerToAdd);
-					study.setMonoCenter(false);
-					study.setStudyCenterList(studyCenterList);
-					studyRepository.save(study);
-				}
+			if (center != null && !studyCenterList.contains(center)) {
+				StudyCenter centerToAdd = new StudyCenter();
+				centerToAdd.setStudy(study);
+				centerToAdd.setCenter(center);
+				centerToAdd.setSubjectNamePrefix(null);
+				studyCenterList.add(centerToAdd);
+				study.setMonoCenter(false);
+				study.setStudyCenterList(studyCenterList);
+				studyRepository.save(study);
 			}
 		}
 	}
 
-	private String copyDatasetToStudy(String datasetIds, String studyId) throws MicroServiceCommunicationException {
+	private String copyDatasetToStudy(List<Long> datasetIds, Long studyId, Long userId) throws MicroServiceCommunicationException {
+		RelatedDatasetDTO dto = new RelatedDatasetDTO();
+		dto.setStudyId(studyId);
+		dto.setDatasetIds(datasetIds);
+		dto.setUserId(userId);
 		try {
-			return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY, datasetIds + ";" + studyId);
-		} catch (AmqpException e) {
+			return (String) rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.COPY_DATASETS_TO_STUDY_QUEUE, objectMapper.writeValueAsString(dto));
+		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException(
 					"Error while communicating with datasets MS to copy datasets to study.", e);
 		}

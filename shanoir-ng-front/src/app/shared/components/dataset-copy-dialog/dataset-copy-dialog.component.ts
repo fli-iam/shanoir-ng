@@ -89,6 +89,7 @@ export class DatasetCopyDialogComponent {
                 formData.set('centerIds', Array.from(this.centerIds).join(","));
                 formData.set('datasetSubjectIds', Array.from(this.datasetSubjectIds).join(","));
                 formData.set('subjectIds', Array.from(this.subjectIds).join(","));
+                console.log("formData : ", formData);
                 return this.http.post<string>(AppUtils.BACKEND_API_STUDY_URL + '/copyDatasets', formData, { responseType: 'text' as 'json'})
                     .toPromise()
                     .then(res => {
