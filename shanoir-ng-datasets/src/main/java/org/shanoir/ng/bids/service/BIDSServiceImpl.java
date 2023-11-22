@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.shanoir.ng.dataset.DatasetDescription;
 import org.shanoir.ng.dataset.controler.DatasetApiController.CoordinatesSystem;
 import org.shanoir.ng.dataset.modality.*;
@@ -312,11 +313,7 @@ public class BIDSServiceImpl implements BIDSService {
 				.append(NEW_LINE);
 				
 				for (Examination examination : examinationList) {
-					String sessionLabel = "" + examination.getId();
-					sessionLabel += (examination.getComment() != null ? "-" + examination.getComment() : "");
-			
-					sessionLabel = sessionLabel.replaceAll(" ", "");
-					sessionLabel = sessionLabel.replaceAll("_", "");
+					String sessionLabel = this.getSessionLabel(examination);
 			
 					buffer.append(sessionLabel).append(TABULATION)
 					.append(examination.getExaminationDate()).append(TABULATION)
@@ -329,7 +326,7 @@ public class BIDSServiceImpl implements BIDSService {
 			File examDir = subjDir;
 			for (Examination exam : examinationList) {
 				if (useSessionFolder) {
-					examDir = createExaminationFolder(exam, subjDir, sessionFile);
+					examDir = createExaminationFolder(exam, subjDir);
 				}
 				exportAsBids(exam, examDir, studyName, subject.getName());
 			}
@@ -348,10 +345,9 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private File createSubjectFolder(String subjectName, final int index, final File baseDir) throws IOException {
 		// Generate another ID here ?
-		subjectName = subjectName.replaceAll(" ", "");
-		subjectName = subjectName.replaceAll("_", "");
+		subjectName = subjectName.replaceAll("[^a-zA-Z0-9]+", "");
 
-		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + "-" + subjectName);
+		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + subjectName);
 		if (!subjectFolder.exists()) {
 			subjectFolder.mkdirs();
 		}
@@ -398,16 +394,11 @@ public class BIDSServiceImpl implements BIDSService {
 	 * Create the session/examination BIDS folder
 	 * @param examination the examination for which we want to create the folder
 	 * @param subjectDir the parent folder
-	 * @param sessionFile the session file to complete
 	 * @return the newly created folder
 	 * @throws IOException 
 	 */
-	private File createExaminationFolder(final Examination examination, final File subjectDir, File sessionFile) throws IOException {
-		String sessionLabel = "" + examination.getId();
-		sessionLabel += (examination.getComment() != null ? "-" + examination.getComment() : "");
-
-		sessionLabel = sessionLabel.replaceAll(" ", "");
-		sessionLabel = sessionLabel.replaceAll("_", "");
+	private File createExaminationFolder(final Examination examination, final File subjectDir) throws IOException {
+		String sessionLabel = this.getSessionLabel(examination);
 
 		// Create exam/session folder
 		File examFolder = new File(subjectDir.getAbsolutePath() + File.separator + SESSION_PREFIX +  sessionLabel);
@@ -415,6 +406,16 @@ public class BIDSServiceImpl implements BIDSService {
 			examFolder.mkdirs();
 		}
 		return examFolder;
+	}
+
+	private String getSessionLabel(Examination examination) {
+		String label = "" + examination.getId();
+		if(!StringUtils.isBlank(examination.getComment())){
+			label += examination.getComment();
+		}
+
+		label = label.replaceAll("[^a-zA-Z0-9]+", "");
+		return label;
 	}
 
 	/**
