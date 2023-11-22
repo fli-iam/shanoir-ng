@@ -67,7 +67,7 @@ public abstract class DatasetAcquisition extends AbstractEntity {
 	
 	/** Datasets. */
 	@JsonIgnore
-	@OneToMany(fetch = FetchType.EAGER, mappedBy = "datasetAcquisition", cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "datasetAcquisition", cascade = CascadeType.ALL)
 	private List<Dataset> datasets;
 
 	/** Related Examination. */
