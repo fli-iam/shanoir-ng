@@ -226,7 +226,7 @@ public class WADODownloaderService {
 			this.extractDICOMZipFromMHTMLFile(responseBody, extractInstanceUID(url),  name, zipOutputStream);
 			return name + DCM;
 		} catch (IOException | MessagingException e) {
-			//LOG.error("A dicom file could not be downloaded from the pacs:", e);
+			LOG.error("A dicom file could not be downloaded from the pacs:", e);
 			throw new ZipPacsFileException(e);
 		} catch (HttpClientErrorException e) {
 			//LOG.error("A dicom file could not be downloaded from the pacs:", e);
@@ -532,12 +532,10 @@ public class WADODownloaderService {
 			int count = multipart.getCount();
 			if (count == 1) {
 				BodyPart bodyPart = multipart.getBodyPart(0);
-				InputStream stream = bodyPart.getInputStream();
 				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
 					ZipEntry entry = new ZipEntry(name + DCM);
-					entry.setSize(bodyPart.getSize());
 					zipOutputStream.putNextEntry(entry);
-					zipOutputStream.write(bodyPart.getInputStream().readAllBytes());
+					bodyPart.getInputStream().transferTo(zipOutputStream);
 					zipOutputStream.closeEntry();
 				} else {
 					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
@@ -547,9 +545,8 @@ public class WADODownloaderService {
 					BodyPart bodyPart = multipart.getBodyPart(i);
 					if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
 						ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
-						entry.setSize(responseBody.length);
 						zipOutputStream.putNextEntry(entry);
-						zipOutputStream.write(responseBody);
+						bodyPart.getInputStream().transferTo(zipOutputStream);
 						zipOutputStream.closeEntry();
 					} else {
 						throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
