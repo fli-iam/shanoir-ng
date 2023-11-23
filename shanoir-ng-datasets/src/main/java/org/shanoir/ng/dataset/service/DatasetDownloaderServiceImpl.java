@@ -196,6 +196,7 @@ public class DatasetDownloaderServiceImpl {
 							// Convert them, sending to import microservice
 							boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
 							if (!result) {
+								response.setContentType(null);
 								throw new RestServiceException(
 										new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Nifti conversion failed", null));
 							}
@@ -222,6 +223,7 @@ public class DatasetDownloaderServiceImpl {
 							datasetFiles.addAll(files);
 						}
 					} else {
+						response.setContentType(null);
 						throw new RestServiceException(
 								new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 										"Please choose either nifti, dicom or eeg file type.", null));
@@ -231,6 +233,7 @@ public class DatasetDownloaderServiceImpl {
 						failingDatasets.add(dataset);
 					}
 				} catch (OutOfMemoryError error) {
+					response.setContentType(null);
 					LOG.error("Out of memory error while copying files: ", error);
 					throw new RestServiceException(
 							new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -238,6 +241,7 @@ public class DatasetDownloaderServiceImpl {
 									error));
 				} catch (Exception e) {
 					// Here we just keep in memory the list of failing files
+					response.setContentType(null);
 					LOG.error("Error while copying files: ", e);
 					failingDatasets.add(dataset);
 				}
@@ -246,6 +250,7 @@ public class DatasetDownloaderServiceImpl {
 			// Check emptiness => no data at all
 			if (isEmpty) {
 				// Folder is empty => return an error
+				response.setContentType(null);
 				LOG.error("No files could be found for the dataset(s).");
 				throw new RestServiceException(
 						new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
@@ -280,6 +285,7 @@ public class DatasetDownloaderServiceImpl {
 			event.setStatus(ShanoirEvent.SUCCESS);
 			eventService.publishEvent(event);
 		} catch (Exception e) {
+			response.setContentType(null);
 			LOG.error("Unexpected error while downloading dataset files.", e);
 			throw new RestServiceException(
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
