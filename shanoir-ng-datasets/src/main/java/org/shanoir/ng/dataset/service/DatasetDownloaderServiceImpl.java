@@ -142,8 +142,8 @@ public class DatasetDownloaderServiceImpl {
 		response.setHeader("Content-Disposition", "attachment;filename=" + zipFileName);
 
 		List<SerieError> serieErrors = new ArrayList<>();
-		ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream());
-		try {
+
+		try (ZipOutputStream zipOutputStream = new ZipOutputStream(response.getOutputStream())) {
 			List<URL> pathURLs = new ArrayList<>();
 			switch (format) {
 				case DCM:
@@ -229,12 +229,12 @@ public class DatasetDownloaderServiceImpl {
 			LOG.error("Error while retrieveing dataset data.", e);
 			DatasetError error = new DatasetError(datasetId, e.getMessage());
 			error.setSerieErrors(serieErrors);
-			writeErrorFileInZip(error, zipOutputStream);
+			ZipOutputStream zipOutputStreamAsError = new ZipOutputStream(response.getOutputStream());
+			writeErrorFileInZip(error, zipOutputStreamAsError);
 			throw new RestServiceException(e,
 					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
 							"No files could be found for this dataset(s)."));
 		} finally {
-			zipOutputStream.close();
 			FileUtils.deleteQuietly(workFolder);
 		}
 	}
