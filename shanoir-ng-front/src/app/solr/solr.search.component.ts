@@ -498,7 +498,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
         let downloadable = true;
         selection.forEach((datasetid) => {
-            let selected: any = this.table.page.content.find((element: any) => element.id == datasetid);
+            let selected: any = this.table?.page?.content?.find((element: any) => element.id == datasetid);
             let studyId
             if (selected) {
                 studyId = selected.studyId;
