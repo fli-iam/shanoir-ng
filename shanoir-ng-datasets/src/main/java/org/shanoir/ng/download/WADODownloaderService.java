@@ -532,7 +532,6 @@ public class WADODownloaderService {
 			int count = multipart.getCount();
 			if (count == 1) {
 				BodyPart bodyPart = multipart.getBodyPart(0);
-				InputStream stream = bodyPart.getInputStream();
 				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
 					ZipEntry entry = new ZipEntry(name + DCM);
 					entry.setSize(bodyPart.getSize());
@@ -547,9 +546,9 @@ public class WADODownloaderService {
 					BodyPart bodyPart = multipart.getBodyPart(i);
 					if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
 						ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
-						entry.setSize(responseBody.length);
+						entry.setSize(bodyPart.getSize());
 						zipOutputStream.putNextEntry(entry);
-						zipOutputStream.write(responseBody);
+						zipOutputStream.write(bodyPart.getInputStream().readAllBytes());
 						zipOutputStream.closeEntry();
 					} else {
 						throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
