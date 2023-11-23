@@ -152,12 +152,10 @@ public class WADODownloaderService {
 		List<String> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
 			String url = ((URL) iterator.next()).toString();
-			String instanceUID;
 			// handle and check at first for WADO-RS URLs by "/instances/"
 			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
-			if (indexInstanceUID > 0) {
-				instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
-			} else {
+			// WADO-URI link found in database
+			if (indexInstanceUID <= 0) {
 				// handle and check secondly for WADO-URI URLs by "objectUID="
 				// instanceUID == objectUID
 				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
@@ -169,8 +167,8 @@ public class WADODownloaderService {
 				} else {
 					url = wadoURItoWadoRS(url);
 				}
-				instanceUID = extractInstanceUID(url);
 			}
+			String instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
 			// Build name
 			String name = buildFileName(subjectName, dataset, datasetFilePath, instanceUID);
 			// Download and zip
