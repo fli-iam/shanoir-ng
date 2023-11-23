@@ -157,7 +157,7 @@ export class ExaminationComponent extends EntityComponent<Examination> {
     }
 
     downloadAll() {
-        this.downloadService.downloadAllByExaminationId(this.examination?.id,null, this.downloadState);
+        this.downloadService.downloadAllByExaminationId(this.examination?.id,this.downloadState);
     }
 
     openViewer() {

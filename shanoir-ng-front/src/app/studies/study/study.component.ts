@@ -651,11 +651,11 @@ export class StudyComponent extends EntityComponent<Study> {
     }
 
     downloadAll() {
-        this.downloadService.downloadAllByStudyId(this.study.id, null,  this.studyDownloadState);
+        this.downloadService.downloadAllByStudyId(this.study.id,  this.studyDownloadState);
     }
 
     downloadSelected() {
-        this.downloadService.downloadByIds(this.selectedDatasetIds, null, this.studyDownloadState);
+        this.downloadService.downloadByIds(this.selectedDatasetIds, this.studyDownloadState);
     }
 
     storageVolumePrettyPrint(size: number) {

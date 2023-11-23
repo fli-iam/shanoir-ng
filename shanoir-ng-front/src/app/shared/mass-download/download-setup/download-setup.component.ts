@@ -14,9 +14,11 @@
 
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { Format } from 'src/app/datasets/shared/dataset.service';
+import {DatasetService, Format} from 'src/app/datasets/shared/dataset.service';
 import { GlobalService } from '../../services/global.service';
 import { Option } from '../../select/select.component';
+import {Dataset} from "../../../datasets/shared/dataset.model";
+import {DatasetType} from "../../../datasets/shared/dataset-type.model";
 
 @Component({
     selector: 'download-setup',
@@ -26,11 +28,20 @@ import { Option } from '../../select/select.component';
 
 export class DownloadSetupComponent implements OnInit {
 
-    @Output() go: EventEmitter<{format: Format, converter: number, nbQueues: number, unzip: boolean}> = new EventEmitter();
+    @Output() go: EventEmitter<{format: Format, converter: number, nbQueues: number, unzip: boolean, datasets: Dataset[]}> = new EventEmitter();
     @Output() close: EventEmitter<void> = new EventEmitter();
+    @Input() studyId: number;
+    @Input() examinationId: number;
+    @Input() acquisitionId: number;
+    @Input() subjectId: number;
+    @Input() datasetIds: number[];
     form: UntypedFormGroup;
-    @Input() format: Format;
-    @Input() converter: number;
+    loading: boolean;
+    format: Format;
+    converter: number;
+    datasets: Dataset[];
+    hasDicom: boolean = false;
+
     @ViewChild('window') window: ElementRef;
 
     formatOptions: Option<Format>[] = [
@@ -48,7 +59,9 @@ export class DownloadSetupComponent implements OnInit {
         new Option<number>(8, 'MRICONVERTER', null, null, null, false),
     ];
 
-    constructor(private formBuilder: UntypedFormBuilder, globalService: GlobalService) {
+    constructor(private formBuilder: UntypedFormBuilder,
+                globalService: GlobalService,
+                private datasetService: DatasetService) {
         globalService.onNavigate.subscribe(() => {
             this.cancel();
         });
@@ -56,6 +69,50 @@ export class DownloadSetupComponent implements OnInit {
 
     ngOnInit(): void {
         this.form = this.buildForm();
+        this.loading = true;
+        if (this.studyId) {
+            if (this.subjectId) {
+                this.datasetService.getByStudyIdAndSubjectId(this.studyId, this.subjectId).then(
+                    datasetsResult => {
+                        this.datasets = datasetsResult;
+                        this.hasDicom = this.hasDicomInDatasets(this.datasets);
+                        this.loading = false;
+                    }
+                );
+            } else {
+                this.datasetService.getByStudyId(this.studyId).then(
+                    datasetsResult => {
+                        this.datasets = datasetsResult;
+                        this.hasDicom = this.hasDicomInDatasets(this.datasets);
+                        this.loading = false;
+                    }
+                );
+            }
+        } else if (this.examinationId) {
+            this.datasetService.getByExaminationId(this.examinationId).then(
+                datasetsResult => {
+                    this.datasets = datasetsResult;
+                    this.hasDicom = this.hasDicomInDatasets(this.datasets);
+                    this.loading = false;
+                }
+            );
+        } else if (this.acquisitionId) {
+            this.datasetService.getByAcquisitionId(this.acquisitionId).then(
+                datasetsResult => {
+                    this.datasets = datasetsResult;
+                    this.hasDicom = this.hasDicomInDatasets(this.datasets);
+                    this.loading = false;
+                }
+            );
+        } else if (this.datasetIds) {
+            this.datasetService.getByIds(new Set(this.datasetIds)).then(
+                datasetsResult => {
+                    this.datasets = datasetsResult;
+                    this.hasDicom = this.hasDicomInDatasets(this.datasets);
+                    this.loading = false;
+                }
+            );
+        }
     }
 
     private buildForm(): UntypedFormGroup {
@@ -73,7 +130,8 @@ export class DownloadSetupComponent implements OnInit {
             format: this.form.get('format').value,
             converter: (this.form.get('format').value == 'nii') ? this.form.get('converter').value : null,
             nbQueues: this.form.get('nbQueues').value,
-            unzip: this.form.get('unzip').value
+            unzip: this.form.get('unzip').value,
+            datasets: this.datasets
         });
     }
 
@@ -87,4 +145,14 @@ export class DownloadSetupComponent implements OnInit {
             this.cancel();
         }
     }
+    // This method checks if the list of given datasets has dicom or not.
+    private hasDicomInDatasets(datasets: Dataset[]) {
+        for (let dataset of datasets) {
+            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.datasetProcessing == null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

@@ -369,12 +369,12 @@ public class ShanoirExec {
 
 	/**
 	 * This method converts a dicom using MRIConvert
+	 * This method is synchronized as we use xvfb
 	 * @param inputFolder the nput folder
 	 * @param outputFolder the output folder
 	 * @return the olg to display.
 	 */
-	public String mriConverter(String inputFolder, String outputFolder, String mriConverterPath) {
-
+	public synchronized String mriConverter(String inputFolder, String outputFolder, String mriConverterPath) {
 		String logs = "mriConverter: ";
 		String execString = "";
 

@@ -134,7 +134,7 @@ export class ExaminationNodeComponent implements OnChanges {
             return;
         }
         this.downloading = true;
-        this.massDownloadService.downloadAllByExaminationId(this.node.id, null, this.downloadState)
+        this.massDownloadService.downloadAllByExaminationId(this.node.id, this.downloadState)
             .then(() => this.downloading = false);
 
     }

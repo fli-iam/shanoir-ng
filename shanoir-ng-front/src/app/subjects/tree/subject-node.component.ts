@@ -169,7 +169,7 @@ export class SubjectNodeComponent implements OnChanges {
 
     download() {
         this.loading = true;
-        this.downloadService.downloadAllByStudyIdAndSubjectId(this.studyId, this.node.id, null,  this.downloadState)
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.studyId, this.node.id, this.downloadState)
             .finally(() => this.loading = false);
     }
 }

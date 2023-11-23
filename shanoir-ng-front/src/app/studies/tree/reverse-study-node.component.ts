@@ -153,7 +153,7 @@ export class ReverseStudyNodeComponent implements OnChanges {
 
     download() {
         this.loading = true;
-        this.downloadService.downloadAllByStudyIdAndSubjectId(this.node.id, this.subjectId, null,  this.downloadState)
+        this.downloadService.downloadAllByStudyIdAndSubjectId(this.node.id, this.subjectId, this.downloadState)
             .finally(() => this.loading = false);
     }
 }

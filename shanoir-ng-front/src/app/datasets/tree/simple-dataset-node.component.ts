@@ -59,12 +59,12 @@ export class SimpleDatasetNodeComponent implements OnChanges {
         this.menuOpened = !this.menuOpened;
     }
 
-    download(format?: Format) {
+    download() {
         if (this.loading) {
             return;
         }
         this.loading = true;
-        this.downloadService.downloadByIds([this.node.id], format, this.downloadState)
+        this.downloadService.downloadByIds([this.node.id], this.downloadState)
             .then(() => this.loading = false);
     }
 

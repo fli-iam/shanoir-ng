@@ -158,7 +158,7 @@ export class DatasetAcquisitionNodeComponent implements OnChanges, OnDestroy {
         }
 
         datasetIdsReady.then(() => {
-            this.massDownloadService.downloadAllByAcquisitionId(this.node.id, null, this.downloadState);
+            this.massDownloadService.downloadAllByAcquisitionId(this.node.id, this.downloadState);
         });
     }
 

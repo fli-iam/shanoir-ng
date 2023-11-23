@@ -3,6 +3,7 @@ package org.shanoir.ng.service;
 import java.io.File;
 import java.util.Collections;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.shanoir.ng.model.Dataset;
 import org.shanoir.ng.model.NiftiConverter;
 import org.shanoir.ng.shared.configuration.RabbitMQConfiguration;
@@ -89,7 +90,11 @@ public class RabbitMqNiftiConversionService {
 				result.mkdirs();
 			}
 
-			converterService.convertToNiftiExec(Long.valueOf(converterId), workFolder, workFolderResult);
+			boolean conversionResult = converterService.convertToNiftiExec(Long.valueOf(converterId), workFolder, workFolderResult);
+
+			if (!conversionResult || ArrayUtils.isEmpty(result.listFiles())) {
+				return false;
+			}
 
 			if (NiftiConverter.DICOMIFIER.equals(converter)) {
 				Dataset dataset = new Dataset();

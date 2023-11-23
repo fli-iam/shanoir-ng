@@ -132,6 +132,6 @@ export class DatasetAcquisitionComponent extends EntityComponent<DatasetAcquisit
     }
 
     downloadAll() {
-        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, null, this.downloadState);
+        this.downloadService.downloadAllByAcquisitionId(this.datasetAcquisition?.id, this.downloadState);
     }
 }

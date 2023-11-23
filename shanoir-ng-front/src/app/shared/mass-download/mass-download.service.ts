@@ -67,54 +67,39 @@ export class MassDownloadService {
         private dialogService: ConfirmDialogService) {
     }
 
-    downloadAllByStudyId(studyId: number, format?: Format, downloadState?: TaskState): Promise<void> {
-        return this.datasetService.getByStudyId(studyId).then(datasets => this.downloadByDatasets(datasets, format, downloadState));
+    downloadAllByStudyId(studyId: number, downloadState?: TaskState): Promise<void> {
+        return this.downloadByDatasets(studyId, null, null,  null,  null, downloadState);
     }
 
-    downloadAllByExaminationId(examinationId: number, format?: Format, downloadState?: TaskState): Promise<void> {
-        return this.datasetService.getByExaminationId(examinationId).then(datasets => this.downloadByDatasets(datasets, format, downloadState));
+    downloadAllByExaminationId(examinationId: number, downloadState?: TaskState): Promise<void> {
+        return this.downloadByDatasets(null, examinationId, null,  null,  null, downloadState);
     }
 
-    downloadAllByAcquisitionId(acquisitionId: number, format?: Format, downloadState?: TaskState) {
-        return this.datasetService.getByAcquisitionId(acquisitionId).then(datasets => this.downloadByDatasets(datasets, format, downloadState));
+    downloadAllByAcquisitionId(acquisitionId: number, downloadState?: TaskState) {
+        return this.downloadByDatasets(null, null, acquisitionId,  null,  null, downloadState);
     }
 
-    downloadAllByStudyIdAndSubjectId(studyId: number, subjectId: number, format?: Format, downloadState?: TaskState): Promise<void> {
-        return this.datasetService.getByStudyIdAndSubjectId(studyId, subjectId).then(datasets => this.downloadByDatasets(datasets, format, downloadState));
+    downloadAllByStudyIdAndSubjectId(studyId: number, subjectId: number, downloadState?: TaskState): Promise<void> {
+        return this.downloadByDatasets(studyId, null, null,  subjectId,  null, downloadState);
     }
 
-    downloadByIds(datasetIds: number[], format?: Format, downloadState?: TaskState): Promise<void> {
-        return this.datasetService.getByIds(new Set(datasetIds)).then(datasets => this.downloadByDatasets(datasets, format, downloadState));
+    downloadByIds(datasetIds: number[], downloadState?: TaskState): Promise<void> {
+        return this.downloadByDatasets(null, null, null,  null,  datasetIds, downloadState);
     }
 
     /**
      * This method is the generic entry to download multiple datasets.
      */
-    private downloadByDatasets(datasets: Dataset[], format?: Format, downloadState?: TaskState): Promise<void> {
-
-        // Here check if we have DICOM datasets or not
-        let hasDicoms: boolean = this.hasDicom(datasets);
-        if (!hasDicoms || format == "dcm") {
-
-            // Directly download if there are no dicom
-            // And do not zip by default
-            if (window.showDirectoryPicker) {
-                return this._downloadDatasets(datasets, format, 4, null , false, downloadState);
-            } else {
-                return this._downloadAlt(datasets.map(ds => ds.id), format, null, downloadState);
-            }
-        }
-
-        // Otherwise, we have dicom, we have to choose
-        return this.openModal(format).then(ret => {
+    private downloadByDatasets(studyId: number, examinationId: number, acquisitionId: number, subjectId: number, datasetIds: number[], downloadState?: TaskState): Promise<void> {
+        return this.openModal(studyId, examinationId, acquisitionId, subjectId, datasetIds).then(ret => {
             if (ret != 'cancel') {
-                return this._downloadDatasets(datasets, ret.format, ret.nbQueues, ret.converter ,ret.unzip, downloadState);
+                return this._downloadDatasets(ret.datasets, ret.format, ret.nbQueues, ret.converter ,ret.unzip, downloadState);
             } else return Promise.resolve();
         }).catch(error => {
             if (error == this.BROWSER_COMPAT_ERROR_MSG) {
-                return this.openAltModal(format).then(ret => {
+                return this.openAltModal(studyId, examinationId, acquisitionId, subjectId, datasetIds).then(ret => {
                     if (ret != 'cancel') {
-                        return this._downloadAlt(datasets.map(ds => ds.id), ret.format, ret.converter, downloadState);
+                        return this._downloadAlt(ret.datasets.map(ds => ds.id), ret.format, ret.converter, downloadState);
                     } else return Promise.resolve();
                 });
             } else throw error;
@@ -444,21 +429,28 @@ export class MassDownloadService {
         return task;
     }
 
-    private openModal(format?: Format): Promise<{format: Format, nbQueues: number, converter: number, unzip: boolean} | 'cancel'> {
+    private openModal(studyId: number, examinationId: number, acquisitionId: number, subjectId: number, datasetIds: number[]): Promise<{format: Format, nbQueues: number, converter: number, unzip: boolean, datasets: Dataset[]} | 'cancel'> {
         // @ts-ignore
         if (window.showDirectoryPicker) { // test compatibility
             let modalRef: ComponentRef<DownloadSetupComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupComponent);
-            modalRef.instance.format = format;
+            modalRef.instance.studyId = studyId;
+            modalRef.instance.examinationId = examinationId;
+            modalRef.instance.acquisitionId = acquisitionId;
+            modalRef.instance.subjectId = subjectId;
+            modalRef.instance.datasetIds = datasetIds;
             return this.waitForEnd(modalRef);
         } else {
             return Promise.reject(this.BROWSER_COMPAT_ERROR_MSG);
         }
     }
 
-    private openAltModal(format?: Format, compatibilityMsg: boolean = true): Promise<{format: Format, converter: number} | 'cancel'> {
+    private openAltModal(studyId: number, examinationId: number, acquisitionId: number, subjectId: number, datasetIds: number[]): Promise<{format: Format, converter: number, datasets: Dataset[]} | 'cancel'> {
         let modalRef: ComponentRef<DownloadSetupAltComponent> = ServiceLocator.rootViewContainerRef.createComponent(DownloadSetupAltComponent);
-        modalRef.instance.format = format;
-        modalRef.instance.compatibilityMessage = compatibilityMsg;
+        modalRef.instance.studyId = studyId;
+        modalRef.instance.examinationId = examinationId;
+        modalRef.instance.acquisitionId = acquisitionId;
+        modalRef.instance.subjectId = subjectId;
+        modalRef.instance.datasetIds = datasetIds;
         return this.waitForEnd(modalRef);
     }
 
@@ -516,16 +508,6 @@ export class MassDownloadService {
             this.consoleService.log('error', 'Can\'t parse the status from the recorded message', [e, task?.report]);
             return null;
         }
-    }
-
-    // This method checks if the list of given datasets has dicom or not.
-    private hasDicom(datasets: Dataset[]) {
-        for (let dataset of datasets) {
-            if (dataset.type != DatasetType.Eeg && dataset.type != DatasetType.BIDS && dataset.datasetProcessing == null) {
-                return true;
-            }
-        }
-        return false;
     }
 }
 

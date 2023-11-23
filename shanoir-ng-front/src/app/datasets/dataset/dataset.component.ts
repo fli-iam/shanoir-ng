@@ -114,7 +114,7 @@ export class DatasetComponent extends EntityComponent<Dataset> {
     }
 
     downloadAll() {
-        this.downloadService.downloadByIds([this.dataset?.id], null,  this.downloadState);
+        this.downloadService.downloadByIds([this.dataset?.id], this.downloadState);
     }
 
     public loadDicomInMemory() {

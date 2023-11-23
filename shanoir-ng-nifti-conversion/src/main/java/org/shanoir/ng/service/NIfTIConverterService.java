@@ -76,9 +76,9 @@ public class NIfTIConverterService {
 	 * @param output    folder
 	 *
 	 */
-	public void convertToNiftiExec(Long converterId, String inputFolder, String outputFolder) {
+	public boolean convertToNiftiExec(Long converterId, String inputFolder, String outputFolder) {
 		if (converterId == null) {
-			return;
+			return false;
 		}
 
 		NiftiConverter converter = NiftiConverter.getType(Math.toIntExact(converterId));
@@ -99,7 +99,10 @@ public class NIfTIConverterService {
 			conversionLogs += shanoirExec.dcm2niiExec(inputFolder, converter.getPath(), outputFolder, true);
 			break;
 		}
+		// Here we should check logs to check which converter failed or not.
 		LOG.error(conversionLogs);
+
+		return conversionLogs.contains("an error has probably occured");
 	}
 
 	/**

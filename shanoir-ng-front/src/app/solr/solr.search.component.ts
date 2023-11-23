@@ -488,7 +488,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     }
     downloadSelected() {
         if (this.selectedDatasetIds && this.canDownload) {
-            this.downloadService.downloadByIds([...this.selectedDatasetIds], null,  this.downloadState);
+            this.downloadService.downloadByIds([...this.selectedDatasetIds], this.downloadState);
         } else {
             this.consoleService.log('error', "Could not download data, please check your right on the studies for these datasets.")
         }

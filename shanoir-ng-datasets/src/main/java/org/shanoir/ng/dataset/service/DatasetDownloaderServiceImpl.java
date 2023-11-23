@@ -170,10 +170,6 @@ public class DatasetDownloaderServiceImpl {
 								subjectName, true, datasetFilePath);
 						datasetFiles.addAll(files);
 					} else if (DCM.equals(format)) {
-						if (dataset.getDatasetProcessing() != null) {
-							// Do not load dicom for processed dataset
-							continue;
-						}
 						DatasetFileUtils.getDatasetFilePathURLs(dataset, pathURLs, DatasetExpressionFormat.DICOM, null);
 						List<String> files = downloader.downloadDicomFilesForURLsAsZip(pathURLs, zipOutputStream,
 								subjectName, dataset, datasetFilePath, null);
@@ -201,7 +197,7 @@ public class DatasetDownloaderServiceImpl {
 							boolean result = (boolean) this.rabbitTemplate.convertSendAndReceive(RabbitMQConfiguration.NIFTI_CONVERSION_QUEUE, converterId + ";" + workFolder.getAbsolutePath());
 							if (!result) {
 								throw new RestServiceException(
-										new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Bad arguments", null));
+										new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Nifti conversion failed", null));
 							}
 							workFolder = new File(workFolder.getAbsolutePath() + File.separator + "result");
 							List<String> files = new ArrayList<>();
