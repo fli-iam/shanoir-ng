@@ -227,13 +227,6 @@ public class DatasetDownloaderServiceImpl {
 			}
 		} catch (Exception e) {
 			LOG.error("Error while retrieveing dataset data.", e);
-			DatasetError error = new DatasetError(datasetId, e.getMessage());
-			error.setSerieErrors(serieErrors);
-			ZipOutputStream zipOutputStreamAsError = new ZipOutputStream(response.getOutputStream());
-			writeErrorFileInZip(error, zipOutputStreamAsError);
-			throw new RestServiceException(e,
-					new ErrorModel(HttpStatus.UNPROCESSABLE_ENTITY.value(),
-							"No files could be found for this dataset(s)."));
 		} finally {
 			FileUtils.deleteQuietly(workFolder);
 		}
