@@ -165,6 +165,9 @@ public class WADODownloaderService {
 					LOG.error("URL for download is neither in WADO-RS nor in WADO-URI format. URL : " + url + " - Dataset id : " + dataset.getId());
 					String errorDetails = "URL for download is neither in WADO-RS nor in WADO-URI format";
 					writeErrorFileInZip(zipOutputStream, subjectName, indexInstanceUID, errorDetails);
+				// in case an old WADO-URI is found in the database: convert it to WADO-RS
+				} else {
+					url = wadoURItoWadoRS(url);
 				}
 				instanceUID = extractInstanceUID(url);
 			}
@@ -562,7 +565,7 @@ public class WADODownloaderService {
 				.replace("&studyUID=", "/studies/")
 				.replace("&seriesUID=", "/series/")
 				.replace("&objectUID=", "/instances/")
-				.replace("&contentType=application/dicom&", "");
+				.replace("&contentType=application/dicom", "");
 	}
 
 }
