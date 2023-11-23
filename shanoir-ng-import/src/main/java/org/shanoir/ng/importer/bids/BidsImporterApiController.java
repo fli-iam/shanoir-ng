@@ -270,15 +270,15 @@ public class BidsImporterApiController implements BidsImporterApi {
 		if (dateIndex == -1) {
 			return null;
 		}
+		// Legal format in BIDS (are we up to date ? I don't think so)
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[.SSSSSS][X]");
+		String[] row = it.next()[0].split(CSV_SEPARATOR);
+		String dateAsString = row[dateIndex];
 		try {
-			// Legal format in BIDS (are we up to date ? I don't think so)
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss[SSSSSS][Z]");
-			String[] row = it.next()[0].split(CSV_SEPARATOR);
-			String dateAsString = row[dateIndex];
 			TemporalAccessor date = formatter.parseBest(dateAsString, LocalDate::from, LocalDateTime::from);
 			return LocalDate.from(date);
 		} catch (Exception e) {
-			LOG.warn("Could not parse date for csv.");
+			LOG.error("Could not parse date [{}] for csv.", dateAsString);
 			return null;
 		}
 	}

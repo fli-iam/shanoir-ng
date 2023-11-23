@@ -199,7 +199,7 @@ public class BIDSServiceImpl implements BIDSService {
 				studyName = this.studyRepo.findById(studyId).get().getName();
 			}
 			// Try to delete the BIDS folder recursively if possible
-			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName);
+			File bidsDir = new File(bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName);
 			if (bidsDir.exists()) {
 				FileUtils.deleteDirectory(bidsDir);
 			}
@@ -210,15 +210,14 @@ public class BIDSServiceImpl implements BIDSService {
 
 	/**
 	 * Returns data from the study formatted as BIDS in a .zip file.
-	 * @param study the study we want to export as BIDS
 	 * @return data from the study formatted as BIDS in a .zip file.
 	 * @throws IOException
 	 */
 	@Override
 	public File exportAsBids(final Long studyId, String studyName) throws IOException {
 		// Get folder
-		studyName = studyName.replaceAll("[ _] ", ""); 
-		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + '_' + studyName;
+		studyName = this.formatLabel(studyName);
+		String tmpFilePath = bidsStorageDir + File.separator + STUDY_PREFIX + studyId + studyName;
 		File workFolder = new File(tmpFilePath);
 		if (workFolder.exists()) {
 			// If the file already exists, just return it
@@ -263,7 +262,6 @@ public class BIDSServiceImpl implements BIDSService {
 	/**
 	 * Create the study/BASE BIDS folder.
 	 * @param studyName the study name
-	 * @param studyId the study id
 	 * @return the base folder newly created
 	 */
 	private File createBaseBidsFolder(File workFolder, String studyName) {
@@ -345,7 +343,7 @@ public class BIDSServiceImpl implements BIDSService {
 	 */
 	private File createSubjectFolder(String subjectName, final int index, final File baseDir) throws IOException {
 		// Generate another ID here ?
-		subjectName = subjectName.replaceAll("[^a-zA-Z0-9]+", "");
+		subjectName = this.formatLabel(subjectName);
 
 		File subjectFolder = new File(baseDir.getAbsolutePath() + File.separator + SUBJECT_PREFIX + index + subjectName);
 		if (!subjectFolder.exists()) {
@@ -357,7 +355,6 @@ public class BIDSServiceImpl implements BIDSService {
 	/**
 	 * Returns data from the examination formatted as BIDS in a .zip file.
 	 * @param examination the examination we want to export as BIDS
-	 * @param subjDir examination BIDS directory where we are working.
 	 * @param studyName the study name
 	 * @param subjectName the subject name
 	 * @return data from the examination formatted as BIDS in a .zip file.
@@ -414,8 +411,7 @@ public class BIDSServiceImpl implements BIDSService {
 			label += examination.getComment();
 		}
 
-		label = label.replaceAll("[^a-zA-Z0-9]+", "");
-		return label;
+		return formatLabel(label);
 	}
 
 	/**
@@ -430,7 +426,7 @@ public class BIDSServiceImpl implements BIDSService {
 	private void createDatasetBidsFiles(final Dataset dataset, final File workDir, final String studyName, final String subjectName) throws IOException {
 		File dataFolder = null;
 
-		String subjectNameUpdated = subjectName.replaceAll("[ _] ", ""); 
+		String subjectNameUpdated = this.formatLabel(subjectName);
 		String datasetFilePrefix = workDir.getName().contains(SESSION_PREFIX) ? workDir.getParentFile().getName() + "_" + workDir.getName() : workDir.getName();
 		
 		dataFolder = createSpecificDataFolder(dataset, workDir, dataFolder, subjectNameUpdated, studyName);
@@ -552,8 +548,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 	private File getScansFile(File parentFile, String subjectName) throws IOException {
 		String fileName = parentFile.getName() + SCANS_FILE_EXTENSION;
-		subjectName = subjectName.replaceAll(" ", "");
-		subjectName = subjectName.replaceAll("_", "");
+		subjectName = this.formatLabel(subjectName);
 		if (!parentFile.getName().contains(subjectName)) {
 			fileName = SUBJECT_PREFIX + subjectName + "_" + parentFile.getName() + SCANS_FILE_EXTENSION;
 		}
@@ -614,8 +609,6 @@ public class BIDSServiceImpl implements BIDSService {
 	 * See https://bids-specification.readthedocs.io/en/latest/04-modality-specific-files/03-electroencephalography.html
 	 * for more informations
 	 * @param dataset the dataset we want to export in BIDS
-	 * @param workFolder the examination work folder in which we are working
-	 * @param pathURLs list of file URL
 	 * @param studyName the name of associated study
 	 * @param subjectName the subject name associated
 	 * @param sessionId the session ID / examination ID associated
@@ -756,8 +749,7 @@ public class BIDSServiceImpl implements BIDSService {
 
 		for (Subject subject : subjs) {
 			String subjectName = subject.getName();
-			subjectName = subjectName.replaceAll(" ", "");
-			subjectName = subjectName.replaceAll("_", "");
+			subjectName = this.formatLabel(subjectName);
 			// Write in the file the values
 			buffer.append(SUBJECT_PREFIX).append(index++).append("_").append(subjectName).append(CSV_SEPARATOR)
 			.append(subject.getId()).append(CSV_SEPARATOR)
@@ -769,6 +761,10 @@ public class BIDSServiceImpl implements BIDSService {
 		} catch (IOException e) {
 			LOG.error("Error while creating particpants.tsv file: {}", e);
 		}
+	}
+
+	private String formatLabel(String label){
+		return label.replaceAll("[^a-zA-Z0-9]+", "");
 	}
 
 }
