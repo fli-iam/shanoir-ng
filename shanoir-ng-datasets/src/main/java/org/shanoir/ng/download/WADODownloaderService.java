@@ -14,11 +14,7 @@
 
 package org.shanoir.ng.download;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -142,11 +138,9 @@ public class WADODownloaderService {
 	 * Return the list of downloaded files
 	 *
 	 * @param urls
-	 * @param workFolder
 	 * @param subjectName
 	 * @param dataset 
-	 * @param datasetFilePath 
-	 * @param response
+	 * @param datasetFilePath
 	 * @throws IOException
 	 * @throws MessagingException
 	 * @return
@@ -179,7 +173,9 @@ public class WADODownloaderService {
 			// Download and zip
 			try {
 				String zipedFile = downloadAndWriteFileInZip(url, zipOutputStream, name);
-				if (zipedFile != null) files.add(zipedFile);
+				if (zipedFile != null) {
+					files.add(zipedFile);
+				}
 			} catch (ZipPacsFileException e) {
 				writeErrorFileInZip(zipOutputStream, name, i, e.getMessage());
 				if (serieErrors != null) serieErrors.add(new SerieError(i, url, e.getMessage()));
@@ -219,7 +215,6 @@ public class WADODownloaderService {
 	 * @param url
 	 * @param zipOutputStream
 	 * @param name the filename without extension
-	 * @param i the position of the file into the dataset
 	 * @return the added file name, null if failed
 	 * @throws ZipPacsFileException
 	 * @throws IOException when couldn't write into the stream
@@ -228,13 +223,9 @@ public class WADODownloaderService {
 		byte[] responseBody = null;
 		try {
 			responseBody = downloadFileFromPACS(url);
-			ZipEntry entry = new ZipEntry(name + DCM);
-			entry.setSize(responseBody.length);
-			zipOutputStream.putNextEntry(entry);
-			zipOutputStream.write(responseBody);
-			zipOutputStream.closeEntry();
+			this.extractDICOMZipFromMHTMLFile(responseBody, extractInstanceUID(url),  name, zipOutputStream);
 			return name + DCM;
-		} catch (IOException e) {
+		} catch (IOException | MessagingException e) {
 			//LOG.error("A dicom file could not be downloaded from the pacs:", e);
 			throw new ZipPacsFileException(e);
 		} catch (HttpClientErrorException e) {
@@ -290,6 +281,7 @@ public class WADODownloaderService {
 					byte[] responseBody = null;
 					try {
 						responseBody = downloadFileFromPACS(url);
+						extractDICOMFilesFromMHTMLFile(responseBody, instanceUID, workFolder);
 					} catch (Exception e) {
 						
 						// Just insert an error log into the file for missing dicoms.
@@ -429,7 +421,6 @@ public class WADODownloaderService {
 	 * and has to be extracted to be used.
 	 * 
 	 * @param url
-	 * @param instanceUID
 	 * @return
 	 */
 	private String extractInstanceUID(String url) {
@@ -451,7 +442,6 @@ public class WADODownloaderService {
 	 * This method contacts the PACS with a WADO-RS url and does the actual download.
 	 * 
 	 * @param url
-	 * @param targetFile
 	 * @return
 	 * @throws IOException
 	 */
@@ -510,7 +500,7 @@ public class WADODownloaderService {
 					if (count == 1) {
 						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + DCM);
 					} else {
-						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + count + DCM);
+						extractedDicomFile = new File(workFolder.getPath() + File.separator + instanceUID + UNDER_SCORE + i + DCM);
 					}
 					Files.copy(bodyPart.getInputStream(), extractedDicomFile.toPath());
 				} else {
@@ -520,6 +510,54 @@ public class WADODownloaderService {
 		}
 	}
 
+	/**
+	 * This method reads in a file in format MHTML, one representation of a multipart/related response, that is given from
+	 * a PACS server, that supports WADO-RS requests.
+	 *
+	 * MHTML, short for MIME Encapsulation of Aggregate HTML Documents, is a web page archive format used to combine in a single document
+	 * the HTML code and its companion resources that are otherwise represented by external links (such as images, Flash animations, Java applets,
+	 * and audio files). The content of an MHTML file is encoded as if it were an HTML e-mail message, using the MIME type multipart/related.
+	 *
+	 * @param responseBody
+	 * @param instanceUID
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 * @throws MessagingException
+	 */
+	private void extractDICOMZipFromMHTMLFile(final byte[] responseBody, final String instanceUID, String name, ZipOutputStream zipOutputStream)
+			throws IOException, MessagingException {
+		try(ByteArrayInputStream bIS = new ByteArrayInputStream(responseBody)) {
+			ByteArrayDataSource datasource = new ByteArrayDataSource(bIS, CONTENT_TYPE_MULTIPART);
+			MimeMultipart multipart = new MimeMultipart(datasource);
+			int count = multipart.getCount();
+			if (count == 1) {
+				BodyPart bodyPart = multipart.getBodyPart(0);
+				InputStream stream = bodyPart.getInputStream();
+				if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
+					ZipEntry entry = new ZipEntry(name + DCM);
+					entry.setSize(bodyPart.getSize());
+					zipOutputStream.putNextEntry(entry);
+					zipOutputStream.write(bodyPart.getInputStream().readAllBytes());
+					zipOutputStream.closeEntry();
+				} else {
+					throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
+				}
+			} else {
+				for (int i = 0; i < count; i++) {
+					BodyPart bodyPart = multipart.getBodyPart(i);
+					if (bodyPart.isMimeType(CONTENT_TYPE_DICOM) || bodyPart.isMimeType(CONTENT_TYPE_DICOM_XML)) {
+						ZipEntry entry = new ZipEntry(name + UNDER_SCORE + i + DCM);
+						entry.setSize(responseBody.length);
+						zipOutputStream.putNextEntry(entry);
+						zipOutputStream.write(responseBody);
+						zipOutputStream.closeEntry();
+					} else {
+						throw new IOException("Answer file from PACS contains other content-type than DICOM, stop here.");
+					}
+				}
+			}
+		}
+	}
 
 	private String wadoURItoWadoRS(String url) {
 		return url
