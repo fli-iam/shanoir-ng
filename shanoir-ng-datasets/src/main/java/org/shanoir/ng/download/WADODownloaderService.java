@@ -166,6 +166,7 @@ public class WADODownloaderService {
 				// in case an old WADO-URI is found in the database: convert it to WADO-RS
 				} else {
 					url = wadoURItoWadoRS(url);
+					indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS); // calculate new index
 				}
 			}
 			String instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
