@@ -33,6 +33,7 @@ import java.util.zip.ZipOutputStream;
 import javax.json.Json;
 import javax.json.stream.JsonParser;
 
+import org.apache.catalina.realm.LockOutRealm;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.json.JSONReader;
 import org.json.JSONException;
@@ -162,7 +163,6 @@ public class WADODownloaderService {
 				if (indexInstanceUID <= 0) {
 					LOG.error("URL for download is neither in WADO-RS nor in WADO-URI format. URL : " + url + " - Dataset id : " + dataset.getId());
 					String errorDetails = "URL for download is neither in WADO-RS nor in WADO-URI format";
-					writeErrorFileInZip(zipOutputStream, subjectName, indexInstanceUID, errorDetails);
 				// in case an old WADO-URI is found in the database: convert it to WADO-RS
 				} else {
 					url = wadoURItoWadoRS(url);
@@ -179,7 +179,7 @@ public class WADODownloaderService {
 					files.add(zipedFile);
 				}
 			} catch (ZipPacsFileException e) {
-				writeErrorFileInZip(zipOutputStream, name, i, e.getMessage());
+				LOG.error("Could not download datasets.", e);
 				if (serieErrors != null) serieErrors.add(new SerieError(i, url, e.getMessage()));
 			}
 		}
@@ -198,17 +198,6 @@ public class WADODownloaderService {
 			name = datasetFilePath + File.separator + name;
 		}
 		return name;
-	}
-
-	private void writeErrorFileInZip(ZipOutputStream zipOutputStream, String name, int i, String details) throws IOException {
-		String error = "An error occured during the download of this .DCM file, please contact a shanoir administrator if necessary.";
-		if (details != null) error += " (" + details + ")";
-		byte[] strToBytes = error.getBytes();
-		ZipEntry entry = new ZipEntry(ERROR + i + "_" + name + TXT);
-		entry.setSize(strToBytes.length);
-		zipOutputStream.putNextEntry(entry);
-		zipOutputStream.write(strToBytes);
-		zipOutputStream.closeEntry();
 	}
 
 	/**
