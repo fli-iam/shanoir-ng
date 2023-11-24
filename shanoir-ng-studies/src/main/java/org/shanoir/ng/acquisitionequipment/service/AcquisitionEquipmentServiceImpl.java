@@ -90,19 +90,24 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 	
 	public AcquisitionEquipment create(AcquisitionEquipment entity) {
 		AcquisitionEquipment newDbAcEq = repository.save(entity);
-		String datasetAcEqName = newDbAcEq.getManufacturerModel().getManufacturer().getName().trim() + " " + newDbAcEq.getManufacturerModel().getName().trim();
 		try {
-			updateName(new IdName(newDbAcEq.getId(), datasetAcEqName));
+			updateName(newDbAcEq);
 		} catch (MicroServiceCommunicationException e) {
 			LOG.error("Could not send the center name creation to the other microservices !", e);
 		}
 		return newDbAcEq;
 	}
 
-	private boolean updateName(IdName idName) throws MicroServiceCommunicationException{
+	private boolean updateName(AcquisitionEquipment equipment) throws MicroServiceCommunicationException{
 		try {
+			String datasetAcEqName =
+					equipment.getManufacturerModel().getManufacturer().getName() + " - "
+							+ equipment.getManufacturerModel().getName() + " "
+							+ (equipment.getManufacturerModel().getMagneticField() != null ? (equipment.getManufacturerModel().getMagneticField() + "T ") : "")
+							+ equipment.getSerialNumber() + " - " + equipment.getCenter().getName();
+
 			rabbitTemplate.convertAndSend(RabbitMQConfiguration.ACQUISITION_EQUIPEMENT_UPDATE_QUEUE,
-					objectMapper.writeValueAsString(idName));
+					objectMapper.writeValueAsString(new IdName(equipment.getId(), datasetAcEqName)));
 			return true;
 		} catch (AmqpException | JsonProcessingException e) {
 			throw new MicroServiceCommunicationException("Error while communicating with datasets MS to update acquisition equipment name.");
@@ -113,8 +118,12 @@ public class AcquisitionEquipmentServiceImpl implements AcquisitionEquipmentServ
 		final Optional<AcquisitionEquipment> entityDbOpt = repository.findById(entity.getId());
 		final AcquisitionEquipment entityDb = entityDbOpt.orElseThrow(
 				() -> new EntityNotFoundException(entity.getClass(), entity.getId()));
-		updateValues(entity, entityDb);
-		return repository.save(entityDb);
+		AcquisitionEquipment updated = updateValues(entity, entityDb);
+		try {
+			updateName(updated);
+		} catch (MicroServiceCommunicationException e) {
+			LOG.error("Could not send the center name creation to the other microservices !", e);
+		}		return repository.save(entityDb);
 	}
 
 	public void deleteById(final Long id) throws EntityNotFoundException  {

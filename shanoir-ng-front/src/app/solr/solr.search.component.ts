@@ -17,7 +17,7 @@ import { AbstractControl, UntypedFormBuilder, UntypedFormGroup, ValidationErrors
 import { Router } from '@angular/router';
 
 import { BreadcrumbsService } from '../breadcrumbs/breadcrumbs.service';
-import { DatasetService } from '../datasets/shared/dataset.service';
+import { DatasetService, Format } from '../datasets/shared/dataset.service';
 import { slideDown } from '../shared/animations/animations';
 import { ConfirmDialogService } from '../shared/components/confirm-dialog/confirm-dialog.service';
 
@@ -33,6 +33,7 @@ import { TableComponent } from "../shared/components/table/table.component";
 import { ConsoleService } from '../shared/console/console.service';
 import { DatepickerComponent } from "../shared/date-picker/date-picker.component";
 import { KeycloakService } from '../shared/keycloak/keycloak.service';
+import { MassDownloadService } from '../shared/mass-download/mass-download.service';
 import { Range } from '../shared/models/range.model';
 import { StudyRightsService } from '../studies/shared/study-rights.service';
 import { StudyUserRight } from '../studies/shared/study-user-right.enum';
@@ -40,6 +41,7 @@ import { FacetPreferences, SolrPagingCriterionComponent } from './criteria/solr.
 import { FacetField, FacetPageable, FacetResultPage, SolrDocument, SolrRequest, SolrResultPage } from './solr.document.model';
 import { SolrService } from "./solr.service";
 import { Clipboard } from '@angular/cdk/clipboard';
+import { TaskState } from '../async-tasks/task.model';
 
 const TextualFacetNames: string[] = ['studyName', 'subjectName', 'subjectType', 'acquisitionEquipmentName', 'examinationComment', 'datasetName', 'datasetType', 'datasetNature', 'tags'];
 const RangeFacetNames: string[] = ['sliceThickness', 'pixelBandwidth', 'magneticFieldStrength'];
@@ -53,7 +55,7 @@ export type TextualFacet = typeof TextualFacetNames[number];
 
 export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
 
-    @ViewChild('progressBar') progressBar: LoadingBarComponent;
+    progressState: TaskState = new TaskState();
     @ViewChildren(SolrPagingCriterionComponent) pagingCriterion: QueryList<SolrPagingCriterionComponent>;
     selections: SelectionBlock[] = [];
     columnDefs: ColumnDefinition[];
@@ -66,6 +68,7 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     selectedDatasetIds: Set<number> = new Set();
     syntaxError: boolean = false;
     dateOpen: boolean = false;
+    datasetStudymap: Map<number, number> = new Map();
 
     tab: 'results' | 'selected' = 'results';
     role: 'admin' | 'expert' | 'user';
@@ -73,13 +76,14 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
     loaded: boolean = false;
     firstPageLoaded: boolean = false;
     viewChecked: boolean = false;
+    canDownload: boolean = true;
     solrRequest: SolrRequest = new SolrRequest();
     private facetPageable: Map<string, FacetPageable>;
 
     constructor(
             private breadcrumbsService: BreadcrumbsService, private formBuilder: UntypedFormBuilder,
             private solrService: SolrService, private router: Router, private datasetService: DatasetService, private datasetAcquisitionService: DatasetAcquisitionService,
-            private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private clipboard: Clipboard,
+            private keycloakService: KeycloakService, private studyRightsService: StudyRightsService, private downloadService: MassDownloadService, private clipboard: Clipboard,
             private confirmDialogService: ConfirmDialogService, private consoleService: ConsoleService, private processingService: ProcessingService) {
 
         this.getRole();
@@ -201,10 +205,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         }
         TextualFacetNames.forEach(facetName => {
             if (this.solrRequest[facetName] && Array.isArray(this.solrRequest[facetName])) {
-                (this.solrRequest[facetName] as []).forEach((facetVal, index) => {
+                (this.solrRequest[facetName] as []).forEach(facetVal => {
                     this.selections = this.selections.concat(
                         new SimpleValueSelectionBlock(facetVal, () => {
-                            this.solrRequest[facetName].splice(index, 1);
+                            this.solrRequest[facetName] = this.solrRequest[facetName].filter(val => val != facetVal);
                         })
                     );
 
@@ -457,13 +461,10 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
         let customActionDefs:any = [];
         customActionDefs.push(
             {title: "Clear selection", awesome: "fa-solid fa-snowplow", action: () => this.selectedDatasetIds = new Set(), disabledIfNoSelected: true},
-            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoSelected: true},
-            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoSelected: true},
-            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoSelected: true},
-            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoSelected: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoSelected: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoSelected: true},
-            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoSelected: true },
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoSelected: true },
+            {title: "Download", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true},
             {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
         );
         return customActionDefs;
@@ -477,25 +478,40 @@ export class SolrSearchComponent implements AfterViewChecked, AfterContentInit {
                 this.table.clearSelection();
                 this.selectionTable.refresh();
             }, disabledIfNoResult: true},
-            {title: "Download as DICOM", awesome: "fa-solid fa-download", action: () => this.massiveDownload('dcm'), disabledIfNoResult: true},
-            {title: "Download as NIfTI", awesome: "fa-solid fa-download", action: () => this.massiveDownload('nii'), disabledIfNoResult: true},
-            {title: "Download as EEG", awesome: "fa-solid fa-download", action: () => this.massiveDownload('eeg'), disabledIfNoResult: true},
-            {title: "Download as BIDS", awesome: "fa-solid fa-download", action: () => this.massiveDownload('BIDS'), disabledIfNoResult: true},
             {title: "Delete selected", awesome: "fa-regular fa-trash", action: this.openDeleteSelectedConfirmDialog, disabledIfNoResult: true},
             {title: "Apply Study Card", awesome: "fa-solid fa-shuffle", action: this.openApplyStudyCard, disabledIfNoResult: true},
-            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode(), disabledIfNoResult: true },
+            {title: "Run a process", awesome: "fa-rocket", action: () => this.initExecutionMode() ,disabledIfNoResult: true },
+            {title: "Download", awesome: "fa-solid fa-download", action: () => this.downloadSelected(), disabledIfNoSelected: true},
             {title: "Copy selected ids", awesome: "fa-solid fa-copy", action: () => this.copyIds(), disabledIfNoSelected: true }
         );
         return customActionDefs;
     }
-
-    massiveDownload(type: string) {
-        if (this.selectedDatasetIds) {
-            this.datasetService.downloadDatasets([...this.selectedDatasetIds], type, this.progressBar);
+    downloadSelected() {
+        if (this.selectedDatasetIds && this.canDownload) {
+            this.downloadService.downloadByIds([...this.selectedDatasetIds]);
+        } else {
+            this.consoleService.log('error', "Could not download data, please check your right on the studies for these datasets.")
         }
     }
 
-    onSelectionChange (selection: any) {
+    onSelectionChange (selection: Set<any>) {
+
+        let downloadable = true;
+        selection.forEach((datasetid) => {
+            let selected: any = this.table?.page?.content?.find((element: any) => element.id == datasetid);
+            let studyId
+            if (selected) {
+                studyId = selected.studyId;
+                this.datasetStudymap.set(datasetid, studyId);
+            } else {
+                studyId = this.datasetStudymap.get(datasetid);
+            }
+            if (!this.hasDownloadRight(studyId)) {
+                downloadable = false;
+            }
+        });
+        this.canDownload = downloadable;
+
         this.selectedDatasetIds = selection;
     }
 

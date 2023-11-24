@@ -1,0 +1,37 @@
+<div class="cell">
+    <form #window class="window" [formGroup]="form">
+        <h2 class="header">Download Datasets</h2>
+        <fieldset class="body">
+            <ol>
+                <!-- <li>
+                    <label>Number of parallel downloading queues</label>
+                    <span class="right-col">
+                        <input type="number" formControlName="nbQueues" min="1" max="1024">
+                    </span>
+                </li> -->
+                <li>
+                    <label>Dataset files format</label>
+                    <span class="right-col">
+                        <select-box formControlName="format" [options]="formatOptions"></select-box>
+                    </span>
+                </li>
+                <li>
+                    <label>Unzip datasets (slower)</label>
+                    <span class="right-col">
+                        <checkbox formControlName="unzip"></checkbox>
+                        <span class="warning" *ngIf="form.get('unzip').value">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            The unzipping will run on your computer
+                        </span>
+                    </span>
+                </li>
+            </ol>
+        </fieldset>
+        <div class="footer">
+            <button type="button" type="button" (click)="downloadNow()" class="alt left-icon" [disabled]="form.dirty && !form.valid">
+                <i class="fas fa-download"></i>Download now
+            </button>
+            <button type="button" (click)="cancel()">Cancel</button>
+        </div>
+    </form>
+</div>

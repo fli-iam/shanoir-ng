@@ -66,10 +66,15 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <!-- <span *ngIf="notificationsService.tasksInProgress.length > 0" (click)="state.jobsOpened = !state.jobsOpened; saveState();" class="chevron"><i class="fas fa-chevron-down"></i></span> -->
     </li>
     <!-- *ngIf="state.jobsOpened" -->
-    <div class="sub-menu jobs" [@slideDown]="state.jobsOpened">
-        <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress)" [ngSwitch]="task.eventType" [@disapearUp] [@.disabled]="task.status == 2">
+    <div class="sub-menu jobs" [@slideDown]="state.jobsOpened" [@disapearUp]>
+        <li *ngFor="let task of notificationsService.freshCompletedTasks.concat(notificationsService.tasksInProgress).concat(notificationsService.tasksInWait)" [ngSwitch]="task.eventType" [@.disabled]="task.status == 2 || task.status == 5">
             <a routerLink="/task"  routerLinkActive="active">
-                <progress-bar [progress]="task.progress" [width]="50"></progress-bar>
+                <progress-bar [progress]="task.progress" [width]="50" [warning]="task.status == 5 || task.status == 3"></progress-bar>
+                <i *ngIf="task.status == 4" class="fa-solid fa-hourglass-half status-icon"></i>
+                <i *ngIf="task.status == 2" class="fa-solid fa-play status-icon"></i>
+                <i *ngIf="task.status == 1" class="fa-solid fa-check status-icon"></i>
+                <i *ngIf="task.status == -1 || task.status == 5" class="fa-solid fa-triangle-exclamation status-icon"></i>
+                {{task.creationDate | date: 'HH:mm:ss'}} 
                 <ng-template [ngSwitchCase]="'downloadDataset.event'">
                     <i class="fa-solid fa-download"></i>
                 </ng-template>
@@ -79,13 +84,10 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
                 <ng-template ngSwitchDefault>
                     <i class="fa-regular fa-clock"></i>
                 </ng-template>
-                {{task.creationDate | date: 'HH:mm:ss'}} - {{task.eventLabel}}
+                {{task.eventLabel}}
             </a>
         </li>
     </div>
-    <!-- <li routerLink="/carmin-dataset-processings" routerLinkActive="active">
-        <i class="fas fa-solid fa-microchip"></i>VIP dataset processings
-    </li> -->
     <li routerLink="/solr-search" routerLinkActive="active"><i class="fas fa-sun"></i>Dataset search (Solr)</li>
     <li (click)="state.dataOpened = !state.dataOpened; saveState();"><i class="fas fa-file-medical-alt"></i>Medical data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>
     <div *ngIf="state.dataOpened" class="sub-menu" [@slideDown]="state.dataOpened">
@@ -111,7 +113,7 @@ along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
         <li routerLink="/preclinical-examination/list" routerLinkActive="active"><i class="fas fa-stethoscope"></i>Preclinical examinations</li>
         <li routerLink="/preclinical-pathology-model/list" routerLinkActive="active"><i class="fas fa-virus"></i>Pathology models</li>
         <li routerLink="/preclinical-therapy/list" routerLinkActive="active"><i class="fas fa-pills"></i>Therapies</li>
-        <li routerLink="/preclinical-anesthetic/list" routerLinkActive="active"><i class="fas fa-moon"></i>Anesthetics</li>        
+        <li routerLink="/preclinical-anesthetic/list" routerLinkActive="active"><i class="fas fa-moon"></i>Anesthetics</li>
     </div>
 
     <li (click)="state.uploadOpened = !state.uploadOpened; saveState();"><i class="fas fa-upload"></i>Import data<span class="chevron"><i class="fas fa-chevron-down"></i></span></li>

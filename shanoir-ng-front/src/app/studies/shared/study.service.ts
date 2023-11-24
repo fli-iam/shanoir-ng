@@ -11,22 +11,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see https://www.gnu.org/licenses/gpl-3.0.html
  */
-import { HttpClient, HttpEvent, HttpEventType, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, OnDestroy } from '@angular/core';
-import { saveAs } from 'file-saver-es';
-import { Subject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 
+import { TaskState } from 'src/app/async-tasks/task.model';
 import { BidsElement } from '../../bids/model/bidsElement.model';
 import { DataUserAgreement } from '../../dua/shared/dua.model';
 import { EntityService } from '../../shared/components/entity/entity.abstract.service';
-import { LoadingBarComponent } from '../../shared/components/loading-bar/loading-bar.component';
 import { KeycloakService } from '../../shared/keycloak/keycloak.service';
 import { IdName } from '../../shared/models/id-name.model';
 import { Profile } from '../../shared/models/profile.model';
 import { SubjectWithSubjectStudy } from '../../subjects/shared/subject.with.subject-study.model';
 import * as AppUtils from '../../utils/app.utils';
 import { StudyUserRight } from './study-user-right.enum';
+import { StudyUser } from "./study-user.model";
 import {
     CenterStudyDTO,
     PublicStudyData,
@@ -36,9 +36,6 @@ import {
     SubjectWithSubjectStudyDTO
 } from './study.dto';
 import { Study } from './study.model';
-import { combineAll } from 'rxjs/operators';
-import {StudyUser, StudyUserDTO} from "./study-user.model";
-import {BACKEND_API_STUDY_DELETE_USER} from "../../utils/app.utils";
 
 @Injectable()
 export class StudyService extends EntityService<Study> implements OnDestroy {
@@ -47,23 +44,23 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
 
     private _duasToSign: number = 0;
 
-    subscribtions: Subscription[] = [];
+    subscriptions: Subscription[] = [];
 
     // currently uploads, number is the studyId and Subjet is a rxjs Subject
-    fileUploadings: Map<number, Promise<void>> = new Map();
+    fileUploads: Map<number, Promise<void>> = new Map();
 
     constructor(protected http: HttpClient, private keycloakService: KeycloakService, private studyDTOService: StudyDTOService) {
         super(http)
     }
 
-    get(id: number, withStorageVolume = false): Promise<Study> {
+    getEntityInstance() { return new Study(); }
+
+    get(id: number, mode: 'eager' | 'lazy' = 'eager', withStorageVolume = false): Promise<Study> {
         return this.http.get<any>(this.API_URL + '/' + id
             + (withStorageVolume ? '?withStorageVolume=true' : ''))
             .toPromise()
             .then(this.mapEntity);
     }
-
-    getEntityInstance() { return new Study(); }
 
     findStudiesByUserId(): Promise<Study[]> {
         return this.http.get<Study[]>(AppUtils.BACKEND_API_STUDY_URL)
@@ -156,10 +153,10 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         }
         const promise: Promise<void> = this.http.post<any>(endpoint, formData).toPromise();
         // keep a track on the current uploadings
-        if (this.fileUploadings.has(studyId)) {
-            this.fileUploadings.set(studyId, Promise.all([this.fileUploadings.get(studyId), promise]).then(() => null));
+        if (this.fileUploads.has(studyId)) {
+            this.fileUploads.set(studyId, Promise.all([this.fileUploads.get(studyId), promise]).then(() => null));
         } else {
-            this.fileUploadings.set(studyId, promise);
+            this.fileUploads.set(studyId, promise);
         }
         return promise;
     }
@@ -170,24 +167,21 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         return this.http.delete(endpoint);
     }
 
-    downloadFile(fileName: string, studyId: number, fileType: 'protocol-file'|'dua', progressBar: LoadingBarComponent): Promise<HttpResponse<Blob>> {
-       const endpoint = this.API_URL + '/' + fileType + '-download/' + studyId + "/" + fileName + "/";
-       if (progressBar) {
-           this.subscribtions.push(
-           this.http.get(endpoint, {
-                    reportProgress: true,
-                    observe: 'events',
-                    responseType: 'blob'
-                }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar))
-           );
-        } else {
-            return this.http.get(endpoint, {
-                    observe: 'response',
-                    responseType: 'blob'
-                }).toPromise();
+    downloadProtocolFile(fileName: string, studyId: number, state?: TaskState) {
+        const endpoint = this.API_URL + '/protocol-file-download/' + studyId + "/" + fileName + "/";
+        return AppUtils.downloadWithStatusGET(endpoint, null, state);
+    }
 
-        }
-        return null;
+    downloadDuaFile(fileName: string, studyId: number, state?: TaskState) {
+        const endpoint = this.API_URL + '/dua-download/' + studyId + "/" + fileName + "/";
+        return AppUtils.downloadWithStatusGET(endpoint, null, state);
+    }
+
+    downloadDuaBlob(fileName: string, studyId: number): Promise<Blob> {
+        const endpoint = this.API_URL + '/dua-download/' + studyId + "/" + fileName + "/";
+        let params: HttpParams = new HttpParams();
+        //params
+        return AppUtils.downloadBlob(endpoint);
     }
 
     getMyDUA(): Promise<DataUserAgreement[]> {
@@ -224,35 +218,13 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
         .toPromise();
     }
 
-    private getFilename(response: HttpResponse<any>): string {
-        const prefix = 'attachment;filename=';
-        let contentDispHeader: string = response.headers.get('Content-Disposition');
-        return contentDispHeader.slice(contentDispHeader.indexOf(prefix) + prefix.length, contentDispHeader.length);
-    }
-
-    progressBarFunc(event: HttpEvent<any>, progressBar: LoadingBarComponent): void {
-       switch (event.type) {
-            case HttpEventType.Sent:
-              progressBar.progress = -1;
-              break;
-            case HttpEventType.DownloadProgress:
-              progressBar.progress = event.loaded;
-              break;
-            case HttpEventType.Response:
-                saveAs(event.body, this.getFilename(event));
-                progressBar.progress = 0;
-        }
-    }
-
-    exportBIDSByStudyId(studyId: number, progressBar: LoadingBarComponent) {
+    exportBIDSByStudyId(studyId: number) {
         if (!studyId) throw Error('study id is required');
-        this.subscribtions.push(
-               this.http.get(AppUtils.BACKEND_API_BIDS_EXPORT_URL + '/studyId/' + studyId, {
-                    reportProgress: true,
-                    observe: 'events',
-                    responseType: 'blob'
-                }).subscribe((event: HttpEvent<any>) => this.progressBarFunc(event, progressBar))
-         );
+        this.http.get(AppUtils.BACKEND_API_BIDS_EXPORT_URL + '/studyId/' + studyId, {
+            reportProgress: true,
+            observe: 'events',
+            responseType: 'blob'
+        });
     }
 
     getBidsStructure(studyId: number): Promise<BidsElement> {
@@ -295,7 +267,7 @@ export class StudyService extends EntityService<Study> implements OnDestroy {
     }
 
     ngOnDestroy() {
-        for(let subscribtion of this.subscribtions) {
+        for(let subscribtion of this.subscriptions) {
             subscribtion.unsubscribe();
         }
     }

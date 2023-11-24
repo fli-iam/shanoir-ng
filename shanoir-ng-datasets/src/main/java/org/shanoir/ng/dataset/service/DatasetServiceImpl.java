@@ -93,9 +93,9 @@ public class DatasetServiceImpl implements DatasetService {
 		if (datasetDb == null) {
 			throw new EntityNotFoundException(Dataset.class, id);
 		}
-		repository.deleteById(id);
 		solrService.deleteFromIndex(id);
 		this.deleteDatasetFromPacs(datasetDb);
+		repository.deleteById(id);
 		shanoirEventService.publishEvent(new ShanoirEvent(ShanoirEventType.DELETE_DATASET_EVENT, id.toString(), KeycloakUtil.getTokenUserId(), "", ShanoirEvent.SUCCESS, datasetDb.getStudyId()));
 	}
 
@@ -185,7 +185,7 @@ public class DatasetServiceImpl implements DatasetService {
 		datasetDb.setId(dataset.getId());
 		datasetDb.setProcessings(dataset.getProcessings());
 		datasetDb.setSubjectId(dataset.getSubjectId());
-		if (dataset.getOriginMetadata().getId().equals(dataset.getUpdatedMetadata().getId())) {
+		if (dataset.getUpdatedMetadata().getId().equals(dataset.getOriginMetadata().getId())) {
 			// Force creation of a new dataset metadata
 			dataset.getUpdatedMetadata().setId(null);
 		}

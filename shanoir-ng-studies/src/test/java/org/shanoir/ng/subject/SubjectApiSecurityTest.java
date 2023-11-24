@@ -93,7 +93,8 @@ public class SubjectApiSecurityTest {
 	public void testAsAnonymous() throws ShanoirException, RestServiceException {
 		assertAccessDenied(api::deleteSubject, ENTITY_ID);
 		assertAccessDenied(api::findSubjects, true, true);
-		assertAccessDenied(api::findSubjectsNames);
+		assertAccessDenied(api::findAllSubjectsNames);
+		assertAccessDenied(api::findSubjectsNames, List.of(ENTITY_ID));
 		assertAccessDenied(api::findSubjectById, ENTITY_ID);
 		assertAccessDenied(api::saveNewSubject, mockNew, null, mockBindingResult);
 		assertAccessDenied(api::updateSubject, ENTITY_ID, mockExisting, mockBindingResult);
@@ -155,7 +156,8 @@ public class SubjectApiSecurityTest {
 	public void testAsAdmin() throws ShanoirException, RestServiceException {
 		assertAccessAuthorized(api::deleteSubject, ENTITY_ID);
 		assertAccessAuthorized(api::findSubjects, true, true);
-		assertAccessAuthorized(api::findSubjectsNames);
+		assertAccessAuthorized(api::findAllSubjectsNames);
+		assertAccessAuthorized(api::findSubjectsNames, List.of(ENTITY_ID));
 		assertAccessAuthorized(api::findSubjectById, ENTITY_ID);
 		assertAccessAuthorized(api::saveNewSubject, mockNew, null, mockBindingResult);
 		assertAccessAuthorized(api::updateSubject, ENTITY_ID, mockExisting, mockBindingResult);
@@ -179,7 +181,9 @@ public class SubjectApiSecurityTest {
 		given(repository.findAll()).willReturn(Arrays.asList(subjectMockNoRights));
 		assertAccessAuthorized(api::findSubjects,true, true);
 		assertEquals(null, api.findSubjects(true, true).getBody());
-		assertAccessAuthorized(api::findSubjectsNames);
+		assertAccessAuthorized(api::findAllSubjectsNames);
+		assertAccessAuthorized(api::findSubjectsNames, List.of(ENTITY_ID));
+
 		//assertNotNull(api.findSubjectsNames().getBody());
 		SubjectStudy subjectStudyMock = new SubjectStudy();
 		subjectStudyMock.setStudy(buildStudyMock(1L));
@@ -204,7 +208,8 @@ public class SubjectApiSecurityTest {
 		given(repository.findAll()).willReturn(Arrays.asList(subjectMockWrongRights));
 		assertAccessAuthorized(api::findSubjects, true, true);
 		assertEquals(null, api.findSubjects(true, true).getBody());
-		assertAccessAuthorized(api::findSubjectsNames);
+		assertAccessAuthorized(api::findAllSubjectsNames);
+		assertAccessAuthorized(api::findSubjectsNames, List.of(ENTITY_ID));
 		//assertEquals(null, api.findSubjectsNames().getBody());
 		subjectStudyMock = new SubjectStudy();
 		subjectStudyMock.setStudy(buildStudyMock(1L));
@@ -229,7 +234,8 @@ public class SubjectApiSecurityTest {
 		given(repository.findAllById(Arrays.asList(1L))).willReturn(Arrays.asList(subjectMockRightRights));
 		assertAccessAuthorized(api::findSubjects, true, true);
 		assertEquals(1, api.findSubjects(true, true).getBody().size());
-		assertAccessAuthorized(api::findSubjectsNames);
+		assertAccessAuthorized(api::findAllSubjectsNames);
+		assertAccessAuthorized(api::findSubjectsNames, List.of(ENTITY_ID));
 		//assertEquals(1, api.findSubjectsNames().getBody().size());
 		subjectStudyMock = new SubjectStudy();
 		subjectStudyMock.setStudy(buildStudyMock(1L));

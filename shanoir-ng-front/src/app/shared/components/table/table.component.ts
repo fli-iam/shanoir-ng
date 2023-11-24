@@ -15,7 +15,6 @@ import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, HostListe
 import { fromEvent, Subscription } from 'rxjs';
 
 import { BreadcrumbsService } from '../../../breadcrumbs/breadcrumbs.service';
-import { ModalComponent } from '../../../shared/components/modal/modal.component';
 import { GlobalService } from '../../services/global.service';
 import { Filter, FilterablePageable, Order, Page, Pageable, Sort } from './pageable.model';
 import * as shajs from 'sha.js';
@@ -24,6 +23,7 @@ import { KeycloakService } from '../../keycloak/keycloak.service';
 import { ColumnDefinition } from './column.definition.type';
 import {isDarkColor} from "../../../utils/app.utils";
 import {Router} from "@angular/router";
+import {formatDate} from "@angular/common";
 
 @Component({
     selector: 'shanoir-table',
@@ -62,7 +62,6 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     isError: boolean = false;
     filter: Filter = new Filter(null, null);
     firstLoading: boolean = true;
-    @ViewChild('settingsDialog') settingsDialog: ModalComponent;
     currentDrag: {columns: any; leftOrigin: number, totalWidth: number, leftColIndex: number};
     private subscriptions: Subscription[] = [];
     private hash: string;
@@ -72,6 +71,7 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
     expended: boolean[] = [];
     subRowOpen: any = {};
     path: string;
+    settingsOpened: boolean = false;
 
     constructor(
             private elementRef: ElementRef,
@@ -248,13 +248,27 @@ export class TableComponent implements OnInit, OnChanges, OnDestroy {
         if (result == null || this.isValueBoolean(result)) {
             return "";
         } else if (col.type == 'date') {
-            const date: any = new Date(result);
-            return isNaN(date) ? result : date.toLocaleDateString(undefined, {year: "numeric", month: "2-digit", day: "2-digit"});
+            let date: Date;
+            if (result instanceof Date) {
+                date = result;
+            } else {
+                date = this.stringToDate(result);
+            }
+            return date?.toLocaleDateString(undefined, {year: "numeric", month: "2-digit", day: "2-digit"}) || result;
         } else if (result.text) {
             return result;
         } else {
-            return "" + result;
+            return result;
         }
+    }
+
+    private stringToDate(dateString: String): Date {
+        if (!dateString) return null;
+        let split: string[] = dateString.split('-');
+        if (split.length != 3) return null;
+        let splitNum: number[] = split.map(elt => parseInt(elt));
+        if (splitNum.includes(NaN)) return null;
+        return new Date(splitNum[2],splitNum[1],splitNum[0]);
     }
 
     getCellGraphics(item: any, col: ColumnDefinition): any {

@@ -22,11 +22,17 @@ import { Component } from '@angular/core';
 export class ConfirmDialogComponent {
     
     title: string;
-    message: string;
+    private _message: string;
     buttons: {ok: string, cancel: string};
     mode: 'confirm' | 'info' | 'error';
     private closeResolve: (value?: boolean | PromiseLike<boolean>) => void;
 
+    public get message(): string {
+        return this._message;
+    }
+    public set message(value: string) {
+        this._message = value?.split(' ').map(w => w.startsWith('https://') ? '<a target="_blank" href="' + w + '">' + w + '</a>' : w).join(' ');
+    }
 
     public openConfirm(title: string, message: string, buttons?: {ok: string, cancel: string}): Promise<boolean> {
         this.title = title;

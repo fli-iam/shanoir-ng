@@ -13,14 +13,14 @@
  */
 
 import { LocationStrategy } from '@angular/common';
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Event, NavigationEnd, Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { ImportMode } from '../import/import.component';
 
 @Injectable()
-export class BreadcrumbsService {
+export class BreadcrumbsService implements OnDestroy {
 
     public steps: Step[] = [];
     
@@ -29,6 +29,7 @@ export class BreadcrumbsService {
     private nextLabel: string;
     private nextMilestone: boolean = false;
     private ignoreNavigationEnd: boolean = false;
+    private subscriptions: Subscription[] = [];
 
     constructor(
             private router: Router, 
@@ -46,7 +47,7 @@ export class BreadcrumbsService {
             // this.saveSession();
         });
 
-        router.events.subscribe(event => {
+        this.subscriptions.push(router.events.subscribe(event => {
             if (event instanceof NavigationEnd
                     // navigating inside a page is not changing page
                     && event.url?.split('#')[0] != this.currentStep?.route?.split('#')[0]) { 
@@ -75,8 +76,12 @@ export class BreadcrumbsService {
                 this.currentStep.waitStep = null;
                 // this.saveSession();
             }
-        });
+        }));
         // this.loadSession();
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions?.forEach(s => s.unsubscribe());
     }
 
     private focusStep(index: number) {
