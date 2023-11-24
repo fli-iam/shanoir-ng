@@ -152,12 +152,10 @@ public class WADODownloaderService {
 		List<String> files = new ArrayList<>();
 		for (Iterator<URL> iterator = urls.iterator(); iterator.hasNext(); i++) {
 			String url = ((URL) iterator.next()).toString();
-			String instanceUID;
 			// handle and check at first for WADO-RS URLs by "/instances/"
 			int indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS);
-			if (indexInstanceUID > 0) {
-				instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
-			} else {
+			// WADO-URI link found in database
+			if (indexInstanceUID <= 0) {
 				// handle and check secondly for WADO-URI URLs by "objectUID="
 				// instanceUID == objectUID
 				indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_URI);
@@ -165,9 +163,13 @@ public class WADODownloaderService {
 					LOG.error("URL for download is neither in WADO-RS nor in WADO-URI format. URL : " + url + " - Dataset id : " + dataset.getId());
 					String errorDetails = "URL for download is neither in WADO-RS nor in WADO-URI format";
 					writeErrorFileInZip(zipOutputStream, subjectName, indexInstanceUID, errorDetails);
+				// in case an old WADO-URI is found in the database: convert it to WADO-RS
+				} else {
+					url = wadoURItoWadoRS(url);
+					indexInstanceUID = url.lastIndexOf(WADO_REQUEST_TYPE_WADO_RS); // calculate new index
 				}
-				instanceUID = extractInstanceUID(url);
 			}
+			String instanceUID = url.substring(indexInstanceUID + WADO_REQUEST_TYPE_WADO_RS.length());
 			// Build name
 			String name = buildFileName(subjectName, dataset, datasetFilePath, instanceUID);
 			// Download and zip
@@ -562,7 +564,7 @@ public class WADODownloaderService {
 				.replace("&studyUID=", "/studies/")
 				.replace("&seriesUID=", "/series/")
 				.replace("&objectUID=", "/instances/")
-				.replace("&contentType=application/dicom&", "");
+				.replace("&contentType=application/dicom", "");
 	}
 
 }

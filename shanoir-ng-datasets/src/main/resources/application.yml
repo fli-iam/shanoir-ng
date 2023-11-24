@@ -74,10 +74,6 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: ${SHANOIR_URL_SCHEME}://${SHANOIR_URL_HOST}/auth/realms/shanoir-ng
-mail:
-  mime:
-    multipart:
-      ignoreexistingboundaryparameter: true
 
 springdoc:
   api-docs:
@@ -200,10 +196,7 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
-mail:
-  mime:
-    multipart:
-      ignoreexistingboundaryparameter: true
+
 ---
 spring:
   config.activate.on-profile: test
@@ -230,7 +223,3 @@ spring:
     init:
       data-locations: classpath:/scripts/test-data-h2.sql
       mode: always
-mail:
-  mime:
-    multipart:
-      ignoreexistingboundaryparameter: true
