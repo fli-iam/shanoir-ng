@@ -179,8 +179,8 @@ public class QualityCardApiController implements QualityCardApi {
 	@Override
     public ResponseEntity<QualityCardResult> testQualityCardOnStudy(
         @Parameter(name = "id of the quality card", required = true) @PathVariable("qualityCardId") Long qualityCardId,
-		@Parameter(name = "dataset number start ", required = true) @PathVariable("start") int start,
-		@Parameter(name = "dataset number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException {
+		@Parameter(name = "examination number start ", required = true) @PathVariable("start") int start,
+		@Parameter(name = "examination number stop", required = true) @PathVariable("stop") int stop) throws RestServiceException, MicroServiceCommunicationException {
 
         final QualityCard qualityCard = qualityCardService.findById(qualityCardId);
         if (qualityCard == null) {
