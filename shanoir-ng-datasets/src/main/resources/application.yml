@@ -196,7 +196,7 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.hibernate: ERROR
-    
+
 ---
 spring:
   config.activate.on-profile: test
