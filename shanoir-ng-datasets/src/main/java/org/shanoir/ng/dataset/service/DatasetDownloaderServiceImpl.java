@@ -99,7 +99,6 @@ public class DatasetDownloaderServiceImpl {
 	private ObjectMapper objectMapper;
 
 	public void massiveDownload(String format, List<Dataset> datasets, HttpServletResponse response, boolean withManifest, Long converterId) throws EntityNotFoundException, RestServiceException, IOException {
-		// Get the data
 		// Check rights on at least one of the datasets and filter the datasetIds list
 
 		boolean isEmpty = true;
